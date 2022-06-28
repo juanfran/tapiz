@@ -1,0 +1,6 @@
+{
+  "api": "http://localhost:3000",
+  "ws": "ws://localhost:300",
+  "defaultLanguage": "en",
+  "GoogleClientId": ""
+}

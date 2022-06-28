@@ -1,0 +1,22 @@
+:host {
+  display: block;
+  position: absolute;
+  user-select: none;
+  z-index: 1;
+}
+
+img {
+  display: block;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+
+.resize {
+  bottom: 0;
+  cursor: se-resize;
+  height: 50px;
+  position: absolute;
+  right: 0;
+  width: 50px;
+}

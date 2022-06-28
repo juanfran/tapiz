@@ -1,0 +1,16 @@
+:host {
+  cursor: se-resize;
+  position: absolute;
+  z-index: 5;
+
+  &.group {
+    border: 4px dashed #a672f8;
+    border-radius: 36px;
+  }
+
+  &.panel {
+    background-color: var(--white);
+    border: 1px solid #67fff9;
+    box-shadow: 0 0 10px 0 rgba(232, 233, 234, 1);
+  }
+}

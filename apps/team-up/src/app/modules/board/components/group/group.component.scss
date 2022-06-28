@@ -1,0 +1,51 @@
+.title {
+  background-color: #5fb0b7;
+  border-radius: 16px;
+  color: var(--white);
+  cursor: pointer;
+  display: block;
+  font-family: "Ubuntu", -apple-system, system-ui, sans-serif;
+  height: 35px;
+  padding: var(--spacing-1);
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  user-select: none;
+  white-space: pre-wrap;
+}
+
+.textarea {
+  background: transparent;
+  border: none;
+  height: 100%;
+  outline: none;
+  overflow: hidden;
+  resize: none;
+  width: 100%;
+}
+
+.resize {
+  bottom: 0;
+  cursor: se-resize;
+  height: 50px;
+  position: absolute;
+  right: 0;
+  width: 50px;
+}
+
+:host {
+  border: 2px dashed #5fb0b7;
+  border-radius: 36px;
+  cursor: grab;
+  padding: 1rem;
+  position: absolute;
+  z-index: 2;
+
+  &.focus {
+    border-color: #a672f8;
+
+    .title {
+      background-color: #a672f8;
+    }
+  }
+}

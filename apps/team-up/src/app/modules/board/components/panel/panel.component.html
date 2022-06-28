@@ -1,0 +1,29 @@
+<div class="title">
+  <ng-container *ngIf="viewModel$ | async as vm">
+    <ng-container *ngIf="vm.edit">
+      <span
+        #textarea
+        class="textarea"
+        role="textbox"
+        (input)="setText($event)"
+        (focus)="selectTextarea($event)"
+        contenteditable
+        >{{ vm.editText }}</span
+      >
+    </ng-container>
+
+    <ng-container *ngIf="!vm.edit">
+      {{ vm.panel.title }}
+    </ng-container>
+
+    <input
+      *ngIf="vm.mode === 'composeMode'"
+      type="color"
+      [value]="vm.panel.color"
+      (change)="newColor($event)" />
+  </ng-container>
+</div>
+<div
+  #resize
+  class="resize no-drag"></div>
+<div class="draggable-icon"></div>

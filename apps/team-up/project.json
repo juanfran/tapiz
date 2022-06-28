@@ -1,0 +1,102 @@
+{
+  "name": "team-up",
+  "projectType": "application",
+  "sourceRoot": "apps/team-up/src",
+  "prefix": "team-up",
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:browser",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/team-up",
+        "index": "apps/team-up/src/index.html",
+        "main": "apps/team-up/src/main.ts",
+        "polyfills": "apps/team-up/src/polyfills.ts",
+        "tsConfig": "apps/team-up/tsconfig.app.json",
+        "inlineStyleLanguage": "scss",
+        "assets": [
+          "apps/team-up/src/favicon.ico",
+          "apps/team-up/src/assets",
+          {
+            "glob": "**/*",
+            "input": "./node_modules/tinymce/",
+            "output": "./assets/"
+          }
+        ],
+        "styles": ["apps/team-up/src/app/styles/styles.scss"],
+        "stylePreprocessorOptions": {
+          "includePaths": ["apps/team-up/src/app/styles/"]
+        },
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "2kb",
+              "maximumError": "4kb"
+            }
+          ],
+          "fileReplacements": [
+            {
+              "replace": "apps/team-up/src/environments/environment.ts",
+              "with": "apps/team-up/src/environments/environment.prod.ts"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "production": {
+          "browserTarget": "team-up:build:production"
+        },
+        "development": {
+          "browserTarget": "team-up:build:development"
+        }
+      },
+      "defaultConfiguration": "development",
+      "options": {
+        "proxyConfig": "apps/team-up/proxy.conf.json"
+      }
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "browserTarget": "team-up:build"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["apps/team-up/**/*.ts", "apps/team-up/**/*.html"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/apps/team-up"],
+      "options": {
+        "jestConfig": "apps/team-up/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

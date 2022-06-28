@@ -1,0 +1,9 @@
+<ng-container *ngFor="let user of users$ | async">
+  <div
+    *ngIf="user.cursor"
+    class="cursor"
+    [style.top.px]="user.cursor.y"
+    [style.left.px]="user.cursor.x">
+    <span>{{ user.name.charAt(0).toUpperCase() }}</span>
+  </div>
+</ng-container>

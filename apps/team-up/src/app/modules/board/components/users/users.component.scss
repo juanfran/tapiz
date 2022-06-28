@@ -1,0 +1,155 @@
+:host {
+  cursor: default;
+  max-width: 185px;
+  position: fixed;
+  right: 1rem;
+  top: 70px;
+}
+
+.right-col-toolbar {
+  background: var(--primary-color-background);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  min-width: 185px;
+  padding: 1rem 1rem 1rem 1.5rem;
+  transition: background 0.5s ease;
+
+  &.users {
+    max-width: 185px;
+    min-height: 18rem;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.icon-svg {
+  flex-shrink: 0;
+  height: 24px;
+  transition: fill 0.5s ease;
+  width: 24px;
+}
+
+.icon-next {
+  fill: var(--primary-color);
+  height: 16px;
+  width: 16px;
+}
+
+.user-container {
+  flex-grow: 1;
+}
+
+.title-container {
+  align-items: center;
+  background: none;
+  border: 0;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 0.5rem 0;
+  padding: 0;
+  transition: background 0.5s ease, color 0.5s ease;
+
+  .icon-svg {
+    fill: var(--primary-color);
+  }
+
+  &:hover {
+    color: #000;
+
+    .icon-svg {
+      fill: #000;
+    }
+  }
+}
+
+.user {
+  align-items: center;
+  display: flex;
+  margin-bottom: 0.5rem;
+  max-width: 100%;
+
+  .username {
+    display: flex;
+    height: 24px;
+    line-height: 24px;
+    margin-left: 0.5rem;
+    max-width: calc(100% - 2rem);
+    transition: color 0.5s ease;
+
+    .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .myself {
+    flex-shrink: 0;
+  }
+
+  &.me {
+    color: var(--primary-color);
+    flex-shrink: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+
+    .icon-svg {
+      fill: var(--primary-color);
+    }
+  }
+
+  &.active {
+    color: var(--primary-color);
+    font-weight: var(--font-weight-bold);
+    /* stylelint-disable-next-line selector-pseudo-element-no-unknown */
+    ::ng-deep svg {
+      fill: var(--primary-color);
+    }
+  }
+}
+
+.title {
+  color: var(--primary-color);
+  font-size: 1rem;
+  margin: 0;
+  transition: color 0.5s ease;
+}
+
+.slider-wrapper {
+  border: solid 1px var(--primary-color);
+  border-radius: 8px;
+  height: 16px;
+  margin-right: 0.5rem;
+  position: relative;
+  transition: all 0.5s ease;
+  width: 22px;
+
+  .slider-dot {
+    background: var(--primary-color);
+    border-radius: 100%;
+    height: 8px;
+    left: 3px;
+    position: absolute;
+    top: 3px;
+    transition: all 0.5s ease;
+    width: 8px;
+  }
+}
+
+.toolbar-slider {
+  align-items: center;
+  display: flex;
+  padding: 0;
+
+  &.showVisible {
+    .slider-dot {
+      left: auto;
+      right: 3px;
+      transition: all 0.5s ease;
+    }
+  }
+}

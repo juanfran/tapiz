@@ -1,0 +1,8 @@
+<img
+  #image
+  [attr.src]="(image$ | push).url"
+  (load)="loadImage()" />
+
+<div
+  #resize
+  class="resize no-drag"></div>

@@ -1,0 +1,66 @@
+:host {
+  display: block;
+  position: absolute;
+  z-index: 3;
+
+  &.focus {
+    border: 1px solid #000;
+
+    .draggable-icon {
+      display: block;
+    }
+  }
+}
+
+.resize {
+  bottom: -25px;
+  cursor: se-resize;
+  height: 50px;
+  position: absolute;
+  right: -25px;
+  width: 50px;
+}
+
+.draggable-icon {
+  border-bottom: solid 1px #ccc;
+  border-right: solid 1px #ccc;
+  bottom: -0.5rem;
+  display: none;
+  height: 5px;
+  position: absolute;
+  right: -0.5rem;
+  width: 5px;
+}
+
+.text {
+  user-select: none;
+  white-space: pre-wrap;
+  font-size: var(--size);
+  color: var(--color);
+}
+
+.textarea {
+  background: transparent;
+  border: none;
+  height: 100%;
+  outline: none;
+  overflow: hidden;
+  resize: none;
+  width: 100%;
+}
+
+.toolbar {
+  align-items: center;
+  background: var(--primary-color-background);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  height: 50px;
+  position: absolute;
+  top: -55px;
+
+  input {
+    user-select: none;
+    margin-right: 10px;
+  }
+}

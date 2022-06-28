@@ -1,0 +1,135 @@
+.text {
+  line-height: 1.1;
+  overflow-wrap: break-word;
+  user-select: none;
+  white-space: pre-wrap;
+}
+
+.name {
+  bottom: 0.5rem;
+  color: var(--orange);
+  font-size: 1.125rem;
+  font-weight: 700;
+  height: 1.75 rem;
+  left: 0.5rem;
+  max-width: 70%;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.characters {
+  bottom: 0.5rem;
+  color: var(--orange);
+  font-size: 1.125rem;
+  font-weight: 700;
+  opacity: 0;
+  position: absolute;
+  right: 0.5rem;
+}
+
+textarea {
+  background: transparent;
+  border: 0;
+  height: 100%;
+  outline: none;
+  resize: none;
+}
+
+:host {
+  background-color: #fdfcdc;
+  box-shadow: 0 0 15px 10px rgba(0, 0, 0, 0.15);
+  display: block;
+  height: 300px;
+  padding: var(--spacing-2);
+  position: absolute;
+  width: 300px;
+  z-index: 4;
+
+  &:not(.visible) .text {
+    font-family: "Redacted Script", -apple-system, system-ui, sans-serif;
+  }
+
+  &.custom-bg {
+    background-color: var(--custom-bg);
+
+    .name,
+    .text,
+    .characters {
+      color: var(--custom-fg);
+    }
+
+    &.focus {
+      outline: solid 2px var(--custom-fg);
+    }
+  }
+
+  &.highlight {
+    z-index: 6;
+  }
+
+  &.focus {
+    outline: solid 2px var(--orange);
+
+    .name {
+      opacity: 1;
+    }
+
+    .characters {
+      opacity: 1;
+    }
+  }
+
+  &.size1 {
+    .text,
+    textarea {
+      font-size: 3.5rem;
+    }
+  }
+
+  &.size2 {
+    .text,
+    textarea {
+      font-size: 2.5rem;
+    }
+  }
+
+  &.size3 {
+    .text,
+    textarea {
+      font-size: 1.9rem;
+    }
+  }
+
+  &.size4 {
+    .text,
+    textarea {
+      font-size: 1.6rem;
+    }
+  }
+
+  &.size5 {
+    .text,
+    textarea {
+      font-size: 1.3rem;
+    }
+  }
+}
+
+.text,
+textarea {
+  font-family: "Open Sans", -apple-system, system-ui, sans-serif;
+}
+
+.vote {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  background-color: rgba(0, 0, 0, 0.15);
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  text-align: center;
+}

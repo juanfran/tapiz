@@ -1,0 +1,26 @@
+<ng-container *ngIf="viewModel$ | async as vm">
+  <div
+    *ngIf="vm.note.votes > 0"
+    class="vote">
+    {{ vm.note.votes }}
+  </div>
+  <ng-container *ngIf="vm.edit">
+    <textarea
+      #textarea
+      (input)="setText($event)"
+      (focus)="selectTextarea($event)"
+      >{{ vm.editText }}</textarea
+    >
+  </ng-container>
+
+  <ng-container *ngIf="!vm.edit">
+    <div class="text">{{ vm.note.text }}</div>
+  </ng-container>
+
+  <div
+    class="name"
+    [title]="vm.username">
+    {{ vm.username }}
+  </div>
+  <div class="characters">{{ vm.note.text.length }}/140</div>
+</ng-container>

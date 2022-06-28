@@ -1,0 +1,23 @@
+<div class="title">
+  <ng-container *ngIf="viewModel$ | async as vm">
+    <ng-container *ngIf="vm.edit">
+      <span
+        #textarea
+        class="textarea"
+        role="textbox"
+        (input)="setText($event)"
+        (keydown.enter)="enter($event)"
+        (focus)="selectTextarea($event)"
+        contenteditable
+        >{{ vm.editText }}</span
+      >
+    </ng-container>
+
+    <ng-container *ngIf="!vm.edit">
+      {{ vm.group.title }}
+    </ng-container>
+  </ng-container>
+</div>
+<div
+  #resize
+  class="resize no-drag"></div>

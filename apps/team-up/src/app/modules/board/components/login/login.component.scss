@@ -1,0 +1,66 @@
+:host {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-rows: 30px 1fr;
+  grid-template-columns: 4fr 6fr;
+  grid-template-rows: 1fr;
+  height: 100vh;
+
+  @media (max-width: 800px) {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  justify-self: flex-start;
+  padding: 4rem 2rem;
+
+  &.left {
+    background: #dcdaf6;
+    height: 100%;
+    justify-self: flex-end;
+    max-width: 800px;
+    min-width: 500px;
+
+    @media (max-width: 800px) {
+      max-width: 100%;
+    }
+  }
+
+  &.right {
+    justify-content: space-between;
+
+    @media (max-width: 800px) {
+      display: none;
+    }
+  }
+}
+
+.elephant {
+  max-width: 100%;
+  width: 100%;
+}
+
+.logo {
+  background: #736bdb;
+  border-radius: 8px;
+  color: var(--white);
+  display: inline-flex;
+  font-size: 2.25rem;
+  margin-bottom: 3rem;
+  padding: 0.25rem 1rem;
+}
+
+.claim {
+  color: #736bdb;
+  font-size: 2.25rem;
+  margin-bottom: 4rem;
+}
+
+.google {
+  display: flex;
+  min-height: 40px;
+}

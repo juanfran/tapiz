@@ -1,0 +1,56 @@
+<ng-container *ngIf="viewModel$ | async as vm">
+  <div class="right-col-toolbar users">
+    <button class="title-container">
+      <h2 class="title">People</h2>
+    </button>
+    <div class="user-container">
+      <button
+        *ngFor="let user of vm.users; trackBy: trackById"
+        (click)="toggleUserHighlight(user.id)"
+        [class.active]="user.id === vm.userHighlight"
+        class="user">
+        <team-up-svg-icon
+          icon="user"
+          class="icon-svg"></team-up-svg-icon>
+        <p class="username">
+          <span
+            class="name"
+            [title]="user.name"
+            >{{ user.name }}</span
+          >
+        </p>
+      </button>
+    </div>
+    <button
+      *ngIf="vm.currentUser"
+      class="user me"
+      (click)="toggleUserHighlight(vm.currentUser.id)">
+      <team-up-svg-icon
+        icon="user"
+        class="icon-svg"></team-up-svg-icon>
+      <p class="username">
+        <span
+          class="name"
+          [title]="vm.currentUser.name"
+          >{{ vm.currentUser.name }}</span
+        >
+        <span class="myself">(me)</span>
+      </p>
+    </button>
+  </div>
+  <div class="right-col-toolbar">
+    <div class="title-container">
+      <h2 class="title">Show my post its</h2>
+    </div>
+    <button
+      class="toolbar-slider"
+      [ngClass]="{ showVisible: vm.visible }"
+      (click)="toggleVisibility()">
+      <div class="slider-wrapper">
+        <div class="slider-dot"></div>
+      </div>
+      <span *ngIf="!vm.visible">Disabled</span>
+      <span *ngIf="vm.visible">Enabled</span>
+    </button>
+  </div>
+</ng-container>

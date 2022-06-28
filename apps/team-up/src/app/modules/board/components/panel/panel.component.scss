@@ -1,0 +1,66 @@
+.draggable-icon {
+  border-bottom: solid 1px #ccc;
+  border-right: solid 1px #ccc;
+  bottom: -0.5rem;
+  display: none;
+  height: 5px;
+  position: absolute;
+  right: -0.5rem;
+  width: 5px;
+}
+
+:host {
+  background-color: var(--white);
+  border: 1px solid #e8e9ea;
+  box-shadow: 0 0 10px 0 rgba(232, 233, 234, 1);
+  color: #736bdb;
+  cursor: grab;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  text-align: center;
+  z-index: 1;
+
+  &.focus {
+    border-color: var(--primary-color);
+
+    .draggable-icon {
+      display: block;
+    }
+  }
+}
+
+.title {
+  color: var(--black);
+  cursor: pointer;
+  display: block;
+  font-family: "Nunito", -apple-system, system-ui, sans-serif;
+  font-size: 1.5rem;
+  height: 45px;
+  margin-top: 10px;
+  padding: var(--spacing-1);
+  user-select: none;
+  white-space: pre-wrap;
+}
+
+.textarea {
+  border: none;
+  height: 100%;
+  outline: none;
+  overflow: hidden;
+  resize: none;
+  width: 100%;
+}
+
+.resize {
+  bottom: -25px;
+  cursor: se-resize;
+  height: 50px;
+  position: absolute;
+  right: -25px;
+  width: 50px;
+}
+
+input[type="color"] {
+  margin-left: 0.5rem;
+}

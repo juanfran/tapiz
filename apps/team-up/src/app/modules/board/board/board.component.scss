@@ -1,0 +1,69 @@
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  width: 100vw;
+
+  &.cursor-text {
+    team-up-panels {
+      pointer-events: none;
+    }
+  }
+}
+
+.work-layer {
+  height: 0;
+  position: relative;
+  transform: scale(1) translate(0, 0);
+  transform-origin: 0 0;
+  width: 0;
+}
+
+canvas {
+  --canvas-size: 9000px;
+
+  border: 1px dotted #c61236;
+  height: var(--canvas-size);
+  left: calc(-1 * (var(--canvas-size) / 2));
+  pointer-events: none;
+  position: absolute;
+  top: calc(-1 * (var(--canvas-size) / 2));
+  width: var(--canvas-size);
+}
+
+team-up-toolbar {
+  left: 1rem;
+  position: fixed;
+  top: 70px;
+  z-index: 5;
+}
+
+team-up-users,
+team-up-header {
+  z-index: 5;
+}
+
+.edit-mode {
+  team-up-panels,
+  team-up-image,
+  team-up-group,
+  team-up-text {
+    pointer-events: none;
+  }
+
+  /* stylelint-disable */
+  team-up-group ::ng-deep {
+    .title,
+    .resize {
+      pointer-events: all;
+    }
+  }
+  /* stylelint-enable */
+}
+
+.compose-mode {
+  team-up-note {
+    pointer-events: none;
+  }
+}

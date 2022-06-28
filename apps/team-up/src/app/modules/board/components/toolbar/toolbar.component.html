@@ -1,0 +1,116 @@
+<ng-container *rxLet="model$; let vm">
+  <div class="toolbar">
+    <div
+      *ngIf="(canvasMode$ | async) === 'editMode'"
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'note'">
+      <button
+        (click)="note()"
+        class="toolbar-button">
+        <team-up-svg-icon
+          icon="add"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Note</div>
+    </div>
+    <div
+      *ngIf="(canvasMode$ | async) === 'editMode'"
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'group'">
+      <button
+        class="toolbar-button"
+        (click)="group()">
+        <team-up-svg-icon
+          icon="template"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Group</div>
+    </div>
+    <div
+      *ngIf="(canvasMode$ | async) === 'editMode'"
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'vote'">
+      <button
+        class="toolbar-button"
+        (click)="vote()">
+        <team-up-svg-icon
+          icon="voting_chip"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Vote</div>
+    </div>
+    <div
+      *ngIf="(canvasMode$ | async) === 'composeMode'"
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'text'">
+      <button
+        class="toolbar-button"
+        (click)="text()">
+        <team-up-svg-icon
+          icon="letter"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Text</div>
+    </div>
+
+    <div
+      *ngIf="(canvasMode$ | async) === 'composeMode'"
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'image'">
+      <button
+        class="toolbar-button"
+        (click)="popupOpen('image')">
+        <team-up-svg-icon
+          icon="picture"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Image</div>
+      <div
+        class="toolbar-container"
+        *ngIf="vm.popupOpen === 'image'">
+        <div class="toolbar-popup image-popup">
+          <form
+            [formGroup]="imageForm"
+            (submit)="newImage()">
+            <span class="popup-title">Image url</span>
+            <input
+              tuAutofocus
+              formControlName="url"
+              autocomplete="off"
+              matInput
+              class="image-url-field" />
+            <button
+              class="submit"
+              type="submit"
+              mat-raised-button
+              color="primary">
+              Submit
+            </button>
+            <button
+              (click)="popupOpen('')"
+              class="cancel"
+              type="text"
+              mat-raised-button
+              color="warn">
+              Cancel
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div
+      *ngIf="(canvasMode$ | async) === 'composeMode'"
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'panel'">
+      <button
+        class="toolbar-button"
+        (click)="panel()">
+        <team-up-svg-icon
+          icon="board"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Board</div>
+    </div>
+  </div>
+</ng-container>

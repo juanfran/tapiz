@@ -1,0 +1,59 @@
+<ng-container *rxLet="model$; let vm">
+  <button
+    class="home"
+    [routerLink]="['/']">
+    <team-up-svg-icon
+      icon="home"
+      class="icon-svg"></team-up-svg-icon>
+  </button>
+  <div class="mode">
+    <ng-container *ngIf="vm.edit">
+      <span
+        #textarea
+        tuAutofocus
+        class="textarea"
+        role="textbox"
+        (tuClickOutside)="clickOutside($event)"
+        (keydown.enter)="enter($event)"
+        contenteditable
+        >{{ vm.name }}</span
+      >
+    </ng-container>
+    <button
+      *ngIf="!vm.edit && vm.isOwner"
+      class="edit-name"
+      (click)="editName()">
+      <team-up-svg-icon
+        icon="edit"
+        class="icon-svg"></team-up-svg-icon>
+      <span class="board-name">{{ vm.name }}</span>
+    </button>
+    <ng-container *ngIf="!vm.isOwner">
+      <team-up-svg-icon
+        icon="edit"
+        class="icon-svg"></team-up-svg-icon>
+      <span class="board-name">{{ vm.name }}</span>
+    </ng-container>
+  </div>
+  <div class="header-right">
+    <button (click)="export()">
+      <team-up-svg-icon
+        icon="export"
+        class="icon-svg"></team-up-svg-icon>
+    </button>
+    <div class="change-mode-button-holder">
+      <button
+        [class.active]="state.get('canvasMode') === 'editMode'"
+        class="change-mode-button"
+        (click)="changeCanvasMode('editMode')">
+        Edit Mode
+      </button>
+      <button
+        [class.active]="state.get('canvasMode') === 'composeMode'"
+        class="change-mode-button"
+        (click)="changeCanvasMode('composeMode')">
+        Compose Mode
+      </button>
+    </div>
+  </div>
+</ng-container>

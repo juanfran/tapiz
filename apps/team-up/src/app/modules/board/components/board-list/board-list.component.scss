@@ -1,0 +1,32 @@
+:host {
+  display: grid;
+  grid-auto-columns: 1fr;
+  grid-auto-rows: 30px 1fr;
+  grid-template-columns: 1fr 3fr;
+  grid-template-rows: 1fr;
+  height: 100vh;
+
+  .mat-button {
+    text-align: left;
+    width: 100%;
+  }
+}
+
+.team-logo {
+  margin-bottom: 1rem;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1rem;
+
+  &.primary {
+    background: #dcdaf6;
+  }
+}
+
+.logout {
+  margin-top: 1rem;
+}

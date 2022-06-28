@@ -1,0 +1,39 @@
+<div
+  [class.edit-mode]="(canvasMode$ | async) === 'editMode'"
+  [class.compose-mode]="(canvasMode$ | async) === 'composeMode'"
+  class="container">
+  <team-up-header></team-up-header>
+  <team-up-users></team-up-users>
+  <team-up-toolbar></team-up-toolbar>
+  <div class="test"></div>
+  <div
+    class="work-layer"
+    #workLayer>
+    <ng-container *ngIf="roomId$ | async">
+      <team-up-overlay></team-up-overlay>
+      <team-up-zone></team-up-zone>
+      <team-up-cursors></team-up-cursors>
+      <ng-container *ngFor="let note of notes$ | async; trackBy: trackById">
+        <team-up-note
+          tuBoardDrag
+          [note]="note"></team-up-note>
+      </ng-container>
+      <ng-container *ngFor="let image of images$ | async; trackBy: trackById">
+        <team-up-image
+          tuBoardDrag
+          [image]="image"></team-up-image>
+      </ng-container>
+      <ng-container *ngFor="let group of groups$ | async; trackBy: trackById">
+        <team-up-group
+          tuBoardDrag
+          [group]="group"></team-up-group>
+      </ng-container>
+      <ng-container *ngFor="let text of texts$ | async; trackBy: trackById">
+        <team-up-text
+          tuBoardDrag
+          [text]="text"></team-up-text>
+      </ng-container>
+      <team-up-panels></team-up-panels>
+    </ng-container>
+  </div>
+</div>

@@ -1,0 +1,33 @@
+@import "@angular/cdk/overlay-prebuilt.css";
+@import "@angular/material/prebuilt-themes/deeppurple-amber.css";
+@import "swatches.scss";
+@import "typography.scss";
+@import "fonts.scss";
+@import "responsive.scss";
+@import "spacing.scss";
+@import "z-index.scss";
+@import "generic.scss";
+
+:root {
+  --purple: #736bdb;
+  --purple-bbg: #736bdb80;
+  --orange: #fed9b7;
+  --yellow: #fdfcdc;
+  --blue: #404e7c;
+  --baby-blue: #42cfdc;
+  --baby-blue-bbg: #42cfdc80;
+  --white: #fff;
+  --black: #000;
+}
+
+.edit-mode {
+  --primary-color: var(--purple);
+  --primary-color-background: #f1f0fc;
+  --primary-color-button-bg: var(--purple-bbg);
+}
+
+.compose-mode {
+  --primary-color: var(--baby-blue);
+  --primary-color-background: #42cfdc26;
+  --primary-color-button-bg: var(--baby-blue-bbg);
+}

@@ -1,0 +1,86 @@
+:host {
+  align-items: center;
+  background: var(--primary-color);
+  cursor: default;
+  display: flex;
+  justify-content: space-between;
+  left: 0;
+  min-height: var(--header-height);
+  padding: 0.5rem 25px;
+  position: fixed;
+  top: 0;
+  transition: background 0.5s ease;
+  width: 100%;
+
+  .icon-svg {
+    fill: var(--white);
+    height: 24px;
+    width: 24px;
+  }
+}
+
+button,
+.board-name {
+  color: var(--white);
+  font-size: 1rem;
+}
+
+.mode {
+  display: flex;
+
+  .icon-svg {
+    margin-right: 0.5rem;
+  }
+}
+
+.edit-name {
+  display: flex;
+  align-items: center;
+}
+
+.board-name {
+  max-width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.change-mode-button-holder {
+  display: flex;
+}
+
+.change-mode-button {
+  align-items: center;
+  border-bottom: solid 2px var(--white);
+  border-top: solid 2px var(--primary-color);
+  display: flex;
+  font-family: "Open Sans", -apple-system, system-ui, sans-serif;
+  font-size: 0.75rem;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0 1rem;
+
+  &.active {
+    border-top: solid 2px var(--white);
+    font-weight: 700;
+  }
+}
+
+.header-right {
+  display: flex;
+
+  .icon-svg {
+    margin-right: 0.5rem;
+  }
+}
+
+.textarea {
+  color: var(--white);
+  background: transparent;
+  border: none;
+  height: 100%;
+  outline: none;
+  overflow: hidden;
+  resize: none;
+  width: 100%;
+}
