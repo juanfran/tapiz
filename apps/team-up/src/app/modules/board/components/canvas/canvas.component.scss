@@ -1,9 +1,0 @@
-:host {
-  left: 0;
-  position: fixed;
-  top: 0;
-}
-
-:host:not(.active) {
-  pointer-events: none;
-}

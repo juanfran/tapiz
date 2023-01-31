@@ -40,7 +40,7 @@ export class Server {
     ws.close();
   }
 
-  public checkConnections(roomId: string) {
+  public checkConnections(boardId: string) {
     const openClients = this.clients.filter(
       (client) => client.ws.readyState === client.ws.OPEN
     );
@@ -49,8 +49,8 @@ export class Server {
         client.ws.readyState === client.ws.CLOSED &&
         !openClients.find((openClient) => {
           return (
-            // check if a new connection for the same user/room was made
-            openClient.id === client.id && openClient.roomId === client.roomId
+            // check if a new connection for the same user/board was made
+            openClient.id === client.id && openClient.boardId === client.boardId
           );
         })
     );
@@ -62,7 +62,7 @@ export class Server {
         (client) => client.ws.readyState === client.ws.OPEN
       );
 
-      this.setState(roomId, (state) => {
+      this.setState(boardId, (state) => {
         if (!state.users) {
           return;
         }
@@ -82,7 +82,7 @@ export class Server {
       });
 
       this.sendAll(
-        roomId,
+        boardId,
         {
           type: BoardActions.wsSetState,
           data: {
@@ -102,10 +102,10 @@ export class Server {
     }
   }
 
-  public sendAll(roomId: string, message: unknown, exclude: Client[] = []) {
-    const roomClients = this.clients.filter((it) => it.roomId === roomId);
+  public sendAll(boardId: string, message: unknown, exclude: Client[] = []) {
+    const boardClients = this.clients.filter((it) => it.boardId === boardId);
 
-    roomClients.forEach((client) => {
+    boardClients.forEach((client) => {
       if (
         !exclude.includes(client) &&
         client.ws.readyState === WebSocket.OPEN
@@ -115,40 +115,40 @@ export class Server {
     });
   }
 
-  public async createRoom(roomId: string) {
-    if (!this.state[roomId]) {
-      const room = await db.getRoom(roomId);
+  public async createBoard(boardId: string) {
+    if (!this.state[boardId]) {
+      const board = await db.getBoard(boardId);
 
-      if (!room) {
-        throw new Error('room not found');
+      if (!board) {
+        throw new Error('board not found');
       }
 
-      this.updateRoom(roomId, {
-        ...room.board,
+      this.updateBoard(boardId, {
+        ...board.board,
         users: [],
       });
     }
   }
 
-  public getRoom(roomId: string) {
-    return this.state[roomId];
+  public getBoard(boardId: string) {
+    return this.state[boardId];
   }
 
-  public setState(roomId: string, fn: (state: CommonState) => void) {
-    const nextState = produce(this.state[roomId], (draft) => {
+  public setState(boardId: string, fn: (state: CommonState) => void) {
+    const nextState = produce(this.state[boardId], (draft) => {
       return fn(draft);
     });
 
-    this.updateRoom(roomId, nextState);
+    this.updateBoard(boardId, nextState);
   }
 
-  public userJoin(roomId: string, user: User) {
-    const isAlreadyInState = this.state[roomId].users.find(
+  public userJoin(boardId: string, user: User) {
+    const isAlreadyInState = this.state[boardId].users.find(
       (it) => it.id === user.id
     );
 
     if (isAlreadyInState) {
-      this.setState(roomId, (state) => {
+      this.setState(boardId, (state) => {
         state.users = state.users.map((it) => {
           if (it.id === user.id) {
             return user;
@@ -158,33 +158,33 @@ export class Server {
         });
       });
     } else {
-      this.setState(roomId, (state) => {
+      this.setState(boardId, (state) => {
         state.users.push(user);
       });
     }
   }
 
-  public getRoomUser(roomId: string, userId: User['id']) {
-    return db.getRoomUser(roomId, userId);
+  public getBoardUser(boardId: string, userId: User['id']) {
+    return db.getBoardUser(boardId, userId);
   }
 
   public setUserVisibility(
-    roomId: string,
+    boardId: string,
     userId: User['id'],
     visible: boolean
   ) {
-    db.updateAccountRoom(roomId, userId, visible);
+    db.updateAccountBoard(boardId, userId, visible);
   }
 
-  public persistRoom(roomId: string) {
-    db.updateBoard(roomId, this.state[roomId]);
+  public persistBoard(boardId: string) {
+    db.updateBoard(boardId, this.state[boardId]);
   }
 
-  public updateBoardName(roomId: string, name: string) {
-    db.updateBoardName(roomId, name);
+  public updateBoardName(boardId: string, name: string) {
+    db.updateBoardName(boardId, name);
   }
 
-  private updateRoom(roomId: string, state: CommonState) {
-    this.state[roomId] = state;
+  private updateBoard(boardId: string, state: CommonState) {
+    this.state[boardId] = state;
   }
 }

@@ -15,8 +15,8 @@ async function createDatabase() {
 
   console.log('drop tables');
   await client.query(`
-    DROP TABLE if exists rooms, users cascade;
-    DROP TABLE if exists room, account_room cascade;
+    DROP TABLE if exists boards, users cascade;
+    DROP TABLE if exists board, account_board cascade;
   `);
 
   console.log('create extensions');
@@ -24,9 +24,9 @@ async function createDatabase() {
     CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
   `);
 
-  console.log('create room');
+  console.log('create board');
   await client.query(`
-    CREATE TABLE room (
+    CREATE TABLE board (
       id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
       name VARCHAR (255) NOT NULL,
       board json NOT NULL,
@@ -34,14 +34,14 @@ async function createDatabase() {
     );
   `);
 
-  console.log('create account_room');
+  console.log('create account_board');
   await client.query(`
-    CREATE TABLE account_room (
+    CREATE TABLE account_board (
       account_id VARCHAR (255),
-      room_id uuid NOT NULL REFERENCES room(id) ON DELETE CASCADE,
+      board_id uuid NOT NULL REFERENCES board(id) ON DELETE CASCADE,
       is_owner boolean DEFAULT false,
       visible boolean DEFAULT false,
-      PRIMARY KEY (account_id, room_id)
+      PRIMARY KEY (account_id, board_id)
     );
   `);
 
@@ -49,44 +49,4 @@ async function createDatabase() {
   console.log('end');
 }
 
-async function createFakeData() {
-  const client = new Client({
-    database: Config.db.database,
-    host: Config.db.host,
-    password: Config.db.password,
-    port: Config.db.port,
-    user: Config.db.user,
-  });
-
-  client.connect();
-
-  const ownerId = '1';
-
-  console.log(`admin id: ${ownerId}`);
-
-  const emptyRoom = {
-    notes: [],
-    paths: [],
-    groups: [],
-    panels: [],
-    images: [],
-    texts: [],
-  };
-
-  const result = await client.query(
-    `INSERT INTO room(name, board) VALUES($1, $2) RETURNING id`,
-    ['Example', JSON.stringify(emptyRoom)]
-  );
-
-  await client.query(
-    `INSERT INTO account_room(account_id, room_id, is_owner) VALUES($1, $2, $3)`,
-    [ownerId, result.rows[0].id, true]
-  );
-
-  console.log(`use this room ${result.rows[0].id}`);
-  process.exit();
-}
-
-createDatabase().then(() => {
-  createFakeData();
-});
+createDatabase();

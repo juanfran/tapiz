@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { Action } from '@ngrx/store';
 import { Store } from '@ngrx/store';
 import { WsService } from '@/app/modules/ws/services/ws.service';
-import { wsMessage } from '@/app/modules/ws/ws.actions';
 import { EMPTY, of } from 'rxjs';
 import {
   exhaustMap,
@@ -16,13 +14,11 @@ import {
 } from 'rxjs/operators';
 import { v4 } from 'uuid';
 import {
-  joinRoom,
+  joinBoard,
   moveCursor,
-  newPath,
   setFocusId,
   setVisible,
   zoneToGroup,
-  setDrawEnabled,
   setMoveEnabled,
   zoneToPanel,
   createBoard,
@@ -34,7 +30,7 @@ import {
   patchNode,
   addNode,
   removeNode,
-  fetchRoomSuccess,
+  fetchBoardSuccess,
   removeBoard,
 } from '../actions/board.actions';
 import { selectZone } from '../selectors/board.selectors';
@@ -49,7 +45,6 @@ export class BoardEffects {
           addNode,
           patchNode,
           removeNode,
-          newPath,
           moveCursor,
           setVisible,
           setBoardName
@@ -64,21 +59,21 @@ export class BoardEffects {
     }
   );
 
-  public joinRoom$ = createEffect(() => {
+  public joinBoard$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(joinRoom),
+      ofType(joinBoard),
       switchMap((action) => {
-        return this.boardApiService.getRoom(action.roomId);
+        return this.boardApiService.getBoard(action.boardId);
       }),
-      map((room) => {
+      map((board) => {
         this.wsService.send({
           action: 'join',
-          roomId: room.id,
+          boardId: board.id,
         });
 
-        return fetchRoomSuccess({
-          name: room.name,
-          owners: room.owners,
+        return fetchBoardSuccess({
+          name: board.name,
+          owners: board.owners,
         });
       })
     );
@@ -94,23 +89,6 @@ export class BoardEffects {
     );
   });
 
-  public drawEnabled$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(setDrawEnabled),
-      map(({ enabled }) => {
-        return setMoveEnabled({ enabled: !enabled });
-      })
-    );
-  });
-
-  public drawEnabledOnPopup$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(setPopupOpen),
-      filter(({ popup }) => popup !== 'pencil'),
-      map(() => setDrawEnabled({ enabled: false }))
-    );
-  });
-
   public resetPopupOnChangeMode$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(changeCanvasMode),
@@ -122,13 +100,6 @@ export class BoardEffects {
     return this.actions$.pipe(
       ofType(changeCanvasMode),
       map(() => setMoveEnabled({ enabled: true }))
-    );
-  });
-
-  public drawEnabledOnChangeMode$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(changeCanvasMode),
-      map(() => setDrawEnabled({ enabled: false }))
     );
   });
 

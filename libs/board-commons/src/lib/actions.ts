@@ -1,7 +1,7 @@
 const prefix = '[Board]';
 
 export const BoardActions = {
-  joinRoom: `${prefix} join room`,
+  joinBoard: `${prefix} join board`,
   setZoom: `${prefix} set zoom`,
   setUserView: `${prefix} set user view`,
   addNode: `${prefix} add node`,
@@ -9,17 +9,14 @@ export const BoardActions = {
   patchNode: `${prefix} patch node`,
   setImagePosition: `${prefix} set image position`,
 
-  setDrawEnabled: `${prefix} set draw enabled`,
   setMoveEnabled: `${prefix} set move enabled`,
   moveCursor: `${prefix} move cursor`,
   editImage: `${prefix} edit image`,
   wsSetState: `${prefix} ws set state`,
   newPath: `${prefix} new path`,
   setUserId: `${prefix} set user id`,
-  changeCanvasMode: `${prefix} change canvas mode`,
+
   setInitZone: `${prefix} set init zone`,
-  changeBrushSize: `${prefix} change brush size`,
-  changeBrushColor: `${prefix} change brush color`,
   setFocusId: `${prefix} set focus id`,
   setVisible: `${prefix} set visible`,
   setZone: `${prefix} set zone`,
@@ -30,9 +27,7 @@ export const BoardActions = {
   undo: `${prefix} undo`,
   redo: `${prefix} redo`,
   toggleUserHighlight: `${prefix} toggle user highlight`,
-  setCanvasActive: `${prefix} set canvas active`,
-  canvasObjectAdded: `${prefix} canvas object added`,
-  canvasObjectModified: `${prefix} canvas object modified`,
+
   setBoardName: `${prefix} set board name`,
   setPopupOpen: `${prefix} set popup open`,
   createBoard: `${prefix} create board`,
@@ -41,7 +36,7 @@ export const BoardActions = {
   initBoard: `${prefix} init board`,
   closeBoard: `${prefix} close board`,
   textToolbarClick: `${prefix} text toolbar click`,
-  fetchRoomSuccess: `${prefix}[api] fetch room success`,
+  fetchBoardSuccess: `${prefix}[api] fetch board success`,
   readyToVote: `${prefix} ready to vote`,
   removeBoard: `${prefix} remove board`,
 
@@ -51,4 +46,9 @@ export const BoardActions = {
   removeNote: `${prefix}[local] remove note`,
   newText: `${prefix}[local] new text`,
   removeText: `${prefix}[local] remove text`,
+
+  changeCanvasMode: `${prefix} change canvas mode`,
+  setCanvasActive: `${prefix} set canvas active`,
+  canvasObjectAdded: `${prefix} canvas object added`,
+  canvasObjectModified: `${prefix} canvas object modified`,
 };

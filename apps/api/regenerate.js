@@ -53,27 +53,19 @@ function createDatabase() {
                     });
                     client.connect();
                     console.log('drop tables');
-                    return [4 /*yield*/, client.query("\n    DROP TABLE if exists rooms, users cascade;\n    DROP TABLE if exists room, account_room cascade;\n  ")];
+                    return [4 /*yield*/, client.query("\n    DROP TABLE if exists boards, users cascade;\n    DROP TABLE if exists board, account_board cascade;\n  ")];
                 case 1:
                     _a.sent();
                     console.log('create extensions');
                     return [4 /*yield*/, client.query("\n    CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";\n  ")];
                 case 2:
                     _a.sent();
-                    // console.log('create account');
-                    // await client.query(`
-                    //   CREATE TABLE account (
-                    //     id BIGSERIAL NOT NULL PRIMARY KEY,
-                    //     name VARCHAR (255) NOT NULL,
-                    //     google_id VARCHAR (255)
-                    //   );
-                    // `);
-                    console.log('create room');
-                    return [4 /*yield*/, client.query("\n    CREATE TABLE room (\n      id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),\n      name VARCHAR (255) NOT NULL,\n      board json NOT NULL,\n      created_on TIMESTAMP NOT NULL DEFAULT now()\n    );\n  ")];
+                    console.log('create board');
+                    return [4 /*yield*/, client.query("\n    CREATE TABLE board (\n      id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),\n      name VARCHAR (255) NOT NULL,\n      board json NOT NULL,\n      created_on TIMESTAMP NOT NULL DEFAULT now()\n    );\n  ")];
                 case 3:
                     _a.sent();
-                    console.log('create account_room');
-                    return [4 /*yield*/, client.query("\n    CREATE TABLE account_room (\n      account_id VARCHAR (255),\n      room_id uuid NOT NULL REFERENCES room(id) ON DELETE CASCADE,\n      is_owner boolean DEFAULT false,\n      visible boolean DEFAULT false,\n      PRIMARY KEY (account_id, room_id)\n    );\n  ")];
+                    console.log('create account_board');
+                    return [4 /*yield*/, client.query("\n    CREATE TABLE account_board (\n      account_id VARCHAR (255),\n      board_id uuid NOT NULL REFERENCES board(id) ON DELETE CASCADE,\n      is_owner boolean DEFAULT false,\n      visible boolean DEFAULT false,\n      PRIMARY KEY (account_id, board_id)\n    );\n  ")];
                 case 4:
                     _a.sent();
                     return [4 /*yield*/, client.end()];
@@ -85,43 +77,4 @@ function createDatabase() {
         });
     });
 }
-function createFakeData() {
-    return __awaiter(this, void 0, void 0, function () {
-        var client, ownerId, emptyRoom, result;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    client = new pg_1.Client({
-                        database: config_1["default"].db.database,
-                        host: config_1["default"].db.host,
-                        password: config_1["default"].db.password,
-                        port: config_1["default"].db.port,
-                        user: config_1["default"].db.user
-                    });
-                    client.connect();
-                    ownerId = '1';
-                    console.log("admin id: ".concat(ownerId));
-                    emptyRoom = {
-                        notes: [],
-                        paths: [],
-                        groups: [],
-                        panels: [],
-                        images: [],
-                        texts: []
-                    };
-                    return [4 /*yield*/, client.query("INSERT INTO room(name, board) VALUES($1, $2) RETURNING id", ['Example', JSON.stringify(emptyRoom)])];
-                case 1:
-                    result = _a.sent();
-                    return [4 /*yield*/, client.query("INSERT INTO account_room(account_id, room_id, is_owner) VALUES($1, $2, $3)", [ownerId, result.rows[0].id, true])];
-                case 2:
-                    _a.sent();
-                    console.log("use this room ".concat(result.rows[0].id));
-                    process.exit();
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-createDatabase().then(function () {
-    createFakeData();
-});
+createDatabase();

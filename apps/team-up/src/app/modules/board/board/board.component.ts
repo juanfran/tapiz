@@ -14,7 +14,7 @@ import { startWith, map, withLatestFrom, filter, first } from 'rxjs/operators';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import {
   newImage,
-  joinRoom,
+  joinBoard,
   setUserView,
   moveCursor,
   setFocusId,
@@ -31,7 +31,7 @@ import {
   selectNotes,
   selectOpen,
   selectPosition,
-  selectRoomId,
+  selectBoardId,
   selectUserId,
   selectZoom,
   selectTexts,
@@ -55,7 +55,7 @@ import { v4 } from 'uuid';
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly notes$ = this.store.select(selectNotes);
-  public readonly roomId$ = this.store.select(selectRoomId);
+  public readonly boardId$ = this.store.select(selectBoardId);
   public readonly images$ = this.store.select(selectImages);
   public readonly texts$ = this.store.select(selectTexts);
   public readonly groups$ = this.store.select(selectGroups);
@@ -132,7 +132,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
           this.store.dispatch(
             addNode({
               node: note,
-              nodeType: 'note'
+              nodeType: 'note',
             })
           );
         }
@@ -249,10 +249,10 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
           // delay(2000),
         )
         .subscribe(() => {
-          const roomId = this.route.snapshot.paramMap.get('id');
+          const boardId = this.route.snapshot.paramMap.get('id');
 
-          if (roomId) {
-            this.store.dispatch(joinRoom({ roomId }));
+          if (boardId) {
+            this.store.dispatch(joinBoard({ boardId }));
             resolve();
           } else {
             reject();

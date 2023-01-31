@@ -33,7 +33,7 @@ function getSingleRow(res: QueryResult<any>) {
   return null;
 }
 
-export function getRoom(roomId: string): Promise<
+export function getBoard(boardId: string): Promise<
   | {
       id: string;
       owner: string;
@@ -43,29 +43,29 @@ export function getRoom(roomId: string): Promise<
   | undefined
 > {
   return client
-    .query('SELECT * FROM room WHERE id = $1', [roomId])
+    .query('SELECT * FROM board WHERE id = $1', [boardId])
     .then(getSingleRow);
 }
 
-export function getRoomOwners(roomId: string) {
+export function getBoardOwners(boardId: string) {
   return client
     .query(
-      'SELECT account_id as id FROM account_room where room_id = $1 and is_owner=true',
-      [roomId]
+      'SELECT account_id as id FROM account_board where board_id = $1 and is_owner=true',
+      [boardId]
     )
     .then((res) => res.rows.map((it) => it.id));
 }
 
-export function getRoomUser(roomId: string, userId: User['id']) {
+export function getBoardUser(boardId: string, userId: User['id']) {
   return client
     .query(
-      'SELECT visible FROM account_room where room_id = $1 AND account_id = $2',
-      [roomId, userId]
+      'SELECT visible FROM account_board where board_id = $1 AND account_id = $2',
+      [boardId, userId]
     )
     .then(getSingleRow);
 }
 
-export function getRooms(ownerId: string): Promise<
+export function getBoards(ownerId: string): Promise<
   {
     id: string;
     owner: string;
@@ -75,51 +75,49 @@ export function getRooms(ownerId: string): Promise<
 > {
   return client
     .query(
-      'SELECT * FROM room LEFT JOIN account_room ON account_room.room_id = room.id where account_id = $1 ORDER BY created_on DESC',
+      'SELECT * FROM board LEFT JOIN account_board ON account_board.board_id = board.id where account_id = $1 ORDER BY created_on DESC',
       [ownerId]
     )
     .then((res) => res.rows);
 }
 
-export async function createRoom(
+export async function createBoard(
   name = 'New board',
   owner: string,
   board: unknown
 ): Promise<string> {
   const result = await client.query(
-    `INSERT INTO room(name, board) VALUES($1, $2) RETURNING id`,
+    `INSERT INTO board(name, board) VALUES($1, $2) RETURNING id`,
     [name, JSON.stringify(board)]
   );
 
-  const room = getSingleRow(result);
+  const boardRow = getSingleRow(result);
 
   await client.query(
-    `INSERT INTO account_room(account_id, room_id, is_owner) VALUES($1, $2, $3)`,
-    [owner, room.id, true]
+    `INSERT INTO account_board(account_id, board_id, is_owner) VALUES($1, $2, $3)`,
+    [owner, boardRow.id, true]
   );
 
-  return room.id;
+  return boardRow.id;
 }
 
-export async function deleteRoom(
-  roomId: string
-) {
-  return client.query(
-    `DELETE FROM room WHERE id=$1;`,
-    [roomId]
-  );
+export async function deleteBoard(boardId: string) {
+  return client.query(`DELETE FROM board WHERE id=$1;`, [boardId]);
 }
 
-export async function joinRoom(userId: string, roomId: string): Promise<void> {
+export async function joinBoard(
+  userId: string,
+  boardId: string
+): Promise<void> {
   const result = await client.query(
-    'SELECT * FROM room LEFT JOIN account_room ON account_room.room_id = room.id where account_id = $1 and room_id = $2',
-    [userId, roomId]
+    'SELECT * FROM board LEFT JOIN account_board ON account_board.board_id = board.id where account_id = $1 and board_id = $2',
+    [userId, boardId]
   );
 
   if (!result.rows.length) {
     await client.query(
-      `INSERT INTO account_room(account_id, room_id, is_owner) VALUES($1, $2, $3)`,
-      [userId, roomId, false]
+      `INSERT INTO account_board(account_id, board_id, is_owner) VALUES($1, $2, $3)`,
+      [userId, boardId, false]
     );
   }
 }
@@ -127,32 +125,31 @@ export async function joinRoom(userId: string, roomId: string): Promise<void> {
 export function updateBoard(id: string, board: CommonState) {
   const dbState = {
     notes: board.notes,
-    paths: board.paths,
     groups: board.groups,
     panels: board.panels,
     images: board.images,
     texts: board.texts,
   };
 
-  return client.query(`UPDATE room set board=$1 where id=$2`, [
+  return client.query(`UPDATE board set board=$1 where id=$2`, [
     JSON.stringify(dbState),
     id,
   ]);
 }
 
-export function updateAccountRoom(
-  roomId: string,
+export function updateAccountBoard(
+  boardId: string,
   userId: User['id'],
   visible: boolean
 ) {
   return client.query(
-    `UPDATE account_room set visible=$1 where account_id=$2 AND room_id = $3`,
-    [visible, userId, roomId]
+    `UPDATE account_board set visible=$1 where account_id=$2 AND board_id = $3`,
+    [visible, userId, boardId]
   );
 }
 
 export function updateBoardName(id: string, name: string) {
-  return client.query(`UPDATE room set name=$1 where id=$2`, [name, id]);
+  return client.query(`UPDATE board set name=$1 where id=$2`, [name, id]);
 }
 
 export function getUserByName(name: string) {
@@ -160,24 +157,3 @@ export function getUserByName(name: string) {
     .query('SELECT * FROM account WHERE name = $1', [name])
     .then(getSingleRow);
 }
-
-// export async function demo() {
-//   const user = await getUserByName('user1');
-
-//   const newRoomId = await createRoom(user.id, {
-//     notes: [],
-//     paths: [],
-//     groups: [],
-//     panels: [],
-//   });
-
-//   let room = await getRoom(newRoomId);
-
-//   if (room) {
-//     updateBoard(room.id, room.board);
-
-//     room = await getRoom(newRoomId);
-
-//     console.log('nuevo', room);
-//   }
-// };

@@ -2,11 +2,11 @@ import { applyDiff, BoardActions, Diff } from '@team-up/board-commons';
 import * as WebSocket from 'ws';
 import { Server } from './server';
 import { messageManager } from './message';
-import { joinRoom, getRoomOwners } from './db';
+import { joinBoard, getBoardOwners } from './db';
 import { checkPermissionsAction } from './permissions';
 
 export class Client {
-  public roomId!: string;
+  public boardId!: string;
   public isOwner!: boolean;
   public sendTimeout?: ReturnType<typeof setTimeout>;
   public pendingMsgs = [];
@@ -32,7 +32,7 @@ export class Client {
     } else {
       const persist = !this.isSessionEvent(message.type);
 
-      const state = this.server.getRoom(this.roomId);
+      const state = this.server.getBoard(this.boardId);
 
       const messageHandler = messageManager.find((manager) => {
         return manager.type === message.type;
@@ -46,9 +46,9 @@ export class Client {
       if (messageHandler) {
         const result = messageHandler.fn(message, this.id, { ...state });
         this.updateStateWithDiff(result);
-        this.server.checkConnections(this.roomId);
+        this.server.checkConnections(this.boardId);
         this.server.sendAll(
-          this.roomId,
+          this.boardId,
           {
             type: BoardActions.wsSetState,
             data: result,
@@ -57,42 +57,42 @@ export class Client {
         );
 
         if (persist) {
-          this.server.persistRoom(this.roomId);
+          this.server.persistBoard(this.boardId);
         }
 
         if (message.type === BoardActions.setVisible) {
-          this.server.setUserVisibility(this.roomId, this.id, message.visible);
+          this.server.setUserVisibility(this.boardId, this.id, message.visible);
         }
       } else if (message.type === BoardActions.setBoardName && this.isOwner) {
-        this.server.updateBoardName(this.roomId, message.name);
+        this.server.updateBoardName(this.boardId, message.name);
 
-        this.server.checkConnections(this.roomId);
-        this.server.sendAll(this.roomId, message, [this]);
+        this.server.checkConnections(this.boardId);
+        this.server.sendAll(this.boardId, message, [this]);
       }
     }
   }
 
-  private async join(message: { roomId: string }) {
-    this.roomId = message.roomId;
+  private async join(message: { boardId: string }) {
+    this.boardId = message.boardId;
 
-    joinRoom(this.id, this.roomId);
+    joinBoard(this.id, this.boardId);
 
-    await this.server.createRoom(this.roomId);
-    const roomUser = await this.server.getRoomUser(this.roomId, this.id);
+    await this.server.createBoard(this.boardId);
+    const boardUser = await this.server.getBoardUser(this.boardId, this.id);
 
     const user = {
       name: this.username,
       id: this.id,
-      visible: roomUser?.visible ?? false,
+      visible: boardUser?.visible ?? false,
       connected: true,
       cursor: null,
     };
 
-    this.server.userJoin(this.roomId, user);
+    this.server.userJoin(this.boardId, user);
 
-    const room = this.server.getRoom(this.roomId);
+    const board = this.server.getBoard(this.boardId);
 
-    const users = room.users.map((it) => {
+    const users = board.users.map((it) => {
       if (it.id === user.id) {
         return user;
       }
@@ -100,24 +100,23 @@ export class Client {
       return it;
     });
 
-    const owners = await getRoomOwners(this.roomId);
+    const owners = await getBoardOwners(this.boardId);
 
     this.isOwner = owners.includes(this.id);
 
     const diff: Diff = {
       set: {
-        paths: room.paths,
-        notes: room.notes,
+        notes: board.notes,
         users: users,
-        groups: room.groups,
-        panels: room.panels,
-        images: room.images,
-        texts: room.texts,
+        groups: board.groups,
+        panels: board.panels,
+        images: board.images,
+        texts: board.texts,
       },
     };
 
     this.server.sendAll(
-      this.roomId,
+      this.boardId,
       {
         type: BoardActions.wsSetState,
         data: {
@@ -154,7 +153,7 @@ export class Client {
   }
 
   private updateStateWithDiff(diff: Diff) {
-    this.server.setState(this.roomId, (state) => {
+    this.server.setState(this.boardId, (state) => {
       return applyDiff(diff, state);
     });
   }

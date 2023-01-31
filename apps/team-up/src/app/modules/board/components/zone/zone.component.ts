@@ -17,7 +17,6 @@ import {
   startWith,
   switchMap,
   takeUntil,
-  takeWhile,
   withLatestFrom,
 } from 'rxjs/operators';
 import {

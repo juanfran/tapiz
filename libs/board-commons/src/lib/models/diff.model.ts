@@ -1,5 +1,4 @@
 import { Note } from './note.model';
-import { fabric } from 'fabric';
 import { User } from './user.model';
 import { Group } from './group.model';
 import { RequireAtLeastOne } from 'type-fest';
@@ -9,7 +8,6 @@ import { Text } from './text.model';
 
 export interface DiffAdd {
   notes?: Note[];
-  paths?: fabric.Point[][];
   users?: User[];
   groups?: Group[];
   panels?: Panel[];

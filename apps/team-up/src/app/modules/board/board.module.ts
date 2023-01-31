@@ -13,7 +13,6 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { BoardDragDirective } from './directives/board-drag.directive';
 import { NoteComponent } from './components/note/note.component';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
-import { CanvasComponent } from './components/canvas/canvas.component';
 import { ImageComponent } from './components/image/image.component';
 import { UsersComponent } from './components/users/users.component';
 import { CursorsComponent } from './components/cursors/cursors.component';
@@ -73,7 +72,7 @@ const routes: Routes = [
     MatButtonModule,
     MatIconModule,
     FormsModule,
-    MatListModule
+    MatListModule,
   ],
   declarations: [
     BoardComponent,
@@ -83,7 +82,6 @@ const routes: Routes = [
     ImageComponent,
     TextComponent,
     ToolbarComponent,
-    CanvasComponent,
     UsersComponent,
     CursorsComponent,
     GroupComponent,

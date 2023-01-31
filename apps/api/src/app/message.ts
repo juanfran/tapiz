@@ -1,5 +1,4 @@
-import { BoardActions, Diff, CommonState } from '@team-up/board-commons';
-import { Point } from 'fabric/fabric-impl';
+import { BoardActions, Diff, CommonState, Point } from '@team-up/board-commons';
 
 const nodeTypeState = {
   note: 'notes',
@@ -34,13 +33,16 @@ export const messageManager = [
       },
     };
   }),
-  onMessage(BoardActions.removeNode, (message: { nodeType: string; node: Record<string, string> }) => {
-    return {
-      remove: {
-        [nodeTypeState[message.nodeType]]: [message.node.id],
-      },
-    };
-  }),
+  onMessage(
+    BoardActions.removeNode,
+    (message: { nodeType: string; node: Record<string, string> }) => {
+      return {
+        remove: {
+          [nodeTypeState[message.nodeType]]: [message.node.id],
+        },
+      };
+    }
+  ),
   onMessage(BoardActions.moveCursor, (message: { cursor: Point }, userId) => {
     return {
       edit: {

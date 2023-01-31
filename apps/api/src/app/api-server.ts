@@ -1,7 +1,13 @@
 import * as cors from 'cors';
 import * as express from 'express';
 import { verifyGoogle } from './auth';
-import { createRoom, getRooms, getRoom, getRoomOwners, deleteRoom } from './db';
+import {
+  createBoard,
+  getBoards,
+  getBoard,
+  getBoardOwners,
+  deleteBoard,
+} from './db';
 import * as cookieParser from 'cookie-parser';
 import { TokenPayload } from 'google-auth-library';
 
@@ -54,9 +60,8 @@ async function authGuard(
 
 app.post('/new', authGuard, async (req, res) => {
   const name = req.body.name;
-  const newRoomId = await createRoom(name, req.user.sub, {
+  const newBoardId = await createBoard(name, req.user.sub, {
     notes: [],
-    paths: [],
     groups: [],
     panels: [],
     images: [],
@@ -64,32 +69,32 @@ app.post('/new', authGuard, async (req, res) => {
   });
 
   res.json({
-    id: newRoomId,
+    id: newBoardId,
   });
 });
 
-app.delete('/delete/:roomId', authGuard, async (req, res) => {
-  await deleteRoom(req.params.roomId);
+app.delete('/delete/:boardId', authGuard, async (req, res) => {
+  await deleteBoard(req.params.boardId);
 
   res.json({
     success: true,
   });
 });
 
-app.get('/room/:roomId', authGuard, async (req, res) => {
-  const room = await getRoom(req.params.roomId);
-  const owners = await getRoomOwners(req.params.roomId);
+app.get('/board/:boardId', authGuard, async (req, res) => {
+  const board = await getBoard(req.params.boardId);
+  const owners = await getBoardOwners(req.params.boardId);
 
   res.json({
-    ...room,
+    ...board,
     owners,
   });
 });
 
-app.get('/rooms', authGuard, async (req, res) => {
-  const rooms = await getRooms(req.user.sub);
+app.get('/boards', authGuard, async (req, res) => {
+  const boards = await getBoards(req.user.sub);
 
-  res.json(rooms);
+  res.json(boards);
 });
 
 app.get('/user', authGuard, async (req, res) => {

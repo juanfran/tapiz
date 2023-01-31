@@ -1,6 +1,5 @@
 import { createAction, props } from '@ngrx/store';
 import {
-  Note,
   Point,
   Image,
   Text,
@@ -18,14 +17,14 @@ import {
 export const initBoard = createAction(BoardActions.initBoard);
 export const closeBoard = createAction(BoardActions.closeBoard);
 
-export const fetchRoomSuccess = createAction(
-  BoardActions.fetchRoomSuccess,
+export const fetchBoardSuccess = createAction(
+  BoardActions.fetchBoardSuccess,
   props<{ owners: string[]; name: string }>()
 );
 
-export const joinRoom = createAction(
-  BoardActions.joinRoom,
-  props<{ roomId: string }>()
+export const joinBoard = createAction(
+  BoardActions.joinBoard,
+  props<{ boardId: string }>()
 );
 
 export const setZoom = createAction(
@@ -46,11 +45,6 @@ export const setBoardName = createAction(
 export const setImagePosition = createAction(
   BoardActions.setImagePosition,
   props<{ id: Image['id']; position: Image['position'] }>()
-);
-
-export const setDrawEnabled = createAction(
-  BoardActions.setDrawEnabled,
-  props<{ enabled: boolean }>()
 );
 
 export const setCanvasActive = createAction(
@@ -93,11 +87,6 @@ export const wsSetState = createAction(
   props<{ id: string; data: Diff }>()
 );
 
-export const newPath = createAction(
-  BoardActions.newPath,
-  props<{ path: fabric.Point[] }>()
-);
-
 export const moveCursor = createAction(
   BoardActions.moveCursor,
   props<{ userId?: string; cursor: Point }>()
@@ -123,19 +112,9 @@ export const setVisible = createAction(
   props<{ visible: boolean }>()
 );
 
-export const changeBrushSize = createAction(
-  BoardActions.changeBrushSize,
-  props<{ brushSize: number }>()
-);
-
 export const changeCanvasMode = createAction(
   BoardActions.changeCanvasMode,
   props<{ canvasMode: string }>()
-);
-
-export const changeBrushColor = createAction(
-  BoardActions.changeBrushColor,
-  props<{ brushColor: string }>()
 );
 
 export const setZone = createAction(

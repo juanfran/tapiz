@@ -25,12 +25,11 @@ export interface BoardState {
   open: boolean;
   initZone: ZoneConfig | null;
   userId: string;
-  roomId: string;
+  boardId: string;
   zoom: number;
   position: Point;
   notes: Note[];
   moveEnabled: boolean;
-  drawEnabled: boolean;
   canvasActive: boolean;
   images: Image[];
   users: User[];
@@ -57,7 +56,7 @@ const initialBoardState = {
   focusId: '',
   open: false,
   initZone: null,
-  roomId: '',
+  boardId: '',
   zoom: 1,
   position: {
     x: 0,
@@ -71,7 +70,6 @@ const initialBoardState = {
   brushSize: 2,
   brushColor: '#000000',
   moveEnabled: true,
-  drawEnabled: false,
   canvasActive: false,
   zone: null,
   userHighlight: null,
@@ -103,7 +101,7 @@ const reducer = createReducer(
       ...initialBoardState,
     };
   }),
-  on(BoardActions.fetchRoomSuccess, (state, { name, owners }): BoardState => {
+  on(BoardActions.fetchBoardSuccess, (state, { name, owners }): BoardState => {
     state.name = name;
     state.owners = owners;
 
@@ -123,8 +121,8 @@ const reducer = createReducer(
 
     return state;
   }),
-  on(BoardActions.joinRoom, (state, { roomId }): BoardState => {
-    state.roomId = roomId;
+  on(BoardActions.joinBoard, (state, { boardId }): BoardState => {
+    state.boardId = boardId;
 
     return state;
   }),
@@ -144,18 +142,8 @@ const reducer = createReducer(
 
     return state;
   }),
-  on(BoardActions.setDrawEnabled, (state, { enabled }): BoardState => {
-    state.drawEnabled = enabled;
-
-    return state;
-  }),
   on(BoardActions.setCanvasActive, (state, { active }): BoardState => {
     state.canvasActive = active;
-
-    return state;
-  }),
-  on(BoardActions.setMoveEnabled, (state, { enabled }): BoardState => {
-    state.moveEnabled = enabled;
 
     return state;
   }),
@@ -268,16 +256,6 @@ const reducer = createReducer(
       visible,
     };
   }),
-  on(BoardActions.changeBrushSize, (state, { brushSize }): BoardState => {
-    state.brushSize = brushSize;
-
-    return state;
-  }),
-  on(BoardActions.changeBrushColor, (state, { brushColor }): BoardState => {
-    state.brushColor = brushColor;
-
-    return state;
-  }),
   on(BoardActions.changeCanvasMode, (state, { canvasMode }): BoardState => {
     state.canvasMode = canvasMode;
     state.focusId = '';
@@ -335,7 +313,7 @@ const reducer = createReducer(
     });
 
     return state;
-  }),
+  })
 );
 
 export const boardFeature = createFeature({

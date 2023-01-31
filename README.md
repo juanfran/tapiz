@@ -24,7 +24,6 @@ npm run start:api
 - [ ] Export with groups & panels
 - [ ] Add emojis to notes
 - [ ] Refactor state management
-- [ ] Use `board` instead of `room`Template
 - [ ] Deprecated RX operators
 - [ ] Back `onMessage` refactor, type safe
 - [ ] Api error handling
