@@ -152,6 +152,11 @@ const reducer = createReducer(
 
     return state;
   }),
+  on(BoardActions.setMoveEnabled, (state, { enabled }): BoardState => {
+    state.moveEnabled = enabled;
+
+    return state;
+  }),
   on(BoardActions.addNode, (state, { node, nodeType }): BoardState => {
     if (nodeType === 'group' || nodeType === 'panel') {
       state.initZone = null;
@@ -175,6 +180,7 @@ const reducer = createReducer(
       });
     } else if (nodeType === 'text') {
       state.texts.push(node);
+      state.boardCursor = 'default';
     }
 
     return state;
@@ -291,10 +297,6 @@ const reducer = createReducer(
   }),
   on(BoardActions.textToolbarClick, (state): BoardState => {
     state.boardCursor = 'text';
-    return state;
-  }),
-  on(BoardActions.newText, (state): BoardState => {
-    state.boardCursor = 'default';
     return state;
   }),
   on(BoardActions.readyToVote, (state): BoardState => {

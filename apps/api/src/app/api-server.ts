@@ -10,15 +10,6 @@ import {
   deleteAccount,
 } from './db';
 import * as cookieParser from 'cookie-parser';
-import { TokenPayload } from 'google-auth-library';
-
-declare global {
-  namespace Express {
-    interface Request {
-      user: TokenPayload;
-    }
-  }
-}
 
 const app = express();
 const port = 8000;

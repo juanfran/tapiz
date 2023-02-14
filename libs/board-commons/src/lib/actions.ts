@@ -42,10 +42,6 @@ export const BoardActions = {
 
   newImage: `${prefix}[local] new image`,
   removeImage: `${prefix}[local] remove image`,
-  newNote: `${prefix}[local] new note`,
-  removeNote: `${prefix}[local] remove note`,
-  newText: `${prefix}[local] new text`,
-  removeText: `${prefix}[local] remove text`,
 
   changeCanvasMode: `${prefix} change canvas mode`,
   setCanvasActive: `${prefix} set canvas active`,

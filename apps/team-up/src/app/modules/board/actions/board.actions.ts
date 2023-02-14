@@ -72,16 +72,6 @@ export const editImage = createAction(
   props<{ id: string; data: Partial<Image> }>()
 );
 
-export const newText = createAction(
-  BoardActions.newText,
-  props<{ text: Text }>()
-);
-
-export const removeText = createAction(
-  BoardActions.removeText,
-  props<{ id: Text['id'] }>()
-);
-
 export const wsSetState = createAction(
   BoardActions.wsSetState,
   props<{ id: string; data: Diff }>()

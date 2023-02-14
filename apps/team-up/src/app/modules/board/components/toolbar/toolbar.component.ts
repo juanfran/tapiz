@@ -7,7 +7,6 @@ import {
   addNode,
   newImage,
   textToolbarClick,
-  newText,
   readyToVote,
 } from '../../actions/board.actions';
 import {
@@ -74,8 +73,9 @@ export class ToolbarComponent {
           };
 
           this.store.dispatch(
-            newText({
-              text: {
+            addNode({
+              nodeType: 'text',
+              node: {
                 id: v4(),
                 text: 'Text',
                 position: textPosition,
