@@ -38,6 +38,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { AutoFocusDirective } from './directives/autofocus.directive';
 import { ClickOutsideDirective } from './directives/click-outside.directive';
 import { TextComponent } from './components/text/text.component';
+import { ConfirmComponent } from './components/confirm-action/confirm-actions.component';
 
 const routes: Routes = [
   {
@@ -94,6 +95,7 @@ const routes: Routes = [
     LoginComponent,
     AutoFocusDirective,
     ClickOutsideDirective,
+    ConfirmComponent,
   ],
   exports: [BoardComponent],
   providers: [],

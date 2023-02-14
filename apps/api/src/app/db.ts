@@ -157,3 +157,9 @@ export function getUserByName(name: string) {
     .query('SELECT * FROM account WHERE name = $1', [name])
     .then(getSingleRow);
 }
+
+export function deleteAccount(ownerId: string): Promise<unknown> {
+  return client.query('DELETE FROM account_board where account_id = $1', [
+    ownerId,
+  ]);
+}

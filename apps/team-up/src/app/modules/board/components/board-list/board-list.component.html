@@ -16,23 +16,43 @@
       color="primary">
       Create Board
     </button>
-    <button
-      type="text"
-      class="logout"
-      (click)="logout()"
-      mat-raised-button
-      color="warn">
-      Logout
-    </button>
+    <div class="user-actions">
+      <button
+        type="button"
+        class="logout"
+        (click)="logout()"
+        mat-raised-button
+        color="warn">
+        Logout
+      </button>
+      <button
+        type="button"
+        title="Delete account"
+        mat-fab
+        color="warn"
+        (click)="deleteAccount()"
+        aria-label="Delete account">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
   </form>
   <form class="col">
     <mat-nav-list>
       <h3 matSubheader>Board Name</h3>
-      <mat-list-item *ngFor="let board of vm.boards" (click)="goBoard(board)">
-         <a matListItemTitle [routerLink]="['/board/', board.id]">{{ board.name }}</a>
-         <button (click)="deleteBoard($event, board)" mat-icon-button matListItemMeta>
-            <mat-icon fontIcon="delete"></mat-icon>
-         </button>
+      <mat-list-item
+        *ngFor="let board of vm.boards"
+        (click)="goBoard(board)">
+        <a
+          matListItemTitle
+          [routerLink]="['/board/', board.id]"
+          >{{ board.name }}</a
+        >
+        <button
+          (click)="deleteBoard($event, board)"
+          mat-icon-button
+          matListItemMeta>
+          <mat-icon fontIcon="delete"></mat-icon>
+        </button>
       </mat-list-item>
     </mat-nav-list>
   </form>

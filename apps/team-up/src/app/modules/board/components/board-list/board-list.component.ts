@@ -11,6 +11,10 @@ import {
 } from '@/app/modules/board/actions/board.actions';
 import { selectBoards } from '@/app/modules/board/selectors/board.selectors';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmComponent } from '../confirm-action/confirm-actions.component';
+import { exhaustMap, filter } from 'rxjs';
+import { BoardApiService } from '../../services/board-api.service';
 
 @UntilDestroy()
 @Component({
@@ -24,11 +28,13 @@ export class BoardListComponent implements OnInit {
   public readonly model$ = this.state.select();
 
   constructor(
+    private boardApiService: BoardApiService,
     private router: Router,
     private store: Store,
     private state: RxState<{
       boards: Board[];
-    }>
+    }>,
+    private dialog: MatDialog
   ) {
     this.state.connect('boards', this.store.select(selectBoards));
   }
@@ -38,9 +44,11 @@ export class BoardListComponent implements OnInit {
   }
 
   public logout() {
+    console.log('eee');
     document.cookie = '';
     localStorage.removeItem('auth');
     this.store.dispatch(setUserId({ userId: '' }));
+    this.router.navigate(['/login']);
   }
 
   public onSubmit(value: string) {
@@ -58,6 +66,36 @@ export class BoardListComponent implements OnInit {
   public deleteBoard(event: Event, board: Board) {
     event.stopPropagation();
 
-    this.store.dispatch(removeBoard({ id: board.id }))
+    this.store.dispatch(removeBoard({ id: board.id }));
+  }
+
+  public deleteAccount() {
+    const dialogRef = this.dialog.open(ConfirmComponent, {
+      data: {
+        title: 'Delete account?',
+        description:
+          'This will delete all your account. Your boards will still be accessible by other users.',
+        confirm: {
+          text: 'Delete account',
+          color: 'warn',
+        },
+        cancel: {
+          text: 'Cancel',
+          color: 'basic',
+        },
+      },
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(
+        filter((it) => it),
+        exhaustMap(() => {
+          return this.boardApiService.removeAccount();
+        })
+      )
+      .subscribe(() => {
+        this.logout();
+      });
   }
 }

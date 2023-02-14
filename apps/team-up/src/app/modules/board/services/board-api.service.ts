@@ -29,4 +29,8 @@ export class BoardApiService {
   public removeBoard(boardId: Board['id']) {
     return this.http.delete(`http://localhost:8000/delete/${boardId}`);
   }
+
+  public removeAccount() {
+    return this.http.delete('http://localhost:8000/remove-account');
+  }
 }

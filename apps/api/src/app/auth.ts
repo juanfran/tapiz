@@ -7,8 +7,8 @@ const googleClient = new OAuth2Client(googleClientId);
 export async function verifyGoogle(token: string) {
   try {
     const ticket = await googleClient.verifyIdToken({
-        idToken: token,
-        audience: googleClientId,
+      idToken: token,
+      audience: googleClientId,
     });
 
     const payload = ticket.getPayload();
@@ -16,7 +16,7 @@ export async function verifyGoogle(token: string) {
     if (payload && payload['sub']) {
       return payload;
     }
-  } catch(err) {
+  } catch (err) {
     console.error(err);
   }
 

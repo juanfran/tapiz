@@ -27,6 +27,13 @@
   }
 }
 
-.logout {
+.user-actions {
+  align-items: center;
+  display: flex;
   margin-top: 1rem;
+}
+
+.logout {
+  margin-right: 1rem;
+  width: 100%;
 }

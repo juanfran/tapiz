@@ -7,6 +7,7 @@ import {
   getBoard,
   getBoardOwners,
   deleteBoard,
+  deleteAccount,
 } from './db';
 import * as cookieParser from 'cookie-parser';
 import { TokenPayload } from 'google-auth-library';
@@ -75,6 +76,14 @@ app.post('/new', authGuard, async (req, res) => {
 
 app.delete('/delete/:boardId', authGuard, async (req, res) => {
   await deleteBoard(req.params.boardId);
+
+  res.json({
+    success: true,
+  });
+});
+
+app.delete('/remove-account', authGuard, async (req, res) => {
+  await deleteAccount(req.user.sub);
 
   res.json({
     success: true,

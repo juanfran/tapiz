@@ -33,7 +33,6 @@ npm run start:api
 - [ ] Back `onMessage` refactor, type safe
 - [ ] Api error handling
 - [ ] Code linter
-- [ ] Delete account
 
 ## Post release
 
