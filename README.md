@@ -11,9 +11,14 @@ npm run config-files
 
 # Edit apps/api/src/app/config.ts
 
-npm run start
 npm run start:docker
 npm run regenerate:db
+```
+
+## Run Team-up
+
+```console
+npm run start
 npm run start:api
 ```
 
@@ -28,6 +33,7 @@ npm run start:api
 - [ ] Back `onMessage` refactor, type safe
 - [ ] Api error handling
 - [ ] Code linter
+- [ ] Delete account
 
 ## Post release
 
