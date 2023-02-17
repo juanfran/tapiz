@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { fromEvent, animationFrameScheduler, Observable, Subject } from 'rxjs';
 import {
-  mapTo,
   map,
   pairwise,
   switchMap,
@@ -14,7 +13,7 @@ import {
 } from 'rxjs/operators';
 import { Point } from '@team-up/board-commons';
 import { Store } from '@ngrx/store';
-import { selectPosition } from '../selectors/board.selectors';
+import { selectPosition } from '../selectors/page.selectors';
 
 @Injectable({
   providedIn: 'root',

@@ -13,41 +13,24 @@ import {
   filter,
 } from 'rxjs/operators';
 import { v4 } from 'uuid';
-import {
-  joinBoard,
-  moveCursor,
-  setFocusId,
-  setVisible,
-  zoneToGroup,
-  setMoveEnabled,
-  zoneToPanel,
-  createBoard,
-  fetchBoards,
-  fetchBoardsSuccess,
-  setPopupOpen,
-  changeCanvasMode,
-  setBoardName,
-  patchNode,
-  addNode,
-  removeNode,
-  fetchBoardSuccess,
-  removeBoard,
-} from '../actions/board.actions';
-import { selectZone } from '../selectors/board.selectors';
+import { BoardActions } from '../actions/board.actions';
+import { PageActions } from '../actions/page.actions';
+import { selectZone } from '../selectors/page.selectors';
 import { BoardApiService } from '../services/board-api.service';
 import { Router } from '@angular/router';
+
 @Injectable()
 export class BoardEffects {
   public wsUpdateState$ = createEffect(
     () => {
       return this.actions$.pipe(
         ofType(
-          addNode,
-          patchNode,
-          removeNode,
-          moveCursor,
-          setVisible,
-          setBoardName
+          BoardActions.addNode,
+          BoardActions.patchNode,
+          BoardActions.removeNode,
+          BoardActions.moveCursor,
+          BoardActions.setVisible,
+          BoardActions.setBoardName
         ),
         tap((action) => {
           this.wsService.send(action);
@@ -61,7 +44,7 @@ export class BoardEffects {
 
   public joinBoard$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(joinBoard),
+      ofType(PageActions.joinBoard),
       switchMap((action) => {
         return this.boardApiService.getBoard(action.boardId);
       }),
@@ -71,7 +54,7 @@ export class BoardEffects {
           boardId: board.id,
         });
 
-        return fetchBoardSuccess({
+        return PageActions.fetchBoardSuccess({
           name: board.name,
           owners: board.owners,
         });
@@ -81,31 +64,31 @@ export class BoardEffects {
 
   public addNode$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(addNode),
+      ofType(BoardActions.addNode),
       filter((action) => !action.history),
       map(({ node }) => {
-        return setFocusId({ focusId: node.id });
+        return PageActions.setFocusId({ focusId: node.id });
       })
     );
   });
 
   public resetPopupOnChangeMode$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(changeCanvasMode),
-      map(() => setPopupOpen({ popup: '' }))
+      ofType(PageActions.changeCanvasMode),
+      map(() => PageActions.setPopupOpen({ popup: '' }))
     );
   });
 
   public moveEnabledOnChangeMode$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(changeCanvasMode),
-      map(() => setMoveEnabled({ enabled: true }))
+      ofType(PageActions.changeCanvasMode),
+      map(() => PageActions.setMoveEnabled({ enabled: true }))
     );
   });
 
   public zoneToGroup$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(zoneToGroup),
+      ofType(PageActions.zoneToGroup),
       withLatestFrom(this.store.select(selectZone)),
       mergeMap(([, zone]) => {
         if (zone) {
@@ -117,7 +100,7 @@ export class BoardEffects {
           }
 
           return of(
-            addNode({
+            BoardActions.addNode({
               nodeType: 'group',
               node: {
                 id: v4(),
@@ -137,7 +120,7 @@ export class BoardEffects {
 
   public zoneToPanel$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(zoneToPanel),
+      ofType(PageActions.zoneToPanel),
       withLatestFrom(this.store.select(selectZone)),
       mergeMap(([, zone]) => {
         if (zone) {
@@ -149,7 +132,7 @@ export class BoardEffects {
           }
 
           return of(
-            addNode({
+            BoardActions.addNode({
               nodeType: 'panel',
               node: {
                 id: v4(),
@@ -171,7 +154,7 @@ export class BoardEffects {
   public createBoard$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(createBoard),
+        ofType(PageActions.createBoard),
         exhaustMap((action) => {
           return this.boardApiService.createBoard(action.name);
         }),
@@ -188,7 +171,7 @@ export class BoardEffects {
   public deleteBoard$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(removeBoard),
+        ofType(PageActions.removeBoard),
         exhaustMap((action) => {
           return this.boardApiService.removeBoard(action.id);
         })
@@ -201,11 +184,11 @@ export class BoardEffects {
 
   public fetchBoards$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(fetchBoards),
+      ofType(PageActions.fetchBoards),
       switchMap(() => {
         return this.boardApiService.fetchBoards().pipe(
           map((boards) => {
-            return fetchBoardsSuccess({ boards });
+            return PageActions.fetchBoardsSuccess({ boards });
           })
         );
       })

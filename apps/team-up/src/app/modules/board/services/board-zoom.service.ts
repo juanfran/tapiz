@@ -7,12 +7,11 @@ import {
   scan,
   share,
   startWith,
-  tap,
   withLatestFrom,
 } from 'rxjs/operators';
 import { Point } from '@team-up/board-commons';
 import { Store } from '@ngrx/store';
-import { selectPosition } from '../selectors/board.selectors';
+import { selectPosition } from '../selectors/page.selectors';
 
 @Injectable({
   providedIn: 'root',

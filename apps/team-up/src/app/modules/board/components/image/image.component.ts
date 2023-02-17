@@ -14,13 +14,14 @@ import {
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { map, pluck } from 'rxjs/operators';
-import { patchNode, removeNode, setFocusId } from '../../actions/board.actions';
+import { map } from 'rxjs/operators';
+import { BoardActions } from '../../actions/board.actions';
+import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
 import { Image } from '@team-up/board-commons';
 import { MoveService } from '../../services/move.service';
-import { selectFocusId } from '../../selectors/board.selectors';
+import { selectFocusId } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
 
 interface State {
@@ -69,7 +70,9 @@ export class ImageComponent implements OnInit, Draggable, AfterViewInit {
 
   @HostListener('mousedown')
   public mousedown() {
-    this.store.dispatch(setFocusId({ focusId: this.state.get('image').id }));
+    this.store.dispatch(
+      PageActions.setFocusId({ focusId: this.state.get('image').id })
+    );
   }
 
   public loadImage() {
@@ -79,8 +82,8 @@ export class ImageComponent implements OnInit, Draggable, AfterViewInit {
 
     if (!width || !height) {
       this.store.dispatch(
-        patchNode({
-          nodeType: 'images',
+        BoardActions.patchNode({
+          nodeType: 'image',
           node: {
             id,
             width: this.imageNativeElement.naturalWidth,
@@ -109,8 +112,8 @@ export class ImageComponent implements OnInit, Draggable, AfterViewInit {
 
   public move(position: Point) {
     this.store.dispatch(
-      patchNode({
-        nodeType: 'images',
+      BoardActions.patchNode({
+        nodeType: 'image',
         node: {
           id: this.state.get('image').id,
           position,
@@ -143,7 +146,10 @@ export class ImageComponent implements OnInit, Draggable, AfterViewInit {
       if (focus) {
         hotkeys('delete', this.state.get('image').id, () => {
           this.store.dispatch(
-            removeNode({ node: this.state.get('image'), nodeType: 'image' })
+            BoardActions.removeNode({
+              node: this.state.get('image'),
+              nodeType: 'image',
+            })
           );
         });
 
@@ -163,8 +169,8 @@ export class ImageComponent implements OnInit, Draggable, AfterViewInit {
             const { width, height } = this.state.get('image');
 
             this.store.dispatch(
-              patchNode({
-                nodeType: 'images',
+              BoardActions.patchNode({
+                nodeType: 'image',
                 node: {
                   id: this.state.get('image').id,
                   width: width + size.x,

@@ -4,14 +4,8 @@ import { Action, Store } from '@ngrx/store';
 import { WsService } from '@/app/modules/ws/services/ws.service';
 import { EMPTY, of } from 'rxjs';
 import { filter, mergeMap, tap } from 'rxjs/operators';
-import {
-  undo,
-  redo,
-  patchNode,
-  endDragNode,
-  addNode,
-  removeNode,
-} from '../actions/board.actions';
+import { BoardActions } from '../actions/board.actions';
+import { PageActions } from '../actions/page.actions';
 import { HistoryService } from '../services/history.service';
 import { AddNode, RemoveNode } from '@team-up/board-commons';
 
@@ -27,7 +21,7 @@ export class HistoryEffects {
 
   public undo$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(undo),
+      ofType(PageActions.undo),
       mergeMap(() => {
         const lastPatches = this.history.undoable.shift();
         if (lastPatches) {
@@ -43,7 +37,7 @@ export class HistoryEffects {
 
   public redo$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(redo),
+      ofType(PageActions.redo),
       mergeMap(() => {
         const nextPatches = this.history.undone.shift();
 
@@ -58,15 +52,19 @@ export class HistoryEffects {
     );
   });
 
-    public newNote$ = createEffect(
+  public newNote$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(addNode),
+        ofType(BoardActions.addNode),
         filter((action) => !action.history),
         tap((action) => {
           this.newUndoneAction(
             action,
-            removeNode({ node: action.node, nodeType: action.nodeType, history: true } as RemoveNode)
+            BoardActions.removeNode({
+              node: action.node,
+              nodeType: action.nodeType,
+              history: true,
+            } as RemoveNode)
           );
         })
       );
@@ -79,12 +77,16 @@ export class HistoryEffects {
   public removeNote$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(removeNode),
+        ofType(BoardActions.removeNode),
         filter((action) => !action.history),
         tap((action) => {
           this.newUndoneAction(
             action,
-            addNode({ node: action.node, nodeType: action.nodeType, history: true } as AddNode)
+            BoardActions.addNode({
+              node: action.node,
+              nodeType: action.nodeType,
+              history: true,
+            } as AddNode)
           );
         })
       );
@@ -97,17 +99,17 @@ export class HistoryEffects {
   public initDrag$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(endDragNode),
+        ofType(PageActions.endDragNode),
         tap((action) => {
           this.newUndoneAction(
-            patchNode({
+            BoardActions.patchNode({
               node: {
                 id: action.id,
                 position: action.finalPosition,
               },
               nodeType: action.nodeType,
             }),
-            patchNode({
+            BoardActions.patchNode({
               node: {
                 id: action.id,
                 position: action.initialPosition,

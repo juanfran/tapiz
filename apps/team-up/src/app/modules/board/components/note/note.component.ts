@@ -15,26 +15,24 @@ import {
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { filter, first, map, pluck, take } from 'rxjs/operators';
-import {
-  endDragNode,
-  patchNode,
-  removeNode,
-  setFocusId,
-} from '../../actions/board.actions';
+import { filter, first, map, take } from 'rxjs/operators';
+import { BoardActions } from '../../actions/board.actions';
+import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
 import { Note, Panel, User } from '@team-up/board-commons';
 import { BoardMoveService } from '../../services/board-move.service';
 import {
-  isUserHighlighted,
-  selectFocusId,
   selectPanels,
   selectUserById,
-  selectUserId,
-  selectVoting,
   usernameById,
 } from '../../selectors/board.selectors';
+import {
+  isUserHighlighted,
+  selectFocusId,
+  selectUserId,
+  selectVoting,
+} from '../../selectors/page.selectors';
 import { Observable } from 'rxjs';
 import hotkeys from 'hotkeys-js';
 import { contrast } from './contrast';
@@ -153,8 +151,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
       if (votes >= 0) {
         this.store.dispatch(
-          patchNode({
-            nodeType: 'notes',
+          BoardActions.patchNode({
+            nodeType: 'note',
             node: {
               id: this.state.get('note').id,
               votes,
@@ -163,7 +161,9 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         );
       }
     } else {
-      this.store.dispatch(setFocusId({ focusId: this.state.get('note').id }));
+      this.store.dispatch(
+        PageActions.setFocusId({ focusId: this.state.get('note').id })
+      );
     }
   }
 
@@ -256,8 +256,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
   public endDrag() {
     this.store.dispatch(
-      endDragNode({
-        nodeType: 'notes',
+      PageActions.endDragNode({
+        nodeType: 'note',
         id: this.state.get('note').id,
         initialPosition: this.state.get('initDragPosition'),
         finalPosition: this.state.get('note').position,
@@ -274,8 +274,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       });
 
     this.store.dispatch(
-      patchNode({
-        nodeType: 'notes',
+      BoardActions.patchNode({
+        nodeType: 'note',
         node: {
           id: this.state.get('note').id,
           position,
@@ -289,8 +289,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       const value = (event.target as HTMLTextAreaElement).value;
 
       this.store.dispatch(
-        patchNode({
-          nodeType: 'notes',
+        BoardActions.patchNode({
+          nodeType: 'note',
           node: {
             id: this.state.get('note').id,
             text: value,
@@ -363,7 +363,10 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       if (focus && !this.state.get('edit')) {
         hotkeys('delete', this.state.get('note').id, () => {
           this.store.dispatch(
-            removeNode({ node: this.state.get('note'), nodeType: 'note' })
+            BoardActions.removeNode({
+              node: this.state.get('note'),
+              nodeType: 'note',
+            })
           );
         });
 

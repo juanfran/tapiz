@@ -15,12 +15,13 @@ import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
 import { map, skip, take } from 'rxjs/operators';
-import { patchNode, removeNode, setFocusId } from '../../actions/board.actions';
+import { BoardActions } from '../../actions/board.actions';
+import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
 import { Text } from '@team-up/board-commons';
 import { MoveService } from '../../services/move.service';
-import { selectFocusId } from '../../selectors/board.selectors';
+import { selectFocusId } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
 import { BoardMoveService } from '../../services/board-move.service';
 
@@ -101,7 +102,9 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
 
   @HostListener('mousedown')
   public mousedown() {
-    this.store.dispatch(setFocusId({ focusId: this.state.get('node').id }));
+    this.store.dispatch(
+      PageActions.setFocusId({ focusId: this.state.get('node').id })
+    );
   }
 
   public get position() {
@@ -134,8 +137,8 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
         const value = (this.textarea.nativeElement as HTMLElement).innerText;
 
         this.store.dispatch(
-          patchNode({
-            nodeType: 'texts',
+          BoardActions.patchNode({
+            nodeType: 'text',
             node: {
               id: this.state.get('node').id,
               text: value.trim(),
@@ -179,8 +182,8 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
       const color = (e.target as HTMLInputElement).value;
 
       this.store.dispatch(
-        patchNode({
-          nodeType: 'texts',
+        BoardActions.patchNode({
+          nodeType: 'text',
           node: {
             id: this.state.get('node').id,
             color,
@@ -195,8 +198,8 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
       const size = Number((e.target as HTMLInputElement).value);
 
       this.store.dispatch(
-        patchNode({
-          nodeType: 'texts',
+        BoardActions.patchNode({
+          nodeType: 'text',
           node: {
             id: this.state.get('node').id,
             size,
@@ -210,8 +213,8 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
     (document.activeElement as HTMLElement)?.blur();
 
     this.store.dispatch(
-      patchNode({
-        nodeType: 'texts',
+      BoardActions.patchNode({
+        nodeType: 'text',
         node: {
           id: this.state.get('node').id,
           position,
@@ -245,7 +248,10 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
       if (focus) {
         hotkeys('delete', this.state.get('node').id, () => {
           this.store.dispatch(
-            removeNode({ node: this.state.get('node'), nodeType: 'text' })
+            BoardActions.removeNode({
+              node: this.state.get('node'),
+              nodeType: 'text',
+            })
           );
         });
 
@@ -274,8 +280,8 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
 
             if (newWidth >= 50 && newHeight >= 20)
               this.store.dispatch(
-                patchNode({
-                  nodeType: 'texts',
+                BoardActions.patchNode({
+                  nodeType: 'text',
                   node: {
                     id: this.state.get('node').id,
                     width: newWidth,

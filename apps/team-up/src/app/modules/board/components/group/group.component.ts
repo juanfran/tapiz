@@ -17,18 +17,14 @@ import {
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { first, pluck } from 'rxjs/operators';
-import {
-  endDragNode,
-  patchNode,
-  removeNode,
-  setFocusId,
-} from '../../actions/board.actions';
+import { first } from 'rxjs/operators';
+import { BoardActions } from '../../actions/board.actions';
+import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
 import { Group } from '@team-up/board-commons';
 import { BoardMoveService } from '../../services/board-move.service';
-import { selectFocusId } from '../../selectors/board.selectors';
+import { selectFocusId } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
 import { MoveService } from '../../services/move.service';
 
@@ -98,7 +94,9 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
       event.stopPropagation();
     }
 
-    this.store.dispatch(setFocusId({ focusId: this.state.get('group').id }));
+    this.store.dispatch(
+      PageActions.setFocusId({ focusId: this.state.get('group').id })
+    );
   }
 
   @HostListener('dblclick', ['$event'])
@@ -141,7 +139,7 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
     event.preventDefault();
 
     (this.textarea.first.nativeElement as HTMLTextAreaElement).blur();
-    this.store.dispatch(setFocusId({ focusId: '' }));
+    this.store.dispatch(PageActions.setFocusId({ focusId: '' }));
   }
 
   public startDrag(position: Point) {
@@ -152,8 +150,8 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
 
   public endDrag() {
     this.store.dispatch(
-      endDragNode({
-        nodeType: 'groups',
+      PageActions.endDragNode({
+        nodeType: 'group',
         id: this.state.get('group').id,
         initialPosition: this.state.get('initDragPosition'),
         finalPosition: this.state.get('group').position,
@@ -163,8 +161,8 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
 
   public move(position: Point) {
     this.store.dispatch(
-      patchNode({
-        nodeType: 'groups',
+      BoardActions.patchNode({
+        nodeType: 'group',
         node: {
           id: this.state.get('group').id,
           position,
@@ -178,8 +176,8 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
       const value = (event.target as HTMLElement).innerText;
 
       this.store.dispatch(
-        patchNode({
-          nodeType: 'groups',
+        BoardActions.patchNode({
+          nodeType: 'group',
           node: {
             id: this.state.get('group').id,
             title: value.trim(),
@@ -235,7 +233,10 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
       if (focus && !this.state.get('edit')) {
         hotkeys('delete', this.state.get('group').id, () => {
           this.store.dispatch(
-            removeNode({ node: this.state.get('group'), nodeType: 'group' })
+            BoardActions.removeNode({
+              node: this.state.get('group'),
+              nodeType: 'group',
+            })
           );
         });
 
@@ -267,8 +268,8 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
             const { width, height } = this.state.get('group');
 
             this.store.dispatch(
-              patchNode({
-                nodeType: 'groups',
+              BoardActions.patchNode({
+                nodeType: 'group',
                 node: {
                   id: this.state.get('group').id,
                   width: width + size.x,

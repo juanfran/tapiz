@@ -10,7 +10,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { selectZoom } from '../selectors/board.selectors';
+import { selectZoom } from '../selectors/page.selectors';
 
 @Injectable({
   providedIn: 'root',

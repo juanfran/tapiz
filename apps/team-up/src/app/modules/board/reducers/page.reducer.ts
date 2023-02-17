@@ -1,0 +1,216 @@
+import { Action, createFeature, createReducer, on } from '@ngrx/store';
+import { Point, ZoneConfig, Zone, User, Board } from '@team-up/board-commons';
+import { wsOpen } from '@/app/modules/ws/ws.actions';
+import { BoardActions } from '../actions/board.actions';
+import { PageActions } from '../actions/page.actions';
+import produce from 'immer';
+
+export interface PageState {
+  visible: boolean;
+  focusId: string;
+  open: boolean;
+  initZone: ZoneConfig | null;
+  userId: string;
+  boardId: string;
+  zoom: number;
+  position: Point;
+  moveEnabled: boolean;
+  zone: Zone | null;
+  userHighlight: User['id'] | null;
+  canvasMode: string;
+  popupOpen: string;
+  isOwner: boolean;
+  owners: string[];
+  boardCursor: string;
+  voting: boolean;
+  boards: Board[];
+}
+
+const initialPageState: PageState = {
+  visible: true,
+  focusId: '',
+  open: false,
+  initZone: null,
+  boardId: '',
+  zoom: 1,
+  position: {
+    x: 0,
+    y: 0,
+  },
+  moveEnabled: true,
+  zone: null,
+  userHighlight: null,
+  canvasMode: 'editMode',
+  popupOpen: '',
+  isOwner: false,
+  owners: [],
+  boardCursor: 'default',
+  voting: false,
+  boards: [],
+  userId: '',
+};
+
+const reducer = createReducer(
+  initialPageState,
+  on(wsOpen, (state): PageState => {
+    state.open = true;
+    return state;
+  }),
+  on(PageActions.initBoard, PageActions.closeBoard, (): PageState => {
+    return {
+      ...initialPageState,
+    };
+  }),
+  on(PageActions.fetchBoardSuccess, (state, { owners }): PageState => {
+    state.owners = owners;
+
+    if (state.userId) {
+      state.isOwner = state.owners.includes(state.userId);
+    }
+
+    return state;
+  }),
+  on(PageActions.setUserId, (state, { userId }): PageState => {
+    state.userId = userId;
+
+    return state;
+  }),
+  on(PageActions.joinBoard, (state, { boardId }): PageState => {
+    state.boardId = boardId;
+
+    return state;
+  }),
+  on(PageActions.setZoom, (state, { zoom }): PageState => {
+    state.zoom = zoom;
+
+    return state;
+  }),
+  on(PageActions.setUserView, (state, { zoom, position }): PageState => {
+    state.zoom = zoom;
+    state.position = position;
+
+    return state;
+  }),
+  on(BoardActions.setVisible, (state, { visible }): PageState => {
+    state.visible = visible;
+
+    return state;
+  }),
+  on(PageActions.setInitZone, (state, { initZone }): PageState => {
+    state.initZone = initZone;
+
+    return state;
+  }),
+  on(PageActions.setMoveEnabled, (state, { enabled }): PageState => {
+    state.moveEnabled = enabled;
+
+    return state;
+  }),
+  on(BoardActions.addNode, (state, { nodeType }): PageState => {
+    if (nodeType === 'group' || nodeType === 'panel') {
+      state.initZone = null;
+      state.moveEnabled = true;
+      state.zone = null;
+    }
+
+    if (nodeType === 'text') {
+      state.boardCursor = 'default';
+    }
+
+    return state;
+  }),
+  on(BoardActions.removeNode, (state, { node }): PageState => {
+    const id = node.id;
+
+    if (id === state.focusId) {
+      state.focusId = '';
+    }
+
+    return state;
+  }),
+  on(PageActions.setFocusId, (state, { focusId }): PageState => {
+    state.focusId = focusId;
+
+    return state;
+  }),
+  on(PageActions.setZone, (state, { zone }): PageState => {
+    state.zone = zone;
+
+    return state;
+  }),
+  on(BoardActions.wsSetState, (state, { data }): PageState => {
+    const currentUser = data.set?.user?.find((it) => it.id === state.userId);
+
+    let visible = state.visible;
+
+    if (currentUser) {
+      visible = currentUser.visible;
+    }
+
+    return {
+      ...state,
+      visible,
+    };
+  }),
+  on(PageActions.changeCanvasMode, (state, { canvasMode }): PageState => {
+    state.canvasMode = canvasMode;
+    state.focusId = '';
+
+    return state;
+  }),
+  on(PageActions.toggleUserHighlight, (state, { id }): PageState => {
+    if (state.userHighlight === id) {
+      state.userHighlight = null;
+    } else {
+      state.userHighlight = id;
+    }
+
+    return state;
+  }),
+  on(PageActions.setPopupOpen, (state, { popup }): PageState => {
+    state.popupOpen = popup;
+
+    if (popup.length) {
+      state.boardCursor = 'default';
+      state.initZone = null;
+      state.voting = false;
+    }
+
+    return state;
+  }),
+  on(PageActions.fetchBoardsSuccess, (state, { boards }): PageState => {
+    state.boards = boards;
+
+    return state;
+  }),
+  on(PageActions.textToolbarClick, (state): PageState => {
+    state.boardCursor = 'text';
+    return state;
+  }),
+  on(PageActions.readyToVote, (state): PageState => {
+    if (state.voting) {
+      state.boardCursor = 'default';
+      state.voting = false;
+    } else {
+      state.boardCursor = 'crosshair';
+      state.voting = true;
+    }
+    return state;
+  }),
+  on(PageActions.removeBoard, (state, { id }): PageState => {
+    state.boards = state.boards.filter((board) => {
+      return board.id !== id;
+    });
+
+    return state;
+  })
+);
+
+export const pageFeature = createFeature({
+  name: 'page',
+  reducer: (state: PageState = initialPageState, action: Action) => {
+    return produce(state, (draft: PageState) => {
+      return reducer(draft, action);
+    });
+  },
+});

@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-// import { SocialAuthService } from '@abacritt/angularx-social-login';
 import { map } from 'rxjs/operators';
-import { selectUserId } from '../selectors/board.selectors';
+import { selectUserId } from '../selectors/page.selectors';
 
 @Injectable({
   providedIn: 'root',

@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { setUserId } from '../../actions/board.actions';
+import { PageActions } from '../../actions/page.actions';
 
 @Component({
   selector: 'team-up-login',
@@ -35,7 +35,7 @@ export class LoginComponent implements AfterViewInit {
       this.authService.getUser().subscribe((user) => {
         localStorage.setItem('user', JSON.stringify(user));
 
-        this.store.dispatch(setUserId({ userId: user.sub }));
+        this.store.dispatch(PageActions.setUserId({ userId: user.sub }));
         this.router.navigate(['/']);
       });
     };

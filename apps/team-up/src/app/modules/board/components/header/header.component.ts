@@ -6,12 +6,13 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { changeCanvasMode, setBoardName } from '../../actions/board.actions';
+import { BoardActions } from '../../actions/board.actions';
+import { PageActions } from '../../actions/page.actions';
+import { selectName } from '../../selectors/board.selectors';
 import {
   selectCanvasMode,
   selectIsOwner,
-  selectName,
-} from '../../selectors/board.selectors';
+} from '../../selectors/page.selectors';
 import { ExportService } from '../../services/export.service';
 
 interface State {
@@ -44,7 +45,7 @@ export class HeaderComponent {
 
   public changeCanvasMode(mode: string) {
     this.store.dispatch(
-      changeCanvasMode({
+      PageActions.changeCanvasMode({
         canvasMode: mode,
       })
     );
@@ -72,7 +73,7 @@ export class HeaderComponent {
       this.state.set({ edit: false });
 
       const name = (event.target as HTMLTextAreaElement).innerText;
-      this.store.dispatch(setBoardName({ name }));
+      this.store.dispatch(BoardActions.setBoardName({ name }));
     }
   }
 
@@ -80,6 +81,6 @@ export class HeaderComponent {
     this.state.set({ edit: false });
 
     const name = (el.nativeElement as HTMLTextAreaElement).innerText;
-    this.store.dispatch(setBoardName({ name }));
+    this.store.dispatch(BoardActions.setBoardName({ name }));
   }
 }

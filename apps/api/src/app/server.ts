@@ -1,4 +1,4 @@
-import { BoardActions, CommonState, User } from '@team-up/board-commons';
+import { BoardCommonActions, CommonState, User } from '@team-up/board-commons';
 import * as WebSocket from 'ws';
 import produce from 'immer';
 import { Client } from './client';
@@ -22,8 +22,8 @@ export class Server {
     if (req.headers.cookie) {
       const cookies = cookie.parse(req.headers.cookie);
 
-      if (cookies.auth) {
-        const user = await verifyGoogle(cookies.auth);
+      if (cookies['auth']) {
+        const user = await verifyGoogle(cookies['auth']);
         if (user?.name) {
           const client = new Client(
             ws,
@@ -84,7 +84,7 @@ export class Server {
       this.sendAll(
         boardId,
         {
-          type: BoardActions.wsSetState,
+          type: BoardCommonActions.wsSetState,
           data: {
             edit: {
               users: closedClients.map((it) => {
