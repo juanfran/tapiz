@@ -66,7 +66,7 @@ app.post('/new', authGuard, async (req, res) => {
 });
 
 app.delete('/delete/:boardId', authGuard, async (req, res) => {
-  await deleteBoard(req.params.boardId);
+  await deleteBoard(req.params['boardId']);
 
   res.json({
     success: true,
@@ -82,8 +82,8 @@ app.delete('/remove-account', authGuard, async (req, res) => {
 });
 
 app.get('/board/:boardId', authGuard, async (req, res) => {
-  const board = await getBoard(req.params.boardId);
-  const owners = await getBoardOwners(req.params.boardId);
+  const board = await getBoard(req.params['boardId']);
+  const owners = await getBoardOwners(req.params['boardId']);
 
   res.json({
     ...board,

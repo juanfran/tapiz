@@ -1,13 +1,14 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { selectUsers } from '../../selectors/board.selectors';
 import {
   selectUserHighlight,
   selectUserId,
-  selectUsers,
   selectVisible,
-} from '../../selectors/board.selectors';
+} from '../../selectors/page.selectors';
 import { RxState, selectSlice } from '@rx-angular/state';
-import { setVisible, toggleUserHighlight } from '../../actions/board.actions';
+import { PageActions } from '../../actions/page.actions';
+import { BoardActions } from '../../actions/board.actions';
 import { User } from '@team-up/board-commons';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -53,11 +54,15 @@ export class UsersComponent {
     );
 
   public toggleVisibility() {
-    this.store.dispatch(setVisible({ visible: !this.state.get('visible') }));
+    this.store.dispatch(
+      BoardActions.setVisible({
+        visible: !this.state.get('visible'),
+      })
+    );
   }
 
   public toggleUserHighlight(userId: User['id']) {
-    this.store.dispatch(toggleUserHighlight({ id: userId }));
+    this.store.dispatch(PageActions.toggleUserHighlight({ id: userId }));
   }
 
   public trackById(index: number, user: User) {

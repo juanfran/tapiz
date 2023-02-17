@@ -12,7 +12,7 @@ export class ExportService {
   public getExportFile(): Promise<string> {
     return new Promise((resolve) => {
       this.store
-        .select(selectBoardState())
+        .select(selectBoardState)
         .pipe(first())
         .subscribe((state) => {
           const exportedNotes = state.notes.map((note) => {

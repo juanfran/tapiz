@@ -6,7 +6,7 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { isUserHighlighActive } from '../../selectors/board.selectors';
+import { isUserHighlighActive } from '../../selectors/page.selectors';
 
 interface State {
   highlight: boolean;

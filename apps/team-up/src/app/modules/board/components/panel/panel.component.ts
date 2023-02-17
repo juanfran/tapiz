@@ -18,12 +18,8 @@ import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
 import { first, pluck } from 'rxjs/operators';
-import {
-  endDragNode,
-  patchNode,
-  removeNode,
-  setFocusId,
-} from '../../actions/board.actions';
+import { BoardActions } from '../../actions/board.actions';
+import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
 import { Panel } from '@team-up/board-commons';
@@ -31,7 +27,7 @@ import { BoardMoveService } from '../../services/board-move.service';
 import {
   selectCanvasMode,
   selectFocusId,
-} from '../../selectors/board.selectors';
+} from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
 import { MoveService } from '../../services/move.service';
 
@@ -102,7 +98,9 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
       event.stopPropagation();
     }
 
-    this.store.dispatch(setFocusId({ focusId: this.state.get('panel').id }));
+    this.store.dispatch(
+      PageActions.setFocusId({ focusId: this.state.get('panel').id })
+    );
   }
 
   @HostListener('dblclick', ['$event'])
@@ -149,8 +147,8 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
 
   public endDrag() {
     this.store.dispatch(
-      endDragNode({
-        nodeType: 'panels',
+      PageActions.endDragNode({
+        nodeType: 'panel',
         id: this.state.get('panel').id,
         initialPosition: this.state.get('initDragPosition'),
         finalPosition: this.state.get('panel').position,
@@ -160,8 +158,8 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
 
   public move(position: Point) {
     this.store.dispatch(
-      patchNode({
-        nodeType: 'panels',
+      BoardActions.patchNode({
+        nodeType: 'panel',
         node: {
           id: this.state.get('panel').id,
           position,
@@ -175,8 +173,8 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
       const value = (event.target as HTMLElement).innerText;
 
       this.store.dispatch(
-        patchNode({
-          nodeType: 'panels',
+        BoardActions.patchNode({
+          nodeType: 'panel',
           node: {
             id: this.state.get('panel').id,
             title: value,
@@ -234,7 +232,10 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
       if (focus && !this.state.get('edit')) {
         hotkeys('delete', this.state.get('panel').id, () => {
           this.store.dispatch(
-            removeNode({ node: this.state.get('panel'), nodeType: 'panel' })
+            BoardActions.removeNode({
+              node: this.state.get('panel'),
+              nodeType: 'panel',
+            })
           );
         });
 
@@ -258,8 +259,8 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
       const color = (e.target as HTMLInputElement).value;
 
       this.store.dispatch(
-        patchNode({
-          nodeType: 'panels',
+        BoardActions.patchNode({
+          nodeType: 'panel',
           node: {
             id: this.state.get('panel').id,
             color,
@@ -283,8 +284,8 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
             const { width, height } = this.state.get('panel');
 
             this.store.dispatch(
-              patchNode({
-                nodeType: 'panels',
+              BoardActions.patchNode({
+                nodeType: 'panel',
                 node: {
                   id: this.state.get('panel').id,
                   width: width + size.x,

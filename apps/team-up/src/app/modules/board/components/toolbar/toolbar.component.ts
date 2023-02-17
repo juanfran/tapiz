@@ -1,14 +1,8 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import {
-  setInitZone,
-  setPopupOpen,
-  addNode,
-  newImage,
-  textToolbarClick,
-  readyToVote,
-} from '../../actions/board.actions';
+import { BoardActions } from '../../actions/board.actions';
+import { PageActions } from '../../actions/page.actions';
 import {
   selectCanvasMode,
   selectPopupOpen,
@@ -16,17 +10,19 @@ import {
   selectUserId,
   selectVisible,
   selectZoom,
-} from '../../selectors/board.selectors';
-import { withLatestFrom } from 'rxjs/operators';
+} from '../../selectors/page.selectors';
+import { take, withLatestFrom } from 'rxjs/operators';
 import { BoardMoveService } from '../../services/board-move.service';
 import { NotesService } from '../../services/notes.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { v4 } from 'uuid';
-import { Subscription } from 'rxjs';
+import { Subscription, zip } from 'rxjs';
+
 interface State {
   visible: boolean;
   popupOpen: string;
 }
+
 @Component({
   selector: 'team-up-toolbar',
   templateUrl: './toolbar.component.html',
@@ -55,7 +51,7 @@ export class ToolbarComponent {
   public text() {
     this.popupOpen('text');
 
-    this.store.dispatch(textToolbarClick());
+    this.store.dispatch(PageActions.textToolbarClick());
 
     this.toolbarSubscription = this.boardMoveService
       .nextMouseDown()
@@ -73,7 +69,7 @@ export class ToolbarComponent {
           };
 
           this.store.dispatch(
-            addNode({
+            BoardActions.addNode({
               nodeType: 'text',
               node: {
                 id: v4(),
@@ -119,7 +115,7 @@ export class ToolbarComponent {
           });
 
           this.store.dispatch(
-            addNode({
+            BoardActions.addNode({
               nodeType: 'note',
               node: note,
             })
@@ -133,7 +129,7 @@ export class ToolbarComponent {
     if (this.state.get('popupOpen') === 'group') {
       this.popupOpen('');
       this.store.dispatch(
-        setInitZone({
+        PageActions.setInitZone({
           initZone: null,
         })
       );
@@ -142,7 +138,7 @@ export class ToolbarComponent {
 
     this.popupOpen('group');
     this.store.dispatch(
-      setInitZone({
+      PageActions.setInitZone({
         initZone: {
           type: 'group',
         },
@@ -157,13 +153,13 @@ export class ToolbarComponent {
       this.popupOpen('');
     }
 
-    this.store.dispatch(readyToVote());
+    this.store.dispatch(PageActions.readyToVote());
   }
 
   public panel() {
     this.popupOpen('panel');
     this.store.dispatch(
-      setInitZone({
+      PageActions.setInitZone({
         initZone: {
           type: 'panel',
         },
@@ -172,7 +168,7 @@ export class ToolbarComponent {
   }
 
   public popupOpen(popupName: string) {
-    this.store.dispatch(setPopupOpen({ popup: popupName }));
+    this.store.dispatch(PageActions.setPopupOpen({ popup: popupName }));
 
     if (this.toolbarSubscription) {
       this.toolbarSubscription.unsubscribe();
@@ -183,17 +179,25 @@ export class ToolbarComponent {
   public newImage() {
     const url = this.imageForm.get('url')?.value;
     if (this.imageForm.valid && url) {
-      this.store.dispatch(
-        newImage({
-          image: {
-            id: v4(),
-            url,
-            position: { x: 0, y: 0 },
-            width: 0,
-            height: 0,
-          },
-        })
-      );
+      zip(this.store.select(selectZoom), this.store.select(selectPosition))
+        .pipe(take(1))
+        .subscribe(([zoom, position]) => {
+          this.store.dispatch(
+            BoardActions.addNode({
+              nodeType: 'image',
+              node: {
+                id: v4(),
+                url,
+                position: {
+                  x: -position.x / zoom,
+                  y: -position.y / zoom,
+                },
+                width: 0,
+                height: 0,
+              },
+            })
+          );
+        });
     }
 
     this.imageForm.reset();

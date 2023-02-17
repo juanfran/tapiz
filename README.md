@@ -26,13 +26,12 @@ npm run start:api
 
 - [ ] Page 404
 - [ ] Show if the user is connected to the board
-- [ ] Export with groups & panels
 - [ ] Add emojis to notes
-- [ ] Refactor state management
 - [ ] Deprecated RX operators
-- [ ] Back `onMessage` refactor, type safe
 - [ ] Api error handling
 - [ ] Code linter
+- [ ] Favicon
+- [ ] Improve text ux
 
 ## Post release
 
@@ -44,3 +43,5 @@ npm run start:api
 - [ ] Vote counter
 - [ ] Duplicate board
 - [ ] Permissions
+- [ ] Refactor toolbar
+- [ ] Export with groups & panels

@@ -9,33 +9,37 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { merge, Subject } from 'rxjs';
-import { startWith, map, withLatestFrom, filter, first } from 'rxjs/operators';
+import { merge, Subject, zip } from 'rxjs';
+import {
+  startWith,
+  map,
+  withLatestFrom,
+  filter,
+  first,
+  take,
+} from 'rxjs/operators';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
+import { BoardActions } from '../actions/board.actions';
+import { PageActions } from '../actions/page.actions';
+
 import {
-  newImage,
-  joinBoard,
-  setUserView,
-  moveCursor,
-  setFocusId,
-  closeBoard,
-  addNode,
-} from '../actions/board.actions';
-import {
-  selectBoardCursor,
-  selectCanvasActive,
-  selectCanvasMode,
   selectGroups,
   selectImages,
-  selectMoveEnabled,
   selectNotes,
+  selectTexts,
+} from '../selectors/board.selectors';
+
+import {
+  selectBoardCursor,
+  selectCanvasMode,
+  selectMoveEnabled,
   selectOpen,
   selectPosition,
   selectBoardId,
   selectUserId,
   selectZoom,
-  selectTexts,
-} from '../selectors/board.selectors';
+} from '../selectors/page.selectors';
+
 import { BoardMoveService } from '../services/board-move.service';
 import { BoardZoomService } from '../services/board-zoom.service';
 import { ActivatedRoute } from '@angular/router';
@@ -70,15 +74,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    this.store
-      .select(selectCanvasActive)
-      .pipe(
-        first(),
-        filter((it) => !it)
-      )
-      .subscribe(() => {
-        this.newNote$.next(event);
-      });
+    this.newNote$.next(event);
   }
 
   constructor(
@@ -130,7 +126,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
           });
 
           this.store.dispatch(
-            addNode({
+            BoardActions.addNode({
               node: note,
               nodeType: 'note',
             })
@@ -143,7 +139,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     this.boardMoveService.mouseDown$
       .pipe(untilDestroyed(this))
       .subscribe(() => {
-        this.store.dispatch(setFocusId({ focusId: '' }));
+        this.store.dispatch(PageActions.setFocusId({ focusId: '' }));
       });
 
     this.boardMoveService.mouseMove$
@@ -156,7 +152,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       )
       .subscribe(([mousePosition, zoom, position]) => {
         this.store.dispatch(
-          moveCursor({
+          BoardActions.moveCursor({
             cursor: {
               x: (-position.x + mousePosition.x) / zoom,
               y: (-position.y + mousePosition.y) / zoom,
@@ -192,7 +188,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       .subscribe(([{ move, zoom }]) => {
         this.workLayerNativeElement.style.transform = `translate(${move.x}px, ${move.y}px) scale(${zoom})`;
 
-        this.store.dispatch(setUserView({ zoom, position: move }));
+        this.store.dispatch(PageActions.setUserView({ zoom, position: move }));
       });
   }
 
@@ -205,31 +201,36 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     const droppedFiles = event.dataTransfer?.files;
 
     if (droppedFiles) {
-      const files = Array.from(droppedFiles);
+      zip(this.store.select(selectZoom), this.store.select(selectPosition))
+        .pipe(take(1))
+        .subscribe(([zoom, position]) => {
+          const files = Array.from(droppedFiles);
 
-      const images = files.filter((file) => file.type.startsWith('image'));
+          const images = files.filter((file) => file.type.startsWith('image'));
 
-      images.forEach((image) => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          this.store.dispatch(
-            newImage({
-              image: {
-                id: v4(),
-                url: reader.result as string,
-                width: 0,
-                height: 0,
-                position: {
-                  x: event.clientX,
-                  y: event.clientY,
-                },
-              },
-            })
-          );
-        };
+          images.forEach((image) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              this.store.dispatch(
+                BoardActions.addNode({
+                  nodeType: 'image',
+                  node: {
+                    id: v4(),
+                    url: reader.result as string,
+                    width: 0,
+                    height: 0,
+                    position: {
+                      x: (-position.x + event.clientX) / zoom,
+                      y: (-position.y + event.clientY) / zoom,
+                    },
+                  },
+                })
+              );
+            };
 
-        reader.readAsDataURL(image);
-      });
+            reader.readAsDataURL(image);
+          });
+        });
     }
   }
 
@@ -246,13 +247,12 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         .pipe(
           filter((open) => open),
           first()
-          // delay(2000),
         )
         .subscribe(() => {
           const boardId = this.route.snapshot.paramMap.get('id');
 
           if (boardId) {
-            this.store.dispatch(joinBoard({ boardId }));
+            this.store.dispatch(PageActions.joinBoard({ boardId }));
             resolve();
           } else {
             reject();
@@ -278,7 +278,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   }
 
   public ngOnDestroy() {
-    this.store.dispatch(closeBoard());
+    this.store.dispatch(PageActions.closeBoard());
     this.wsService.close();
   }
 }

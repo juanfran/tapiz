@@ -5,29 +5,31 @@ import { Note } from './note.model';
 import { Panel } from './panel.model';
 import { Text } from './text.model';
 
+export type NodeType = 'note' | 'group' | 'panel' | 'text' | 'image';
+
 interface NotePatch {
   node: RequireAtLeastOne<Partial<Note>, 'id'>;
-  nodeType: 'notes';
+  nodeType: 'note';
 }
 
 interface PanelPatch {
   node: RequireAtLeastOne<Partial<Panel>, 'id'>;
-  nodeType: 'panels';
+  nodeType: 'panel';
 }
 
 interface GroupPatch {
   node: RequireAtLeastOne<Partial<Group>, 'id'>;
-  nodeType: 'groups';
+  nodeType: 'group';
 }
 
 interface ImagePatch {
   node: RequireAtLeastOne<Partial<Image>, 'id'>;
-  nodeType: 'images';
+  nodeType: 'image';
 }
 
 interface TextPatch {
   node: RequireAtLeastOne<Partial<Text>, 'id'>;
-  nodeType: 'texts';
+  nodeType: 'text';
 }
 
 export type PatchNode =
@@ -41,52 +43,52 @@ export type AddNode =
   | {
       node: Note;
       nodeType: 'note';
-      history? : boolean;
+      history?: boolean;
     }
   | {
       node: Group;
       nodeType: 'group';
-      history? : boolean;
+      history?: boolean;
     }
   | {
       node: Panel;
       nodeType: 'panel';
-      history? : boolean;
+      history?: boolean;
     }
   | {
       node: Text;
       nodeType: 'text';
-      history? : boolean;
+      history?: boolean;
     }
   | {
       node: Image;
       nodeType: 'image';
-      history? : boolean;
+      history?: boolean;
     };
 
 export type RemoveNode =
   | {
-    node: Note;
-    nodeType: 'note';
-    history? : boolean;
-  }
+      node: Note;
+      nodeType: 'note';
+      history?: boolean;
+    }
   | {
-    node: Group;
-    nodeType: 'group';
-    history? : boolean;
-  }
+      node: Group;
+      nodeType: 'group';
+      history?: boolean;
+    }
   | {
-    node: Panel;
-    nodeType: 'panel';
-    history? : boolean;
-  }
+      node: Panel;
+      nodeType: 'panel';
+      history?: boolean;
+    }
   | {
-    node: Text;
-    nodeType: 'text';
-    history? : boolean;
-  }
+      node: Text;
+      nodeType: 'text';
+      history?: boolean;
+    }
   | {
-    node: Image;
-    nodeType: 'image';
-    history? : boolean;
-  };
+      node: Image;
+      nodeType: 'image';
+      history?: boolean;
+    };

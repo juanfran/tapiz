@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Auth } from '@team-up/board-commons';
-import { setUserId } from './modules/board/actions/board.actions';
+import { PageActions } from './modules/board/actions/page.actions';
 
 @Component({
   selector: 'team-up-root',
@@ -19,7 +19,7 @@ export class AppComponent {
       const user: Auth = JSON.parse(userStr);
 
       if (user['sub']) {
-        this.store.dispatch(setUserId({ userId: user['sub'] }));
+        this.store.dispatch(PageActions.setUserId({ userId: user['sub'] }));
       }
     }
   }

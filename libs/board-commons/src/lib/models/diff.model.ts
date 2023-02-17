@@ -7,30 +7,30 @@ import { Image } from './image.model';
 import { Text } from './text.model';
 
 export interface DiffAdd {
-  notes?: Note[];
-  users?: User[];
-  groups?: Group[];
-  panels?: Panel[];
-  images?: Image[];
-  texts?: Text[];
+  note?: Note[];
+  user?: User[];
+  group?: Group[];
+  panel?: Panel[];
+  image?: Image[];
+  text?: Text[];
 }
 
 export interface DiffRemove {
-  notes?: Note['id'][];
-  users?: User['id'][];
-  groups?: Group['id'][];
-  panels?: Panel['id'][];
-  images?: Image['id'][];
-  texts?: Text['id'][];
+  note?: Note['id'][];
+  user?: User['id'][];
+  group?: Group['id'][];
+  panel?: Panel['id'][];
+  image?: Image['id'][];
+  text?: Text['id'][];
 }
 
 export interface DiffEdit {
-  notes?: RequireAtLeastOne<Partial<Note>, 'id'>[];
-  groups?: RequireAtLeastOne<Partial<Group>, 'id'>[];
-  panels?: RequireAtLeastOne<Partial<Panel>, 'id'>[];
-  images?: RequireAtLeastOne<Partial<Image>, 'id'>[];
-  texts?: RequireAtLeastOne<Partial<Text>, 'id'>[];
-  users?: RequireAtLeastOne<Partial<User>, 'id'>[];
+  note?: RequireAtLeastOne<Partial<Note>, 'id'>[];
+  group?: RequireAtLeastOne<Partial<Group>, 'id'>[];
+  panel?: RequireAtLeastOne<Partial<Panel>, 'id'>[];
+  image?: RequireAtLeastOne<Partial<Image>, 'id'>[];
+  text?: RequireAtLeastOne<Partial<Text>, 'id'>[];
+  user?: RequireAtLeastOne<Partial<User>, 'id'>[];
 }
 
 export interface Diff {

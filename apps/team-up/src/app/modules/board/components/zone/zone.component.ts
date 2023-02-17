@@ -19,19 +19,13 @@ import {
   takeUntil,
   withLatestFrom,
 } from 'rxjs/operators';
-import {
-  setMoveEnabled,
-  setZone,
-  zoneToGroup,
-  setPopupOpen,
-  zoneToPanel,
-} from '../../actions/board.actions';
+import { PageActions } from '../../actions/page.actions';
 import {
   selectPosition,
   selectInitZone,
   selectZone,
   selectZoom,
-} from '../../selectors/board.selectors';
+} from '../../selectors/page.selectors';
 import { BoardMoveService } from '../../services/board-move.service';
 
 interface State {
@@ -116,7 +110,7 @@ export class ZoneComponent {
           this.store.select(selectPosition)
         ),
         switchMap(([mouseDownEvent, zoom, position]) => {
-          this.store.dispatch(setMoveEnabled({ enabled: false }));
+          this.store.dispatch(PageActions.setMoveEnabled({ enabled: false }));
 
           return this.boardMoveService.mouseMove$.pipe(
             takeUntil(this.boardMoveService.mouseUp$),
@@ -149,19 +143,19 @@ export class ZoneComponent {
       .subscribe({
         next: (zone) => {
           this.store.dispatch(
-            setZone({
+            PageActions.setZone({
               zone,
             })
           );
           this.appRef.tick();
         },
         complete: () => {
-          this.store.dispatch(setPopupOpen({ popup: '' }));
+          this.store.dispatch(PageActions.setPopupOpen({ popup: '' }));
 
           if (this.state.get('config')?.type === 'group') {
-            this.store.dispatch(zoneToGroup());
+            this.store.dispatch(PageActions.zoneToGroup());
           } else if (this.state.get('config')?.type === 'panel') {
-            this.store.dispatch(zoneToPanel());
+            this.store.dispatch(PageActions.zoneToPanel());
           }
         },
       });

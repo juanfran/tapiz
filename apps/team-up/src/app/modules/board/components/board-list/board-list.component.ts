@@ -3,13 +3,8 @@ import { UntilDestroy } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
 import { Board } from '@team-up/board-commons';
-import {
-  createBoard,
-  fetchBoards,
-  removeBoard,
-  setUserId,
-} from '@/app/modules/board/actions/board.actions';
-import { selectBoards } from '@/app/modules/board/selectors/board.selectors';
+import { PageActions } from '@/app/modules/board/actions/page.actions';
+import { selectBoards } from '@/app/modules/board/selectors/page.selectors';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmComponent } from '../confirm-action/confirm-actions.component';
@@ -40,20 +35,19 @@ export class BoardListComponent implements OnInit {
   }
 
   public ngOnInit() {
-    this.store.dispatch(fetchBoards());
+    this.store.dispatch(PageActions.fetchBoards());
   }
 
   public logout() {
-    console.log('eee');
     document.cookie = '';
     localStorage.removeItem('auth');
-    this.store.dispatch(setUserId({ userId: '' }));
+    this.store.dispatch(PageActions.setUserId({ userId: '' }));
     this.router.navigate(['/login']);
   }
 
   public onSubmit(value: string) {
     this.store.dispatch(
-      createBoard({
+      PageActions.createBoard({
         name: value.trim().length ? value : 'New board',
       })
     );
@@ -66,7 +60,7 @@ export class BoardListComponent implements OnInit {
   public deleteBoard(event: Event, board: Board) {
     event.stopPropagation();
 
-    this.store.dispatch(removeBoard({ id: board.id }));
+    this.store.dispatch(PageActions.removeBoard({ id: board.id }));
   }
 
   public deleteAccount() {

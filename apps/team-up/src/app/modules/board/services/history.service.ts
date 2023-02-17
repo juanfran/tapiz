@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import * as BoardActions from '../actions/board.actions';
+import { PageActions } from '../actions/page.actions';
 import hotkeys from 'hotkeys-js';
 
 @Injectable({
@@ -20,10 +20,10 @@ export class HistoryService {
   }
 
   public undo() {
-    this.store.dispatch(BoardActions.undo());
+    this.store.dispatch(PageActions.undo());
   }
 
   public redo() {
-    this.store.dispatch(BoardActions.redo());
+    this.store.dispatch(PageActions.redo());
   }
 }

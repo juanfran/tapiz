@@ -1,177 +1,31 @@
-import { createAction, props } from '@ngrx/store';
+import { props, createAction } from '@ngrx/store';
 import {
-  Point,
-  Image,
-  Text,
-  BoardActions,
-  Diff,
-  Zone,
-  ZoneConfig,
-  User,
-  Board,
-  PatchNode,
   AddNode,
+  Diff,
+  PatchNode,
+  Point,
   RemoveNode,
+  BoardCommonActions,
 } from '@team-up/board-commons';
 
-export const initBoard = createAction(BoardActions.initBoard);
-export const closeBoard = createAction(BoardActions.closeBoard);
-
-export const fetchBoardSuccess = createAction(
-  BoardActions.fetchBoardSuccess,
-  props<{ owners: string[]; name: string }>()
-);
-
-export const joinBoard = createAction(
-  BoardActions.joinBoard,
-  props<{ boardId: string }>()
-);
-
-export const setZoom = createAction(
-  BoardActions.setZoom,
-  props<{ zoom: number }>()
-);
-
-export const setUserView = createAction(
-  BoardActions.setUserView,
-  props<{ zoom: number; position: Point }>()
-);
-
-export const setBoardName = createAction(
-  BoardActions.setBoardName,
-  props<{ name: string }>()
-);
-
-export const setImagePosition = createAction(
-  BoardActions.setImagePosition,
-  props<{ id: Image['id']; position: Image['position'] }>()
-);
-
-export const setCanvasActive = createAction(
-  BoardActions.setCanvasActive,
-  props<{ active: boolean }>()
-);
-
-export const setMoveEnabled = createAction(
-  BoardActions.setMoveEnabled,
-  props<{ enabled: boolean }>()
-);
-
-export const newImage = createAction(
-  BoardActions.newImage,
-  props<{ image: Image }>()
-);
-
-export const removeImage = createAction(
-  BoardActions.removeImage,
-  props<{ id: Image['id'] }>()
-);
-
-export const editImage = createAction(
-  BoardActions.editImage,
-  props<{ id: string; data: Partial<Image> }>()
-);
-
-export const wsSetState = createAction(
-  BoardActions.wsSetState,
-  props<{ id: string; data: Diff }>()
-);
-
-export const moveCursor = createAction(
-  BoardActions.moveCursor,
-  props<{ userId?: string; cursor: Point }>()
-);
-
-export const setUserId = createAction(
-  BoardActions.setUserId,
-  props<{ userId: string }>()
-);
-
-export const setInitZone = createAction(
-  BoardActions.setInitZone,
-  props<{ initZone: ZoneConfig | null }>()
-);
-
-export const setFocusId = createAction(
-  BoardActions.setFocusId,
-  props<{ focusId: string }>()
-);
-
-export const setVisible = createAction(
-  BoardActions.setVisible,
-  props<{ visible: boolean }>()
-);
-
-export const changeCanvasMode = createAction(
-  BoardActions.changeCanvasMode,
-  props<{ canvasMode: string }>()
-);
-
-export const setZone = createAction(
-  BoardActions.setZone,
-  props<{ zone: Zone | null }>()
-);
-
-export const zoneToGroup = createAction(BoardActions.zoneToGroup);
-
-export const zoneToPanel = createAction(BoardActions.zoneToPanel);
-
-export const patchNode = createAction(
-  BoardActions.patchNode,
-  props<PatchNode>()
-);
-
-export const addNode = createAction(BoardActions.addNode, props<AddNode>());
-export const removeNode = createAction(
-  BoardActions.removeNode,
-  props<RemoveNode>()
-);
-
-export const initDragNode = createAction(
-  BoardActions.initDragNode,
-  props<PatchNode>()
-);
-
-export const endDragNode = createAction(
-  BoardActions.endDragNode,
-  props<{
-    id: string;
-    nodeType: 'notes' | 'panels' | 'groups' | 'images' | 'texts';
-    initialPosition: Point;
-    finalPosition: Point;
-  }>()
-);
-
-export const undo = createAction(BoardActions.undo);
-
-export const redo = createAction(BoardActions.redo);
-
-export const toggleUserHighlight = createAction(
-  BoardActions.toggleUserHighlight,
-  props<{ id: User['id'] }>()
-);
-
-export const setPopupOpen = createAction(
-  BoardActions.setPopupOpen,
-  props<{ popup: string }>()
-);
-export const createBoard = createAction(
-  BoardActions.createBoard,
-  props<{ name: string }>()
-);
-
-export const fetchBoards = createAction(BoardActions.fetchBoards);
-
-export const fetchBoardsSuccess = createAction(
-  BoardActions.fetchBoardsSuccess,
-  props<{ boards: Board[] }>()
-);
-
-export const textToolbarClick = createAction(BoardActions.textToolbarClick);
-
-export const readyToVote = createAction(BoardActions.readyToVote);
-
-export const removeBoard = createAction(
-  BoardActions.removeBoard,
-  props<{ id: Board['id'] }>()
-);
+export const BoardActions = {
+  setBoardName: createAction(
+    BoardCommonActions.setBoardName,
+    props<{ name: string }>()
+  ),
+  moveCursor: createAction(
+    BoardCommonActions.moveCursor,
+    props<{ cursor: Point }>()
+  ),
+  patchNode: createAction(BoardCommonActions.patchNode, props<PatchNode>()),
+  addNode: createAction(BoardCommonActions.addNode, props<AddNode>()),
+  removeNode: createAction(BoardCommonActions.removeNode, props<RemoveNode>()),
+  setVisible: createAction(
+    BoardCommonActions.setVisible,
+    props<{ visible: boolean }>()
+  ),
+  wsSetState: createAction(
+    BoardCommonActions.wsSetState,
+    props<{ id: string; data: Diff }>()
+  ),
+};

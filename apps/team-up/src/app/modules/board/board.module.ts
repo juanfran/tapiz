@@ -39,6 +39,7 @@ import { AutoFocusDirective } from './directives/autofocus.directive';
 import { ClickOutsideDirective } from './directives/click-outside.directive';
 import { TextComponent } from './components/text/text.component';
 import { ConfirmComponent } from './components/confirm-action/confirm-actions.component';
+import { pageFeature } from './reducers/page.reducer';
 
 const routes: Routes = [
   {
@@ -64,6 +65,7 @@ const routes: Routes = [
     DragDropModule,
     RouterModule.forChild(routes),
     StoreModule.forFeature(boardFeature),
+    StoreModule.forFeature(pageFeature),
     EffectsModule.forFeature([BoardEffects, HistoryEffects]),
     MatSliderModule,
     MatDialogModule,

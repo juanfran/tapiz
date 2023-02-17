@@ -19,7 +19,7 @@ import {
 } from 'rxjs/operators';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Draggable } from '../models/draggable.model';
-import { selectZoom } from '../selectors/board.selectors';
+import { selectZoom } from '../selectors/page.selectors';
 import { Point } from '@team-up/board-commons';
 
 @UntilDestroy()

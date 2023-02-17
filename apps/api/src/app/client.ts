@@ -1,7 +1,12 @@
-import { applyDiff, BoardActions, Diff } from '@team-up/board-commons';
+import {
+  applyDiff,
+  Board,
+  BoardCommonActions,
+  Diff,
+  getDiff,
+} from '@team-up/board-commons';
 import * as WebSocket from 'ws';
 import { Server } from './server';
-import { messageManager } from './message';
 import { joinBoard, getBoardOwners } from './db';
 import { checkPermissionsAction } from './permissions';
 
@@ -9,7 +14,7 @@ export class Client {
   public boardId!: string;
   public isOwner!: boolean;
   public sendTimeout?: ReturnType<typeof setTimeout>;
-  public pendingMsgs = [];
+  public pendingMsgs: unknown[] = [];
 
   constructor(
     public ws: WebSocket,
@@ -20,50 +25,57 @@ export class Client {
     this.ws.on('message', this.incomingMessage.bind(this));
   }
 
-  public isSessionEvent(eventType: string) {
-    return eventType === BoardActions.moveCursor;
+  public isSessionEvent(diff: Diff) {
+    const isUserEvent = !!(
+      diff.edit?.user ||
+      diff.add?.user ||
+      diff.remove?.user
+    );
+    return isUserEvent;
   }
 
   public incomingMessage(messageString: string) {
     const message = this.parseMessage(messageString);
 
-    if (message.action === 'join') {
-      this.join(message);
+    if ('action' in message) {
+      if (message.action === 'join') {
+        this.join(message);
+      }
     } else {
-      const persist = !this.isSessionEvent(message.type);
-
       const state = this.server.getBoard(this.boardId);
-
-      const messageHandler = messageManager.find((manager) => {
-        return manager.type === message.type;
-      });
 
       if (!checkPermissionsAction(state, message, this.id)) {
         return;
       }
 
-      // validate if the user has permission to make the change
-      if (messageHandler) {
-        const result = messageHandler.fn(message, this.id, { ...state });
-        this.updateStateWithDiff(result);
+      const diffResult = getDiff(message, this.id);
+
+      if (diffResult) {
         this.server.checkConnections(this.boardId);
+
+        this.updateStateWithDiff(diffResult);
         this.server.sendAll(
           this.boardId,
           {
-            type: BoardActions.wsSetState,
-            data: result,
+            type: BoardCommonActions.wsSetState,
+            data: diffResult,
           },
           [this]
         );
+
+        const persist = !this.isSessionEvent(diffResult);
 
         if (persist) {
           this.server.persistBoard(this.boardId);
         }
 
-        if (message.type === BoardActions.setVisible) {
+        if (BoardCommonActions.setVisible === message.type) {
           this.server.setUserVisibility(this.boardId, this.id, message.visible);
         }
-      } else if (message.type === BoardActions.setBoardName && this.isOwner) {
+      } else if (
+        BoardCommonActions.setBoardName === message.type &&
+        this.isOwner
+      ) {
         this.server.updateBoardName(this.boardId, message.name);
 
         this.server.checkConnections(this.boardId);
@@ -106,19 +118,19 @@ export class Client {
 
     const diff: Diff = {
       set: {
-        notes: board.notes,
-        users: users,
-        groups: board.groups,
-        panels: board.panels,
-        images: board.images,
-        texts: board.texts,
+        note: board.notes,
+        user: users,
+        group: board.groups,
+        panel: board.panels,
+        image: board.images,
+        text: board.texts,
       },
     };
 
     this.server.sendAll(
       this.boardId,
       {
-        type: BoardActions.wsSetState,
+        type: BoardCommonActions.wsSetState,
         data: {
           edit: {
             users: [user],
@@ -129,12 +141,12 @@ export class Client {
     );
 
     this.send({
-      type: BoardActions.wsSetState,
+      type: BoardCommonActions.wsSetState,
       data: diff,
     });
   }
 
-  public send(msg: any) {
+  public send(msg: unknown) {
     this.pendingMsgs.push(msg);
 
     if (this.sendTimeout) {
