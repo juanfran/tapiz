@@ -56,9 +56,10 @@ const reducer = createReducer(
     state.open = true;
     return state;
   }),
-  on(PageActions.initBoard, PageActions.closeBoard, (): PageState => {
+  on(PageActions.initBoard, PageActions.closeBoard, (state): PageState => {
     return {
       ...initialPageState,
+      userId: state.userId,
     };
   }),
   on(PageActions.fetchBoardSuccess, (state, { owners }): PageState => {
