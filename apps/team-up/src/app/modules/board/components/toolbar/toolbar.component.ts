@@ -5,6 +5,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import {
   selectCanvasMode,
+  selectEmoji,
   selectPopupOpen,
   selectPosition,
   selectUserId,
@@ -17,6 +18,8 @@ import { NotesService } from '../../services/notes.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { v4 } from 'uuid';
 import { Subscription, zip } from 'rxjs';
+import 'emoji-picker-element';
+import { EmojiClickEvent, NativeEmoji } from 'emoji-picker-element/shared';
 
 interface State {
   visible: boolean;
@@ -149,11 +152,10 @@ export class ToolbarComponent {
   public vote() {
     if (this.state.get('popupOpen') !== 'vote') {
       this.popupOpen('vote');
+      this.store.dispatch(PageActions.readyToVote());
     } else {
       this.popupOpen('');
     }
-
-    this.store.dispatch(PageActions.readyToVote());
   }
 
   public panel() {
@@ -164,6 +166,20 @@ export class ToolbarComponent {
           type: 'panel',
         },
       })
+    );
+  }
+
+  public emoji() {
+    if (this.state.get('popupOpen') !== 'emoji') {
+      this.popupOpen('emoji');
+    } else {
+      this.popupOpen('');
+    }
+  }
+
+  public emojiSelected(emojiEvent: EmojiClickEvent) {
+    this.store.dispatch(
+      PageActions.selectEmoji({ emoji: emojiEvent.detail.emoji as NativeEmoji })
     );
   }
 

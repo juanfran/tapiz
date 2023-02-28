@@ -23,4 +23,12 @@
     {{ vm.username }}
   </div>
   <div class="characters">{{ vm.note.text.length }}/140</div>
+
+  <div
+    *ngFor="let emoji of vm.note.emojis"
+    class="emoji"
+    [style.left.px]="emoji.position.x"
+    [style.top.px]="emoji.position.y">
+    {{ emoji.unicode }}
+  </div>
 </ng-container>

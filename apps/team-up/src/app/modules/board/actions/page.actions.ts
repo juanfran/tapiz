@@ -8,6 +8,7 @@ import {
   PatchNode,
   NodeType,
 } from '@team-up/board-commons';
+import { NativeEmoji } from 'emoji-picker-element/shared';
 
 export const PageActions = createActionGroup({
   source: 'Page',
@@ -16,7 +17,6 @@ export const PageActions = createActionGroup({
     'Close board': emptyProps(),
     'Fetch board success': props<{ owners: string[]; name: string }>(),
     'Join board': props<{ boardId: string }>(),
-    'Set zoom': props<{ zoom: number }>(),
     'Set user view': props<{ zoom: number; position: Point }>(),
     'Set move enabled': props<{ enabled: boolean }>(),
     'Set user id': props<{ userId: string }>(),
@@ -44,5 +44,6 @@ export const PageActions = createActionGroup({
     'Ready to vote': emptyProps(),
     'Remove board': props<{ id: Board['id'] }>(),
     'Board not found': props<{ id: Board['id'] }>(),
+    'Select emoji': props<{ emoji: NativeEmoji }>(),
   },
 });

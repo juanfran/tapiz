@@ -29,6 +29,8 @@ export class LoginComponent implements AfterViewInit {
   public ngAfterViewInit() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).onSignIn = (googleUser: any) => {
+      console.log('login', googleUser);
+
       document.cookie = `auth=${googleUser.credential}`;
       localStorage.setItem('auth', googleUser.credential);
 

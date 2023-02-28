@@ -19,6 +19,7 @@ export const {
   selectIsOwner,
   selectBoardCursor,
   selectVoting,
+  selectEmoji,
   selectPageState,
 } = pageFeature;
 

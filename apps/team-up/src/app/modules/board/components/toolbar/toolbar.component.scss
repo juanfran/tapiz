@@ -5,6 +5,7 @@
   cursor: default;
   height: auto;
   position: relative;
+  display: flex;
 }
 
 .toolbar-tooltip {
@@ -175,4 +176,13 @@
 
 .actions {
   margin-top: 0.5rem;
+}
+
+.emojis {
+  background: var(--primary-color-background);
+  border-radius: 8px;
+  margin-left: 1rem;
+  padding: 0.5rem;
+  position: absolute;
+  left: 46px;
 }

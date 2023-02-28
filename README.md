@@ -24,10 +24,9 @@ npm run start:api
 
 ## TODO before beta release
 
-- [ ] Add emojis to notes
-- [ ] Deprecated RX operators
-- [ ] Code linter
 - [ ] Improve text ux
+- [ ] Validate inputs (ex: notes withous fields)
+- [ ] Resize image
 
 ## Post release
 
@@ -40,5 +39,8 @@ npm run start:api
 - [ ] Duplicate board
 - [ ] Permissions
 - [ ] Refactor toolbar
+- [ ] Refactor css
 - [ ] Export with groups & panels
 - [ ] Split board.module
+- [ ] Deprecated RX operators
+- [ ] Code linter

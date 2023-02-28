@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { fromEvent, Observable } from 'rxjs';
 import {
   distinctUntilChanged,
+  filter,
   map,
   pairwise,
   scan,
@@ -27,7 +28,16 @@ export class BoardZoomService {
     const maxZoom = 2.5;
     const minZoom = 0.2;
 
-    const wheel$ = fromEvent<WheelEvent>(window, 'wheel').pipe(share());
+    const wheel$ = fromEvent<WheelEvent>(window, 'wheel').pipe(
+      share(),
+      filter((event) => {
+        if (event.target) {
+          return (event.target as HTMLElement).tagName !== 'EMOJI-PICKER';
+        }
+
+        return true;
+      })
+    );
 
     this.zoom$ = wheel$.pipe(
       map((event) => {
