@@ -24,7 +24,6 @@ npm run start:api
 
 ## TODO before beta release
 
-- [ ] Show if the user is connected to the board
 - [ ] Add emojis to notes
 - [ ] Deprecated RX operators
 - [ ] Code linter

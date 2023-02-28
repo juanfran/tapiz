@@ -40,68 +40,6 @@ export class Server {
     ws.close();
   }
 
-  public checkConnections(boardId: string) {
-    const openClients = this.clients.filter(
-      (client) => client.ws.readyState === client.ws.OPEN
-    );
-    const closedClients = this.clients.filter(
-      (client) =>
-        client.ws.readyState === client.ws.CLOSED &&
-        !openClients.find((openClient) => {
-          return (
-            // check if a new connection for the same user/board was made
-            openClient.id === client.id && openClient.boardId === client.boardId
-          );
-        })
-    );
-
-    const removedClientIds = closedClients.map((client) => client.id);
-
-    if (removedClientIds.length) {
-      this.clients = this.clients.filter(
-        (client) => client.ws.readyState === client.ws.OPEN
-      );
-
-      this.setState(boardId, (state) => {
-        if (!state.users) {
-          return;
-        }
-
-        state.users = state.users.map((user) => {
-          const isClosed = removedClientIds.includes(user.id);
-
-          if (isClosed) {
-            return {
-              ...user,
-              connected: false,
-            };
-          }
-
-          return user;
-        });
-      });
-
-      this.sendAll(
-        boardId,
-        {
-          type: BoardCommonActions.wsSetState,
-          data: {
-            edit: {
-              users: closedClients.map((it) => {
-                return {
-                  id: it.id,
-                  connected: false,
-                  cursor: null,
-                };
-              }),
-            },
-          },
-        },
-        []
-      );
-    }
-  }
-
   public sendAll(boardId: string, message: unknown, exclude: Client[] = []) {
     const boardClients = this.clients.filter((it) => it.boardId === boardId);
 

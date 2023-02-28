@@ -22,6 +22,7 @@ export class Client {
     public id: string
   ) {
     this.ws.on('message', this.incomingMessage.bind(this));
+    this.ws.on('close', this.close.bind(this));
   }
 
   public isSessionEvent(diff: Diff) {
@@ -50,8 +51,6 @@ export class Client {
       const diffResult = getDiff(message, this.id);
 
       if (diffResult) {
-        this.server.checkConnections(this.boardId);
-
         this.updateStateWithDiff(diffResult);
         this.server.sendAll(
           this.boardId,
@@ -76,11 +75,47 @@ export class Client {
         this.isOwner
       ) {
         this.server.updateBoardName(this.boardId, message.name);
-
-        this.server.checkConnections(this.boardId);
         this.server.sendAll(this.boardId, message, [this]);
       }
     }
+  }
+
+  public close() {
+    this.server.setState(this.boardId, (state) => {
+      if (!state.users) {
+        return;
+      }
+
+      state.users = state.users.map((user) => {
+        if (user.id === this.id) {
+          return {
+            ...user,
+            connected: false,
+          };
+        }
+
+        return user;
+      });
+    });
+
+    this.server.sendAll(
+      this.boardId,
+      {
+        type: BoardCommonActions.wsSetState,
+        data: {
+          edit: {
+            user: [
+              {
+                id: this.id,
+                connected: false,
+                cursor: null,
+              },
+            ],
+          },
+        },
+      },
+      []
+    );
   }
 
   private async join(message: { boardId: string }) {
@@ -132,10 +167,10 @@ export class Client {
         type: BoardCommonActions.wsSetState,
         data: {
           edit: {
-            users: [user],
+            user: [user],
           },
         },
-      },
+      } as Diff,
       [this]
     );
 
