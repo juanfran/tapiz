@@ -40,6 +40,19 @@
       <div class="toolbar-tooltip">Vote</div>
     </div>
     <div
+      *ngIf="(canvasMode$ | async) === 'editMode'"
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'emoji'">
+      <button
+        class="toolbar-button"
+        (click)="emoji()">
+        <team-up-svg-icon
+          icon="mood"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Add emoji</div>
+    </div>
+    <div
       *ngIf="(canvasMode$ | async) === 'composeMode'"
       class="toolbar-button-container"
       [class.active]="vm.popupOpen === 'text'">
@@ -114,5 +127,11 @@
       </button>
       <div class="toolbar-tooltip">Board</div>
     </div>
+  </div>
+
+  <div
+    class="emojis"
+    *ngIf="vm.popupOpen === 'emoji'">
+    <emoji-picker (emoji-click)="emojiSelected($event)"></emoji-picker>
   </div>
 </ng-container>

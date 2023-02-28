@@ -133,3 +133,11 @@ textarea {
   border-radius: 10px;
   text-align: center;
 }
+
+.emoji {
+  position: absolute;
+  font-family: "Twemoji Mozilla","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","EmojiOne Color","Android Emoji",sans-serif;
+  font-size: 1.375rem;
+  z-index: -1;
+}
+

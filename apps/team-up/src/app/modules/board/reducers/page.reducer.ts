@@ -4,6 +4,7 @@ import { wsOpen } from '@/app/modules/ws/ws.actions';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
 import produce from 'immer';
+import { NativeEmoji } from 'emoji-picker-element/shared';
 
 export interface PageState {
   visible: boolean;
@@ -24,6 +25,7 @@ export interface PageState {
   boardCursor: string;
   voting: boolean;
   boards: Board[];
+  emoji: NativeEmoji | null;
 }
 
 const initialPageState: PageState = {
@@ -48,6 +50,7 @@ const initialPageState: PageState = {
   voting: false,
   boards: [],
   userId: '',
+  emoji: null,
 };
 
 const reducer = createReducer(
@@ -78,11 +81,6 @@ const reducer = createReducer(
   }),
   on(PageActions.joinBoard, (state, { boardId }): PageState => {
     state.boardId = boardId;
-
-    return state;
-  }),
-  on(PageActions.setZoom, (state, { zoom }): PageState => {
-    state.zoom = zoom;
 
     return state;
   }),
@@ -171,10 +169,12 @@ const reducer = createReducer(
   on(PageActions.setPopupOpen, (state, { popup }): PageState => {
     state.popupOpen = popup;
 
+    state.emoji = null;
+    state.boardCursor = 'default';
+    state.voting = false;
+
     if (popup.length) {
-      state.boardCursor = 'default';
       state.initZone = null;
-      state.voting = false;
     }
 
     return state;
@@ -202,6 +202,12 @@ const reducer = createReducer(
     state.boards = state.boards.filter((board) => {
       return board.id !== id;
     });
+
+    return state;
+  }),
+  on(PageActions.selectEmoji, (state, { emoji }): PageState => {
+    state.boardCursor = 'crosshair';
+    state.emoji = emoji;
 
     return state;
   })

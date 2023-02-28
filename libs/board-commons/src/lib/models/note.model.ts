@@ -6,4 +6,8 @@ export interface Note {
   position: Point;
   ownerId: string;
   votes: number;
+  emojis: {
+    unicode: string;
+    position: Point;
+  }[];
 }

@@ -12,6 +12,7 @@ export class NotesService {
       id: v4(),
       text: '',
       votes: 0,
+      emojis: [],
       ...data,
     };
   }

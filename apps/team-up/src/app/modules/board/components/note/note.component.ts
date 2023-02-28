@@ -29,13 +29,17 @@ import {
 } from '../../selectors/board.selectors';
 import {
   isUserHighlighted,
+  selectEmoji,
   selectFocusId,
   selectUserId,
   selectVoting,
+  selectZoom,
 } from '../../selectors/page.selectors';
 import { Observable } from 'rxjs';
 import hotkeys from 'hotkeys-js';
 import { contrast } from './contrast';
+import { NativeEmoji } from 'emoji-picker-element/shared';
+import { concatLatestFrom } from '@ngrx/effects';
 interface State {
   edit: boolean;
   note: Note;
@@ -178,6 +182,38 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         this.focusTextarea();
       });
     }
+  }
+
+  @HostListener('click', ['$event'])
+  public emoji(event: MouseEvent) {
+    this.store
+      .select(selectEmoji)
+      .pipe(
+        take(1),
+        filter((it): it is NativeEmoji => !!it),
+        concatLatestFrom(() => this.store.select(selectZoom))
+      )
+      .subscribe(([emoji, zoom]) => {
+        const targetPosition = this.nativeElement.getBoundingClientRect();
+        this.store.dispatch(
+          BoardActions.patchNode({
+            nodeType: 'note',
+            node: {
+              id: this.state.get('note').id,
+              emojis: [
+                ...this.state.get('note').emojis,
+                {
+                  unicode: emoji.unicode,
+                  position: {
+                    x: (event.clientX - targetPosition.left) / zoom - 27 / 2,
+                    y: (event.clientY - targetPosition.top) / zoom - 27 / 2,
+                  },
+                },
+              ],
+            },
+          })
+        );
+      });
   }
 
   public isOwner() {

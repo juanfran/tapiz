@@ -1,4 +1,5 @@
 import { RequireAtLeastOne } from 'type-fest';
+
 import { Group } from './group.model';
 import { Image } from './image.model';
 import { Note } from './note.model';
