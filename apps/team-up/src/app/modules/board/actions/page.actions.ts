@@ -43,5 +43,6 @@ export const PageActions = createActionGroup({
     'Text toolbar click': emptyProps(),
     'Ready to vote': emptyProps(),
     'Remove board': props<{ id: Board['id'] }>(),
+    'Board not found': props<{ id: Board['id'] }>(),
   },
 });

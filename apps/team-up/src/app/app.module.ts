@@ -8,7 +8,6 @@ import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { environment } from '../environments/environment';
 import { StoreRouterConnectingModule } from '@ngrx/router-store';
-import { PagesModule } from './pages/pages.module';
 import { HttpClientModule } from '@angular/common/http';
 import { ApiRestInterceptorModule } from './commons/api-rest-interceptor/api-rest-interceptor.module';
 import { WsModule } from './modules/ws/ws.module';
@@ -16,6 +15,7 @@ import { BoardModule } from './modules/board/board.module';
 import { CommonsModule } from './commons/commons.module';
 import { TranslocoRootModule } from './transloco/transloco-root.module';
 import { ConfigService, configFactory } from './services/config.service';
+import { RouterModule } from '@angular/router';
 
 document.oncontextmenu = () => {
   return false;
@@ -35,7 +35,6 @@ export function prefersReducedMotion(): boolean {
     CommonsModule,
     HttpClientModule,
     ApiRestInterceptorModule,
-    PagesModule,
     BrowserModule,
     BrowserAnimationsModule.withConfig({
       disableAnimations: prefersReducedMotion(),
@@ -57,6 +56,7 @@ export function prefersReducedMotion(): boolean {
     EffectsModule.forRoot([]),
     !environment.production ? StoreDevtoolsModule.instrument() : [],
     TranslocoRootModule,
+    RouterModule.forRoot([]),
   ],
   bootstrap: [AppComponent],
   providers: [

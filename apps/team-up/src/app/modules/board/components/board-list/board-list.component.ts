@@ -41,6 +41,7 @@ export class BoardListComponent implements OnInit {
   public logout() {
     document.cookie = '';
     localStorage.removeItem('auth');
+    localStorage.removeItem('user');
     this.store.dispatch(PageActions.setUserId({ userId: '' }));
     this.router.navigate(['/login']);
   }

@@ -11,6 +11,7 @@ import {
   tap,
   withLatestFrom,
   filter,
+  catchError,
 } from 'rxjs/operators';
 import { v4 } from 'uuid';
 import { BoardActions } from '../actions/board.actions';
@@ -46,18 +47,26 @@ export class BoardEffects {
     return this.actions$.pipe(
       ofType(PageActions.joinBoard),
       switchMap((action) => {
-        return this.boardApiService.getBoard(action.boardId);
-      }),
-      map((board) => {
-        this.wsService.send({
-          action: 'join',
-          boardId: board.id,
-        });
+        return this.boardApiService.getBoard(action.boardId).pipe(
+          map((board) => {
+            this.wsService.send({
+              action: 'join',
+              boardId: board.id,
+            });
 
-        return PageActions.fetchBoardSuccess({
-          name: board.name,
-          owners: board.owners,
-        });
+            return PageActions.fetchBoardSuccess({
+              name: board.name,
+              owners: board.owners,
+            });
+          }),
+          catchError(() => {
+            return of(
+              PageActions.boardNotFound({
+                id: action.boardId,
+              })
+            );
+          })
+        );
       })
     );
   });
@@ -71,6 +80,18 @@ export class BoardEffects {
       })
     );
   });
+
+  public boardNotFound$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(PageActions.boardNotFound),
+        tap(() => {
+          this.router.navigate(['/404']);
+        })
+      );
+    },
+    { dispatch: false }
+  );
 
   public resetPopupOnChangeMode$ = createEffect(() => {
     return this.actions$.pipe(

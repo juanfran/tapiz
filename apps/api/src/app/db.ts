@@ -15,7 +15,7 @@ export function startDB() {
       user: Config.db.user,
     });
 
-    pool.connect((err, _client, done) => {
+    pool.connect((err, _client) => {
       if (err) throw err;
 
       client = _client;
@@ -25,6 +25,7 @@ export function startDB() {
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getSingleRow(res: QueryResult<any>) {
   if (res.rows) {
     return res.rows[0];
@@ -44,7 +45,8 @@ export function getBoard(boardId: string): Promise<
 > {
   return client
     .query('SELECT * FROM board WHERE id = $1', [boardId])
-    .then(getSingleRow);
+    .then(getSingleRow)
+    .catch(() => undefined);
 }
 
 export function getBoardOwners(boardId: string) {
@@ -53,7 +55,8 @@ export function getBoardOwners(boardId: string) {
       'SELECT account_id as id FROM account_board where board_id = $1 and is_owner=true',
       [boardId]
     )
-    .then((res) => res.rows.map((it) => it.id));
+    .then((res) => res.rows.map((it) => it.id))
+    .catch(() => [] as unknown[]);
 }
 
 export function getBoardUser(boardId: string, userId: User['id']) {
@@ -62,7 +65,8 @@ export function getBoardUser(boardId: string, userId: User['id']) {
       'SELECT visible FROM account_board where board_id = $1 AND account_id = $2',
       [boardId, userId]
     )
-    .then(getSingleRow);
+    .then(getSingleRow)
+    .catch(() => undefined);
 }
 
 export function getBoards(ownerId: string): Promise<
@@ -78,43 +82,56 @@ export function getBoards(ownerId: string): Promise<
       'SELECT * FROM board LEFT JOIN account_board ON account_board.board_id = board.id where account_id = $1 ORDER BY created_on DESC',
       [ownerId]
     )
-    .then((res) => res.rows);
+    .then((res) => res.rows)
+    .catch(() => []);
 }
 
 export async function createBoard(
   name = 'New board',
   owner: string,
   board: unknown
-): Promise<string> {
-  const result = await client.query(
-    `INSERT INTO board(name, board) VALUES($1, $2) RETURNING id`,
-    [name, JSON.stringify(board)]
-  );
+): Promise<string | Error> {
+  const result = await client
+    .query(`INSERT INTO board(name, board) VALUES($1, $2) RETURNING id`, [
+      name,
+      JSON.stringify(board),
+    ])
+    .catch((e) => console.error(e.stack));
 
-  const boardRow = getSingleRow(result);
+  if (result) {
+    const boardRow = getSingleRow(result);
 
-  await client.query(
-    `INSERT INTO account_board(account_id, board_id, is_owner) VALUES($1, $2, $3)`,
-    [owner, boardRow.id, true]
-  );
+    await client
+      .query(
+        `INSERT INTO account_board(account_id, board_id, is_owner) VALUES($1, $2, $3)`,
+        [owner, boardRow.id, true]
+      )
+      .catch((e) => console.error(e.stack));
 
-  return boardRow.id;
+    return boardRow.id;
+  }
+
+  return new Error('Error creating project');
 }
 
 export async function deleteBoard(boardId: string) {
-  return client.query(`DELETE FROM board WHERE id=$1;`, [boardId]);
+  return client
+    .query(`DELETE FROM board WHERE id=$1;`, [boardId])
+    .catch(() => undefined);
 }
 
 export async function joinBoard(
   userId: string,
   boardId: string
 ): Promise<void> {
-  const result = await client.query(
-    'SELECT * FROM board LEFT JOIN account_board ON account_board.board_id = board.id where account_id = $1 and board_id = $2',
-    [userId, boardId]
-  );
+  const result = await client
+    .query(
+      'SELECT * FROM board LEFT JOIN account_board ON account_board.board_id = board.id where account_id = $1 and board_id = $2',
+      [userId, boardId]
+    )
+    .catch(() => undefined);
 
-  if (!result.rows.length) {
+  if (result && !result.rows.length) {
     await client.query(
       `INSERT INTO account_board(account_id, board_id, is_owner) VALUES($1, $2, $3)`,
       [userId, boardId, false]
@@ -131,10 +148,12 @@ export function updateBoard(id: string, board: CommonState) {
     texts: board.texts,
   };
 
-  return client.query(`UPDATE board set board=$1 where id=$2`, [
-    JSON.stringify(dbState),
-    id,
-  ]);
+  return client
+    .query(`UPDATE board set board=$1 where id=$2`, [
+      JSON.stringify(dbState),
+      id,
+    ])
+    .catch(() => undefined);
 }
 
 export function updateAccountBoard(
@@ -142,24 +161,29 @@ export function updateAccountBoard(
   userId: User['id'],
   visible: boolean
 ) {
-  return client.query(
-    `UPDATE account_board set visible=$1 where account_id=$2 AND board_id = $3`,
-    [visible, userId, boardId]
-  );
+  return client
+    .query(
+      `UPDATE account_board set visible=$1 where account_id=$2 AND board_id = $3`,
+      [visible, userId, boardId]
+    )
+    .catch(() => undefined);
 }
 
 export function updateBoardName(id: string, name: string) {
-  return client.query(`UPDATE board set name=$1 where id=$2`, [name, id]);
+  return client
+    .query(`UPDATE board set name=$1 where id=$2`, [name, id])
+    .catch(() => undefined);
 }
 
 export function getUserByName(name: string) {
   return client
     .query('SELECT * FROM account WHERE name = $1', [name])
-    .then(getSingleRow);
+    .then(getSingleRow)
+    .catch(() => undefined);
 }
 
 export function deleteAccount(ownerId: string): Promise<unknown> {
-  return client.query('DELETE FROM account_board where account_id = $1', [
-    ownerId,
-  ]);
+  return client
+    .query('DELETE FROM account_board where account_id = $1', [ownerId])
+    .catch(() => undefined);
 }

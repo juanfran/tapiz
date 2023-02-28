@@ -83,12 +83,18 @@ app.delete('/remove-account', authGuard, async (req, res) => {
 
 app.get('/board/:boardId', authGuard, async (req, res) => {
   const board = await getBoard(req.params['boardId']);
-  const owners = await getBoardOwners(req.params['boardId']);
 
-  res.json({
-    ...board,
-    owners,
-  });
+  if (!board) {
+    res.status(404);
+    res.send();
+  } else {
+    const owners = await getBoardOwners(req.params['boardId']);
+
+    res.json({
+      ...board,
+      owners,
+    });
+  }
 });
 
 app.get('/boards', authGuard, async (req, res) => {

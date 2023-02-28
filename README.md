@@ -24,11 +24,9 @@ npm run start:api
 
 ## TODO before beta release
 
-- [ ] Page 404
 - [ ] Show if the user is connected to the board
 - [ ] Add emojis to notes
 - [ ] Deprecated RX operators
-- [ ] Api error handling
 - [ ] Code linter
 - [ ] Improve text ux
 
@@ -44,3 +42,4 @@ npm run start:api
 - [ ] Permissions
 - [ ] Refactor toolbar
 - [ ] Export with groups & panels
+- [ ] Split board.module

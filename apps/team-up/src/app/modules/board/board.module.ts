@@ -40,6 +40,7 @@ import { ClickOutsideDirective } from './directives/click-outside.directive';
 import { TextComponent } from './components/text/text.component';
 import { ConfirmComponent } from './components/confirm-action/confirm-actions.component';
 import { pageFeature } from './reducers/page.reducer';
+import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 
 const routes: Routes = [
   {
@@ -56,6 +57,8 @@ const routes: Routes = [
     path: 'login',
     component: LoginComponent,
   },
+  { path: '404', component: PageNotFoundComponent },
+  { path: '**', pathMatch: 'full', component: PageNotFoundComponent },
 ];
 @NgModule({
   imports: [
@@ -63,7 +66,7 @@ const routes: Routes = [
     LetModule,
     PushModule,
     DragDropModule,
-    RouterModule.forChild(routes),
+    RouterModule.forRoot(routes),
     StoreModule.forFeature(boardFeature),
     StoreModule.forFeature(pageFeature),
     EffectsModule.forFeature([BoardEffects, HistoryEffects]),
@@ -98,6 +101,7 @@ const routes: Routes = [
     AutoFocusDirective,
     ClickOutsideDirective,
     ConfirmComponent,
+    PageNotFoundComponent,
   ],
   exports: [BoardComponent],
   providers: [],

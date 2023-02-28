@@ -1,6 +1,5 @@
 import {
   applyDiff,
-  Board,
   BoardCommonActions,
   Diff,
   getDiff,
