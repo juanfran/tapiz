@@ -30,7 +30,6 @@ npm run start:api
 - [ ] Deprecated RX operators
 - [ ] Api error handling
 - [ ] Code linter
-- [ ] Favicon
 - [ ] Improve text ux
 
 ## Post release
