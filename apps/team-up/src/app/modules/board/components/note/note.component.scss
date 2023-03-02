@@ -39,6 +39,9 @@ textarea {
 }
 
 :host {
+  --emoji-width: 27px;
+  --emoji-height: 33px;
+
   background-color: #fdfcdc;
   box-shadow: 0 0 15px 10px rgba(0, 0, 0, 0.15);
   display: block;
@@ -139,5 +142,7 @@ textarea {
   font-family: "Twemoji Mozilla","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","EmojiOne Color","Android Emoji",sans-serif;
   font-size: 1.375rem;
   z-index: -1;
+  width: var(--emoji-width);
+  height: var(--emoji-height);
 }
 

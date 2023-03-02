@@ -5,7 +5,6 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import {
   selectCanvasMode,
-  selectEmoji,
   selectPopupOpen,
   selectPosition,
   selectUserId,

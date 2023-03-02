@@ -15,7 +15,7 @@ import {
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { filter, first, map, take } from 'rxjs/operators';
+import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
@@ -31,6 +31,7 @@ import {
   isUserHighlighted,
   selectEmoji,
   selectFocusId,
+  selectPopupOpen,
   selectUserId,
   selectVoting,
   selectZoom,
@@ -194,6 +195,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         concatLatestFrom(() => this.store.select(selectZoom))
       )
       .subscribe(([emoji, zoom]) => {
+        const { width, height } = this.emojisSize();
         const targetPosition = this.nativeElement.getBoundingClientRect();
         this.store.dispatch(
           BoardActions.patchNode({
@@ -205,8 +207,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
                 {
                   unicode: emoji.unicode,
                   position: {
-                    x: (event.clientX - targetPosition.left) / zoom - 27 / 2,
-                    y: (event.clientY - targetPosition.top) / zoom - 27 / 2,
+                    x: (event.clientX - targetPosition.left) / zoom - width / 2,
+                    y: (event.clientY - targetPosition.top) / zoom - height / 2,
                   },
                 },
               ],
@@ -214,6 +216,58 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
           })
         );
       });
+  }
+
+  @HostListener('contextmenu', ['$event'])
+  public removeEmoji(event: MouseEvent) {
+    this.store
+      .select(selectPopupOpen)
+      .pipe(
+        take(1),
+        filter((it) => it === 'emoji'),
+        switchMap(() => {
+          return this.store.select(selectZoom);
+        })
+      )
+      .subscribe((zoom) => {
+        const targetPosition = this.nativeElement.getBoundingClientRect();
+        const { width, height } = this.emojisSize();
+
+        const clientX = (event.clientX - targetPosition.left) / zoom;
+        const clientY = (event.clientY - targetPosition.top) / zoom;
+
+        const emojis = this.state.get('note').emojis.filter((emoji) => {
+          return !(
+            clientX >= emoji.position.x &&
+            clientX <= emoji.position.x + width &&
+            clientY >= emoji.position.y &&
+            clientY <= emoji.position.y + height
+          );
+        });
+
+        this.store.dispatch(
+          BoardActions.patchNode({
+            nodeType: 'note',
+            node: {
+              id: this.state.get('note').id,
+              emojis: [...emojis],
+            },
+          })
+        );
+      });
+  }
+
+  public emojisSize() {
+    const styles = getComputedStyle(this.nativeElement);
+
+    const width = Number(
+      styles.getPropertyValue('--emoji-width').replace('px', '')
+    );
+    const height = Number(
+      styles.getPropertyValue('--emoji-height').replace('px', '')
+    );
+
+    return { width, height };
   }
 
   public isOwner() {
