@@ -24,7 +24,6 @@ npm run start:api
 
 ## TODO before beta release
 
-- [ ] Improve text ux
 - [ ] Validate inputs (ex: notes without fields, permission delete)
 - [ ] Passport google login
 

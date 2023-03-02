@@ -158,21 +158,6 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
     (this.textarea.nativeElement as HTMLTextAreaElement).focus();
   }
 
-  public selectElementContents(el: HTMLElement) {
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    const sel = window.getSelection();
-
-    if (sel) {
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-  }
-
-  public selectTextarea($event: FocusEvent) {
-    this.selectElementContents($event.target as HTMLElement);
-  }
-
   public startDrag(position: Point) {}
 
   public endDrag() {}
@@ -232,6 +217,10 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
       };
     });
 
+    if (this.state.get('focus')) {
+      this.edit();
+    }
+
     this.state
       .select('node')
       .pipe(
@@ -269,6 +258,10 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
   }
 
   public ngAfterViewInit(): void {
+    if (this.state.get('focus')) {
+      this.focusTextarea();
+    }
+
     if (this.resize) {
       this.moveService
         .listenIncrementalAreaSelector(this.resize.nativeElement)
