@@ -48,10 +48,20 @@
           >{{ board.name }}</a
         >
         <button
+          title="Delete project"
+          *ngIf="board.is_owner"
           (click)="deleteBoard($event, board)"
           mat-icon-button
           matListItemMeta>
           <mat-icon fontIcon="delete"></mat-icon>
+        </button>
+        <button
+          title="Leave project"
+          *ngIf="!board.is_owner"
+          (click)="leaveBoard($event, board)"
+          mat-icon-button
+          matListItemMeta>
+          <mat-icon fontIcon="directions_walk"></mat-icon>
         </button>
       </mat-list-item>
     </mat-nav-list>

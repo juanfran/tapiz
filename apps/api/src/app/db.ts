@@ -79,7 +79,7 @@ export function getBoards(ownerId: string): Promise<
 > {
   return client
     .query(
-      'SELECT * FROM board LEFT JOIN account_board ON account_board.board_id = board.id where account_id = $1 ORDER BY created_on DESC',
+      'SELECT id, is_owner, name FROM board LEFT JOIN account_board ON account_board.board_id = board.id where account_id = $1 ORDER BY created_on DESC',
       [ownerId]
     )
     .then((res) => res.rows)
@@ -117,6 +117,15 @@ export async function createBoard(
 export async function deleteBoard(boardId: string) {
   return client
     .query(`DELETE FROM board WHERE id=$1;`, [boardId])
+    .catch(() => undefined);
+}
+
+export async function leaveBoard(userId: string, boardId: string) {
+  return client
+    .query(`DELETE FROM account_board WHERE board_id=$1 AND account_id=$2;`, [
+      boardId,
+      userId,
+    ])
     .catch(() => undefined);
 }
 

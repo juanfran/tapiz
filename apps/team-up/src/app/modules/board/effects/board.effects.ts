@@ -203,6 +203,20 @@ export class BoardEffects {
     }
   );
 
+  public leaveBoard$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(PageActions.leaveBoard),
+        exhaustMap((action) => {
+          return this.boardApiService.leaveBoard(action.id);
+        })
+      );
+    },
+    {
+      dispatch: false,
+    }
+  );
+
   public fetchBoards$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.fetchBoards),

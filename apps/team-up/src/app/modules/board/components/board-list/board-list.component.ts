@@ -64,6 +64,12 @@ export class BoardListComponent implements OnInit {
     this.store.dispatch(PageActions.removeBoard({ id: board.id }));
   }
 
+  public leaveBoard(event: Event, board: Board) {
+    event.stopPropagation();
+
+    this.store.dispatch(PageActions.leaveBoard({ id: board.id }));
+  }
+
   public deleteAccount() {
     const dialogRef = this.dialog.open(ConfirmComponent, {
       data: {

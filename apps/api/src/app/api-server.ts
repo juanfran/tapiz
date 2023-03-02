@@ -8,6 +8,7 @@ import {
   getBoardOwners,
   deleteBoard,
   deleteAccount,
+  leaveBoard,
 } from './db';
 import * as cookieParser from 'cookie-parser';
 
@@ -67,6 +68,14 @@ app.post('/new', authGuard, async (req, res) => {
 
 app.delete('/delete/:boardId', authGuard, async (req, res) => {
   await deleteBoard(req.params['boardId']);
+
+  res.json({
+    success: true,
+  });
+});
+
+app.delete('/leave/:boardId', authGuard, async (req, res) => {
+  await leaveBoard(req.user.sub, req.params['boardId']);
 
   res.json({
     success: true,

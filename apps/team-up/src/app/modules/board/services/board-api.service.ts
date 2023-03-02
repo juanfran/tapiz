@@ -30,6 +30,10 @@ export class BoardApiService {
     return this.http.delete(`http://localhost:8000/delete/${boardId}`);
   }
 
+  public leaveBoard(boardId: Board['id']) {
+    return this.http.delete(`http://localhost:8000/leave/${boardId}`);
+  }
+
   public removeAccount() {
     return this.http.delete('http://localhost:8000/remove-account');
   }

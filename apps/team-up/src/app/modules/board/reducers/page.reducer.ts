@@ -198,13 +198,17 @@ const reducer = createReducer(
     }
     return state;
   }),
-  on(PageActions.removeBoard, (state, { id }): PageState => {
-    state.boards = state.boards.filter((board) => {
-      return board.id !== id;
-    });
+  on(
+    PageActions.removeBoard,
+    PageActions.leaveBoard,
+    (state, { id }): PageState => {
+      state.boards = state.boards.filter((board) => {
+        return board.id !== id;
+      });
 
-    return state;
-  }),
+      return state;
+    }
+  ),
   on(PageActions.selectEmoji, (state, { emoji }): PageState => {
     state.boardCursor = 'crosshair';
     state.emoji = emoji;
