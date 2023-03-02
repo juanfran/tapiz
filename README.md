@@ -27,6 +27,8 @@ npm run start:api
 - [ ] Improve text ux
 - [ ] Validate inputs (ex: notes withous fields)
 - [ ] Resize image
+- [ ] Leave board
+- [ ] Passport google login
 
 ## Post release
 
@@ -44,3 +46,4 @@ npm run start:api
 - [ ] Split board.module
 - [ ] Deprecated RX operators
 - [ ] Code linter
+- [ ] Board screenshot
