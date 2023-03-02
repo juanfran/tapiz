@@ -10,6 +10,7 @@ import {
   AfterViewInit,
   ApplicationRef,
   HostListener,
+  ChangeDetectorRef,
 } from '@angular/core';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
@@ -21,13 +22,17 @@ import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
 import { Image } from '@team-up/board-commons';
 import { MoveService } from '../../services/move.service';
-import { selectFocusId } from '../../selectors/page.selectors';
+import {
+  selectCanvasMode,
+  selectFocusId,
+} from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
 
 interface State {
   image: Image;
   draggable: boolean;
   focus: boolean;
+  mode: string;
 }
 @UntilDestroy()
 @Component({
@@ -53,6 +58,10 @@ export class ImageComponent implements OnInit, Draggable, AfterViewInit {
     return this.state.get('image')?.height ?? '0';
   }
 
+  @HostBinding('class') get mode() {
+    return this.state.get('mode');
+  }
+
   public readonly image$ = this.state.select('image');
 
   @ViewChild('resize') resize!: ElementRef;
@@ -63,7 +72,8 @@ export class ImageComponent implements OnInit, Draggable, AfterViewInit {
     private store: Store,
     private boardDragDirective: BoardDragDirective,
     private moveService: MoveService,
-    private appRef: ApplicationRef
+    private appRef: ApplicationRef,
+    private cd: ChangeDetectorRef
   ) {
     this.state.set({ draggable: true });
   }
@@ -125,11 +135,14 @@ export class ImageComponent implements OnInit, Draggable, AfterViewInit {
   public ngOnInit() {
     this.boardDragDirective.setHost(this);
 
+    this.state.connect('mode', this.store.select(selectCanvasMode));
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
       return {
         focus: focusId === state.image.id,
       };
     });
+
+    this.state.hold(this.state.select('mode'), () => this.cd.markForCheck());
 
     this.image$
       .pipe(

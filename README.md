@@ -26,7 +26,6 @@ npm run start:api
 
 - [ ] Improve text ux
 - [ ] Validate inputs (ex: notes without fields, permission delete)
-- [ ] Resize image
 - [ ] Passport google login
 
 ## Post release

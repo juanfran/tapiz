@@ -3,6 +3,11 @@
   position: absolute;
   user-select: none;
   z-index: 1;
+
+  &.composeMode:hover {
+    cursor: pointer;
+    outline: 3px dotted var(--primary-color);
+  }
 }
 
 img {
@@ -20,3 +25,4 @@ img {
   right: 0;
   width: 50px;
 }
+
