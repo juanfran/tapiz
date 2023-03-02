@@ -5,7 +5,7 @@
   z-index: 1;
 
   &.composeMode:hover {
-    cursor: pointer;
+    cursor: grab;
     outline: 3px dotted var(--primary-color);
   }
 }
