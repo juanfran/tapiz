@@ -44,3 +44,4 @@ npm run start:api
 - [ ] Deprecated RX operators
 - [ ] Code linter
 - [ ] Board screenshot
+- [ ] More login options
