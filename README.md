@@ -25,7 +25,8 @@ npm run start:api
 ## TODO before beta release
 
 - [ ] Validate inputs (ex: notes without fields, permission delete)
-- [ ] Passport google login
+- [ ] Upgrade & satisfies ts
+- [ ] config front/back
 
 ## Post release
 
