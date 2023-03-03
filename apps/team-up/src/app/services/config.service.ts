@@ -27,7 +27,7 @@ export class ConfigService {
       catchError(() => {
         this.config = {
           api: 'http://localhost:3000',
-          ws: 'ws://localhost:300',
+          ws: 'ws://localhost:3000',
           defaultLanguage: 'en',
           GoogleClientId: '',
         };

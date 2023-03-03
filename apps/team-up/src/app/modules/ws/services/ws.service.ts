@@ -1,6 +1,6 @@
+import { ConfigService } from '@/app/services/config.service';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Actions } from '@ngrx/effects';
 import { wsMessage, wsOpen } from '../ws.actions';
 
 @Injectable({
@@ -9,10 +9,10 @@ import { wsMessage, wsOpen } from '../ws.actions';
 export class WsService {
   private ws!: WebSocket;
 
-  constructor(private store: Store, private actions$: Actions) {}
+  constructor(private store: Store, private configService: ConfigService) {}
 
   public listen() {
-    this.ws = new WebSocket('ws://localhost:8080');
+    this.ws = new WebSocket(`${this.configService.config.ws}`);
 
     this.ws.addEventListener('open', () => {
       this.store.dispatch(wsOpen());
