@@ -1,6 +1,5 @@
 export interface Config {
-  api: string;
-  ws: string;
-  defaultLanguage: 'en';
-  GoogleClientId: string;
+  API: string;
+  WS: string;
+  GOOGLE_CLIENT_ID: string;
 }

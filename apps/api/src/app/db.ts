@@ -8,11 +8,11 @@ export function startDB() {
   return new Promise((resolve) => {
     // move to env variables https://node-postgres.com/features/connecting
     const pool = new Pool({
-      database: Config.db.database,
-      host: Config.db.host,
-      password: Config.db.password,
-      port: Config.db.port,
-      user: Config.db.user,
+      database: Config.DB_DATABASE,
+      host: Config.DB_HOST,
+      password: Config.DB_PASSWORD,
+      port: Number(Config.DB_PORT),
+      user: Config.DB_USER,
     });
 
     pool.connect((err, _client) => {

@@ -12,7 +12,7 @@ export class WsService {
   constructor(private store: Store, private configService: ConfigService) {}
 
   public listen() {
-    this.ws = new WebSocket(`${this.configService.config.ws}`);
+    this.ws = new WebSocket(`${this.configService.config.WS}`);
 
     this.ws.addEventListener('open', () => {
       this.store.dispatch(wsOpen());

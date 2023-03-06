@@ -10,12 +10,12 @@ export class BoardApiService {
   constructor(private http: HttpClient, private configService: ConfigService) {}
 
   public fetchBoards() {
-    return this.http.get<Board[]>(`${this.configService.config.api}/boards`);
+    return this.http.get<Board[]>(`${this.configService.config.API}/boards`);
   }
 
   public createBoard(board: Board['name']) {
     return this.http.post<{ id: string }>(
-      `${this.configService.config.api}/new`,
+      `${this.configService.config.API}/new`,
       {
         name: board,
       }
@@ -27,22 +27,22 @@ export class BoardApiService {
       id: string;
       owners: string[];
       name: string;
-    }>(`${this.configService.config.api}/board/${boardId}`);
+    }>(`${this.configService.config.API}/board/${boardId}`);
   }
 
   public removeBoard(boardId: Board['id']) {
     return this.http.delete(
-      `${this.configService.config.api}/delete/${boardId}`
+      `${this.configService.config.API}/delete/${boardId}`
     );
   }
 
   public leaveBoard(boardId: Board['id']) {
     return this.http.delete(
-      `${this.configService.config.api}/leave/${boardId}`
+      `${this.configService.config.API}/leave/${boardId}`
     );
   }
 
   public removeAccount() {
-    return this.http.delete(`${this.configService.config.api}/remove-account`);
+    return this.http.delete(`${this.configService.config.API}/remove-account`);
   }
 }

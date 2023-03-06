@@ -24,7 +24,7 @@ export class LoginComponent implements AfterViewInit {
     private store: Store,
     private configService: ConfigService
   ) {}
-  public clientId = this.configService.config.GoogleClientId;
+  public clientId = this.configService.config.GOOGLE_CLIENT_ID;
 
   public ngAfterViewInit() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

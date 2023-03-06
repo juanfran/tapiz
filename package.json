@@ -3,18 +3,17 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "config-files": "cp apps/api/src/app/config.ts.example apps/api/src/app/config.ts && cp apps/team-up/src/environments/environment.ts.example apps/team-up/src/environments/environment.ts",
+    "config": "ts-node scripts/setup-env.ts",
     "ng": "nx",
     "postinstall": "node ./decorate-angular-cli.js",
-    "start": "nx serve team-up",
+    "start": "npm run config && nx serve team-up",
     "start:api": "nx serve api",
-    "build": "nx build",
+    "build": "npm run config && nx build",
     "test": "nx test",
     "start:docker": "cd docker && docker-compose up -d",
     "stop:docker": "cd docker && docker-compose down",
     "start:docker:clean": "cd docker && docker-compose up -d --force-recreate --build",
-    "regenerate:db": "node apps/api/regenerate.js",
-    "regenerate": "npx tsc apps/api/regenerate.ts && node apps/api/regenerate.js"
+    "regenerate": "npx ts-node apps/api/regenerate.ts"
   },
   "private": true,
   "dependencies": {
@@ -86,6 +85,7 @@
     "@typescript-eslint/eslint-plugin": "5.47.1",
     "@typescript-eslint/parser": "5.47.1",
     "cypress": "^9.1.0",
+    "dotenv": "^16.0.3",
     "eslint": "~8.15.0",
     "eslint-config-prettier": "8.1.0",
     "eslint-plugin-cypress": "^2.10.3",

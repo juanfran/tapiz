@@ -26,10 +26,9 @@ export class ConfigService {
       }),
       catchError(() => {
         this.config = {
-          api: 'http://localhost:3000',
-          ws: 'ws://localhost:3000',
-          defaultLanguage: 'en',
-          GoogleClientId: '',
+          API: 'http://localhost:3000',
+          WS: 'ws://localhost:3000',
+          GOOGLE_CLIENT_ID: '',
         };
 
         return of(false);

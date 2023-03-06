@@ -40,8 +40,6 @@ Thumbs.db
 
 .angular
 
-
 docker/postgres_data/
 apps/team-up/src/assets/config.json
-apps/api/src/app/config.ts
-apps/api/src/app/config.js
+.env

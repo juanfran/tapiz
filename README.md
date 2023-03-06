@@ -7,10 +7,8 @@ TeamUp is a web based colaborative board to helps teams in their online meetings
 ## Setup
 
 ```console
-npm run config-files
-
-# Edit apps/api/src/app/config.ts
-
+copy .env.example to .env
+Edit .env
 npm run start:docker
 npm run regenerate:db
 ```
@@ -25,7 +23,8 @@ npm run start:api
 ## TODO before beta release
 
 - [ ] Validate inputs (ex: notes without fields, permission delete)
-- [ ] config front/back
+- [ ] docker config
+- [ ] serverless ws
 
 ## Post release
 
