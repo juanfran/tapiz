@@ -10,9 +10,9 @@
     "start:api": "nx serve api",
     "build": "npm run config && nx build",
     "test": "nx test",
-    "start:docker": "cd docker && docker-compose up -d",
-    "stop:docker": "cd docker && docker-compose down",
-    "start:docker:clean": "cd docker && docker-compose up -d --force-recreate --build",
+    "start:docker": "cd docker && docker compose --env-file=../.env up -d",
+    "stop:docker": "cd docker && docker compose --env-file=../.env down",
+    "start:docker:clean": "cd docker && docker compose --env-file=../.env --force-recreate --build up -d",
     "regenerate": "npx ts-node apps/api/regenerate.ts"
   },
   "private": true,
