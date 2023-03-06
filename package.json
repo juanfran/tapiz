@@ -12,7 +12,7 @@
     "test": "nx test",
     "start:docker": "cd docker && docker compose --env-file=../.env up -d",
     "stop:docker": "cd docker && docker compose --env-file=../.env down",
-    "start:docker:clean": "cd docker && docker compose --env-file=../.env --force-recreate --build up -d",
+    "start:docker:clean": "cd docker && docker compose --env-file=../.env up -d --force-recreate --build",
     "regenerate": "npx ts-node apps/api/regenerate.ts"
   },
   "private": true,

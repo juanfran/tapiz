@@ -11,7 +11,7 @@ export function startDB() {
       database: Config.DB_DATABASE,
       host: Config.DB_HOST,
       password: Config.DB_PASSWORD,
-      port: Number(Config.DB_PORT),
+      port: Number(Config.DB_PORT_HOST),
       user: Config.DB_USER,
     });
 

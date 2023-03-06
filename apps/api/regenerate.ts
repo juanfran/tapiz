@@ -1,13 +1,14 @@
 import { Client } from 'pg';
-import Config from './src/app/config';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 async function createDatabase() {
   const client = new Client({
-    database: Config.DB_DATABASE,
-    host: Config.DB_HOST,
-    password: Config.DB_PASSWORD,
-    port: Number(Config.DB_PORT),
-    user: Config.DB_USER,
+    database: process.env['POSTGRES_DB'],
+    host: process.env['DB_HOST'],
+    password: process.env['POSTGRES_PASSWORD'],
+    port: Number(process.env['DB_PORT_HOST']),
+    user: process.env['POSTGRES_USER'],
   });
 
   client.connect();

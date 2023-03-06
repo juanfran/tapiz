@@ -1,6 +1,7 @@
 import * as cors from 'cors';
 import * as express from 'express';
 import { verifyGoogle } from './auth';
+import Config from './config';
 import {
   createBoard,
   getBoards,
@@ -13,7 +14,7 @@ import {
 import * as cookieParser from 'cookie-parser';
 
 const app = express();
-const port = 8000;
+const port = Config.API_SERVER_PORT;
 
 app.use(express.json());
 app.use(cookieParser());

@@ -6,6 +6,7 @@ import * as db from './db';
 import { Request } from 'express';
 import * as cookie from 'cookie';
 import { verifyGoogle } from './auth';
+import Config from './config';
 
 export class Server {
   private wss!: WebSocket.Server;
@@ -14,7 +15,7 @@ export class Server {
   public state: Record<string, CommonState> = {};
 
   public start() {
-    this.wss = new WebSocket.Server({ port: 8080 });
+    this.wss = new WebSocket.Server({ port: Config.WS_SERVER_PORT });
     this.wss.on('connection', this.connection.bind(this));
   }
 

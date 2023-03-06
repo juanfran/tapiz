@@ -23,7 +23,6 @@ npm run start:api
 ## TODO before beta release
 
 - [ ] Validate inputs (ex: notes without fields, permission delete)
-- [ ] serverless ws
 
 ## Post release
 
