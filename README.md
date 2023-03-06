@@ -25,7 +25,6 @@ npm run start:api
 ## TODO before beta release
 
 - [ ] Validate inputs (ex: notes without fields, permission delete)
-- [ ] Upgrade & satisfies ts
 - [ ] config front/back
 
 ## Post release
