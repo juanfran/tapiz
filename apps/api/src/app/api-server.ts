@@ -12,8 +12,9 @@ import {
   leaveBoard,
 } from './db';
 import * as cookieParser from 'cookie-parser';
+import { body, validationResult } from 'express-validator';
 
-const app = express();
+export const app = express();
 const port = Config.API_SERVER_PORT;
 
 app.use(express.json());
@@ -52,20 +53,33 @@ async function authGuard(
   }
 }
 
-app.post('/new', authGuard, async (req, res) => {
-  const name = req.body.name;
-  const newBoardId = await createBoard(name, req.user.sub, {
-    notes: [],
-    groups: [],
-    panels: [],
-    images: [],
-    texts: [],
-  });
+app.post(
+  '/new',
+  authGuard,
+  body('name').isLength({ min: 1, max: 255 }),
+  async (req, res) => {
+    const errors = validationResult(req);
 
-  res.json({
-    id: newBoardId,
-  });
-});
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
+
+      return;
+    }
+
+    const name = req.body.name;
+    const newBoardId = await createBoard(name, req.user.sub, {
+      notes: [],
+      groups: [],
+      panels: [],
+      images: [],
+      texts: [],
+    });
+
+    res.json({
+      id: newBoardId,
+    });
+  }
+);
 
 app.delete('/delete/:boardId', authGuard, async (req, res) => {
   await deleteBoard(req.params['boardId']);
