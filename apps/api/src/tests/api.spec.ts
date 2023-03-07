@@ -75,4 +75,8 @@ describe('Api', () => {
       expect(resBoard.body.owners).toEqual([userId]);
     });
   });
+
+  it('board not found', (done) => {
+    request(app).get('/boards/xxx').expect(404, done);
+  });
 });
