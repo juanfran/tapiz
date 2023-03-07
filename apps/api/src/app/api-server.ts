@@ -82,19 +82,34 @@ app.post(
 );
 
 app.delete('/delete/:boardId', authGuard, async (req, res) => {
-  await deleteBoard(req.params['boardId']);
+  const owners = await getBoardOwners(req.params['boardId']);
 
-  res.json({
-    success: true,
-  });
+  if (owners.includes(req.user.sub)) {
+    await deleteBoard(req.params['boardId']);
+
+    res.json({
+      success: true,
+    });
+  } else {
+    res.status(400).json({
+      errors: ['no permissions'],
+    });
+  }
 });
 
 app.delete('/leave/:boardId', authGuard, async (req, res) => {
-  await leaveBoard(req.user.sub, req.params['boardId']);
+  const owners = await getBoardOwners(req.params['boardId']);
 
-  res.json({
-    success: true,
-  });
+  if (owners.includes(req.user.sub)) {
+    res.status(400).json({
+      errors: ['owner can not leave the board'],
+    });
+  } else {
+    await leaveBoard(req.user.sub, req.params['boardId']);
+    res.json({
+      success: true,
+    });
+  }
 });
 
 app.delete('/remove-account', authGuard, async (req, res) => {
@@ -130,7 +145,6 @@ app.get('/boards', authGuard, async (req, res) => {
 app.get('/user', authGuard, async (req, res) => {
   res.json({
     name: req.user.name,
-    picture: req.user.picture,
     sub: req.user.sub,
   });
 });

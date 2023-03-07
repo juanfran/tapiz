@@ -23,6 +23,7 @@ npm run start:api
 ## TODO before beta release
 
 - [ ] Validate inputs (ex: notes without fields, permission delete)
+- npm run test -- --detectOpenHandles pgql disconnect¿
 
 ## Post release
 
