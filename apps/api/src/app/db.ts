@@ -3,26 +3,20 @@ import { Pool, PoolClient, QueryResult } from 'pg';
 import Config from './config';
 
 export let client: PoolClient;
+export let pool: Pool | undefined;
 
-export function startDB() {
-  return new Promise((resolve) => {
-    // move to env variables https://node-postgres.com/features/connecting
-    const pool = new Pool({
-      database: Config.DB_DATABASE,
-      host: Config.DB_HOST,
-      password: Config.DB_PASSWORD,
-      port: Number(Config.DB_PORT_HOST),
-      user: Config.DB_USER,
-    });
-
-    pool.connect((err, _client) => {
-      if (err) throw err;
-
-      client = _client;
-
-      resolve(client);
-    });
+export async function startDB() {
+  pool = new Pool({
+    database: Config.DB_DATABASE,
+    host: Config.DB_HOST,
+    password: Config.DB_PASSWORD,
+    port: Number(Config.DB_PORT_HOST),
+    user: Config.DB_USER,
   });
+
+  client = await pool.connect();
+
+  return client;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
