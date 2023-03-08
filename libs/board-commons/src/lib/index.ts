@@ -14,3 +14,4 @@ export * from './models/node.model';
 export * from './models/text.model';
 export * from './state-tools';
 export * from './board-common-actions';
+export * from './validators/index';

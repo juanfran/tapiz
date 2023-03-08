@@ -20,10 +20,6 @@ npm run start
 npm run start:api
 ```
 
-## TODO before beta release
-
-- [ ] Validate inputs (ex: notes without fields, permission delete)
-
 ## Post release
 
 - [ ] Multilanguage
@@ -42,3 +38,4 @@ npm run start:api
 - [ ] Code linter
 - [ ] Board screenshot
 - [ ] More login options
+- [ ] Board Size limit

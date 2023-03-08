@@ -31,6 +31,7 @@ function getSingleRow(res: QueryResult<any>) {
 export function getBoard(boardId: string): Promise<
   | {
       id: string;
+      name: string;
       owner: string;
       board: CommonState;
       created_on: string;
@@ -53,7 +54,12 @@ export function getBoardOwners(boardId: string) {
     .catch(() => [] as unknown[]);
 }
 
-export function getBoardUser(boardId: string, userId: User['id']) {
+export function getBoardUser(
+  boardId: string,
+  userId: User['id']
+): Promise<{
+  visible: boolean;
+}> {
   return client
     .query(
       'SELECT visible FROM account_board where board_id = $1 AND account_id = $2',

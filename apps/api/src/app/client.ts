@@ -3,11 +3,12 @@ import {
   BoardCommonActions,
   Diff,
   getDiff,
+  Validators,
 } from '@team-up/board-commons';
 import * as WebSocket from 'ws';
 import { Server } from './server';
 import { joinBoard, getBoardOwners } from './db';
-import { checkPermissionsAction } from './permissions';
+import { validation } from './validation';
 
 export class Client {
   public boardId!: string;
@@ -37,18 +38,34 @@ export class Client {
   public incomingMessage(messageString: string) {
     const message = this.parseMessage(messageString);
 
-    if ('action' in message) {
-      if (message.action === 'join') {
-        this.join(message);
-      }
-    } else {
-      const state = this.server.getBoard(this.boardId);
+    if ('action' in message && message.action === 'join') {
+      this.join(message);
+    } else if (
+      BoardCommonActions.setBoardName === message.type &&
+      this.isOwner
+    ) {
+      const action = Validators.changeBoardName.safeParse(message);
 
-      if (!checkPermissionsAction(state, message, this.id)) {
+      if (!action.success) {
         return;
       }
 
-      const diffResult = getDiff(message, this.id);
+      this.server.updateBoardName(this.boardId, action.data.name);
+      this.server.sendAll(this.boardId, action.data, [this]);
+    } else if ('type' in message) {
+      const state = this.server.getBoard(this.boardId);
+
+      if (!state) {
+        return;
+      }
+
+      const validationResult = validation(message, state, this.id);
+
+      if (!validationResult) {
+        return;
+      }
+
+      const diffResult = getDiff(validationResult, this.id);
 
       if (diffResult) {
         this.updateStateWithDiff(diffResult);
@@ -70,12 +87,6 @@ export class Client {
         if (BoardCommonActions.setVisible === message.type) {
           this.server.setUserVisibility(this.boardId, this.id, message.visible);
         }
-      } else if (
-        BoardCommonActions.setBoardName === message.type &&
-        this.isOwner
-      ) {
-        this.server.updateBoardName(this.boardId, message.name);
-        this.server.sendAll(this.boardId, message, [this]);
       }
     }
   }
@@ -123,61 +134,69 @@ export class Client {
 
     joinBoard(this.id, this.boardId);
 
-    await this.server.createBoard(this.boardId);
-    const boardUser = await this.server.getBoardUser(this.boardId, this.id);
+    try {
+      await this.server.createBoard(this.boardId);
+      const boardUser = await this.server.getBoardUser(this.boardId, this.id);
 
-    const user = {
-      name: this.username,
-      id: this.id,
-      visible: boardUser?.visible ?? false,
-      connected: true,
-      cursor: null,
-    };
+      const user = {
+        name: this.username,
+        id: this.id,
+        visible: boardUser?.visible ?? false,
+        connected: true,
+        cursor: null,
+      };
 
-    this.server.userJoin(this.boardId, user);
+      this.server.userJoin(this.boardId, user);
 
-    const board = this.server.getBoard(this.boardId);
+      const board = this.server.getBoard(this.boardId);
 
-    const users = board.users.map((it) => {
-      if (it.id === user.id) {
-        return user;
+      if (!board) {
+        return;
       }
 
-      return it;
-    });
+      const users = board.users.map((it) => {
+        if (it.id === user.id) {
+          return user;
+        }
 
-    const owners = await getBoardOwners(this.boardId);
+        return it;
+      });
 
-    this.isOwner = owners.includes(this.id);
+      const owners = await getBoardOwners(this.boardId);
 
-    const diff: Diff = {
-      set: {
-        note: board.notes,
-        user: users,
-        group: board.groups,
-        panel: board.panels,
-        image: board.images,
-        text: board.texts,
-      },
-    };
+      this.isOwner = owners.includes(this.id);
 
-    this.server.sendAll(
-      this.boardId,
-      {
-        type: BoardCommonActions.wsSetState,
-        data: {
-          edit: {
-            user: [user],
-          },
+      const diff: Diff = {
+        set: {
+          note: board.notes,
+          user: users,
+          group: board.groups,
+          panel: board.panels,
+          image: board.images,
+          text: board.texts,
         },
-      } as Diff,
-      [this]
-    );
+      };
 
-    this.send({
-      type: BoardCommonActions.wsSetState,
-      data: diff,
-    });
+      this.server.sendAll(
+        this.boardId,
+        {
+          type: BoardCommonActions.wsSetState,
+          data: {
+            edit: {
+              user: [user],
+            },
+          },
+        } as Diff,
+        [this]
+      );
+
+      this.send({
+        type: BoardCommonActions.wsSetState,
+        data: diff,
+      });
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   public send(msg: unknown) {
@@ -195,7 +214,13 @@ export class Client {
   }
 
   private parseMessage(messageString: string) {
-    return JSON.parse(messageString);
+    try {
+      return JSON.parse(messageString);
+    } catch (e) {
+      console.error(e);
+
+      return {};
+    }
   }
 
   private updateStateWithDiff(diff: Diff) {

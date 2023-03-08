@@ -7,6 +7,7 @@ import { Diff, DiffAdd, DiffEdit, DiffRemove } from './models/diff.model';
 import { BoardCommonActions } from './board-common-actions';
 import { NodeType } from './models/node.model';
 
+// TODO: type safe
 export const getDiff = (action: any, userId?: string): Diff | null => {
   if (action.type === BoardCommonActions.patchNode) {
     return {
@@ -17,7 +18,14 @@ export const getDiff = (action: any, userId?: string): Diff | null => {
   } else if (action.type === BoardCommonActions.addNode) {
     return {
       add: {
-        [action.nodeType]: [action.node],
+        [action.nodeType]: [
+          {
+            ...action.node,
+            votes: 0,
+            emojis: [],
+            ownerId: userId ?? action.node.ownerId,
+          },
+        ],
       },
     };
   } else if (action.type === BoardCommonActions.removeNode) {
@@ -43,7 +51,7 @@ export const getDiff = (action: any, userId?: string): Diff | null => {
         user: [
           {
             id: userId,
-            visible: action.visible,
+            visible: !!action.visible,
           },
         ],
       },

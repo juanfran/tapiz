@@ -33,6 +33,36 @@ interface TextPatch {
   nodeType: 'text';
 }
 
+interface NoteAdd {
+  node: Note;
+  nodeType: 'note';
+  history?: boolean;
+}
+
+interface GroupAdd {
+  node: Group;
+  nodeType: 'group';
+  history?: boolean;
+}
+
+interface PanelAdd {
+  node: Panel;
+  nodeType: 'panel';
+  history?: boolean;
+}
+
+interface TextAdd {
+  node: Text;
+  nodeType: 'text';
+  history?: boolean;
+}
+
+interface ImageAdd {
+  node: Image;
+  nodeType: 'image';
+  history?: boolean;
+}
+
 export type PatchNode =
   | NotePatch
   | PanelPatch
@@ -40,56 +70,47 @@ export type PatchNode =
   | ImagePatch
   | TextPatch;
 
-export type AddNode =
-  | {
-      node: Note;
-      nodeType: 'note';
-      history?: boolean;
-    }
-  | {
-      node: Group;
-      nodeType: 'group';
-      history?: boolean;
-    }
-  | {
-      node: Panel;
-      nodeType: 'panel';
-      history?: boolean;
-    }
-  | {
-      node: Text;
-      nodeType: 'text';
-      history?: boolean;
-    }
-  | {
-      node: Image;
-      nodeType: 'image';
-      history?: boolean;
-    };
+export type AddNode = NoteAdd | GroupAdd | PanelAdd | TextAdd | ImageAdd;
+
+interface NoteRemove {
+  node: Note;
+  nodeType: 'note';
+  history?: boolean;
+}
+
+interface GroupRemove {
+  node: Group;
+  nodeType: 'group';
+  history?: boolean;
+}
+
+interface PanelRemove {
+  node: Panel;
+  nodeType: 'panel';
+  history?: boolean;
+}
+
+interface TextRemove {
+  node: Text;
+  nodeType: 'text';
+  history?: boolean;
+}
+
+interface ImageRemove {
+  node: Image;
+  nodeType: 'image';
+  history?: boolean;
+}
 
 export type RemoveNode =
-  | {
-      node: Note;
-      nodeType: 'note';
-      history?: boolean;
-    }
-  | {
-      node: Group;
-      nodeType: 'group';
-      history?: boolean;
-    }
-  | {
-      node: Panel;
-      nodeType: 'panel';
-      history?: boolean;
-    }
-  | {
-      node: Text;
-      nodeType: 'text';
-      history?: boolean;
-    }
-  | {
-      node: Image;
-      nodeType: 'image';
-      history?: boolean;
-    };
+  | NoteRemove
+  | GroupRemove
+  | PanelRemove
+  | TextRemove
+  | ImageRemove;
+
+export interface NodeAction {
+  type: string;
+  nodeType: NodeType;
+  node: unknown;
+}

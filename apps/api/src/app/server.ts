@@ -69,7 +69,7 @@ export class Server {
     }
   }
 
-  public getBoard(boardId: string) {
+  public getBoard(boardId: string): CommonState | undefined {
     return this.state[boardId];
   }
 
