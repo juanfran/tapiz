@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const note = z.object({
-  text: z.string().max(1000),
+  text: z.string().max(140),
   votes: z.number().int().nonnegative().safe(),
   position: z.object({
     x: z.number().safe(),

@@ -57,7 +57,10 @@ export const validation = (
           (it) => it.id === validatorResult.data.id
         );
 
-        if (node?.ownerId !== userId) {
+        if (
+          action.type === BoardCommonActions.patchNode &&
+          node?.ownerId !== userId
+        ) {
           return false;
         }
 
