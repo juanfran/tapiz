@@ -5,6 +5,7 @@ import * as groupValidators from './group.validator';
 import * as imageValidators from './image.validator';
 import * as cursorValidators from './cursor.validator';
 import * as textValidators from './text.validator';
+import * as vectorValidators from './vector.validator';
 
 export const Validators = {
   ...changeBoardNameValidators,
@@ -14,4 +15,5 @@ export const Validators = {
   ...imageValidators,
   ...cursorValidators,
   ...textValidators,
+  ...vectorValidators,
 };

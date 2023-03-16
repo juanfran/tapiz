@@ -73,6 +73,7 @@ app.post(
       panels: [],
       images: [],
       texts: [],
+      vectors: [],
     });
 
     res.json({

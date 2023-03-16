@@ -155,6 +155,7 @@ export function updateBoard(id: string, board: CommonState) {
     panels: board.panels,
     images: board.images,
     texts: board.texts,
+    vectors: board.vectors,
   };
 
   return client

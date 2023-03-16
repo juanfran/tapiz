@@ -10,7 +10,7 @@ import {
   getBoard,
   updateBoard,
 } from '../app/db';
-import { BoardCommonActions, CommonState } from '@team-up/board-commons';
+import { BoardCommonActions } from '@team-up/board-commons';
 
 const userId = randUuid();
 const initBoard = {
@@ -20,6 +20,7 @@ const initBoard = {
   images: [],
   texts: [],
   users: [],
+  vectors: [],
 };
 
 const users: Record<string, string> = {

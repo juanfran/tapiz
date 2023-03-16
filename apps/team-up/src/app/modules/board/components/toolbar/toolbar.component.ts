@@ -19,6 +19,8 @@ import { v4 } from 'uuid';
 import { Subscription, zip } from 'rxjs';
 import 'emoji-picker-element';
 import { EmojiClickEvent, NativeEmoji } from 'emoji-picker-element/shared';
+import { MatDialog } from '@angular/material/dialog';
+import { CocomaterialComponent } from '../cocomaterial/cocomaterial.component';
 
 interface State {
   visible: boolean;
@@ -44,7 +46,8 @@ export class ToolbarComponent {
     public state: RxState<State>,
     private store: Store,
     private boardMoveService: BoardMoveService,
-    private notesService: NotesService
+    private notesService: NotesService,
+    private dialog: MatDialog
   ) {
     this.state.connect('visible', this.store.select(selectVisible));
     this.state.connect('popupOpen', this.store.select(selectPopupOpen));
@@ -152,6 +155,26 @@ export class ToolbarComponent {
     if (this.state.get('popupOpen') !== 'vote') {
       this.popupOpen('vote');
       this.store.dispatch(PageActions.readyToVote());
+    } else {
+      this.popupOpen('');
+    }
+  }
+
+  public cocomaterial() {
+    if (this.state.get('popupOpen') !== 'cocomaterial') {
+      this.popupOpen('cocomaterial');
+
+      const dialogRef = this.dialog.open(CocomaterialComponent, {
+        height: '900px',
+        width: '800px',
+        enterAnimationDuration: 0,
+        exitAnimationDuration: 0,
+        autoFocus: false,
+      });
+
+      dialogRef.afterClosed().subscribe(() => {
+        this.popupOpen('');
+      });
     } else {
       this.popupOpen('');
     }

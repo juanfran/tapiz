@@ -41,6 +41,8 @@ import { TextComponent } from './components/text/text.component';
 import { ConfirmComponent } from './components/confirm-action/confirm-actions.component';
 import { pageFeature } from './reducers/page.reducer';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
+import { PageEffects } from './effects/page.effects';
+import { VectorComponent } from './components/vector/vector.component';
 
 const routes: Routes = [
   {
@@ -69,7 +71,7 @@ const routes: Routes = [
     RouterModule.forRoot(routes),
     StoreModule.forFeature(boardFeature),
     StoreModule.forFeature(pageFeature),
-    EffectsModule.forFeature([BoardEffects, HistoryEffects]),
+    EffectsModule.forFeature([BoardEffects, HistoryEffects, PageEffects]),
     MatSliderModule,
     MatDialogModule,
     MatInputModule,
@@ -102,6 +104,7 @@ const routes: Routes = [
     ClickOutsideDirective,
     ConfirmComponent,
     PageNotFoundComponent,
+    VectorComponent,
   ],
   exports: [BoardComponent],
   providers: [],

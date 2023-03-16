@@ -18,7 +18,7 @@
   justify-content: center;
   left: 100%;
   min-height: 2rem;
-  min-width: 5.125rem;
+  min-width: 4.125rem;
   opacity: 0;
   padding: 0.25rem;
   pointer-events: none;
@@ -63,6 +63,8 @@
     + .toolbar-tooltip {
       left: calc(100% + 0.5rem);
       opacity: 1;
+      padding: 0 10px;
+      white-space: nowrap;
       width: auto;
     }
   }

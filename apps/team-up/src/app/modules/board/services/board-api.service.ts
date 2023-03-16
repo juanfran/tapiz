@@ -1,7 +1,11 @@
 import { ConfigService } from '@/app/services/config.service';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Board } from '@team-up/board-commons';
+import {
+  Board,
+  CocomaterialApiListVectors,
+  CocomaterialTag,
+} from '@team-up/board-commons';
 
 @Injectable({
   providedIn: 'root',
@@ -44,5 +48,24 @@ export class BoardApiService {
 
   public removeAccount() {
     return this.http.delete(`${this.configService.config.API}/remove-account`);
+  }
+
+  public getCocomaterialTags() {
+    return this.http.get<CocomaterialTag[]>(
+      `https://cocomaterial.com/api/tags`
+    );
+  }
+
+  public getCocomaterialVectors(page = 1, page_size = 40, tags: string[] = []) {
+    return this.http.get<CocomaterialApiListVectors>(
+      `https://cocomaterial.com/api/vectors`,
+      {
+        params: {
+          page,
+          page_size,
+          tags,
+        },
+      }
+    );
   }
 }

@@ -1,0 +1,35 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  height: 100%;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.vectors {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-gap: 20px;
+  height: 100%;
+  overflow: auto;
+
+  .vector {
+    background-position: 50%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 150px;
+    width: 100%;
+  }
+
+  &::ng-deep {
+    svg {
+      display: block;
+      width: 100%;
+    }
+  }
+}
+
+

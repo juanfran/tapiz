@@ -9,6 +9,7 @@ import {
   Group,
   Panel,
   Text,
+  Vector,
 } from '@team-up/board-commons';
 import { produce, enablePatches } from 'immer';
 import { BoardActions } from '../actions/board.actions';
@@ -23,6 +24,7 @@ export interface BoardState {
   groups: Group[];
   panels: Panel[];
   texts: Text[];
+  vectors: Vector[];
 }
 
 const initialBoardState: BoardState = {
@@ -33,6 +35,7 @@ const initialBoardState: BoardState = {
   groups: [],
   panels: [],
   texts: [],
+  vectors: [],
 };
 
 const reducer = createReducer(
@@ -81,6 +84,7 @@ const reducer = createReducer(
       panels: state.panels,
       images: state.images,
       texts: state.texts,
+      vectors: state.vectors,
     };
 
     return {

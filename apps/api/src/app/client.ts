@@ -93,7 +93,7 @@ export class Client {
 
   public close() {
     this.server.setState(this.boardId, (state) => {
-      if (!state.users) {
+      if (!state?.users) {
         return;
       }
 
@@ -174,6 +174,7 @@ export class Client {
           panel: board.panels,
           image: board.images,
           text: board.texts,
+          vector: board.vectors,
         },
       };
 

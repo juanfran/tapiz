@@ -21,6 +21,7 @@ export const {
   selectVoting,
   selectEmoji,
   selectPageState,
+  selectCocomaterial,
 } = pageFeature;
 
 export const isFocus = (id: string) => {

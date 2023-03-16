@@ -32,6 +32,11 @@
           tuBoardDrag
           [text]="text"></team-up-text>
       </ng-container>
+      <ng-container *ngFor="let vector of vectors$ | async; trackBy: trackById">
+        <team-up-vector
+          tuBoardDrag
+          [vector]="vector"></team-up-vector>
+      </ng-container>
       <team-up-panels></team-up-panels>
     </ng-container>
   </div>

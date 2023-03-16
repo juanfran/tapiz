@@ -149,7 +149,7 @@ export function applyDiff(diff: Diff, state: CommonState): CommonState {
       }
     }
 
-    // move note to the top
+    // move to the top
     if (diff?.edit.note) {
       const movedNotes = diff?.edit.note
         .filter((note) => note.position)
@@ -159,6 +159,20 @@ export function applyDiff(diff: Diff, state: CommonState): CommonState {
 
       if (index !== -1) {
         state.notes.push(state.notes.splice(index, 1)[0]);
+      }
+    }
+
+    if (diff?.edit.vector) {
+      const movedVectors = diff?.edit.vector
+        .filter((note) => note.position)
+        .map((it) => it.id);
+
+      const index = state.vectors.findIndex((it) =>
+        movedVectors.includes(it.id)
+      );
+
+      if (index !== -1) {
+        state.vectors.push(state.vectors.splice(index, 1)[0]);
       }
     }
   }
@@ -176,4 +190,5 @@ export const NodeState: Record<NodeType | 'user', string> = {
   text: 'texts',
   panel: 'panels',
   user: 'users',
+  vector: 'vectors',
 };

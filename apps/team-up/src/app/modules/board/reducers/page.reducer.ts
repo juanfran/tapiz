@@ -1,5 +1,13 @@
 import { Action, createFeature, createReducer, on } from '@ngrx/store';
-import { Point, ZoneConfig, Zone, User, Board } from '@team-up/board-commons';
+import {
+  Point,
+  ZoneConfig,
+  Zone,
+  User,
+  Board,
+  CocomaterialTag,
+  CocomaterialApiListVectors,
+} from '@team-up/board-commons';
 import { wsOpen } from '@/app/modules/ws/ws.actions';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
@@ -26,6 +34,11 @@ export interface PageState {
   voting: boolean;
   boards: Board[];
   emoji: NativeEmoji | null;
+  cocomaterial: {
+    page: number;
+    tags: CocomaterialTag[];
+    vectors: CocomaterialApiListVectors | null;
+  };
 }
 
 const initialPageState: PageState = {
@@ -51,6 +64,11 @@ const initialPageState: PageState = {
   boards: [],
   userId: '',
   emoji: null,
+  cocomaterial: {
+    page: 1,
+    tags: [],
+    vectors: null,
+  },
 };
 
 const reducer = createReducer(
@@ -212,6 +230,25 @@ const reducer = createReducer(
   on(PageActions.selectEmoji, (state, { emoji }): PageState => {
     state.boardCursor = 'crosshair';
     state.emoji = emoji;
+
+    return state;
+  }),
+  on(PageActions.fetchCocomaterialTagsSuccess, (state, { tags }): PageState => {
+    state.cocomaterial.tags = tags;
+
+    return state;
+  }),
+  on(PageActions.fetchVectorsSuccess, (state, { vectors, page }): PageState => {
+    if (page === 1) {
+      state.cocomaterial.vectors = vectors;
+    } else if (state.cocomaterial.vectors) {
+      state.cocomaterial.vectors = {
+        ...vectors,
+        results: [...state.cocomaterial.vectors.results, ...vectors.results],
+      };
+    }
+
+    state.cocomaterial.page = page;
 
     return state;
   })

@@ -15,6 +15,7 @@ const initBoard = {
   panels: [],
   images: [],
   texts: [],
+  vectors: [],
 };
 
 const users: Record<string, string> = {

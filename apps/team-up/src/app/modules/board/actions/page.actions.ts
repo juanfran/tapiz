@@ -7,6 +7,8 @@ import {
   Board,
   PatchNode,
   NodeType,
+  CocomaterialTag,
+  CocomaterialApiListVectors,
 } from '@team-up/board-commons';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 
@@ -46,5 +48,12 @@ export const PageActions = createActionGroup({
     'Leave board': props<{ id: Board['id'] }>(),
     'Board not found': props<{ id: Board['id'] }>(),
     'Select emoji': props<{ emoji: NativeEmoji }>(),
+    'Fetch cocomaterial tags success': props<{ tags: CocomaterialTag[] }>(),
+    'Fetch vectors': props<{ tags: string[] }>(),
+    'Fetch vectors success': props<{
+      vectors: CocomaterialApiListVectors;
+      page: number;
+    }>(),
+    'Next vectors page': props<{ tags: string[] }>(),
   },
 });

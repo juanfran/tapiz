@@ -13,12 +13,13 @@ const validations = {
     panel: Validators.newPanel,
     group: Validators.newGroup,
     image: Validators.newImage,
+    vector: Validators.newVector,
     text: Validators.newText,
   } as Record<NodeType, unknown>,
   patch: {
     panel: Validators.patchPanel,
     group: Validators.patchGroup,
-    image: Validators.patchImage,
+    vector: Validators.patchVector,
     text: Validators.patchText,
   } as Record<NodeType, unknown>,
 };

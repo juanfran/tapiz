@@ -12,7 +12,8 @@ import {
 } from 'rxjs/operators';
 import { Point } from '@team-up/board-commons';
 import { Store } from '@ngrx/store';
-import { selectPosition } from '../selectors/page.selectors';
+import { selectPopupOpen, selectPosition } from '../selectors/page.selectors';
+import { concatLatestFrom } from '@ngrx/effects';
 
 @Injectable({
   providedIn: 'root',
@@ -30,13 +31,19 @@ export class BoardZoomService {
 
     const wheel$ = fromEvent<WheelEvent>(window, 'wheel').pipe(
       share(),
-      filter((event) => {
+      concatLatestFrom(() => this.store.select(selectPopupOpen)),
+      filter(([event, popup]) => {
+        if (popup === 'cocomaterial') {
+          return false;
+        }
+
         if (event.target) {
           return (event.target as HTMLElement).tagName !== 'EMOJI-PICKER';
         }
 
         return true;
-      })
+      }),
+      map(([event]) => event)
     );
 
     this.zoom$ = wheel$.pipe(

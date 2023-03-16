@@ -26,8 +26,8 @@ export class ConfigService {
       }),
       catchError(() => {
         this.config = {
-          API: 'http://localhost:3000',
-          WS: 'ws://localhost:3000',
+          API: 'http://localhost:8000',
+          WS: 'ws://localhost:8000',
           GOOGLE_CLIENT_ID: '',
         };
 

@@ -12,6 +12,7 @@ export * from './models/common-state.model';
 export * from './models/config.model';
 export * from './models/node.model';
 export * from './models/text.model';
+export * from './models/cocomaterial.model';
 export * from './state-tools';
 export * from './board-common-actions';
 export * from './validators/index';

@@ -27,6 +27,7 @@ import {
   selectImages,
   selectNotes,
   selectTexts,
+  selectVectors,
 } from '../selectors/board.selectors';
 
 import {
@@ -61,6 +62,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly notes$ = this.store.select(selectNotes);
   public readonly boardId$ = this.store.select(selectBoardId);
   public readonly images$ = this.store.select(selectImages);
+  public readonly vectors$ = this.store.select(selectVectors);
   public readonly texts$ = this.store.select(selectTexts);
   public readonly groups$ = this.store.select(selectGroups);
   public readonly canvasMode$ = this.store.select(selectCanvasMode);
@@ -87,7 +89,9 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     private notesService: NotesService,
     private historyService: HistoryService,
     public dialog: MatDialog
-  ) {}
+  ) {
+    this.store.dispatch(PageActions.initBoard());
+  }
 
   public initBoard() {
     this.store

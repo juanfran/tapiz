@@ -11,6 +11,7 @@ export const {
   selectName,
   selectTexts,
   selectBoardState,
+  selectVectors,
 } = boardFeature;
 
 export const selectNote = (noteId: Note['id']) => {
