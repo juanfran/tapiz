@@ -36,7 +36,12 @@ export class LoginComponent implements AfterViewInit {
         localStorage.setItem('user', JSON.stringify(user));
 
         this.store.dispatch(PageActions.setUserId({ userId: user.sub }));
-        this.router.navigate(['/']);
+
+        const nextUrl = sessionStorage.getItem('url') ?? '/';
+
+        sessionStorage.removeItem('url');
+
+        this.router.navigate([nextUrl]);
       });
     };
 
