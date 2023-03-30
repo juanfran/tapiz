@@ -19,6 +19,7 @@ const validations = {
   patch: {
     panel: Validators.patchPanel,
     group: Validators.patchGroup,
+    image: Validators.patchImage,
     vector: Validators.patchVector,
     text: Validators.patchText,
   } as Record<NodeType, unknown>,

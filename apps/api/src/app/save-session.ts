@@ -30,10 +30,11 @@ export const runSession = () => {
   });
   ws.on('open', () => {
     setInterval(() => {
-      const msg = JSON.stringify(file[index]);
-      if (msg['boardId']) {
-        msg['boardId'] = boardId;
+      if (file[index]['boardId']) {
+        file[index]['boardId'] = boardId;
       }
+
+      const msg = JSON.stringify(file[index]);
 
       ws.send(msg);
       index++;
