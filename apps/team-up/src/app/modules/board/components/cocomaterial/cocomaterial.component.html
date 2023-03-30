@@ -48,7 +48,8 @@
     <button
       (click)="selectVector(vector, $event)"
       class="vector"
-      *ngFor="let vector of vm.vectors"
-      [tuSvgBackground]="vector.svgContent"></button>
+      *ngFor="let vector of vm.vectors">
+      <img [attr.src]="vector.svg" />
+    </button>
   </div>
 </ng-container>

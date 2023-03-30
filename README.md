@@ -1,6 +1,6 @@
 # TeamUp
 
-TeamUp is a web based collaborative board to help teams in their online meetings.
+TeamUp is a web based collaborative board to help teams in their online meetings & projects.
 
 ![Demo](https://github.com/juanfran/team-up/blob/main/resources/demo-teamup-new.gif)
 
@@ -48,6 +48,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Board screenshot
 - [ ] More login options
 - [ ] Board Size limit
-- [ ] Coco material
 - [ ] Multi board (one board with multiples ¿views?, easy to move between phases in retrospectives)
 - [ ] Board links (move your board to previous store prosition)
+- [ ] Search

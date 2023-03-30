@@ -6,6 +6,7 @@ import {
   CocomaterialApiListVectors,
   CocomaterialTag,
 } from '@team-up/board-commons';
+import { map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -57,15 +58,26 @@ export class BoardApiService {
   }
 
   public getCocomaterialVectors(page = 1, page_size = 40, tags: string[] = []) {
-    return this.http.get<CocomaterialApiListVectors>(
-      `https://cocomaterial.com/api/vectors`,
-      {
+    return this.http
+      .get<CocomaterialApiListVectors>(`https://cocomaterial.com/api/vectors`, {
         params: {
           page,
           page_size,
           tags,
         },
-      }
-    );
+      })
+      .pipe(
+        map((result) => {
+          return {
+            ...result,
+            results: result.results.map((vector) => {
+              return {
+                ...vector,
+                svgContent: '',
+              };
+            }),
+          };
+        })
+      );
   }
 }

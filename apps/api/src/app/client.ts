@@ -9,6 +9,9 @@ import * as WebSocket from 'ws';
 import { Server } from './server';
 import { joinBoard, getBoardOwners } from './db';
 import { validation } from './validation';
+// import { saveMsg, init } from './save-session';
+
+// init();
 
 export class Client {
   public boardId!: string;
@@ -37,6 +40,8 @@ export class Client {
 
   public incomingMessage(messageString: string) {
     const message = this.parseMessage(messageString);
+
+    //saveMsg(message);
 
     if ('action' in message && message.action === 'join') {
       this.join(message);
