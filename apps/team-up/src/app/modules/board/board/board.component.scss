@@ -47,7 +47,6 @@ team-up-header {
 .edit-mode {
   team-up-panels,
   team-up-image,
-  team-up-vecor,
   team-up-group,
   team-up-text {
     pointer-events: none;
@@ -64,7 +63,9 @@ team-up-header {
 }
 
 .compose-mode {
-  team-up-note {
+  team-up-note,
+  team-up-vector,
+  team-up-group {
     pointer-events: none;
   }
 }
