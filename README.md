@@ -15,7 +15,7 @@ TeamUp is a web based collaborative board to help teams in their online meetings
 cp .env.example .env
 # Edit .env
 npm run start:docker
-npm run regenerate:db
+npm run regenerate
 ```
 
 ## Run Team-up
