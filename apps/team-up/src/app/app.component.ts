@@ -2,12 +2,15 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Auth } from '@team-up/board-commons';
 import { PageActions } from './modules/board/actions/page.actions';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'team-up-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [RouterOutlet],
 })
 export class AppComponent {
   public title = 'team up';

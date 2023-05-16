@@ -1,4 +1,8 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  CUSTOM_ELEMENTS_SCHEMA,
+} from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
 import { BoardActions } from '../../actions/board.actions';
@@ -14,13 +18,24 @@ import {
 import { take, withLatestFrom } from 'rxjs/operators';
 import { BoardMoveService } from '../../services/board-move.service';
 import { NotesService } from '../../services/notes.service';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { v4 } from 'uuid';
 import { Subscription, zip } from 'rxjs';
 import 'emoji-picker-element';
 import { EmojiClickEvent, NativeEmoji } from 'emoji-picker-element/shared';
 import { MatDialog } from '@angular/material/dialog';
 import { CocomaterialComponent } from '../cocomaterial/cocomaterial.component';
+import { MatButtonModule } from '@angular/material/button';
+import { AutoFocusDirective } from '../../directives/autofocus.directive';
+import { MatInputModule } from '@angular/material/input';
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { NgIf, AsyncPipe } from '@angular/common';
+import { LetDirective } from '@rx-angular/template/let';
 
 interface State {
   visible: boolean;
@@ -33,6 +48,18 @@ interface State {
   styleUrls: ['./toolbar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
+  standalone: true,
+  imports: [
+    LetDirective,
+    NgIf,
+    SvgIconComponent,
+    ReactiveFormsModule,
+    MatInputModule,
+    AutoFocusDirective,
+    MatButtonModule,
+    AsyncPipe,
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ToolbarComponent {
   public readonly model$ = this.state.select();

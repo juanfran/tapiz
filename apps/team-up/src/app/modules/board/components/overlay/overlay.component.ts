@@ -18,6 +18,7 @@ interface State {
   styleUrls: ['./overlay.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
+  standalone: true,
 })
 export class OverlayComponent {
   @HostBinding('style.display') get display() {

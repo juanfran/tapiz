@@ -27,6 +27,7 @@ import {
   selectFocusId,
 } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
+import { PushPipe } from '@rx-angular/template/push';
 
 interface State {
   vector: Vector;
@@ -41,6 +42,8 @@ interface State {
   styleUrls: ['./vector.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
+  standalone: true,
+  imports: [PushPipe],
 })
 export class VectorComponent implements OnInit, Draggable, AfterViewInit {
   @ViewChild('vector') public imageRef!: ElementRef;

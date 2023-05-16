@@ -14,6 +14,12 @@ import {
   selectIsOwner,
 } from '../../selectors/page.selectors';
 import { ExportService } from '../../services/export.service';
+import { ClickOutsideDirective } from '../../directives/click-outside.directive';
+import { AutoFocusDirective } from '../../directives/autofocus.directive';
+import { NgIf } from '@angular/common';
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { RouterLink } from '@angular/router';
+import { LetDirective } from '@rx-angular/template/let';
 
 interface State {
   edit: boolean;
@@ -27,6 +33,15 @@ interface State {
   styleUrls: ['./header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
+  standalone: true,
+  imports: [
+    LetDirective,
+    RouterLink,
+    SvgIconComponent,
+    NgIf,
+    AutoFocusDirective,
+    ClickOutsideDirective,
+  ],
 })
 export class HeaderComponent {
   constructor(

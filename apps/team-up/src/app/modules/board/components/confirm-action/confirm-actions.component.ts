@@ -1,10 +1,13 @@
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'team-up-confirm',
   templateUrl: './confirm-actions.component.html',
   styleUrls: ['./confirm-actions.component.scss'],
+  standalone: true,
+  imports: [MatDialogModule, MatButtonModule],
 })
 export class ConfirmComponent {
   constructor(

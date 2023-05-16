@@ -25,6 +25,7 @@ import { Point } from '@team-up/board-commons';
 @UntilDestroy()
 @Directive({
   selector: '[tuBoardDrag]',
+  standalone: true,
 })
 export class BoardDragDirective implements AfterViewInit {
   public host?: Draggable;

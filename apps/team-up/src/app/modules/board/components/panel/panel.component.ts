@@ -30,6 +30,7 @@ import {
 } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
 import { MoveService } from '../../services/move.service';
+import { NgIf, AsyncPipe } from '@angular/common';
 
 interface State {
   edit: boolean;
@@ -47,6 +48,8 @@ interface State {
   styleUrls: ['./panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
+  standalone: true,
+  imports: [NgIf, AsyncPipe],
 })
 export class PanelComponent implements AfterViewInit, OnInit, Draggable {
   @Input()

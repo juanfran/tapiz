@@ -41,6 +41,7 @@ import hotkeys from 'hotkeys-js';
 import { contrast } from './contrast';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 import { concatLatestFrom } from '@ngrx/effects';
+import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 interface State {
   edit: boolean;
   note: Note;
@@ -62,6 +63,8 @@ interface State {
   styleUrls: ['./note.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
+  standalone: true,
+  imports: [NgIf, NgFor, AsyncPipe],
 })
 export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   @Input()

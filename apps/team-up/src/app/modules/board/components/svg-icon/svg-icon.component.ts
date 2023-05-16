@@ -8,6 +8,7 @@ import { Component, Input } from '@angular/core';
       <use attr.xlink:href="#{{ icon }}"></use>
     </svg>
   `,
+  standalone: true,
 })
 export class SvgIconComponent {
   @Input() public icon = '';

@@ -39,6 +39,7 @@ interface State {
   styleUrls: ['./zone.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
+  standalone: true,
 })
 export class ZoneComponent {
   @HostBinding('style.display') get display() {
