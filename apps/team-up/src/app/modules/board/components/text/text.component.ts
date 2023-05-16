@@ -24,6 +24,7 @@ import { MoveService } from '../../services/move.service';
 import { selectFocusId } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
 import { BoardMoveService } from '../../services/board-move.service';
+import { NgIf, AsyncPipe } from '@angular/common';
 
 interface State {
   node: Text;
@@ -39,6 +40,8 @@ interface State {
   styleUrls: ['./text.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
+  standalone: true,
+  imports: [NgIf, AsyncPipe],
 })
 export class TextComponent implements OnInit, Draggable, AfterViewInit {
   @Input()

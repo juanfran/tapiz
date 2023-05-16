@@ -6,12 +6,15 @@ import {
   selectUserId,
   selectVisible,
 } from '../../selectors/page.selectors';
-import { RxState, selectSlice } from '@rx-angular/state';
+import { RxState } from '@rx-angular/state';
 import { PageActions } from '../../actions/page.actions';
 import { BoardActions } from '../../actions/board.actions';
 import { User } from '@team-up/board-commons';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { selectSlice } from '@rx-angular/state/selections';
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { NgIf, NgFor, NgClass, AsyncPipe } from '@angular/common';
 
 interface State {
   visible: boolean;
@@ -33,6 +36,8 @@ interface ComponentViewModel {
   styleUrls: ['./users.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
+  standalone: true,
+  imports: [NgIf, NgFor, SvgIconComponent, NgClass, AsyncPipe],
 })
 export class UsersComponent {
   constructor(private store: Store, private state: RxState<State>) {

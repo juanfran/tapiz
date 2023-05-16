@@ -8,6 +8,7 @@ import {
 
 @Directive({
   selector: '[tuClickOutside]',
+  standalone: true,
 })
 export class ClickOutsideDirective {
   constructor(private elementRef: ElementRef) {}

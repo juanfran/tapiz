@@ -15,6 +15,7 @@ import { PageActions } from '../../actions/page.actions';
   styleUrls: ['./login.component.scss'],
   templateUrl: './login.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
 })
 export class LoginComponent implements AfterViewInit {
   constructor(

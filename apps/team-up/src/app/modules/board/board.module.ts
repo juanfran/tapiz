@@ -81,8 +81,6 @@ const routes: Routes = [
     MatIconModule,
     FormsModule,
     MatListModule,
-  ],
-  declarations: [
     BoardComponent,
     BoardListComponent,
     BoardDragDirective,

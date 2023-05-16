@@ -49,6 +49,20 @@ import { HistoryService } from '../services/history.service';
 import { MatDialog } from '@angular/material/dialog';
 import { WsService } from '@/app/modules/ws/services/ws.service';
 import { v4 } from 'uuid';
+import { PanelsComponent } from '../components/panels/panel.component';
+import { VectorComponent } from '../components/vector/vector.component';
+import { TextComponent } from '../components/text/text.component';
+import { GroupComponent } from '../components/group/group.component';
+import { ImageComponent } from '../components/image/image.component';
+import { BoardDragDirective } from '../directives/board-drag.directive';
+import { NoteComponent } from '../components/note/note.component';
+import { CursorsComponent } from '../components/cursors/cursors.component';
+import { ZoneComponent } from '../components/zone/zone.component';
+import { OverlayComponent } from '../components/overlay/overlay.component';
+import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import { ToolbarComponent } from '../components/toolbar/toolbar.component';
+import { UsersComponent } from '../components/users/users.component';
+import { HeaderComponent } from '../components/header/header.component';
 
 @UntilDestroy()
 @Component({
@@ -57,6 +71,25 @@ import { v4 } from 'uuid';
   styleUrls: ['./board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
+  standalone: true,
+  imports: [
+    HeaderComponent,
+    UsersComponent,
+    ToolbarComponent,
+    NgIf,
+    OverlayComponent,
+    ZoneComponent,
+    CursorsComponent,
+    NgFor,
+    NoteComponent,
+    BoardDragDirective,
+    ImageComponent,
+    GroupComponent,
+    TextComponent,
+    VectorComponent,
+    PanelsComponent,
+    AsyncPipe,
+  ],
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly notes$ = this.store.select(selectNotes);

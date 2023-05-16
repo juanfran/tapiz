@@ -5,11 +5,18 @@ import { RxState } from '@rx-angular/state';
 import { Board } from '@team-up/board-commons';
 import { PageActions } from '@/app/modules/board/actions/page.actions';
 import { selectBoards } from '@/app/modules/board/selectors/page.selectors';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmComponent } from '../confirm-action/confirm-actions.component';
 import { exhaustMap, filter } from 'rxjs';
 import { BoardApiService } from '../../services/board-api.service';
+import { MatListModule } from '@angular/material/list';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 
 @UntilDestroy()
 @Component({
@@ -18,6 +25,20 @@ import { BoardApiService } from '../../services/board-api.service';
   styleUrls: ['./board-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
+  standalone: true,
+  imports: [
+    NgIf,
+    ReactiveFormsModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatListModule,
+    NgFor,
+    RouterLink,
+    AsyncPipe,
+  ],
 })
 export class BoardListComponent implements OnInit {
   public readonly model$ = this.state.select();
