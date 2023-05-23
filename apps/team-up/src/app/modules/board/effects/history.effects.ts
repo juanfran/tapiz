@@ -1,13 +1,19 @@
 import { Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import {
+  Actions,
+  act,
+  concatLatestFrom,
+  createEffect,
+  ofType,
+} from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { WsService } from '@/app/modules/ws/services/ws.service';
 import { EMPTY, of } from 'rxjs';
 import { filter, mergeMap, tap } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
-import { HistoryService } from '../services/history.service';
 import { AddNode, RemoveNode } from '@team-up/board-commons';
+import { selectNote } from '../selectors/board.selectors';
 
 @Injectable()
 export class HistoryEffects {
@@ -125,6 +131,34 @@ export class HistoryEffects {
     }
   );
 
+  public setNoteDrawing$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(PageActions.setNoteDrawing),
+        filter((action) => !action.history),
+        concatLatestFrom((action) => this.store.select(selectNote(action.id))),
+        tap(([action, note]) => {
+          this.newUndoneAction(
+            {
+              ...action,
+              history: true,
+            } as Action,
+            BoardActions.patchNode({
+              nodeType: 'note',
+              node: {
+                id: action.id,
+                drawing: note?.drawing ?? [],
+              },
+            })
+          );
+        })
+      );
+    },
+    {
+      dispatch: false,
+    }
+  );
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public newUndoneAction(action: Action, inverseAction: Action) {
     this.history.undoable.unshift({
@@ -134,10 +168,5 @@ export class HistoryEffects {
     this.history.undone = [];
   }
 
-  constructor(
-    private actions$: Actions,
-    private wsService: WsService,
-    private historyService: HistoryService,
-    private store: Store
-  ) {}
+  constructor(private actions$: Actions, private store: Store) {}
 }

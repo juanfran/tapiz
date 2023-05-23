@@ -187,6 +187,15 @@ export class ToolbarComponent {
     }
   }
 
+  public draw() {
+    if (this.state.get('popupOpen') !== 'draw') {
+      this.popupOpen('draw');
+      this.store.dispatch(PageActions.readyToDraw());
+    } else {
+      this.popupOpen('');
+    }
+  }
+
   public cocomaterial() {
     if (this.state.get('popupOpen') !== 'cocomaterial') {
       this.popupOpen('cocomaterial');

@@ -1,6 +1,7 @@
 import { createSelector } from '@ngrx/store';
 import { Note, User } from '@team-up/board-commons';
 import { boardFeature } from '../reducers/board.reducer';
+import { selectFocusId } from './page.selectors';
 
 export const {
   selectNotes,
@@ -39,3 +40,9 @@ export const usernameById = (userId: User['id']) => {
     return user?.name ?? '';
   });
 };
+
+export const selectNoteFocus = createSelector(
+  selectNotes,
+  selectFocusId,
+  (notes: Note[], noteId) => notes.find((note) => note.id === noteId)
+);

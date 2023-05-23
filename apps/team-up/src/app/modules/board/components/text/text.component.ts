@@ -236,21 +236,14 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
         ).style.transform = `translate(${position.x}px, ${position.y}px)`;
       });
 
-    this.state.hold(this.state.select('focus').pipe(skip(1)), (focus) => {
-      if (focus) {
-        hotkeys('delete', this.state.get('node').id, () => {
-          this.store.dispatch(
-            BoardActions.removeNode({
-              node: this.state.get('node'),
-              nodeType: 'text',
-            })
-          );
-        });
-
-        hotkeys.setScope(this.state.get('node').id);
-      } else {
-        (document.activeElement as HTMLElement)?.blur();
-        hotkeys.unbind('delete', this.state.get('node').id);
+    hotkeys('delete', () => {
+      if (this.state.get('focus')) {
+        this.store.dispatch(
+          BoardActions.removeNode({
+            node: this.state.get('node'),
+            nodeType: 'text',
+          })
+        );
       }
     });
 

@@ -158,20 +158,14 @@ export class VectorComponent implements OnInit, Draggable, AfterViewInit {
         ).style.transform = `translate(${position.x}px, ${position.y}px)`;
       });
 
-    this.state.hold(this.state.select('focus'), (focus) => {
-      if (focus) {
-        hotkeys('delete', this.state.get('vector').id, () => {
-          this.store.dispatch(
-            BoardActions.removeNode({
-              node: this.state.get('vector'),
-              nodeType: 'vector',
-            })
-          );
-        });
-
-        hotkeys.setScope(this.state.get('vector').id);
-      } else {
-        hotkeys.unbind('delete', this.state.get('vector').id);
+    hotkeys('delete', () => {
+      if (this.state.get('focus')) {
+        this.store.dispatch(
+          BoardActions.removeNode({
+            node: this.state.get('vector'),
+            nodeType: 'vector',
+          })
+        );
       }
     });
   }

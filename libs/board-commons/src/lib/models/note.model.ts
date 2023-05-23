@@ -1,3 +1,4 @@
+import { Drawing } from './drawing.model';
 import { Point } from './point.model';
 
 export interface Note {
@@ -10,4 +11,5 @@ export interface Note {
     unicode: string;
     position: Point;
   }[];
+  drawing: Drawing[];
 }

@@ -9,6 +9,8 @@ import {
   NodeType,
   CocomaterialTag,
   CocomaterialApiListVectors,
+  Drawing,
+  Note,
 } from '@team-up/board-commons';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 
@@ -55,5 +57,13 @@ export const PageActions = createActionGroup({
       page: number;
     }>(),
     'Next vectors page': props<{ tags: string[] }>(),
+    'Ready to draw': emptyProps(),
+    'Set drawing params': props<{ color: string; size: number }>(),
+    'Clean note drawing': emptyProps(),
+    'Set note drawing': props<{
+      id: Note['id'];
+      drawing: Drawing[];
+      history?: boolean;
+    }>(),
   },
 });

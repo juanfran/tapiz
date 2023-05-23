@@ -20,7 +20,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { Note, Panel, User } from '@team-up/board-commons';
+import { Drawing, Note, Panel, User } from '@team-up/board-commons';
 import { BoardMoveService } from '../../services/board-move.service';
 import {
   selectPanels,
@@ -42,6 +42,7 @@ import { contrast } from './contrast';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 import { concatLatestFrom } from '@ngrx/effects';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import { DrawingDirective } from '../../directives/drawing.directive';
 interface State {
   edit: boolean;
   note: Note;
@@ -64,12 +65,14 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
   standalone: true,
-  imports: [NgIf, NgFor, AsyncPipe],
+  imports: [NgIf, NgFor, AsyncPipe, DrawingDirective],
 })
 export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   @Input()
   public set note(note: Note) {
-    this.state.set({ note });
+    this.state.set({
+      note,
+    });
   }
 
   @HostBinding('class.focus') get focus() {
@@ -452,26 +455,29 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       this.store.select(isUserHighlighted(this.state.get('note').ownerId))
     );
 
-    this.state.hold(this.state.select('focus'), (focus) => {
-      if (focus && !this.state.get('edit')) {
-        hotkeys('delete', this.state.get('note').id, () => {
-          this.store.dispatch(
-            BoardActions.removeNode({
-              node: this.state.get('note'),
-              nodeType: 'note',
-            })
-          );
-        });
-
-        hotkeys.setScope(this.state.get('note').id);
-      } else {
-        hotkeys.unbind('delete', this.state.get('note').id);
+    hotkeys('delete', () => {
+      if (this.state.get('focus')) {
+        this.store.dispatch(
+          BoardActions.removeNode({
+            node: this.state.get('note'),
+            nodeType: 'note',
+          })
+        );
       }
     });
   }
 
   public focusTextarea() {
     (this.textarea.first.nativeElement as HTMLTextAreaElement).focus();
+  }
+
+  public setDrawing(newLine: Drawing[]) {
+    this.store.dispatch(
+      PageActions.setNoteDrawing({
+        id: this.state.get('note').id,
+        drawing: [...this.state.get('note').drawing, ...newLine],
+      })
+    );
   }
 
   public ngAfterViewInit() {
