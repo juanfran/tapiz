@@ -146,3 +146,15 @@ textarea {
   height: var(--emoji-height);
 }
 
+.vote,
+.name,
+.characters {
+  pointer-events: none;
+  z-index: 1;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}

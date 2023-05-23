@@ -232,20 +232,14 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
       };
     });
 
-    this.state.hold(this.state.select('focus'), (focus) => {
-      if (focus && !this.state.get('edit')) {
-        hotkeys('delete', this.state.get('group').id, () => {
-          this.store.dispatch(
-            BoardActions.removeNode({
-              node: this.state.get('group'),
-              nodeType: 'group',
-            })
-          );
-        });
-
-        hotkeys.setScope(this.state.get('group').id);
-      } else {
-        hotkeys.unbind('delete', this.state.get('group').id);
+    hotkeys('delete', () => {
+      if (this.state.get('focus')) {
+        this.store.dispatch(
+          BoardActions.removeNode({
+            node: this.state.get('group'),
+            nodeType: 'group',
+          })
+        );
       }
     });
   }

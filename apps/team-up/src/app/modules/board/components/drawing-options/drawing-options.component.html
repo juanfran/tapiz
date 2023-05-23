@@ -1,0 +1,23 @@
+<form
+  class="form"
+  [formGroup]="form">
+  <input
+    formControlName="color"
+    type="color"
+    class="color-picker" />
+  <input
+    formControlName="size"
+    type="range"
+    class="range"
+    min="1"
+    max="72"
+    value="1" />
+
+  <button
+    (click)="clean()"
+    mat-mini-fab
+    color="primary"
+    aria-label="Clean">
+    <mat-icon>delete</mat-icon>
+  </button>
+</form>

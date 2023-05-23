@@ -13,6 +13,7 @@ export class NotesService {
       text: '',
       votes: 0,
       emojis: [],
+      drawing: [],
       ...data,
     };
   }

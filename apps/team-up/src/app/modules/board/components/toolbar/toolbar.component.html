@@ -51,6 +51,18 @@
       </div>
       <div
         class="toolbar-button-container"
+        [class.active]="vm.popupOpen === 'draw'">
+        <button
+          class="toolbar-button"
+          (click)="draw()">
+          <team-up-svg-icon
+            icon="edit"
+            class="icon-svg"></team-up-svg-icon>
+        </button>
+        <div class="toolbar-tooltip">Draw</div>
+      </div>
+      <div
+        class="toolbar-button-container"
         [class.active]="vm.popupOpen === 'cocomaterial'">
         <button
           class="toolbar-button"

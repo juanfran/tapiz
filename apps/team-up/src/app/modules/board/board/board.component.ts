@@ -39,13 +39,13 @@ import {
   selectBoardId,
   selectUserId,
   selectZoom,
+  selectDrawing,
 } from '../selectors/page.selectors';
 
 import { BoardMoveService } from '../services/board-move.service';
 import { BoardZoomService } from '../services/board-zoom.service';
 import { ActivatedRoute } from '@angular/router';
 import { NotesService } from '../services/notes.service';
-import { HistoryService } from '../services/history.service';
 import { MatDialog } from '@angular/material/dialog';
 import { WsService } from '@/app/modules/ws/services/ws.service';
 import { v4 } from 'uuid';
@@ -63,6 +63,7 @@ import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import { ToolbarComponent } from '../components/toolbar/toolbar.component';
 import { UsersComponent } from '../components/users/users.component';
 import { HeaderComponent } from '../components/header/header.component';
+import { DrawingOptionsComponent } from '../components/drawing-options/drawing-options.component';
 
 @UntilDestroy()
 @Component({
@@ -88,6 +89,7 @@ import { HeaderComponent } from '../components/header/header.component';
     TextComponent,
     VectorComponent,
     PanelsComponent,
+    DrawingOptionsComponent,
     AsyncPipe,
   ],
 })
@@ -100,6 +102,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly groups$ = this.store.select(selectGroups);
   public readonly canvasMode$ = this.store.select(selectCanvasMode);
   public readonly newNote$ = new Subject<MouseEvent>();
+  public readonly drawing = this.store.selectSignal(selectDrawing);
 
   @ViewChild('workLayer', { read: ElementRef }) public workLayer!: ElementRef;
 
@@ -112,6 +115,23 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     this.newNote$.next(event);
   }
 
+  @HostListener('document:keydown.control.z') public undoAction() {
+    console.log('sdfsdf undo');
+    this.undo();
+  }
+
+  @HostListener('document:keydown.control.y') public redoAction() {
+    this.redo();
+  }
+
+  public undo() {
+    this.store.dispatch(PageActions.undo());
+  }
+
+  public redo() {
+    this.store.dispatch(PageActions.redo());
+  }
+
   constructor(
     private wsService: WsService,
     private store: Store,
@@ -120,7 +140,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     private el: ElementRef,
     private route: ActivatedRoute,
     private notesService: NotesService,
-    private historyService: HistoryService,
     public dialog: MatDialog
   ) {
     this.store.dispatch(PageActions.initBoard());
@@ -139,8 +158,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
           this.el.nativeElement.classList.remove(`cursor-text`);
         }
       });
-
-    this.historyService.listen();
 
     this.newNote$
       .pipe(

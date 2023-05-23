@@ -231,20 +231,14 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
 
     this.state.connect('mode', this.store.select(selectCanvasMode));
 
-    this.state.hold(this.state.select('focus'), (focus) => {
-      if (focus && !this.state.get('edit')) {
-        hotkeys('delete', this.state.get('panel').id, () => {
-          this.store.dispatch(
-            BoardActions.removeNode({
-              node: this.state.get('panel'),
-              nodeType: 'panel',
-            })
-          );
-        });
-
-        hotkeys.setScope(this.state.get('panel').id);
-      } else {
-        hotkeys.unbind('delete', this.state.get('panel').id);
+    hotkeys('delete', () => {
+      if (this.state.get('focus')) {
+        this.store.dispatch(
+          BoardActions.removeNode({
+            node: this.state.get('panel'),
+            nodeType: 'panel',
+          })
+        );
       }
     });
   }

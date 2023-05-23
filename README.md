@@ -34,7 +34,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Multilanguage
 - [ ] Shapes
 - [ ] Templates
-- [ ] Drawing
 - [ ] Timer
 - [ ] Vote counter
 - [ ] Duplicate board
@@ -51,3 +50,4 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Multi board (one board with multiples ¿views?, easy to move between phases in retrospectives)
 - [ ] Board links (move your board to previous store prosition)
 - [ ] Search
+- [ ] Improve docker

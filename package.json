@@ -34,6 +34,7 @@
     "@ngrx/router-store": "16.0.0",
     "@ngrx/store": "16.0.0",
     "@ngrx/store-devtools": "16.0.0",
+    "@nx/angular": "16.2.1",
     "@rx-angular/cdk": "^15.0.0",
     "@rx-angular/state": "^15.0.0",
     "@rx-angular/template": "^15.0.0",
@@ -46,6 +47,7 @@
     "immer": "^9.0.3",
     "messageformat": "^2.3.0",
     "ngx-infinite-scroll": "^16.0.0",
+    "pako": "^2.1.0",
     "pg": "^8.7.1",
     "pg-native": "^3.0.0",
     "remeda": "^1.8.1",
@@ -53,8 +55,7 @@
     "tslib": "^2.3.0",
     "ws": "^7.4.6",
     "zod": "^3.21.4",
-    "zone.js": "0.13.0",
-    "@nx/angular": "16.2.1"
+    "zone.js": "0.13.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "16.0.1",
@@ -67,6 +68,13 @@
     "@angular/compiler-cli": "16.0.1",
     "@angular/language-service": "16.0.1",
     "@ngneat/falso": "^6.4.0",
+    "@nx/cypress": "16.2.1",
+    "@nx/eslint-plugin": "16.2.1",
+    "@nx/express": "16.2.1",
+    "@nx/jest": "16.2.1",
+    "@nx/linter": "16.2.1",
+    "@nx/node": "16.2.1",
+    "@nx/workspace": "16.2.1",
     "@schematics/angular": "16.0.1",
     "@types/cookie": "^0.4.1",
     "@types/cookie-parser": "^1.4.2",
@@ -75,6 +83,7 @@
     "@types/jest": "29.4.0",
     "@types/jsdom": "^20.0.1",
     "@types/node": "18.7.1",
+    "@types/pako": "^2.0.0",
     "@types/pg": "^8.6.1",
     "@types/supertest": "^2.0.12",
     "@types/uuid": "^8.3.1",
@@ -95,14 +104,7 @@
     "supertest": "^6.3.3",
     "ts-jest": "29.1.0",
     "ts-node": "10.9.1",
-    "typescript": "5.0.4",
-    "@nx/workspace": "16.2.1",
-    "@nx/eslint-plugin": "16.2.1",
-    "@nx/cypress": "16.2.1",
-    "@nx/linter": "16.2.1",
-    "@nx/node": "16.2.1",
-    "@nx/jest": "16.2.1",
-    "@nx/express": "16.2.1"
+    "typescript": "5.0.4"
   },
   "overrides": {
     "@rx-angular/cdk": {
@@ -116,4 +118,3 @@
     }
   }
 }
-

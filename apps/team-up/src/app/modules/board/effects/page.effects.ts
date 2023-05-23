@@ -3,8 +3,11 @@ import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { filter, map, switchMap } from 'rxjs';
 import { PageActions } from '../actions/page.actions';
-import { selectCocomaterial } from '../selectors/page.selectors';
+import { selectCocomaterial, selectUserId } from '../selectors/page.selectors';
 import { BoardApiService } from '../services/board-api.service';
+import { BoardActions } from '../actions/board.actions';
+import { selectNoteFocus } from '../selectors/board.selectors';
+import { Note } from '@team-up/board-commons';
 
 @Injectable()
 export class PageEffects {
@@ -55,6 +58,40 @@ export class PageEffects {
               });
             })
           );
+      })
+    );
+  });
+
+  public cleanDrawing$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.cleanNoteDrawing),
+      concatLatestFrom(() => [
+        this.store.select(selectNoteFocus),
+        this.store.select(selectUserId),
+      ]),
+      filter(([, note, ownerId]) => !!note && note.ownerId === ownerId),
+      map(([, note]) => note),
+      filter((note): note is Note => !!note),
+      map((note) => {
+        return PageActions.setNoteDrawing({
+          id: note.id,
+          drawing: [],
+        });
+      })
+    );
+  });
+
+  public setNoteDrawing$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.setNoteDrawing),
+      map((action) => {
+        return BoardActions.patchNode({
+          nodeType: 'note',
+          node: {
+            id: action.id,
+            drawing: action.drawing,
+          },
+        });
       })
     );
   });

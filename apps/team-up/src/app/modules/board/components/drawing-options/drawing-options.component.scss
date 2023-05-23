@@ -1,0 +1,16 @@
+:host {
+  background: var(--primary-color-background);
+  border-radius: 8px;
+  display: flex;
+  padding: .5rem 1rem;
+  width: 325px;
+  justify-content: space-between;
+}
+
+.range {
+  width: 200px;
+}
+
+.form {
+  display: contents;
+}

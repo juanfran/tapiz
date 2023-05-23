@@ -31,4 +31,10 @@
     [style.top.px]="emoji.position.y">
     {{ emoji.unicode }}
   </div>
+  <canvas
+    [tuDrawing]="vm.note.drawing"
+    [canDraw]="isOwner()"
+    (drawing)="setDrawing($event)"
+    width="300"
+    height="300"></canvas>
 </ng-container>

@@ -21,6 +21,10 @@ export const {
   selectVoting,
   selectEmoji,
   selectPageState,
+  selectDragEnabled,
+  selectDrawing,
+  selectDrawingColor,
+  selectDrawingSize,
   selectCocomaterial,
 } = pageFeature;
 

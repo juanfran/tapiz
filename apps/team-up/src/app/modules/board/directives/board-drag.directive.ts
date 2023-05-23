@@ -19,8 +19,9 @@ import {
 } from 'rxjs/operators';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Draggable } from '../models/draggable.model';
-import { selectZoom } from '../selectors/page.selectors';
+import { selectDragEnabled, selectZoom } from '../selectors/page.selectors';
 import { Point } from '@team-up/board-commons';
+import { concatLatestFrom } from '@ngrx/effects';
 
 @UntilDestroy()
 @Directive({
@@ -64,6 +65,8 @@ export class BoardDragDirective implements AfterViewInit {
 
         return true;
       }),
+      concatLatestFrom(() => this.store.select(selectDragEnabled)),
+      filter(([, dragEnabled]) => dragEnabled),
       map(() => true)
     );
 
