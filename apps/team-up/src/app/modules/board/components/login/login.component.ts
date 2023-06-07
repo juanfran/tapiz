@@ -1,14 +1,17 @@
-import { AuthService } from '@/app/services/auth.service';
-import { ConfigService } from '@/app/services/config.service';
-import { GoogleAuthService } from '@/app/services/googleAuth.service';
-import {
-  Component,
-  ChangeDetectionStrategy,
-  AfterViewInit,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { PageActions } from '../../actions/page.actions';
+import {
+  Auth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  GithubAuthProvider,
+} from '@angular/fire/auth';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { SvgIconComponent } from '../svg-icon/svg-icon.component';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'team-up-login',
@@ -16,36 +19,51 @@ import { PageActions } from '../../actions/page.actions';
   templateUrl: './login.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    SvgIconComponent,
+    MatSnackBarModule,
+  ],
 })
-export class LoginComponent implements AfterViewInit {
+export class LoginComponent {
   constructor(
-    private authService: AuthService,
-    private googleAuthService: GoogleAuthService,
+    private auth: Auth,
     private router: Router,
     private store: Store,
-    private configService: ConfigService
+    private snackBar: MatSnackBar
   ) {}
-  public clientId = this.configService.config.GOOGLE_CLIENT_ID;
 
-  public ngAfterViewInit() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).onSignIn = (googleUser: any) => {
-      document.cookie = `auth=${googleUser.credential}`;
-      localStorage.setItem('auth', googleUser.credential);
+  public async loginGoogle() {
+    this.login(new GoogleAuthProvider());
+  }
 
-      this.authService.getUser().subscribe((user) => {
-        localStorage.setItem('user', JSON.stringify(user));
+  public loginGithub() {
+    this.login(new GithubAuthProvider());
+  }
 
-        this.store.dispatch(PageActions.setUserId({ userId: user.sub }));
+  private async login(provider: GithubAuthProvider | GoogleAuthProvider) {
+    try {
+      const result = await signInWithPopup(this.auth, provider);
+
+      if (this.auth.currentUser) {
+        const idToken = await this.auth.currentUser.getIdToken();
+
+        document.cookie = `auth=${idToken}`;
+        localStorage.setItem('user', JSON.stringify(result.user));
+
+        this.store.dispatch(PageActions.setUserId({ userId: result.user.uid }));
 
         const nextUrl = sessionStorage.getItem('url') ?? '/';
 
         sessionStorage.removeItem('url');
 
         this.router.navigate([nextUrl]);
-      });
-    };
-
-    this.googleAuthService.init();
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        this.snackBar.open(error.message, 'Close');
+      }
+    }
   }
 }

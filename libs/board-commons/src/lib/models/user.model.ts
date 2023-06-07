@@ -7,9 +7,3 @@ export interface User {
   connected: boolean;
   cursor: Point | null;
 }
-
-export interface Auth {
-  name: string;
-  picture: string;
-  sub: string;
-}

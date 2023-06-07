@@ -32,7 +32,7 @@ const usersNames: Record<string, string> = {
 
 jest.mock('../app/auth', () => {
   return {
-    verifyGoogle: (id: number) => {
+    verifyToken: (id: number) => {
       return Promise.resolve({
         sub: users[id],
         name: usersNames[id],

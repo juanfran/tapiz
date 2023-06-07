@@ -2,9 +2,11 @@ import {
   enableProdMode,
   APP_INITIALIZER,
   importProvidersFrom,
+  inject,
 } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { getAuth, provideAuth } from '@angular/fire/auth';
 import { prefersReducedMotion } from './app/app.module';
 import { environment } from './environments/environment';
 import { AppComponent } from './app/app.component';
@@ -24,8 +26,6 @@ import {
 import { BoardModule } from './app/modules/board/board.module';
 import { configFactory, ConfigService } from './app/services/config.service';
 
-const mediaQueryList = window.matchMedia('(prefers-reduced-motion)');
-
 if (environment.production) {
   enableProdMode();
 }
@@ -33,6 +33,10 @@ if (environment.production) {
 bootstrapApplication(AppComponent, {
   providers: [
     importProvidersFrom(
+      provideFirebaseApp(() => {
+        return initializeApp(inject(ConfigService).config.firebaseConfig);
+      }),
+      provideAuth(() => getAuth()),
       BoardModule,
       ApiRestInterceptorModule,
       BrowserModule,

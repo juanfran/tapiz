@@ -5,7 +5,7 @@ import { Client } from './client';
 import * as db from './db';
 import { Request } from 'express';
 import * as cookie from 'cookie';
-import { verifyGoogle } from './auth';
+import { verifyToken } from './auth';
 import Config from './config';
 
 export class Server {
@@ -24,12 +24,12 @@ export class Server {
       const cookies = cookie.parse(req.headers.cookie);
 
       if (cookies['auth']) {
-        const user = await verifyGoogle(cookies['auth']);
-        if (user?.name) {
+        const user = await verifyToken(cookies['auth']);
+        if (user && user['name']) {
           const client = new Client(
             ws,
             this,
-            user.name ?? 'anonymous',
+            user['name'] ?? 'anonymous',
             user.sub
           );
           this.clients.push(client);

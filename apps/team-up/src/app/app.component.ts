@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Auth } from '@team-up/board-commons';
 import { PageActions } from './modules/board/actions/page.actions';
 import { RouterOutlet } from '@angular/router';
+import { User } from 'firebase/auth';
 
 @Component({
   selector: 'team-up-root',
@@ -19,10 +19,10 @@ export class AppComponent {
     const userStr = localStorage.getItem('user');
 
     if (userStr) {
-      const user: Auth = JSON.parse(userStr);
+      const user: User = JSON.parse(userStr);
 
-      if (user['sub']) {
-        this.store.dispatch(PageActions.setUserId({ userId: user['sub'] }));
+      if (user['uid']) {
+        this.store.dispatch(PageActions.setUserId({ userId: user['uid'] }));
       }
     }
   }

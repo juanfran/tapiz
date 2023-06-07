@@ -25,12 +25,7 @@ export class ConfigService {
         return true;
       }),
       catchError(() => {
-        this.config = {
-          API: 'http://localhost:8000',
-          WS: 'ws://localhost:8000',
-          GOOGLE_CLIENT_ID: '',
-        };
-
+        console.error('Error loading config');
         return of(false);
       })
     );

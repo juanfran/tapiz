@@ -1,6 +1,6 @@
 import * as cors from 'cors';
 import * as express from 'express';
-import { verifyGoogle } from './auth';
+import { verifyToken } from './auth';
 import Config from './config';
 import {
   createBoard,
@@ -41,7 +41,7 @@ async function authGuard(
   if (!token) {
     return error401();
   } else {
-    const user = await verifyGoogle(token as string);
+    const user = await verifyToken(token as string);
 
     if (user) {
       req.user = user;

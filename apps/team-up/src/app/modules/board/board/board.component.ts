@@ -116,7 +116,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   }
 
   @HostListener('document:keydown.control.z') public undoAction() {
-    console.log('sdfsdf undo');
     this.undo();
   }
 
