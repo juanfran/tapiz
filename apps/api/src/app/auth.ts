@@ -1,17 +1,12 @@
-import { OAuth2Client } from 'google-auth-library';
-import Config from './config';
+import admin from 'firebase-admin';
 
-const googleClientId = Config.GOOGLE_CLIENT_ID;
-const googleClient = new OAuth2Client(googleClientId);
+admin.initializeApp({
+  credential: admin.credential.applicationDefault(),
+});
 
-export async function verifyGoogle(token: string) {
+export async function verifyToken(token: string) {
   try {
-    const ticket = await googleClient.verifyIdToken({
-      idToken: token,
-      audience: googleClientId,
-    });
-
-    const payload = ticket.getPayload();
+    const payload = await admin.auth().verifyIdToken(token);
 
     if (payload && payload['sub']) {
       return payload;

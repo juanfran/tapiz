@@ -41,6 +41,7 @@
 
 .elephant {
   max-width: 100%;
+  margin-bottom: 0;
   width: 100%;
 }
 
@@ -60,7 +61,23 @@
   margin-bottom: 4rem;
 }
 
-.google {
+.button-inner {
   display: flex;
-  min-height: 40px;
+  align-items: center;
+
+  & team-up-svg-icon {
+    margin-right: .75rem;
+  }
+}
+
+.login-buttons {
+  width: 100%;
+
+  button {
+    width: 100%;
+
+    &:not(:last-child) {
+      margin-bottom: .75rem;
+    }
+  }
 }

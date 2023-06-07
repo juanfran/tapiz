@@ -13,7 +13,15 @@ TeamUp is a web based collaborative board to help teams in their online meetings
 
 ```console
 cp .env.example .env
-# Edit .env
+```
+
+Get your firebase config json file and set the path in .env FIREBASE_CONFIG
+
+Setup firebase with Google & Github authentication.
+
+Download `Google Application Credentials` from firebase and set `GOOGLE_APPLICATION_CREDENTIALS` in the .env file.
+
+```console
 npm run start:docker
 npm run regenerate
 ```

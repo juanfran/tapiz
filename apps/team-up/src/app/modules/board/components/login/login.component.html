@@ -6,23 +6,31 @@
     Welcome to Team Up! The free Open Source Tool that helps your herd to make
     happy, easy meetings, retros and brainstormings.
   </p>
-  <div class="google">
-    <div
-      id="g_id_onload"
-      [attr.data-client_id]="clientId"
-      data-context="signin"
-      data-ux_mode="popup"
-      data-callback="onSignIn"
-      data-auto_prompt="false"></div>
 
-    <div
-      class="g_id_signin"
-      data-type="standard"
-      data-shape="rectangular"
-      data-theme="outline"
-      data-text="signin_with"
-      data-size="large"
-      data-logo_alignment="left"></div>
+  <div class="login-buttons">
+    <button
+      mat-raised-button
+      class="google"
+      (click)="loginGoogle()">
+      <div class="button-inner">
+        <team-up-svg-icon
+          icon="google"
+          class="icon-svg"></team-up-svg-icon>
+        Login with Google
+      </div>
+    </button>
+
+    <button
+      mat-raised-button
+      class="github"
+      (click)="loginGithub()">
+      <div class="button-inner">
+        <team-up-svg-icon
+          icon="github"
+          class="icon-svg"></team-up-svg-icon>
+        Login with Github
+      </div>
+    </button>
   </div>
 
   <div class="col right">
