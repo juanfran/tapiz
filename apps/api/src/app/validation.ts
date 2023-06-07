@@ -4,6 +4,7 @@ import {
   NodeAction,
   NodeState,
   NodeType,
+  Note,
   Validators,
 } from '@team-up/board-commons';
 import { ZodAny } from 'zod';
@@ -55,12 +56,19 @@ export const validation = (
           return false;
         }
 
-        const node = state.notes.find(
-          (it) => it.id === validatorResult.data.id
+        const validNote = validatorResult.data as Note;
+
+        const ownerProperties = ['text'];
+
+        const node = state.notes.find((it) => it.id === validNote.id);
+
+        const invalidAccess = Object.keys(validNote).some((it) =>
+          ownerProperties.includes(it)
         );
 
         if (
           action.type === BoardCommonActions.patchNode &&
+          invalidAccess &&
           node?.ownerId !== userId
         ) {
           return false;
@@ -68,7 +76,7 @@ export const validation = (
 
         return {
           ...action,
-          node: validatorResult.data,
+          node: validNote,
         };
       } else if (action.type === BoardCommonActions.addNode) {
         const validatorResult = Validators.newNote.safeParse(action.node);

@@ -259,6 +259,7 @@ describe('ws', () => {
               emojis: [],
               votes: 0,
               position: { x: 0, y: 0 },
+              drawing: [],
             },
           ],
         });
