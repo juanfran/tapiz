@@ -32,6 +32,7 @@
     {{ emoji.unicode }}
   </div>
   <canvas
+    *ngIf="vm.visible"
     [tuDrawing]="vm.note.drawing"
     [canDraw]="isOwner()"
     (drawing)="setDrawing($event)"
