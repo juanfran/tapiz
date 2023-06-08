@@ -1,7 +1,6 @@
 import * as cors from 'cors';
 import * as express from 'express';
 import { verifyToken } from './auth';
-import Config from './config';
 import {
   createBoard,
   getBoards,
@@ -13,9 +12,11 @@ import {
 } from './db';
 import * as cookieParser from 'cookie-parser';
 import { body, validationResult } from 'express-validator';
+import { startWsServer } from './ws-server';
 
 export const app = express();
-const port = Config.API_SERVER_PORT;
+const port = 8000;
+const baseUrl = '/api';
 
 app.use(express.json());
 app.use(cookieParser());
@@ -54,7 +55,7 @@ async function authGuard(
 }
 
 app.post(
-  '/new',
+  `${baseUrl}/new`,
   authGuard,
   body('name').isLength({ min: 1, max: 255 }),
   async (req, res) => {
@@ -82,7 +83,7 @@ app.post(
   }
 );
 
-app.delete('/delete/:boardId', authGuard, async (req, res) => {
+app.delete(`${baseUrl}/delete/:boardId`, authGuard, async (req, res) => {
   const owners = await getBoardOwners(req.params['boardId']);
 
   if (owners.includes(req.user.sub)) {
@@ -98,7 +99,7 @@ app.delete('/delete/:boardId', authGuard, async (req, res) => {
   }
 });
 
-app.delete('/leave/:boardId', authGuard, async (req, res) => {
+app.delete(`${baseUrl}/leave/:boardId`, authGuard, async (req, res) => {
   const owners = await getBoardOwners(req.params['boardId']);
 
   if (owners.includes(req.user.sub)) {
@@ -121,7 +122,7 @@ app.delete('/remove-account', authGuard, async (req, res) => {
   });
 });
 
-app.get('/board/:boardId', authGuard, async (req, res) => {
+app.get(`${baseUrl}/board/:boardId`, authGuard, async (req, res) => {
   const board = await getBoard(req.params['boardId']);
 
   if (!board) {
@@ -137,21 +138,27 @@ app.get('/board/:boardId', authGuard, async (req, res) => {
   }
 });
 
-app.get('/boards', authGuard, async (req, res) => {
+app.get(`${baseUrl}/boards`, authGuard, async (req, res) => {
   const boards = await getBoards(req.user.sub);
 
   res.json(boards);
 });
 
-app.get('/user', authGuard, async (req, res) => {
+app.get(`${baseUrl}/user`, authGuard, async (req, res) => {
   res.json({
     name: req.user.name,
     sub: req.user.sub,
   });
 });
 
+app.get('*', function (req, res) {
+  res.send(req.url);
+});
+
 export function startApiServer() {
-  app.listen(port, () => {
+  const httpServer = app.listen(port, () => {
     console.log(`http://localhost:${port}`);
   });
+
+  startWsServer(httpServer);
 }

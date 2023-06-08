@@ -5,18 +5,31 @@ import Config from './config';
 export let client: PoolClient;
 export let pool: Pool | undefined;
 
-export async function startDB() {
+async function waitDb() {
   pool = new Pool({
     database: Config.DB_DATABASE,
     host: Config.DB_HOST,
     password: Config.DB_PASSWORD,
-    port: Number(Config.DB_PORT_HOST),
+    port: Config.DB_PORT,
     user: Config.DB_USER,
   });
 
   client = await pool.connect();
 
   return client;
+}
+
+export async function startDB() {
+  const run = () => {
+    try {
+      waitDb();
+    } catch (e) {
+      console.log('Error connecting to DB, retrying in 2 seconds');
+      setTimeout(run, 2000);
+    }
+  };
+
+  run();
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

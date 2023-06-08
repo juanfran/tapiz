@@ -5,7 +5,7 @@ dotenv.config();
 async function createDatabase() {
   const client = new Client({
     database: process.env['POSTGRES_DB'],
-    host: process.env['DB_HOST'],
+    host: process.env['POSTGRES_HOST'],
     password: process.env['POSTGRES_PASSWORD'],
     port: Number(process.env['DB_PORT_HOST']),
     user: process.env['POSTGRES_USER'],

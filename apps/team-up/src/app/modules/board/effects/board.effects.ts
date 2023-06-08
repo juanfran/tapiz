@@ -59,12 +59,16 @@ export class BoardEffects {
               owners: board.owners,
             });
           }),
-          catchError(() => {
-            return of(
-              PageActions.boardNotFound({
-                id: action.boardId,
-              })
-            );
+          catchError((e) => {
+            if (e.status === 404) {
+              return of(
+                PageActions.boardNotFound({
+                  id: action.boardId,
+                })
+              );
+            }
+
+            return EMPTY;
           })
         );
       })

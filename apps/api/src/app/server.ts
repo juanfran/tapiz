@@ -6,17 +6,19 @@ import * as db from './db';
 import { Request } from 'express';
 import * as cookie from 'cookie';
 import { verifyToken } from './auth';
-import Config from './config';
-
+import { Server as HTTPServer } from 'http';
+import { Server as HTTPSServer } from 'https';
 export class Server {
   private wss!: WebSocket.Server;
 
   public clients: Client[] = [];
   public state: Record<string, CommonState> = {};
 
-  public start() {
-    this.wss = new WebSocket.Server({ port: Config.WS_SERVER_PORT });
+  public start(server: HTTPServer | HTTPSServer) {
+    this.wss = new WebSocket.Server({ server });
     this.wss.on('connection', this.connection.bind(this));
+
+    return this.wss;
   }
 
   public async connection(ws: WebSocket, req: Request) {

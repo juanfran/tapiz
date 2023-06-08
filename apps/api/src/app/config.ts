@@ -3,10 +3,9 @@ dotenv.config();
 
 export default {
   DB_DATABASE: process.env['POSTGRES_DB'],
-  DB_HOST: process.env['DB_HOST'],
+  DB_HOST: process.env['POSTGRES_HOST'],
   DB_PASSWORD: process.env['POSTGRES_PASSWORD'],
-  DB_PORT_HOST: process.env['DB_PORT_HOST'],
+  DB_PORT_HOST: Number(process.env['DB_PORT_HOST']),
+  DB_PORT: Number(process.env['DB_PORT']),
   DB_USER: process.env['POSTGRES_USER'],
-  WS_SERVER_PORT: Number(process.env['WS_SERVER_PORT']),
-  API_SERVER_PORT: Number(process.env['API_SERVER_PORT']),
 };
