@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 import * as WebSocket from 'ws';
 
-import Config from '../app/config';
 const sessionFile = 'apps/api/src/app/sessions/session.json';
 
 export const saveMsg = (obj: Record<string, unknown>) => {
@@ -23,7 +22,7 @@ export const runSession = () => {
   const cookie = '';
   const boardId = '';
 
-  const ws = new WebSocket(`ws://localhost:${Config.WS_SERVER_PORT}`, {
+  const ws = new WebSocket(`ws://localhost:8000`, {
     headers: {
       Cookie: `auth=${cookie}`,
     },

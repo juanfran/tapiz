@@ -1,0 +1,24 @@
+FROM node:18 AS builder
+
+RUN mkdir -p /home/team-up
+
+COPY ./ /home/team-up
+
+WORKDIR /home/team-up
+
+RUN npm ci
+RUN npx nx run team-up:build:production
+RUN npm prune --production
+RUN rm -rf apps libs resources
+
+FROM nginx:1.25.0-alpine
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /home/team-up/dist/apps/team-up /usr/share/nginx/html
+RUN touch /var/run/nginx.pid
+RUN chown -R nginx:nginx /var/run/nginx.pid /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d
+USER nginx
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+
+
+CMD cp /home/team-up/dist/apps/team-up/assets/config.json /usr/share/nginx/html/assets/ && nginx -g "daemon off;"

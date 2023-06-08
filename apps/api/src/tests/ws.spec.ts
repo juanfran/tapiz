@@ -11,6 +11,7 @@ import {
   updateBoard,
 } from '../app/db';
 import { BoardCommonActions } from '@team-up/board-commons';
+import * as http from 'http';
 
 const userId = randUuid();
 const initBoard = {
@@ -61,11 +62,15 @@ describe('ws', () => {
 
   beforeAll(async () => {
     await startDB();
-    startWsServer();
+
+    const server = http.createServer();
+    server.listen(8000);
+
+    startWsServer(server);
   });
 
   beforeAll((done) => {
-    ws = new WebSocket(`ws://localhost:${Config.WS_SERVER_PORT}`, {
+    ws = new WebSocket(`ws://localhost:8000`, {
       headers: {
         Cookie: 'auth=user-1',
       },

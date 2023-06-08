@@ -40,11 +40,9 @@ Thumbs.db
 
 .angular
 
-docker/postgres_data/
 apps/team-up/src/assets/config.json
 .env
 
 apps/api/src/app/sessions/*
 
-google-api-credentials.json
-firebase-config.json
+firebase/*
