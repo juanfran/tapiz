@@ -23,6 +23,8 @@ services:
       - db
     env_file:
       - .env
+    environment:
+      - NODE_ENV=production
     volumes:
       - ./firebase:/home/team-up/firebase
 

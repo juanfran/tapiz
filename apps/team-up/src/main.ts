@@ -3,6 +3,7 @@ import {
   APP_INITIALIZER,
   importProvidersFrom,
   inject,
+  provideZoneChangeDetection,
 } from '@angular/core';
 
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
@@ -69,5 +70,9 @@ bootstrapApplication(AppComponent, {
     },
     provideHttpClient(withInterceptorsFromDi()),
     provideRouter([]),
+    provideZoneChangeDetection({
+      eventCoalescing: true,
+      runCoalescing: true,
+    }),
   ],
 }).catch((err) => console.error(err));
