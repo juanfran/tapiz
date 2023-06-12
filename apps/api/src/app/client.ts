@@ -39,8 +39,15 @@ export class Client {
   }
 
   public incomingMessage(messageString: string) {
-    const message = this.parseMessage(messageString);
+    const messages = this.parseMessage(messageString);
 
+    messages.forEach((message: any) => {
+      this.processMsg(message);
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public processMsg(message: any) {
     //saveMsg(message);
 
     if ('action' in message && message.action === 'join') {
@@ -225,7 +232,7 @@ export class Client {
     } catch (e) {
       console.error(e);
 
-      return {};
+      return [];
     }
   }
 

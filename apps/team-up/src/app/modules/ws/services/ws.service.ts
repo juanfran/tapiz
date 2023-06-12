@@ -8,8 +8,11 @@ import { wsMessage, wsOpen } from '../ws.actions';
 })
 export class WsService {
   private ws!: WebSocket;
+  private pool: unknown[] = [];
 
-  constructor(private store: Store, private configService: ConfigService) {}
+  constructor(private store: Store, private configService: ConfigService) {
+    this.poolLoop();
+  }
 
   public listen() {
     this.ws = new WebSocket(`${this.configService.config.WS}`);
@@ -34,12 +37,23 @@ export class WsService {
     });
   }
 
-  public send(obj: unknown) {
-    const data = JSON.stringify(obj);
-    this.ws.send(data);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public send(obj: any) {
+    this.pool.push(obj);
   }
 
   public close() {
     this.ws.close();
+  }
+
+  private poolLoop() {
+    if (this.pool.length) {
+      this.ws.send(JSON.stringify(this.pool));
+      this.pool = [];
+    }
+
+    setTimeout(() => {
+      this.poolLoop();
+    }, 1000 / 15);
   }
 }

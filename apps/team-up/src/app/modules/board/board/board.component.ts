@@ -17,6 +17,7 @@ import {
   filter,
   first,
   take,
+  throttleTime,
 } from 'rxjs/operators';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { BoardActions } from '../actions/board.actions';
@@ -201,7 +202,8 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         withLatestFrom(
           this.store.select(selectZoom),
           this.store.select(selectPosition)
-        )
+        ),
+        throttleTime(1000 / 15)
       )
       .subscribe(([mousePosition, zoom, position]) => {
         this.store.dispatch(
