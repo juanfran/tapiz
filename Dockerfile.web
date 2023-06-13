@@ -22,10 +22,3 @@ RUN chmod +x /docker-entrypoint.d/40-run.sh
 
 USER nginx
 EXPOSE 80
-
-# CMD cp /home/team-up/dist/apps/team-up/assets/config.json /usr/share/nginx/html/assets/ && nginx -g "daemon off;"
-
-
-# CMD [ "/home/team-up/run.sh" ]
-
-# ENTRYPOINT ["/docker-entrypoint.d/run.sh"]
