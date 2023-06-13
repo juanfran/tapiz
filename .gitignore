@@ -41,6 +41,7 @@ Thumbs.db
 .angular
 
 apps/team-up/src/assets/config.json
+apps/team-up/src/assets/firebase.json
 .env
 
 apps/api/src/app/sessions/*

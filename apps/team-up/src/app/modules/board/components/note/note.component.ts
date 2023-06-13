@@ -15,7 +15,15 @@ import {
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { filter, first, map, switchMap, take } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  exhaustMap,
+  filter,
+  first,
+  map,
+  switchMap,
+  take,
+} from 'rxjs/operators';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
@@ -362,13 +370,6 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   }
 
   public move(position: Point) {
-    this.store
-      .select(selectPanels)
-      .pipe(take(1))
-      .subscribe((panels) => {
-        this.findPanel(position, panels);
-      });
-
     this.store.dispatch(
       BoardActions.patchNode({
         nodeType: 'note',
@@ -426,6 +427,17 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       .subscribe((note) => {
         this.nativeElement.style.transform = `translate(${note.position.x}px, ${note.position.y}px)`;
       });
+
+    this.state.hold(
+      this.state.select('note').pipe(
+        map((note) => note.position),
+        distinctUntilChanged(),
+        concatLatestFrom(() => this.store.select(selectPanels))
+      ),
+      ([position, panels]) => {
+        this.findPanel(position, panels);
+      }
+    );
 
     const user$: Observable<User> = this.store
       .select(selectUserById(this.state.get('note').ownerId))
