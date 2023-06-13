@@ -40,7 +40,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./apps/team-up/src/assets/config.json:/home/team-up/dist/apps/team-up/assets/config.json
+      - ${FIREBASE_CONFIG}:/usr/share/nginx/html/assets/firebase.json
 
 volumes:
   pgdata:

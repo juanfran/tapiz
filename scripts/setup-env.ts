@@ -10,15 +10,9 @@ front.forEach((key) => {
   frontConfig[key] = process.env[key];
 });
 
-const fireBaseConfig = readFileSync(
-  process.env.FIREBASE_CONFIG as string,
-  'utf8'
-);
-
 writeFileSync(
   './apps/team-up/src/assets/config.json',
   JSON.stringify({
     ...frontConfig,
-    firebaseConfig: JSON.parse(fireBaseConfig),
   })
 );
