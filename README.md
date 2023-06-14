@@ -35,6 +35,5 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Board links (move your board to previous store prosition)
 - [ ] Search
 - [ ] Multi drag notes
-- [ ] Show note owner on hover
 - [ ] Follow other user cursor
 - [ ] Save data from previous users (show name in notes)
