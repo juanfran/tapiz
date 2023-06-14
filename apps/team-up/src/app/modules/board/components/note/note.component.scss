@@ -10,7 +10,7 @@
   color: var(--orange);
   font-size: 1.125rem;
   font-weight: 700;
-  height: 1.75 rem;
+  height: 1.75rem;
   left: 0.5rem;
   max-width: 70%;
   opacity: 0;
@@ -50,6 +50,12 @@ textarea {
   position: absolute;
   width: 300px;
   z-index: 4;
+
+  &:hover {
+    .name {
+      opacity: 1;
+    }
+  }
 
   &:not(.visible) .text {
     font-family: "Redacted Script", -apple-system, system-ui, sans-serif;

@@ -37,3 +37,4 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Multi drag notes
 - [ ] Show note owner on hover
 - [ ] Follow other user cursor
+- [ ] Save data from previous users (show name in notes)
