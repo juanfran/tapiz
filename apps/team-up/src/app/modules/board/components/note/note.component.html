@@ -7,6 +7,7 @@
   <ng-container *ngIf="vm.edit">
     <textarea
       #textarea
+      maxlength="140"
       (input)="setText($event)"
       (focus)="selectTextarea($event)"
       >{{ vm.editText }}</textarea
