@@ -34,3 +34,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Multi board (one board with multiples ¿views?, easy to move between phases in retrospectives)
 - [ ] Board links (move your board to previous store prosition)
 - [ ] Search
+- [ ] Multi drag notes
+- [ ] Show note owner on hover
+- [ ] Follow other user cursor
