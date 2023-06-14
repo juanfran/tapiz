@@ -51,6 +51,10 @@ textarea {
   width: 300px;
   z-index: 4;
 
+  canvas {
+    pointer-events: none;
+  }
+
   &:hover {
     .name {
       opacity: 1;
@@ -89,6 +93,10 @@ textarea {
     .characters {
       opacity: 1;
     }
+  }
+
+  &.drawing canvas {
+    pointer-events: all;
   }
 
   &.size1 {

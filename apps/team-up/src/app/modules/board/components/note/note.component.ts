@@ -17,7 +17,6 @@ import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
 import {
   distinctUntilChanged,
-  exhaustMap,
   filter,
   first,
   map,
@@ -37,6 +36,7 @@ import {
 } from '../../selectors/board.selectors';
 import {
   isUserHighlighted,
+  selectDrawing,
   selectEmoji,
   selectFocusId,
   selectPopupOpen,
@@ -64,6 +64,7 @@ interface State {
   initialText: string;
   customBg: boolean;
   voting: boolean;
+  drawing: boolean;
 }
 @UntilDestroy()
 @Component({
@@ -81,6 +82,10 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     this.state.set({
       note,
     });
+  }
+
+  @HostBinding('class.drawing') get drawing() {
+    return this.state.get('drawing');
   }
 
   @HostBinding('class.focus') get focus() {
@@ -147,6 +152,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
     this.state.connect('userId', this.store.select(selectUserId));
     this.state.connect('voting', this.store.select(selectVoting));
+    this.state.connect('drawing', this.store.select(selectDrawing));
     this.state.hold(this.state.select('focus'), () => this.cd.markForCheck());
     this.state.hold(this.state.select('visible'), () => this.cd.markForCheck());
   }
@@ -188,6 +194,10 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
   @HostListener('dblclick', ['$event'])
   public dblclick(event: MouseEvent) {
+    if (this.state.get('drawing')) {
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
 
