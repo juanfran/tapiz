@@ -8,8 +8,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { RxState } from '@rx-angular/state';
-import { merge, Subject, zip } from 'rxjs';
+import { fromEvent, merge, Subject, zip } from 'rxjs';
 import {
   startWith,
   map,
@@ -72,7 +71,7 @@ import { DrawingOptionsComponent } from '../components/drawing-options/drawing-o
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState],
+  providers: [],
   standalone: true,
   imports: [
     HeaderComponent,
@@ -146,6 +145,15 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   }
 
   public initBoard() {
+    fromEvent<MouseEvent>(this.el.nativeElement, 'wheel', { passive: false })
+      .pipe(
+        filter((event: MouseEvent) => event.ctrlKey),
+        untilDestroyed(this)
+      )
+      .subscribe((event: MouseEvent) => {
+        event.preventDefault();
+      });
+
     this.store
       .select(selectBoardCursor)
       .pipe(untilDestroyed(this))
