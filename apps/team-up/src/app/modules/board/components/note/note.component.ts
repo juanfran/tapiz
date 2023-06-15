@@ -20,6 +20,7 @@ import {
   filter,
   first,
   map,
+  startWith,
   switchMap,
   take,
 } from 'rxjs/operators';
@@ -121,6 +122,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   ) {
     this.state.set({
       textSize: 56,
+      visible: true,
     });
 
     this.state
