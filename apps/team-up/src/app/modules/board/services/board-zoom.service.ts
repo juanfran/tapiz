@@ -33,7 +33,7 @@ export class BoardZoomService {
       share(),
       concatLatestFrom(() => this.store.select(selectPopupOpen)),
       filter(([event, popup]) => {
-        if (popup === 'cocomaterial') {
+        if (popup === 'cocomaterial' || popup === 'search') {
           return false;
         }
 

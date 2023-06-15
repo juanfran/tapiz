@@ -1,0 +1,21 @@
+<form [formGroup]="form">
+  <mat-form-field>
+    <input
+      #search
+      type="text"
+      placeholder="Search text"
+      matInput
+      formControlName="search"
+      [matAutocomplete]="auto" />
+    <mat-autocomplete
+      #auto="matAutocomplete"
+      [hideSingleSelectionIndicator]="true"
+      (optionSelected)="selected($event)">
+      <mat-option
+        *ngFor="let option of options$ | async"
+        [value]="option">
+        {{ option.text }}
+      </mat-option>
+    </mat-autocomplete>
+  </mat-form-field>
+</form>

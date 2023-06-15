@@ -73,6 +73,16 @@
         </button>
         <div class="toolbar-tooltip">Cocomaterial</div>
       </div>
+      <div
+        class="toolbar-button-container"
+        [class.active]="vm.popupOpen === 'search'">
+        <button
+          class="toolbar-button"
+          (click)="search()">
+          <mat-icon>search</mat-icon>
+        </button>
+        <div class="toolbar-tooltip">Search</div>
+      </div>
     </ng-container>
 
     <ng-container *ngIf="(canvasMode$ | async) === 'composeMode'">

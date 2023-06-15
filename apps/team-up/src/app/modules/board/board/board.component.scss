@@ -46,6 +46,14 @@ team-up-drawing-options {
   z-index: 5;
 }
 
+team-up-search-options {
+  left: calc(50% - 150px);
+  position: fixed;
+  top: 50px;
+  z-index: 5;
+}
+
+
 team-up-users,
 team-up-header {
   z-index: 5;

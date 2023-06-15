@@ -1,0 +1,16 @@
+:host {
+  background: var(--primary-color-background);
+  border-radius: 8px;
+  display: flex;
+  padding: .5rem 1rem;
+  width: 425px;
+  justify-content: space-between;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+form {
+  width: 100%;
+}

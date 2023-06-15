@@ -36,6 +36,7 @@ import { MatInputModule } from '@angular/material/input';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { LetDirective } from '@rx-angular/template/let';
+import { MatIconModule } from '@angular/material/icon';
 
 interface State {
   visible: boolean;
@@ -58,6 +59,7 @@ interface State {
     AutoFocusDirective,
     MatButtonModule,
     AsyncPipe,
+    MatIconModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -191,6 +193,15 @@ export class ToolbarComponent {
     if (this.state.get('popupOpen') !== 'draw') {
       this.popupOpen('draw');
       this.store.dispatch(PageActions.readyToDraw());
+    } else {
+      this.popupOpen('');
+    }
+  }
+
+  public search() {
+    if (this.state.get('popupOpen') !== 'search') {
+      this.popupOpen('search');
+      this.store.dispatch(PageActions.readyToSearch());
     } else {
       this.popupOpen('');
     }

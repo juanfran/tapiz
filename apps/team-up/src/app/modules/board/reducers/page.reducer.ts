@@ -43,6 +43,7 @@ export interface PageState {
     tags: CocomaterialTag[];
     vectors: CocomaterialApiListVectors | null;
   };
+  searching: boolean;
 }
 
 const initialPageState: PageState = {
@@ -77,6 +78,7 @@ const initialPageState: PageState = {
     tags: [],
     vectors: null,
   },
+  searching: false,
 };
 
 const reducer = createReducer(
@@ -200,6 +202,7 @@ const reducer = createReducer(
     state.voting = false;
     state.dragEnabled = true;
     state.drawing = false;
+    state.searching = false;
 
     if (popup.length) {
       state.initZone = null;
@@ -265,6 +268,11 @@ const reducer = createReducer(
   on(PageActions.readyToDraw, (state): PageState => {
     state.dragEnabled = false;
     state.drawing = true;
+
+    return state;
+  }),
+  on(PageActions.readyToSearch, (state): PageState => {
+    state.searching = true;
 
     return state;
   }),

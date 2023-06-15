@@ -26,6 +26,7 @@ export const {
   selectDrawingColor,
   selectDrawingSize,
   selectCocomaterial,
+  selectSearching,
 } = pageFeature;
 
 export const isFocus = (id: string) => {

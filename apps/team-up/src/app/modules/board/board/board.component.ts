@@ -40,6 +40,7 @@ import {
   selectUserId,
   selectZoom,
   selectDrawing,
+  selectSearching,
 } from '../selectors/page.selectors';
 
 import { BoardMoveService } from '../services/board-move.service';
@@ -64,6 +65,8 @@ import { ToolbarComponent } from '../components/toolbar/toolbar.component';
 import { UsersComponent } from '../components/users/users.component';
 import { HeaderComponent } from '../components/header/header.component';
 import { DrawingOptionsComponent } from '../components/drawing-options/drawing-options.component';
+import { SearchOptionsComponent } from '../components/search-options/search-options.component';
+import { Actions, ofType } from '@ngrx/effects';
 
 @UntilDestroy()
 @Component({
@@ -90,6 +93,7 @@ import { DrawingOptionsComponent } from '../components/drawing-options/drawing-o
     VectorComponent,
     PanelsComponent,
     DrawingOptionsComponent,
+    SearchOptionsComponent,
     AsyncPipe,
   ],
 })
@@ -103,6 +107,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly canvasMode$ = this.store.select(selectCanvasMode);
   public readonly newNote$ = new Subject<MouseEvent>();
   public readonly drawing = this.store.selectSignal(selectDrawing);
+  public readonly search = this.store.selectSignal(selectSearching);
 
   @ViewChild('workLayer', { read: ElementRef }) public workLayer!: ElementRef;
 
@@ -139,6 +144,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     private el: ElementRef,
     private route: ActivatedRoute,
     private notesService: NotesService,
+    private actions: Actions,
     public dialog: MatDialog
   ) {
     this.store.dispatch(PageActions.initBoard());
@@ -249,9 +255,13 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         filter(([, moveEnabled]) => moveEnabled)
       )
       .subscribe(([{ move, zoom }]) => {
-        this.workLayerNativeElement.style.transform = `translate(${move.x}px, ${move.y}px) scale(${zoom})`;
-
         this.store.dispatch(PageActions.setUserView({ zoom, position: move }));
+      });
+
+    this.actions
+      .pipe(ofType(PageActions.setUserView), untilDestroyed(this))
+      .subscribe(({ zoom, position }) => {
+        this.workLayerNativeElement.style.transform = `translate(${position.x}px, ${position.y}px) scale(${zoom})`;
       });
   }
 

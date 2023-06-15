@@ -58,6 +58,7 @@ export const PageActions = createActionGroup({
     }>(),
     'Next vectors page': props<{ tags: string[] }>(),
     'Ready to draw': emptyProps(),
+    'Ready to search': emptyProps(),
     'Set drawing params': props<{ color: string; size: number }>(),
     'Clean note drawing': emptyProps(),
     'Set note drawing': props<{
