@@ -1,5 +1,4 @@
 .text {
-  line-height: 1.1;
   overflow-wrap: break-word;
   user-select: none;
   white-space: pre-wrap;
@@ -36,6 +35,7 @@ textarea {
   height: 100%;
   outline: none;
   resize: none;
+  padding: 0;
 }
 
 :host {
@@ -98,46 +98,14 @@ textarea {
   &.drawing canvas {
     pointer-events: all;
   }
-
-  &.size1 {
-    .text,
-    textarea {
-      font-size: 3.5rem;
-    }
-  }
-
-  &.size2 {
-    .text,
-    textarea {
-      font-size: 2.5rem;
-    }
-  }
-
-  &.size3 {
-    .text,
-    textarea {
-      font-size: 1.9rem;
-    }
-  }
-
-  &.size4 {
-    .text,
-    textarea {
-      font-size: 1.6rem;
-    }
-  }
-
-  &.size5 {
-    .text,
-    textarea {
-      font-size: 1.3rem;
-    }
-  }
 }
 
 .text,
 textarea {
   font-family: "Open Sans", -apple-system, system-ui, sans-serif;
+  font-size: var(--text-size);
+  overflow: hidden;
+  line-height: 1.1;
 }
 
 .vote {

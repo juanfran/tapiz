@@ -65,6 +65,7 @@ interface State {
   customBg: boolean;
   voting: boolean;
   drawing: boolean;
+  textSize: number;
 }
 @UntilDestroy()
 @Component({
@@ -82,6 +83,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     this.state.set({
       note,
     });
+
+    this.calculateTextSize();
   }
 
   @HostBinding('class.drawing') get drawing() {
@@ -104,30 +107,6 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     return this.state.get('customBg');
   }
 
-  @HostBinding('class.size1') get size1() {
-    return this.state.get('note').text.length <= 30;
-  }
-
-  @HostBinding('class.size2') get size2() {
-    const length = this.state.get('note').text.length;
-    return length > 30 && length <= 40;
-  }
-
-  @HostBinding('class.size3') get size3() {
-    const length = this.state.get('note').text.length;
-    return length > 40 && length <= 55;
-  }
-
-  @HostBinding('class.size4') get size4() {
-    const length = this.state.get('note').text.length;
-    return length > 40 && length <= 100;
-  }
-
-  @HostBinding('class.size5') get size5() {
-    const length = this.state.get('note').text.length;
-    return length > 100;
-  }
-
   public readonly viewModel$ = this.state.select();
 
   @ViewChildren('textarea') textarea!: QueryList<ElementRef>;
@@ -140,6 +119,10 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     private boardDragDirective: BoardDragDirective,
     private cd: ChangeDetectorRef
   ) {
+    this.state.set({
+      textSize: 56,
+    });
+
     this.state
       .select('note')
       .pipe(first())
@@ -155,6 +138,12 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     this.state.connect('drawing', this.store.select(selectDrawing));
     this.state.hold(this.state.select('focus'), () => this.cd.markForCheck());
     this.state.hold(this.state.select('visible'), () => this.cd.markForCheck());
+    this.state.hold(this.state.select('textSize'), () => {
+      this.el.nativeElement.style.setProperty(
+        '--text-size',
+        `${this.state.get('textSize')}px`
+      );
+    });
   }
 
   @HostListener('mousedown', ['$event'])
@@ -506,5 +495,53 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     if (this.state.get('focus')) {
       this.focusTextarea();
     }
+  }
+
+  public calculateTextSize() {
+    const realSize = 268;
+
+    const sizeSearch = (fontSize: number) => {
+      const height = this.noteHeight(
+        this.state.get('note').text,
+        realSize,
+        `${fontSize}px "Open Sans", -apple-system, system-ui, sans-serif`,
+        1.1
+      );
+
+      if (height > 250) {
+        sizeSearch(fontSize - 1);
+      } else {
+        this.state.set({ textSize: fontSize });
+      }
+    };
+
+    sizeSearch(56);
+  }
+
+  private noteHeight(
+    texto: string,
+    width: number,
+    font: string,
+    lineHeight: number
+  ) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) return 0;
+
+    ctx.font = font;
+
+    const textLines = texto.split('\n');
+
+    const nlines = textLines.reduce((prev, line) => {
+      const error = 1.05;
+      const measure = ctx.measureText(line).width * error;
+
+      return prev + (Math.ceil(measure / width) || 1);
+    }, 0);
+
+    const realLineHeight = parseInt(font) * lineHeight;
+
+    return nlines * realLineHeight;
   }
 }
