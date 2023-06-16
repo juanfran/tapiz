@@ -5,14 +5,17 @@ import {
   filter,
   map,
   pairwise,
-  scan,
   share,
   startWith,
   withLatestFrom,
 } from 'rxjs/operators';
 import { Point } from '@team-up/board-commons';
 import { Store } from '@ngrx/store';
-import { selectPopupOpen, selectPosition } from '../selectors/page.selectors';
+import {
+  selectPopupOpen,
+  selectPosition,
+  selectZoom,
+} from '../selectors/page.selectors';
 import { concatLatestFrom } from '@ngrx/effects';
 
 @Injectable({
@@ -56,22 +59,20 @@ export class BoardZoomService {
           },
         };
       }),
-      scan(
-        (acc, curr) => {
-          if (curr.zoom > 0) {
-            return {
-              ...curr,
-              zoom: acc.zoom - 0.1,
-            };
-          }
-
+      withLatestFrom(this.store.select(selectZoom)),
+      map(([zoomEvent, zoom]) => {
+        if (zoomEvent.zoom > 0) {
           return {
-            ...curr,
-            zoom: acc.zoom + 0.1,
+            point: zoomEvent.point,
+            zoom: zoom - 0.1,
           };
-        },
-        { zoom: 1, point: { x: 0, y: 0 } }
-      ),
+        }
+
+        return {
+          point: zoomEvent.point,
+          zoom: zoom + 0.1,
+        };
+      }),
       map((zoomEvent) => {
         if (zoomEvent.zoom >= maxZoom) {
           zoomEvent.zoom = maxZoom;

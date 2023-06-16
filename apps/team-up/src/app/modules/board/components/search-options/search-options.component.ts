@@ -1,7 +1,6 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   ElementRef,
   ViewChild,
@@ -17,10 +16,16 @@ import { MatOptionModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import { selectNotes, selectUsers } from '../../selectors/board.selectors';
-import { map, startWith, withLatestFrom } from 'rxjs';
+import {
+  Observable,
+  combineLatest,
+  map,
+  startWith,
+  withLatestFrom,
+} from 'rxjs';
 import { PageActions } from '../../actions/page.actions';
-import { selectUserId, selectZoom } from '../../selectors/page.selectors';
-import { BoardActions } from '../../actions/board.actions';
+import { selectUserId } from '../../selectors/page.selectors';
+import { Note } from '@team-up/board-commons';
 @Component({
   selector: 'team-up-search-options',
   templateUrl: './search-options.component.html',
@@ -39,19 +44,16 @@ export class SearchOptionsComponent implements AfterViewInit {
   @ViewChild('search') searchInput!: ElementRef<HTMLInputElement>;
 
   public form = new FormGroup({
-    search: new FormControl(''),
+    search: new FormControl('', { nonNullable: true }),
   });
 
   public store = inject(Store);
-  public cd = inject(ChangeDetectorRef);
   public notes$ = this.store.select(selectNotes);
-  public userse$ = this.store.select(selectUsers);
+  public users$ = this.store.select(selectUsers);
   public currentUser$ = this.store.select(selectUserId);
-
-  public options$ = this.form.get('search')?.valueChanges.pipe(
-    startWith(''),
-    withLatestFrom(this.notes$, this.userse$, this.currentUser$),
-    map(([value, notes, users, currentUserId]) => {
+  public visibleNotes$ = combineLatest([this.notes$, this.users$]).pipe(
+    withLatestFrom(this.currentUser$),
+    map(([[notes, users], currentUserId]) => {
       const filteredNotes = notes.filter((note) => {
         const user = users.find((user) => user.id === note.ownerId);
 
@@ -66,43 +68,37 @@ export class SearchOptionsComponent implements AfterViewInit {
         return true;
       });
 
-      if (value) {
-        return filteredNotes.filter((note) =>
-          this.normalizeText(note.text).includes(value)
-        );
-      }
-
       return filteredNotes;
     })
   );
 
+  public options$!: Observable<Note[]>;
+
+  constructor() {
+    const search = this.form.get('search');
+
+    if (search) {
+      this.options$ = combineLatest([
+        search.valueChanges.pipe(startWith('')),
+        this.visibleNotes$,
+      ]).pipe(
+        map(([value, notes]) => {
+          if (value) {
+            return notes.filter((note) =>
+              this.normalizeText(note.text).includes(value)
+            );
+          }
+
+          return notes;
+        })
+      );
+    }
+  }
+
   public selected(event: MatAutocompleteSelectedEvent) {
-    this.form.get('search')?.setValue(null);
+    this.form.get('search')?.setValue('');
 
-    document.body.clientWidth / 2;
-    const x = -(event.option.value.position.x - document.body.clientWidth / 2);
-    const y = -(event.option.value.position.y - document.body.clientHeight / 2);
-
-    this.store.dispatch(
-      PageActions.setUserView({
-        zoom: 1,
-        position: {
-          x,
-          y,
-        },
-      })
-    );
-
-    this.store.dispatch(
-      BoardActions.moveCursor({
-        cursor: {
-          x,
-          y,
-        },
-      })
-    );
-
-    this.store.dispatch(PageActions.setPopupOpen({ popup: '' }));
+    this.store.dispatch(PageActions.goToNote({ note: event.option.value }));
   }
 
   public normalizeText(text: string) {

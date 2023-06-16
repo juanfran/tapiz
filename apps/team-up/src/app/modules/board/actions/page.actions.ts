@@ -66,5 +66,6 @@ export const PageActions = createActionGroup({
       drawing: Drawing[];
       history?: boolean;
     }>(),
+    'Go to note': props<{ note: Note }>(),
   },
 });

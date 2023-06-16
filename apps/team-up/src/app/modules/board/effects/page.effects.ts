@@ -8,6 +8,7 @@ import { BoardApiService } from '../services/board-api.service';
 import { BoardActions } from '../actions/board.actions';
 import { selectNoteFocus } from '../selectors/board.selectors';
 import { Note } from '@team-up/board-commons';
+import { pageFeature } from '../reducers/page.reducer';
 
 @Injectable()
 export class PageEffects {
@@ -91,6 +92,44 @@ export class PageEffects {
             id: action.id,
             drawing: action.drawing,
           },
+        });
+      })
+    );
+  });
+
+  public goToNote$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.goToNote),
+      concatLatestFrom(() => [this.store.select(pageFeature.selectZoom)]),
+      map(([{ note }, zoom]) => {
+        const noteWidth = 300;
+
+        const x =
+          -note.position.x * zoom +
+          document.body.clientWidth / 2 -
+          (noteWidth / 2) * zoom;
+        const y =
+          -note.position.y * zoom +
+          document.body.clientHeight / 2 -
+          (noteWidth / 2) * zoom;
+
+        return PageActions.setUserView({
+          zoom,
+          position: {
+            x,
+            y,
+          },
+        });
+      })
+    );
+  });
+
+  public goToNoteResetPopup$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.goToNote),
+      map(() => {
+        return PageActions.setPopupOpen({
+          popup: '',
         });
       })
     );
