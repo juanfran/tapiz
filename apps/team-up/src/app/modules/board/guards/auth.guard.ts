@@ -6,8 +6,9 @@ import {
 } from '@angular/router';
 import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { map } from 'rxjs/operators';
+import { filter, map, switchMap } from 'rxjs/operators';
 import { selectUserId } from '../selectors/page.selectors';
+import { AuthService } from '@/app/services/auth.service';
 
 export const AuthGuard: CanActivateFn = (
   next: ActivatedRouteSnapshot,
@@ -15,15 +16,22 @@ export const AuthGuard: CanActivateFn = (
 ) => {
   const store = inject(Store);
   const router = inject(Router);
-  return store.select(selectUserId).pipe(
-    map((userId) => {
-      if (userId.length) {
-        return true;
-      }
+  const authService = inject(AuthService);
 
-      sessionStorage.setItem('url', state.url);
+  return authService.authReady.pipe(
+    filter((ready) => ready),
+    switchMap(() => {
+      return store.select(selectUserId).pipe(
+        map((userId) => {
+          if (userId.length) {
+            return true;
+          }
 
-      return router.parseUrl('/login');
+          sessionStorage.setItem('url', state.url);
+
+          return router.parseUrl('/login');
+        })
+      );
     })
   );
 };

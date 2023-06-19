@@ -1,8 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { PageActions } from './modules/board/actions/page.actions';
 import { RouterOutlet } from '@angular/router';
-import { User } from 'firebase/auth';
+import { CommonModule } from '@angular/common';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'team-up-root',
@@ -10,20 +9,12 @@ import { User } from 'firebase/auth';
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, CommonModule],
 })
 export class AppComponent {
   public title = 'team up';
 
-  constructor(private store: Store) {
-    const userStr = localStorage.getItem('user');
-
-    if (userStr) {
-      const user: User = JSON.parse(userStr);
-
-      if (user['uid']) {
-        this.store.dispatch(PageActions.setUserId({ userId: user['uid'] }));
-      }
-    }
+  constructor(private authService: AuthService) {
+    this.authService.initAuth();
   }
 }

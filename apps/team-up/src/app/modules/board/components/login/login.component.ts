@@ -47,10 +47,6 @@ export class LoginComponent {
       const result = await signInWithPopup(this.auth, provider);
 
       if (this.auth.currentUser) {
-        const idToken = await this.auth.currentUser.getIdToken();
-
-        document.cookie = `auth=${idToken};path=/`;
-
         localStorage.setItem('user', JSON.stringify(result.user));
 
         this.store.dispatch(PageActions.setUserId({ userId: result.user.uid }));

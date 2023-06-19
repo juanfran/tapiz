@@ -17,6 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import { AuthService } from '@/app/services/auth.service';
 
 @UntilDestroy()
 @Component({
@@ -44,6 +45,7 @@ export class BoardListComponent implements OnInit {
   public readonly model$ = this.state.select();
 
   constructor(
+    private authService: AuthService,
     private boardApiService: BoardApiService,
     private router: Router,
     private store: Store,
@@ -60,11 +62,7 @@ export class BoardListComponent implements OnInit {
   }
 
   public logout() {
-    document.cookie = '';
-    localStorage.removeItem('auth');
-    localStorage.removeItem('user');
-    this.store.dispatch(PageActions.setUserId({ userId: '' }));
-    this.router.navigate(['/login']);
+    this.authService.logout();
   }
 
   public onSubmit(value: string) {
