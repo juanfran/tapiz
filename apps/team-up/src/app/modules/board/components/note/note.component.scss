@@ -43,7 +43,7 @@ textarea {
   --emoji-height: 33px;
 
   background-color: #fdfcdc;
-  box-shadow: 0 0 15px 10px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.15);
   display: block;
   height: 300px;
   padding: var(--spacing-2);
@@ -68,14 +68,18 @@ textarea {
   &.custom-bg {
     background-color: var(--custom-bg);
 
-    .name,
-    .text,
-    .characters {
+    .text {
       color: var(--custom-fg);
     }
 
+    .name,
+    .characters {
+      color: var(--custom-outline);
+    }
+
+
     &.focus {
-      outline: solid 2px var(--custom-fg);
+      outline: solid 2px var(--custom-outline);
     }
   }
 

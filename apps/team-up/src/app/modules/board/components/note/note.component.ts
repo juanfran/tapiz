@@ -20,7 +20,6 @@ import {
   filter,
   first,
   map,
-  startWith,
   switchMap,
   take,
 } from 'rxjs/operators';
@@ -47,7 +46,7 @@ import {
 } from '../../selectors/page.selectors';
 import { Observable } from 'rxjs';
 import hotkeys from 'hotkeys-js';
-import { contrast } from './contrast';
+import { contrast, hexToRgb } from './contrast';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 import { concatLatestFrom } from '@ngrx/effects';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
@@ -311,17 +310,19 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     });
 
     if (insidePanel?.color && insidePanel.color !== '#fdfcdc') {
-      const contrast1 = contrast('#ffffff', insidePanel?.color);
-      const contrast2 = contrast('#000000', insidePanel?.color);
+      const rgb = hexToRgb(insidePanel.color);
 
-      if (contrast1 > contrast2) {
-        this.nativeElement.style.setProperty('--custom-fg', '#fff');
-      } else {
-        this.nativeElement.style.setProperty('--custom-fg', '#000');
-      }
+      this.nativeElement.style.setProperty('--custom-fg', '#000');
 
       this.state.set({ customBg: true });
-      this.nativeElement.style.setProperty('--custom-bg', insidePanel.color);
+      this.nativeElement.style.setProperty(
+        '--custom-bg',
+        `rgba(${rgb?.r}, ${rgb?.g}, ${rgb?.b}, 0.3)`
+      );
+      this.nativeElement.style.setProperty(
+        '--custom-outline',
+        insidePanel.color
+      );
     } else {
       this.state.set({ customBg: false });
     }
