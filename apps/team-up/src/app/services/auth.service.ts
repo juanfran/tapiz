@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { PageActions } from '../modules/board/actions/page.actions';
 import { User } from '@team-up/board-commons';
-import { User as FirebaeUser } from 'firebase/auth';
+import { User as FirebaseUser } from 'firebase/auth';
 import { BehaviorSubject, filter, take } from 'rxjs';
 import { selectUserId } from '../modules/board/selectors/page.selectors';
 
@@ -31,10 +31,12 @@ export class AuthService {
     const userStr = localStorage.getItem('user');
 
     if (userStr) {
-      const user: FirebaeUser = JSON.parse(userStr);
+      const user: FirebaseUser = JSON.parse(userStr);
 
       if (user['uid']) {
         this.store.dispatch(PageActions.setUserId({ userId: user['uid'] }));
+      } else {
+        this.router.navigate(['/login']);
       }
     } else {
       this.authReady$.next(true);
@@ -52,7 +54,7 @@ export class AuthService {
             this.refreshToken();
 
             setInterval(async () => {
-              this.refreshToken();
+              this.refreshToken(true);
             }, 55 * 60 * 1000);
           } else {
             this.logout();
@@ -69,9 +71,9 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  private async refreshToken() {
+  private async refreshToken(forceRefresh = false) {
     if (this.auth.currentUser) {
-      const idToken = await this.auth.currentUser.getIdToken();
+      const idToken = await this.auth.currentUser.getIdToken(forceRefresh);
       document.cookie = `auth=${idToken};path=/`;
 
       this.authReady$.next(true);
