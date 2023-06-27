@@ -82,6 +82,22 @@ export function getBoardUser(
     .catch(() => undefined);
 }
 
+export function getBoardUsers(boardId: string): Promise<
+  {
+    id: string;
+    visible: boolean;
+    name: string;
+  }[]
+> {
+  return client
+    .query(
+      'SELECT account_id as id, visible, name FROM account_board LEFT JOIN account ON account_board.account_id = account.id where board_id = $1',
+      [boardId]
+    )
+    .then((res) => res.rows)
+    .catch(() => []);
+}
+
 export function getBoards(ownerId: string): Promise<
   {
     id: string;
@@ -101,7 +117,7 @@ export function getBoards(ownerId: string): Promise<
 
 export async function createBoard(
   name = 'New board',
-  owner: string,
+  ownerId: string,
   board: unknown
 ): Promise<string | Error> {
   const result = await client
@@ -117,7 +133,7 @@ export async function createBoard(
     await client
       .query(
         `INSERT INTO account_board(account_id, board_id, is_owner) VALUES($1, $2, $3)`,
-        [owner, boardRow.id, true]
+        [ownerId, boardRow.id, true]
       )
       .catch((e) => console.error(e.stack));
 
@@ -205,8 +221,20 @@ export function getUserByName(name: string) {
     .catch(() => undefined);
 }
 
-export function deleteAccount(ownerId: string): Promise<unknown> {
+export function deleteAccount(userId: string): Promise<unknown> {
   return client
-    .query('DELETE FROM account_board where account_id = $1', [ownerId])
+    .query('DELETE FROM account where id = $1', [userId])
+    .catch(() => undefined);
+}
+
+export function createUser(userId: string, name: string): Promise<unknown> {
+  return client
+    .query(
+      `INSERT INTO account (id, name)
+      VALUES ($1, $2)
+      ON CONFLICT (id) DO UPDATE
+        SET name = excluded.name;`,
+      [userId, name]
+    )
     .catch(() => undefined);
 }

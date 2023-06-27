@@ -9,6 +9,7 @@ import {
   deleteBoard,
   deleteAccount,
   leaveBoard,
+  createUser,
 } from './db';
 import * as cookieParser from 'cookie-parser';
 import { body, validationResult } from 'express-validator';
@@ -66,6 +67,8 @@ app.post(
 
       return;
     }
+
+    await createUser(req.user.sub, req.user.name);
 
     const name = req.body.name;
     const newBoardId = await createBoard(name, req.user.sub, {
