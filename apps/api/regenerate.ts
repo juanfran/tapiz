@@ -15,8 +15,9 @@ async function createDatabase() {
 
   console.log('drop tables');
   await client.query(`
-    DROP TABLE if exists boards, users cascade;
-    DROP TABLE if exists board, account_board cascade;
+    DROP TABLE if exists account cascade;
+    DROP TABLE if exists account_board cascade;
+    DROP TABLE if exists board;
   `);
 
   console.log('create extensions');
@@ -34,10 +35,18 @@ async function createDatabase() {
     );
   `);
 
+  console.log('create accounts');
+  await client.query(`
+    CREATE TABLE account (
+      id VARCHAR (255) PRIMARY KEY ,
+      name VARCHAR (255) NOT NULL
+    );
+  `);
+
   console.log('create account_board');
   await client.query(`
     CREATE TABLE account_board (
-      account_id VARCHAR (255),
+      account_id VARCHAR (255) NOT NULL REFERENCES account(id) ON DELETE CASCADE,
       board_id uuid NOT NULL REFERENCES board(id) ON DELETE CASCADE,
       is_owner boolean DEFAULT false,
       visible boolean DEFAULT false,

@@ -64,9 +64,17 @@ export class Server {
         throw new Error('board not found');
       }
 
+      const users = await this.getBoardUsers(boardId);
+
       this.updateBoard(boardId, {
         ...board.board,
-        users: [],
+        users: users.map((it) => {
+          return {
+            ...it,
+            connected: false,
+            cursor: null,
+          };
+        }),
       });
     }
   }
@@ -107,6 +115,10 @@ export class Server {
 
   public getBoardUser(boardId: string, userId: User['id']) {
     return db.getBoardUser(boardId, userId);
+  }
+
+  public getBoardUsers(boardId: string) {
+    return db.getBoardUsers(boardId);
   }
 
   public setUserVisibility(

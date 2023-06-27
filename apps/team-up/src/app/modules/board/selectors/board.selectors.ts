@@ -29,7 +29,9 @@ export const selectUserById = (id: string) => {
 
 export const selectCursors = () => {
   return createSelector(selectUsers, (users) => {
-    return users.filter((user) => !!user.cursor).map((user) => user);
+    return users
+      .filter((user) => !!user.cursor && user.connected)
+      .map((user) => user);
   });
 };
 

@@ -35,4 +35,3 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Board links (move your board to previous store prosition)
 - [ ] Multi drag notes
 - [ ] Follow other user cursor
-- [ ] Save data from previous users (show name in notes)

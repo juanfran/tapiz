@@ -52,7 +52,7 @@ export class UsersComponent {
       selectSlice(['visible', 'users', 'userId', 'userHighlight']),
       map(({ visible, users, userId, userHighlight }) => ({
         visible,
-        users: users.filter((user) => user.id !== userId && user.connected),
+        users: users.filter((user) => user.id !== userId),
         currentUser: users.find((user) => user.id === userId),
         userHighlight,
       }))

@@ -7,7 +7,7 @@ import {
 } from '@team-up/board-commons';
 import * as WebSocket from 'ws';
 import { Server } from './server';
-import { joinBoard, getBoardOwners } from './db';
+import { joinBoard, getBoardOwners, createUser } from './db';
 import { validation } from './validation';
 // import { saveMsg, init } from './save-session';
 
@@ -144,7 +144,8 @@ export class Client {
   private async join(message: { boardId: string }) {
     this.boardId = message.boardId;
 
-    joinBoard(this.id, this.boardId);
+    await createUser(this.id, this.username);
+    await joinBoard(this.id, this.boardId);
 
     try {
       await this.server.createBoard(this.boardId);

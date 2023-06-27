@@ -8,8 +8,13 @@ CREATE TABLE IF NOT EXISTS board (
   created_on TIMESTAMP NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS account_board (
-  account_id VARCHAR (255),
+CREATE TABLE account (
+  id VARCHAR (255) PRIMARY KEY ,
+  name VARCHAR (255) NOT NULL
+);
+
+CREATE TABLE account_board (
+  account_id VARCHAR (255) NOT NULL REFERENCES account(id) ON DELETE CASCADE,
   board_id uuid NOT NULL REFERENCES board(id) ON DELETE CASCADE,
   is_owner boolean DEFAULT false,
   visible boolean DEFAULT false,
