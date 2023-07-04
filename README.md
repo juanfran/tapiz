@@ -14,7 +14,7 @@ You can get started with Teamup locally or self-host it with docker.
 
 This is an alpha release and not yet ready for production use. Please open an issue with feedback about the current features and any issues you encounter. Let us know if you have any suggestions for new features.
 
-## TODO
+## TODO, features
 
 - [ ] Multilanguage
 - [ ] Shapes
@@ -22,16 +22,27 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Timer
 - [ ] Vote counter
 - [ ] Duplicate board
-- [ ] Permissions
+- [ ] Export with groups & panels
+- [ ] Board screenshot? (Redisign home screen)
+- [ ] Multi board (one board with multiples ¿views?, easy to move between phases in retrospectives)
+- [ ] Board links (share a board position with other useres)
+- [ ] Multi drag notes
+- [ ] Follow other user screen
+- [ ] Copy paste
+- [ ] Teams (Access permissions)
+- [ ] Undo/Redo buttons in drawing mode
+- [ ] Reactions (emoji animation not persisted)
+- [ ] D&D with snap
+- [ ] Personalize board background, radius, border...
+- [ ] Rotate imaga, text & vector
+- [ ] Components (kanban, grid, etc)
+- [ ] Arrows (connect nodes)
+
+## TODO, code refactor
+
 - [ ] Refactor toolbar
 - [ ] Refactor css
-- [ ] Export with groups & panels
-- [ ] Split board.module
 - [ ] Deprecated RX operators
 - [ ] Code linter
-- [ ] Board screenshot
 - [ ] Board Size limit
-- [ ] Multi board (one board with multiples ¿views?, easy to move between phases in retrospectives)
-- [ ] Board links (move your board to previous store prosition)
-- [ ] Multi drag notes
-- [ ] Follow other user cursor
+- [ ] Split board.module
