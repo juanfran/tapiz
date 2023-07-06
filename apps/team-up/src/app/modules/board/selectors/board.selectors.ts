@@ -1,5 +1,5 @@
 import { createSelector } from '@ngrx/store';
-import { Note, User } from '@team-up/board-commons';
+import { NodeType, Note, User } from '@team-up/board-commons';
 import { boardFeature } from '../reducers/board.reducer';
 import { selectFocusId } from './page.selectors';
 
@@ -41,6 +41,27 @@ export const usernameById = (userId: User['id']) => {
 
     return user?.name ?? '';
   });
+};
+
+export const selectAllNodes = () => {
+  return createSelector(
+    selectNotes,
+    selectImages,
+    selectGroups,
+    selectPanels,
+    selectTexts,
+    selectVectors,
+    (note, image, group, panel, text, vector) => {
+      return {
+        note,
+        image,
+        group,
+        panel,
+        text,
+        vector,
+      } as unknown as Record<NodeType, { id: string; ownerId?: string }[]>;
+    }
+  );
 };
 
 export const selectNoteFocus = createSelector(

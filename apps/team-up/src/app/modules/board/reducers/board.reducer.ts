@@ -76,7 +76,7 @@ const reducer = createReducer(
       return state;
     }
   ),
-  on(BoardActions.wsSetState, (state, { data }): BoardState => {
+  on(BoardActions.setState, (state, { data }): BoardState => {
     const commonState = {
       notes: state.notes,
       users: state.users,

@@ -24,8 +24,5 @@ export const BoardActions = {
     BoardCommonActions.setVisible,
     props<{ visible: boolean }>()
   ),
-  wsSetState: createAction(
-    BoardCommonActions.wsSetState,
-    props<{ id: string; data: Diff }>()
-  ),
+  setState: createAction(BoardCommonActions.setState, props<{ data: Diff }>()),
 };

@@ -84,7 +84,7 @@ export class Client {
         this.server.sendAll(
           this.boardId,
           {
-            type: BoardCommonActions.wsSetState,
+            type: BoardCommonActions.setState,
             data: diffResult,
           },
           [this]
@@ -124,7 +124,7 @@ export class Client {
     this.server.sendAll(
       this.boardId,
       {
-        type: BoardCommonActions.wsSetState,
+        type: BoardCommonActions.setState,
         data: {
           edit: {
             user: [
@@ -194,7 +194,7 @@ export class Client {
       this.server.sendAll(
         this.boardId,
         {
-          type: BoardCommonActions.wsSetState,
+          type: BoardCommonActions.setState,
           data: {
             edit: {
               user: [user],
@@ -205,7 +205,7 @@ export class Client {
       );
 
       this.send({
-        type: BoardCommonActions.wsSetState,
+        type: BoardCommonActions.setState,
         data: diff,
       });
     } catch (e) {

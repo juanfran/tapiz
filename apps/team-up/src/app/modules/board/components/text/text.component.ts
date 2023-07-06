@@ -14,7 +14,7 @@ import {
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { map, skip, take } from 'rxjs/operators';
+import { filter, first, map, skip, take, withLatestFrom } from 'rxjs/operators';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
@@ -25,6 +25,7 @@ import { selectFocusId } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
 import { BoardMoveService } from '../../services/board-move.service';
 import { NgIf, AsyncPipe } from '@angular/common';
+import { pageFeature } from '../../reducers/page.reducer';
 
 interface State {
   node: Text;
@@ -158,7 +159,9 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
   }
 
   public focusTextarea() {
-    (this.textarea.nativeElement as HTMLTextAreaElement).focus();
+    if (this.textarea.nativeElement) {
+      (this.textarea.nativeElement as HTMLTextAreaElement).focus();
+    }
   }
 
   public startDrag(position: Point) {}
@@ -220,9 +223,22 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
       };
     });
 
-    if (this.state.get('focus')) {
-      this.edit();
-    }
+    this.store
+      .select(selectFocusId)
+      .pipe(
+        first(),
+        withLatestFrom(
+          this.store.select(pageFeature.selectAdditionalContext),
+          this.state.select('node').pipe(map((node) => node.id))
+        ),
+        filter(([id, context, nodeId]) => {
+          return id === nodeId && context[id] !== 'pasted';
+        }),
+        untilDestroyed(this)
+      )
+      .subscribe(() => {
+        this.edit();
+      });
 
     this.state
       .select('node')

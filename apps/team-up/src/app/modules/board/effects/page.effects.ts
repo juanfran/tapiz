@@ -135,6 +135,15 @@ export class PageEffects {
     );
   });
 
+  public pasteNodeAddNode$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.pasteNode),
+      map((action) => {
+        return BoardActions.addNode(action);
+      })
+    );
+  });
+
   constructor(
     private actions$: Actions,
     private store: Store,

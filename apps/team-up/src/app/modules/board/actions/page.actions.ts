@@ -11,6 +11,7 @@ import {
   CocomaterialApiListVectors,
   Drawing,
   Note,
+  AddNode,
 } from '@team-up/board-commons';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 
@@ -67,5 +68,6 @@ export const PageActions = createActionGroup({
       history?: boolean;
     }>(),
     'Go to note': props<{ note: Note }>(),
+    'Paste node': props<AddNode>(),
   },
 });
