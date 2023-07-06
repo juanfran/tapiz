@@ -44,6 +44,7 @@ export interface PageState {
     vectors: CocomaterialApiListVectors | null;
   };
   searching: boolean;
+  additionalContext: Record<string, unknown>;
 }
 
 const initialPageState: PageState = {
@@ -79,6 +80,7 @@ const initialPageState: PageState = {
     vectors: null,
   },
   searching: false,
+  additionalContext: {},
 };
 
 const reducer = createReducer(
@@ -165,7 +167,7 @@ const reducer = createReducer(
 
     return state;
   }),
-  on(BoardActions.wsSetState, (state, { data }): PageState => {
+  on(BoardActions.setState, (state, { data }): PageState => {
     const currentUser = data.set?.user?.find((it) => it.id === state.userId);
 
     let visible = state.visible;
@@ -279,6 +281,11 @@ const reducer = createReducer(
   on(PageActions.setDrawingParams, (state, { size, color }): PageState => {
     state.drawingColor = color;
     state.drawingSize = size;
+
+    return state;
+  }),
+  on(PageActions.pasteNode, (state, { node }): PageState => {
+    state.additionalContext[node.id] = 'pasted';
 
     return state;
   })

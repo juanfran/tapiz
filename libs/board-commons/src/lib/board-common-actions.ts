@@ -7,5 +7,5 @@ export const BoardCommonActions = {
   addNode: `${ActionType} AddNode`,
   removeNode: `${ActionType} RemoveNode`,
   setVisible: `${ActionType} Set visible`,
-  wsSetState: `${ActionType} Ws set state`,
+  setState: `${ActionType} Set state`,
 };

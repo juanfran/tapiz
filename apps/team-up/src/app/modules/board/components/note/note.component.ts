@@ -22,6 +22,7 @@ import {
   map,
   switchMap,
   take,
+  withLatestFrom,
 } from 'rxjs/operators';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
@@ -46,11 +47,12 @@ import {
 } from '../../selectors/page.selectors';
 import { Observable } from 'rxjs';
 import hotkeys from 'hotkeys-js';
-import { contrast, hexToRgb } from './contrast';
+import { hexToRgb } from './contrast';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 import { concatLatestFrom } from '@ngrx/effects';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import { DrawingDirective } from '../../directives/drawing.directive';
+import { pageFeature } from '../../reducers/page.reducer';
 interface State {
   edit: boolean;
   note: Note;
@@ -414,11 +416,19 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
     this.store
       .select(selectFocusId)
-      .pipe(first(), untilDestroyed(this))
-      .subscribe((id) => {
-        if (id === this.state.get('note').id) {
-          this.edit();
-        }
+      .pipe(
+        first(),
+        withLatestFrom(
+          this.store.select(pageFeature.selectAdditionalContext),
+          this.state.select('note').pipe(map((note) => note.id))
+        ),
+        filter(([id, context, noteId]) => {
+          return id === noteId && context[id] !== 'pasted';
+        }),
+        untilDestroyed(this)
+      )
+      .subscribe(() => {
+        this.edit();
       });
 
     this.boardDragDirective.setHost(this);
@@ -482,7 +492,9 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   }
 
   public focusTextarea() {
-    (this.textarea.first.nativeElement as HTMLTextAreaElement).focus();
+    if (this.textarea.first) {
+      (this.textarea.first.nativeElement as HTMLTextAreaElement).focus();
+    }
   }
 
   public setDrawing(newLine: Drawing[]) {

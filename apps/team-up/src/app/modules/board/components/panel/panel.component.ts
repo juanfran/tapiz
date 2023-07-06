@@ -17,7 +17,7 @@ import {
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { first, pluck } from 'rxjs/operators';
+import { filter, first, map, pluck, withLatestFrom } from 'rxjs/operators';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
@@ -31,6 +31,7 @@ import {
 import hotkeys from 'hotkeys-js';
 import { MoveService } from '../../services/move.service';
 import { NgIf, AsyncPipe } from '@angular/common';
+import { pageFeature } from '../../reducers/page.reducer';
 
 interface State {
   edit: boolean;
@@ -205,11 +206,19 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
   public ngOnInit() {
     this.store
       .select(selectFocusId)
-      .pipe(first())
-      .subscribe((id) => {
-        if (id === this.state.get('panel').id) {
-          this.edit();
-        }
+      .pipe(
+        first(),
+        withLatestFrom(
+          this.store.select(pageFeature.selectAdditionalContext),
+          this.state.select('panel').pipe(map((panel) => panel.id))
+        ),
+        filter(([id, context, panelId]) => {
+          return id === panelId && context[id] !== 'pasted';
+        }),
+        untilDestroyed(this)
+      )
+      .subscribe(() => {
+        this.edit();
       });
 
     this.boardDragDirective.setHost(this);
@@ -248,7 +257,9 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
   }
 
   public focusTextarea() {
-    (this.textarea.first.nativeElement as HTMLTextAreaElement).focus();
+    if (this.textarea.first) {
+      (this.textarea.first.nativeElement as HTMLTextAreaElement).focus();
+    }
   }
 
   public newColor(e: Event) {
@@ -269,7 +280,7 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
 
   public ngAfterViewInit() {
     if (this.state.get('focus')) {
-      (this.textarea.first.nativeElement as HTMLTextAreaElement).focus();
+      this.focusTextarea();
     }
 
     if (this.resize) {

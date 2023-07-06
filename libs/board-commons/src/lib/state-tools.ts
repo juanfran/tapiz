@@ -16,14 +16,26 @@ export const getDiff = (action: any, userId?: string): Diff | null => {
       },
     };
   } else if (action.type === BoardCommonActions.addNode) {
+    if (action.node.type === 'note') {
+      return {
+        add: {
+          [action.nodeType]: [
+            {
+              ...action.node,
+              votes: 0,
+              emojis: [],
+              ownerId: userId ?? action.node.ownerId,
+            },
+          ],
+        },
+      };
+    }
+
     return {
       add: {
         [action.nodeType]: [
           {
             ...action.node,
-            votes: 0,
-            emojis: [],
-            ownerId: userId ?? action.node.ownerId,
           },
         ],
       },
@@ -115,16 +127,6 @@ export function applyDiff(diff: Diff, state: CommonState): CommonState {
 
       if (value && state && state[stateKey]) {
         const newElements: unknown[] = [];
-
-        value.forEach((edit) => {
-          const finded = (state[stateKey] as any[]).find(
-            (old) => old.id === edit.id
-          );
-
-          if (!finded) {
-            newElements.push(edit);
-          }
-        });
 
         state = {
           ...state,

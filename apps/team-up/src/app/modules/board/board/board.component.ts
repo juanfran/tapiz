@@ -67,6 +67,7 @@ import { HeaderComponent } from '../components/header/header.component';
 import { DrawingOptionsComponent } from '../components/drawing-options/drawing-options.component';
 import { SearchOptionsComponent } from '../components/search-options/search-options.component';
 import { Actions, ofType } from '@ngrx/effects';
+import { CopyPasteDirective } from '../directives/copy-paste.directive';
 
 @UntilDestroy()
 @Component({
@@ -96,6 +97,7 @@ import { Actions, ofType } from '@ngrx/effects';
     SearchOptionsComponent,
     AsyncPipe,
   ],
+  hostDirectives: [CopyPasteDirective],
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly notes$ = this.store.select(selectNotes);
