@@ -16,22 +16,22 @@ This is an alpha release and not yet ready for production use. Please open an is
 
 ## TODO, features
 
+- [ ] Multi drag notes
+- [ ] Follow other user screen
+- [ ] D&D with snap
+- [ ] Vote counter
 - [ ] Multilanguage
 - [ ] Shapes
 - [ ] Templates
 - [ ] Timer
-- [ ] Vote counter
 - [ ] Duplicate board
 - [ ] Export with groups & panels
 - [ ] Board screenshot? (Redisign home screen)
 - [ ] Multi board (one board with multiples ¿views?, easy to move between phases in retrospectives)
 - [ ] Board links (share a board position with other useres)
-- [ ] Multi drag notes
-- [ ] Follow other user screen
 - [ ] Teams (Access permissions)
 - [ ] Undo/Redo buttons in drawing mode
 - [ ] Reactions (emoji animation not persisted)
-- [ ] D&D with snap
 - [ ] Personalize board background, radius, border...
 - [ ] Rotate imaga, text & vector
 - [ ] Components (kanban, grid, etc)
@@ -48,3 +48,4 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Split board.module
 - [ ] Set user view vs mouse, merge?
 - [ ] Set user view vs mouse vs ws message vs ws set state, redux devtools polution
+- [ ] persistBoard every x seconds reduce the number of db writes
