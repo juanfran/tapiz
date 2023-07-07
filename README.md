@@ -36,6 +36,7 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Rotate imaga, text & vector
 - [ ] Components (kanban, grid, etc)
 - [ ] Arrows (connect nodes)
+- [ ] D&D cocomaterial on add
 
 ## TODO, code refactor
 
