@@ -18,7 +18,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 
 - [ ] Multi drag notes
 - [ ] Follow other user screen
-- [ ] D&D with snap
 - [ ] Vote counter
 - [ ] Multilanguage
 - [ ] Shapes
