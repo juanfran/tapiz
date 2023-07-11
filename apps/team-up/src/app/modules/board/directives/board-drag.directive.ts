@@ -5,12 +5,13 @@ import {
   ElementRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { animationFrameScheduler, fromEvent } from 'rxjs';
+import { animationFrameScheduler, fromEvent, merge } from 'rxjs';
 import {
   filter,
   finalize,
   map,
   pairwise,
+  startWith,
   switchMap,
   takeUntil,
   tap,
@@ -19,7 +20,11 @@ import {
 } from 'rxjs/operators';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Draggable } from '../models/draggable.model';
-import { selectDragEnabled, selectZoom } from '../selectors/page.selectors';
+import {
+  selectDragEnabled,
+  selectPosition,
+  selectZoom,
+} from '../selectors/page.selectors';
 import { Point } from '@team-up/board-commons';
 import { concatLatestFrom } from '@ngrx/effects';
 
@@ -31,6 +36,7 @@ import { concatLatestFrom } from '@ngrx/effects';
 export class BoardDragDirective implements AfterViewInit {
   public host?: Draggable;
   public initDragPosition: Point | null = null;
+  private snap = 50;
 
   constructor(
     private el: ElementRef,
@@ -39,17 +45,27 @@ export class BoardDragDirective implements AfterViewInit {
   ) {}
 
   public ngAfterViewInit() {
-    const initialPosition = this.host?.position
-      ? this.host.position
-      : { x: 0, y: 0 };
-    this.listen(initialPosition);
+    this.listen();
   }
 
   public setHost(host: Draggable) {
     this.host = host;
   }
 
-  public listen(initialPosition: Point) {
+  public listen() {
+    const keydown$ = fromEvent<KeyboardEvent>(document, 'keydown').pipe(
+      map(
+        (event) => event.code === 'ControlLeft' || event.code === 'ControlRight'
+      )
+    );
+    const keyup$ = fromEvent<KeyboardEvent>(document, 'keyup').pipe(
+      map(
+        (event) =>
+          !(event.code === 'ControlLeft' || event.code === 'ControlRight')
+      )
+    );
+    const controlPressed$ = merge(keydown$, keyup$).pipe(startWith(false));
+
     const mouseDown$ = fromEvent<MouseEvent>(
       this.el.nativeElement,
       'mousedown'
@@ -67,10 +83,12 @@ export class BoardDragDirective implements AfterViewInit {
       }),
       concatLatestFrom(() => this.store.select(selectDragEnabled)),
       filter(([, dragEnabled]) => dragEnabled),
-      map(() => true)
+      map(([event]) => event)
     );
 
     const mouseUp$ = fromEvent(window, 'mouseup').pipe(map(() => false));
+
+    let startPositionDiff = { x: 0, y: 0 };
 
     const mouseMove$ = fromEvent<MouseEvent>(document.body, 'mousemove').pipe(
       throttleTime(0, animationFrameScheduler),
@@ -79,37 +97,43 @@ export class BoardDragDirective implements AfterViewInit {
         mouseMove.preventDefault();
 
         return {
-          clientX: mouseMove.clientX,
-          clientY: mouseMove.clientY,
+          x: mouseMove.clientX,
+          y: mouseMove.clientY,
         };
       }),
-      pairwise(),
-      map(([mouseMovePrev, mouseMoveCurr]) => {
+      withLatestFrom(
+        this.store.select(selectZoom),
+        this.store.select(selectPosition)
+      ),
+      map(([move, zoom, position]) => {
+        const posX = -position.x + move.x;
+        const posY = -position.y + move.y;
+
         return {
-          x: mouseMovePrev.clientX - mouseMoveCurr.clientX,
-          y: mouseMovePrev.clientY - mouseMoveCurr.clientY,
-        };
-      }),
-      withLatestFrom(this.store.select(selectZoom)),
-      map(([move, zoom]) => {
-        return {
-          x: move.x / zoom,
-          y: move.y / zoom,
+          x: posX / zoom,
+          y: posY / zoom,
         };
       })
     );
 
     const move$ = mouseDown$.pipe(
-      switchMap(() => {
+      withLatestFrom(
+        this.store.select(selectZoom),
+        this.store.select(selectPosition)
+      ),
+      switchMap(([event, zoom, position]) => {
+        const initialPosition = this.host?.position ?? { x: 0, y: 0 };
+
+        const posX = -position.x + event.clientX;
+        const posY = -position.y + event.clientY;
+
+        startPositionDiff = {
+          x: posX / zoom - initialPosition.x,
+          y: posY / zoom - initialPosition.y,
+        };
+
         return mouseMove$.pipe(
           takeUntil(mouseUp$),
-          map((move) => {
-            const previousPosition = this.host?.position ?? initialPosition;
-            return {
-              x: previousPosition.x - move.x,
-              y: previousPosition.y - move.y,
-            };
-          }),
           tap((initialPosition) => {
             if (!this.initDragPosition) {
               this.initDragPosition = initialPosition;
@@ -124,14 +148,26 @@ export class BoardDragDirective implements AfterViewInit {
       })
     );
 
-    move$.pipe(untilDestroyed(this)).subscribe((move) => {
-      // TODO: performance?
-      // this.nativeElement.style.transform = `translate(${move.x}px, ${move.y}px)`;
-      if (this.host) {
-        this.host.move(move);
-        this.appRef.tick();
-      }
-    });
+    move$
+      .pipe(withLatestFrom(controlPressed$), untilDestroyed(this))
+      .subscribe(([move, ctrlPressed]) => {
+        if (this.host) {
+          let finalPosition = {
+            x: move.x - startPositionDiff.x,
+            y: move.y - startPositionDiff.y,
+          };
+
+          if (ctrlPressed) {
+            finalPosition = {
+              x: Math.round(finalPosition.x / this.snap) * this.snap,
+              y: Math.round(finalPosition.y / this.snap) * this.snap,
+            };
+          }
+
+          this.host.move(finalPosition);
+          this.appRef.tick();
+        }
+      });
   }
 
   public get nativeElement() {
