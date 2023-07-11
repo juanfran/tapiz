@@ -53,19 +53,12 @@ export class BoardDragDirective implements AfterViewInit {
   }
 
   public listen() {
-    const keydown$ = fromEvent<KeyboardEvent>(document, 'keydown').pipe(
-      map(
-        (event) => event.code === 'ControlLeft' || event.code === 'ControlRight'
-      )
+    const keydown$ = fromEvent<KeyboardEvent>(document, 'keydown');
+    const keyup$ = fromEvent<KeyboardEvent>(document, 'keyup');
+    const controlPressed$ = merge(keydown$, keyup$).pipe(
+      map((event) => event.ctrlKey),
+      startWith(false)
     );
-    const keyup$ = fromEvent<KeyboardEvent>(document, 'keyup').pipe(
-      map(
-        (event) =>
-          !(event.code === 'ControlLeft' || event.code === 'ControlRight')
-      )
-    );
-    const controlPressed$ = merge(keydown$, keyup$).pipe(startWith(false));
-
     const mouseDown$ = fromEvent<MouseEvent>(
       this.el.nativeElement,
       'mousedown'
