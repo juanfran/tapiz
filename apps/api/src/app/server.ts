@@ -91,10 +91,12 @@ export class Server {
     this.updateBoard(boardId, nextState);
   }
 
+  public isUserInBoard(boardId: string, userId: User['id']) {
+    return this.state[boardId].users.some((it) => it.id === userId);
+  }
+
   public userJoin(boardId: string, user: User) {
-    const isAlreadyInState = this.state[boardId].users.find(
-      (it) => it.id === user.id
-    );
+    const isAlreadyInState = this.isUserInBoard(boardId, user.id);
 
     if (isAlreadyInState) {
       this.setState(boardId, (state) => {

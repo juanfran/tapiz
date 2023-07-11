@@ -159,6 +159,8 @@ export class Client {
         cursor: null,
       };
 
+      const isAlreadyInBoard = this.server.isUserInBoard(this.boardId, this.id);
+
       this.server.userJoin(this.boardId, user);
 
       const board = this.server.getBoard(this.boardId);
@@ -196,7 +198,7 @@ export class Client {
         {
           type: BoardCommonActions.setState,
           data: {
-            add: {
+            [isAlreadyInBoard ? 'edit' : 'add']: {
               user: [user],
             },
           },
