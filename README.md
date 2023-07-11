@@ -47,4 +47,3 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Split board.module
 - [ ] Set user view vs mouse, merge?
 - [ ] Set user view vs mouse vs ws message vs ws set state, redux devtools polution
-- [ ] persistBoard every x seconds reduce the number of db writes

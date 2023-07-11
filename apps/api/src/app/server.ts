@@ -10,6 +10,7 @@ import { Server as HTTPServer } from 'http';
 import { Server as HTTPSServer } from 'https';
 export class Server {
   private wss!: WebSocket.Server;
+  private pendingBoardUpdates = new Set<string>();
 
   public clients: Client[] = [];
   public state: Record<string, CommonState> = {};
@@ -132,7 +133,16 @@ export class Server {
   }
 
   public persistBoard(boardId: string) {
-    db.updateBoard(boardId, this.state[boardId]);
+    if (this.pendingBoardUpdates.has(boardId)) {
+      return;
+    }
+
+    this.pendingBoardUpdates.add(boardId);
+
+    setTimeout(() => {
+      db.updateBoard(boardId, this.state[boardId]);
+      this.pendingBoardUpdates.delete(boardId);
+    }, 500);
   }
 
   public updateBoardName(boardId: string, name: string) {
