@@ -196,7 +196,7 @@ export class Client {
         {
           type: BoardCommonActions.setState,
           data: {
-            edit: {
+            add: {
               user: [user],
             },
           },
