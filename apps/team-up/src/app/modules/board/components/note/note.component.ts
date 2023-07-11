@@ -496,7 +496,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   }
 
   public calculateTextSize() {
-    const realSize = 268;
+    const realSize = 250;
 
     const sizeSearch = (fontSize: number) => {
       const height = this.noteHeight(
@@ -506,7 +506,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         1.1
       );
 
-      if (height > 250) {
+      if (height > realSize - 10) {
         sizeSearch(fontSize - 1);
       } else {
         this.state.set({ textSize: fontSize });
