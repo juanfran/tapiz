@@ -30,3 +30,22 @@ export function contrast(color1: string, color2: string) {
 
   return 0;
 }
+
+export function lighter(hex: string, percentage: number) {
+  const colorRGB = hexToRgb(hex);
+
+  if (colorRGB) {
+    colorRGB.r += Math.round(((255 - colorRGB.r) * percentage) / 100);
+    colorRGB.g += Math.round(((255 - colorRGB.g) * percentage) / 100);
+    colorRGB.b += Math.round(((255 - colorRGB.b) * percentage) / 100);
+
+    return (
+      '#' +
+      ('0' + colorRGB.r.toString(16)).slice(-2) +
+      ('0' + colorRGB.g.toString(16)).slice(-2) +
+      ('0' + colorRGB.b.toString(16)).slice(-2)
+    );
+  }
+
+  return '#ffffff';
+}

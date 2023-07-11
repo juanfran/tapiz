@@ -42,7 +42,8 @@ textarea {
   --emoji-width: 27px;
   --emoji-height: 33px;
 
-  background-color: #fdfcdc;
+  background-color: var(--custom-bg);
+  border: solid 2px transparent;
   box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.15);
   display: block;
   height: 300px;
@@ -65,30 +66,12 @@ textarea {
     font-family: "Redacted Script", -apple-system, system-ui, sans-serif;
   }
 
-  &.custom-bg {
-    background-color: var(--custom-bg);
-
-    .text {
-      color: var(--custom-fg);
-    }
-
-    .name,
-    .characters {
-      color: var(--custom-outline);
-    }
-
-
-    &.focus {
-      outline: solid 2px var(--custom-outline);
-    }
-  }
-
   &.highlight {
     z-index: 6;
   }
 
   &.focus {
-    outline: solid 2px var(--orange);
+    border-color: var(--custom-main);
 
     .name {
       opacity: 1;
@@ -102,6 +85,10 @@ textarea {
   &.drawing canvas {
     pointer-events: all;
   }
+}
+
+.text {
+  color: var(--custom-fg);
 }
 
 .text,
@@ -131,6 +118,12 @@ textarea {
   width: var(--emoji-width);
   height: var(--emoji-height);
 }
+
+.name,
+.characters {
+  color: var(--custom-main);
+}
+
 
 .vote,
 .name,

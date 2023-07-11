@@ -47,7 +47,7 @@ import {
 } from '../../selectors/page.selectors';
 import { Observable } from 'rxjs';
 import hotkeys from 'hotkeys-js';
-import { hexToRgb } from './contrast';
+import { lighter } from './contrast';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 import { concatLatestFrom } from '@ngrx/effects';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
@@ -64,7 +64,6 @@ interface State {
   userId: string;
   initDragPosition: Note['position'];
   initialText: string;
-  customBg: boolean;
   voting: boolean;
   drawing: boolean;
   textSize: number;
@@ -103,10 +102,6 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
   @HostBinding('class.highlight') get highlight() {
     return this.state.get('highlight');
-  }
-
-  @HostBinding('class.custom-bg') get customBg() {
-    return this.state.get('customBg');
   }
 
   public readonly viewModel$ = this.state.select();
@@ -311,23 +306,11 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       );
     });
 
-    if (insidePanel?.color && insidePanel.color !== '#fdfcdc') {
-      const rgb = hexToRgb(insidePanel.color);
+    const color = insidePanel?.color ?? '#fdab61';
 
-      this.nativeElement.style.setProperty('--custom-fg', '#000');
-
-      this.state.set({ customBg: true });
-      this.nativeElement.style.setProperty(
-        '--custom-bg',
-        `rgba(${rgb?.r}, ${rgb?.g}, ${rgb?.b}, 0.3)`
-      );
-      this.nativeElement.style.setProperty(
-        '--custom-outline',
-        insidePanel.color
-      );
-    } else {
-      this.state.set({ customBg: false });
-    }
+    this.nativeElement.style.setProperty('--custom-fg', '#000');
+    this.nativeElement.style.setProperty('--custom-bg', lighter(color, 70));
+    this.nativeElement.style.setProperty('--custom-main', color);
   }
 
   public edit() {
