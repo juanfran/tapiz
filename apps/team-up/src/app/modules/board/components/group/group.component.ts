@@ -99,7 +99,10 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
     }
 
     this.store.dispatch(
-      PageActions.setFocusId({ focusId: this.state.get('group').id })
+      PageActions.setFocusId({
+        focusId: this.state.get('group').id,
+        ctrlKey: event.ctrlKey,
+      })
     );
   }
 
@@ -136,7 +139,7 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
   }
 
   public get preventDrag() {
-    return !this.state.get('draggable');
+    return !this.state.get('draggable') || !this.state.get('focus');
   }
 
   public enter(event: Event) {
@@ -216,7 +219,7 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
           this.state.select('group').pipe(map((group) => group.id))
         ),
         filter(([id, context, groupId]) => {
-          return id === groupId && context[id] !== 'pasted';
+          return id.includes(groupId) && context[groupId] !== 'pasted';
         }),
         untilDestroyed(this)
       )
@@ -237,7 +240,7 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
 
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
       return {
-        focus: focusId === state.group.id,
+        focus: focusId.includes(state.group.id),
       };
     });
 

@@ -30,7 +30,7 @@ export const {
 } = pageFeature;
 
 export const isFocus = (id: string) => {
-  return createSelector(selectFocusId, (focusId) => id === focusId);
+  return createSelector(selectFocusId, (focusId) => focusId.includes(id));
 };
 
 export const isUserHighlighActive = () => {

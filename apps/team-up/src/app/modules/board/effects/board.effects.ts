@@ -43,6 +43,22 @@ export class BoardEffects {
     }
   );
 
+  public wsUpdateStatePaste$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(PageActions.pasteNodes),
+        tap((action) => {
+          action.nodes.forEach((node) => {
+            this.wsService.send(BoardActions.addNode(node));
+          });
+        })
+      );
+    },
+    {
+      dispatch: false,
+    }
+  );
+
   public joinBoard$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.joinBoard),

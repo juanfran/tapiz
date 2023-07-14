@@ -1,13 +1,6 @@
 import { Injectable } from '@angular/core';
-import {
-  Actions,
-  act,
-  concatLatestFrom,
-  createEffect,
-  ofType,
-} from '@ngrx/effects';
+import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { WsService } from '@/app/modules/ws/services/ws.service';
 import { EMPTY, of } from 'rxjs';
 import { filter, mergeMap, tap } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
@@ -18,8 +11,8 @@ import { selectNote } from '../selectors/board.selectors';
 @Injectable()
 export class HistoryEffects {
   public history: {
-    undoable: { action: Action; inverseAction: Action }[];
-    undone: { action: Action; inverseAction: Action }[];
+    undoable: { action: Action; inverseAction: Action[] }[];
+    undone: { action: Action; inverseAction: Action[] }[];
   } = {
     undoable: [],
     undone: [],
@@ -30,10 +23,11 @@ export class HistoryEffects {
       ofType(PageActions.undo),
       mergeMap(() => {
         const lastPatches = this.history.undoable.shift();
+
         if (lastPatches) {
           this.history.undone.unshift(lastPatches);
 
-          return of(lastPatches.inverseAction);
+          return of(...lastPatches.inverseAction);
         }
 
         return EMPTY;
@@ -58,20 +52,19 @@ export class HistoryEffects {
     );
   });
 
-  public newNote$ = createEffect(
+  public newNode$ = createEffect(
     () => {
       return this.actions$.pipe(
         ofType(BoardActions.addNode),
         filter((action) => !action.history),
         tap((action) => {
-          this.newUndoneAction(
-            action,
+          this.newUndoneAction(action, [
             BoardActions.removeNode({
               node: action.node,
               nodeType: action.nodeType,
               history: true,
-            } as RemoveNode)
-          );
+            } as RemoveNode),
+          ]);
         })
       );
     },
@@ -80,20 +73,41 @@ export class HistoryEffects {
     }
   );
 
-  public removeNote$ = createEffect(
+  public pasteNodes$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(PageActions.pasteNodes),
+        tap((action) => {
+          const actions = action.nodes.map((it) => {
+            return BoardActions.removeNode({
+              node: it.node,
+              nodeType: it.nodeType,
+              history: true,
+            } as RemoveNode);
+          });
+
+          this.newUndoneAction(action, actions);
+        })
+      );
+    },
+    {
+      dispatch: false,
+    }
+  );
+
+  public removeNode$ = createEffect(
     () => {
       return this.actions$.pipe(
         ofType(BoardActions.removeNode),
         filter((action) => !action.history),
         tap((action) => {
-          this.newUndoneAction(
-            action,
+          this.newUndoneAction(action, [
             BoardActions.addNode({
               node: action.node,
               nodeType: action.nodeType,
               history: true,
-            } as AddNode)
-          );
+            } as AddNode),
+          ]);
         })
       );
     },
@@ -115,13 +129,15 @@ export class HistoryEffects {
               },
               nodeType: action.nodeType,
             }),
-            BoardActions.patchNode({
-              node: {
-                id: action.id,
-                position: action.initialPosition,
-              },
-              nodeType: action.nodeType,
-            })
+            [
+              BoardActions.patchNode({
+                node: {
+                  id: action.id,
+                  position: action.initialPosition,
+                },
+                nodeType: action.nodeType,
+              }),
+            ]
           );
         })
       );
@@ -143,13 +159,15 @@ export class HistoryEffects {
               ...action,
               history: true,
             } as Action,
-            BoardActions.patchNode({
-              nodeType: 'note',
-              node: {
-                id: action.id,
-                drawing: note?.drawing ?? [],
-              },
-            })
+            [
+              BoardActions.patchNode({
+                nodeType: 'note',
+                node: {
+                  id: action.id,
+                  drawing: note?.drawing ?? [],
+                },
+              }),
+            ]
           );
         })
       );
@@ -160,7 +178,7 @@ export class HistoryEffects {
   );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public newUndoneAction(action: Action, inverseAction: Action) {
+  public newUndoneAction(action: Action, inverseAction: Action[]) {
     this.history.undoable.unshift({
       action,
       inverseAction,

@@ -16,7 +16,7 @@ import { NativeEmoji } from 'emoji-picker-element/shared';
 
 export interface PageState {
   visible: boolean;
-  focusId: string;
+  focusId: string[];
   open: boolean;
   initZone: ZoneConfig | null;
   userId: string;
@@ -49,7 +49,7 @@ export interface PageState {
 
 const initialPageState: PageState = {
   visible: true,
-  focusId: '',
+  focusId: [],
   open: false,
   initZone: null,
   boardId: '',
@@ -151,17 +151,28 @@ const reducer = createReducer(
   on(BoardActions.removeNode, (state, { node }): PageState => {
     const id = node.id;
 
-    if (id === state.focusId) {
-      state.focusId = '';
+    if (state.focusId.includes(id)) {
+      state.focusId = state.focusId.filter((it) => it !== id);
     }
 
     return state;
   }),
-  on(PageActions.setFocusId, (state, { focusId }): PageState => {
-    state.focusId = focusId;
+  on(
+    PageActions.setFocusId,
+    (state, { focusId, ctrlKey = false }): PageState => {
+      if (focusId && state.focusId.includes(focusId)) {
+        return state;
+      }
 
-    return state;
-  }),
+      if (ctrlKey) {
+        state.focusId.push(focusId);
+      } else {
+        state.focusId = [focusId];
+      }
+
+      return state;
+    }
+  ),
   on(PageActions.setZone, (state, { zone }): PageState => {
     state.zone = zone;
 
@@ -183,7 +194,7 @@ const reducer = createReducer(
   }),
   on(PageActions.changeCanvasMode, (state, { canvasMode }): PageState => {
     state.canvasMode = canvasMode;
-    state.focusId = '';
+    state.focusId = [];
 
     return state;
   }),
@@ -284,8 +295,12 @@ const reducer = createReducer(
 
     return state;
   }),
-  on(PageActions.pasteNode, (state, { node }): PageState => {
-    state.additionalContext[node.id] = 'pasted';
+  on(PageActions.pasteNodes, (state, { nodes }): PageState => {
+    nodes.forEach((it) => {
+      state.additionalContext[it.node.id] = 'pasted';
+    });
+
+    state.focusId = nodes.map((it) => it.node.id);
 
     return state;
   })

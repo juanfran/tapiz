@@ -6,7 +6,7 @@ import { concatLatestFrom } from '@ngrx/effects';
 import { selectFocusId, selectUserId } from '../selectors/page.selectors';
 import type { RequireAtLeastOne } from 'type-fest';
 import { v4 } from 'uuid';
-import { NodeType } from '@team-up/board-commons';
+import { AddNode, NodeType, Point } from '@team-up/board-commons';
 import { PageActions } from '../actions/page.actions';
 
 type ValidCopyNode = RequireAtLeastOne<Record<string, unknown>, 'id'>;
@@ -25,14 +25,12 @@ export class CopyPasteDirective {
   }
 
   private store = inject(Store);
-  private copyNode?: {
+  private copyNode: {
     nodeType: NodeType;
-    data: ValidCopyNode;
-  };
+    node: ValidCopyNode;
+  }[] = [];
 
   public copy() {
-    this.copyNode = undefined;
-
     this.store
       .select(selectAllNodes())
       .pipe(
@@ -43,39 +41,56 @@ export class CopyPasteDirective {
         ])
       )
       .subscribe(([nodes, focusId, userId]) => {
+        this.copyNode = [];
+
         for (const [key, list] of Object.entries(nodes)) {
-          const node = list.find((node) => node.id === focusId);
+          const nodes = list
+            .filter((node) => focusId.includes(node.id))
+            .filter((node) => {
+              const hasOwner = 'ownerId' in node;
 
-          if (node) {
-            if ('ownerId' in node && node.ownerId !== userId) {
-              break;
-            }
+              return !hasOwner || (hasOwner && node.ownerId === userId);
+            });
 
-            this.copyNode = {
-              nodeType: key as NodeType,
-              data: { ...node },
-            };
-            break;
-          }
+          this.copyNode.push(
+            ...nodes.map((node) => {
+              const newNode = { ...node };
+
+              if ('position' in newNode) {
+                newNode.position = {
+                  x: (newNode.position as Point).x + 10,
+                  y: (newNode.position as Point).y + 10,
+                };
+              }
+
+              return {
+                nodeType: key as NodeType,
+                node: newNode,
+              };
+            })
+          );
         }
       });
   }
 
   public paste() {
-    if (!this.copyNode) {
+    if (!this.copyNode.length) {
       return;
     }
 
-    this.copyNode.data.id = v4();
+    const nodes = this.copyNode.map((it) => {
+      return {
+        nodeType: it.nodeType,
+        node: {
+          ...it.node,
+          id: v4(),
+        },
+      };
+    });
 
     this.store.dispatch(
-      PageActions.pasteNode({
-        nodeType: this.copyNode.nodeType,
-        node: {
-          ...this.copyNode.data,
-        },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      PageActions.pasteNodes({ nodes: nodes as any[] })
     );
   }
 }

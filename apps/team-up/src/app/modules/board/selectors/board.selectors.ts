@@ -67,5 +67,5 @@ export const selectAllNodes = () => {
 export const selectNoteFocus = createSelector(
   selectNotes,
   selectFocusId,
-  (notes: Note[], noteId) => notes.find((note) => note.id === noteId)
+  (notes: Note[], noteId) => notes.find((note) => noteId.includes(note.id))
 );
