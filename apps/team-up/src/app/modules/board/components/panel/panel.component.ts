@@ -103,7 +103,10 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
     }
 
     this.store.dispatch(
-      PageActions.setFocusId({ focusId: this.state.get('panel').id })
+      PageActions.setFocusId({
+        focusId: this.state.get('panel').id,
+        ctrlKey: event.ctrlKey,
+      })
     );
   }
 
@@ -140,7 +143,7 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
   }
 
   public get preventDrag() {
-    return !this.state.get('draggable');
+    return !this.state.get('draggable') || !this.state.get('focus');
   }
 
   public startDrag(position: Point) {
@@ -213,7 +216,7 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
           this.state.select('panel').pipe(map((panel) => panel.id))
         ),
         filter(([id, context, panelId]) => {
-          return id === panelId && context[id] !== 'pasted';
+          return id.includes(panelId) && context[panelId] !== 'pasted';
         }),
         untilDestroyed(this)
       )
@@ -234,7 +237,7 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
 
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
       return {
-        focus: focusId === state.panel.id,
+        focus: focusId.includes(state.panel.id),
       };
     });
 

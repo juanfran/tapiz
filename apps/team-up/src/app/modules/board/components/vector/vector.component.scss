@@ -4,7 +4,7 @@
   user-select: none;
   z-index: 2;
 
-  &:not(.composeMode):hover {
+  &:not(.composeMode):hover, &.focus {
     cursor: grab;
     outline: 3px dotted var(--primary-color);
   }

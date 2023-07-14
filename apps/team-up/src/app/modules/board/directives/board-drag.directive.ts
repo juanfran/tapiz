@@ -10,7 +10,6 @@ import {
   filter,
   finalize,
   map,
-  pairwise,
   startWith,
   switchMap,
   takeUntil,
@@ -27,6 +26,8 @@ import {
 } from '../selectors/page.selectors';
 import { Point } from '@team-up/board-commons';
 import { concatLatestFrom } from '@ngrx/effects';
+import { MultiDragService } from '@/app/services/multi-drag.service';
+import { filterNil } from '@/app/commons/operators/filter-nil';
 
 @UntilDestroy()
 @Directive({
@@ -41,7 +42,8 @@ export class BoardDragDirective implements AfterViewInit {
   constructor(
     private el: ElementRef,
     private store: Store,
-    private appRef: ApplicationRef
+    private appRef: ApplicationRef,
+    private multiDragService: MultiDragService
   ) {}
 
   public ngAfterViewInit() {
@@ -59,9 +61,13 @@ export class BoardDragDirective implements AfterViewInit {
       map((event) => event.ctrlKey),
       startWith(false)
     );
-    const mouseDown$ = fromEvent<MouseEvent>(
-      this.el.nativeElement,
-      'mousedown'
+    const mouseDown$ = merge(
+      fromEvent<MouseEvent>(this.el.nativeElement, 'mousedown').pipe(
+        tap((event) => {
+          this.multiDragService.updateSharedMouseDown(event);
+        })
+      ),
+      this.multiDragService.mouseDown$.pipe(filterNil())
     ).pipe(
       filter((e) => {
         if ((e.target as HTMLElement).classList.contains('no-drag')) {
@@ -79,16 +85,22 @@ export class BoardDragDirective implements AfterViewInit {
       map(([event]) => event)
     );
 
-    const mouseUp$ = fromEvent(window, 'mouseup').pipe(map(() => false));
+    const mouseUp$ = fromEvent(window, 'mouseup').pipe(map(() => true));
 
     let startPositionDiff = { x: 0, y: 0 };
 
-    const mouseMove$ = fromEvent<MouseEvent>(document.body, 'mousemove').pipe(
-      throttleTime(0, animationFrameScheduler),
+    const mouseMove$ = merge(
+      fromEvent<MouseEvent>(document.body, 'mousemove').pipe(
+        throttleTime(0, animationFrameScheduler),
+        tap((event) => {
+          // prevent select text on drag note
+          event.preventDefault();
+          this.multiDragService.updateSharedMouseMove(event);
+        })
+      ),
+      this.multiDragService.mouseMove$.pipe(filterNil())
+    ).pipe(
       map((mouseMove) => {
-        // prevent select text on drag note
-        mouseMove.preventDefault();
-
         return {
           x: mouseMove.clientX,
           y: mouseMove.clientY,
@@ -134,8 +146,11 @@ export class BoardDragDirective implements AfterViewInit {
             }
           }),
           finalize(() => {
-            this.initDragPosition = null;
-            this.host?.endDrag();
+            if (this.initDragPosition) {
+              this.initDragPosition = null;
+              this.host?.endDrag();
+              this.multiDragService.endDrag();
+            }
           })
         );
       })

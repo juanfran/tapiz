@@ -174,7 +174,10 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       }
     } else {
       this.store.dispatch(
-        PageActions.setFocusId({ focusId: this.state.get('note').id })
+        PageActions.setFocusId({
+          focusId: this.state.get('note').id,
+          ctrlKey: event.ctrlKey,
+        })
       );
     }
   }
@@ -336,7 +339,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   }
 
   public get preventDrag() {
-    return this.state.get('edit');
+    return this.state.get('edit') || !this.state.get('focus');
   }
 
   public startDrag(position: Point) {
@@ -406,7 +409,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
           this.state.select('note').pipe(map((note) => note.id))
         ),
         filter(([id, context, noteId]) => {
-          return id === noteId && context[id] !== 'pasted';
+          return id.includes(noteId) && context[noteId] !== 'pasted';
         }),
         untilDestroyed(this)
       )
@@ -453,7 +456,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
       return {
-        focus: focusId === state.note.id,
+        focus: focusId.includes(state.note.id),
       };
     });
 

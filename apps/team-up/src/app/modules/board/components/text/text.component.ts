@@ -104,10 +104,13 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
     this.state.set({ draggable: true, edit: false });
   }
 
-  @HostListener('mousedown')
-  public mousedown() {
+  @HostListener('mousedown', ['$event'])
+  public mousedown(event: MouseEvent) {
     this.store.dispatch(
-      PageActions.setFocusId({ focusId: this.state.get('node').id })
+      PageActions.setFocusId({
+        focusId: this.state.get('node').id,
+        ctrlKey: event.ctrlKey,
+      })
     );
   }
 
@@ -116,7 +119,7 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
   }
 
   public get preventDrag() {
-    return !this.state.get('draggable');
+    return !this.state.get('draggable') || !this.state.get('focus');
   }
 
   public dblclick(event: MouseEvent) {
@@ -219,7 +222,7 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
 
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
       return {
-        focus: focusId === state.node.id,
+        focus: focusId.includes(state.node.id),
       };
     });
 
@@ -232,7 +235,7 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
           this.state.select('node').pipe(map((node) => node.id))
         ),
         filter(([id, context, nodeId]) => {
-          return id === nodeId && context[id] !== 'pasted';
+          return id.includes(nodeId) && context[nodeId] !== 'pasted';
         }),
         untilDestroyed(this)
       )

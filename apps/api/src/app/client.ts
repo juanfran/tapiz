@@ -41,6 +41,10 @@ export class Client {
   public incomingMessage(messageString: string) {
     const messages = this.parseMessage(messageString);
 
+    if (!Array.isArray(messages)) {
+      return;
+    }
+
     messages.forEach((message: any) => {
       this.processMsg(message);
     });

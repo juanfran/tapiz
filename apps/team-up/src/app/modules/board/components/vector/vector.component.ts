@@ -65,6 +65,10 @@ export class VectorComponent implements OnInit, Draggable, AfterViewInit {
     return this.state.get('mode');
   }
 
+  @HostBinding('class.focus') get focus() {
+    return this.state.get('focus');
+  }
+
   public readonly vector$ = this.state.select('vector');
 
   @ViewChild('resize') resize!: ElementRef;
@@ -81,42 +85,22 @@ export class VectorComponent implements OnInit, Draggable, AfterViewInit {
     this.state.set({ draggable: true });
   }
 
-  @HostListener('mousedown')
-  public mousedown() {
+  @HostListener('mousedown', ['$event'])
+  public mousedown(event: MouseEvent) {
     this.store.dispatch(
-      PageActions.setFocusId({ focusId: this.state.get('vector').id })
+      PageActions.setFocusId({
+        focusId: this.state.get('vector').id,
+        ctrlKey: event.ctrlKey,
+      })
     );
   }
-
-  // public loadImage() {
-  //   const id = this.state.get('image').id;
-  //   const width = this.state.get('image').width;
-  //   const height = this.state.get('image').height;
-
-  //   if (!width || !height) {
-  //     this.store.dispatch(
-  //       BoardActions.patchNode({
-  //         nodeType: 'image',
-  //         node: {
-  //           id,
-  //           width: this.imageNativeElement.naturalWidth,
-  //           height: this.imageNativeElement.naturalHeight,
-  //         },
-  //       })
-  //     );
-  //   }
-  // }
-
-  // public get imageNativeElement() {
-  //   return this.imageRef.nativeElement as HTMLImageElement;
-  // }
 
   public get position() {
     return this.state.get('vector').position;
   }
 
   public get preventDrag() {
-    return !this.state.get('draggable');
+    return !this.state.get('draggable') || !this.state.get('focus');
   }
 
   public startDrag(position: Point) {}
@@ -141,7 +125,7 @@ export class VectorComponent implements OnInit, Draggable, AfterViewInit {
     this.state.connect('mode', this.store.select(selectCanvasMode));
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
       return {
-        focus: focusId === state.vector.id,
+        focus: focusId.includes(state.vector.id),
       };
     });
 

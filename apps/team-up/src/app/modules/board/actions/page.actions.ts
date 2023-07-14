@@ -26,7 +26,7 @@ export const PageActions = createActionGroup({
     'Set move enabled': props<{ enabled: boolean }>(),
     'Set user id': props<{ userId: string }>(),
     'Set init zone': props<{ initZone: ZoneConfig | null }>(),
-    'Set focus id': props<{ focusId: string }>(),
+    'Set focus id': props<{ focusId: string; ctrlKey?: boolean }>(),
     'Change canvas mode': props<{ canvasMode: string }>(),
     'Set zone': props<{ zone: Zone | null }>(),
     'Zone to group': emptyProps(),
@@ -68,6 +68,6 @@ export const PageActions = createActionGroup({
       history?: boolean;
     }>(),
     'Go to note': props<{ note: Note }>(),
-    'Paste node': props<AddNode>(),
+    'Paste nodes': props<{ nodes: AddNode[] }>(),
   },
 });

@@ -81,10 +81,13 @@ export class ImageComponent implements OnInit, Draggable, AfterViewInit {
     this.state.set({ draggable: true });
   }
 
-  @HostListener('mousedown')
-  public mousedown() {
+  @HostListener('mousedown', ['$event'])
+  public mousedown(event: MouseEvent) {
     this.store.dispatch(
-      PageActions.setFocusId({ focusId: this.state.get('image').id })
+      PageActions.setFocusId({
+        focusId: this.state.get('image').id,
+        ctrlKey: event.ctrlKey,
+      })
     );
   }
 
@@ -116,7 +119,7 @@ export class ImageComponent implements OnInit, Draggable, AfterViewInit {
   }
 
   public get preventDrag() {
-    return !this.state.get('draggable');
+    return !this.state.get('draggable') || !this.state.get('focus');
   }
 
   public startDrag(position: Point) {}
@@ -141,7 +144,7 @@ export class ImageComponent implements OnInit, Draggable, AfterViewInit {
     this.state.connect('mode', this.store.select(selectCanvasMode));
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
       return {
-        focus: focusId === state.image.id,
+        focus: focusId.includes(state.image.id),
       };
     });
 
