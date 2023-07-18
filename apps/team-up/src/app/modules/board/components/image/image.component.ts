@@ -27,7 +27,7 @@ import {
   selectFocusId,
 } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
-import { PushPipe } from '@rx-angular/template/push';
+import { RxPush } from '@rx-angular/template/push';
 
 interface State {
   image: Image;
@@ -43,7 +43,7 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
   standalone: true,
-  imports: [PushPipe],
+  imports: [RxPush],
 })
 export class ImageComponent implements OnInit, Draggable, AfterViewInit {
   @ViewChild('image') public imageRef!: ElementRef;

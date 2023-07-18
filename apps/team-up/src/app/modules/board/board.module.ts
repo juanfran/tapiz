@@ -7,8 +7,6 @@ import { StoreModule } from '@ngrx/store';
 import { boardFeature } from './reducers/board.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { BoardEffects } from './effects/board.effects';
-import { LetModule } from '@rx-angular/template/let';
-import { PushModule } from '@rx-angular/template/push';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { BoardDragDirective } from './directives/board-drag.directive';
 import { NoteComponent } from './components/note/note.component';
@@ -65,8 +63,6 @@ const routes: Routes = [
 @NgModule({
   imports: [
     CommonModule,
-    LetModule,
-    PushModule,
     DragDropModule,
     RouterModule.forRoot(routes),
     StoreModule.forFeature(boardFeature),

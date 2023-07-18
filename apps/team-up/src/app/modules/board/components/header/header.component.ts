@@ -19,7 +19,7 @@ import { AutoFocusDirective } from '../../directives/autofocus.directive';
 import { NgIf } from '@angular/common';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { RouterLink } from '@angular/router';
-import { LetDirective } from '@rx-angular/template/let';
+import { RxLet } from '@rx-angular/template/let';
 
 interface State {
   edit: boolean;
@@ -35,7 +35,7 @@ interface State {
   providers: [RxState],
   standalone: true,
   imports: [
-    LetDirective,
+    RxLet,
     RouterLink,
     SvgIconComponent,
     NgIf,

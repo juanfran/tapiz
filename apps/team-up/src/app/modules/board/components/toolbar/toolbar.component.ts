@@ -35,7 +35,7 @@ import { AutoFocusDirective } from '../../directives/autofocus.directive';
 import { MatInputModule } from '@angular/material/input';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { NgIf, AsyncPipe } from '@angular/common';
-import { LetDirective } from '@rx-angular/template/let';
+import { RxLet } from '@rx-angular/template/let';
 import { MatIconModule } from '@angular/material/icon';
 
 interface State {
@@ -51,7 +51,7 @@ interface State {
   providers: [RxState],
   standalone: true,
   imports: [
-    LetDirective,
+    RxLet,
     NgIf,
     SvgIconComponent,
     ReactiveFormsModule,
