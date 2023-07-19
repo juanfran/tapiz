@@ -36,34 +36,39 @@
       </button>
     </div>
   </form>
-  <form class="col">
-    <mat-nav-list>
-      <h3 matSubheader>Board Name</h3>
-      <mat-list-item
+  <div class="col">
+    <h1 matSubheader>Boards</h1>
+    <div class="board-list">
+      <div
+        class="board-item"
         *ngFor="let board of vm.boards"
         (click)="goBoard(board)">
-        <a
-          matListItemTitle
-          [routerLink]="['/board/', board.id]"
-          >{{ board.name }}</a
-        >
-        <button
-          title="Delete project"
-          *ngIf="board.is_owner"
-          (click)="deleteBoard($event, board)"
-          mat-icon-button
-          matListItemMeta>
-          <mat-icon fontIcon="delete"></mat-icon>
-        </button>
-        <button
-          title="Leave project"
-          *ngIf="!board.is_owner"
-          (click)="leaveBoard($event, board)"
-          mat-icon-button
-          matListItemMeta>
-          <mat-icon fontIcon="directions_walk"></mat-icon>
-        </button>
-      </mat-list-item>
-    </mat-nav-list>
-  </form>
+        <div
+          class="board-bg"
+          [tuBoardIdToColor]="board.id">
+          <a
+            class="board-title"
+            [routerLink]="['/board/', board.id]"
+            >{{ board.name }}</a
+          >
+        </div>
+        <div class="board-extra">
+          <button
+            title="Delete project"
+            *ngIf="board.is_owner"
+            (click)="deleteBoard($event, board)"
+            mat-icon-button>
+            <mat-icon fontIcon="delete"></mat-icon>
+          </button>
+          <button
+            title="Leave project"
+            *ngIf="!board.is_owner"
+            (click)="leaveBoard($event, board)"
+            mat-icon-button>
+            <mat-icon fontIcon="directions_walk"></mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </ng-container>

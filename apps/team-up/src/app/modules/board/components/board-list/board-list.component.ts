@@ -10,7 +10,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmComponent } from '../confirm-action/confirm-actions.component';
 import { exhaustMap, filter } from 'rxjs';
 import { BoardApiService } from '../../services/board-api.service';
-import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -18,6 +17,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import { AuthService } from '@/app/services/auth.service';
+import { BoardIdToColorDirective } from '../../directives/board-id-to-color.directive';
 
 @UntilDestroy()
 @Component({
@@ -35,10 +35,10 @@ import { AuthService } from '@/app/services/auth.service';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatListModule,
     NgFor,
     RouterLink,
     AsyncPipe,
+    BoardIdToColorDirective,
   ],
 })
 export class BoardListComponent implements OnInit {

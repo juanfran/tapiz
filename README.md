@@ -25,7 +25,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Timer
 - [ ] Duplicate board
 - [ ] Export with groups & panels
-- [ ] Board screenshot? (Redisign home screen)
 - [ ] Multi board (one board with multiples ¿views?, easy to move between phases in retrospectives)
 - [ ] Board links (share a board position with other useres)
 - [ ] Teams (Access permissions)
@@ -36,6 +35,8 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Components (kanban, grid, etc)
 - [ ] Arrows (connect nodes)
 - [ ] D&D cocomaterial on add
+- [ ] Reorder boards
+- [ ] Search boards
 
 ## TODO, code refactor
 
