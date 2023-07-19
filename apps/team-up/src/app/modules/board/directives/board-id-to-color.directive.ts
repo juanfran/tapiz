@@ -33,7 +33,6 @@ export class BoardIdToColorDirective {
 
     this.elementRef.nativeElement.style.backgroundColor = this.colors[index];
 
-    console.log(contrast(this.colors[index], '#ffffff'));
     if (contrast(this.colors[index], '#ffffff') > 2) {
       this.elementRef.nativeElement.style.color = '#ffffff';
     } else {
