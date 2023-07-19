@@ -18,6 +18,7 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import { AuthService } from '@/app/services/auth.service';
 import { BoardIdToColorDirective } from '../../directives/board-id-to-color.directive';
+import { TitleComponent } from '../title/title.component';
 
 @UntilDestroy()
 @Component({
@@ -39,6 +40,7 @@ import { BoardIdToColorDirective } from '../../directives/board-id-to-color.dire
     RouterLink,
     AsyncPipe,
     BoardIdToColorDirective,
+    TitleComponent,
   ],
 })
 export class BoardListComponent implements OnInit {

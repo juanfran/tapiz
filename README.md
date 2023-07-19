@@ -37,6 +37,7 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] D&D cocomaterial on add
 - [ ] Reorder boards
 - [ ] Search boards
+- [ ] Favourite boards
 
 ## TODO, code refactor
 

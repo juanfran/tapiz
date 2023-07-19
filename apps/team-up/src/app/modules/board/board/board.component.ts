@@ -47,7 +47,6 @@ import { BoardMoveService } from '../services/board-move.service';
 import { BoardZoomService } from '../services/board-zoom.service';
 import { ActivatedRoute } from '@angular/router';
 import { NotesService } from '../services/notes.service';
-import { MatDialog } from '@angular/material/dialog';
 import { WsService } from '@/app/modules/ws/services/ws.service';
 import { v4 } from 'uuid';
 import { PanelsComponent } from '../components/panels/panel.component';
@@ -68,6 +67,8 @@ import { DrawingOptionsComponent } from '../components/drawing-options/drawing-o
 import { SearchOptionsComponent } from '../components/search-options/search-options.component';
 import { Actions, ofType } from '@ngrx/effects';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
+import { boardFeature } from '../reducers/board.reducer';
+import { TitleComponent } from '../components/title/title.component';
 
 @UntilDestroy()
 @Component({
@@ -96,6 +97,7 @@ import { CopyPasteDirective } from '../directives/copy-paste.directive';
     DrawingOptionsComponent,
     SearchOptionsComponent,
     AsyncPipe,
+    TitleComponent,
   ],
   hostDirectives: [CopyPasteDirective],
 })
@@ -110,6 +112,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly newNote$ = new Subject<MouseEvent>();
   public readonly drawing = this.store.selectSignal(selectDrawing);
   public readonly search = this.store.selectSignal(selectSearching);
+  public readonly boardTitle = this.store.selectSignal(boardFeature.selectName);
 
   @ViewChild('workLayer', { read: ElementRef }) public workLayer!: ElementRef;
 
@@ -146,8 +149,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     private el: ElementRef,
     private route: ActivatedRoute,
     private notesService: NotesService,
-    private actions: Actions,
-    public dialog: MatDialog
+    private actions: Actions
   ) {
     this.store.dispatch(PageActions.initBoard());
   }

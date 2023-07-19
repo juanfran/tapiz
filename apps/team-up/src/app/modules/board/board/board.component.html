@@ -1,3 +1,4 @@
+<team-up-title [title]="boardTitle()"></team-up-title>
 <div
   [class.edit-mode]="(canvasMode$ | async) === 'editMode'"
   [class.compose-mode]="(canvasMode$ | async) === 'composeMode'"
