@@ -49,8 +49,8 @@ export class BoardMoveService {
       throttleTime(0, animationFrameScheduler),
       map((mouseMove) => {
         return {
-          x: mouseMove.clientX,
-          y: mouseMove.clientY,
+          x: Math.round(mouseMove.clientX),
+          y: Math.round(mouseMove.clientY),
         };
       }),
       share()

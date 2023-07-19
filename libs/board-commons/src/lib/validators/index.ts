@@ -3,9 +3,11 @@ import * as noteValidators from './note.validator';
 import * as panelValidators from './panel.validator';
 import * as groupValidators from './group.validator';
 import * as imageValidators from './image.validator';
-import * as cursorValidators from './cursor.validator';
 import * as textValidators from './text.validator';
 import * as vectorValidators from './vector.validator';
+import * as userValidators from './user.validator';
+import * as stateActionValidators from './state-action.validator';
+import * as userMoveValidators from './user-move.validator';
 
 export const Validators = {
   ...changeBoardNameValidators,
@@ -13,7 +15,9 @@ export const Validators = {
   ...panelValidators,
   ...groupValidators,
   ...imageValidators,
-  ...cursorValidators,
   ...textValidators,
   ...vectorValidators,
+  ...userValidators,
+  ...stateActionValidators,
+  ...userMoveValidators,
 };

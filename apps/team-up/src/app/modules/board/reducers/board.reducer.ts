@@ -1,5 +1,5 @@
 import { Action, createFeature, createReducer, on } from '@ngrx/store';
-import { BoardCommonActions, getDiff } from '@team-up/board-commons';
+import { getActionDiff, getDiff } from '@team-up/board-commons';
 import { PageActions } from '../actions/page.actions';
 import {
   Note,
@@ -57,25 +57,26 @@ const reducer = createReducer(
 
     return state;
   }),
-  on(
-    BoardActions.addNode,
-    BoardActions.removeNode,
-    BoardActions.patchNode,
-    (state, action): BoardState => {
-      const diff = getDiff(action);
+  on(BoardActions.batchNodeActions, (state, action): BoardState => {
+    action.actions;
+    const diffs = getDiff(action.actions);
 
-      if (diff) {
-        const result = applyDiff(diff, state);
-
+    if (diffs.length) {
+      const result = diffs.reduce((acc, diff) => {
         return {
-          ...state,
-          ...result,
+          ...acc,
+          ...applyDiff(diff, acc),
         };
-      }
+      }, state);
 
-      return state;
+      return {
+        ...state,
+        ...result,
+      };
     }
-  ),
+
+    return state;
+  }),
   on(BoardActions.setState, (state, { data }): BoardState => {
     const commonState = {
       notes: state.notes,
@@ -94,7 +95,10 @@ const reducer = createReducer(
   }),
   on(PageActions.pasteNodes, (state, { nodes }): BoardState => {
     nodes.forEach((node) => {
-      const diff = getDiff(BoardActions.addNode(node));
+      const diff = getActionDiff({
+        op: 'add',
+        data: node,
+      });
 
       if (diff) {
         const result = applyDiff(diff, state);

@@ -47,4 +47,12 @@ export class DrawingOptionsComponent {
   public clean() {
     this.store.dispatch(PageActions.cleanNoteDrawing());
   }
+
+  public undo() {
+    this.store.dispatch(PageActions.undoDrawing());
+  }
+
+  public redo() {
+    this.store.dispatch(PageActions.redoDrawing());
+  }
 }

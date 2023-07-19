@@ -28,7 +28,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { Drawing, Note, Panel, User } from '@team-up/board-commons';
+import { Drawing, NodeType, Note, Panel, User } from '@team-up/board-commons';
 import { BoardMoveService } from '../../services/board-move.service';
 import {
   selectPanels,
@@ -62,7 +62,6 @@ interface State {
   highlight: boolean;
   username: string;
   userId: string;
-  initDragPosition: Note['position'];
   initialText: string;
   voting: boolean;
   drawing: boolean;
@@ -163,12 +162,20 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
       if (votes >= 0) {
         this.store.dispatch(
-          BoardActions.patchNode({
-            nodeType: 'note',
-            node: {
-              id: this.state.get('note').id,
-              votes,
-            },
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [
+              {
+                data: {
+                  type: 'note',
+                  node: {
+                    id: this.state.get('note').id,
+                    votes,
+                  },
+                },
+                op: 'patch',
+              },
+            ],
           })
         );
       }
@@ -212,21 +219,33 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         const { width, height } = this.emojisSize();
         const targetPosition = this.nativeElement.getBoundingClientRect();
         this.store.dispatch(
-          BoardActions.patchNode({
-            nodeType: 'note',
-            node: {
-              id: this.state.get('note').id,
-              emojis: [
-                ...this.state.get('note').emojis,
-                {
-                  unicode: emoji.unicode,
-                  position: {
-                    x: (event.clientX - targetPosition.left) / zoom - width / 2,
-                    y: (event.clientY - targetPosition.top) / zoom - height / 2,
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [
+              {
+                data: {
+                  type: 'note',
+                  node: {
+                    id: this.state.get('note').id,
+                    emojis: [
+                      ...this.state.get('note').emojis,
+                      {
+                        unicode: emoji.unicode,
+                        position: {
+                          x:
+                            (event.clientX - targetPosition.left) / zoom -
+                            width / 2,
+                          y:
+                            (event.clientY - targetPosition.top) / zoom -
+                            height / 2,
+                        },
+                      },
+                    ],
                   },
                 },
-              ],
-            },
+                op: 'patch',
+              },
+            ],
           })
         );
       });
@@ -260,12 +279,20 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         });
 
         this.store.dispatch(
-          BoardActions.patchNode({
-            nodeType: 'note',
-            node: {
-              id: this.state.get('note').id,
-              emojis: [...emojis],
-            },
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [
+              {
+                data: {
+                  type: 'note',
+                  node: {
+                    id: this.state.get('note').id,
+                    emojis: [...emojis],
+                  },
+                },
+                op: 'patch',
+              },
+            ],
           })
         );
       });
@@ -334,6 +361,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     );
   }
 
+  public nodeType: NodeType = 'note';
+
   public get position() {
     return this.state.get('note').position;
   }
@@ -342,46 +371,25 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     return this.state.get('edit') || !this.state.get('focus');
   }
 
-  public startDrag(position: Point) {
-    this.state.set({
-      initDragPosition: position,
-    });
-  }
-
-  public endDrag() {
-    this.store.dispatch(
-      PageActions.endDragNode({
-        nodeType: 'note',
-        id: this.state.get('note').id,
-        initialPosition: this.state.get('initDragPosition'),
-        finalPosition: this.state.get('note').position,
-      })
-    );
-  }
-
-  public move(position: Point) {
-    this.store.dispatch(
-      BoardActions.patchNode({
-        nodeType: 'note',
-        node: {
-          id: this.state.get('note').id,
-          position,
-        },
-      })
-    );
-  }
-
   public setText(event: Event) {
     if (event.target) {
       const value = (event.target as HTMLTextAreaElement).value;
 
       this.store.dispatch(
-        BoardActions.patchNode({
-          nodeType: 'note',
-          node: {
-            id: this.state.get('note').id,
-            text: value,
-          },
+        BoardActions.batchNodeActions({
+          history: true,
+          actions: [
+            {
+              data: {
+                type: 'note',
+                node: {
+                  id: this.state.get('note').id,
+                  text: value,
+                },
+              },
+              op: 'patch',
+            },
+          ],
         })
       );
     }
@@ -395,6 +403,10 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
   public get nativeElement(): HTMLElement {
     return this.el.nativeElement as HTMLElement;
+  }
+
+  public get id() {
+    return this.state.get('note').id;
   }
 
   public ngOnInit() {
@@ -468,9 +480,17 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     hotkeys('delete', () => {
       if (this.state.get('focus')) {
         this.store.dispatch(
-          BoardActions.removeNode({
-            node: this.state.get('note'),
-            nodeType: 'note',
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [
+              {
+                data: {
+                  type: 'note',
+                  node: this.state.get('note'),
+                },
+                op: 'remove',
+              },
+            ],
           })
         );
       }

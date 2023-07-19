@@ -155,15 +155,25 @@ describe('ws', () => {
 
     describe('note', () => {
       it('invalid new', async () => {
-        await send({
-          type: BoardCommonActions.addNode,
-          nodeType: 'note',
-          node: {
-            id: 'xx-yy',
-            invalid: 'xx',
-            text: 'xx',
-          },
-        });
+        const action = {
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'note',
+                node: {
+                  id: 'xx-yy',
+                  invalid: 'xx',
+                  text: 'xx',
+                },
+              },
+              op: 'add',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
+        };
+
+        await send(action);
 
         const boardResult = await getBoard(board1);
 
@@ -172,26 +182,36 @@ describe('ws', () => {
       });
 
       it('new', async () => {
-        await send({
-          type: BoardCommonActions.addNode,
-          nodeType: 'note',
-          node: {
-            id: 'xx-yy',
-            text: 'xx',
-            position: { x: 0, y: 0 },
-            emojis: [
-              {
-                unicode: 'x',
-                position: {
-                  x: 0,
-                  y: 0,
+        const action = {
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'note',
+                node: {
+                  id: 'xx-yy',
+                  text: 'xx',
+                  position: { x: 0, y: 0 },
+                  emojis: [
+                    {
+                      unicode: 'x',
+                      position: {
+                        x: 0,
+                        y: 0,
+                      },
+                    },
+                  ],
+                  votes: 4,
+                  invalidField: true,
                 },
               },
-            ],
-            votes: 4,
-            invalidField: true,
-          },
-        });
+              op: 'add',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
+        };
+
+        await send(action);
 
         const boardResult = await getBoard(board1);
 
@@ -211,13 +231,21 @@ describe('ws', () => {
         const nodeId = boardResult?.board.notes[0].id;
 
         const action = {
-          nodeType: 'note',
-          node: {
-            id: nodeId,
-            text: 'edit',
-            invalidField: true,
-          },
-          type: BoardCommonActions.patchNode,
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'note',
+                node: {
+                  id: nodeId,
+                  text: 'edit',
+                  invalidField: true,
+                },
+              },
+              op: 'patch',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
         };
 
         await send(action);
@@ -231,18 +259,28 @@ describe('ws', () => {
         expect(ws.OPEN).toEqual(WebSocket.OPEN);
       });
 
+      it.skip('patch non-existent note', async () => {});
+
       it('remove', async () => {
         let boardResult = await getBoard(board1);
 
         const nodeId = boardResult?.board.notes[0].id;
 
         const action = {
-          nodeType: 'note',
-          node: {
-            id: nodeId,
-            text: 'edit',
-          },
-          type: BoardCommonActions.removeNode,
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'note',
+                node: {
+                  id: nodeId,
+                  text: 'edit',
+                },
+              },
+              op: 'remove',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
         };
 
         await send(action);
@@ -270,21 +308,37 @@ describe('ws', () => {
         });
 
         const action = {
-          nodeType: 'note',
-          node: {
-            id: 'fake',
-            text: 'edit',
-          },
-          type: BoardCommonActions.patchNode,
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'note',
+                node: {
+                  id: 'fake',
+                  text: 'edit',
+                },
+              },
+              op: 'patch',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
         };
 
         const action2 = {
-          nodeType: 'note',
-          node: {
-            id: 'fake',
-            text: 'edit',
-          },
-          type: BoardCommonActions.removeNode,
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'note',
+                node: {
+                  id: 'fake',
+                  text: 'edit',
+                },
+              },
+              op: 'revome',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
         };
 
         await send(action);
@@ -300,14 +354,24 @@ describe('ws', () => {
 
     describe('group', () => {
       it('invalid new', async () => {
-        await send({
-          type: BoardCommonActions.addNode,
-          nodeType: 'group',
-          node: {
-            id: 'xx-yy',
-            invalid: 'xx',
-          },
-        });
+        const action = {
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'group',
+                node: {
+                  id: 'xx-yy',
+                  invalid: 'xx',
+                },
+              },
+              op: 'add',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
+        };
+
+        await send(action);
 
         const boardResult = await getBoard(board1);
 
@@ -316,17 +380,27 @@ describe('ws', () => {
       });
 
       it('new', async () => {
-        await send({
-          type: BoardCommonActions.addNode,
-          nodeType: 'group',
-          node: {
-            id: 'xx-yy',
-            position: { x: 0, y: 0 },
-            width: 300,
-            height: 300,
-            invalidField: true,
-          },
-        });
+        const action = {
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'group',
+                node: {
+                  id: 'xx-yy',
+                  position: { x: 0, y: 0 },
+                  width: 300,
+                  height: 300,
+                  invalidField: true,
+                },
+              },
+              op: 'add',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
+        };
+
+        await send(action);
 
         const boardResult = await getBoard(board1);
 
@@ -346,13 +420,21 @@ describe('ws', () => {
         const nodeId = boardResult?.board.groups[0].id;
 
         const action = {
-          nodeType: 'group',
-          node: {
-            id: nodeId,
-            title: 'edit',
-            invalidField: true,
-          },
-          type: BoardCommonActions.patchNode,
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'group',
+                node: {
+                  id: nodeId,
+                  title: 'edit',
+                  invalidField: true,
+                },
+              },
+              op: 'patch',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
         };
 
         await send(action);
@@ -371,11 +453,19 @@ describe('ws', () => {
         const nodeId = boardResult?.board.groups[0].id;
 
         const action = {
-          nodeType: 'group',
-          node: {
-            id: nodeId,
-          },
-          type: BoardCommonActions.removeNode,
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'group',
+                node: {
+                  id: nodeId,
+                },
+              },
+              op: 'remove',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
         };
 
         await send(action);
@@ -389,14 +479,24 @@ describe('ws', () => {
 
     describe('panel', () => {
       it('invalid new', async () => {
-        await send({
-          type: BoardCommonActions.addNode,
-          nodeType: 'panel',
-          node: {
-            id: 'xx-yy',
-            title: 'xxx',
-          },
-        });
+        const action = {
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'panel',
+                node: {
+                  id: 'xx-yy',
+                  title: 'xxx',
+                },
+              },
+              op: 'add',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
+        };
+
+        await send(action);
 
         const boardResult = await getBoard(board1);
 
@@ -405,18 +505,28 @@ describe('ws', () => {
       });
 
       it('new', async () => {
-        await send({
-          type: BoardCommonActions.addNode,
-          nodeType: 'panel',
-          node: {
-            id: 'xx-yy',
-            position: { x: 0, y: 0 },
-            width: 300,
-            height: 300,
-            color: '#000000',
-            invalidField: true,
-          },
-        });
+        const action = {
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'panel',
+                node: {
+                  id: 'xx-yy',
+                  position: { x: 0, y: 0 },
+                  width: 300,
+                  height: 300,
+                  color: '#000000',
+                  invalidField: true,
+                },
+              },
+              op: 'add',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
+        };
+
+        await send(action);
 
         const boardResult = await getBoard(board1);
 
@@ -436,13 +546,21 @@ describe('ws', () => {
         const nodeId = boardResult?.board.panels[0].id;
 
         const action = {
-          nodeType: 'panel',
-          node: {
-            id: nodeId,
-            title: 'edit',
-            invalidField: true,
-          },
-          type: BoardCommonActions.patchNode,
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'panel',
+                node: {
+                  id: nodeId,
+                  title: 'edit',
+                  invalidField: true,
+                },
+              },
+              op: 'patch',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
         };
 
         await send(action);
@@ -460,11 +578,19 @@ describe('ws', () => {
         const nodeId = boardResult?.board.panels[0].id;
 
         const action = {
-          nodeType: 'panel',
-          node: {
-            id: nodeId,
-          },
-          type: BoardCommonActions.removeNode,
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'panel',
+                node: {
+                  id: nodeId,
+                },
+              },
+              op: 'remove',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
         };
 
         await send(action);
@@ -478,17 +604,27 @@ describe('ws', () => {
 
     describe('image', () => {
       it('invalid new', async () => {
-        await send({
-          type: BoardCommonActions.addNode,
-          nodeType: 'image',
-          node: {
-            id: 'xx-yy',
-            position: { x: 0, y: 0 },
-            width: 300,
-            height: 300,
-            invalid: 'xx',
-          },
-        });
+        const action = {
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'image',
+                node: {
+                  id: 'xx-yy',
+                  position: { x: 0, y: 0 },
+                  width: 300,
+                  height: 300,
+                  invalid: 'xx',
+                },
+              },
+              op: 'add',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
+        };
+
+        await send(action);
 
         const boardResult = await getBoard(board1);
 
@@ -499,18 +635,28 @@ describe('ws', () => {
       it('new', async () => {
         const url = randUrl();
 
-        await send({
-          type: BoardCommonActions.addNode,
-          nodeType: 'image',
-          node: {
-            id: 'xx-yy',
-            url,
-            position: { x: 0, y: 0 },
-            width: 300,
-            height: 300,
-            invalidField: true,
-          },
-        });
+        const action = {
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'image',
+                node: {
+                  id: 'xx-yy',
+                  url,
+                  position: { x: 0, y: 0 },
+                  width: 300,
+                  height: 300,
+                  invalidField: true,
+                },
+              },
+              op: 'add',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
+        };
+
+        await send(action);
 
         const boardResult = await getBoard(board1);
 
@@ -532,12 +678,20 @@ describe('ws', () => {
         const url = randUrl();
 
         const action = {
-          nodeType: 'image',
-          node: {
-            id: nodeId,
-            url,
-          },
-          type: BoardCommonActions.patchNode,
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'image',
+                node: {
+                  id: nodeId,
+                  url,
+                },
+              },
+              op: 'patch',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
         };
 
         await send(action);
@@ -556,11 +710,19 @@ describe('ws', () => {
         const nodeId = boardResult?.board.images[0].id;
 
         const action = {
-          nodeType: 'image',
-          node: {
-            id: nodeId,
-          },
-          type: BoardCommonActions.removeNode,
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'image',
+                node: {
+                  id: nodeId,
+                },
+              },
+              op: 'remove',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
         };
 
         await send(action);
@@ -574,17 +736,27 @@ describe('ws', () => {
 
     describe('text', () => {
       it('invalid new', async () => {
-        await send({
-          type: BoardCommonActions.addNode,
-          nodeType: 'text',
-          node: {
-            id: 'xx-yy',
-            position: { x: 0, y: 0 },
-            width: 300,
-            height: 300,
-            invalid: 'xx',
-          },
-        });
+        const action = {
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'text',
+                node: {
+                  id: 'xx-yy',
+                  position: { x: 0, y: 0 },
+                  width: 300,
+                  height: 300,
+                  invalid: 'xx',
+                },
+              },
+              op: 'add',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
+        };
+
+        await send(action);
 
         const boardResult = await getBoard(board1);
 
@@ -595,21 +767,31 @@ describe('ws', () => {
       it('new', async () => {
         const url = randUrl();
 
-        await send({
-          type: BoardCommonActions.addNode,
-          nodeType: 'text',
-          node: {
-            id: 'xx-yy',
-            url,
-            text: 'text',
-            position: { x: 0, y: 0 },
-            width: 300,
-            height: 300,
-            color: '#000',
-            size: 16,
-            invalidField: true,
-          },
-        });
+        const action = {
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'text',
+                node: {
+                  id: 'xx-yy',
+                  url,
+                  text: 'text',
+                  position: { x: 0, y: 0 },
+                  width: 300,
+                  height: 300,
+                  color: '#000',
+                  size: 16,
+                  invalidField: true,
+                },
+              },
+              op: 'add',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
+        };
+
+        await send(action);
 
         const boardResult = await getBoard(board1);
 
@@ -631,12 +813,20 @@ describe('ws', () => {
         const nodeId = boardResult?.board.texts[0].id;
 
         const action = {
-          nodeType: 'text',
-          node: {
-            id: nodeId,
-            size: 23,
-          },
-          type: BoardCommonActions.patchNode,
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'text',
+                node: {
+                  id: nodeId,
+                  size: 23,
+                },
+              },
+              op: 'patch',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
         };
 
         await send(action);
@@ -655,11 +845,19 @@ describe('ws', () => {
         const nodeId = boardResult?.board.texts[0].id;
 
         const action = {
-          nodeType: 'text',
-          node: {
-            id: nodeId,
-          },
-          type: BoardCommonActions.removeNode,
+          history: false,
+          actions: [
+            {
+              data: {
+                type: 'text',
+                node: {
+                  id: nodeId,
+                },
+              },
+              op: 'remove',
+            },
+          ],
+          type: BoardCommonActions.batchNodeActions,
         };
 
         await send(action);

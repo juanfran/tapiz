@@ -120,11 +120,6 @@ const reducer = createReducer(
 
     return state;
   }),
-  on(BoardActions.setVisible, (state, { visible }): PageState => {
-    state.visible = visible;
-
-    return state;
-  }),
   on(PageActions.setInitZone, (state, { initZone }): PageState => {
     state.initZone = initZone;
 
@@ -135,26 +130,30 @@ const reducer = createReducer(
 
     return state;
   }),
-  on(BoardActions.addNode, (state, { nodeType }): PageState => {
-    if (nodeType === 'group' || nodeType === 'panel') {
-      state.initZone = null;
-      state.moveEnabled = true;
-      state.zone = null;
-    }
-
-    if (nodeType === 'text') {
-      state.boardCursor = 'default';
-    }
-
+  on(BoardActions.setVisible, (state, { visible }): PageState => {
+    state.visible = visible;
     return state;
   }),
-  on(BoardActions.removeNode, (state, { node }): PageState => {
-    const id = node.id;
+  on(BoardActions.batchNodeActions, (state, { actions }): PageState => {
+    if (actions.length === 1) {
+      const action = actions[0];
 
-    if (state.focusId.includes(id)) {
-      state.focusId = state.focusId.filter((it) => it !== id);
+      if (action.op === 'add') {
+        if (action.data.type === 'group' || action.data.type === 'panel') {
+          state.initZone = null;
+          state.moveEnabled = true;
+          state.zone = null;
+        } else if (action.data.type === 'text') {
+          state.boardCursor = 'default';
+        }
+      } else if (action.op === 'remove') {
+        const id = action.data.node.id;
+
+        if (state.focusId.includes(id)) {
+          state.focusId = state.focusId.filter((it) => it !== id);
+        }
+      }
     }
-
     return state;
   }),
   on(
@@ -165,6 +164,7 @@ const reducer = createReducer(
       }
 
       if (ctrlKey) {
+        state.focusId = state.focusId.filter((it) => !!it);
         state.focusId.push(focusId);
       } else {
         state.focusId = [focusId];

@@ -1,30 +1,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Entries } from 'type-fest';
 
-import { CommonState } from './models/common-state.model';
-import { Diff, DiffAdd, DiffEdit, DiffRemove } from './models/diff.model';
-
+import { type CommonState } from './models/common-state.model';
+import type { Diff, DiffAdd, DiffEdit, DiffRemove } from './models/diff.model';
+import type { NodeType, StateActions } from './models/node.model';
+import { Point } from './models/point.model';
 import { BoardCommonActions } from './board-common-actions';
-import { NodeType } from './models/node.model';
 
-// TODO: type safe
-export const getDiff = (action: any, userId?: string): Diff | null => {
-  if (action.type === BoardCommonActions.patchNode) {
+export const getActionDiff = (
+  action: StateActions,
+  userId?: string
+): Diff | null => {
+  if (action.op === 'patch') {
     return {
       edit: {
-        [action.nodeType]: [action.node],
+        [action.data.type]: [action.data.node],
       },
     };
-  } else if (action.type === BoardCommonActions.addNode) {
-    if (action.node.type === 'note') {
+  } else if (action.op === 'add') {
+    if (action.data.type === 'note') {
       return {
         add: {
-          [action.nodeType]: [
+          [action.data.type]: [
             {
-              ...action.node,
+              ...action.data.node,
               votes: 0,
               emojis: [],
-              ownerId: userId ?? action.node.ownerId,
+              ownerId: userId ?? action.data.node.ownerId,
             },
           ],
         },
@@ -33,44 +35,30 @@ export const getDiff = (action: any, userId?: string): Diff | null => {
 
     return {
       add: {
-        [action.nodeType]: [
+        [action.data.type]: [
           {
-            ...action.node,
+            ...action.data.node,
           },
         ],
       },
     };
-  } else if (action.type === BoardCommonActions.removeNode) {
+  } else if (action.op === 'remove') {
     return {
       remove: {
-        [action.nodeType]: [action.node.id],
-      },
-    };
-  } else if (action.type === BoardCommonActions.moveCursor && userId) {
-    return {
-      edit: {
-        user: [
-          {
-            id: userId,
-            cursor: action.cursor,
-          },
-        ],
-      },
-    };
-  } else if (action.type === BoardCommonActions.setVisible && userId) {
-    return {
-      edit: {
-        user: [
-          {
-            id: userId,
-            visible: !!action.visible,
-          },
-        ],
+        [action.data.type]: [action.data.node.id],
       },
     };
   }
 
   return null;
+};
+
+export const getDiff = (actions: StateActions[], userId?: string): Diff[] => {
+  return actions
+    .map((action) => {
+      return getActionDiff(action, userId);
+    })
+    .filter((it): it is Diff => it !== null);
 };
 
 export function applyDiff(diff: Diff, state: CommonState): CommonState {
@@ -182,6 +170,46 @@ export function applyDiff(diff: Diff, state: CommonState): CommonState {
   return {
     ...state,
   };
+}
+
+/* group patchs over the same object, example moving mouse */
+export function optimize(actions: StateActions[] | unknown[]) {
+  const isStateAction = (action: any): action is StateActions => {
+    return 'op' in action && 'data' in action;
+  };
+
+  const isMouseMoveAction = (
+    action: any
+  ): action is { type: string; position: Point; cursor: Point } => {
+    return action.type === BoardCommonActions.moveUser;
+  };
+
+  const optimizedTmp: Record<string, any> = {};
+  const notOptimized: unknown[] = [];
+
+  let key = '';
+
+  actions.forEach((action) => {
+    if (isMouseMoveAction(action)) {
+      key = 'mouse-move';
+    } else if (!isStateAction(action)) {
+      notOptimized.push(action);
+      return;
+    } else {
+      key = `${action.op}-${action.data.type}-${action.data.node.id}`;
+    }
+
+    if (!optimizedTmp[key]) {
+      optimizedTmp[key] = action;
+    } else {
+      optimizedTmp[key] = {
+        ...optimizedTmp[key],
+        ...action,
+      };
+    }
+  });
+
+  return [...notOptimized, ...Object.values(optimizedTmp)];
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 

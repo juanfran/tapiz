@@ -169,18 +169,26 @@ export class CocomaterialComponent {
       .pipe(withLatestFrom(this.store.select(selectZoom)), take(1))
       .subscribe(([position, zoom]) => {
         this.store.dispatch(
-          BoardActions.addNode({
-            node: {
-              id: v4(),
-              url: vector.svg,
-              width: 150,
-              height: 150,
-              position: {
-                x: (-position.x + event.pageX) / zoom - 75,
-                y: (-position.y + event.pageY) / zoom - 75,
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [
+              {
+                data: {
+                  type: 'vector',
+                  node: {
+                    id: v4(),
+                    url: vector.svg,
+                    width: 150,
+                    height: 150,
+                    position: {
+                      x: (-position.x + event.pageX) / zoom - 75,
+                      y: (-position.y + event.pageY) / zoom - 75,
+                    },
+                  },
+                },
+                op: 'add',
               },
-            },
-            nodeType: 'vector',
+            ],
           })
         );
       });

@@ -86,12 +86,20 @@ export class PageEffects {
     return this.actions$.pipe(
       ofType(PageActions.setNoteDrawing),
       map((action) => {
-        return BoardActions.patchNode({
-          nodeType: 'note',
-          node: {
-            id: action.id,
-            drawing: action.drawing,
-          },
+        return BoardActions.batchNodeActions({
+          history: true,
+          actions: [
+            {
+              data: {
+                type: 'note',
+                node: {
+                  id: action.id,
+                  drawing: action.drawing,
+                },
+              },
+              op: 'patch',
+            },
+          ],
         });
       })
     );

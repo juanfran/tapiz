@@ -1,7 +1,8 @@
 import { ConfigService } from '@/app/services/config.service';
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { wsMessage, wsOpen } from '../ws.actions';
+import { wsOpen } from '../ws.actions';
+import { optimize } from '@team-up/board-commons';
 
 @Injectable({
   providedIn: 'root',
@@ -26,8 +27,6 @@ export class WsService {
         [key in PropertyKey]: unknown;
       }[];
 
-      this.store.dispatch(wsMessage({ messages: data }));
-
       data.forEach((message) => {
         if (message['type']) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,8 +37,8 @@ export class WsService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public send(obj: any) {
-    this.pool.push(obj);
+  public send(obj: unknown[]) {
+    this.pool.push(...obj);
   }
 
   public close() {
@@ -48,7 +47,8 @@ export class WsService {
 
   private poolLoop() {
     if (this.pool.length) {
-      this.ws.send(JSON.stringify(this.pool));
+      const optimizedPool = optimize(this.pool);
+      this.ws.send(JSON.stringify(optimizedPool));
       this.pool = [];
     }
 

@@ -103,17 +103,25 @@ export class ToolbarComponent {
           };
 
           this.store.dispatch(
-            BoardActions.addNode({
-              nodeType: 'text',
-              node: {
-                id: v4(),
-                text: 'Text',
-                position: textPosition,
-                width: 200,
-                height: 50,
-                color: '#000',
-                size: 16,
-              },
+            BoardActions.batchNodeActions({
+              history: true,
+              actions: [
+                {
+                  data: {
+                    type: 'text',
+                    node: {
+                      id: v4(),
+                      text: 'Text',
+                      position: textPosition,
+                      width: 200,
+                      height: 50,
+                      color: '#000',
+                      size: 16,
+                    },
+                  },
+                  op: 'add',
+                },
+              ],
             })
           );
         },
@@ -149,9 +157,17 @@ export class ToolbarComponent {
           });
 
           this.store.dispatch(
-            BoardActions.addNode({
-              nodeType: 'note',
-              node: note,
+            BoardActions.batchNodeActions({
+              history: true,
+              actions: [
+                {
+                  data: {
+                    type: 'note',
+                    node: note,
+                  },
+                  op: 'add',
+                },
+              ],
             })
           );
         },
@@ -268,18 +284,26 @@ export class ToolbarComponent {
         .pipe(take(1))
         .subscribe(([zoom, position]) => {
           this.store.dispatch(
-            BoardActions.addNode({
-              nodeType: 'image',
-              node: {
-                id: v4(),
-                url,
-                position: {
-                  x: -position.x / zoom,
-                  y: -position.y / zoom,
+            BoardActions.batchNodeActions({
+              history: true,
+              actions: [
+                {
+                  data: {
+                    type: 'image',
+                    node: {
+                      id: v4(),
+                      url,
+                      position: {
+                        x: -position.x / zoom,
+                        y: -position.y / zoom,
+                      },
+                      width: 0,
+                      height: 0,
+                    },
+                  },
+                  op: 'add',
                 },
-                width: 0,
-                height: 0,
-              },
+              ],
             })
           );
         });

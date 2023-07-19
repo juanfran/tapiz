@@ -10,8 +10,8 @@ import {
   switchMap,
   tap,
   withLatestFrom,
-  filter,
   catchError,
+  filter,
 } from 'rxjs/operators';
 import { v4 } from 'uuid';
 import { BoardActions } from '../actions/board.actions';
@@ -19,20 +19,32 @@ import { PageActions } from '../actions/page.actions';
 import { selectZone } from '../selectors/page.selectors';
 import { BoardApiService } from '../services/board-api.service';
 import { Router } from '@angular/router';
+import { StateActions } from '@team-up/board-commons';
 
 @Injectable()
 export class BoardEffects {
+  public wsUpdateStateName$ = createEffect(
+    () => {
+      return this.actions$
+        .pipe(ofType(BoardActions.setBoardName, BoardActions.setVisible))
+        .pipe(
+          tap((action) => {
+            this.wsService.send([action]);
+          })
+        );
+    },
+    {
+      dispatch: false,
+    }
+  );
+
   public wsUpdateState$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(
-          BoardActions.addNode,
-          BoardActions.patchNode,
-          BoardActions.removeNode,
-          BoardActions.moveCursor,
-          BoardActions.setVisible,
-          BoardActions.setBoardName
-        ),
+        ofType(BoardActions.batchNodeActions),
+        map((batch) => {
+          return batch.actions;
+        }),
         tap((action) => {
           this.wsService.send(action);
         })
@@ -48,9 +60,14 @@ export class BoardEffects {
       return this.actions$.pipe(
         ofType(PageActions.pasteNodes),
         tap((action) => {
-          action.nodes.forEach((node) => {
-            this.wsService.send(BoardActions.addNode(node));
+          const batchActions: StateActions[] = action.nodes.map((node) => {
+            return {
+              op: 'add',
+              data: node,
+            };
           });
+
+          this.wsService.send(batchActions);
         })
       );
     },
@@ -65,10 +82,12 @@ export class BoardEffects {
       switchMap((action) => {
         return this.boardApiService.getBoard(action.boardId).pipe(
           map((board) => {
-            this.wsService.send({
-              action: 'join',
-              boardId: board.id,
-            });
+            this.wsService.send([
+              {
+                action: 'join',
+                boardId: board.id,
+              },
+            ]);
 
             return PageActions.fetchBoardSuccess({
               name: board.name,
@@ -93,10 +112,21 @@ export class BoardEffects {
 
   public addNode$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(BoardActions.addNode),
-      filter((action) => !action.history),
-      map(({ node }) => {
-        return PageActions.setFocusId({ focusId: node.id });
+      ofType(BoardActions.batchNodeActions),
+      filter((it) => {
+        return (
+          it.actions.length === 1 && !!it.history && it.actions[0].op === 'add'
+        );
+      }),
+      map(({ actions }) => {
+        if ('id' in actions[0].data.node) {
+          return PageActions.setFocusId({ focusId: actions[0].data.node.id });
+        }
+
+        return { type: 'noop' };
+      }),
+      filter((it) => {
+        return it.type !== 'noop';
       })
     );
   });
@@ -141,15 +171,23 @@ export class BoardEffects {
           }
 
           return of(
-            BoardActions.addNode({
-              nodeType: 'group',
-              node: {
-                id: v4(),
-                title: '',
-                position: zone.position,
-                width: width,
-                height: height,
-              },
+            BoardActions.batchNodeActions({
+              history: true,
+              actions: [
+                {
+                  data: {
+                    type: 'group',
+                    node: {
+                      id: v4(),
+                      title: '',
+                      position: zone.position,
+                      width: width,
+                      height: height,
+                    },
+                  },
+                  op: 'add',
+                },
+              ],
             })
           );
         }
@@ -173,16 +211,24 @@ export class BoardEffects {
           }
 
           return of(
-            BoardActions.addNode({
-              nodeType: 'panel',
-              node: {
-                id: v4(),
-                title: '',
-                position: zone.position,
-                width: width,
-                height: height,
-                color: '#fdfcdc',
-              },
+            BoardActions.batchNodeActions({
+              history: true,
+              actions: [
+                {
+                  data: {
+                    type: 'panel',
+                    node: {
+                      id: v4(),
+                      title: '',
+                      position: zone.position,
+                      width: width,
+                      height: height,
+                      color: '#fdfcdc',
+                    },
+                  },
+                  op: 'add',
+                },
+              ],
             })
           );
         }

@@ -6,7 +6,7 @@ import { concatLatestFrom } from '@ngrx/effects';
 import { selectFocusId, selectUserId } from '../selectors/page.selectors';
 import type { RequireAtLeastOne } from 'type-fest';
 import { v4 } from 'uuid';
-import { AddNode, NodeType, Point } from '@team-up/board-commons';
+import { NodeAdd, NodeType, Point } from '@team-up/board-commons';
 import { PageActions } from '../actions/page.actions';
 
 type ValidCopyNode = RequireAtLeastOne<Record<string, unknown>, 'id'>;
@@ -80,7 +80,7 @@ export class CopyPasteDirective {
 
     const nodes = this.copyNode.map((it) => {
       return {
-        nodeType: it.nodeType,
+        type: it.nodeType,
         node: {
           ...it.node,
           id: v4(),
@@ -89,8 +89,7 @@ export class CopyPasteDirective {
     });
 
     this.store.dispatch(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      PageActions.pasteNodes({ nodes: nodes as any[] })
+      PageActions.pasteNodes({ nodes: nodes as NodeAdd['data'][] })
     );
   }
 }

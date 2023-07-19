@@ -2,10 +2,8 @@ const ActionType = '[Board]';
 
 export const BoardCommonActions = {
   setBoardName: `${ActionType} SetBoardName`,
-  moveCursor: `${ActionType} MoveCursor`,
-  patchNode: `${ActionType} PatchNode`,
-  addNode: `${ActionType} AddNode`,
-  removeNode: `${ActionType} RemoveNode`,
-  setVisible: `${ActionType} Set visible`,
+  moveUser: `${ActionType} MoveUser`,
   setState: `${ActionType} Set state`,
+  batchNodeActions: `${ActionType} Batch node actions`,
+  setVisible: `${ActionType} Set visible`,
 };

@@ -8,7 +8,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { fromEvent, merge, Subject, zip } from 'rxjs';
+import { animationFrameScheduler, fromEvent, merge, Subject, zip } from 'rxjs';
 import {
   startWith,
   map,
@@ -198,9 +198,17 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
           });
 
           this.store.dispatch(
-            BoardActions.addNode({
-              node: note,
-              nodeType: 'note',
+            BoardActions.batchNodeActions({
+              history: true,
+              actions: [
+                {
+                  data: {
+                    type: 'note',
+                    node: note,
+                  },
+                  op: 'add',
+                },
+              ],
             })
           );
         }
@@ -221,17 +229,21 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
           this.store.select(selectZoom),
           this.store.select(selectPosition)
         ),
-        throttleTime(1000 / 15)
+        throttleTime(0, animationFrameScheduler)
       )
       .subscribe(([mousePosition, zoom, position]) => {
-        this.store.dispatch(
-          BoardActions.moveCursor({
-            cursor: {
-              x: (-position.x + mousePosition.x) / zoom,
-              y: (-position.y + mousePosition.y) / zoom,
-            },
-          })
-        );
+        const action = BoardActions.moveUser({
+          position: {
+            x: Math.round(position.x),
+            y: Math.round(position.y),
+          },
+          cursor: {
+            x: Math.round((-position.x + mousePosition.x) / zoom),
+            y: Math.round((-position.y + mousePosition.y) / zoom),
+          },
+        });
+
+        this.wsService.send([action]);
       });
 
     const userView$ = merge(
@@ -289,18 +301,26 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
             const reader = new FileReader();
             reader.onloadend = () => {
               this.store.dispatch(
-                BoardActions.addNode({
-                  nodeType: 'image',
-                  node: {
-                    id: v4(),
-                    url: reader.result as string,
-                    width: 0,
-                    height: 0,
-                    position: {
-                      x: (-position.x + event.clientX) / zoom,
-                      y: (-position.y + event.clientY) / zoom,
+                BoardActions.batchNodeActions({
+                  history: true,
+                  actions: [
+                    {
+                      data: {
+                        type: 'image',
+                        node: {
+                          id: v4(),
+                          url: reader.result as string,
+                          width: 0,
+                          height: 0,
+                          position: {
+                            x: (-position.x + event.clientX) / zoom,
+                            y: (-position.y + event.clientY) / zoom,
+                          },
+                        },
+                      },
+                      op: 'add',
                     },
-                  },
+                  ],
                 })
               );
             };
