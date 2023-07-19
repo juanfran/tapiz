@@ -5,7 +5,7 @@ import { EMPTY, of } from 'rxjs';
 import { filter, mergeMap, tap } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
-import { AddNode, RemoveNode } from '@team-up/board-commons';
+import { StateActions } from '@team-up/board-commons';
 import { selectNote } from '../selectors/board.selectors';
 
 @Injectable()
@@ -55,16 +55,35 @@ export class HistoryEffects {
   public newNode$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(BoardActions.addNode),
-        filter((action) => !action.history),
+        ofType(BoardActions.batchNodeActions),
+        filter((action) => {
+          return !!action.history;
+        }),
         tap((action) => {
-          this.newUndoneAction(action, [
-            BoardActions.removeNode({
-              node: action.node,
-              nodeType: action.nodeType,
-              history: true,
-            } as RemoveNode),
-          ]);
+          const addActions = action.actions.filter((it) => {
+            return it.op === 'add';
+          });
+
+          const removeActions = addActions.map((it) => {
+            return {
+              op: 'remove',
+              data: {
+                type: it.data.type,
+                node: {
+                  id: it.data.node.id,
+                },
+              },
+            };
+          }) as StateActions[];
+
+          if (removeActions.length) {
+            this.newUndoneAction(action, [
+              BoardActions.batchNodeActions({
+                history: false,
+                actions: removeActions,
+              }),
+            ]);
+          }
         })
       );
     },
@@ -78,15 +97,26 @@ export class HistoryEffects {
       return this.actions$.pipe(
         ofType(PageActions.pasteNodes),
         tap((action) => {
-          const actions = action.nodes.map((it) => {
-            return BoardActions.removeNode({
-              node: it.node,
-              nodeType: it.nodeType,
-              history: true,
-            } as RemoveNode);
-          });
+          const removeActions = action.nodes.map((it) => {
+            return {
+              op: 'remove',
+              data: {
+                type: it.type,
+                node: {
+                  id: it.node.id,
+                },
+              },
+            };
+          }) as StateActions[];
 
-          this.newUndoneAction(action, actions);
+          if (removeActions.length) {
+            this.newUndoneAction(action, [
+              BoardActions.batchNodeActions({
+                history: false,
+                actions: removeActions,
+              }),
+            ]);
+          }
         })
       );
     },
@@ -98,16 +128,30 @@ export class HistoryEffects {
   public removeNode$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(BoardActions.removeNode),
-        filter((action) => !action.history),
+        ofType(BoardActions.batchNodeActions),
+        filter((action) => {
+          return !!action.history;
+        }),
         tap((action) => {
-          this.newUndoneAction(action, [
-            BoardActions.addNode({
-              node: action.node,
-              nodeType: action.nodeType,
-              history: true,
-            } as AddNode),
-          ]);
+          const removeActions = action.actions.filter((it) => {
+            return it.op === 'remove';
+          });
+
+          const addActions = removeActions.map((it) => {
+            return {
+              op: 'add',
+              data: it.data,
+            };
+          }) as StateActions[];
+
+          if (addActions.length) {
+            this.newUndoneAction(action, [
+              BoardActions.batchNodeActions({
+                history: false,
+                actions: addActions,
+              }),
+            ]);
+          }
         })
       );
     },
@@ -120,52 +164,38 @@ export class HistoryEffects {
     () => {
       return this.actions$.pipe(
         ofType(PageActions.endDragNode),
-        tap((action) => {
+        tap((actions) => {
           this.newUndoneAction(
-            BoardActions.patchNode({
-              node: {
-                id: action.id,
-                position: action.finalPosition,
-              },
-              nodeType: action.nodeType,
+            BoardActions.batchNodeActions({
+              history: false,
+              actions: actions.nodes.map((node) => {
+                return {
+                  data: {
+                    type: node.nodeType,
+                    node: {
+                      id: node.id,
+                      position: node.finalPosition,
+                    },
+                  },
+                  op: 'patch',
+                };
+              }),
             }),
             [
-              BoardActions.patchNode({
-                node: {
-                  id: action.id,
-                  position: action.initialPosition,
-                },
-                nodeType: action.nodeType,
-              }),
-            ]
-          );
-        })
-      );
-    },
-    {
-      dispatch: false,
-    }
-  );
-
-  public setNoteDrawing$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(PageActions.setNoteDrawing),
-        filter((action) => !action.history),
-        concatLatestFrom((action) => this.store.select(selectNote(action.id))),
-        tap(([action, note]) => {
-          this.newUndoneAction(
-            {
-              ...action,
-              history: true,
-            } as Action,
-            [
-              BoardActions.patchNode({
-                nodeType: 'note',
-                node: {
-                  id: action.id,
-                  drawing: note?.drawing ?? [],
-                },
+              BoardActions.batchNodeActions({
+                history: false,
+                actions: actions.nodes.map((node) => {
+                  return {
+                    data: {
+                      type: node.nodeType,
+                      node: {
+                        id: node.id,
+                        position: node.initialPosition,
+                      },
+                    },
+                    op: 'patch',
+                  };
+                }),
               }),
             ]
           );

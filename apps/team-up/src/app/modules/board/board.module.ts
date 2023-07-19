@@ -41,6 +41,7 @@ import { pageFeature } from './reducers/page.reducer';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 import { PageEffects } from './effects/page.effects';
 import { VectorComponent } from './components/vector/vector.component';
+import { DrawingHistoryEffects } from './effects/drawing-history.effects';
 
 const routes: Routes = [
   {
@@ -67,7 +68,12 @@ const routes: Routes = [
     RouterModule.forRoot(routes),
     StoreModule.forFeature(boardFeature),
     StoreModule.forFeature(pageFeature),
-    EffectsModule.forFeature([BoardEffects, HistoryEffects, PageEffects]),
+    EffectsModule.forFeature([
+      BoardEffects,
+      HistoryEffects,
+      PageEffects,
+      DrawingHistoryEffects,
+    ]),
     MatSliderModule,
     MatDialogModule,
     MatInputModule,

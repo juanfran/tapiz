@@ -14,6 +14,22 @@
     value="1" />
 
   <button
+    (click)="undo()"
+    mat-mini-fab
+    color="primary"
+    aria-label="Undo">
+    <mat-icon>undo</mat-icon>
+  </button>
+
+  <button
+    (click)="redo()"
+    mat-mini-fab
+    color="primary"
+    aria-label="Redo">
+    <mat-icon>redo</mat-icon>
+  </button>
+
+  <button
     (click)="clean()"
     mat-mini-fab
     color="primary"

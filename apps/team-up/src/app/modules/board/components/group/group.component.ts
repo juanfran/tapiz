@@ -22,7 +22,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { Group } from '@team-up/board-commons';
+import { Group, NodeType } from '@team-up/board-commons';
 import { BoardMoveService } from '../../services/board-move.service';
 import { selectFocusId } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
@@ -36,7 +36,6 @@ interface State {
   editText: string;
   focus: boolean;
   draggable: boolean;
-  initDragPosition: Point;
 }
 @UntilDestroy()
 @Component({
@@ -149,46 +148,25 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
     this.store.dispatch(PageActions.setFocusId({ focusId: '' }));
   }
 
-  public startDrag(position: Point) {
-    this.state.set({
-      initDragPosition: position,
-    });
-  }
-
-  public endDrag() {
-    this.store.dispatch(
-      PageActions.endDragNode({
-        nodeType: 'group',
-        id: this.state.get('group').id,
-        initialPosition: this.state.get('initDragPosition'),
-        finalPosition: this.state.get('group').position,
-      })
-    );
-  }
-
-  public move(position: Point) {
-    this.store.dispatch(
-      BoardActions.patchNode({
-        nodeType: 'group',
-        node: {
-          id: this.state.get('group').id,
-          position,
-        },
-      })
-    );
-  }
-
   public setText(event: Event) {
     if (event.target) {
       const value = (event.target as HTMLElement).innerText;
 
       this.store.dispatch(
-        BoardActions.patchNode({
-          nodeType: 'group',
-          node: {
-            id: this.state.get('group').id,
-            title: value.trim(),
-          },
+        BoardActions.batchNodeActions({
+          history: true,
+          actions: [
+            {
+              data: {
+                type: 'group',
+                node: {
+                  id: this.state.get('group').id,
+                  title: value.trim(),
+                },
+              },
+              op: 'patch',
+            },
+          ],
         })
       );
     }
@@ -247,13 +225,27 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
     hotkeys('delete', () => {
       if (this.state.get('focus')) {
         this.store.dispatch(
-          BoardActions.removeNode({
-            node: this.state.get('group'),
-            nodeType: 'group',
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [
+              {
+                data: {
+                  type: 'group',
+                  node: this.state.get('group'),
+                },
+                op: 'remove',
+              },
+            ],
           })
         );
       }
     });
+  }
+
+  public nodeType: NodeType = 'group';
+
+  public get id() {
+    return this.state.get('group').id;
   }
 
   public get nativeElement(): HTMLElement {
@@ -279,13 +271,21 @@ export class GroupComponent implements AfterViewInit, OnInit, Draggable {
             const { width, height } = this.state.get('group');
 
             this.store.dispatch(
-              BoardActions.patchNode({
-                nodeType: 'group',
-                node: {
-                  id: this.state.get('group').id,
-                  width: width + size.x,
-                  height: height + size.y,
-                },
+              BoardActions.batchNodeActions({
+                history: true,
+                actions: [
+                  {
+                    data: {
+                      type: 'group',
+                      node: {
+                        id: this.state.get('group').id,
+                        width: width + size.x,
+                        height: height + size.y,
+                      },
+                    },
+                    op: 'patch',
+                  },
+                ],
               })
             );
 

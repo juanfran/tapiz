@@ -3,6 +3,8 @@ import {
   BoardCommonActions,
   Diff,
   getDiff,
+  Point,
+  StateActions,
   Validators,
 } from '@team-up/board-commons';
 import * as WebSocket from 'ws';
@@ -29,81 +31,143 @@ export class Client {
     this.ws.on('close', this.close.bind(this));
   }
 
-  public isSessionEvent(diff: Diff) {
-    const isUserEvent = !!(
-      diff.edit?.user ||
-      diff.add?.user ||
-      diff.remove?.user
-    );
-    return isUserEvent;
-  }
-
   public incomingMessage(messageString: string) {
-    const messages = this.parseMessage(messageString);
+    let messages = this.parseMessage(messageString);
 
     if (!Array.isArray(messages)) {
       return;
     }
 
-    messages.forEach((message: any) => {
-      this.processMsg(message);
-    });
+    messages = messages.filter((message) => !!message);
+
+    this.processMsg(messages);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public processMsg(message: any) {
+  public processMsg(pendingMessages: any) {
     //saveMsg(message);
 
-    if ('action' in message && message.action === 'join') {
-      this.join(message);
-    } else if (
-      BoardCommonActions.setBoardName === message.type &&
-      this.isOwner
-    ) {
-      const action = Validators.changeBoardName.safeParse(message);
+    const messages: any[] = [];
+    const mouseMove: { position: Point; cursor: Point }[] = [];
 
-      if (!action.success) {
-        return;
+    pendingMessages.forEach((it: any) => {
+      if (it.type !== BoardCommonActions.moveUser) {
+        messages.push(it);
+      } else {
+        mouseMove.push(it);
       }
+    });
 
-      this.server.updateBoardName(this.boardId, action.data.name);
-      this.server.sendAll(this.boardId, action.data, [this]);
-    } else if ('type' in message) {
-      const state = this.server.getBoard(this.boardId);
+    this.mouseMoves(mouseMove);
 
-      if (!state) {
-        return;
+    if (messages.length) {
+      if ('action' in messages[0] && messages[0].action === 'join') {
+        this.join(messages[0]);
+      } else if (
+        BoardCommonActions.setBoardName === messages[0].type &&
+        this.isOwner
+      ) {
+        this.updateBoardName(messages[0]);
+      } else if (BoardCommonActions.setVisible === messages[0].type) {
+        this.updateUserVisibility(messages[0]);
+      } else {
+        this.parseStateActionMessage(messages);
       }
+    }
+  }
 
-      const validationResult = validation(message, state, this.id);
+  private mouseMoves(messages: { position: Point; cursor: Point }[]) {
+    const moveMessage = messages.pop();
 
-      if (!validationResult) {
-        return;
-      }
+    if (!moveMessage) {
+      return;
+    }
 
-      const diffResult = getDiff(validationResult, this.id);
+    const result = Validators.userMove.safeParse({
+      position: moveMessage.position,
+      cursor: moveMessage.cursor,
+    });
 
-      if (diffResult) {
-        this.updateStateWithDiff(diffResult);
-        this.server.sendAll(
-          this.boardId,
+    if (!result.success) {
+      return;
+    }
+
+    const diff = {
+      edit: {
+        user: [
           {
-            type: BoardCommonActions.setState,
-            data: diffResult,
+            id: this.id,
+            ...result.data,
           },
-          [this]
-        );
+        ],
+      },
+    };
 
-        const persist = !this.isSessionEvent(diffResult);
+    this.updateStateWithDiff(diff);
+    this.server.sendAll(
+      this.boardId,
+      {
+        type: BoardCommonActions.setState,
+        data: diff,
+      },
+      [this]
+    );
+  }
 
-        if (persist) {
-          this.server.persistBoard(this.boardId);
-        }
+  private async updateBoardName(message: { name: string }) {
+    const action = Validators.changeBoardName.safeParse(message);
 
-        if (BoardCommonActions.setVisible === message.type) {
-          this.server.setUserVisibility(this.boardId, this.id, message.visible);
-        }
-      }
+    if (!action.success) {
+      return;
+    }
+
+    this.server.updateBoardName(this.boardId, action.data.name);
+    this.server.sendAll(this.boardId, action.data, [this]);
+  }
+
+  private updateUserVisibility(message: { visible?: boolean }) {
+    const action = Validators.patchUserVisibility.safeParse(message);
+
+    if (!action.success) {
+      return;
+    }
+
+    this.server.setUserVisibility(this.boardId, this.id, action.data.visible);
+    const diff = {
+      edit: {
+        user: [
+          {
+            id: this.id,
+            visible: action.data.visible,
+          },
+        ],
+      },
+    };
+
+    this.updateSendAllDiff(diff);
+  }
+
+  public parseStateActionMessage(message: StateActions[]) {
+    const state = this.server.getBoard(this.boardId);
+
+    if (!state) {
+      return;
+    }
+
+    const validationResult = validation(message, state, this.id);
+
+    if (!validationResult.length) {
+      return;
+    }
+
+    const diffResult = getDiff(validationResult, this.id);
+
+    if (diffResult.length) {
+      diffResult.forEach((diff) => {
+        this.updateSendAllDiff(diff);
+      });
+
+      this.server.persistBoard(this.boardId);
     }
   }
 
@@ -142,6 +206,18 @@ export class Client {
         },
       },
       []
+    );
+  }
+
+  private updateSendAllDiff(diff: Diff) {
+    this.updateStateWithDiff(diff);
+    this.server.sendAll(
+      this.boardId,
+      {
+        type: BoardCommonActions.setState,
+        data: diff,
+      },
+      [this]
     );
   }
 

@@ -22,7 +22,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { Panel } from '@team-up/board-commons';
+import { NodeType, Panel } from '@team-up/board-commons';
 import { BoardMoveService } from '../../services/board-move.service';
 import {
   selectCanvasMode,
@@ -39,7 +39,6 @@ interface State {
   editText: string;
   focus: boolean;
   draggable: boolean;
-  initDragPosition: Point;
   mode: string;
 }
 @UntilDestroy()
@@ -75,6 +74,12 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
   @ViewChildren('textarea') textarea!: QueryList<ElementRef>;
 
   @ViewChild('resize') resize!: ElementRef;
+
+  public nodeType: NodeType = 'panel';
+
+  public get id() {
+    return this.state.get('panel').id;
+  }
 
   constructor(
     private el: ElementRef,
@@ -146,46 +151,25 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
     return !this.state.get('draggable') || !this.state.get('focus');
   }
 
-  public startDrag(position: Point) {
-    this.state.set({
-      initDragPosition: position,
-    });
-  }
-
-  public endDrag() {
-    this.store.dispatch(
-      PageActions.endDragNode({
-        nodeType: 'panel',
-        id: this.state.get('panel').id,
-        initialPosition: this.state.get('initDragPosition'),
-        finalPosition: this.state.get('panel').position,
-      })
-    );
-  }
-
-  public move(position: Point) {
-    this.store.dispatch(
-      BoardActions.patchNode({
-        nodeType: 'panel',
-        node: {
-          id: this.state.get('panel').id,
-          position,
-        },
-      })
-    );
-  }
-
   public setText(event: Event) {
     if (event.target) {
       const value = (event.target as HTMLElement).innerText;
 
       this.store.dispatch(
-        BoardActions.patchNode({
-          nodeType: 'panel',
-          node: {
-            id: this.state.get('panel').id,
-            title: value,
-          },
+        BoardActions.batchNodeActions({
+          history: true,
+          actions: [
+            {
+              data: {
+                type: 'panel',
+                node: {
+                  id: this.state.get('panel').id,
+                  title: value,
+                },
+              },
+              op: 'patch',
+            },
+          ],
         })
       );
     }
@@ -246,9 +230,17 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
     hotkeys('delete', () => {
       if (this.state.get('focus')) {
         this.store.dispatch(
-          BoardActions.removeNode({
-            node: this.state.get('panel'),
-            nodeType: 'panel',
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [
+              {
+                data: {
+                  type: 'panel',
+                  node: this.state.get('panel'),
+                },
+                op: 'remove',
+              },
+            ],
           })
         );
       }
@@ -270,12 +262,20 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
       const color = (e.target as HTMLInputElement).value;
 
       this.store.dispatch(
-        BoardActions.patchNode({
-          nodeType: 'panel',
-          node: {
-            id: this.state.get('panel').id,
-            color,
-          },
+        BoardActions.batchNodeActions({
+          history: true,
+          actions: [
+            {
+              data: {
+                type: 'panel',
+                node: {
+                  id: this.state.get('panel').id,
+                  color,
+                },
+              },
+              op: 'patch',
+            },
+          ],
         })
       );
     }
@@ -295,13 +295,21 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
             const { width, height } = this.state.get('panel');
 
             this.store.dispatch(
-              BoardActions.patchNode({
-                nodeType: 'panel',
-                node: {
-                  id: this.state.get('panel').id,
-                  width: width + size.x,
-                  height: height + size.y,
-                },
+              BoardActions.batchNodeActions({
+                history: true,
+                actions: [
+                  {
+                    data: {
+                      type: 'panel',
+                      node: {
+                        id: this.state.get('panel').id,
+                        width: width + size.x,
+                        height: height + size.y,
+                      },
+                    },
+                    op: 'patch',
+                  },
+                ],
               })
             );
 

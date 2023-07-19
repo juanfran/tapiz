@@ -33,7 +33,11 @@ export interface DiffEdit {
   panel?: RequireAtLeastOne<Partial<Panel>, 'id'>[];
   image?: RequireAtLeastOne<Partial<Image>, 'id'>[];
   text?: RequireAtLeastOne<Partial<Text>, 'id'>[];
-  user?: RequireAtLeastOne<Partial<User>, 'id'>[];
+  user?: {
+    id: User['id'];
+    cursor?: User['cursor'];
+    visible?: User['visible'];
+  }[];
   vector?: RequireAtLeastOne<Partial<Vector>, 'id'>[];
 }
 

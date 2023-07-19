@@ -20,7 +20,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { Vector } from '@team-up/board-commons';
+import { NodeType, Vector } from '@team-up/board-commons';
 import { MoveService } from '../../services/move.service';
 import {
   selectCanvasMode,
@@ -73,6 +73,16 @@ export class VectorComponent implements OnInit, Draggable, AfterViewInit {
 
   @ViewChild('resize') resize!: ElementRef;
 
+  public nodeType: NodeType = 'vector';
+
+  public get id() {
+    return this.state.get('vector').id;
+  }
+
+  public get nativeElement() {
+    return this.el.nativeElement as HTMLElement;
+  }
+
   constructor(
     private el: ElementRef,
     private state: RxState<State>,
@@ -103,22 +113,6 @@ export class VectorComponent implements OnInit, Draggable, AfterViewInit {
     return !this.state.get('draggable') || !this.state.get('focus');
   }
 
-  public startDrag(position: Point) {}
-
-  public endDrag() {}
-
-  public move(position: Point) {
-    this.store.dispatch(
-      BoardActions.patchNode({
-        nodeType: 'vector',
-        node: {
-          id: this.state.get('vector').id,
-          position,
-        },
-      })
-    );
-  }
-
   public ngOnInit() {
     this.boardDragDirective.setHost(this);
 
@@ -145,9 +139,17 @@ export class VectorComponent implements OnInit, Draggable, AfterViewInit {
     hotkeys('delete', () => {
       if (this.state.get('focus')) {
         this.store.dispatch(
-          BoardActions.removeNode({
-            node: this.state.get('vector'),
-            nodeType: 'vector',
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [
+              {
+                data: {
+                  type: 'vector',
+                  node: this.state.get('vector'),
+                },
+                op: 'remove',
+              },
+            ],
           })
         );
       }
@@ -163,13 +165,21 @@ export class VectorComponent implements OnInit, Draggable, AfterViewInit {
             const { width, height } = this.state.get('vector');
 
             this.store.dispatch(
-              BoardActions.patchNode({
-                nodeType: 'vector',
-                node: {
-                  id: this.state.get('vector').id,
-                  width: width + size.x,
-                  height: height + size.y,
-                },
+              BoardActions.batchNodeActions({
+                history: true,
+                actions: [
+                  {
+                    data: {
+                      type: 'vector',
+                      node: {
+                        id: this.state.get('vector').id,
+                        width: width + size.x,
+                        height: height + size.y,
+                      },
+                    },
+                    op: 'patch',
+                  },
+                ],
               })
             );
 

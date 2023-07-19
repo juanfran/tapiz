@@ -60,9 +60,7 @@ export class UsersComponent {
 
   public toggleVisibility() {
     this.store.dispatch(
-      BoardActions.setVisible({
-        visible: !this.state.get('visible'),
-      })
+      BoardActions.setVisible({ visible: !this.state.get('visible') })
     );
   }
 

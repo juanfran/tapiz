@@ -5,13 +5,12 @@ import {
   ZoneConfig,
   User,
   Board,
-  PatchNode,
   NodeType,
   CocomaterialTag,
   CocomaterialApiListVectors,
   Drawing,
   Note,
-  AddNode,
+  NodeAdd,
 } from '@team-up/board-commons';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 
@@ -31,12 +30,13 @@ export const PageActions = createActionGroup({
     'Set zone': props<{ zone: Zone | null }>(),
     'Zone to group': emptyProps(),
     'Zone to panel': emptyProps(),
-    'Init drag zone': props<PatchNode>(),
     'End drag node': props<{
-      id: string;
-      nodeType: NodeType;
-      initialPosition: Point;
-      finalPosition: Point;
+      nodes: {
+        id: string;
+        nodeType: NodeType;
+        initialPosition: Point;
+        finalPosition: Point;
+      }[];
     }>(),
     Undo: emptyProps(),
     Redo: emptyProps(),
@@ -68,6 +68,8 @@ export const PageActions = createActionGroup({
       history?: boolean;
     }>(),
     'Go to note': props<{ note: Note }>(),
-    'Paste nodes': props<{ nodes: AddNode[] }>(),
+    'Paste nodes': props<{ nodes: NodeAdd['data'][] }>(),
+    'Undo drawing': emptyProps(),
+    'Redo drawing': emptyProps(),
   },
 });

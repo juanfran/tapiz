@@ -1,11 +1,9 @@
 import { props, createAction } from '@ngrx/store';
 import {
-  AddNode,
   Diff,
-  PatchNode,
-  Point,
-  RemoveNode,
   BoardCommonActions,
+  BachStateActions,
+  Point,
 } from '@team-up/board-commons';
 
 export const BoardActions = {
@@ -13,16 +11,17 @@ export const BoardActions = {
     BoardCommonActions.setBoardName,
     props<{ name: string }>()
   ),
-  moveCursor: createAction(
-    BoardCommonActions.moveCursor,
-    props<{ cursor: Point }>()
+  batchNodeActions: createAction(
+    BoardCommonActions.batchNodeActions,
+    props<BachStateActions>()
   ),
-  patchNode: createAction(BoardCommonActions.patchNode, props<PatchNode>()),
-  addNode: createAction(BoardCommonActions.addNode, props<AddNode>()),
-  removeNode: createAction(BoardCommonActions.removeNode, props<RemoveNode>()),
   setVisible: createAction(
     BoardCommonActions.setVisible,
     props<{ visible: boolean }>()
+  ),
+  moveUser: createAction(
+    BoardCommonActions.moveUser,
+    props<{ position: Point; cursor: Point }>()
   ),
   setState: createAction(BoardCommonActions.setState, props<{ data: Diff }>()),
 };

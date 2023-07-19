@@ -9,6 +9,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import {
+  animationFrameScheduler,
   filter,
   finalize,
   fromEvent,
@@ -77,7 +78,7 @@ export class DrawingDirective {
       'mousemove'
     ).pipe(
       takeUntil(mouseUp$),
-      throttleTime(25),
+      throttleTime(0, animationFrameScheduler),
       concatLatestFrom(() => this.store.select(selectDrawing)),
       filter(([, dragEnabled]) => dragEnabled),
       map(([event]) => event),

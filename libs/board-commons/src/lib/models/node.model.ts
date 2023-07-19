@@ -1,142 +1,103 @@
 import { RequireAtLeastOne } from 'type-fest';
-import { Vector } from './cocomaterial.model';
 
 import { Group } from './group.model';
-import { Image } from './image.model';
 import { Note } from './note.model';
 import { Panel } from './panel.model';
+import { Image } from './image.model';
 import { Text } from './text.model';
+import { Vector } from './cocomaterial.model';
 
 export type NodeType = 'note' | 'group' | 'panel' | 'text' | 'image' | 'vector';
 
-interface NotePatch {
-  node: RequireAtLeastOne<Partial<Note>, 'id'>;
-  nodeType: 'note';
-}
-
-interface PanelPatch {
-  node: RequireAtLeastOne<Partial<Panel>, 'id'>;
-  nodeType: 'panel';
-}
-
-interface GroupPatch {
-  node: RequireAtLeastOne<Partial<Group>, 'id'>;
-  nodeType: 'group';
-}
-
-interface ImagePatch {
-  node: RequireAtLeastOne<Partial<Image>, 'id'>;
-  nodeType: 'image';
-}
-
-interface TextPatch {
-  node: RequireAtLeastOne<Partial<Text>, 'id'>;
-  nodeType: 'text';
-}
-
-interface VectorPatch {
-  node: RequireAtLeastOne<Partial<Vector>, 'id'>;
-  nodeType: 'vector';
-}
-
 interface NoteAdd {
   node: Note;
-  nodeType: 'note';
-  history?: boolean;
+  type: 'note';
 }
 
 interface GroupAdd {
   node: Group;
-  nodeType: 'group';
-  history?: boolean;
+  type: 'group';
 }
 
 interface PanelAdd {
   node: Panel;
-  nodeType: 'panel';
-  history?: boolean;
-}
-
-interface TextAdd {
-  node: Text;
-  nodeType: 'text';
-  history?: boolean;
+  type: 'panel';
 }
 
 interface ImageAdd {
   node: Image;
-  nodeType: 'image';
-  history?: boolean;
+  type: 'image';
+}
+
+interface TextAdd {
+  node: Text;
+  type: 'text';
 }
 
 interface VectorAdd {
   node: Vector;
-  nodeType: 'vector';
-  history?: boolean;
+  type: 'vector';
 }
 
-export type PatchNode =
-  | NotePatch
-  | PanelPatch
-  | GroupPatch
-  | ImagePatch
-  | TextPatch
-  | VectorPatch;
-
-export type AddNode =
-  | NoteAdd
-  | GroupAdd
-  | PanelAdd
-  | TextAdd
-  | ImageAdd
-  | VectorAdd;
-
-interface NoteRemove {
-  node: Note;
-  nodeType: 'note';
-  history?: boolean;
+interface NotePatch {
+  node: RequireAtLeastOne<Partial<Note>, 'id'>;
+  type: 'note';
 }
 
-interface GroupRemove {
-  node: Group;
-  nodeType: 'group';
-  history?: boolean;
+interface PanelPatch {
+  node: RequireAtLeastOne<Partial<Panel>, 'id'>;
+  type: 'panel';
 }
 
-interface PanelRemove {
-  node: Panel;
-  nodeType: 'panel';
-  history?: boolean;
+interface GroupPatch {
+  node: RequireAtLeastOne<Partial<Group>, 'id'>;
+  type: 'group';
 }
 
-interface TextRemove {
-  node: Text;
-  nodeType: 'text';
-  history?: boolean;
+interface ImagePatch {
+  node: RequireAtLeastOne<Partial<Image>, 'id'>;
+  type: 'image';
 }
 
-interface ImageRemove {
-  node: Image;
-  nodeType: 'image';
-  history?: boolean;
+interface TextPatch {
+  node: RequireAtLeastOne<Partial<Text>, 'id'>;
+  type: 'text';
 }
 
-interface VectorRemove {
-  node: Vector;
-  nodeType: 'vector';
-  history?: boolean;
+interface VectorPatch {
+  node: RequireAtLeastOne<Partial<Vector>, 'id'>;
+  type: 'vector';
 }
 
-export type RemoveNode =
-  | NoteRemove
-  | GroupRemove
-  | PanelRemove
-  | TextRemove
-  | ImageRemove
-  | VectorRemove;
+export interface NodeAdd {
+  op: 'add';
+  data: NoteAdd | GroupAdd | PanelAdd | ImageAdd | TextAdd | VectorAdd;
+}
 
-export interface NodeAction {
-  type: string;
-  nodeType: NodeType;
-  node: unknown;
+export interface NodePatch {
+  op: 'patch';
+  data:
+    | NotePatch
+    | GroupPatch
+    | PanelPatch
+    | ImagePatch
+    | TextPatch
+    | VectorPatch;
+}
+
+export interface NodeRemove {
+  op: 'remove';
+  data: {
+    node: {
+      id: string;
+    };
+    type: NodeType;
+  };
+}
+
+export type StateActions = NodeAdd | NodePatch | NodeRemove;
+
+export interface BachStateActions {
+  actions: StateActions[];
+  history?: boolean;
 }
