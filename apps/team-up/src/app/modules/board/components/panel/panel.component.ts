@@ -1,4 +1,3 @@
-import { Point } from '@angular/cdk/drag-drop';
 import {
   Component,
   ChangeDetectionStrategy,
@@ -11,8 +10,6 @@ import {
   OnInit,
   HostBinding,
   ChangeDetectorRef,
-  ViewChild,
-  ApplicationRef,
 } from '@angular/core';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
@@ -29,9 +26,11 @@ import {
   selectFocusId,
 } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
-import { MoveService } from '../../services/move.service';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { pageFeature } from '../../reducers/page.reducer';
+import { Resizable } from '../../models/resizable.model';
+import { ResizableDirective } from '../../directives/resize.directive';
+import { ResizeHandlerDirective } from '../../directives/resize-handler.directive';
 
 interface State {
   edit: boolean;
@@ -49,9 +48,11 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
   standalone: true,
-  imports: [NgIf, AsyncPipe],
+  imports: [NgIf, AsyncPipe, ResizeHandlerDirective],
 })
-export class PanelComponent implements AfterViewInit, OnInit, Draggable {
+export class PanelComponent
+  implements AfterViewInit, OnInit, Draggable, Resizable
+{
   @Input()
   public set panel(panel: Panel) {
     this.state.set({ panel });
@@ -73,8 +74,6 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
 
   @ViewChildren('textarea') textarea!: QueryList<ElementRef>;
 
-  @ViewChild('resize') resize!: ElementRef;
-
   public nodeType: NodeType = 'panel';
 
   public get id() {
@@ -86,10 +85,9 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
     private boardMoveService: BoardMoveService,
     private state: RxState<State>,
     private store: Store,
-    private moveService: MoveService,
     private boardDragDirective: BoardDragDirective,
-    private cd: ChangeDetectorRef,
-    private appRef: ApplicationRef
+    private resizableDirective: ResizableDirective,
+    private cd: ChangeDetectorRef
   ) {
     this.state.set({ draggable: true });
 
@@ -209,6 +207,7 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
       });
 
     this.boardDragDirective.setHost(this);
+    this.resizableDirective.setHost(this);
 
     this.state
       .select('panel')
@@ -284,40 +283,6 @@ export class PanelComponent implements AfterViewInit, OnInit, Draggable {
   public ngAfterViewInit() {
     if (this.state.get('focus')) {
       this.focusTextarea();
-    }
-
-    if (this.resize) {
-      this.moveService
-        .listenIncrementalAreaSelector(this.resize.nativeElement)
-        .pipe()
-        .subscribe((size) => {
-          if (size) {
-            const { width, height } = this.state.get('panel');
-
-            this.store.dispatch(
-              BoardActions.batchNodeActions({
-                history: true,
-                actions: [
-                  {
-                    data: {
-                      type: 'panel',
-                      node: {
-                        id: this.state.get('panel').id,
-                        width: width + size.x,
-                        height: height + size.y,
-                      },
-                    },
-                    op: 'patch',
-                  },
-                ],
-              })
-            );
-
-            this.appRef.tick();
-          } else {
-            this.state.set({ draggable: true });
-          }
-        });
     }
   }
 }

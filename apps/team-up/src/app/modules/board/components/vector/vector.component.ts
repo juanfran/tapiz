@@ -1,4 +1,3 @@
-import { Point } from '@angular/cdk/drag-drop';
 import {
   Component,
   ChangeDetectionStrategy,
@@ -7,8 +6,6 @@ import {
   OnInit,
   ViewChild,
   HostBinding,
-  AfterViewInit,
-  ApplicationRef,
   HostListener,
   ChangeDetectorRef,
 } from '@angular/core';
@@ -21,13 +18,15 @@ import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
 import { NodeType, Vector } from '@team-up/board-commons';
-import { MoveService } from '../../services/move.service';
 import {
   selectCanvasMode,
   selectFocusId,
 } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
 import { RxPush } from '@rx-angular/template/push';
+import { Resizable } from '../../models/resizable.model';
+import { ResizeHandlerDirective } from '../../directives/resize-handler.directive';
+import { ResizableDirective } from '../../directives/resize.directive';
 
 interface State {
   vector: Vector;
@@ -43,9 +42,9 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
   standalone: true,
-  imports: [RxPush],
+  imports: [RxPush, ResizeHandlerDirective],
 })
-export class VectorComponent implements OnInit, Draggable, AfterViewInit {
+export class VectorComponent implements OnInit, Draggable, Resizable {
   @ViewChild('vector') public imageRef!: ElementRef;
 
   @Input()
@@ -71,8 +70,6 @@ export class VectorComponent implements OnInit, Draggable, AfterViewInit {
 
   public readonly vector$ = this.state.select('vector');
 
-  @ViewChild('resize') resize!: ElementRef;
-
   public nodeType: NodeType = 'vector';
 
   public get id() {
@@ -88,8 +85,7 @@ export class VectorComponent implements OnInit, Draggable, AfterViewInit {
     private state: RxState<State>,
     private store: Store,
     private boardDragDirective: BoardDragDirective,
-    private moveService: MoveService,
-    private appRef: ApplicationRef,
+    private resizableDirective: ResizableDirective,
     private cd: ChangeDetectorRef
   ) {
     this.state.set({ draggable: true });
@@ -115,6 +111,7 @@ export class VectorComponent implements OnInit, Draggable, AfterViewInit {
 
   public ngOnInit() {
     this.boardDragDirective.setHost(this);
+    this.resizableDirective.setHost(this);
 
     this.state.connect('mode', this.store.select(selectCanvasMode));
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
@@ -154,40 +151,5 @@ export class VectorComponent implements OnInit, Draggable, AfterViewInit {
         );
       }
     });
-  }
-
-  public ngAfterViewInit(): void {
-    if (this.resize) {
-      this.moveService
-        .listenIncrementalAreaSelector(this.resize.nativeElement)
-        .subscribe((size) => {
-          if (size) {
-            const { width, height } = this.state.get('vector');
-
-            this.store.dispatch(
-              BoardActions.batchNodeActions({
-                history: true,
-                actions: [
-                  {
-                    data: {
-                      type: 'vector',
-                      node: {
-                        id: this.state.get('vector').id,
-                        width: width + size.x,
-                        height: height + size.y,
-                      },
-                    },
-                    op: 'patch',
-                  },
-                ],
-              })
-            );
-
-            this.appRef.tick();
-          } else {
-            this.state.set({ draggable: true });
-          }
-        });
-    }
   }
 }
