@@ -48,7 +48,7 @@ export class Client {
     //saveMsg(message);
 
     const messages: any[] = [];
-    const mouseMove: { position: Point; cursor: Point }[] = [];
+    const mouseMove: { position: Point; cursor: Point; zoom: number }[] = [];
 
     pendingMessages.forEach((it: any) => {
       if (it.type !== BoardCommonActions.moveUser) {
@@ -76,7 +76,9 @@ export class Client {
     }
   }
 
-  private mouseMoves(messages: { position: Point; cursor: Point }[]) {
+  private mouseMoves(
+    messages: { position: Point; cursor: Point; zoom: number }[]
+  ) {
     const moveMessage = messages.pop();
 
     if (!moveMessage) {
@@ -84,8 +86,7 @@ export class Client {
     }
 
     const result = Validators.userMove.safeParse({
-      position: moveMessage.position,
-      cursor: moveMessage.cursor,
+      ...moveMessage,
     });
 
     if (!result.success) {

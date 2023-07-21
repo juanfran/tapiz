@@ -93,11 +93,13 @@ export class BoardZoomService {
 
     this.zoomMove$ = this.zoom$.pipe(
       startWith({ zoom: 1, point: { x: 0, y: 0 } }),
-      pairwise(),
-      withLatestFrom(this.store.select(selectPosition)),
-      map(([[prevZoomEvent, zoomEvent], position]) => {
-        const xs = (zoomEvent.point.x - position.x) / prevZoomEvent.zoom;
-        const ys = (zoomEvent.point.y - position.y) / prevZoomEvent.zoom;
+      withLatestFrom(
+        this.store.select(selectZoom),
+        this.store.select(selectPosition)
+      ),
+      map(([zoomEvent, prevZoomEvent, position]) => {
+        const xs = (zoomEvent.point.x - position.x) / prevZoomEvent;
+        const ys = (zoomEvent.point.y - position.y) / prevZoomEvent;
 
         return [
           {

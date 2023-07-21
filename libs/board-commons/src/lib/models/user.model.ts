@@ -6,4 +6,6 @@ export interface User {
   visible: boolean;
   connected: boolean;
   cursor: Point | null;
+  position?: Point;
+  zoom?: number;
 }

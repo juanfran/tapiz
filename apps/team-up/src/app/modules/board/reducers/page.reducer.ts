@@ -45,6 +45,7 @@ export interface PageState {
   };
   searching: boolean;
   additionalContext: Record<string, unknown>;
+  follow: string;
 }
 
 const initialPageState: PageState = {
@@ -81,6 +82,7 @@ const initialPageState: PageState = {
   },
   searching: false,
   additionalContext: {},
+  follow: '',
 };
 
 const reducer = createReducer(
@@ -301,6 +303,21 @@ const reducer = createReducer(
     });
 
     state.focusId = nodes.map((it) => it.node.id);
+
+    return state;
+  }),
+  on(PageActions.followUser, (state, { id }): PageState => {
+    if (state.follow === id) {
+      state.follow = '';
+    } else {
+      state.follow = id;
+    }
+
+    if (state.follow) {
+      state.moveEnabled = false;
+    } else {
+      state.moveEnabled = true;
+    }
 
     return state;
   })

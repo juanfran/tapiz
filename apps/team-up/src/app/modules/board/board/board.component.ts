@@ -6,6 +6,7 @@ import {
   AfterViewInit,
   HostListener,
   OnDestroy,
+  HostBinding,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { animationFrameScheduler, fromEvent, merge, Subject, zip } from 'rxjs';
@@ -70,6 +71,9 @@ import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { boardFeature } from '../reducers/board.reducer';
 import { TitleComponent } from '../components/title/title.component';
 import { ResizableDirective } from '../directives/resize.directive';
+import { FollowUserComponent } from '@/app/followUser/follow-user.component';
+import { Point } from '@team-up/board-commons';
+import { pageFeature } from '../reducers/page.reducer';
 
 @UntilDestroy()
 @Component({
@@ -100,6 +104,7 @@ import { ResizableDirective } from '../directives/resize.directive';
     SearchOptionsComponent,
     AsyncPipe,
     TitleComponent,
+    FollowUserComponent,
   ],
   hostDirectives: [CopyPasteDirective],
 })
@@ -115,8 +120,14 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly drawing = this.store.selectSignal(selectDrawing);
   public readonly search = this.store.selectSignal(selectSearching);
   public readonly boardTitle = this.store.selectSignal(boardFeature.selectName);
+  public readonly folloUser = this.store.selectSignal(pageFeature.selectFollow);
 
   @ViewChild('workLayer', { read: ElementRef }) public workLayer!: ElementRef;
+
+  @HostBinding('class.follow-user')
+  public get isFollowUser() {
+    return this.folloUser();
+  }
 
   @HostListener('dblclick', ['$event'])
   public dblclick(event: MouseEvent) {
@@ -234,18 +245,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         throttleTime(0, animationFrameScheduler)
       )
       .subscribe(([mousePosition, zoom, position]) => {
-        const action = BoardActions.moveUser({
-          position: {
-            x: Math.round(position.x),
-            y: Math.round(position.y),
-          },
-          cursor: {
-            x: Math.round((-position.x + mousePosition.x) / zoom),
-            y: Math.round((-position.y + mousePosition.y) / zoom),
-          },
-        });
-
-        this.wsService.send([action]);
+        updateUserPosition(position, mousePosition, zoom);
       });
 
     const userView$ = merge(
@@ -269,12 +269,45 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
           zoom: 1,
         }),
         untilDestroyed(this),
-        withLatestFrom(this.store.select(selectMoveEnabled)),
-        filter(([, moveEnabled]) => moveEnabled)
+        withLatestFrom(
+          this.boardMoveService.mouseMove$,
+          this.store.select(selectMoveEnabled)
+        ),
+        filter(([, , moveEnabled]) => moveEnabled)
       )
-      .subscribe(([{ move, zoom }]) => {
-        this.store.dispatch(PageActions.setUserView({ zoom, position: move }));
+      .subscribe(([{ move, zoom }, mousePosition]) => {
+        this.store.dispatch(
+          PageActions.setUserView({
+            zoom,
+            position: {
+              x: Math.round(move.x),
+              y: Math.round(move.y),
+            },
+          })
+        );
+
+        updateUserPosition(move, mousePosition, zoom);
       });
+
+    const updateUserPosition = (
+      position: Point,
+      mousePosition: Point,
+      zoom: number
+    ) => {
+      const action = BoardActions.moveUser({
+        position: {
+          x: Math.round(position.x),
+          y: Math.round(position.y),
+        },
+        cursor: {
+          x: Math.round((-position.x + mousePosition.x) / zoom),
+          y: Math.round((-position.y + mousePosition.y) / zoom),
+        },
+        zoom,
+      });
+
+      this.wsService.send([action]);
+    };
 
     this.actions
       .pipe(ofType(PageActions.setUserView), untilDestroyed(this))

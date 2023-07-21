@@ -21,7 +21,7 @@ export const BoardActions = {
   ),
   moveUser: createAction(
     BoardCommonActions.moveUser,
-    props<{ position: Point; cursor: Point }>()
+    props<{ position: Point; cursor: Point; zoom: number }>()
   ),
   setState: createAction(BoardCommonActions.setState, props<{ data: Diff }>()),
 };
