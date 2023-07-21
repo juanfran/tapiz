@@ -25,18 +25,18 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Duplicate board
 - [ ] Export with groups & panels
 - [ ] Multi board (one board with multiples ¿views?, easy to move between phases in retrospectives)
-- [ ] Board links (share a board position with other useres)
-- [ ] Teams (Access permissions)
-- [ ] Undo/Redo buttons in drawing mode
+- [ ] Board links (share a board position with other users)
+- [ ] Teams & ¿projects? (Access permissions)
 - [ ] Reactions (emoji animation not persisted)
 - [ ] Personalize board background, radius, border...
-- [ ] Rotate imaga, text & vector
+- [ ] Rotate image, text & vector
 - [ ] Components (kanban, grid, etc)
 - [ ] Arrows (connect nodes)
 - [ ] D&D cocomaterial on add
 - [ ] Reorder boards
 - [ ] Search boards
 - [ ] Favourite boards
+- [ ] Empty boards placeholder
 
 ## TODO, code refactor
 
