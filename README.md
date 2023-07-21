@@ -16,7 +16,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 
 ## TODO, features
 
-- [ ] Multi drag notes
 - [ ] Follow other user screen
 - [ ] Vote counter
 - [ ] Multilanguage
@@ -47,7 +46,3 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Code linter
 - [ ] Board Size limit
 - [ ] Split board.module
-- [ ] Set user view vs mouse, merge?
-- [ ] Set user view vs mouse vs ws message vs ws set state, redux devtools polution
-- [ ] Actions in batch, useful for copy-paste
-- [ ] Fix undo after drag multiple (refactor needed?)
