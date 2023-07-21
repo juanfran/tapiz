@@ -75,17 +75,6 @@
       </div>
       <div
         class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'search'">
-        <button
-          class="toolbar-button"
-          (click)="search()">
-          <mat-icon>search</mat-icon>
-        </button>
-        <div class="toolbar-tooltip">Search</div>
-      </div>
-
-      <div
-        class="toolbar-button-container"
         [class.active]="vm.popupOpen === 'image'">
         <button
           class="toolbar-button"
@@ -129,6 +118,16 @@
             </form>
           </div>
         </div>
+      </div>
+      <div
+        class="toolbar-button-container"
+        [class.active]="vm.popupOpen === 'search'">
+        <button
+          class="toolbar-button"
+          (click)="search()">
+          <mat-icon>search</mat-icon>
+        </button>
+        <div class="toolbar-tooltip">Search</div>
       </div>
     </ng-container>
 
