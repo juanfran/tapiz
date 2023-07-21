@@ -6,7 +6,8 @@
     <div class="user-container">
       <button
         *ngFor="let user of vm.users; trackBy: trackById"
-        (click)="toggleUserHighlight(user.id)"
+        [cdkMenuTriggerFor]="menu"
+        [cdkMenuTriggerData]="{ user: user }"
         [class.offline]="!user.connected"
         [class.active]="user.id === vm.userHighlight"
         class="user">
@@ -54,4 +55,26 @@
       <span *ngIf="vm.visible">Enabled</span>
     </button>
   </div>
+
+  <ng-template
+    #menu
+    let-user="user">
+    <div
+      class="user-menu"
+      cdkMenu>
+      <button
+        cdkMenuItem
+        class="user-menu-item"
+        (cdkMenuItemTriggered)="follow(user.id)">
+        <ng-container *ngIf="!vm.follow">Follow</ng-container>
+        <ng-container *ngIf="vm.follow">Unfollow</ng-container>
+      </button>
+      <button
+        cdkMenuItem
+        class="user-menu-item"
+        (cdkMenuItemTriggered)="toggleUserHighlight(user.id)">
+        Hightlight
+      </button>
+    </div>
+  </ng-template>
 </ng-container>

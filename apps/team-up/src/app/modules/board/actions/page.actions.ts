@@ -71,5 +71,6 @@ export const PageActions = createActionGroup({
     'Paste nodes': props<{ nodes: NodeAdd['data'][] }>(),
     'Undo drawing': emptyProps(),
     'Redo drawing': emptyProps(),
+    'Follow user': props<{ id: User['id'] }>(),
   },
 });

@@ -15,12 +15,15 @@ import { map } from 'rxjs/operators';
 import { selectSlice } from '@rx-angular/state/selections';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { NgIf, NgFor, NgClass, AsyncPipe } from '@angular/common';
+import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
+import { pageFeature } from '../../reducers/page.reducer';
 
 interface State {
   visible: boolean;
   users: User[];
   userId: User['id'];
   userHighlight: User['id'] | null;
+  follow: string;
 }
 
 interface ComponentViewModel {
@@ -28,6 +31,7 @@ interface ComponentViewModel {
   users: User[];
   currentUser?: User;
   userHighlight: User['id'] | null;
+  follow: string;
 }
 
 @Component({
@@ -37,7 +41,16 @@ interface ComponentViewModel {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
   standalone: true,
-  imports: [NgIf, NgFor, SvgIconComponent, NgClass, AsyncPipe],
+  imports: [
+    NgIf,
+    NgFor,
+    SvgIconComponent,
+    NgClass,
+    AsyncPipe,
+    CdkMenuTrigger,
+    CdkMenu,
+    CdkMenuItem,
+  ],
 })
 export class UsersComponent {
   constructor(private store: Store, private state: RxState<State>) {
@@ -45,16 +58,18 @@ export class UsersComponent {
     this.state.connect('users', this.store.select(selectUsers));
     this.state.connect('userId', this.store.select(selectUserId));
     this.state.connect('userHighlight', this.store.select(selectUserHighlight));
+    this.state.connect('follow', this.store.select(pageFeature.selectFollow));
   }
 
   public readonly viewModel$: Observable<ComponentViewModel> =
     this.state.select(
-      selectSlice(['visible', 'users', 'userId', 'userHighlight']),
-      map(({ visible, users, userId, userHighlight }) => ({
+      selectSlice(['visible', 'users', 'userId', 'userHighlight', 'follow']),
+      map(({ visible, users, userId, userHighlight, follow }) => ({
         visible,
         users: users.filter((user) => user.id !== userId),
         currentUser: users.find((user) => user.id === userId),
         userHighlight,
+        follow,
       }))
     );
 
@@ -68,7 +83,11 @@ export class UsersComponent {
     this.store.dispatch(PageActions.toggleUserHighlight({ id: userId }));
   }
 
-  public trackById(index: number, user: User) {
+  public follow(userId: User['id']) {
+    this.store.dispatch(PageActions.followUser({ id: userId }));
+  }
+
+  public trackById(_: number, user: User) {
     return user.id;
   }
 }

@@ -9,4 +9,5 @@ export const userMove = z.object({
     x: z.number().safe(),
     y: z.number().safe(),
   }),
+  zoom: z.number().safe(),
 });
