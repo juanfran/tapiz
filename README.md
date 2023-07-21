@@ -36,7 +36,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Search boards
 - [ ] Favourite boards
 - [ ] Empty boards placeholder
-- [ ] Store user last position (localStorage?)
 
 ## TODO, code refactor
 

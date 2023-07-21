@@ -264,10 +264,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
 
     userView$
       .pipe(
-        startWith({
-          move: { x: 0, y: 0 },
-          zoom: 1,
-        }),
         untilDestroyed(this),
         withLatestFrom(
           this.boardMoveService.mouseMove$,

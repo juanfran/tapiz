@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { filter, map, switchMap } from 'rxjs';
+import { filter, map, switchMap, tap } from 'rxjs';
 import { PageActions } from '../actions/page.actions';
 import { selectCocomaterial, selectUserId } from '../selectors/page.selectors';
 import { BoardApiService } from '../services/board-api.service';
@@ -9,6 +9,7 @@ import { BoardActions } from '../actions/board.actions';
 import { selectNoteFocus } from '../selectors/board.selectors';
 import { Note } from '@team-up/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
+import { filterNil } from '@/app/commons/operators/filter-nil';
 
 @Injectable()
 export class PageEffects {
@@ -138,6 +139,42 @@ export class PageEffects {
       map(() => {
         return PageActions.setPopupOpen({
           popup: '',
+        });
+      })
+    );
+  });
+
+  public saveLastUserView$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(PageActions.setUserView),
+        tap((action) => {
+          localStorage.setItem(
+            'lastUserView',
+            JSON.stringify({
+              zoom: action.zoom,
+              position: action.position,
+            })
+          );
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
+  public restoreLastUserView$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.fetchBoardSuccess),
+      map(() => {
+        return localStorage.getItem('lastUserView');
+      }),
+      filterNil(),
+      map((lastUserView) => {
+        const { zoom, position } = JSON.parse(lastUserView);
+
+        return PageActions.setUserView({
+          zoom,
+          position,
         });
       })
     );
