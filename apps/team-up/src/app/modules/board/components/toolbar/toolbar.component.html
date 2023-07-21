@@ -83,21 +83,6 @@
         </button>
         <div class="toolbar-tooltip">Search</div>
       </div>
-    </ng-container>
-
-    <ng-container *ngIf="(canvasMode$ | async) === 'composeMode'">
-      <div
-        class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'text'">
-        <button
-          class="toolbar-button"
-          (click)="text()">
-          <team-up-svg-icon
-            icon="letter"
-            class="icon-svg"></team-up-svg-icon>
-        </button>
-        <div class="toolbar-tooltip">Text</div>
-      </div>
 
       <div
         class="toolbar-button-container"
@@ -144,6 +129,21 @@
             </form>
           </div>
         </div>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="(canvasMode$ | async) === 'composeMode'">
+      <div
+        class="toolbar-button-container"
+        [class.active]="vm.popupOpen === 'text'">
+        <button
+          class="toolbar-button"
+          (click)="text()">
+          <team-up-svg-icon
+            icon="letter"
+            class="icon-svg"></team-up-svg-icon>
+        </button>
+        <div class="toolbar-tooltip">Text</div>
       </div>
 
       <div

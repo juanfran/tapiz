@@ -38,7 +38,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Reorder boards
 - [ ] Search boards
 - [ ] Favourite boards
-- [ ] Cocomaterial gifs
 
 ## TODO, code refactor
 

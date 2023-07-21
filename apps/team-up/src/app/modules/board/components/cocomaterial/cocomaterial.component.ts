@@ -168,29 +168,31 @@ export class CocomaterialComponent {
       .select(selectPosition)
       .pipe(withLatestFrom(this.store.select(selectZoom)), take(1))
       .subscribe(([position, zoom]) => {
-        this.store.dispatch(
-          BoardActions.batchNodeActions({
-            history: true,
-            actions: [
-              {
-                data: {
-                  type: 'vector',
-                  node: {
-                    id: v4(),
-                    url: vector.svg,
-                    width: 150,
-                    height: 150,
-                    position: {
-                      x: (-position.x + event.pageX) / zoom - 75,
-                      y: (-position.y + event.pageY) / zoom - 75,
+        if (vector.svg || vector.gif) {
+          this.store.dispatch(
+            BoardActions.batchNodeActions({
+              history: true,
+              actions: [
+                {
+                  data: {
+                    type: vector.svg ? 'vector' : 'image',
+                    node: {
+                      id: v4(),
+                      url: vector.svg ?? vector.gif ?? '',
+                      width: 150,
+                      height: 150,
+                      position: {
+                        x: (-position.x + event.pageX) / zoom - 75,
+                        y: (-position.y + event.pageY) / zoom - 75,
+                      },
                     },
                   },
+                  op: 'add',
                 },
-                op: 'add',
-              },
-            ],
-          })
-        );
+              ],
+            })
+          );
+        }
       });
 
     this.dialogRef.close();

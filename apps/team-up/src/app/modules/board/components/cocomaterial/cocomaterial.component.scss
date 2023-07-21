@@ -12,11 +12,14 @@ mat-form-field {
 .vectors {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  grid-gap: 20px;
+  grid-template-rows: 160px;
+  grid-gap: 10px;
   height: 100%;
   overflow: auto;
 
   .vector {
+    align-items: center;
+    display: flex;
     background-position: 50%;
     background-size: contain;
     background-repeat: no-repeat;
@@ -33,6 +36,5 @@ mat-form-field {
 }
 
 img {
-  height: 100%;
+  margin: 0;
 }
-

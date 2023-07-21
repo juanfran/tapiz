@@ -49,7 +49,7 @@
       (click)="selectVector(vector, $event)"
       class="vector"
       *ngFor="let vector of vm.vectors">
-      <img [attr.src]="vector.svg" />
+      <img [attr.src]="vector.svg ?? vector.gif" />
     </button>
   </div>
 </ng-container>

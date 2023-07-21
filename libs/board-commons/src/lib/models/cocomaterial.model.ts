@@ -9,11 +9,13 @@ export interface CocomaterialTag {
 export interface CocomaterialApiVector {
   coloredSvg: null | string;
   coloredSvgContent: string;
+  gif: null | string;
+  coloredGif: null | string;
   fillColor: null | string;
   id: number;
   name: string;
   strokeColor: null | string;
-  svg: string;
+  svg: null | string;
   svgContent: string;
   tags: string;
   url: string;
