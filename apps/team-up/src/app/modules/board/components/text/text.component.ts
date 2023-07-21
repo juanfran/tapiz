@@ -26,6 +26,9 @@ import hotkeys from 'hotkeys-js';
 import { BoardMoveService } from '../../services/board-move.service';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { pageFeature } from '../../reducers/page.reducer';
+import { Resizable } from '../../models/resizable.model';
+import { ResizeHandlerDirective } from '../../directives/resize-handler.directive';
+import { ResizableDirective } from '../../directives/resize.directive';
 
 interface State {
   node: Text;
@@ -42,9 +45,11 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
   standalone: true,
-  imports: [NgIf, AsyncPipe],
+  imports: [NgIf, AsyncPipe, ResizeHandlerDirective],
 })
-export class TextComponent implements OnInit, Draggable, AfterViewInit {
+export class TextComponent
+  implements OnInit, Draggable, AfterViewInit, Resizable
+{
   @Input()
   public set text(node: Text) {
     this.state.set({ node });
@@ -73,8 +78,6 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
 
   @ViewChild('textarea') textarea!: ElementRef;
 
-  @ViewChild('resize') resize!: ElementRef;
-
   public plugins = [
     'advlist',
     'autolink',
@@ -98,8 +101,7 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
     private store: Store,
     private boardDragDirective: BoardDragDirective,
     private boardMoveService: BoardMoveService,
-    private moveService: MoveService,
-    private appRef: ApplicationRef
+    private resizableDirective: ResizableDirective
   ) {
     this.state.set({ draggable: true, edit: false });
   }
@@ -235,6 +237,7 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
 
   public ngOnInit() {
     this.boardDragDirective.setHost(this);
+    this.resizableDirective.setHost(this);
 
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
       return {
@@ -299,42 +302,6 @@ export class TextComponent implements OnInit, Draggable, AfterViewInit {
   public ngAfterViewInit(): void {
     if (this.state.get('focus')) {
       this.focusTextarea();
-    }
-
-    if (this.resize) {
-      this.moveService
-        .listenIncrementalAreaSelector(this.resize.nativeElement)
-        .subscribe((size) => {
-          if (size) {
-            const { width, height } = this.state.get('node');
-            const newWidth = width + size.x;
-            const newHeight = height + size.y;
-
-            if (newWidth >= 50 && newHeight >= 20)
-              this.store.dispatch(
-                BoardActions.batchNodeActions({
-                  history: true,
-                  actions: [
-                    {
-                      data: {
-                        type: 'text',
-                        node: {
-                          id: this.state.get('node').id,
-                          width: newWidth,
-                          height: newHeight,
-                        },
-                      },
-                      op: 'patch',
-                    },
-                  ],
-                })
-              );
-
-            this.appRef.tick();
-          } else {
-            this.state.set({ draggable: true });
-          }
-        });
     }
   }
 }

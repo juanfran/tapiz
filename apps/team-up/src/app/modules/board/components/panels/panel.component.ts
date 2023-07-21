@@ -5,6 +5,7 @@ import { selectPanels } from '../../selectors/board.selectors';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { PanelComponent } from '../panel/panel.component';
 import { NgFor, AsyncPipe } from '@angular/common';
+import { ResizableDirective } from '../../directives/resize.directive';
 
 @Component({
   selector: 'team-up-panels',
@@ -12,7 +13,13 @@ import { NgFor, AsyncPipe } from '@angular/common';
   styleUrls: ['./panels.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgFor, PanelComponent, BoardDragDirective, AsyncPipe],
+  imports: [
+    NgFor,
+    PanelComponent,
+    BoardDragDirective,
+    AsyncPipe,
+    ResizableDirective,
+  ],
 })
 export class PanelsComponent {
   public panels$ = this.store.select(selectPanels);

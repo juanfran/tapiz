@@ -69,6 +69,7 @@ import { Actions, ofType } from '@ngrx/effects';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { boardFeature } from '../reducers/board.reducer';
 import { TitleComponent } from '../components/title/title.component';
+import { ResizableDirective } from '../directives/resize.directive';
 
 @UntilDestroy()
 @Component({
@@ -89,6 +90,7 @@ import { TitleComponent } from '../components/title/title.component';
     NgFor,
     NoteComponent,
     BoardDragDirective,
+    ResizableDirective,
     ImageComponent,
     GroupComponent,
     TextComponent,
