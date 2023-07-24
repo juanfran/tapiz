@@ -122,10 +122,7 @@ export const validateAction = (
           ...msg,
           data: {
             type: msg.data.type,
-            node: {
-              ...validatorResult.data,
-              ownerId: userId,
-            },
+            node: validatorResult.data,
           },
         };
       }
