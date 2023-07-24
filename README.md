@@ -27,7 +27,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Board links (share a board position with other users)
 - [ ] Teams & ¿projects? (Access permissions)
 - [ ] Reactions (emoji animation not persisted)
-- [ ] Personalize board background, radius, border...
 - [ ] Rotate image, text & vector
 - [ ] Components (kanban, grid, etc)
 - [ ] Arrows (connect nodes)
