@@ -8,7 +8,13 @@ const panel = z.object({
   }),
   width: z.number().nonnegative().safe(),
   height: z.number().nonnegative().safe(),
-  color: z.string().min(4).max(7),
+  color: z.string().length(7).regex(/^#/).nullable(),
+  backgroundColor: z.string().length(7).regex(/^#/).nullable(),
+  fontColor: z.string().length(7).regex(/^#/).nullable(),
+  fontSize: z.number().nonnegative().safe().nullable(),
+  borderColor: z.string().length(7).regex(/^#/).nullable(),
+  borderWidth: z.number().nonnegative().safe().nullable(),
+  borderRadius: z.number().nonnegative().safe().nullable(),
 });
 
 export const patchPanel = panel.partial().extend({

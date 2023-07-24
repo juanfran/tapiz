@@ -4,9 +4,6 @@ import {
   Input,
   HostListener,
   ElementRef,
-  QueryList,
-  ViewChildren,
-  AfterViewInit,
   OnInit,
   HostBinding,
   ChangeDetectorRef,
@@ -20,7 +17,6 @@ import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
 import { NodeType, Panel } from '@team-up/board-commons';
-import { BoardMoveService } from '../../services/board-move.service';
 import {
   selectCanvasMode,
   selectFocusId,
@@ -31,11 +27,11 @@ import { pageFeature } from '../../reducers/page.reducer';
 import { Resizable } from '../../models/resizable.model';
 import { ResizableDirective } from '../../directives/resize.directive';
 import { ResizeHandlerDirective } from '../../directives/resize-handler.directive';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
 
 interface State {
-  edit: boolean;
   panel: Panel;
-  editText: string;
   focus: boolean;
   draggable: boolean;
   mode: string;
@@ -48,14 +44,13 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
   standalone: true,
-  imports: [NgIf, AsyncPipe, ResizeHandlerDirective],
+  imports: [NgIf, AsyncPipe, ResizeHandlerDirective, MatIconModule],
 })
-export class PanelComponent
-  implements AfterViewInit, OnInit, Draggable, Resizable
-{
+export class PanelComponent implements OnInit, Draggable, Resizable {
   @Input()
   public set panel(panel: Panel) {
     this.state.set({ panel });
+    this.setCssVariables();
   }
 
   @HostBinding('style.width.px') get width() {
@@ -72,8 +67,6 @@ export class PanelComponent
 
   public readonly viewModel$ = this.state.select();
 
-  @ViewChildren('textarea') textarea!: QueryList<ElementRef>;
-
   public nodeType: NodeType = 'panel';
 
   public get id() {
@@ -82,62 +75,25 @@ export class PanelComponent
 
   constructor(
     private el: ElementRef,
-    private boardMoveService: BoardMoveService,
     private state: RxState<State>,
     private store: Store,
     private boardDragDirective: BoardDragDirective,
     private resizableDirective: ResizableDirective,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {
     this.state.set({ draggable: true });
 
     this.state.hold(this.state.select('focus'), () => this.cd.markForCheck());
-    this.state.hold(this.state.select('edit'), (edit) =>
-      this.state.set({ draggable: !edit })
-    );
   }
 
   @HostListener('mousedown', ['$event'])
   public mousedown(event: MouseEvent) {
-    // prevent select word on dblclick
-    if (!this.state.get('edit')) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
     this.store.dispatch(
       PageActions.setFocusId({
         focusId: this.state.get('panel').id,
         ctrlKey: event.ctrlKey,
       })
-    );
-  }
-
-  @HostListener('dblclick', ['$event'])
-  public dblclick(event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.edit();
-    requestAnimationFrame(() => {
-      this.focusTextarea();
-    });
-  }
-
-  public edit() {
-    this.state.set({
-      edit: true,
-      editText: this.state.get('panel').title,
-    });
-
-    this.state.connect(
-      this.boardMoveService.mouseDown$.pipe(first()),
-      (state) => {
-        return {
-          ...state,
-          edit: false,
-        };
-      }
     );
   }
 
@@ -147,45 +103,6 @@ export class PanelComponent
 
   public get preventDrag() {
     return !this.state.get('draggable') || !this.state.get('focus');
-  }
-
-  public setText(event: Event) {
-    if (event.target) {
-      const value = (event.target as HTMLElement).innerText;
-
-      this.store.dispatch(
-        BoardActions.batchNodeActions({
-          history: true,
-          actions: [
-            {
-              data: {
-                type: 'panel',
-                node: {
-                  id: this.state.get('panel').id,
-                  title: value,
-                },
-              },
-              op: 'patch',
-            },
-          ],
-        })
-      );
-    }
-  }
-
-  public selectElementContents(el: HTMLElement) {
-    const range = document.createRange();
-    range.selectNodeContents(el);
-    const sel = window.getSelection();
-
-    if (sel) {
-      sel.removeAllRanges();
-      sel.addRange(range);
-    }
-  }
-
-  public selectTextarea($event: FocusEvent) {
-    this.selectElementContents($event.target as HTMLElement);
   }
 
   public ngOnInit() {
@@ -203,7 +120,7 @@ export class PanelComponent
         untilDestroyed(this)
       )
       .subscribe(() => {
-        this.edit();
+        this.openSettings();
       });
 
     this.boardDragDirective.setHost(this);
@@ -250,15 +167,19 @@ export class PanelComponent
     return this.el.nativeElement as HTMLElement;
   }
 
-  public focusTextarea() {
-    if (this.textarea.first) {
-      (this.textarea.first.nativeElement as HTMLTextAreaElement).focus();
-    }
-  }
+  public async openSettings() {
+    const m = await import('../panel-settings/panel-settings.component');
 
-  public newColor(e: Event) {
-    if (e.target) {
-      const color = (e.target as HTMLInputElement).value;
+    const dialogRef = this.dialog.open(m.PanelSettingsComponent, {
+      data: {
+        panel: this.state.get('panel'),
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result) {
+        return;
+      }
 
       this.store.dispatch(
         BoardActions.batchNodeActions({
@@ -269,7 +190,7 @@ export class PanelComponent
                 type: 'panel',
                 node: {
                   id: this.state.get('panel').id,
-                  color,
+                  ...result,
                 },
               },
               op: 'patch',
@@ -277,12 +198,47 @@ export class PanelComponent
           ],
         })
       );
-    }
+    });
   }
 
-  public ngAfterViewInit() {
-    if (this.state.get('focus')) {
-      this.focusTextarea();
+  private setCssVariables() {
+    const panel = this.state.get('panel');
+
+    if (!panel) {
+      return;
+    }
+
+    if (panel.backgroundColor) {
+      this.nativeElement.style.setProperty(
+        '--backgroundColor',
+        panel.backgroundColor
+      );
+    }
+
+    if (panel.fontColor) {
+      this.nativeElement.style.setProperty('--fontColor', panel.fontColor);
+    }
+
+    if (panel.fontSize) {
+      this.nativeElement.style.setProperty('--fontSize', panel.fontSize + 'px');
+    }
+
+    if (panel.borderColor) {
+      this.nativeElement.style.setProperty('--borderColor', panel.borderColor);
+    }
+
+    if (panel.borderWidth) {
+      this.nativeElement.style.setProperty(
+        '--borderWidth',
+        panel.borderWidth + 'px'
+      );
+    }
+
+    if (panel.borderRadius) {
+      this.nativeElement.style.setProperty(
+        '--borderRadius',
+        panel.borderRadius + 'px'
+      );
     }
   }
 }

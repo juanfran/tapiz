@@ -1,26 +1,17 @@
 <div class="title">
   <ng-container *ngIf="viewModel$ | async as vm">
-    <ng-container *ngIf="vm.edit">
-      <span
-        #textarea
-        class="textarea"
-        role="textbox"
-        (input)="setText($event)"
-        (focus)="selectTextarea($event)"
-        contenteditable
-        >{{ vm.editText }}</span
-      >
-    </ng-container>
+    {{ vm.panel.title }}
 
-    <ng-container *ngIf="!vm.edit">
-      {{ vm.panel.title }}
-    </ng-container>
-
-    <input
+    <button
       *ngIf="vm.mode === 'composeMode'"
-      type="color"
-      [value]="vm.panel.color"
-      (change)="newColor($event)" />
+      (click)="openSettings()"
+      type="button"
+      title="Settings"
+      mat-fab
+      aria-label="Settings"
+      class="settings">
+      <mat-icon>settings</mat-icon>
+    </button>
   </ng-container>
 </div>
 <div

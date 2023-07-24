@@ -7,4 +7,10 @@ export interface Panel {
   width: number;
   height: number;
   color?: string;
+  backgroundColor?: string;
+  fontColor?: string;
+  fontSize?: number;
+  borderColor?: string;
+  borderWidth?: number;
+  borderRadius?: number;
 }
