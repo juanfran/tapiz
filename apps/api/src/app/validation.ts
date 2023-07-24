@@ -55,7 +55,10 @@ export const validateAction = (
 
       return {
         ...msg,
-        node: validNote,
+        data: {
+          type: msg.data.type,
+          node: validNote,
+        },
       };
     } else if (msg.op === 'add') {
       const validatorResult = Validators.newNote.safeParse(msg.data.node);
@@ -66,9 +69,12 @@ export const validateAction = (
 
       return {
         ...msg,
-        node: {
-          ...validatorResult.data,
-          ownerId: userId,
+        data: {
+          type: msg.data.type,
+          node: {
+            ...validatorResult.data,
+            ownerId: userId,
+          },
         },
       };
     }
@@ -96,7 +102,10 @@ export const validateAction = (
 
         return {
           ...msg,
-          node: validatorResult.data,
+          data: {
+            type: msg.data.type,
+            node: validatorResult.data,
+          },
         };
       }
     } else if (msg.op === 'add') {
@@ -111,9 +120,12 @@ export const validateAction = (
 
         return {
           ...msg,
-          node: {
-            ...validatorResult.data,
-            ownerId: userId,
+          data: {
+            type: msg.data.type,
+            node: {
+              ...validatorResult.data,
+              ownerId: userId,
+            },
           },
         };
       }

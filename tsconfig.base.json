@@ -11,6 +11,7 @@
     "target": "es2020",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "module": "esnext",
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,

@@ -42,6 +42,7 @@ import { PageNotFoundComponent } from './components/page-not-found/page-not-foun
 import { PageEffects } from './effects/page.effects';
 import { VectorComponent } from './components/vector/vector.component';
 import { DrawingHistoryEffects } from './effects/drawing-history.effects';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 
 const routes: Routes = [
   {
@@ -107,7 +108,12 @@ const routes: Routes = [
     VectorComponent,
   ],
   exports: [BoardComponent],
-  providers: [],
+  providers: [
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: { appearance: 'outline' },
+    },
+  ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class BoardModule {}

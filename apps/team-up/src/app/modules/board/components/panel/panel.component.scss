@@ -9,9 +9,20 @@
   width: 5px;
 }
 
+
+
 :host {
-  background-color: var(--white);
-  border: 1px solid #e8e9ea;
+  --backgroundColor: var(--white);
+  --fontColor: var(--black);
+  --fontSize: 4rem;
+  --borderColor: #e8e9ea;
+  --borderWidth: 1px;
+  --borderRadius: 0;
+
+  align-items: flex-start;
+  background-color: var(--backgroundColor);
+  border: var(--borderWidth) solid var(--borderColor);
+  border-radius: var(--borderRadius);
   box-shadow: 0 0 10px 0 rgba(232, 233, 234, 1);
   color: #736bdb;
   cursor: grab;
@@ -31,25 +42,17 @@
 }
 
 .title {
-  color: var(--black);
+  align-items: center;
+  color: var(--fontColor);
   cursor: pointer;
-  display: block;
+  display: flex;
   font-family: "Nunito", -apple-system, system-ui, sans-serif;
-  font-size: 1.5rem;
-  height: 45px;
+  font-size: var(--fontSize);
+  min-height: 45px;
   margin-top: 10px;
   padding: var(--spacing-1);
   user-select: none;
   white-space: pre-wrap;
-}
-
-.textarea {
-  border: none;
-  height: 100%;
-  outline: none;
-  overflow: hidden;
-  resize: none;
-  width: 100%;
 }
 
 .resize {
@@ -61,6 +64,6 @@
   width: 50px;
 }
 
-input[type="color"] {
-  margin-left: 0.5rem;
+.settings {
+  color: currentColor;
 }
