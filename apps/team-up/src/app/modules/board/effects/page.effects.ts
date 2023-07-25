@@ -1,9 +1,20 @@
 import { Injectable } from '@angular/core';
 import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { filter, map, switchMap, tap } from 'rxjs';
+import {
+  filter,
+  map,
+  switchMap,
+  tap,
+  throttleTime,
+  withLatestFrom,
+} from 'rxjs';
 import { PageActions } from '../actions/page.actions';
-import { selectCocomaterial, selectUserId } from '../selectors/page.selectors';
+import {
+  selectBoardId,
+  selectCocomaterial,
+  selectUserId,
+} from '../selectors/page.selectors';
 import { BoardApiService } from '../services/board-api.service';
 import { BoardActions } from '../actions/board.actions';
 import { selectNoteFocus } from '../selectors/board.selectors';
@@ -148,9 +159,11 @@ export class PageEffects {
     () => {
       return this.actions$.pipe(
         ofType(PageActions.setUserView),
-        tap((action) => {
+        throttleTime(500),
+        withLatestFrom(this.store.select(selectBoardId)),
+        tap(([action, boardId]) => {
           localStorage.setItem(
-            'lastUserView',
+            `lastUserView-${boardId}`,
             JSON.stringify({
               zoom: action.zoom,
               position: action.position,
@@ -165,8 +178,9 @@ export class PageEffects {
   public restoreLastUserView$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.fetchBoardSuccess),
-      map(() => {
-        return localStorage.getItem('lastUserView');
+      withLatestFrom(this.store.select(selectBoardId)),
+      map(([, boardId]) => {
+        return localStorage.getItem(`lastUserView-${boardId}`);
       }),
       filterNil(),
       map((lastUserView) => {
