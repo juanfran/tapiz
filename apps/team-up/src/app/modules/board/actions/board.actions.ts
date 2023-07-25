@@ -1,9 +1,9 @@
 import { props, createAction } from '@ngrx/store';
 import {
-  Diff,
   BoardCommonActions,
   BachStateActions,
   Point,
+  StateActions,
 } from '@team-up/board-commons';
 
 export const BoardActions = {
@@ -23,5 +23,8 @@ export const BoardActions = {
     BoardCommonActions.moveUser,
     props<{ position: Point; cursor: Point; zoom: number }>()
   ),
-  setState: createAction(BoardCommonActions.setState, props<{ data: Diff }>()),
+  setState: createAction(
+    BoardCommonActions.setState,
+    props<{ data: StateActions[] }>()
+  ),
 };

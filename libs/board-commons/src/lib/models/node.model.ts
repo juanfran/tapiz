@@ -6,6 +6,7 @@ import { Panel } from './panel.model';
 import { Image } from './image.model';
 import { Text } from './text.model';
 import { Vector } from './cocomaterial.model';
+import { User } from './user.model';
 
 export type NodeType = 'note' | 'group' | 'panel' | 'text' | 'image' | 'vector';
 
@@ -39,6 +40,11 @@ interface VectorAdd {
   type: 'vector';
 }
 
+interface UserAdd {
+  node: User;
+  type: 'user';
+}
+
 interface NotePatch {
   node: RequireAtLeastOne<Partial<Note>, 'id'>;
   type: 'note';
@@ -69,9 +75,21 @@ interface VectorPatch {
   type: 'vector';
 }
 
+interface UserPatch {
+  node: RequireAtLeastOne<Partial<User>, 'id'>;
+  type: 'user';
+}
+
 export interface NodeAdd {
   op: 'add';
-  data: NoteAdd | GroupAdd | PanelAdd | ImageAdd | TextAdd | VectorAdd;
+  data:
+    | NoteAdd
+    | GroupAdd
+    | PanelAdd
+    | ImageAdd
+    | TextAdd
+    | VectorAdd
+    | UserAdd;
 }
 
 export interface NodePatch {
@@ -82,7 +100,8 @@ export interface NodePatch {
     | PanelPatch
     | ImagePatch
     | TextPatch
-    | VectorPatch;
+    | VectorPatch
+    | UserPatch;
 }
 
 export interface NodeRemove {

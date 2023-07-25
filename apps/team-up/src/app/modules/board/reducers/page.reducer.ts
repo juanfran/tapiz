@@ -181,7 +181,9 @@ const reducer = createReducer(
     return state;
   }),
   on(BoardActions.setState, (state, { data }): PageState => {
-    const currentUser = data.set?.user?.find((it) => it.id === state.userId);
+    const currentUser = data.find(
+      (it) => it.data.type === 'user' && it.data.node.id === state.userId
+    ) as User | undefined;
 
     let visible = state.visible;
 

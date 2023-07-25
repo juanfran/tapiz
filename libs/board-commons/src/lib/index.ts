@@ -5,7 +5,6 @@ export * from './models/panel.model';
 export * from './models/image.model';
 export * from './models/point.model';
 export * from './models/vote.model';
-export * from './models/diff.model';
 export * from './models/user.model';
 export * from './models/zone.model';
 export * from './models/common-state.model';

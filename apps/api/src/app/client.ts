@@ -1,8 +1,6 @@
 import {
   applyDiff,
   BoardCommonActions,
-  Diff,
-  getDiff,
   Point,
   StateActions,
   Validators,
@@ -93,26 +91,19 @@ export class Client {
       return;
     }
 
-    const diff = {
-      edit: {
-        user: [
-          {
-            id: this.id,
-            ...result.data,
-          },
-        ],
+    const action: StateActions = {
+      data: {
+        type: 'user',
+        node: {
+          id: this.id,
+          ...result.data,
+        },
       },
+      op: 'patch',
     };
 
-    this.updateStateWithDiff(diff);
-    this.server.sendAll(
-      this.boardId,
-      {
-        type: BoardCommonActions.setState,
-        data: diff,
-      },
-      [this]
-    );
+    this.updateStateWithAction(action);
+    this.server.sendAll(this.boardId, this.getSetStateAction([action]), [this]);
   }
 
   private async updateBoardName(message: { name: string }) {
@@ -134,18 +125,19 @@ export class Client {
     }
 
     this.server.setUserVisibility(this.boardId, this.id, action.data.visible);
-    const diff = {
-      edit: {
-        user: [
-          {
-            id: this.id,
-            visible: action.data.visible,
-          },
-        ],
+
+    const actionState: StateActions = {
+      data: {
+        type: 'user',
+        node: {
+          id: this.id,
+          visible: action.data.visible,
+        },
       },
+      op: 'patch',
     };
 
-    this.updateSendAllDiff(diff);
+    this.updateSendAllStateAction(actionState);
   }
 
   public parseStateActionMessage(message: StateActions[]) {
@@ -161,11 +153,9 @@ export class Client {
       return;
     }
 
-    const diffResult = getDiff(validationResult, this.id);
-
-    if (diffResult.length) {
-      diffResult.forEach((diff) => {
-        this.updateSendAllDiff(diff);
+    if (validationResult.length) {
+      validationResult.forEach((action) => {
+        this.updateSendAllStateAction(action);
       });
 
       this.server.persistBoard(this.boardId);
@@ -190,36 +180,24 @@ export class Client {
       });
     });
 
-    this.server.sendAll(
-      this.boardId,
-      {
-        type: BoardCommonActions.setState,
-        data: {
-          edit: {
-            user: [
-              {
-                id: this.id,
-                connected: false,
-                cursor: null,
-              },
-            ],
-          },
+    const action: StateActions = {
+      data: {
+        type: 'user',
+        node: {
+          id: this.id,
+          connected: false,
+          cursor: null,
         },
       },
-      []
-    );
+      op: 'patch',
+    };
+
+    this.server.sendAll(this.boardId, this.getSetStateAction([action]), []);
   }
 
-  private updateSendAllDiff(diff: Diff) {
-    this.updateStateWithDiff(diff);
-    this.server.sendAll(
-      this.boardId,
-      {
-        type: BoardCommonActions.setState,
-        data: diff,
-      },
-      [this]
-    );
+  private updateSendAllStateAction(action: StateActions) {
+    this.updateStateWithAction(action);
+    this.server.sendAll(this.boardId, this.getSetStateAction([action]), [this]);
   }
 
   private async join(message: { boardId: string }) {
@@ -262,38 +240,102 @@ export class Client {
 
       this.isOwner = owners.includes(this.id);
 
-      const diff: Diff = {
-        set: {
-          note: board.notes,
-          user: users,
-          group: board.groups,
-          panel: board.panels,
-          image: board.images,
-          text: board.texts,
-          vector: board.vectors,
+      const initStateActions: StateActions[] = [
+        ...board.users.map(
+          (it) =>
+            ({
+              data: {
+                type: 'user',
+                node: it,
+              },
+              op: 'add',
+            } as StateActions)
+        ),
+        ...board.notes.map(
+          (it) =>
+            ({
+              data: {
+                type: 'note',
+                node: it,
+              },
+              op: 'add',
+            } as StateActions)
+        ),
+        ...board.groups.map(
+          (it) =>
+            ({
+              data: {
+                type: 'group',
+                node: it,
+              },
+              op: 'add',
+            } as StateActions)
+        ),
+        ...board.panels.map(
+          (it) =>
+            ({
+              data: {
+                type: 'panel',
+                node: it,
+              },
+              op: 'add',
+            } as StateActions)
+        ),
+        ...board.images.map(
+          (it) =>
+            ({
+              data: {
+                type: 'image',
+                node: it,
+              },
+              op: 'add',
+            } as StateActions)
+        ),
+        ...board.texts.map(
+          (it) =>
+            ({
+              data: {
+                type: 'text',
+                node: it,
+              },
+              op: 'add',
+            } as StateActions)
+        ),
+        ...board.vectors.map(
+          (it) =>
+            ({
+              data: {
+                type: 'vector',
+                node: it,
+              },
+              op: 'add',
+            } as StateActions)
+        ),
+      ];
+
+      const userAction: StateActions = {
+        data: {
+          type: 'user',
+          node: user,
         },
+        op: isAlreadyInBoard ? 'patch' : 'add',
       };
 
-      this.server.sendAll(
-        this.boardId,
-        {
-          type: BoardCommonActions.setState,
-          data: {
-            [isAlreadyInBoard ? 'edit' : 'add']: {
-              user: [user],
-            },
-          },
-        } as Diff,
-        [this]
-      );
+      this.server.sendAll(this.boardId, this.getSetStateAction([userAction]), [
+        this,
+      ]);
 
-      this.send({
-        type: BoardCommonActions.setState,
-        data: diff,
-      });
+      this.send(this.getSetStateAction(initStateActions));
     } catch (e) {
       console.error(e);
     }
+  }
+
+  public getSetStateAction(action: StateActions[]) {
+    return {
+      type: BoardCommonActions.setState,
+      data: action,
+    };
   }
 
   public send(msg: unknown) {
@@ -320,9 +362,9 @@ export class Client {
     }
   }
 
-  private updateStateWithDiff(diff: Diff) {
+  private updateStateWithAction(action: StateActions) {
     this.server.setState(this.boardId, (state) => {
-      return applyDiff(diff, state);
+      return applyDiff(action, state);
     });
   }
 }

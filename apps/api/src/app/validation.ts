@@ -5,7 +5,7 @@ import {
   StateActions,
   Validators,
 } from '@team-up/board-commons';
-import { stateAction } from 'libs/board-commons/src/lib/validators/state-action.validator';
+
 import { ZodAny } from 'zod';
 
 const validations = {
@@ -138,7 +138,7 @@ export const validation = (
   userId: string
 ) => {
   if (Array.isArray(msg)) {
-    msg = msg.filter((it) => stateAction.safeParse(it).success);
+    msg = msg.filter((it) => Validators.stateAction.safeParse(it).success);
 
     const actions = msg.map((it) => {
       return validateAction(it, state, userId);

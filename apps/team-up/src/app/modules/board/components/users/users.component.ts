@@ -61,16 +61,18 @@ export class UsersComponent {
     this.state.connect('follow', this.store.select(pageFeature.selectFollow));
   }
 
-  public readonly viewModel$: Observable<ComponentViewModel> =
-    this.state.select(
-      selectSlice(['visible', 'users', 'userId', 'userHighlight', 'follow']),
-      map(({ visible, users, userId, userHighlight, follow }) => ({
-        visible,
-        users: users.filter((user) => user.id !== userId),
-        currentUser: users.find((user) => user.id === userId),
-        userHighlight,
-        follow,
-      }))
+  public readonly viewModel$: Observable<ComponentViewModel> = this.state
+    .select()
+    .pipe(
+      map(({ visible, users, userId, userHighlight, follow }) => {
+        return {
+          visible,
+          users: users.filter((user) => user.id !== userId),
+          currentUser: users.find((user) => user.id === userId),
+          userHighlight,
+          follow,
+        };
+      })
     );
 
   public toggleVisibility() {
