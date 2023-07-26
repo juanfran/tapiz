@@ -153,21 +153,6 @@ textarea {
   width: 100%;
 }
 
-/* MODAL */
-
-.modal {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: center;
-  width: 100%;
-}
-
-.modal-bg {
-  background-color: rgba(10, 10, 10, 0.86);
-}
-
 button {
   background: none;
   border: 0;
@@ -192,16 +177,4 @@ button {
 
 main {
   height: 100%;
-}
-
-/* Editor */
-
-.mce-content-body {
-  p {
-    margin-bottom: 1rem;
-  }
-
-  &:focus-visible {
-    outline: none;
-  }
 }

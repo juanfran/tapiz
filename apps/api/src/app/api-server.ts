@@ -10,6 +10,7 @@ import {
   deleteAccount,
   leaveBoard,
   createUser,
+  getBoardUser,
 } from './db';
 import * as cookieParser from 'cookie-parser';
 import { body, validationResult } from 'express-validator';
@@ -115,6 +116,33 @@ app.delete(`${baseUrl}/leave/:boardId`, authGuard, async (req, res) => {
       success: true,
     });
   }
+});
+
+app.post(`${baseUrl}/duplicate`, authGuard, async (req, res) => {
+  if (!req.body.boardId) {
+    res.status(400).json({
+      errors: ['boardId is required'],
+    });
+
+    return;
+  }
+
+  const boardUser = await getBoardUser(req.body.boardId, req.user.sub);
+  const board = await getBoard(req.body.boardId);
+
+  if (!boardUser || !board) {
+    res.status(404).json({
+      errors: ['board not found'],
+    });
+
+    return;
+  }
+
+  const newBoardId = await createBoard(board.name, req.user.sub, board.board);
+
+  res.json({
+    id: newBoardId,
+  });
 });
 
 app.delete('/remove-account', authGuard, async (req, res) => {

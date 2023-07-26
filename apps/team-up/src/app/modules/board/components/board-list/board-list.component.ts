@@ -19,6 +19,7 @@ import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import { AuthService } from '@/app/services/auth.service';
 import { BoardIdToColorDirective } from '../../directives/board-id-to-color.directive';
 import { TitleComponent } from '../title/title.component';
+import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
 
 @UntilDestroy()
 @Component({
@@ -41,6 +42,9 @@ import { TitleComponent } from '../title/title.component';
     AsyncPipe,
     BoardIdToColorDirective,
     TitleComponent,
+    CdkMenuTrigger,
+    CdkMenu,
+    CdkMenuItem,
   ],
 })
 export class BoardListComponent implements OnInit {
@@ -79,16 +83,16 @@ export class BoardListComponent implements OnInit {
     this.router.navigate(['/board/', board.id]);
   }
 
-  public deleteBoard(event: Event, board: Board) {
-    event.stopPropagation();
-
+  public deleteBoard(board: Board) {
     this.store.dispatch(PageActions.removeBoard({ id: board.id }));
   }
 
-  public leaveBoard(event: Event, board: Board) {
-    event.stopPropagation();
-
+  public leaveBoard(board: Board) {
     this.store.dispatch(PageActions.leaveBoard({ id: board.id }));
+  }
+
+  public duplicateBoard(board: Board) {
+    this.store.dispatch(PageActions.duplicateBoard({ id: board.id }));
   }
 
   public deleteAccount() {

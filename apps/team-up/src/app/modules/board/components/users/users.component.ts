@@ -12,7 +12,6 @@ import { BoardActions } from '../../actions/board.actions';
 import { User } from '@team-up/board-commons';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { selectSlice } from '@rx-angular/state/selections';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { NgIf, NgFor, NgClass, AsyncPipe } from '@angular/common';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';

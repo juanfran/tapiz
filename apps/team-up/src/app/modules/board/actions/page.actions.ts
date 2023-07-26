@@ -72,5 +72,6 @@ export const PageActions = createActionGroup({
     'Undo drawing': emptyProps(),
     'Redo drawing': emptyProps(),
     'Follow user': props<{ id: User['id'] }>(),
+    'Duplicate board': props<{ id: Board['id'] }>(),
   },
 });

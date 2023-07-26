@@ -47,6 +47,12 @@ export class BoardApiService {
     );
   }
 
+  public duplicateBoard(boardId: Board['id']) {
+    return this.http.post(`${this.configService.config.API}/duplicate`, {
+      boardId,
+    });
+  }
+
   public removeAccount() {
     return this.http.delete(`${this.configService.config.API}/remove-account`);
   }

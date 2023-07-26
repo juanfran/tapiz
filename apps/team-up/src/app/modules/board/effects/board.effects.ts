@@ -283,6 +283,18 @@ export class BoardEffects {
     }
   );
 
+  public duplicateBoard$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.duplicateBoard),
+      exhaustMap((action) => {
+        return this.boardApiService.duplicateBoard(action.id);
+      }),
+      map(() => {
+        return PageActions.fetchBoards();
+      })
+    );
+  });
+
   public fetchBoards$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.fetchBoards),

@@ -43,9 +43,9 @@
     <div class="board-list">
       <div
         class="board-item"
-        *ngFor="let board of vm.boards"
-        (click)="goBoard(board)">
+        *ngFor="let board of vm.boards">
         <div
+          (click)="goBoard(board)"
           class="board-bg"
           [tuBoardIdToColor]="board.id">
           <a
@@ -56,19 +56,46 @@
         </div>
         <div class="board-extra">
           <button
-            title="Delete project"
-            *ngIf="board.is_owner"
-            (click)="deleteBoard($event, board)"
+            type="button"
+            title="Settings"
+            [cdkMenuTriggerFor]="menu"
             mat-icon-button>
-            <mat-icon fontIcon="delete"></mat-icon>
+            <mat-icon fontIcon="settings"></mat-icon>
           </button>
-          <button
-            title="Leave project"
-            *ngIf="!board.is_owner"
-            (click)="leaveBoard($event, board)"
-            mat-icon-button>
-            <mat-icon fontIcon="directions_walk"></mat-icon>
-          </button>
+
+          <ng-template #menu>
+            <div
+              class="menu"
+              cdkMenu>
+              <button
+                cdkMenuItem
+                class="menu-item menu-item-icon"
+                title="Delete project"
+                *ngIf="board.is_owner"
+                (cdkMenuItemTriggered)="duplicateBoard(board)">
+                <mat-icon fontIcon="content_copy"></mat-icon>
+                Duplicate
+              </button>
+              <button
+                cdkMenuItem
+                class="menu-item menu-item-icon"
+                title="Delete project"
+                *ngIf="board.is_owner"
+                (cdkMenuItemTriggered)="deleteBoard(board)">
+                <mat-icon fontIcon="delete"></mat-icon>
+                Delete project
+              </button>
+              <button
+                cdkMenuItem
+                class="menu-item menu-item-icon"
+                title="Leave project"
+                *ngIf="!board.is_owner"
+                (cdkMenuItemTriggered)="leaveBoard(board)">
+                <mat-icon fontIcon="directions_walk"></mat-icon>
+                Leave project
+              </button>
+            </div>
+          </ng-template>
         </div>
       </div>
     </div>

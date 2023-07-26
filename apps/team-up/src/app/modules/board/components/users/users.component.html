@@ -60,18 +60,18 @@
     #menu
     let-user="user">
     <div
-      class="user-menu"
+      class="menu"
       cdkMenu>
       <button
         cdkMenuItem
-        class="user-menu-item"
+        class="menu-item"
         (cdkMenuItemTriggered)="follow(user.id)">
         <ng-container *ngIf="!vm.follow">Follow</ng-container>
         <ng-container *ngIf="vm.follow">Unfollow</ng-container>
       </button>
       <button
         cdkMenuItem
-        class="user-menu-item"
+        class="menu-item"
         (cdkMenuItemTriggered)="toggleUserHighlight(user.id)">
         Hightlight
       </button>

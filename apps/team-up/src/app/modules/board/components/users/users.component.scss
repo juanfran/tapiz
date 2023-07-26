@@ -159,37 +159,3 @@
   }
 }
 
-
-.user-menu {
-  display: inline-flex;
-  flex-direction: column;
-  width: 150px;
-  background-color: rgb(255, 255, 255);
-  padding: 6px 0;
-}
-
-.user-menu-item {
-  width: 100%;
-}
-
-.user-menu-item {
-  background-color: transparent;
-  cursor: pointer;
-  border: none;
-  user-select: none;
-  line-height: 36px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-  flex: 1;
-
-  &:hover {
-    background-color: rgb(208, 208, 208);
-  }
-
-  &:active {
-    background-color: rgb(170, 170, 170);
-  }
-}
-

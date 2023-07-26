@@ -1,0 +1,35 @@
+.menu {
+  display: inline-flex;
+  flex-direction: column;
+  width: 150px;
+  background-color: rgb(255, 255, 255);
+  padding: 6px 0;
+  box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.15);
+}
+
+.menu-item {
+  width: 100%;
+  background-color: transparent;
+  cursor: pointer;
+  border: none;
+  user-select: none;
+  line-height: 36px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex: 1;
+
+  &.menu-item-icon {
+    gap: 0.5rem;
+    padding: 0 16px 0 8px;
+  }
+
+  &:hover {
+    background-color: rgb(208, 208, 208);
+  }
+
+  &:active {
+    background-color: rgb(170, 170, 170);
+  }
+}
