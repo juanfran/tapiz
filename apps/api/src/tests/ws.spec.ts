@@ -260,6 +260,7 @@ describe('ws', () => {
       });
 
       it.skip('patch non-existent note', async () => {});
+      it.skip('patch owner id', async () => {});
 
       it('remove', async () => {
         let boardResult = await getBoard(board1);
