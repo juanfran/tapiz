@@ -70,8 +70,7 @@
               <button
                 cdkMenuItem
                 class="menu-item menu-item-icon"
-                title="Delete project"
-                *ngIf="board.is_owner"
+                title="Duplicate board"
                 (cdkMenuItemTriggered)="duplicateBoard(board)">
                 <mat-icon fontIcon="content_copy"></mat-icon>
                 Duplicate
@@ -79,11 +78,11 @@
               <button
                 cdkMenuItem
                 class="menu-item menu-item-icon"
-                title="Delete project"
+                title="Delete board"
                 *ngIf="board.is_owner"
                 (cdkMenuItemTriggered)="deleteBoard(board)">
                 <mat-icon fontIcon="delete"></mat-icon>
-                Delete project
+                Delete board
               </button>
               <button
                 cdkMenuItem

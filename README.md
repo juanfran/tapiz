@@ -21,7 +21,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Shapes
 - [ ] Templates
 - [ ] Timer
-- [ ] Duplicate board
 - [ ] Export with groups & panels
 - [ ] Multi board (one board with multiples ¿views?, easy to move between phases in retrospectives)
 - [ ] Board links (share a board position with other users)

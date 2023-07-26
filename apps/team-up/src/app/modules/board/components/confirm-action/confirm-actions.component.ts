@@ -23,6 +23,7 @@ export class ConfirmComponent {
         text: string;
         color: string;
       };
+      align?: 'start' | 'center' | 'end';
     }
   ) {}
 }

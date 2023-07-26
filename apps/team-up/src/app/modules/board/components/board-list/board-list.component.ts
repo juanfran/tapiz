@@ -8,7 +8,7 @@ import { selectBoards } from '@/app/modules/board/selectors/page.selectors';
 import { Router, RouterLink } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmComponent } from '../confirm-action/confirm-actions.component';
-import { exhaustMap, filter } from 'rxjs';
+import { exhaustMap, filter, tap } from 'rxjs';
 import { BoardApiService } from '../../services/board-api.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -84,7 +84,28 @@ export class BoardListComponent implements OnInit {
   }
 
   public deleteBoard(board: Board) {
-    this.store.dispatch(PageActions.removeBoard({ id: board.id }));
+    const dialogRef = this.dialog.open(ConfirmComponent, {
+      data: {
+        title: 'Are you sure?',
+        description: 'This will delete all your board data.',
+        confirm: {
+          text: 'Delete board',
+          color: 'warn',
+        },
+        cancel: {
+          text: 'Cancel',
+          color: 'basic',
+        },
+        align: 'end',
+      },
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(filter((it) => it))
+      .subscribe(() => {
+        this.store.dispatch(PageActions.removeBoard({ id: board.id }));
+      });
   }
 
   public leaveBoard(board: Board) {
@@ -109,6 +130,7 @@ export class BoardListComponent implements OnInit {
           text: 'Cancel',
           color: 'basic',
         },
+        align: 'end',
       },
     });
 

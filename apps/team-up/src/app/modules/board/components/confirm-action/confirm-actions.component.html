@@ -2,7 +2,7 @@
 <mat-dialog-content>
   {{ data.description }}
 </mat-dialog-content>
-<mat-dialog-actions>
+<mat-dialog-actions [align]="data.align">
   <button
     mat-raised-button
     [mat-dialog-close]="true"
