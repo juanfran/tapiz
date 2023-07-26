@@ -291,66 +291,6 @@ describe('ws', () => {
         expect(boardResult?.board.notes).toHaveLength(0);
         expect(ws.OPEN).toEqual(WebSocket.OPEN);
       });
-
-      it('patch & delete without permissions', async () => {
-        await updateBoard(board1, {
-          ...initBoard,
-          notes: [
-            {
-              id: 'fake',
-              ownerId: 'fake',
-              text: 'text',
-              emojis: [],
-              votes: 0,
-              position: { x: 0, y: 0 },
-              drawing: [],
-            },
-          ],
-        });
-
-        const action = {
-          history: false,
-          actions: [
-            {
-              data: {
-                type: 'note',
-                node: {
-                  id: 'fake',
-                  text: 'edit',
-                },
-              },
-              op: 'patch',
-            },
-          ],
-          type: BoardCommonActions.batchNodeActions,
-        };
-
-        const action2 = {
-          history: false,
-          actions: [
-            {
-              data: {
-                type: 'note',
-                node: {
-                  id: 'fake',
-                  text: 'edit',
-                },
-              },
-              op: 'revome',
-            },
-          ],
-          type: BoardCommonActions.batchNodeActions,
-        };
-
-        await send(action);
-        await send(action2);
-
-        const boardResult = await getBoard(board1);
-
-        expect(boardResult?.board.notes.length).toEqual(1);
-        expect(boardResult?.board.notes[0].text).toEqual('text');
-        expect(ws.OPEN).toEqual(WebSocket.OPEN);
-      });
     });
 
     describe('group', () => {

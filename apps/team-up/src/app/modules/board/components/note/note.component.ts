@@ -198,7 +198,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     event.preventDefault();
     event.stopPropagation();
 
-    if (this.isOwner() && !this.state.get('voting')) {
+    if (!this.state.get('voting')) {
       this.edit();
       requestAnimationFrame(() => {
         this.focusTextarea();

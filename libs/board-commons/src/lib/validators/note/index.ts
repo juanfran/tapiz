@@ -62,20 +62,6 @@ export const validate = (
       return false;
     }
 
-    const ownerProperties = ['text'];
-
-    const validNote = validation.data;
-
-    const node = state.notes.find((it) => it.id === validNote.id);
-
-    const invalidAccess = Object.keys(validNote).some((it) =>
-      ownerProperties.includes(it)
-    );
-
-    if (msg.op === 'patch' && invalidAccess && node?.ownerId !== userId) {
-      return false;
-    }
-
     if (validation.success) {
       validatorResult = validation.data;
     }
