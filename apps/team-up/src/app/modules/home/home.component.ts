@@ -3,56 +3,55 @@ import { UntilDestroy } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
 import { Board } from '@team-up/board-commons';
-import { PageActions } from '@/app/modules/board/actions/page.actions';
-import { selectBoards } from '@/app/modules/board/selectors/page.selectors';
 import { Router, RouterLink } from '@angular/router';
-import { MatDialog } from '@angular/material/dialog';
-import { ConfirmComponent } from '../confirm-action/confirm-actions.component';
-import { exhaustMap, filter, tap } from 'rxjs';
-import { BoardApiService } from '../../services/board-api.service';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+
+import { filter } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '@/app/services/auth.service';
-import { BoardIdToColorDirective } from '../../directives/board-id-to-color.directive';
-import { TitleComponent } from '../title/title.component';
+
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
+import { ConfirmComponent } from '@/app/shared/confirm-action/confirm-actions.component';
+import { TitleComponent } from '@/app/shared/title/title.component';
+import { BoardIdToColorDirective } from '@/app/shared/board-id-to-color.directive';
+import { homeFeature } from './+state/home.feature';
+import { HomeActions } from './+state/home.actions';
 
 @UntilDestroy()
 @Component({
-  selector: 'team-up-board-list',
-  templateUrl: './board-list.component.html',
-  styleUrls: ['./board-list.component.scss'],
+  selector: 'team-up-home',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
   standalone: true,
   imports: [
-    NgIf,
+    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    NgFor,
     RouterLink,
-    AsyncPipe,
     BoardIdToColorDirective,
     TitleComponent,
     CdkMenuTrigger,
     CdkMenu,
     CdkMenuItem,
+    MatDialogModule,
   ],
 })
-export class BoardListComponent implements OnInit {
+export class HomeComponent implements OnInit {
   public readonly model$ = this.state.select();
 
   constructor(
     private authService: AuthService,
-    private boardApiService: BoardApiService,
     private router: Router,
     private store: Store,
     private state: RxState<{
@@ -60,11 +59,11 @@ export class BoardListComponent implements OnInit {
     }>,
     private dialog: MatDialog
   ) {
-    this.state.connect('boards', this.store.select(selectBoards));
+    this.state.connect('boards', this.store.select(homeFeature.selectBoards));
   }
 
   public ngOnInit() {
-    this.store.dispatch(PageActions.fetchBoards());
+    this.store.dispatch(HomeActions.fetchBoards());
   }
 
   public logout() {
@@ -73,7 +72,7 @@ export class BoardListComponent implements OnInit {
 
   public onSubmit(value: string) {
     this.store.dispatch(
-      PageActions.createBoard({
+      HomeActions.createBoard({
         name: value.trim().length ? value : 'New board',
       })
     );
@@ -104,16 +103,16 @@ export class BoardListComponent implements OnInit {
       .afterClosed()
       .pipe(filter((it) => it))
       .subscribe(() => {
-        this.store.dispatch(PageActions.removeBoard({ id: board.id }));
+        this.store.dispatch(HomeActions.removeBoard({ id: board.id }));
       });
   }
 
   public leaveBoard(board: Board) {
-    this.store.dispatch(PageActions.leaveBoard({ id: board.id }));
+    this.store.dispatch(HomeActions.leaveBoard({ id: board.id }));
   }
 
   public duplicateBoard(board: Board) {
-    this.store.dispatch(PageActions.duplicateBoard({ id: board.id }));
+    this.store.dispatch(HomeActions.duplicateBoard({ id: board.id }));
   }
 
   public deleteAccount() {
@@ -136,14 +135,9 @@ export class BoardListComponent implements OnInit {
 
     dialogRef
       .afterClosed()
-      .pipe(
-        filter((it) => it),
-        exhaustMap(() => {
-          return this.boardApiService.removeAccount();
-        })
-      )
+      .pipe(filter((it) => it))
       .subscribe(() => {
-        this.logout();
+        this.store.dispatch(HomeActions.removeAccount());
       });
   }
 }

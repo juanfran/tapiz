@@ -14,7 +14,6 @@ export const {
   selectZone,
   selectUserHighlight,
   selectPopupOpen,
-  selectBoards,
   selectBoardId,
   selectIsOwner,
   selectBoardCursor,

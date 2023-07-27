@@ -3,11 +3,11 @@ import { Injectable, inject } from '@angular/core';
 import { Auth, onAuthStateChanged } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { PageActions } from '../modules/board/actions/page.actions';
 import { User } from '@team-up/board-commons';
 import { User as FirebaseUser } from 'firebase/auth';
 import { BehaviorSubject, filter, take } from 'rxjs';
-import { selectUserId } from '../modules/board/selectors/page.selectors';
+import { AppActions } from '../+state/app.actions';
+import { appFeature } from '../+state/app.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -34,7 +34,7 @@ export class AuthService {
       const user: FirebaseUser = JSON.parse(userStr);
 
       if (user['uid']) {
-        this.store.dispatch(PageActions.setUserId({ userId: user['uid'] }));
+        this.store.dispatch(AppActions.setUserId({ userId: user['uid'] }));
       } else {
         this.router.navigate(['/login']);
       }
@@ -43,9 +43,12 @@ export class AuthService {
     }
 
     this.store
-      .select(selectUserId)
+      .select(appFeature.selectUserId)
       .pipe(
-        filter((userId) => userId.length > 0),
+        filter((userId) => {
+          console.log(userId);
+          return userId.length > 0;
+        }),
         take(1)
       )
       .subscribe(() => {
@@ -67,7 +70,7 @@ export class AuthService {
     this.auth.signOut();
     document.cookie = '';
     localStorage.removeItem('user');
-    this.store.dispatch(PageActions.setUserId({ userId: '' }));
+    this.store.dispatch(AppActions.setUserId({ userId: '' }));
     this.router.navigate(['/login']);
   }
 

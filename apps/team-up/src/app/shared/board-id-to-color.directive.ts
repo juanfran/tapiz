@@ -1,5 +1,5 @@
 import { Directive, ElementRef, Input, inject } from '@angular/core';
-import { contrast } from '../components/note/contrast';
+import { contrast } from '../modules/board/components/note/contrast';
 
 @Directive({
   selector: '[tuBoardIdToColor]',

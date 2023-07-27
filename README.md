@@ -43,4 +43,3 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Deprecated RX operators
 - [ ] Code linter
 - [ ] Board Size limit
-- [ ] Split board.module

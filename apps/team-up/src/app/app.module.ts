@@ -1,28 +1,38 @@
-import { APP_INITIALIZER, NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+import { LoginComponent } from './modules/board/components/login/login.component';
+import { AuthGuard } from './modules/board/guards/auth.guard';
+import { PageNotFoundComponent } from './modules/board/components/page-not-found/page-not-found.component';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 
-import { AppComponent } from './app.component';
-import { StoreModule } from '@ngrx/store';
-import { EffectsModule } from '@ngrx/effects';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { environment } from '../environments/environment';
-import { StoreRouterConnectingModule } from '@ngrx/router-store';
-import { HttpClientModule } from '@angular/common/http';
-import { ApiRestInterceptorModule } from './commons/api-rest-interceptor/api-rest-interceptor.module';
-
-import { BoardModule } from './modules/board/board.module';
-
-import { TranslocoRootModule } from './transloco/transloco-root.module';
-import { ConfigService, configFactory } from './services/config.service';
-import { RouterModule } from '@angular/router';
-
-document.oncontextmenu = () => {
-  return false;
-};
-
-export function prefersReducedMotion(): boolean {
-  const mediaQueryList = window.matchMedia('(prefers-reduced-motion)');
-
-  return mediaQueryList.matches;
-}
+const routes: Routes = [
+  {
+    path: '',
+    loadChildren: () =>
+      import('./modules/home/home.routes').then((mod) => mod.homesRoutes),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'board/:id',
+    loadChildren: () =>
+      import('./modules/board/board.routes').then((mod) => mod.boardRoutes),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'login',
+    component: LoginComponent,
+  },
+  { path: '404', component: PageNotFoundComponent },
+  { path: '**', pathMatch: 'full', component: PageNotFoundComponent },
+];
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  providers: [
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: { appearance: 'outline' },
+    },
+  ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+})
+export class AppModule {}

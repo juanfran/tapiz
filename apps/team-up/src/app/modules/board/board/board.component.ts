@@ -11,7 +11,6 @@ import {
 import { Store } from '@ngrx/store';
 import { animationFrameScheduler, fromEvent, merge, Subject, zip } from 'rxjs';
 import {
-  startWith,
   map,
   withLatestFrom,
   filter,
@@ -60,7 +59,7 @@ import { NoteComponent } from '../components/note/note.component';
 import { CursorsComponent } from '../components/cursors/cursors.component';
 import { ZoneComponent } from '../components/zone/zone.component';
 import { OverlayComponent } from '../components/overlay/overlay.component';
-import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ToolbarComponent } from '../components/toolbar/toolbar.component';
 import { UsersComponent } from '../components/users/users.component';
 import { HeaderComponent } from '../components/header/header.component';
@@ -69,11 +68,13 @@ import { SearchOptionsComponent } from '../components/search-options/search-opti
 import { Actions, ofType } from '@ngrx/effects';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { boardFeature } from '../reducers/board.reducer';
-import { TitleComponent } from '../components/title/title.component';
+import { TitleComponent } from '../../../shared/title/title.component';
 import { ResizableDirective } from '../directives/resize.directive';
 import { FollowUserComponent } from '@/app/followUser/follow-user.component';
 import { Point } from '@team-up/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
+import { MatDialogModule } from '@angular/material/dialog';
+import { appFeature } from '@/app/+state/app.reducer';
 
 @UntilDestroy()
 @Component({
@@ -84,14 +85,13 @@ import { pageFeature } from '../reducers/page.reducer';
   providers: [],
   standalone: true,
   imports: [
+    CommonModule,
     HeaderComponent,
     UsersComponent,
     ToolbarComponent,
-    NgIf,
     OverlayComponent,
     ZoneComponent,
     CursorsComponent,
-    NgFor,
     NoteComponent,
     BoardDragDirective,
     ResizableDirective,
@@ -102,9 +102,9 @@ import { pageFeature } from '../reducers/page.reducer';
     PanelsComponent,
     DrawingOptionsComponent,
     SearchOptionsComponent,
-    AsyncPipe,
     TitleComponent,
     FollowUserComponent,
+    MatDialogModule,
   ],
   hostDirectives: [CopyPasteDirective],
 })
@@ -164,7 +164,22 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     private notesService: NotesService,
     private actions: Actions
   ) {
-    this.store.dispatch(PageActions.initBoard());
+    this.store
+      .select(appFeature.selectUserId)
+      .pipe(take(1))
+      .subscribe((userId) => {
+        this.store.dispatch(
+          PageActions.initBoard({
+            userId,
+          })
+        );
+      });
+
+    fromEvent(document, 'contextmenu')
+      .pipe(untilDestroyed(this))
+      .subscribe((event) => {
+        event.preventDefault();
+      });
   }
 
   public initBoard() {

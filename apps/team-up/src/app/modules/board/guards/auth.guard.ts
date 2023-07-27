@@ -7,8 +7,9 @@ import {
 import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { filter, map, switchMap } from 'rxjs/operators';
-import { selectUserId } from '../selectors/page.selectors';
+
 import { AuthService } from '@/app/services/auth.service';
+import { appFeature } from '@/app/+state/app.reducer';
 
 export const AuthGuard: CanActivateFn = (
   next: ActivatedRouteSnapshot,
@@ -21,7 +22,7 @@ export const AuthGuard: CanActivateFn = (
   return authService.authReady.pipe(
     filter((ready) => ready),
     switchMap(() => {
-      return store.select(selectUserId).pipe(
+      return store.select(appFeature.selectUserId).pipe(
         map((userId) => {
           if (userId.length) {
             return true;

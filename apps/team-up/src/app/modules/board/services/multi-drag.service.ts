@@ -15,18 +15,18 @@ import {
   throttleTime,
   withLatestFrom,
 } from 'rxjs';
-import { Draggable } from '../modules/board/models/draggable.model';
+import { Draggable } from '../models/draggable.model';
 import { concatLatestFrom } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { filterNil } from '../commons/operators/filter-nil';
+import { filterNil } from '../../../commons/operators/filter-nil';
 import {
   selectDragEnabled,
   selectPosition,
   selectZoom,
-} from '../modules/board/selectors/page.selectors';
+} from '../selectors/page.selectors';
 import { NodeType, Point } from '@team-up/board-commons';
-import { PageActions } from '../modules/board/actions/page.actions';
-import { BoardActions } from '../modules/board/actions/board.actions';
+import { PageActions } from '../actions/page.actions';
+import { BoardActions } from '../actions/board.actions';
 @Injectable({
   providedIn: 'root',
 })
