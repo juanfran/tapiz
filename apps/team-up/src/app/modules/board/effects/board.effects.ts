@@ -4,7 +4,6 @@ import { Store } from '@ngrx/store';
 import { WsService } from '@/app/modules/ws/services/ws.service';
 import { EMPTY, of } from 'rxjs';
 import {
-  exhaustMap,
   map,
   mergeMap,
   switchMap,
@@ -17,7 +16,7 @@ import { v4 } from 'uuid';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
 import { selectZone } from '../selectors/page.selectors';
-import { BoardApiService } from '../services/board-api.service';
+import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
 import { StateActions } from '@team-up/board-commons';
 
@@ -234,76 +233,6 @@ export class BoardEffects {
         }
 
         return EMPTY;
-      })
-    );
-  });
-
-  public createBoard$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(PageActions.createBoard),
-        exhaustMap((action) => {
-          return this.boardApiService.createBoard(action.name);
-        }),
-        tap((result) => {
-          void this.router.navigate(['board', result.id]);
-        })
-      );
-    },
-    {
-      dispatch: false,
-    }
-  );
-
-  public deleteBoard$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(PageActions.removeBoard),
-        exhaustMap((action) => {
-          return this.boardApiService.removeBoard(action.id);
-        })
-      );
-    },
-    {
-      dispatch: false,
-    }
-  );
-
-  public leaveBoard$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(PageActions.leaveBoard),
-        exhaustMap((action) => {
-          return this.boardApiService.leaveBoard(action.id);
-        })
-      );
-    },
-    {
-      dispatch: false,
-    }
-  );
-
-  public duplicateBoard$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(PageActions.duplicateBoard),
-      exhaustMap((action) => {
-        return this.boardApiService.duplicateBoard(action.id);
-      }),
-      map(() => {
-        return PageActions.fetchBoards();
-      })
-    );
-  });
-
-  public fetchBoards$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(PageActions.fetchBoards),
-      switchMap(() => {
-        return this.boardApiService.fetchBoards().pipe(
-          map((boards) => {
-            return PageActions.fetchBoardsSuccess({ boards });
-          })
-        );
       })
     );
   });

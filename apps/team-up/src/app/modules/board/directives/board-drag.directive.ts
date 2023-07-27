@@ -1,7 +1,6 @@
 import { AfterViewInit, Directive, OnDestroy, inject } from '@angular/core';
 import { Draggable } from '../models/draggable.model';
-
-import { MultiDragService } from '@/app/services/multi-drag.service';
+import { MultiDragService } from '../services/multi-drag.service';
 
 @Directive({
   selector: '[tuBoardDrag]',

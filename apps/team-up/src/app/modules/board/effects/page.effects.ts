@@ -15,7 +15,7 @@ import {
   selectCocomaterial,
   selectUserId,
 } from '../selectors/page.selectors';
-import { BoardApiService } from '../services/board-api.service';
+import { BoardApiService } from '../../../services/board-api.service';
 import { BoardActions } from '../actions/board.actions';
 import { selectNoteFocus } from '../selectors/board.selectors';
 import { Note } from '@team-up/board-commons';

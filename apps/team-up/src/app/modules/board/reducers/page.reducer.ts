@@ -4,7 +4,6 @@ import {
   ZoneConfig,
   Zone,
   User,
-  Board,
   CocomaterialTag,
   CocomaterialApiListVectors,
 } from '@team-up/board-commons';
@@ -32,7 +31,6 @@ export interface PageState {
   owners: string[];
   boardCursor: string;
   voting: boolean;
-  boards: Board[];
   emoji: NativeEmoji | null;
   dragEnabled: boolean;
   drawing: boolean;
@@ -68,7 +66,6 @@ const initialPageState: PageState = {
   owners: [],
   boardCursor: 'default',
   voting: false,
-  boards: [],
   userId: '',
   emoji: null,
   dragEnabled: true,
@@ -91,7 +88,13 @@ const reducer = createReducer(
     state.open = true;
     return state;
   }),
-  on(PageActions.initBoard, PageActions.closeBoard, (state): PageState => {
+  on(PageActions.initBoard, (state, { userId }): PageState => {
+    return {
+      ...initialPageState,
+      userId,
+    };
+  }),
+  on(PageActions.closeBoard, (state): PageState => {
     return {
       ...initialPageState,
       userId: state.userId,
@@ -103,11 +106,6 @@ const reducer = createReducer(
     if (state.userId) {
       state.isOwner = state.owners.includes(state.userId);
     }
-
-    return state;
-  }),
-  on(PageActions.setUserId, (state, { userId }): PageState => {
-    state.userId = userId;
 
     return state;
   }),
@@ -227,11 +225,6 @@ const reducer = createReducer(
 
     return state;
   }),
-  on(PageActions.fetchBoardsSuccess, (state, { boards }): PageState => {
-    state.boards = boards;
-
-    return state;
-  }),
   on(PageActions.textToolbarClick, (state): PageState => {
     state.boardCursor = 'text';
     return state;
@@ -246,17 +239,6 @@ const reducer = createReducer(
     }
     return state;
   }),
-  on(
-    PageActions.removeBoard,
-    PageActions.leaveBoard,
-    (state, { id }): PageState => {
-      state.boards = state.boards.filter((board) => {
-        return board.id !== id;
-      });
-
-      return state;
-    }
-  ),
   on(PageActions.selectEmoji, (state, { emoji }): PageState => {
     state.boardCursor = 'crosshair';
     state.emoji = emoji;

@@ -1,7 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { PageActions } from '../../actions/page.actions';
 import {
   Auth,
   signInWithPopup,
@@ -12,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { AppActions } from '@/app/+state/app.actions';
 
 @Component({
   selector: 'team-up-login',
@@ -49,7 +49,7 @@ export class LoginComponent {
       if (this.auth.currentUser) {
         localStorage.setItem('user', JSON.stringify(result.user));
 
-        this.store.dispatch(PageActions.setUserId({ userId: result.user.uid }));
+        this.store.dispatch(AppActions.setUserId({ userId: result.user.uid }));
 
         const nextUrl = sessionStorage.getItem('url') ?? '/';
 

@@ -145,7 +145,7 @@ app.post(`${baseUrl}/duplicate`, authGuard, async (req, res) => {
   });
 });
 
-app.delete('/remove-account', authGuard, async (req, res) => {
+app.delete(`${baseUrl}/remove-account`, authGuard, async (req, res) => {
   await deleteAccount(req.user.sub);
 
   res.json({
