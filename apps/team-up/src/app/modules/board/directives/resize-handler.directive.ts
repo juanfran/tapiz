@@ -1,4 +1,10 @@
-import { AfterViewInit, Directive, ElementRef, inject } from '@angular/core';
+import {
+  AfterViewInit,
+  Directive,
+  ElementRef,
+  HostBinding,
+  inject,
+} from '@angular/core';
 import { ResizableDirective } from './resize.directive';
 
 @Directive({
@@ -8,6 +14,9 @@ import { ResizableDirective } from './resize.directive';
 export class ResizeHandlerDirective implements AfterViewInit {
   private el = inject(ElementRef<HTMLElement>);
   private resize = inject(ResizableDirective);
+
+  @HostBinding('class.no-drag')
+  public noDrag = true;
 
   private get nativeElement() {
     return this.el.nativeElement;

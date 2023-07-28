@@ -1,4 +1,3 @@
-import { Point } from '@angular/cdk/drag-drop';
 import {
   Component,
   ChangeDetectionStrategy,
@@ -8,7 +7,6 @@ import {
   ViewChild,
   HostBinding,
   AfterViewInit,
-  ApplicationRef,
   HostListener,
 } from '@angular/core';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
@@ -20,7 +18,6 @@ import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
 import { NodeType, Text } from '@team-up/board-commons';
-import { MoveService } from '../../services/move.service';
 import { selectFocusId } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
 import { BoardMoveService } from '../../services/board-move.service';

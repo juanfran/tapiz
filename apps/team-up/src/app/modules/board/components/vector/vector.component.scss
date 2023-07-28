@@ -3,10 +3,25 @@
   position: absolute;
   user-select: none;
   z-index: 2;
+  transform-origin: left top 0;
+  will-change: transform;
 
-  &:not(.composeMode):hover, &.focus {
+  team-up-resize-handler,
+  [tuRotateHandler] {
+    display: none;
+  }
+
+  &.focus {
     cursor: grab;
     outline: 3px dotted var(--primary-color);
+
+    [tuRotateHandler] {
+      display: flex;
+    }
+
+    team-up-resize-handler {
+      display: contents;
+    }
   }
 }
 
@@ -16,13 +31,3 @@ img {
   width: 100%;
   height: 100%;
 }
-
-.resize {
-  bottom: 0;
-  cursor: se-resize;
-  height: 50px;
-  position: absolute;
-  right: 0;
-  width: 50px;
-}
-

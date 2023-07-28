@@ -1,5 +1,5 @@
 import { ApplicationRef, DestroyRef, Directive, inject } from '@angular/core';
-import { Resizable } from '../models/resizable.model';
+import { Resizable, ResizePosition } from '../models/resizable.model';
 import { MoveService } from '../services/move.service';
 import { filterNil } from '@/app/commons/operators/filter-nil';
 import { Store } from '@ngrx/store';
@@ -24,23 +24,24 @@ export class ResizableDirective {
     this.host = host;
   }
 
-  public setHandler(handler: HTMLElement) {
+  public setHandler(
+    handler: HTMLElement,
+    position: ResizePosition = 'bottom-right'
+  ) {
     this.resizeHandler = handler;
-    this.listen();
+    this.listen(position);
   }
 
-  public listen() {
+  public listen(position: ResizePosition) {
     if (!this.resizeHandler || !this.host) {
       return;
     }
 
     this.moveService
-      .listenIncrementalAreaSelector(this.resizeHandler)
+      .listenIncrementalAreaSelector(this.resizeHandler, this.host, position)
       .pipe(filterNil(), takeUntilDestroyed(this.destroyRef))
       .subscribe((size) => {
         if (this.host) {
-          const { width, height } = this.host;
-
           this.store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
@@ -50,8 +51,12 @@ export class ResizableDirective {
                     type: this.host.nodeType,
                     node: {
                       id: this.host.id,
-                      width: width + size.x,
-                      height: height + size.y,
+                      position: {
+                        x: size.x,
+                        y: size.y,
+                      },
+                      width: size.width,
+                      height: size.height,
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     } as any,
                   },

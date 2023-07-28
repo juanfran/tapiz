@@ -297,6 +297,7 @@ export class ToolbarComponent {
                         x: -position.x / zoom,
                         y: -position.y / zoom,
                       },
+                      rotation: 0,
                       width: 0,
                       height: 0,
                     },

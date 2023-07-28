@@ -26,7 +26,12 @@ import hotkeys from 'hotkeys-js';
 import { RxPush } from '@rx-angular/template/push';
 import { Resizable } from '../../models/resizable.model';
 import { ResizableDirective } from '../../directives/resize.directive';
-import { ResizeHandlerDirective } from '../../directives/resize-handler.directive';
+import { ResizeHandlerComponent } from '../resize-handler/resize-handler.component';
+import { MatIconModule } from '@angular/material/icon';
+import { RotateHandlerDirective } from '../../directives/rotate-handler.directive';
+import { RotateDirective } from '../../directives/rotate.directive';
+import { compose, rotateDEG, translate, toCSS } from 'transformation-matrix';
+import { Rotatable } from '../../models/rotatable.model';
 
 interface State {
   image: Image;
@@ -42,9 +47,14 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
   standalone: true,
-  imports: [RxPush, ResizeHandlerDirective],
+  imports: [
+    RxPush,
+    ResizeHandlerComponent,
+    RotateHandlerDirective,
+    MatIconModule,
+  ],
 })
-export class ImageComponent implements OnInit, Draggable, Resizable {
+export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
   @ViewChild('image') public imageRef!: ElementRef;
 
   @Input()
@@ -64,6 +74,10 @@ export class ImageComponent implements OnInit, Draggable, Resizable {
     return this.state.get('mode');
   }
 
+  @HostBinding('class.focus') get focus() {
+    return this.state.get('focus');
+  }
+
   public readonly image$ = this.state.select('image');
 
   constructor(
@@ -72,6 +86,7 @@ export class ImageComponent implements OnInit, Draggable, Resizable {
     private store: Store,
     private boardDragDirective: BoardDragDirective,
     private resizableDirective: ResizableDirective,
+    private rotateDirective: RotateDirective,
     private cd: ChangeDetectorRef
   ) {
     this.state.set({ draggable: true });
@@ -122,6 +137,10 @@ export class ImageComponent implements OnInit, Draggable, Resizable {
     return this.state.get('image').position;
   }
 
+  public get rotation() {
+    return this.state.get('image').rotation;
+  }
+
   public get preventDrag() {
     return !this.state.get('draggable') || !this.state.get('focus');
   }
@@ -139,6 +158,7 @@ export class ImageComponent implements OnInit, Draggable, Resizable {
   public ngOnInit() {
     this.boardDragDirective.setHost(this);
     this.resizableDirective.setHost(this);
+    this.rotateDirective.setHost(this);
 
     this.state.connect('mode', this.store.select(selectCanvasMode));
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
@@ -151,13 +171,15 @@ export class ImageComponent implements OnInit, Draggable, Resizable {
 
     this.image$
       .pipe(
-        map((it) => it.position),
+        map((it) => {
+          return { position: it.position, rotation: it.rotation };
+        }),
         untilDestroyed(this)
       )
-      .subscribe((position) => {
-        (
-          this.el.nativeElement as HTMLElement
-        ).style.transform = `translate(${position.x}px, ${position.y}px)`;
+      .subscribe(({ position, rotation }) => {
+        this.nativeElement.style.transform = toCSS(
+          compose(translate(position.x, position.y), rotateDEG(rotation))
+        );
       });
 
     hotkeys('delete', () => {

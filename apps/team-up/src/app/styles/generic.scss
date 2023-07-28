@@ -178,3 +178,33 @@ button {
 main {
   height: 100%;
 }
+
+
+[tuRotateHandler] {
+  aspect-ratio: 1;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+  position: absolute;
+  bottom: -50px;
+  left: calc(50% - 45px / 2);
+  width: 45px;
+
+  mat-icon {
+    transform: scale(1.5);
+  }
+
+  * {
+    pointer-events: none;
+  }
+}
+
+[tuResizeHandler] {
+  bottom: 0;
+  cursor: se-resize;
+  height: 50px;
+  position: absolute;
+  right: 0;
+  width: 50px;
+}

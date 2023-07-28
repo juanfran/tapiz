@@ -25,10 +25,10 @@ import hotkeys from 'hotkeys-js';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { pageFeature } from '../../reducers/page.reducer';
 import { Resizable } from '../../models/resizable.model';
-import { ResizableDirective } from '../../directives/resize.directive';
 import { ResizeHandlerDirective } from '../../directives/resize-handler.directive';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
+import { ResizableDirective } from '../../directives/resize.directive';
 
 interface State {
   panel: Panel;
@@ -44,7 +44,7 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
   standalone: true,
-  imports: [NgIf, AsyncPipe, ResizeHandlerDirective, MatIconModule],
+  imports: [NgIf, AsyncPipe, MatIconModule, ResizeHandlerDirective],
 })
 export class PanelComponent implements OnInit, Draggable, Resizable {
   @Input()

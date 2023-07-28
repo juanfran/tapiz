@@ -51,6 +51,7 @@ textarea {
   position: absolute;
   width: 300px;
   z-index: 4;
+  will-change: transform;
 
   canvas {
     pointer-events: none;

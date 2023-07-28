@@ -46,7 +46,6 @@ export class AuthService {
       .select(appFeature.selectUserId)
       .pipe(
         filter((userId) => {
-          console.log(userId);
           return userId.length > 0;
         }),
         take(1)
