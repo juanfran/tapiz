@@ -6,4 +6,5 @@ export interface Image {
   width: number;
   height: number;
   position: Point;
+  rotation: number;
 }

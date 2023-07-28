@@ -26,7 +26,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Board links (share a board position with other users)
 - [ ] Teams & ¿projects? (Access permissions)
 - [ ] Reactions (emoji animation not persisted)
-- [ ] Rotate image, text & vector
 - [ ] Components (kanban, grid, etc)
 - [ ] Arrows (connect nodes)
 - [ ] D&D cocomaterial on add
@@ -35,6 +34,7 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Favourite boards
 - [ ] Empty boards placeholder
 - [ ] Image & Vector can also be used in compose mode
+- [ ] Bookmarks
 
 ## TODO, code refactor
 

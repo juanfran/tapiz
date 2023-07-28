@@ -3,6 +3,10 @@
   [attr.src]="(image$ | push).url"
   (load)="loadImage()" />
 
+<team-up-resize-handler></team-up-resize-handler>
+
 <div
-  tuResizeHandler
-  class="resize no-drag"></div>
+  tuRotateHandler
+  class="no-drag">
+  <mat-icon>refresh</mat-icon>
+</div>

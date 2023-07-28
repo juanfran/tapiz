@@ -185,6 +185,7 @@ export class CocomaterialComponent {
                         x: (-position.x + event.pageX) / zoom - 75,
                         y: (-position.y + event.pageY) / zoom - 75,
                       },
+                      rotation: 0,
                     },
                   },
                   op: 'add',

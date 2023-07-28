@@ -75,6 +75,7 @@ import { Point } from '@team-up/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
 import { appFeature } from '@/app/+state/app.reducer';
+import { RotateDirective } from '../directives/rotate.directive';
 
 @UntilDestroy()
 @Component({
@@ -105,6 +106,7 @@ import { appFeature } from '@/app/+state/app.reducer';
     TitleComponent,
     FollowUserComponent,
     MatDialogModule,
+    RotateDirective,
   ],
   hostDirectives: [CopyPasteDirective],
 })
@@ -362,6 +364,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
                             x: (-position.x + event.clientX) / zoom,
                             y: (-position.y + event.clientY) / zoom,
                           },
+                          rotation: 0,
                         },
                       },
                       op: 'add',

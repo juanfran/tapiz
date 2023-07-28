@@ -1,4 +1,3 @@
-import { Point } from '@angular/cdk/drag-drop';
 import {
   Component,
   ChangeDetectionStrategy,
@@ -11,8 +10,6 @@ import {
   OnInit,
   HostBinding,
   ChangeDetectorRef,
-  ViewChild,
-  ApplicationRef,
 } from '@angular/core';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
@@ -26,12 +23,11 @@ import { Group, NodeType } from '@team-up/board-commons';
 import { BoardMoveService } from '../../services/board-move.service';
 import { selectFocusId } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
-import { MoveService } from '../../services/move.service';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { pageFeature } from '../../reducers/page.reducer';
 import { Resizable } from '../../models/resizable.model';
-import { ResizeHandlerDirective } from '../../directives/resize-handler.directive';
 import { ResizableDirective } from '../../directives/resize.directive';
+import { ResizeHandlerDirective } from '../../directives/resize-handler.directive';
 
 interface State {
   edit: boolean;

@@ -24,6 +24,7 @@
         <team-up-image
           tuBoardDrag
           tuResize
+          tuRotate
           [image]="image"></team-up-image>
       </ng-container>
       <ng-container *ngFor="let group of groups$ | async; trackBy: trackById">
@@ -42,6 +43,7 @@
         <team-up-vector
           tuBoardDrag
           tuResize
+          tuRotate
           [vector]="vector"></team-up-vector>
       </ng-container>
       <team-up-panels></team-up-panels>
