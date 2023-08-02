@@ -1,22 +1,28 @@
-import { CommonState, User } from '@team-up/board-commons';
-import { Pool, PoolClient, QueryResult } from 'pg';
-import Config from './config';
+import { DBState, User } from '@team-up/board-commons';
+import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import { migrate } from 'drizzle-orm/postgres-js/migrator';
+import * as postgres from 'postgres';
+import * as schema from './schema';
 
-export let client: PoolClient;
-export let pool: Pool | undefined;
+import Config from './config';
+import { and, desc, eq } from 'drizzle-orm';
+
+import { SetNonNullable } from 'type-fest';
+
+let db: PostgresJsDatabase;
 
 async function waitDb() {
-  pool = new Pool({
-    database: Config.DB_DATABASE,
-    host: Config.DB_HOST,
-    password: Config.DB_PASSWORD,
-    port: Config.DB_PORT,
-    user: Config.DB_USER,
-  });
+  const connection = `postgres://${Config.DB_USER}:${Config.DB_PASSWORD}@${Config.DB_HOST}:${Config.DB_PORT}/${Config.DB_DATABASE}`;
 
-  client = await pool.connect();
+  const migrationClient = postgres(connection, { max: 1 });
 
-  return client;
+  await migrate(drizzle(migrationClient), { migrationsFolder: 'drizzle' });
+
+  const queryClient = postgres(connection);
+
+  db = drizzle(queryClient);
+
+  return db;
 }
 
 export async function startDB() {
@@ -32,152 +38,173 @@ export async function startDB() {
   run();
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getSingleRow(res: QueryResult<any>) {
-  if (res.rows) {
-    return res.rows[0];
+export async function getBoard(boardId: string) {
+  try {
+    const results = await db
+      .select()
+      .from(schema.boards)
+      .where(eq(schema.boards.id, boardId));
+
+    return results[0];
+  } catch (e) {
+    console.error(e);
+
+    return null;
   }
-
-  return null;
 }
 
-export function getBoard(boardId: string): Promise<
-  | {
-      id: string;
-      name: string;
-      owner: string;
-      board: CommonState;
-      created_on: string;
-    }
-  | undefined
-> {
-  return client
-    .query('SELECT * FROM board WHERE id = $1', [boardId])
-    .then(getSingleRow)
-    .catch(() => undefined);
+export async function getBoardOwners(boardId: string) {
+  const results = await db
+    .select({
+      id: schema.acountsToBoards.accountId,
+    })
+    .from(schema.acountsToBoards)
+    .where(
+      and(
+        eq(schema.acountsToBoards.boardId, boardId),
+        eq(schema.acountsToBoards.isOwner, true)
+      )
+    );
+
+  return results.map((it) => it.id);
 }
 
-export function getBoardOwners(boardId: string) {
-  return client
-    .query(
-      'SELECT account_id as id FROM account_board where board_id = $1 and is_owner=true',
-      [boardId]
+export async function getBoardUser(boardId: string, userId: User['id']) {
+  const results = await db
+    .select({
+      visible: schema.acountsToBoards.visible,
+    })
+    .from(schema.acountsToBoards)
+    .where(
+      and(
+        eq(schema.acountsToBoards.boardId, boardId),
+        eq(schema.acountsToBoards.accountId, userId)
+      )
+    );
+
+  return results[0];
+}
+
+export async function getBoardUsers(boardId: string) {
+  const results = await db
+    .select({
+      id: schema.acountsToBoards.accountId,
+      visible: schema.acountsToBoards.visible,
+      accounts: {
+        name: schema.accounts.name,
+      },
+    })
+    .from(schema.acountsToBoards)
+    .leftJoin(
+      schema.accounts,
+      eq(schema.accounts.id, schema.acountsToBoards.accountId)
     )
-    .then((res) => res.rows.map((it) => it.id))
-    .catch(() => [] as unknown[]);
+    .where(eq(schema.acountsToBoards.boardId, boardId));
+
+  return results
+    .filter((it): it is SetNonNullable<typeof it> => !!it.accounts)
+    .map((result) => ({
+      id: result.id,
+      visible: result.visible,
+      name: result.accounts.name,
+    }));
 }
 
-export function getBoardUser(
-  boardId: string,
-  userId: User['id']
-): Promise<{
-  visible: boolean;
-}> {
-  return client
-    .query(
-      'SELECT visible FROM account_board where board_id = $1 AND account_id = $2',
-      [boardId, userId]
+export async function getBoards(ownerId: string) {
+  const results = await db
+    .select({
+      id: schema.boards.id,
+      name: schema.boards.name,
+      createdAt: schema.boards.createdAt,
+      acountsToBoards: {
+        owner: schema.acountsToBoards.isOwner,
+      },
+    })
+    .from(schema.boards)
+    .leftJoin(
+      schema.acountsToBoards,
+      eq(schema.acountsToBoards.boardId, schema.boards.id)
     )
-    .then(getSingleRow)
-    .catch(() => undefined);
-}
+    .where(eq(schema.acountsToBoards.accountId, ownerId))
+    .orderBy(desc(schema.boards.createdAt));
 
-export function getBoardUsers(boardId: string): Promise<
-  {
-    id: string;
-    visible: boolean;
-    name: string;
-  }[]
-> {
-  return client
-    .query(
-      'SELECT account_id as id, visible, name FROM account_board LEFT JOIN account ON account_board.account_id = account.id where board_id = $1',
-      [boardId]
-    )
-    .then((res) => res.rows)
-    .catch(() => []);
-}
-
-export function getBoards(ownerId: string): Promise<
-  {
-    id: string;
-    owner: string;
-    board: CommonState;
-    created_on: string;
-  }[]
-> {
-  return client
-    .query(
-      'SELECT id, is_owner, name FROM board LEFT JOIN account_board ON account_board.board_id = board.id where account_id = $1 ORDER BY created_on DESC',
-      [ownerId]
-    )
-    .then((res) => res.rows)
-    .catch(() => []);
+  return results
+    .filter((it): it is SetNonNullable<typeof it> => !!it.acountsToBoards)
+    .map((result) => ({
+      id: result.id,
+      name: result.name,
+      createdAt: result.createdAt,
+      owner: result.acountsToBoards.owner,
+    }));
 }
 
 export async function createBoard(
   name = 'New board',
   ownerId: string,
-  board: unknown
-): Promise<string | Error> {
-  const result = await client
-    .query(`INSERT INTO board(name, board) VALUES($1, $2) RETURNING id`, [
-      name,
-      JSON.stringify(board),
-    ])
-    .catch((e) => console.error(e.stack));
+  board: DBState
+) {
+  const result = await db
+    .insert(schema.boards)
+    .values({ name, board: board })
+    .returning();
 
-  if (result) {
-    const boardRow = getSingleRow(result);
+  const boardId = result[0].id;
 
-    await client
-      .query(
-        `INSERT INTO account_board(account_id, board_id, is_owner) VALUES($1, $2, $3)`,
-        [ownerId, boardRow.id, true]
-      )
-      .catch((e) => console.error(e.stack));
+  if (boardId) {
+    await db
+      .insert(schema.acountsToBoards)
+      .values({ accountId: ownerId, boardId, isOwner: true });
 
-    return boardRow.id;
+    return boardId;
   }
 
   return new Error('Error creating project');
 }
 
 export async function deleteBoard(boardId: string) {
-  return client
-    .query(`DELETE FROM board WHERE id=$1;`, [boardId])
-    .catch(() => undefined);
+  return db.delete(schema.boards).where(eq(schema.boards.id, boardId));
 }
 
 export async function leaveBoard(userId: string, boardId: string) {
-  return client
-    .query(`DELETE FROM account_board WHERE board_id=$1 AND account_id=$2;`, [
-      boardId,
-      userId,
-    ])
-    .catch(() => undefined);
+  return db
+    .delete(schema.acountsToBoards)
+    .where(
+      and(
+        eq(schema.acountsToBoards.accountId, userId),
+        eq(schema.acountsToBoards.boardId, boardId)
+      )
+    );
 }
 
 export async function joinBoard(
   userId: string,
   boardId: string
 ): Promise<void> {
-  const result = await client
-    .query(
-      'SELECT * FROM board LEFT JOIN account_board ON account_board.board_id = board.id where account_id = $1 and board_id = $2',
-      [userId, boardId]
+  const result = await db
+    .select()
+    .from(schema.boards)
+    .leftJoin(
+      schema.acountsToBoards,
+      eq(schema.boards.id, schema.acountsToBoards.boardId)
     )
-    .catch(() => undefined);
-
-  if (result && !result.rows.length) {
-    await client.query(
-      `INSERT INTO account_board(account_id, board_id, is_owner) VALUES($1, $2, $3)`,
-      [userId, boardId, false]
+    .where(
+      and(
+        eq(schema.acountsToBoards.accountId, userId),
+        eq(schema.acountsToBoards.boardId, boardId)
+      )
     );
+
+  if (result && !result.length) {
+    await db.insert(schema.acountsToBoards).values({
+      accountId: userId,
+      boardId,
+      isOwner: false,
+      visible: false,
+    });
   }
 }
 
-export function updateBoard(id: string, board: CommonState) {
+export async function updateBoard(id: string, board: DBState) {
   const dbState = {
     notes: board.notes,
     groups: board.groups,
@@ -185,56 +212,52 @@ export function updateBoard(id: string, board: CommonState) {
     images: board.images,
     texts: board.texts,
     vectors: board.vectors,
-  };
-
-  return client
-    .query(`UPDATE board set board=$1 where id=$2`, [
-      JSON.stringify(dbState),
-      id,
-    ])
-    .catch(() => undefined);
+  } as DBState;
+  return db
+    .update(schema.boards)
+    .set({ board: dbState })
+    .where(eq(schema.boards.id, id));
 }
 
-export function updateAccountBoard(
+export async function updateAccountBoard(
   boardId: string,
   userId: User['id'],
   visible: boolean
 ) {
-  return client
-    .query(
-      `UPDATE account_board set visible=$1 where account_id=$2 AND board_id = $3`,
-      [visible, userId, boardId]
-    )
-    .catch(() => undefined);
+  return db
+    .update(schema.acountsToBoards)
+    .set({ visible })
+    .where(
+      and(
+        eq(schema.acountsToBoards.accountId, userId),
+        eq(schema.acountsToBoards.boardId, boardId)
+      )
+    );
 }
 
-export function updateBoardName(id: string, name: string) {
-  return client
-    .query(`UPDATE board set name=$1 where id=$2`, [name, id])
-    .catch(() => undefined);
+export async function updateBoardName(id: string, name: string) {
+  return db.update(schema.boards).set({ name }).where(eq(schema.boards.id, id));
 }
 
-export function getUserByName(name: string) {
-  return client
-    .query('SELECT * FROM account WHERE name = $1', [name])
-    .then(getSingleRow)
-    .catch(() => undefined);
+export async function getUserByName(name: string) {
+  return db
+    .select()
+    .from(schema.accounts)
+    .where(eq(schema.accounts.name, name));
 }
 
-export function deleteAccount(userId: string): Promise<unknown> {
-  return client
-    .query('DELETE FROM account where id = $1', [userId])
-    .catch(() => undefined);
+export async function deleteAccount(userId: string): Promise<unknown> {
+  return db.delete(schema.accounts).where(eq(schema.accounts.id, userId));
 }
 
-export function createUser(userId: string, name: string): Promise<unknown> {
-  return client
-    .query(
-      `INSERT INTO account (id, name)
-      VALUES ($1, $2)
-      ON CONFLICT (id) DO UPDATE
-        SET name = excluded.name;`,
-      [userId, name]
-    )
-    .catch(() => undefined);
+export async function createUser(userId: string, name: string) {
+  return db
+    .insert(schema.accounts)
+    .values({ id: userId, name })
+    .onConflictDoUpdate({
+      target: schema.accounts.id,
+      set: {
+        name,
+      },
+    });
 }

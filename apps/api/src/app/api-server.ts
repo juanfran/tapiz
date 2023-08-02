@@ -15,6 +15,7 @@ import {
 import * as cookieParser from 'cookie-parser';
 import { body, validationResult } from 'express-validator';
 import { startWsServer } from './ws-server';
+import { DBState } from '@team-up/board-commons';
 
 export const app = express();
 const port = 8000;
@@ -79,7 +80,7 @@ app.post(
       images: [],
       texts: [],
       vectors: [],
-    });
+    } as DBState);
 
     res.json({
       id: newBoardId,
@@ -128,9 +129,18 @@ app.post(`${baseUrl}/duplicate`, authGuard, async (req, res) => {
   }
 
   const boardUser = await getBoardUser(req.body.boardId, req.user.sub);
+
+  if (!boardUser) {
+    res.status(404).json({
+      errors: ['board not found'],
+    });
+
+    return;
+  }
+
   const board = await getBoard(req.body.boardId);
 
-  if (!boardUser || !board) {
+  if (!board) {
     res.status(404).json({
       errors: ['board not found'],
     });
