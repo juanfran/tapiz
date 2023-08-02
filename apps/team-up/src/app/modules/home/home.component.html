@@ -79,7 +79,7 @@
                 cdkMenuItem
                 class="menu-item menu-item-icon"
                 title="Delete board"
-                *ngIf="board.is_owner"
+                *ngIf="board.owner"
                 (cdkMenuItemTriggered)="deleteBoard(board)">
                 <mat-icon fontIcon="delete"></mat-icon>
                 Delete board
@@ -88,7 +88,7 @@
                 cdkMenuItem
                 class="menu-item menu-item-icon"
                 title="Leave project"
-                *ngIf="!board.is_owner"
+                *ngIf="!board.owner"
                 (cdkMenuItemTriggered)="leaveBoard(board)">
                 <mat-icon fontIcon="directions_walk"></mat-icon>
                 Leave project

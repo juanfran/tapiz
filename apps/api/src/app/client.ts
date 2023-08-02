@@ -228,14 +228,6 @@ export class Client {
         return;
       }
 
-      const users = board.users.map((it) => {
-        if (it.id === user.id) {
-          return user;
-        }
-
-        return it;
-      });
-
       const owners = await getBoardOwners(this.boardId);
 
       this.isOwner = owners.includes(this.id);
