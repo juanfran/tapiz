@@ -23,6 +23,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["apps/team-up/src/*"],
+      "@team-up/api/*": ["apps/api/src/*"],
       "@team-up/board-commons": ["libs/board-commons/src/index.ts"],
       "@team-up/board-commons/*": ["libs/board-commons/src/lib/*"]
     }

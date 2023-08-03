@@ -11,6 +11,8 @@ export const configFactory = (
   return () => config.loadAppConfig();
 };
 
+export let appConfig!: Config;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -29,6 +31,8 @@ export class ConfigService {
           ...mainConfig,
           firebaseConfig: firebase,
         };
+
+        appConfig = this.config;
         return true;
       }),
       catchError(() => {
