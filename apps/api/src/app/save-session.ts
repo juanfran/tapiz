@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as WebSocket from 'ws';
+import fs from 'fs';
+import WebSocket from 'ws';
 
 const sessionFile = 'apps/api/src/app/sessions/session.json';
 

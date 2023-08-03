@@ -1,4 +1,4 @@
-import { startApiServer } from './app/api-server';
+import { startApiServer } from './app/index';
 import { startDB } from './app/db';
 
 startDB();

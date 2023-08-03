@@ -1,7 +1,7 @@
 import { DBState, User } from '@team-up/board-commons';
 import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
-import * as postgres from 'postgres';
+import postgres from 'postgres';
 import * as schema from './schema';
 
 import Config from './config';
