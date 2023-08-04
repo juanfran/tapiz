@@ -20,7 +20,10 @@ app.use(
   })
 );
 
-app.use('/trpc', createExpressMiddleware({ router: appRouter, createContext }));
+app.use(
+  '/api/trpc',
+  createExpressMiddleware({ router: appRouter, createContext })
+);
 
 const port = 8000;
 
