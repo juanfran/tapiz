@@ -35,22 +35,13 @@ export class CopyPasteDirective {
       .select(selectAllNodes())
       .pipe(
         take(1),
-        concatLatestFrom(() => [
-          this.store.select(selectFocusId),
-          this.store.select(selectUserId),
-        ])
+        concatLatestFrom(() => [this.store.select(selectFocusId)])
       )
-      .subscribe(([nodes, focusId, userId]) => {
+      .subscribe(([nodes, focusId]) => {
         this.copyNode = [];
 
         for (const [key, list] of Object.entries(nodes)) {
-          const nodes = list
-            .filter((node) => focusId.includes(node.id))
-            .filter((node) => {
-              const hasOwner = 'ownerId' in node;
-
-              return !hasOwner || (hasOwner && node.ownerId === userId);
-            });
+          const nodes = list.filter((node) => focusId.includes(node.id));
 
           this.copyNode.push(
             ...nodes.map((node) => {
