@@ -171,6 +171,7 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
     const m = await import('../panel-settings/panel-settings.component');
 
     const dialogRef = this.dialog.open(m.PanelSettingsComponent, {
+      width: '400px',
       data: {
         panel: this.state.get('panel'),
       },
