@@ -35,6 +35,8 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Empty boards placeholder
 - [ ] Image & Vector can also be used in compose mode
 - [ ] Bookmarks
+- [ ] Performance not render not visible nodes
+- [ ] Select note color
 
 ## TODO, code refactor
 
