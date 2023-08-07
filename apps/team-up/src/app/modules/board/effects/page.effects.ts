@@ -78,11 +78,7 @@ export class PageEffects {
   public cleanDrawing$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.cleanNoteDrawing),
-      concatLatestFrom(() => [
-        this.store.select(selectNoteFocus),
-        this.store.select(selectUserId),
-      ]),
-      filter(([, note, ownerId]) => !!note && note.ownerId === ownerId),
+      concatLatestFrom(() => [this.store.select(selectNoteFocus)]),
       map(([, note]) => note),
       filter((note): note is Note => !!note),
       map((note) => {

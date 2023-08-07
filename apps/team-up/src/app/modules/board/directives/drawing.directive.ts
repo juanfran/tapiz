@@ -52,7 +52,7 @@ export class DrawingDirective {
   }
 
   @Input()
-  public canDraw = false;
+  public canDraw = true;
 
   @Output() drawing = new EventEmitter<Drawing[]>();
 
