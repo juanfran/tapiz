@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS "accounts" (
 	"id" varchar(256) PRIMARY KEY NOT NULL,
-	"name" varchar(256) NOT NULL
+	"name" varchar(256) NOT NULL,
+	"email" varchar(320) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "accounts_boards" (

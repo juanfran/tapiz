@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AppActions } from '@/app/+state/app.actions';
+import { BoardApiService } from '@/app/services/board-api.service';
 
 @Component({
   selector: 'team-up-login',
@@ -31,7 +32,8 @@ export class LoginComponent {
     private auth: Auth,
     private router: Router,
     private store: Store,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private boardApiService: BoardApiService
   ) {}
 
   public async loginGoogle() {
@@ -47,15 +49,16 @@ export class LoginComponent {
       const result = await signInWithPopup(this.auth, provider);
 
       if (this.auth.currentUser) {
-        localStorage.setItem('user', JSON.stringify(result.user));
-
         this.store.dispatch(AppActions.setUserId({ userId: result.user.uid }));
 
-        const nextUrl = sessionStorage.getItem('url') ?? '/';
+        this.boardApiService.login().subscribe(() => {
+          localStorage.setItem('user', JSON.stringify(result.user));
 
-        sessionStorage.removeItem('url');
+          const nextUrl = sessionStorage.getItem('url') ?? '/';
+          sessionStorage.removeItem('url');
 
-        this.router.navigate([nextUrl]);
+          this.router.navigate([nextUrl]);
+        });
       }
     } catch (error) {
       if (error instanceof Error) {

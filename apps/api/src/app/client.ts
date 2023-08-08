@@ -23,7 +23,8 @@ export class Client {
     public ws: WebSocket,
     private server: Server,
     public username: string,
-    public id: string
+    public id: string,
+    public email: string
   ) {
     this.ws.on('message', this.incomingMessage.bind(this));
     this.ws.on('close', this.close.bind(this));
@@ -203,7 +204,6 @@ export class Client {
   private async join(message: { boardId: string }) {
     this.boardId = message.boardId;
 
-    await createUser(this.id, this.username);
     await joinBoard(this.id, this.boardId);
 
     try {

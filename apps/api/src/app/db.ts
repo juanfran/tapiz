@@ -250,10 +250,10 @@ export async function deleteAccount(userId: string): Promise<unknown> {
   return db.delete(schema.accounts).where(eq(schema.accounts.id, userId));
 }
 
-export async function createUser(userId: string, name: string) {
+export async function createUser(userId: string, name: string, email: string) {
   return db
     .insert(schema.accounts)
-    .values({ id: userId, name })
+    .values({ id: userId, name, email })
     .onConflictDoUpdate({
       target: schema.accounts.id,
       set: {

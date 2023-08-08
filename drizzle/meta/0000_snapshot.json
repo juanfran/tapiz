@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "fd826381-38ce-4a1a-b6d5-24f93bc74fff",
+  "id": "fa17bf90-81b4-4dd0-a9f0-28ed5d20222c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "accounts": {
@@ -17,6 +17,12 @@
         "name": {
           "name": "name",
           "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(320)",
           "primaryKey": false,
           "notNull": true
         }

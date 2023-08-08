@@ -31,7 +31,11 @@ export const appRouter = router({
   newBoard: protectedProcedure
     .input(z.object({ name: z.string().min(1).max(255) }))
     .mutation(async (req) => {
-      await db.createUser(req.ctx.user.sub, req.ctx.user['name']);
+      await db.createUser(
+        req.ctx.user.sub,
+        req.ctx.user['name'],
+        req.ctx.user['email']
+      );
 
       const newBoardId = await db.createBoard(
         req.input.name,
@@ -135,5 +139,14 @@ export const appRouter = router({
       name: req.ctx.user['name'],
       sub: req.ctx.user.sub,
     };
+  }),
+  login: protectedProcedure.query(async (req) => {
+    await db.createUser(
+      req.ctx.user.sub,
+      req.ctx.user.name,
+      req.ctx.user.email
+    );
+
+    return true;
   }),
 });

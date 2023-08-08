@@ -11,52 +11,56 @@ import {
 } from '@team-up/board-commons';
 import { from, map } from 'rxjs';
 
-const trpc = createTRPCProxyClient<AppRouter>({
-  links: [
-    httpBatchLink({
-      url: appConfig.API + '/trpc',
-      fetch(url, options) {
-        return fetch(url, {
-          ...options,
-          credentials: 'include',
-        });
-      },
-    }),
-  ],
-});
-
 @Injectable({
   providedIn: 'root',
 })
 export class BoardApiService {
+  trpc = createTRPCProxyClient<AppRouter>({
+    links: [
+      httpBatchLink({
+        url: appConfig.API + '/trpc',
+        fetch(url, options) {
+          return fetch(url, {
+            ...options,
+            credentials: 'include',
+          });
+        },
+      }),
+    ],
+  });
+
   constructor(private http: HttpClient, private configService: ConfigService) {}
 
   public fetchBoards() {
-    return from(trpc.boards.query());
+    return from(this.trpc.boards.query());
   }
 
   public createBoard(board: Board['name']) {
-    return from(trpc.newBoard.mutate({ name: board }));
+    return from(this.trpc.newBoard.mutate({ name: board }));
   }
 
   public getBoard(boardId: string) {
-    return from(trpc.board.query({ boardId }));
+    return from(this.trpc.board.query({ boardId }));
   }
 
   public removeBoard(boardId: Board['id']) {
-    return from(trpc.deleteBoard.mutate({ boardId }));
+    return from(this.trpc.deleteBoard.mutate({ boardId }));
   }
 
   public leaveBoard(boardId: Board['id']) {
-    return from(trpc.leaveBoard.mutate({ boardId }));
+    return from(this.trpc.leaveBoard.mutate({ boardId }));
   }
 
   public duplicateBoard(boardId: Board['id']) {
-    return from(trpc.duplicateBoard.mutate({ boardId }));
+    return from(this.trpc.duplicateBoard.mutate({ boardId }));
   }
 
   public removeAccount() {
-    return from(trpc.removeAccount.mutate());
+    return from(this.trpc.removeAccount.mutate());
+  }
+
+  public login() {
+    return from(this.trpc.login.query());
   }
 
   public getCocomaterialTags() {

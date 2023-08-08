@@ -33,7 +33,8 @@ export class Server {
             ws,
             this,
             user['name'] ?? 'anonymous',
-            user.sub
+            user.sub,
+            user.email
           );
           this.clients.push(client);
           return;

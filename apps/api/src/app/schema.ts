@@ -13,6 +13,7 @@ import { DBState } from '@team-up/board-commons';
 export const accounts = pgTable('accounts', {
   id: varchar('id', { length: 256 }).primaryKey(),
   name: varchar('name', { length: 256 }).notNull(),
+  email: varchar('email', { length: 320 }).notNull(),
 });
 
 export const usersRelations = relations(accounts, ({ many }) => ({
