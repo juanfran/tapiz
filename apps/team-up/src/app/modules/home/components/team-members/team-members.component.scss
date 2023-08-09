@@ -1,0 +1,68 @@
+:host {
+  padding: 1rem;
+  display: block;
+}
+
+.title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+form {
+  background-color: var(--accent--ui);
+  padding: var(--spacing-4);
+  border-radius: 5px;
+
+  .actions {
+    margin-block-start: var(--spacing-4);
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.row-emails {
+  display: flex;
+  gap: var(--spacing-4);
+}
+
+.emails {
+  width: 100%;
+}
+
+.invite-title {
+  font-size: var(--font-size-16);
+  font-weight: 600;
+}
+
+.members {
+  margin-block-start: var(--spacing-4);
+}
+
+.members-list {
+  margin-top: var(--spacing-4);
+}
+
+.member {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
+  gap: var(--spacing-4);
+
+  .user-info {
+    width: 100%;
+  }
+
+  .name {
+    font-size: var(--font-size-16);
+    font-weight: 800;
+  }
+
+  .pending {
+    font-size: var(--font-size-12);
+    font-weight: 400;
+  }
+}
+

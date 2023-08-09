@@ -10,17 +10,14 @@ import {
   withLatestFrom,
 } from 'rxjs';
 import { PageActions } from '../actions/page.actions';
-import {
-  selectBoardId,
-  selectCocomaterial,
-  selectUserId,
-} from '../selectors/page.selectors';
+import { selectBoardId, selectCocomaterial } from '../selectors/page.selectors';
 import { BoardApiService } from '../../../services/board-api.service';
 import { BoardActions } from '../actions/board.actions';
 import { selectNoteFocus } from '../selectors/board.selectors';
 import { Note } from '@team-up/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { filterNil } from '@/app/commons/operators/filter-nil';
+import { ActivatedRoute } from '@angular/router';
 
 @Injectable()
 export class PageEffects {
@@ -171,17 +168,43 @@ export class PageEffects {
     { dispatch: false }
   );
 
-  public restoreLastUserView$ = createEffect(() => {
+  public restoreUserView$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.fetchBoardSuccess),
       withLatestFrom(this.store.select(selectBoardId)),
       map(([, boardId]) => {
-        return localStorage.getItem(`lastUserView-${boardId}`);
+        const lastUserView = localStorage.getItem(`lastUserView-${boardId}`);
+        const params = this.route.snapshot.queryParams;
+        let zoom = 1;
+        let position = { x: 0, y: 0 };
+
+        if (lastUserView) {
+          const lastUserViewParse = JSON.parse(lastUserView);
+
+          zoom = lastUserViewParse.zoom;
+          position = lastUserViewParse.position;
+        }
+
+        if (params['position']) {
+          const urlPosition = params['position'].split(',');
+
+          position = {
+            x: Number(urlPosition[0]),
+            y: Number(urlPosition[1]),
+          };
+        }
+
+        if (params['zoom']) {
+          zoom = Number(params['zoom']);
+        }
+
+        return {
+          position,
+          zoom,
+        };
       }),
       filterNil(),
-      map((lastUserView) => {
-        const { zoom, position } = JSON.parse(lastUserView);
-
+      map(({ zoom, position }) => {
         return PageActions.setUserView({
           zoom,
           position,
@@ -190,9 +213,23 @@ export class PageEffects {
     );
   });
 
+  public setBoardPrivacy$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(PageActions.setBoardPrivacy),
+        concatLatestFrom(() => [this.store.select(selectBoardId)]),
+        switchMap(([{ isPublic }, boardId]) => {
+          return this.boardApiService.setBoardPrivacy(boardId, isPublic);
+        })
+      );
+    },
+    { dispatch: false }
+  );
+
   constructor(
     private actions$: Actions,
     private store: Store,
-    private boardApiService: BoardApiService
+    private boardApiService: BoardApiService,
+    private route: ActivatedRoute
   ) {}
 }

@@ -1,66 +1,69 @@
-import { ConfigService, appConfig } from '@/app/services/config.service';
+import { ConfigService } from '@/app/services/config.service';
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
-import type { AppRouter } from '@team-up/api/app';
+import { Injectable, inject } from '@angular/core';
 
 import {
   Board,
   CocomaterialApiListVectors,
   CocomaterialTag,
+  Team,
 } from '@team-up/board-commons';
-import { from, map } from 'rxjs';
+import { Observable, from, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BoardApiService {
-  trpc = createTRPCProxyClient<AppRouter>({
-    links: [
-      httpBatchLink({
-        url: appConfig.API + '/trpc',
-        fetch(url, options) {
-          return fetch(url, {
-            ...options,
-            credentials: 'include',
-          });
-        },
-      }),
-    ],
-  });
-
-  constructor(private http: HttpClient, private configService: ConfigService) {}
+  private configService = inject(ConfigService);
+  private http = inject(HttpClient);
+  private trpc = this.configService.getTrpcConfig();
 
   public fetchBoards() {
-    return from(this.trpc.boards.query());
+    return from(this.trpc.board.boards.query());
   }
 
-  public createBoard(board: Board['name']) {
-    return from(this.trpc.newBoard.mutate({ name: board }));
+  public fetchTeamBoards(teamId: string) {
+    return from(this.trpc.board.teamBoards.query({ teamId }));
+  }
+
+  public fetchStarredBoards() {
+    return from(this.trpc.board.starreds.query());
+  }
+
+  public createBoard(board: Board['name'], teamId?: Team['id']) {
+    return from(this.trpc.board.create.mutate({ name: board, teamId }));
   }
 
   public getBoard(boardId: string) {
-    return from(this.trpc.board.query({ boardId }));
+    return from(this.trpc.board.board.query({ boardId }));
   }
 
   public removeBoard(boardId: Board['id']) {
-    return from(this.trpc.deleteBoard.mutate({ boardId }));
+    return from(this.trpc.board.delete.mutate({ boardId }));
   }
 
   public leaveBoard(boardId: Board['id']) {
-    return from(this.trpc.leaveBoard.mutate({ boardId }));
+    return from(this.trpc.board.leave.mutate({ boardId }));
   }
 
-  public duplicateBoard(boardId: Board['id']) {
-    return from(this.trpc.duplicateBoard.mutate({ boardId }));
+  public duplicateBoard(boardId: Board['id']): Observable<Board> {
+    return from(this.trpc.board.duplicate.mutate({ boardId }));
   }
 
-  public removeAccount() {
-    return from(this.trpc.removeAccount.mutate());
+  public renameBoard(boardId: Board['id'], name: Board['name']) {
+    return from(this.trpc.board.rename.mutate({ boardId, name }));
   }
 
-  public login() {
-    return from(this.trpc.login.query());
+  public setBoardPrivacy(boardId: Board['id'], isPublic: boolean) {
+    return from(this.trpc.board.changePrivacy.mutate({ boardId, isPublic }));
+  }
+
+  public addStar(boardId: Board['id']) {
+    return from(this.trpc.board.addStar.mutate({ boardId }));
+  }
+
+  public removeStar(boardId: Board['id']) {
+    return from(this.trpc.board.removeStar.mutate({ boardId }));
   }
 
   public getCocomaterialTags() {

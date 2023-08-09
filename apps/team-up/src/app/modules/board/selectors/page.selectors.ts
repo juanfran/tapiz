@@ -15,7 +15,7 @@ export const {
   selectUserHighlight,
   selectPopupOpen,
   selectBoardId,
-  selectIsOwner,
+  selectIsAdmin,
   selectBoardCursor,
   selectVoting,
   selectEmoji,

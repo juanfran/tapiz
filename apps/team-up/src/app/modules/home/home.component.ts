@@ -1,28 +1,28 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { UntilDestroy } from '@ngneat/until-destroy';
-import { Store } from '@ngrx/store';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RxState } from '@rx-angular/state';
-import { Board } from '@team-up/board-commons';
-import { Router, RouterLink } from '@angular/router';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-
-import { filter } from 'rxjs';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { UserTeam, UserInvitation } from '@team-up/board-commons';
+import { MatMenuModule } from '@angular/material/menu';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '@/app/services/auth.service';
-
-import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
-import { ConfirmComponent } from '@/app/shared/confirm-action/confirm-actions.component';
-import { TitleComponent } from '@/app/shared/title/title.component';
-import { BoardIdToColorDirective } from '@/app/shared/board-id-to-color.directive';
-import { homeFeature } from './+state/home.feature';
+import { Store } from '@ngrx/store';
 import { HomeActions } from './+state/home.actions';
+import { RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { CreateTeamComponent } from './components/create-team/create-team.component';
+import { homeFeature } from './+state/home.feature';
+import { trackByProp } from '@/app/shared/track-by-prop';
+import { ConfirmComponent } from '@/app/shared/confirm-action/confirm-actions.component';
+import { filter } from 'rxjs';
+import { MatButtonModule } from '@angular/material/button';
+import { MatBadgeModule } from '@angular/material/badge';
+import { UserInvitationsComponent } from './components/user-invitations/user-invitations.component';
 
-@UntilDestroy()
+interface State {
+  teams: UserTeam[];
+  invitations: UserInvitation[];
+}
+
 @Component({
   selector: 'team-up-home',
   templateUrl: './home.component.html',
@@ -32,87 +32,49 @@ import { HomeActions } from './+state/home.actions';
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
+    MatMenuModule,
+    RouterModule,
     MatIconModule,
-    RouterLink,
-    BoardIdToColorDirective,
-    TitleComponent,
-    CdkMenuTrigger,
-    CdkMenu,
-    CdkMenuItem,
     MatDialogModule,
+    MatButtonModule,
+    MatBadgeModule,
   ],
 })
-export class HomeComponent implements OnInit {
-  public readonly model$ = this.state.select();
+export class HomeComponent {
+  private authService = inject(AuthService);
+  private store = inject(Store);
+  private state = inject(RxState) as RxState<State>;
+  private dialog = inject(MatDialog);
 
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-    private store: Store,
-    private state: RxState<{
-      boards: Board[];
-    }>,
-    private dialog: MatDialog
-  ) {
-    this.state.connect('boards', this.store.select(homeFeature.selectBoards));
+  public model$ = this.state.select();
+  public trackById = trackByProp('id');
+
+  constructor() {
+    this.store.dispatch(HomeActions.initHome());
+
+    this.state.connect('teams', this.store.select(homeFeature.selectTeams));
+    this.state.connect(
+      'invitations',
+      this.store.select(homeFeature.selectUserInvitations)
+    );
   }
 
-  public ngOnInit() {
-    this.store.dispatch(HomeActions.fetchBoards());
+  public openCreateTeamDialog() {
+    const dialogRef = this.dialog.open(CreateTeamComponent, {
+      width: '400px',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result) {
+        return;
+      }
+
+      this.store.dispatch(HomeActions.createTeam({ name: result.name }));
+    });
   }
 
   public logout() {
     this.authService.logout();
-  }
-
-  public onSubmit(value: string) {
-    this.store.dispatch(
-      HomeActions.createBoard({
-        name: value.trim().length ? value : 'New board',
-      })
-    );
-  }
-
-  public goBoard(board: Board) {
-    this.router.navigate(['/board/', board.id]);
-  }
-
-  public deleteBoard(board: Board) {
-    const dialogRef = this.dialog.open(ConfirmComponent, {
-      data: {
-        title: 'Are you sure?',
-        description: 'This will delete all your board data.',
-        confirm: {
-          text: 'Delete board',
-          color: 'warn',
-        },
-        cancel: {
-          text: 'Cancel',
-          color: 'basic',
-        },
-        align: 'end',
-      },
-    });
-
-    dialogRef
-      .afterClosed()
-      .pipe(filter((it) => it))
-      .subscribe(() => {
-        this.store.dispatch(HomeActions.removeBoard({ id: board.id }));
-      });
-  }
-
-  public leaveBoard(board: Board) {
-    this.store.dispatch(HomeActions.leaveBoard({ id: board.id }));
-  }
-
-  public duplicateBoard(board: Board) {
-    this.store.dispatch(HomeActions.duplicateBoard({ id: board.id }));
   }
 
   public deleteAccount() {
@@ -139,5 +101,14 @@ export class HomeComponent implements OnInit {
       .subscribe(() => {
         this.store.dispatch(HomeActions.removeAccount());
       });
+  }
+
+  public openInvitationDialog() {
+    this.dialog.open(UserInvitationsComponent, {
+      width: '600px',
+      data: {
+        invitations: this.state.get('invitations'),
+      },
+    });
   }
 }

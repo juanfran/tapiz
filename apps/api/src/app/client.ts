@@ -7,15 +7,16 @@ import {
 } from '@team-up/board-commons';
 import * as WebSocket from 'ws';
 import { Server } from './server';
-import { joinBoard, getBoardOwners, createUser } from './db';
+import db from './db';
 import { validation } from './validation';
+import { z } from 'zod';
 // import { saveMsg, init } from './save-session';
 
 // init();
 
 export class Client {
   public boardId!: string;
-  public isOwner!: boolean;
+  public isAdmin!: boolean;
   public sendTimeout?: ReturnType<typeof setTimeout>;
   public pendingMsgs: unknown[] = [];
 
@@ -34,10 +35,10 @@ export class Client {
     let messages = this.parseMessage(messageString);
 
     if (!Array.isArray(messages)) {
-      return;
+      messages = [messages];
     }
 
-    messages = messages.filter((message) => !!message);
+    messages = (messages as any[]).filter((message) => !!message);
 
     this.processMsg(messages);
   }
@@ -64,7 +65,7 @@ export class Client {
         this.join(messages[0]);
       } else if (
         BoardCommonActions.setBoardName === messages[0].type &&
-        this.isOwner
+        this.isAdmin
       ) {
         this.updateBoardName(messages[0]);
       } else if (BoardCommonActions.setVisible === messages[0].type) {
@@ -163,6 +164,10 @@ export class Client {
     }
   }
 
+  public noAccessClose() {
+    this.ws.close(1008, 'Unauthorized');
+  }
+
   public close() {
     this.server.setState(this.boardId, (state) => {
       if (!state?.users) {
@@ -202,9 +207,23 @@ export class Client {
   }
 
   private async join(message: { boardId: string }) {
+    const result = z.string().uuid().safeParse(message.boardId);
+
+    if (!result.success) {
+      this.noAccessClose();
+      return;
+    }
+
+    const haveAccess = await db.board.haveAccess(message.boardId, this.id);
+
+    if (!haveAccess) {
+      this.noAccessClose();
+      return;
+    }
+
     this.boardId = message.boardId;
 
-    await joinBoard(this.id, this.boardId);
+    await db.board.joinBoard(this.id, this.boardId);
 
     try {
       await this.server.createBoard(this.boardId);
@@ -228,9 +247,9 @@ export class Client {
         return;
       }
 
-      const owners = await getBoardOwners(this.boardId);
+      const admins = await db.board.getAllBoardAdmins(this.boardId);
 
-      this.isOwner = owners.includes(this.id);
+      this.isAdmin = admins.includes(this.id);
 
       const initStateActions: StateActions[] = [
         ...board.users.map(

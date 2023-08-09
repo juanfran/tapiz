@@ -11,7 +11,7 @@ import { PageActions } from '../../actions/page.actions';
 import { selectName } from '../../selectors/board.selectors';
 import {
   selectCanvasMode,
-  selectIsOwner,
+  selectIsAdmin,
 } from '../../selectors/page.selectors';
 import { ExportService } from '../../services/export.service';
 import { ClickOutsideDirective } from '../../directives/click-outside.directive';
@@ -20,12 +20,15 @@ import { NgIf } from '@angular/common';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { RouterLink } from '@angular/router';
 import { RxLet } from '@rx-angular/template/let';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { ShareBoardComponent } from '../share-board/share-board.component';
 
 interface State {
   edit: boolean;
   canvasMode: string;
   name: string;
-  isOwner: boolean;
+  isAdmin: boolean;
 }
 @Component({
   selector: 'team-up-header',
@@ -41,6 +44,7 @@ interface State {
     NgIf,
     AutoFocusDirective,
     ClickOutsideDirective,
+    MatIconModule,
   ],
 })
 export class HeaderComponent {
@@ -48,12 +52,13 @@ export class HeaderComponent {
     private exportService: ExportService,
     private store: Store,
     public state: RxState<State>,
-    public cd: ChangeDetectorRef
+    public cd: ChangeDetectorRef,
+    public dialog: MatDialog
   ) {
     this.state.set({ edit: false });
     this.state.connect('canvasMode', this.store.select(selectCanvasMode));
     this.state.connect('name', this.store.select(selectName));
-    this.state.connect('isOwner', this.store.select(selectIsOwner));
+    this.state.connect('isAdmin', this.store.select(selectIsAdmin));
   }
 
   public model$ = this.state.select();
@@ -97,5 +102,12 @@ export class HeaderComponent {
 
     const name = (el.nativeElement as HTMLTextAreaElement).innerText;
     this.store.dispatch(BoardActions.setBoardName({ name }));
+  }
+
+  public share() {
+    this.dialog.open(ShareBoardComponent, {
+      width: '600px',
+      autoFocus: 'dialog',
+    });
   }
 }

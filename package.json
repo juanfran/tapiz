@@ -13,6 +13,7 @@
     "start:docker": "cd docker && docker compose --env-file=../.env up -d",
     "stop:docker": "cd docker && docker compose --env-file=../.env down",
     "start:docker:clean": "cd docker && docker compose --env-file=../.env up -d --force-recreate --build",
+    "regenerate": "nx run api:run-script:regenerate",
     "generate": "drizzle-kit generate:pg",
     "studio": "npx drizzle-kit studio"
   },
@@ -45,7 +46,7 @@
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
-    "drizzle-orm": "^0.27.2",
+    "drizzle-orm": "^0.28.1",
     "emoji-picker-element": "^1.16.0",
     "express": "^4.18.1",
     "firebase": "^9.22.1",

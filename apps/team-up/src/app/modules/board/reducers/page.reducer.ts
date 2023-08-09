@@ -27,7 +27,7 @@ export interface PageState {
   userHighlight: User['id'] | null;
   canvasMode: string;
   popupOpen: string;
-  isOwner: boolean;
+  isAdmin: boolean;
   owners: string[];
   boardCursor: string;
   voting: boolean;
@@ -44,6 +44,7 @@ export interface PageState {
   searching: boolean;
   additionalContext: Record<string, unknown>;
   follow: string;
+  isPublic: boolean;
 }
 
 const initialPageState: PageState = {
@@ -62,7 +63,7 @@ const initialPageState: PageState = {
   userHighlight: null,
   canvasMode: 'editMode',
   popupOpen: '',
-  isOwner: false,
+  isAdmin: false,
   owners: [],
   boardCursor: 'default',
   voting: false,
@@ -80,6 +81,7 @@ const initialPageState: PageState = {
   searching: false,
   additionalContext: {},
   follow: '',
+  isPublic: false,
 };
 
 const reducer = createReducer(
@@ -100,15 +102,15 @@ const reducer = createReducer(
       userId: state.userId,
     };
   }),
-  on(PageActions.fetchBoardSuccess, (state, { owners }): PageState => {
-    state.owners = owners;
+  on(
+    PageActions.fetchBoardSuccess,
+    (state, { isAdmin, isPublic }): PageState => {
+      state.isAdmin = isAdmin;
+      state.isPublic = isPublic;
 
-    if (state.userId) {
-      state.isOwner = state.owners.includes(state.userId);
+      return state;
     }
-
-    return state;
-  }),
+  ),
   on(PageActions.joinBoard, (state, { boardId }): PageState => {
     state.boardId = boardId;
 
@@ -302,6 +304,11 @@ const reducer = createReducer(
     } else {
       state.moveEnabled = true;
     }
+
+    return state;
+  }),
+  on(PageActions.setBoardPrivacy, (state, { isPublic }): PageState => {
+    state.isPublic = isPublic;
 
     return state;
   })

@@ -1,102 +1,92 @@
-<team-up-title title="Boards"></team-up-title>
-
 <ng-container *ngIf="model$ | async as vm">
-  <form
-    class="col primary"
-    (submit)="onSubmit(createBoard.value)">
-    <div class="team-logo">
-      <span>Team Up</span>
-    </div>
-    <mat-form-field appearance="fill">
-      <mat-label>Create new board</mat-label>
-      <input
-        #createBoard
-        matInput />
-    </mat-form-field>
-    <button
-      mat-raised-button
-      color="primary">
-      Create Board
-    </button>
-    <div class="user-actions">
-      <button
-        type="button"
-        class="logout"
-        (click)="logout()"
-        mat-raised-button
-        color="warn">
-        Logout
-      </button>
-      <button
-        type="button"
-        title="Delete account"
-        mat-fab
-        color="warn"
-        (click)="deleteAccount()"
-        aria-label="Delete account">
-        <mat-icon>delete</mat-icon>
-      </button>
-    </div>
-  </form>
-  <div class="col">
-    <h1 matSubheader>Boards</h1>
-    <div class="board-list">
-      <div
-        class="board-item"
-        *ngFor="let board of vm.boards">
-        <div
-          (click)="goBoard(board)"
-          class="board-bg"
-          [tuBoardIdToColor]="board.id">
-          <a
-            class="board-title"
-            [routerLink]="['/board/', board.id]"
-            >{{ board.name }}</a
-          >
-        </div>
-        <div class="board-extra">
-          <button
-            type="button"
-            title="Settings"
-            [cdkMenuTriggerFor]="menu"
-            mat-icon-button>
-            <mat-icon fontIcon="settings"></mat-icon>
-          </button>
+  <div class="header">
+    <a
+      class="logo"
+      routerLink="/">
+      <img src="/assets/svg/elephants.svg" />
+      <span class="team">Team</span><span class="up">Up</span>
+    </a>
 
-          <ng-template #menu>
-            <div
-              class="menu"
-              cdkMenu>
-              <button
-                cdkMenuItem
-                class="menu-item menu-item-icon"
-                title="Duplicate board"
-                (cdkMenuItemTriggered)="duplicateBoard(board)">
-                <mat-icon fontIcon="content_copy"></mat-icon>
-                Duplicate
-              </button>
-              <button
-                cdkMenuItem
-                class="menu-item menu-item-icon"
-                title="Delete board"
-                *ngIf="board.owner"
-                (cdkMenuItemTriggered)="deleteBoard(board)">
-                <mat-icon fontIcon="delete"></mat-icon>
-                Delete board
-              </button>
-              <button
-                cdkMenuItem
-                class="menu-item menu-item-icon"
-                title="Leave project"
-                *ngIf="!board.owner"
-                (cdkMenuItemTriggered)="leaveBoard(board)">
-                <mat-icon fontIcon="directions_walk"></mat-icon>
-                Leave project
-              </button>
-            </div>
-          </ng-template>
-        </div>
+    <div class="inline-end-header">
+      <button
+        [matBadge]="vm.invitations.length"
+        matBadgeColor="warn"
+        (click)="openInvitationDialog()"
+        type="button"
+        *ngIf="vm.invitations.length">
+        <mat-icon>mail</mat-icon>
+      </button>
+
+      <div class="user-menu">
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="menu">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button
+            mat-menu-item
+            (click)="deleteAccount()">
+            <mat-icon>person_remove</mat-icon>
+            <span>Delete account</span>
+          </button>
+          <button
+            mat-menu-item
+            (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Logout</span>
+          </button>
+        </mat-menu>
       </div>
+    </div>
+  </div>
+  <div class="wrapper">
+    <nav class="navigation-menu">
+      <ul>
+        <li>
+          <a
+            class="menu-option"
+            routerLink="/"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            >Boards</a
+          >
+        </li>
+        <li>
+          <a
+            class="menu-option"
+            routerLink="/starred"
+            routerLinkActive="active"
+            >Starred</a
+          >
+        </li>
+      </ul>
+
+      <div class="teams">
+        <h4>
+          Teams
+          <button
+            tuIconButton
+            size="small"
+            (click)="openCreateTeamDialog()"
+            aria-label="Create team">
+            <mat-icon>add</mat-icon>
+          </button>
+        </h4>
+        <ul>
+          <li *ngFor="let team of vm.teams; trackById">
+            <a
+              class="menu-option"
+              [routerLink]="['/team', team.id]"
+              routerLinkActive="active"
+              >{{ team.name }}</a
+            >
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="main">
+      <router-outlet></router-outlet>
     </div>
   </div>
 </ng-container>

@@ -24,7 +24,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Export with groups & panels
 - [ ] Multi board (one board with multiples ¿views?, easy to move between phases in retrospectives)
 - [ ] Board links (share a board position with other users)
-- [ ] Teams & ¿projects? (Access permissions)
 - [ ] Reactions (emoji animation not persisted)
 - [ ] Components (kanban, grid, etc)
 - [ ] Arrows (connect nodes)
@@ -37,6 +36,14 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Bookmarks
 - [ ] Performance not render not visible nodes
 - [ ] Select note color
+- [ ] Drawing component or drawing everywhere
+- [ ] Transfer board team (only admin)
+- [ ] Planning Poker
+- [ ] Loading board
+- [ ] Personal token
+- [ ] Placeholder boards home
+- [ ] Real time home boards
+- [ ] Real time members & permissions
 
 ## TODO, code refactor
 

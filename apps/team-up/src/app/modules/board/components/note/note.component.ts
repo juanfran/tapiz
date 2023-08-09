@@ -191,7 +191,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
   @HostListener('dblclick', ['$event'])
   public dblclick(event: MouseEvent) {
-    if (this.state.get('drawing')) {
+    if (this.state.get('drawing') || !this.state.get('visible')) {
       return;
     }
 

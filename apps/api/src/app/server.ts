@@ -2,7 +2,7 @@ import { CommonState, User } from '@team-up/board-commons';
 import * as WebSocket from 'ws';
 import produce from 'immer';
 import { Client } from './client';
-import * as db from './db';
+import db from './db';
 import { Request } from 'express';
 import * as cookie from 'cookie';
 import { verifyToken } from './auth';
@@ -60,7 +60,7 @@ export class Server {
 
   public async createBoard(boardId: string) {
     if (!this.state[boardId]) {
-      const board = await db.getBoard(boardId);
+      const board = await db.board.getBoard(boardId);
 
       if (!board) {
         throw new Error('board not found');
@@ -118,11 +118,11 @@ export class Server {
   }
 
   public getBoardUser(boardId: string, userId: User['id']) {
-    return db.getBoardUser(boardId, userId);
+    return db.board.getBoardUser(boardId, userId);
   }
 
   public getBoardUsers(boardId: string) {
-    return db.getBoardUsers(boardId);
+    return db.board.getBoardUsers(boardId);
   }
 
   public setUserVisibility(
@@ -130,7 +130,7 @@ export class Server {
     userId: User['id'],
     visible: boolean
   ) {
-    db.updateAccountBoard(boardId, userId, visible);
+    db.board.updateAccountBoard(boardId, userId, visible);
   }
 
   public persistBoard(boardId: string) {
@@ -141,13 +141,13 @@ export class Server {
     this.pendingBoardUpdates.add(boardId);
 
     setTimeout(() => {
-      db.updateBoard(boardId, this.state[boardId]);
+      db.board.updateBoard(boardId, this.state[boardId]);
       this.pendingBoardUpdates.delete(boardId);
     }, 500);
   }
 
   public updateBoardName(boardId: string, name: string) {
-    db.updateBoardName(boardId, name);
+    db.board.updateBoardName(boardId, name);
   }
 
   private updateBoard(boardId: string, state: CommonState) {

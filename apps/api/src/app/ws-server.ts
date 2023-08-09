@@ -4,5 +4,7 @@ import { Server as HTTPSServer } from 'https';
 
 export function startWsServer(httpServer: HTTPServer | HTTPSServer) {
   const server = new Server();
-  return server.start(httpServer);
+  server.start(httpServer);
+
+  return server;
 }

@@ -4,7 +4,8 @@
     "outDir": "../../dist/out-tsc",
     "types": [],
     "target": "ES2022",
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "strict": true
   },
   "files": ["src/main.ts", "src/polyfills.ts", "src/types/index.d.ts"],
   "include": ["src/**/*.d.ts"],

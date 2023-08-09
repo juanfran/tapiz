@@ -1,8 +1,10 @@
 import { ConfigService } from '@/app/services/config.service';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { wsOpen } from '../ws.actions';
 import { optimize } from '@team-up/board-commons';
+import { NotificationService } from '@/app/shared/notification/notification.service';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +12,8 @@ import { optimize } from '@team-up/board-commons';
 export class WsService {
   private ws!: WebSocket;
   private pool: unknown[] = [];
+  private notificationService = inject(NotificationService);
+  private router = inject(Router);
 
   constructor(private store: Store, private configService: ConfigService) {
     this.poolLoop();
@@ -34,6 +38,26 @@ export class WsService {
         }
       });
     });
+
+    this.ws.addEventListener('close', (e) => {
+      if (e.code === 1008) {
+        this.notificationService.open({
+          message: 'Unauthorized',
+          action: 'Close',
+          type: 'error',
+        });
+
+        this.router.navigate(['/']);
+      } else if (e.code !== 1000 && e.code !== 1001) {
+        this.notificationService.open({
+          message: 'Connection lost',
+          action: 'Close',
+          type: 'error',
+        });
+
+        this.router.navigate(['/']);
+      }
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,7 +66,7 @@ export class WsService {
   }
 
   public close() {
-    this.ws.close();
+    this.ws.close(1000);
   }
 
   private poolLoop() {

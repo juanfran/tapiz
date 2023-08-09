@@ -19,7 +19,11 @@ export const PageActions = createActionGroup({
   events: {
     'Init board': props<{ userId: User['id'] }>(),
     'Close board': emptyProps(),
-    'Fetch board success': props<{ owners: string[]; name: string }>(),
+    'Fetch board success': props<{
+      isAdmin: boolean;
+      name: string;
+      isPublic: boolean;
+    }>(),
     'Join board': props<{ boardId: string }>(),
     'Set user view': props<{ zoom: number; position: Point }>(),
     'Set move enabled': props<{ enabled: boolean }>(),
@@ -66,5 +70,6 @@ export const PageActions = createActionGroup({
     'Undo drawing': emptyProps(),
     'Redo drawing': emptyProps(),
     'Follow user': props<{ id: User['id'] }>(),
+    'Set board privacy': props<{ isPublic: boolean }>(),
   },
 });
