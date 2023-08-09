@@ -90,11 +90,12 @@ export class BoardEffects {
 
             return PageActions.fetchBoardSuccess({
               name: board.name,
-              owners: board.owners,
+              isAdmin: board.isAdmin,
+              isPublic: board.public,
             });
           }),
           catchError((e) => {
-            if (e.status === 404) {
+            if (e.data.httpStatus === 404 || e.data.httpStatus === 401) {
               return of(
                 PageActions.boardNotFound({
                   id: action.boardId,

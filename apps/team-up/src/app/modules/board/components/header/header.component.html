@@ -20,7 +20,7 @@
       >
     </ng-container>
     <button
-      *ngIf="!vm.edit && vm.isOwner"
+      *ngIf="!vm.edit && vm.isAdmin"
       class="edit-name"
       (click)="editName()">
       <team-up-svg-icon
@@ -28,11 +28,16 @@
         class="icon-svg"></team-up-svg-icon>
       <span class="board-name">{{ vm.name }}</span>
     </button>
-    <ng-container *ngIf="!vm.isOwner">
+    <ng-container *ngIf="!vm.isAdmin">
       <span class="board-name">{{ vm.name }}</span>
     </ng-container>
   </div>
-  <div class="header-right">
+  <div class="header-end">
+    <button
+      class="share"
+      (click)="share()">
+      <mat-icon>share</mat-icon>
+    </button>
     <button (click)="export()">
       <team-up-svg-icon
         icon="export"

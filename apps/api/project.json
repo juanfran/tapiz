@@ -54,6 +54,13 @@
         "jestConfig": "apps/api/jest.config.ts",
         "passWithNoTests": true
       }
+    },
+    "run-script": {
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "ts-node --project apps/api/tsconfig.app.json apps/api/src/app/regenerate.ts"
+      }
     }
   },
   "tags": []

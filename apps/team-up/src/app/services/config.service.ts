@@ -4,6 +4,8 @@ import { Config } from '@team-up/board-commons';
 import { catchError, map, Observable, of, zip } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { FirebaseOptions } from 'firebase/app';
+import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
+import { AppRouter } from '@team-up/api/app';
 
 export const configFactory = (
   config: ConfigService
@@ -40,5 +42,21 @@ export class ConfigService {
         return of(false);
       })
     );
+  }
+
+  public getTrpcConfig() {
+    return createTRPCProxyClient<AppRouter>({
+      links: [
+        httpBatchLink({
+          url: appConfig.API + '/trpc',
+          fetch(url, options) {
+            return fetch(url, {
+              ...options,
+              credentials: 'include',
+            });
+          },
+        }),
+      ],
+    });
   }
 }

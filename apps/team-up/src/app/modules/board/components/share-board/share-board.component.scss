@@ -1,0 +1,34 @@
+:host {
+  padding: 1rem;
+  display: block;
+}
+
+.title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.copy-url {
+  align-items: center;
+  display: flex;
+  gap: var(--spacing-4);
+  margin-block-start: var(--spacing-4);
+
+  mat-form-field {
+    inline-size: 100%;
+  }
+
+  button {
+    white-space: nowrap;
+  }
+}
+
+.board-position {
+  margin-block-start: var(--spacing-4);
+  inline-size: 100%;
+}
+
+.board-visibility {
+  margin-block-start: var(--spacing-4);
+}

@@ -2,5 +2,9 @@
 export interface Board {
   name: string;
   id: string;
-  owner: boolean;
+  createdAt: string;
+  teamId: string | null;
+  role: 'admin' | 'member' | 'guest';
+  starred: boolean;
+  lastAccessedAt: string;
 }

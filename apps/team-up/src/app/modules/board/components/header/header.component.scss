@@ -66,8 +66,9 @@ button,
   }
 }
 
-.header-right {
+.header-end {
   display: flex;
+  gap: var(--spacing-4);
 
   .icon-svg {
     margin-right: 0.5rem;
@@ -83,4 +84,9 @@ button,
   overflow: hidden;
   resize: none;
   width: 100%;
+}
+
+.share {
+  display: flex;
+  align-items: center;
 }

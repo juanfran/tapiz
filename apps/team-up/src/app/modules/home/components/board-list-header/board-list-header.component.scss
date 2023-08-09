@@ -1,0 +1,10 @@
+:host {
+  display: block;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: var(--spacing-6);
+}

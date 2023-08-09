@@ -1,6 +1,7 @@
 @import "@angular/cdk/overlay-prebuilt.css";
 @import "@angular/material/prebuilt-themes/deeppurple-amber.css";
-@import "swatches.scss";
+@import "override-material.scss";
+@import "fonts.scss";
 @import "typography.scss";
 @import "fonts.scss";
 @import "responsive.scss";
@@ -11,7 +12,8 @@
 @import "menu.scss";
 
 :root {
-  --purple: #736bdb;
+  --purple: hsl(244, 61%, 64%);
+  --purple-light: hsl(244, 61%, 85%);
   --purple-bbg: #736bdb80;
   --orange: #fed9b7;
   --yellow: #fdfcdc;
@@ -20,6 +22,21 @@
   --baby-blue-bbg: #42cfdc80;
   --white: #fff;
   --black: #000;
+  --color-light-1: #F8F8FC;
+  --error: rgb(240, 62, 62);
+
+  /* NEW COLORS */
+
+  --primary: hsl(0, 0%, 0%);
+  --secondary: hsl(240, 27%, 70%);
+  --tertiary: hsl(240, 33%, 98%);
+  --light: hsl(0, 0%, 100%);
+  --accent: hsla(248, 50%, 58%, 0.5);
+  --accent--alt: hsl(240, 33%, 99%);
+  --accent--ui: #efefef;
+
+  --brand: hsl(244, 61%, 64%);
+  --brand-light: hsl(244, 61%, 85%);
 }
 
 .edit-mode {
