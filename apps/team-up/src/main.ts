@@ -11,7 +11,6 @@ import { getAuth, provideAuth } from '@angular/fire/auth';
 import { environment } from './environments/environment';
 import { AppComponent } from './app/app.component';
 import { provideRouter } from '@angular/router';
-import { TranslocoRootModule } from './app/transloco/transloco-root.module';
 import {
   StoreDevtoolsModule,
   provideStoreDevtools,
@@ -52,8 +51,7 @@ bootstrapApplication(AppComponent, {
       BrowserAnimationsModule.withConfig({
         disableAnimations: prefersReducedMotion(),
       }),
-      !environment.production ? StoreDevtoolsModule.instrument() : [],
-      TranslocoRootModule
+      !environment.production ? StoreDevtoolsModule.instrument() : []
     ),
     provideStore(
       {
