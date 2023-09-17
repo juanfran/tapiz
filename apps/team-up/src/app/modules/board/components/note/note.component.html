@@ -1,8 +1,8 @@
 <ng-container *ngIf="viewModel$ | async as vm">
   <div
-    *ngIf="vm.note.votes > 0"
+    *ngIf="vm.votes > 0"
     class="vote">
-    {{ vm.note.votes }}
+    {{ vm.votes }}
   </div>
   <ng-container *ngIf="vm.edit">
     <textarea

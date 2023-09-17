@@ -5,7 +5,12 @@ import { type StateActions } from '../../models/node.model';
 
 const note = z.object({
   text: z.string().max(140),
-  votes: z.number().int().nonnegative().safe(),
+  votes: z.array(
+    z.object({
+      userId: z.string().max(255),
+      vote: z.number().int().min(0),
+    })
+  ),
   position: z.object({
     x: z.number().safe(),
     y: z.number().safe(),

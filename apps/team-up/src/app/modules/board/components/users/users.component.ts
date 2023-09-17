@@ -88,6 +88,10 @@ export class UsersComponent {
     this.store.dispatch(PageActions.followUser({ id: userId }));
   }
 
+  public showVotes(userId: User['id']) {
+    this.store.dispatch(PageActions.toggleShowVotes({ userId }));
+  }
+
   public trackById(_: number, user: User) {
     return user.id;
   }

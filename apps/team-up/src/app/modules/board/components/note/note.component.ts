@@ -45,7 +45,7 @@ import {
   selectVoting,
   selectZoom,
 } from '../../selectors/page.selectors';
-import { Observable } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import hotkeys from 'hotkeys-js';
 import { lighter } from './contrast';
 import { NativeEmoji } from 'emoji-picker-element/shared';
@@ -103,7 +103,16 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     return this.state.get('highlight');
   }
 
-  public readonly viewModel$ = this.state.select();
+  public readonly viewModel$ = this.state.select().pipe(
+    map((state) => {
+      return {
+        ...state,
+        votes: state.note.votes.reduce((prev, it) => {
+          return prev + it.vote;
+        }, 0),
+      };
+    })
+  );
 
   @ViewChildren('textarea') textarea!: QueryList<ElementRef>;
 
@@ -154,13 +163,38 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     if (this.state.get('voting')) {
       let votes = this.state.get('note').votes;
 
-      if (event.button === 2) {
-        votes--;
+      let currentUserVote = votes.find(
+        (vote) => vote.userId === this.state.get('userId')
+      );
+
+      if (currentUserVote) {
+        votes = votes.map((vote) => {
+          if (vote.userId === this.state.get('userId')) {
+            return {
+              ...vote,
+              vote: event.button === 2 ? vote.vote - 1 : vote.vote + 1,
+            };
+          }
+
+          return vote;
+        });
       } else {
-        votes++;
+        votes = [
+          ...votes,
+          {
+            userId: this.state.get('userId'),
+            vote: event.button === 2 ? -1 : 1,
+          },
+        ];
       }
 
-      if (votes >= 0) {
+      currentUserVote = votes.find(
+        (vote) => vote.userId === this.state.get('userId')
+      );
+
+      votes = votes.filter((vote) => vote.vote !== 0);
+
+      if (currentUserVote && currentUserVote.vote >= 0) {
         this.store.dispatch(
           BoardActions.batchNodeActions({
             history: true,
@@ -474,7 +508,20 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
     this.state.connect(
       'highlight',
-      this.store.select(isUserHighlighted(this.state.get('note').ownerId))
+      combineLatest([
+        this.store.select(isUserHighlighted(this.state.get('note').ownerId)),
+        this.store.select(pageFeature.selectShowUserVotes).pipe(
+          map((userVotes) => {
+            return !!this.state
+              .get('note')
+              .votes.find((vote) => vote.userId === userVotes);
+          })
+        ),
+      ]).pipe(
+        map(([highlight, showVotes]) => {
+          return highlight ? highlight : showVotes;
+        })
+      )
     );
 
     hotkeys('delete', () => {

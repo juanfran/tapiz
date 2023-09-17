@@ -26,6 +26,7 @@ export const {
   selectDrawingSize,
   selectCocomaterial,
   selectSearching,
+  selectShowUserVotes,
 } = pageFeature;
 
 export const isFocus = (id: string) => {
@@ -33,9 +34,13 @@ export const isFocus = (id: string) => {
 };
 
 export const isUserHighlighActive = () => {
-  return createSelector(selectUserHighlight, (id) => {
-    return !!id;
-  });
+  return createSelector(
+    selectUserHighlight,
+    selectShowUserVotes,
+    (id, userVotes) => {
+      return id ? !!id : !!userVotes;
+    }
+  );
 };
 
 export const isUserHighlighted = (userId: string) => {

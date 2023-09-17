@@ -6,7 +6,10 @@ export interface Note {
   text: string;
   position: Point;
   ownerId: string;
-  votes: number;
+  votes: {
+    userId: string;
+    vote: number;
+  }[];
   emojis: {
     unicode: string;
     position: Point;

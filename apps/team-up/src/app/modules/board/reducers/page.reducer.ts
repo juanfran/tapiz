@@ -25,6 +25,7 @@ export interface PageState {
   moveEnabled: boolean;
   zone: Zone | null;
   userHighlight: User['id'] | null;
+  showUserVotes: User['id'] | null;
   canvasMode: string;
   popupOpen: string;
   isAdmin: boolean;
@@ -61,6 +62,7 @@ const initialPageState: PageState = {
   moveEnabled: true,
   zone: null,
   userHighlight: null,
+  showUserVotes: null,
   canvasMode: 'editMode',
   popupOpen: '',
   isAdmin: false,
@@ -203,11 +205,30 @@ const reducer = createReducer(
     return state;
   }),
   on(PageActions.toggleUserHighlight, (state, { id }): PageState => {
+    state.showUserVotes = null;
+
     if (state.userHighlight === id) {
       state.userHighlight = null;
     } else {
       state.userHighlight = id;
     }
+
+    return state;
+  }),
+  on(PageActions.toggleShowVotes, (state, { userId }): PageState => {
+    state.userHighlight = null;
+
+    if (state.showUserVotes === userId) {
+      state.showUserVotes = null;
+    } else {
+      state.showUserVotes = userId;
+    }
+
+    return state;
+  }),
+  on(PageActions.stopHighlight, (state): PageState => {
+    state.userHighlight = null;
+    state.showUserVotes = null;
 
     return state;
   }),

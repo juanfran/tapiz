@@ -11,7 +11,7 @@ export class NotesService {
       ...data,
       id: v4(),
       text: '',
-      votes: 0,
+      votes: [],
       emojis: [],
       drawing: [],
       ...data,

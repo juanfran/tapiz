@@ -1,11 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import { pageFeature } from '../modules/board/reducers/page.reducer';
-import { boardFeature } from '../modules/board/reducers/board.reducer';
+import { pageFeature } from '../../modules/board/reducers/page.reducer';
+import { boardFeature } from '../../modules/board/reducers/board.reducer';
 import { map, switchMap } from 'rxjs';
-import { filterNil } from '../commons/operators/filter-nil';
-import { PageActions } from '../modules/board/actions/page.actions';
+import { filterNil } from '../../commons/operators/filter-nil';
+import { PageActions } from '../../modules/board/actions/page.actions';
 import { MatButtonModule } from '@angular/material/button';
 
 @Component({
@@ -25,6 +25,7 @@ import { MatButtonModule } from '@angular/material/button';
     </div>
   `,
   styleUrls: ['./follow-user.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FollowUserComponent {
   private store = inject(Store);

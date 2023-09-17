@@ -70,12 +70,13 @@ import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { boardFeature } from '../reducers/board.reducer';
 import { TitleComponent } from '../../../shared/title/title.component';
 import { ResizableDirective } from '../directives/resize.directive';
-import { FollowUserComponent } from '@/app/followUser/follow-user.component';
+import { FollowUserComponent } from '@/app/shared/follow-user/follow-user.component';
 import { Point } from '@team-up/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
 import { appFeature } from '@/app/+state/app.reducer';
 import { RotateDirective } from '../directives/rotate.directive';
+import { StopHighlightComponent } from '@/app/shared/stop-highlight/stop-highlight';
 
 @UntilDestroy()
 @Component({
@@ -107,6 +108,7 @@ import { RotateDirective } from '../directives/rotate.directive';
     FollowUserComponent,
     MatDialogModule,
     RotateDirective,
+    StopHighlightComponent,
   ],
   hostDirectives: [CopyPasteDirective],
 })

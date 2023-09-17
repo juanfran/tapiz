@@ -26,7 +26,8 @@
     <button
       *ngIf="vm.currentUser"
       class="user me"
-      (click)="toggleUserHighlight(vm.currentUser.id)">
+      [cdkMenuTriggerFor]="menu"
+      [cdkMenuTriggerData]="{ user: vm.currentUser }">
       <team-up-svg-icon
         icon="user"
         class="icon-svg"></team-up-svg-icon>
@@ -63,6 +64,7 @@
       class="menu"
       cdkMenu>
       <button
+        *ngIf="vm.currentUser?.id !== user.id"
         cdkMenuItem
         class="menu-item"
         (cdkMenuItemTriggered)="follow(user.id)">
@@ -74,6 +76,12 @@
         class="menu-item"
         (cdkMenuItemTriggered)="toggleUserHighlight(user.id)">
         Hightlight
+      </button>
+      <button
+        cdkMenuItem
+        class="menu-item"
+        (cdkMenuItemTriggered)="showVotes(user.id)">
+        Show votes
       </button>
     </div>
   </ng-template>

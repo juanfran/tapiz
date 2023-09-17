@@ -30,7 +30,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] D&D cocomaterial on add
 - [ ] Reorder boards
 - [ ] Search boards
-- [ ] Favourite boards
 - [ ] Empty boards placeholder
 - [ ] Image & Vector can also be used in compose mode
 - [ ] Bookmarks
