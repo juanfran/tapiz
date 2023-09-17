@@ -116,7 +116,7 @@ export class ToolbarComponent {
                       width: 200,
                       height: 50,
                       color: '#000',
-                      size: 16,
+                      size: 32,
                     },
                   },
                   op: 'add',
