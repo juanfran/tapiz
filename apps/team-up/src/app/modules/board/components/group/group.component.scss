@@ -1,9 +1,10 @@
 .title {
+  align-items: center;
   background-color: #5fb0b7;
   border-radius: 16px;
   color: var(--white);
   cursor: pointer;
-  display: block;
+  display: flex;
   font-family: "Ubuntu", -apple-system, system-ui, sans-serif;
   height: 35px;
   padding: var(--spacing-1);
