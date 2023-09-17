@@ -11,7 +11,13 @@
       type="text" />
   </mat-form-field>
 
-  <mat-form-field>
+  <mat-checkbox
+    color="primary"
+    [formControl]="overwriteCardColor">
+    Overwrite card color
+  </mat-checkbox>
+
+  <mat-form-field *ngIf="overwriteCardColor.value">
     <mat-label>Card color</mat-label>
     <input
       formControlName="color"

@@ -14,5 +14,10 @@ h1 {
 }
 
 mat-form-field {
-  width: 100%;
+  inline-size: 100%;
+  margin-block-end: var(--spacing-4);
+}
+
+mat-checkbox {
+  margin-block-end: var(--spacing-4);
 }

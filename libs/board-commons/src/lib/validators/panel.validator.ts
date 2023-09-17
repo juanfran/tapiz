@@ -30,5 +30,4 @@ export const newPanel = panel
     position: true,
     width: true,
     height: true,
-    color: true,
   });
