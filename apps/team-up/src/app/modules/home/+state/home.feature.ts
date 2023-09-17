@@ -7,7 +7,7 @@ import {
   TeamMember,
   SortBoard,
 } from '@team-up/board-commons';
-import produce from 'immer';
+import { produce } from 'immer';
 import { HomeActions } from './home.actions';
 
 export interface HomeState {

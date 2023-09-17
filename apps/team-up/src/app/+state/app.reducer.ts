@@ -1,6 +1,6 @@
 import { Action, createFeature, createReducer, on } from '@ngrx/store';
 import { User } from '@team-up/board-commons';
-import produce from 'immer';
+import { produce } from 'immer';
 import { AppActions } from './app.actions';
 
 export interface AppState {

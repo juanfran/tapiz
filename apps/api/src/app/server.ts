@@ -1,6 +1,6 @@
 import { CommonState, User } from '@team-up/board-commons';
 import * as WebSocket from 'ws';
-import produce from 'immer';
+import { produce } from 'immer';
 import { Client } from './client';
 import db from './db';
 import { Request } from 'express';

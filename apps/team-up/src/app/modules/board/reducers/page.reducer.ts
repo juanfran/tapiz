@@ -10,7 +10,7 @@ import {
 import { wsOpen } from '@/app/modules/ws/ws.actions';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
-import produce from 'immer';
+import { produce } from 'immer';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 
 export interface PageState {
