@@ -40,6 +40,7 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Real time home boards
 - [ ] Real time members & permissions
 - [ ] Vote group
+- [ ] Read only board
 
 ## TODO, code refactor
 
