@@ -135,6 +135,27 @@ describe('board', () => {
     expect(board.name).toEqual('new name');
   });
 
+  it('transfer board only by admin', async () => {
+    const callerUser1 = getUserCaller(1);
+
+    const resultCreateBoard = await callerUser1.board.create({
+      name: randProductName(),
+      teamId,
+    });
+
+    const result = await callerUser1.board.transferBoard({
+      boardId: resultCreateBoard.id,
+      teamId: undefined,
+    });
+
+    const board = await callerUser1.board.board({
+      boardId: resultCreateBoard.id,
+    });
+
+    expect(result.success).toEqual(true);
+    expect(board.teamId).toEqual(null);
+  });
+
   it('delete board only by admin', async () => {
     const callerUser1 = await getUserCaller(1);
     const callerUser2 = await getUserCaller(2);

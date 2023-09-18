@@ -17,6 +17,7 @@ export interface HomeState {
   members: TeamMember[];
   userInvitations: UserInvitation[];
   sortBy: SortBoard;
+  currentTeamId: string | null;
 }
 
 const sortBy = localStorage.getItem('boardSortBy') ?? '-createdAt';
@@ -28,6 +29,7 @@ const initialHomeState: HomeState = {
   members: [],
   userInvitations: [],
   sortBy: sortBy as SortBoard,
+  currentTeamId: null,
 };
 
 const reducer = createReducer(
@@ -37,10 +39,15 @@ const reducer = createReducer(
     HomeActions.initAllBoardsPage,
     HomeActions.initTeamPage,
     HomeActions.initStarredPage,
-    (state): HomeState => {
+    (state, action): HomeState => {
       state.invitations = [];
       state.members = [];
       state.boards = [];
+      state.currentTeamId = null;
+
+      if (action.type === HomeActions.initTeamPage.type) {
+        state.currentTeamId = action.teamId;
+      }
 
       return state;
     }
@@ -229,6 +236,23 @@ const reducer = createReducer(
   }),
   on(HomeActions.changeBoardSortBy, (state, { sortBy }) => {
     state.sortBy = sortBy;
+
+    return state;
+  }),
+  on(HomeActions.transferBoard, (state, { id, teamId }) => {
+    state.boards = state.boards.map((board) => {
+      if (board.id === id) {
+        board.teamId = teamId;
+      }
+
+      return board;
+    });
+
+    if (state.currentTeamId !== teamId) {
+      state.boards = state.boards.filter((board) => {
+        return board.id !== id;
+      });
+    }
 
     return state;
   })

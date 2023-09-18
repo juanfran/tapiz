@@ -7,7 +7,7 @@ import { RxState } from '@rx-angular/state';
 import { Board } from '@team-up/board-commons';
 import { BoardListComponent } from '../board-list/board-list.component';
 import { homeFeature } from '../../+state/home.feature';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { BoardListHeaderComponent } from '../board-list-header/board-list-header.component';
 interface State {
@@ -41,7 +41,6 @@ interface State {
 export class AllBoardsComponent {
   private state = inject(RxState) as RxState<State>;
   private store = inject(Store);
-  private dialog = inject(MatDialog);
   public model$ = this.state.select();
 
   constructor() {

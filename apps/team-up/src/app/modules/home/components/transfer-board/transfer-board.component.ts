@@ -17,7 +17,7 @@ import { homeFeature } from '../../+state/home.feature';
 import { MatSelectModule } from '@angular/material/select';
 
 @Component({
-  selector: 'team-up-create-board',
+  selector: 'team-up-transfer-board',
   standalone: true,
   imports: [
     CommonModule,
@@ -30,21 +30,14 @@ import { MatSelectModule } from '@angular/material/select';
     MatSelectModule,
   ],
   template: `
-    <team-up-modal-header title="Create board"></team-up-modal-header>
+    <team-up-modal-header title="Transfer board"></team-up-modal-header>
     <form
       [formGroup]="form"
       (submit)="submit()">
-      <mat-form-field [hideRequiredMarker]="true">
-        <mat-label>Board name</mat-label>
-        <input
-          formControlName="name"
-          placeholder="Board name"
-          matInput
-          type="text" />
-      </mat-form-field>
       <mat-form-field>
         <mat-label>Team</mat-label>
         <mat-select formControlName="team">
+          <mat-option [value]="null">No team</mat-option>
           <mat-option
             *ngFor="let team of teams()"
             [value]="team.id"
@@ -59,23 +52,19 @@ import { MatSelectModule } from '@angular/material/select';
           type="submit"
           mat-raised-button
           color="primary">
-          Create
+          Transfer
         </button>
       </div>
     </form>
   `,
-  styleUrls: ['./create-board.component.scss'],
+  styleUrls: ['./transfer-board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateBoardComponent {
+export class TransferBoardComponent {
   public data = inject(MAT_DIALOG_DATA);
   public store = inject(Store);
   public dialogRef = inject(MatDialogRef);
   public form = new FormGroup({
-    name: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required],
-    }),
     team: new FormControl(this.data.teamId, {
       nonNullable: true,
     }),
@@ -86,7 +75,6 @@ export class CreateBoardComponent {
   public submit() {
     if (this.form.valid) {
       this.dialogRef.close({
-        name: this.form.value.name,
         teamId: this.form.value.team,
       });
     }

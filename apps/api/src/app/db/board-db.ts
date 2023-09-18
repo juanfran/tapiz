@@ -420,3 +420,10 @@ export async function removeStarredBoard(userId: string, boardId: string) {
       )
     );
 }
+
+export async function transferBoard(boardId: string, teamId: string | null) {
+  return db
+    .update(schema.boards)
+    .set({ teamId })
+    .where(eq(schema.boards.id, boardId));
+}

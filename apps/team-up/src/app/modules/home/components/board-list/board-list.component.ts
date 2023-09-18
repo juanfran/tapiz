@@ -21,6 +21,7 @@ import { BoardIdToColorDirective } from '@/app/shared/board-id-to-color.directiv
 import { RenameBoardComponent } from '../rename-board/rename-board.component';
 import { MatSelectModule } from '@angular/material/select';
 import { homeFeature } from '../../+state/home.feature';
+import { TransferBoardComponent } from '../transfer-board/transfer-board.component';
 
 @Component({
   selector: 'team-up-board-list',
@@ -120,6 +121,26 @@ export class BoardListComponent {
 
   public leaveBoard(board: Board) {
     this.store.dispatch(HomeActions.leaveBoard({ id: board.id }));
+  }
+
+  public transferBoard(board: Board) {
+    const dialogRef = this.dialog.open(TransferBoardComponent, {
+      width: '400px',
+      data: {
+        teamId: board.teamId,
+      },
+    });
+    dialogRef
+      .afterClosed()
+      .pipe(filter((it) => it))
+      .subscribe((newBoard) => {
+        this.store.dispatch(
+          HomeActions.transferBoard({
+            id: board.id,
+            teamId: newBoard.teamId ?? null,
+          })
+        );
+      });
   }
 
   public renameBoard(board: Board) {
