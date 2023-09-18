@@ -46,8 +46,8 @@ export const newNote = note.extend({
 
 export const validate = (
   msg: StateActions,
-  state: CommonState,
-  userId: string
+  _state: CommonState,
+  _userId: string
 ): StateActions | false => {
   let validatorResult: StateActions['data']['node'] | null = null;
 
@@ -55,10 +55,7 @@ export const validate = (
     const validation = newNote.safeParse(msg.data.node);
 
     if (validation.success) {
-      validatorResult = {
-        ...validation.data,
-        ownerId: userId,
-      };
+      validatorResult = validation.data;
     }
   } else if (msg.op === 'patch' || msg.op === 'remove') {
     const validation = patchNote.safeParse(msg.data.node);
