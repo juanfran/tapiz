@@ -66,6 +66,15 @@ export class BoardApiService {
     return from(this.trpc.board.removeStar.mutate({ boardId }));
   }
 
+  public transferBoard(boardId: Board['id'], teamId: Team['id'] | null) {
+    return from(
+      this.trpc.board.transferBoard.mutate({
+        boardId,
+        teamId: teamId ?? undefined,
+      })
+    );
+  }
+
   public getCocomaterialTags() {
     return this.http.get<CocomaterialTag[]>(
       `https://cocomaterial.com/api/tags`

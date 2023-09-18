@@ -70,6 +70,15 @@
           <button
             cdkMenuItem
             class="menu-item menu-item-icon"
+            title="Transfer board"
+            *ngIf="board.role === 'admin'"
+            (cdkMenuItemTriggered)="transferBoard(board)">
+            <mat-icon fontIcon="drive_file_move"></mat-icon>
+            Transfer board
+          </button>
+          <button
+            cdkMenuItem
+            class="menu-item menu-item-icon"
             title="Duplicate board"
             (cdkMenuItemTriggered)="duplicateBoard(board)">
             <mat-icon fontIcon="content_copy"></mat-icon>

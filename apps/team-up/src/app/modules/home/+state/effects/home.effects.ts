@@ -585,3 +585,18 @@ export const changeSortBy$ = createEffect(
     dispatch: false,
   }
 );
+
+export const transferBoard$ = createEffect(
+  (actions$ = inject(Actions), boardApiService = inject(BoardApiService)) => {
+    return actions$.pipe(
+      ofType(HomeActions.transferBoard),
+      mergeMap((action) => {
+        return boardApiService.transferBoard(action.id, action.teamId);
+      })
+    );
+  },
+  {
+    functional: true,
+    dispatch: false,
+  }
+);

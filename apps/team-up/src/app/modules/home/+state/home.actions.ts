@@ -90,5 +90,6 @@ export const HomeActions = createActionGroup({
     'Unstar board': props<{ id: Board['id'] }>(),
     'Init starred page': emptyProps(),
     'Change board sort by': props<{ sortBy: SortBoard }>(),
+    'Transfer board': props<{ id: Board['id']; teamId: Team['id'] | null }>(),
   },
 });

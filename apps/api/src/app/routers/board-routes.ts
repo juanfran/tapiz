@@ -185,4 +185,18 @@ export const boardRouter = router({
         success: true,
       };
     }),
+  transferBoard: boardAdminProcedure
+    .input(
+      z.object({
+        boardId: z.string().uuid(),
+        teamId: z.string().uuid().optional(),
+      })
+    )
+    .mutation(async (req) => {
+      await db.board.transferBoard(req.input.boardId, req.input.teamId ?? null);
+
+      return {
+        success: true,
+      };
+    }),
 });
