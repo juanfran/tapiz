@@ -1,3 +1,15 @@
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-raised-button.mat-primary {
+  --mdc-filled-button-container-color: var(--brand);
+  --mdc-protected-button-container-color: var(--brand);
+}
+
 .mdc-snackbar.error {
   --mdc-snackbar-container-color: var(--error);
+}
+
+:root {
+  --mdc-outlined-text-field-focus-outline-color:  var(--brand);
+  --mdc-outlined-text-field-caret-color:  var(--brand);
+  --mdc-outlined-text-field-focus-label-text-color:  var(--brand);
 }
