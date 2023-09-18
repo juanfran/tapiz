@@ -18,9 +18,9 @@
 .textarea {
   background: transparent;
   border: none;
-  height: 100%;
   outline: none;
   overflow: hidden;
+  padding: var(--spacing-1);
   resize: none;
   width: 100%;
 }
