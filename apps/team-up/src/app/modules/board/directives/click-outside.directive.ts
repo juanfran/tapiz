@@ -13,7 +13,7 @@ import {
 export class ClickOutsideDirective {
   constructor(private elementRef: ElementRef) {}
 
-  @Output() public tuClickOutside = new EventEmitter<{
+  @Output() public teamUpClickOutside = new EventEmitter<{
     event: MouseEvent;
     el: ElementRef;
   }>();
@@ -25,7 +25,7 @@ export class ClickOutsideDirective {
         this.elementRef.nativeElement.contains(targetElement);
 
       if (!clickedInside) {
-        this.tuClickOutside.emit({
+        this.teamUpClickOutside.emit({
           event,
           el: this.elementRef,
         });
