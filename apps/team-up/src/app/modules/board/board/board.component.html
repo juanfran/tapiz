@@ -2,6 +2,7 @@
 <div
   [class.edit-mode]="(canvasMode$ | async) === 'editMode'"
   [class.compose-mode]="(canvasMode$ | async) === 'composeMode'"
+  [class.loading]="!loaded()"
   class="container">
   <team-up-header></team-up-header>
   <team-up-users></team-up-users>
@@ -51,4 +52,10 @@
   </div>
   <team-up-follow-user></team-up-follow-user>
   <team-up-stop-highlight></team-up-stop-highlight>
+</div>
+
+<div
+  *ngIf="!loaded()"
+  class="loading-bar">
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
 </div>

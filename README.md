@@ -38,7 +38,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Drawing component or drawing everywhere
 - [ ] Transfer board team (only admin)
 - [ ] Planning Poker
-- [ ] Loading board
 - [ ] Personal token
 - [ ] Placeholder boards home
 - [ ] Real time home boards

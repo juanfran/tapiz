@@ -14,6 +14,7 @@ import { produce } from 'immer';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 
 export interface PageState {
+  loaded: boolean;
   visible: boolean;
   focusId: string[];
   open: boolean;
@@ -49,6 +50,7 @@ export interface PageState {
 }
 
 const initialPageState: PageState = {
+  loaded: false,
   visible: true,
   focusId: [],
   open: false,
@@ -109,6 +111,7 @@ const reducer = createReducer(
     (state, { isAdmin, isPublic }): PageState => {
       state.isAdmin = isAdmin;
       state.isPublic = isPublic;
+      state.loaded = true;
 
       return state;
     }

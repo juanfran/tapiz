@@ -76,6 +76,10 @@ team-up-header {
   /* stylelint-enable */
 }
 
+.container.loading {
+  display: none;
+}
+
 .compose-mode {
   team-up-note,
   team-up-image,

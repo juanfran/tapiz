@@ -18,6 +18,7 @@ import {
   take,
   throttleTime,
 } from 'rxjs/operators';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
@@ -109,6 +110,7 @@ import { StopHighlightComponent } from '@/app/shared/stop-highlight/stop-highlig
     MatDialogModule,
     RotateDirective,
     StopHighlightComponent,
+    MatProgressBarModule,
   ],
   hostDirectives: [CopyPasteDirective],
 })
@@ -125,6 +127,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly search = this.store.selectSignal(selectSearching);
   public readonly boardTitle = this.store.selectSignal(boardFeature.selectName);
   public readonly folloUser = this.store.selectSignal(pageFeature.selectFollow);
+  public readonly loaded = this.store.selectSignal(pageFeature.selectLoaded);
 
   @ViewChild('workLayer', { read: ElementRef }) public workLayer!: ElementRef;
 
