@@ -7,7 +7,7 @@
   will-change: transform;
 
   team-up-resize-handler,
-  [tuRotateHandler] {
+  [teamUpRotateHandler] {
     display: none;
   }
 
@@ -15,7 +15,7 @@
     cursor: grab;
     outline: 3px dotted var(--primary-color);
 
-    [tuRotateHandler] {
+    [teamUpRotateHandler] {
       display: flex;
     }
 

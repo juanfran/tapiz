@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { selectAllNodes } from '../selectors/board.selectors';
 import { take } from 'rxjs';
 import { concatLatestFrom } from '@ngrx/effects';
-import { selectFocusId, selectUserId } from '../selectors/page.selectors';
+import { selectFocusId } from '../selectors/page.selectors';
 import type { RequireAtLeastOne } from 'type-fest';
 import { v4 } from 'uuid';
 import { NodeAdd, NodeType, Point } from '@team-up/board-commons';
@@ -12,7 +12,7 @@ import { PageActions } from '../actions/page.actions';
 type ValidCopyNode = RequireAtLeastOne<Record<string, unknown>, 'id'>;
 
 @Directive({
-  selector: '[tuCopyPaste]',
+  selector: '[teamUpCopyPaste]',
   standalone: true,
 })
 export class CopyPasteDirective {

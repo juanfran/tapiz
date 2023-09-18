@@ -4,7 +4,6 @@ import {
   distinctUntilChanged,
   filter,
   map,
-  pairwise,
   share,
   startWith,
   withLatestFrom,

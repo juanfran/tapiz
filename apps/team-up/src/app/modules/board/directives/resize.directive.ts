@@ -7,7 +7,7 @@ import { BoardActions } from '../actions/board.actions';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Directive({
-  selector: '[tuResize]',
+  selector: '[teamUpResize]',
   standalone: true,
 })
 export class ResizableDirective {

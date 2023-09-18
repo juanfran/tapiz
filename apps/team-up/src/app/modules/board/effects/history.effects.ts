@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
 import { EMPTY, of } from 'rxjs';
 import { filter, mergeMap, tap } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
 import { StateActions } from '@team-up/board-commons';
-import { selectNote } from '../selectors/board.selectors';
 
 @Injectable()
 export class HistoryEffects {

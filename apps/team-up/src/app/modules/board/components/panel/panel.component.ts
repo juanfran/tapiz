@@ -11,7 +11,7 @@ import {
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { filter, first, map, pluck, withLatestFrom } from 'rxjs/operators';
+import { filter, first, map, withLatestFrom } from 'rxjs/operators';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
@@ -128,7 +128,10 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
 
     this.state
       .select('panel')
-      .pipe(pluck('position'), untilDestroyed(this))
+      .pipe(
+        map((it) => it.position),
+        untilDestroyed(this)
+      )
       .subscribe((position) => {
         (
           this.el.nativeElement as HTMLElement

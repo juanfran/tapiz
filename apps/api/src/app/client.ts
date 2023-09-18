@@ -38,7 +38,7 @@ export class Client {
       messages = [messages];
     }
 
-    messages = (messages as any[]).filter((message) => !!message);
+    messages = (messages as unknown[]).filter((message) => !!message);
 
     this.processMsg(messages);
   }
@@ -47,9 +47,11 @@ export class Client {
   public processMsg(pendingMessages: any) {
     //saveMsg(message);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const messages: any[] = [];
     const mouseMove: { position: Point; cursor: Point; zoom: number }[] = [];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     pendingMessages.forEach((it: any) => {
       if (it.type !== BoardCommonActions.moveUser) {
         messages.push(it);

@@ -8,7 +8,7 @@ import {
 import { ResizableDirective } from './resize.directive';
 
 @Directive({
-  selector: '[tuResizeHandler]',
+  selector: '[teamUpResizeHandler]',
   standalone: true,
 })
 export class ResizeHandlerDirective implements AfterViewInit {

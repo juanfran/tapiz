@@ -18,33 +18,33 @@
       <team-up-cursors></team-up-cursors>
       <ng-container *ngFor="let note of notes$ | async; trackBy: trackById">
         <team-up-note
-          tuBoardDrag
+          teamUpBoardDrag
           [note]="note"></team-up-note>
       </ng-container>
       <ng-container *ngFor="let image of images$ | async; trackBy: trackById">
         <team-up-image
-          tuBoardDrag
-          tuResize
-          tuRotate
+          teamUpBoardDrag
+          teamUpResize
+          teamUpRotate
           [image]="image"></team-up-image>
       </ng-container>
       <ng-container *ngFor="let group of groups$ | async; trackBy: trackById">
         <team-up-group
-          tuBoardDrag
-          tuResize
+          teamUpBoardDrag
+          teamUpResize
           [group]="group"></team-up-group>
       </ng-container>
       <ng-container *ngFor="let text of texts$ | async; trackBy: trackById">
         <team-up-text
-          tuBoardDrag
-          tuResize
+          teamUpBoardDrag
+          teamUpResize
           [text]="text"></team-up-text>
       </ng-container>
       <ng-container *ngFor="let vector of vectors$ | async; trackBy: trackById">
         <team-up-vector
-          tuBoardDrag
-          tuResize
-          tuRotate
+          teamUpBoardDrag
+          teamUpResize
+          teamUpRotate
           [vector]="vector"></team-up-vector>
       </ng-container>
       <team-up-panels></team-up-panels>

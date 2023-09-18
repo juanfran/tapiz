@@ -2,13 +2,13 @@ import { Directive, ElementRef, Input, inject } from '@angular/core';
 import { contrast } from '../modules/board/components/note/contrast';
 
 @Directive({
-  selector: '[tuBoardIdToColor]',
+  selector: '[teamUpBoardIdToColor]',
   standalone: true,
 })
 export class BoardIdToColorDirective {
   private elementRef = inject(ElementRef<HTMLElement>);
 
-  @Input({ required: true }) set tuBoardIdToColor(boardId: string) {
+  @Input({ required: true }) set teamUpBoardIdToColor(boardId: string) {
     this.uuidToColor(boardId);
   }
 

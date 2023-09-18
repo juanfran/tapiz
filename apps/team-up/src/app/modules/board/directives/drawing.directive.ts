@@ -37,11 +37,11 @@ export interface MouseDrawingEvent {
 }
 
 @Directive({
-  selector: '[tuDrawing]',
+  selector: '[teamUpDrawing]',
   standalone: true,
 })
 export class DrawingDirective {
-  @Input() set tuDrawing(drawing: Drawing[]) {
+  @Input() set teamUpDrawing(drawing: Drawing[]) {
     const paintCanvas = this.elementRef.nativeElement;
 
     this.context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);

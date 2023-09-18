@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { ConfigService } from './config.service';
 import { from } from 'rxjs';
-import { Role } from '@team-up/board-commons';
 
 @Injectable({
   providedIn: 'root',

@@ -2,7 +2,7 @@ import { AfterViewInit, Directive, ElementRef, inject } from '@angular/core';
 import { RotateDirective } from './rotate.directive';
 
 @Directive({
-  selector: '[tuRotateHandler]',
+  selector: '[teamUpRotateHandler]',
   standalone: true,
 })
 export class RotateHandlerDirective implements AfterViewInit {

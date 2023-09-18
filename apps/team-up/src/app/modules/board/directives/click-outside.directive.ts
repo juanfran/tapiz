@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 
 @Directive({
-  selector: '[tuClickOutside]',
+  selector: '[teamUpClickOutside]',
   standalone: true,
 })
 export class ClickOutsideDirective {

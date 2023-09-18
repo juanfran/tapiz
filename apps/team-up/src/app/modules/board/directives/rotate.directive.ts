@@ -7,7 +7,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Rotatable } from '../models/rotatable.model';
 
 @Directive({
-  selector: '[tuRotate]',
+  selector: '[teamUpRotate]',
   standalone: true,
 })
 export class RotateDirective {

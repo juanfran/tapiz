@@ -46,5 +46,4 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Refactor toolbar
 - [ ] Refactor css
 - [ ] Deprecated RX operators
-- [ ] Code linter
 - [ ] Board Size limit

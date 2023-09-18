@@ -3,7 +3,7 @@ import { Draggable } from '../models/draggable.model';
 import { MultiDragService } from '../services/multi-drag.service';
 
 @Directive({
-  selector: '[tuBoardDrag]',
+  selector: '[teamUpBoardDrag]',
   standalone: true,
 })
 export class BoardDragDirective implements AfterViewInit, OnDestroy {

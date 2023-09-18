@@ -1,10 +1,4 @@
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  ViewChild,
-  inject,
-} from '@angular/core';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { ResizableDirective } from '../../directives/resize.directive';
 import { CommonModule } from '@angular/common';
 

@@ -164,7 +164,7 @@ main {
   height: 100%;
 }
 
-[tuRotateHandler] {
+[teamUpRotateHandler] {
   aspect-ratio: 1;
   align-items: center;
   display: flex;
@@ -184,7 +184,7 @@ main {
   }
 }
 
-[tuResizeHandler] {
+[teamUpResizeHandler] {
   bottom: 0;
   cursor: se-resize;
   height: 50px;

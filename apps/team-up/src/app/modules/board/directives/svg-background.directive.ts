@@ -1,18 +1,12 @@
-import {
-  AfterViewInit,
-  Directive,
-  ElementRef,
-  HostBinding,
-  Input,
-} from '@angular/core';
+import { Directive, HostBinding, Input } from '@angular/core';
 
 @Directive({
-  selector: '[tuSvgBackground]',
+  selector: '[teamUpSvgBackground]',
   standalone: true,
 })
 export class SvgBackgroundDirective {
   @Input()
-  public set tuSvgBackground(svg: string) {
+  public set teamUpSvgBackground(svg: string) {
     this.svg64 = window.btoa(svg);
   }
 

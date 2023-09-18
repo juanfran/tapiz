@@ -12,7 +12,7 @@ import {
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { filter, first, map, skip, take, withLatestFrom } from 'rxjs/operators';
+import { filter, first, map, take, withLatestFrom } from 'rxjs/operators';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';

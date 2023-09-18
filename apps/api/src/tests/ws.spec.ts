@@ -1,24 +1,11 @@
 import WebSocket from 'ws';
 
 import { startWsServer } from '../app/ws-server';
-import Config from '../app/config';
-import { randFirstName, randUrl, randUuid } from '@ngneat/falso';
 import { startDB } from '../app/db/init-db';
 import { BoardCommonActions } from '@team-up/board-commons';
 import * as http from 'http';
 import { createMultipleUsers, getAuth, getUserCaller } from './test-helpers';
-import { getBoard, getBoardUser, getBoardUsers } from '../app/db/board-db';
-
-const userId = randUuid();
-const initBoard = {
-  notes: [],
-  groups: [],
-  panels: [],
-  images: [],
-  texts: [],
-  users: [],
-  vectors: [],
-};
+import { getBoard, getBoardUser } from '../app/db/board-db';
 
 jest.mock('../app/auth', () => {
   return {

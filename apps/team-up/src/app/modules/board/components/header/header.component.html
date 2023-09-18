@@ -10,10 +10,10 @@
     <ng-container *ngIf="vm.edit">
       <span
         #textarea
-        tuAutofocus
+        teamUpAutofocus
         class="textarea"
         role="textbox"
-        (tuClickOutside)="clickOutside($event)"
+        (teamUpClickOutside)="clickOutside($event)"
         (keydown.enter)="enter($event)"
         contenteditable
         >{{ vm.name }}</span
