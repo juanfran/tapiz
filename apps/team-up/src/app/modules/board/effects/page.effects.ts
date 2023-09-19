@@ -14,7 +14,6 @@ import { selectBoardId, selectCocomaterial } from '../selectors/page.selectors';
 import { BoardApiService } from '../../../services/board-api.service';
 import { BoardActions } from '../actions/board.actions';
 import { selectNoteFocus } from '../selectors/board.selectors';
-import { Note } from '@team-up/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { filterNil } from '@/app/commons/operators/filter-nil';
 import { ActivatedRoute } from '@angular/router';
@@ -77,7 +76,7 @@ export class PageEffects {
       ofType(PageActions.cleanNoteDrawing),
       concatLatestFrom(() => [this.store.select(selectNoteFocus)]),
       map(([, note]) => note),
-      filter((note): note is Note => !!note),
+      filterNil(),
       map((note) => {
         return PageActions.setNoteDrawing({
           id: note.id,
@@ -97,8 +96,8 @@ export class PageEffects {
             {
               data: {
                 type: 'note',
-                node: {
-                  id: action.id,
+                id: action.id,
+                content: {
                   drawing: action.drawing,
                 },
               },

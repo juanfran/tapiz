@@ -4,12 +4,12 @@
     *ngIf="vm.toolbar">
     <input
       type="color"
-      [value]="vm.node.color"
+      [value]="vm.node.content.color"
       (change)="newColor($event)" />
 
     <input
       type="number"
-      [value]="vm.node.size"
+      [value]="vm.node.content.size"
       (change)="newSize($event)" />
   </div>
   <ng-container *ngIf="vm.edit">
@@ -21,11 +21,9 @@
       >{{ vm.editText }}</span
     >
   </ng-container>
-  <div (dblclick)="dblclick($event)">
-    <ng-container *ngIf="!vm.edit">
-      <span class="text">{{ vm.node.text }}</span>
-    </ng-container>
-  </div>
+  <ng-container *ngIf="!vm.edit">
+    <span class="text">{{ vm.node.content.text }}</span>
+  </ng-container>
 </ng-container>
 
 <div teamUpResizeHandler></div>

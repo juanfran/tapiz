@@ -68,9 +68,7 @@ export class HistoryEffects {
               op: 'remove',
               data: {
                 type: it.data.type,
-                node: {
-                  id: it.data.node.id,
-                },
+                id: it.data.id,
               },
             };
           }) as StateActions[];
@@ -101,9 +99,7 @@ export class HistoryEffects {
               op: 'remove',
               data: {
                 type: it.type,
-                node: {
-                  id: it.node.id,
-                },
+                id: it.id,
               },
             };
           }) as StateActions[];
@@ -171,8 +167,8 @@ export class HistoryEffects {
                 return {
                   data: {
                     type: node.nodeType,
-                    node: {
-                      id: node.id,
+                    id: node.id,
+                    content: {
                       position: node.finalPosition,
                     },
                   },
@@ -187,8 +183,8 @@ export class HistoryEffects {
                   return {
                     data: {
                       type: node.nodeType,
-                      node: {
-                        id: node.id,
+                      id: node.id,
+                      content: {
                         position: node.initialPosition,
                       },
                     },

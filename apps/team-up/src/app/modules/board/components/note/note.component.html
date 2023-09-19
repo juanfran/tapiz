@@ -15,7 +15,7 @@
   </ng-container>
 
   <ng-container *ngIf="!vm.edit">
-    <div class="text">{{ vm.note.text }}</div>
+    <div class="text">{{ vm.note.content.text }}</div>
   </ng-container>
 
   <div
@@ -23,10 +23,10 @@
     [title]="vm.username">
     {{ vm.username }}
   </div>
-  <div class="characters">{{ vm.note.text.length }}/140</div>
+  <div class="characters">{{ vm.note.content.text.length }}/140</div>
 
   <div
-    *ngFor="let emoji of vm.note.emojis"
+    *ngFor="let emoji of vm.note.content.emojis"
     class="emoji"
     [style.left.px]="emoji.position.x"
     [style.top.px]="emoji.position.y">
@@ -34,7 +34,7 @@
   </div>
   <canvas
     *ngIf="vm.visible"
-    [teamUpDrawing]="vm.note.drawing"
+    [teamUpDrawing]="vm.note.content.drawing"
     (drawing)="setDrawing($event)"
     width="300"
     height="300"></canvas>

@@ -1,5 +1,6 @@
 :host {
   display: block;
+  border: 1px solid transparent;
   position: absolute;
   z-index: 3;
 
@@ -13,7 +14,6 @@
 }
 
 .text {
-  user-select: none;
   white-space: pre-wrap;
   font-size: var(--size);
   color: var(--color);

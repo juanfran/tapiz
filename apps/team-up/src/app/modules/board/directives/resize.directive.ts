@@ -49,8 +49,8 @@ export class ResizableDirective {
                 {
                   data: {
                     type: this.host.nodeType,
-                    node: {
-                      id: this.host.id,
+                    id: this.host.id,
+                    content: {
                       position: {
                         x: size.x,
                         y: size.y,

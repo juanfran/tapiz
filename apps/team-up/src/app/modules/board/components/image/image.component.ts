@@ -17,7 +17,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { Image, NodeType } from '@team-up/board-commons';
+import { Image, NodeType, TuNode } from '@team-up/board-commons';
 import {
   selectCanvasMode,
   selectFocusId,
@@ -34,7 +34,7 @@ import { compose, rotateDEG, translate, toCSS } from 'transformation-matrix';
 import { Rotatable } from '../../models/rotatable.model';
 
 interface State {
-  image: Image;
+  image: TuNode<Image>;
   draggable: boolean;
   focus: boolean;
   mode: string;
@@ -58,16 +58,16 @@ export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
   @ViewChild('image') public imageRef!: ElementRef;
 
   @Input()
-  public set image(image: Image) {
+  public set image(image: TuNode<Image>) {
     this.state.set({ image });
   }
 
   @HostBinding('style.width.px') get width() {
-    return this.state.get('image')?.width ?? '0';
+    return this.state.get('image')?.content.width ?? '0';
   }
 
   @HostBinding('style.height.px') get height() {
-    return this.state.get('image')?.height ?? '0';
+    return this.state.get('image')?.content.height ?? '0';
   }
 
   @HostBinding('class') get mode() {
@@ -104,8 +104,8 @@ export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
 
   public loadImage() {
     const id = this.state.get('image').id;
-    const width = this.state.get('image').width;
-    const height = this.state.get('image').height;
+    const width = this.state.get('image').content.width;
+    const height = this.state.get('image').content.height;
 
     if (!width || !height) {
       this.store.dispatch(
@@ -115,8 +115,8 @@ export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
             {
               data: {
                 type: 'image',
-                node: {
-                  id,
+                id,
+                content: {
                   width: this.imageNativeElement.naturalWidth,
                   height: this.imageNativeElement.naturalHeight,
                 },
@@ -134,11 +134,11 @@ export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
   }
 
   public get position() {
-    return this.state.get('image').position;
+    return this.state.get('image').content.position;
   }
 
   public get rotation() {
-    return this.state.get('image').rotation;
+    return this.state.get('image').content.rotation;
   }
 
   public get preventDrag() {
@@ -172,7 +172,10 @@ export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
     this.image$
       .pipe(
         map((it) => {
-          return { position: it.position, rotation: it.rotation };
+          return {
+            position: it.content.position,
+            rotation: it.content.rotation,
+          };
         }),
         untilDestroyed(this)
       )
@@ -191,7 +194,7 @@ export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
               {
                 data: {
                   type: 'image',
-                  node: this.state.get('image'),
+                  id: this.state.get('image').id,
                 },
                 op: 'remove',
               },

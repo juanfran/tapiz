@@ -176,8 +176,8 @@ export class CocomaterialComponent {
                 {
                   data: {
                     type: vector.svg ? 'vector' : 'image',
-                    node: {
-                      id: v4(),
+                    id: v4(),
+                    content: {
                       url: vector.svg ?? vector.gif ?? '',
                       width: 150,
                       height: 150,

@@ -1,3 +1,4 @@
+import { TuNode } from './node.model';
 import { Point } from './point.model';
 
 export interface CocomaterialTag {
@@ -29,10 +30,13 @@ export interface CocomaterialApiListVectors {
 }
 
 export interface Vector {
-  id: string;
   url: string;
   width: number;
   height: number;
   position: Point;
   rotation: number;
+}
+
+export function isVector(node: TuNode): node is TuNode<Vector> {
+  return node.type === 'vector';
 }

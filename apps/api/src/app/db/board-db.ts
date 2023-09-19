@@ -330,12 +330,7 @@ export async function joinBoard(
 
 export async function updateBoard(id: string, board: DBState) {
   const dbState = {
-    notes: board.notes,
-    groups: board.groups,
-    panels: board.panels,
-    images: board.images,
-    texts: board.texts,
-    vectors: board.vectors,
+    nodes: board.nodes,
   } as DBState;
   return db
     .update(schema.boards)

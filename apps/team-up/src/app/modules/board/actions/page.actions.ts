@@ -61,7 +61,7 @@ export const PageActions = createActionGroup({
     'Set drawing params': props<{ color: string; size: number }>(),
     'Clean note drawing': emptyProps(),
     'Set note drawing': props<{
-      id: Note['id'];
+      id: string;
       drawing: Drawing[];
       history?: boolean;
     }>(),

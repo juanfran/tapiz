@@ -47,8 +47,8 @@ export class RotateDirective {
               {
                 data: {
                   type: host.nodeType,
-                  node: {
-                    id: host.id,
+                  id: host.id,
+                  content: {
                     rotation: path.rotation,
                     position: {
                       x: path.x,

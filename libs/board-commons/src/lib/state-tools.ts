@@ -4,66 +4,87 @@ import { type CommonState } from './models/common-state.model';
 import type { NodeType, StateActions } from './models/node.model';
 import { Point } from './models/point.model';
 import { BoardCommonActions } from './board-common-actions';
+import { User } from './models/user.model';
 
 export function applyDiff(
   action: StateActions,
   state: CommonState
 ): CommonState {
-  const stateKey = NodeState[action.data.type] as keyof CommonState;
-  const value = action.data.node;
+  if (action.data.type === 'user') {
+    if (state.users) {
+      if (action.op === 'add') {
+        state = {
+          ...state,
+          users: [...state.users, action.data.content as User],
+        };
+      } else if (action.op === 'remove') {
+        state = {
+          ...state,
+          users: state.users.filter((it) => action.data.id !== it.id),
+        };
+      } else if (action.op === 'patch') {
+        state = {
+          ...state,
+          users: [
+            ...state.users.map((it) => {
+              if (action.data.id === it.id) {
+                return {
+                  ...it,
+                  ...action.data.content,
+                };
+              }
+              return it;
+            }),
+          ],
+        };
+      }
+
+      return state;
+    }
+  }
+
+  const stateElement = state.nodes;
 
   if (action.op === 'add') {
-    const stateElement = state[stateKey];
-    const value = action.data.node;
+    const value = action.data;
 
-    if (value && stateElement) {
+    if (value) {
       state = {
         ...state,
-        [stateKey]: [...stateElement, value],
+        nodes: [...stateElement, value],
       };
     }
+  } else if (action.op === 'remove') {
+    state = {
+      ...state,
+      nodes: state.nodes.filter((it) => action.data.id !== it.id),
+    };
+  } else if (action.op === 'patch') {
+    state = {
+      ...state,
+      nodes: [
+        ...state.nodes.map((it) => {
+          if (action.data.id === it.id) {
+            return {
+              ...it,
+              content: {
+                ...it.content,
+                ...action.data.content,
+              },
+            };
+          }
+          return it;
+        }),
+      ],
+    };
   }
 
-  if (action.op === 'remove') {
-    const objs = state[stateKey] as { id: string }[];
+  // move to the top
+  if (action.data.type === 'note' || action.data.type === 'vector') {
+    const index = state.nodes.findIndex((it) => action.data.id === it.id);
 
-    if (value && state[stateKey]) {
-      state = {
-        ...state,
-        [stateKey]: objs.filter((it) => value.id !== it.id),
-      };
-    }
-  }
-
-  if (action.op === 'patch') {
-    if (value && state && state[stateKey]) {
-      const newElements: unknown[] = [];
-
-      state = {
-        ...state,
-        [stateKey]: [
-          ...state[stateKey].map((it) => {
-            if (value.id === it.id) {
-              return {
-                ...it,
-                ...value,
-              };
-            }
-
-            return it;
-          }),
-          ...newElements,
-        ],
-      };
-    }
-
-    // move to the top
-    if (action.data.type === 'note' || action.data.type === 'vector') {
-      const index = state.notes.findIndex((it) => value.id === it.id);
-
-      if (index !== -1) {
-        state.notes.push(state.notes.splice(index, 1)[0]);
-      }
+    if (index !== -1) {
+      state.nodes.push(state.nodes.splice(index, 1)[0]);
     }
   }
 
@@ -96,7 +117,7 @@ export function optimize(actions: StateActions[] | unknown[]) {
       notOptimized.push(action);
       return;
     } else {
-      key = `${action.op}-${action.data.type}-${action.data.node.id}`;
+      key = `${action.op}-${action.data.type}-${action.data.id}`;
     }
 
     if (!optimizedTmp[key]) {

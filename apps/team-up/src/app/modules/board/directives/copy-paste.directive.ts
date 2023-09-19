@@ -1,15 +1,12 @@
 import { Directive, HostListener, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { selectAllNodes } from '../selectors/board.selectors';
 import { take } from 'rxjs';
 import { concatLatestFrom } from '@ngrx/effects';
 import { selectFocusId } from '../selectors/page.selectors';
-import type { RequireAtLeastOne } from 'type-fest';
 import { v4 } from 'uuid';
-import { NodeAdd, NodeType, Point } from '@team-up/board-commons';
+import { NodeAdd, Point, TuNode } from '@team-up/board-commons';
 import { PageActions } from '../actions/page.actions';
-
-type ValidCopyNode = RequireAtLeastOne<Record<string, unknown>, 'id'>;
+import { boardFeature } from '../reducers/board.reducer';
 
 @Directive({
   selector: '[teamUpCopyPaste]',
@@ -25,14 +22,11 @@ export class CopyPasteDirective {
   }
 
   private store = inject(Store);
-  private copyNode: {
-    nodeType: NodeType;
-    node: ValidCopyNode;
-  }[] = [];
+  private copyNode: TuNode[] = [];
 
   public copy() {
     this.store
-      .select(selectAllNodes())
+      .select(boardFeature.selectNodes)
       .pipe(
         take(1),
         concatLatestFrom(() => [this.store.select(selectFocusId)])
@@ -40,24 +34,21 @@ export class CopyPasteDirective {
       .subscribe(([nodes, focusId]) => {
         this.copyNode = [];
 
-        for (const [key, list] of Object.entries(nodes)) {
-          const nodes = list.filter((node) => focusId.includes(node.id));
+        const copyNodes = nodes.filter((node) => focusId.includes(node.id));
 
+        if (copyNodes) {
           this.copyNode.push(
-            ...nodes.map((node) => {
-              const newNode = { ...node };
+            ...copyNodes.map((node) => {
+              const newNode = structuredClone(node);
 
-              if ('position' in newNode) {
-                newNode.position = {
-                  x: (newNode.position as Point).x + 10,
-                  y: (newNode.position as Point).y + 10,
+              if ('position' in newNode.content) {
+                newNode.content.position = {
+                  x: (newNode.content.position as Point).x + 10,
+                  y: (newNode.content.position as Point).y + 10,
                 };
               }
 
-              return {
-                nodeType: key as NodeType,
-                node: newNode,
-              };
+              return newNode;
             })
           );
         }
@@ -69,18 +60,13 @@ export class CopyPasteDirective {
       return;
     }
 
-    const nodes = this.copyNode.map((it) => {
+    const nodes: NodeAdd['data'][] = this.copyNode.map((it) => {
       return {
-        type: it.nodeType,
-        node: {
-          ...it.node,
-          id: v4(),
-        },
+        ...it,
+        id: v4(),
       };
     });
 
-    this.store.dispatch(
-      PageActions.pasteNodes({ nodes: nodes as NodeAdd['data'][] })
-    );
+    this.store.dispatch(PageActions.pasteNodes({ nodes }));
   }
 }

@@ -1,6 +1,5 @@
-import { Action, createFeature, createReducer, on } from '@ngrx/store';
+import { createFeature, createReducer, on } from '@ngrx/store';
 import { User } from '@team-up/board-commons';
-import { produce } from 'immer';
 import { AppActions } from './app.actions';
 
 export interface AppState {
@@ -14,17 +13,14 @@ const initialAppState: AppState = {
 const reducer = createReducer(
   initialAppState,
   on(AppActions.setUserId, (state, { userId }): AppState => {
-    state.userId = userId;
-
-    return state;
+    return {
+      ...state,
+      userId,
+    };
   })
 );
 
 export const appFeature = createFeature({
   name: 'app',
-  reducer: (state: AppState = initialAppState, action: Action) => {
-    return produce(state, (draft: AppState) => {
-      return reducer(draft, action);
-    });
-  },
+  reducer,
 });

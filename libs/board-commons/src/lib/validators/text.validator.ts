@@ -12,10 +12,6 @@ const text = z.object({
   size: z.number().positive().safe(),
 });
 
-export const patchText = text.partial().extend({
-  id: z.string().max(255),
-});
+export const patchText = text.partial();
 
-export const newText = text.extend({
-  id: z.string().max(255),
-});
+export const newText = text;

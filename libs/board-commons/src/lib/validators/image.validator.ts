@@ -11,10 +11,6 @@ const image = z.object({
   rotation: z.number().safe(),
 });
 
-export const patchImage = image.partial().extend({
-  id: z.string().max(255),
-});
+export const patchImage = image.partial();
 
-export const newImage = image.extend({
-  id: z.string().max(255),
-});
+export const newImage = image;

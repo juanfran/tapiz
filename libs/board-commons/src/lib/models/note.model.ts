@@ -1,8 +1,8 @@
 import { Drawing } from './drawing.model';
+import { TuNode } from './node.model';
 import { Point } from './point.model';
 
 export interface Note {
-  id: string;
   text: string;
   position: Point;
   ownerId: string;
@@ -15,4 +15,8 @@ export interface Note {
     position: Point;
   }[];
   drawing: Drawing[];
+}
+
+export function isNote(node: TuNode): node is TuNode<Note> {
+  return node.type === 'note';
 }

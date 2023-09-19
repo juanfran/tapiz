@@ -1,7 +1,7 @@
+import { TuNode } from './node.model';
 import { Point } from './point.model';
 
 export interface Panel {
-  id: string;
   title: string;
   position: Point;
   width: number;
@@ -13,4 +13,8 @@ export interface Panel {
   borderColor?: string;
   borderWidth?: number;
   borderRadius?: number;
+}
+
+export function isPanel(node: TuNode): node is TuNode<Panel> {
+  return node.type === 'panel';
 }

@@ -17,17 +17,10 @@ const panel = z.object({
   borderRadius: z.number().nonnegative().safe().nullable(),
 });
 
-export const patchPanel = panel.partial().extend({
-  id: z.string().max(255),
-});
+export const patchPanel = panel.partial();
 
-export const newPanel = panel
-  .partial()
-  .extend({
-    id: z.string().max(255),
-  })
-  .required({
-    position: true,
-    width: true,
-    height: true,
-  });
+export const newPanel = panel.partial().required({
+  position: true,
+  width: true,
+  height: true,
+});

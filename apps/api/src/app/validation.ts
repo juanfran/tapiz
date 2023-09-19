@@ -51,7 +51,7 @@ export const validateAction = (
       // check if the element present in the state
       if (Array.isArray(state[stateType])) {
         const node = (state[stateType] as Array<{ id: string }>).find(
-          (it) => it.id === msg.data.node.id
+          (it) => it.id === msg.data.id
         );
 
         if (!node) {
@@ -59,46 +59,52 @@ export const validateAction = (
         }
       }
 
-      if (validator) {
-        const validatorResult = (validator as ZodAny).safeParse(msg.data.node);
-
-        if (!validatorResult.success) {
-          return false;
-        }
-
-        if (Array.isArray(state[stateType])) {
-          const node = (state[stateType] as Array<{ id: string }>).find(
-            (it) => it.id === validatorResult.data.id
-          );
-
-          if (!node) {
-            return false;
-          }
-        }
-
+      if (msg.op === 'remove') {
         return {
-          ...msg,
+          op: msg.op,
           data: {
+            id: msg.data.id,
             type: msg.data.type,
-            node: validatorResult.data,
           },
         };
+      } else if (msg.op === 'patch') {
+        if (validator) {
+          const validatorResult = (validator as ZodAny).safeParse(
+            msg.data.content
+          );
+
+          if (!validatorResult.success) {
+            return false;
+          }
+
+          return {
+            op: msg.op,
+            data: {
+              id: msg.data.id,
+              type: msg.data.type,
+              content: validatorResult.data,
+            },
+          };
+        }
       }
     } else if (msg.op === 'add') {
       const validator = validations['new'][msg.data.type as NodeType];
 
       if (validator) {
-        const validatorResult = (validator as ZodAny).safeParse(msg.data.node);
+        const validatorResult = (validator as ZodAny).safeParse(
+          msg.data.content
+        );
 
         if (!validatorResult.success) {
           return false;
         }
 
         return {
-          ...msg,
+          op: msg.op,
           data: {
+            id: msg.data.id,
             type: msg.data.type,
-            node: validatorResult.data,
+            content: validatorResult.data,
           },
         };
       }

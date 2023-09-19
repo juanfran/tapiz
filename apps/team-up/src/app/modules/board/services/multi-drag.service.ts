@@ -224,8 +224,8 @@ export class MultiDragService {
               {
                 data: {
                   type: draggable.nodeType,
-                  node: {
-                    id: draggable.id,
+                  id: draggable.id,
+                  content: {
                     position,
                   },
                 },

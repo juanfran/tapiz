@@ -15,7 +15,7 @@ import {
 import { MatOptionModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
-import { selectNotes, selectUsers } from '../../selectors/board.selectors';
+import { selectUsers } from '../../selectors/board.selectors';
 import {
   Observable,
   combineLatest,
@@ -25,7 +25,8 @@ import {
 } from 'rxjs';
 import { PageActions } from '../../actions/page.actions';
 import { selectUserId } from '../../selectors/page.selectors';
-import { Note } from '@team-up/board-commons';
+import { Note, TuNode, isNote } from '@team-up/board-commons';
+import { boardFeature } from '../../reducers/board.reducer';
 @Component({
   selector: 'team-up-search-options',
   templateUrl: './search-options.component.html',
@@ -48,14 +49,16 @@ export class SearchOptionsComponent implements AfterViewInit {
   });
 
   public store = inject(Store);
-  public notes$ = this.store.select(selectNotes);
+  public notes$ = this.store
+    .select(boardFeature.selectNodes)
+    .pipe(map((nodes) => nodes.filter(isNote)));
   public users$ = this.store.select(selectUsers);
   public currentUser$ = this.store.select(selectUserId);
   public visibleNotes$ = combineLatest([this.notes$, this.users$]).pipe(
     withLatestFrom(this.currentUser$),
     map(([[notes, users], currentUserId]) => {
       const filteredNotes = notes.filter((note) => {
-        const user = users.find((user) => user.id === note.ownerId);
+        const user = users.find((user) => user.id === note.content.ownerId);
 
         if (user) {
           if (user.id === currentUserId) {
@@ -72,7 +75,7 @@ export class SearchOptionsComponent implements AfterViewInit {
     })
   );
 
-  public options$!: Observable<Note[]>;
+  public options$!: Observable<TuNode<Note>[]>;
 
   constructor() {
     const search = this.form.get('search');
@@ -85,7 +88,7 @@ export class SearchOptionsComponent implements AfterViewInit {
         map(([value, notes]) => {
           if (value) {
             return notes.filter((note) =>
-              this.normalizeText(note.text).includes(value)
+              this.normalizeText(note.content.text).includes(value)
             );
           }
 

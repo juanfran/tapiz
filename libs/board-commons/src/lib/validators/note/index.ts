@@ -34,31 +34,28 @@ const note = z.object({
       nY: z.number().safe(),
     })
   ),
+  ownerId: z.string().max(255),
 });
 
-export const patchNote = note.partial().extend({
-  id: z.string().max(255),
-});
+export const patchNote = note.partial();
 
-export const newNote = note.extend({
-  id: z.string().max(255),
-});
+export const newNote = note;
 
 export const validate = (
   msg: StateActions,
   _state: CommonState,
   _userId: string
 ): StateActions | false => {
-  let validatorResult: StateActions['data']['node'] | null = null;
+  let validatorResult: unknown | null = null;
 
   if (msg.op === 'add') {
-    const validation = newNote.safeParse(msg.data.node);
+    const validation = newNote.safeParse(msg.data.content);
 
     if (validation.success) {
       validatorResult = validation.data;
     }
-  } else if (msg.op === 'patch' || msg.op === 'remove') {
-    const validation = patchNote.safeParse(msg.data.node);
+  } else if (msg.op === 'patch') {
+    const validation = patchNote.safeParse(msg.data.content);
 
     if (!validation.success) {
       return false;
@@ -68,13 +65,17 @@ export const validate = (
       validatorResult = validation.data;
     }
   }
+  if (msg.op === 'remove') {
+    validatorResult = msg.data;
+  }
 
   if (validatorResult) {
     return {
       op: msg.op,
       data: {
+        id: msg.data.id,
         type: msg.data.type,
-        node: validatorResult,
+        content: validatorResult,
       },
     } as StateActions;
   }

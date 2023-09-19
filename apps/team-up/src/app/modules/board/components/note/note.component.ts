@@ -28,13 +28,17 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { Drawing, NodeType, Note, Panel, User } from '@team-up/board-commons';
-import { BoardMoveService } from '../../services/board-move.service';
 import {
-  selectPanels,
-  selectUserById,
-  usernameById,
-} from '../../selectors/board.selectors';
+  Drawing,
+  NodeType,
+  Note,
+  Panel,
+  TuNode,
+  User,
+  isPanel,
+} from '@team-up/board-commons';
+import { BoardMoveService } from '../../services/board-move.service';
+import { selectUserById, usernameById } from '../../selectors/board.selectors';
 import {
   isUserHighlighted,
   selectDrawing,
@@ -53,9 +57,10 @@ import { concatLatestFrom } from '@ngrx/effects';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import { DrawingDirective } from '../../directives/drawing.directive';
 import { pageFeature } from '../../reducers/page.reducer';
+import { boardFeature } from '../../reducers/board.reducer';
 interface State {
   edit: boolean;
-  note: Note;
+  note: TuNode<Note>;
   editText: string;
   focus: boolean;
   visible: boolean;
@@ -79,7 +84,7 @@ interface State {
 })
 export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   @Input()
-  public set note(note: Note) {
+  public set note(note: TuNode<Note>) {
     this.state.set({
       note,
     });
@@ -111,7 +116,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     map((state) => {
       return {
         ...state,
-        votes: state.note.votes.reduce((prev, it) => {
+        votes: state.note.content.votes.reduce((prev, it) => {
           return prev + it.vote;
         }, 0),
       };
@@ -139,7 +144,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       .subscribe((note) => {
         this.state.connect(
           'username',
-          this.store.select(usernameById(note.ownerId))
+          this.store.select(usernameById(note.content.ownerId))
         );
       });
 
@@ -165,7 +170,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     }
 
     if (this.state.get('voting')) {
-      let votes = this.state.get('note').votes;
+      let votes = this.state.get('note').content.votes;
 
       let currentUserVote = votes.find(
         (vote) => vote.userId === this.state.get('userId')
@@ -206,8 +211,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
               {
                 data: {
                   type: 'note',
-                  node: {
-                    id: this.state.get('note').id,
+                  id: this.state.get('note').id,
+                  content: {
                     votes,
                   },
                 },
@@ -263,10 +268,10 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
               {
                 data: {
                   type: 'note',
-                  node: {
-                    id: this.state.get('note').id,
+                  id: this.state.get('note').id,
+                  content: {
                     emojis: [
-                      ...this.state.get('note').emojis,
+                      ...this.state.get('note').content.emojis,
                       {
                         unicode: emoji.unicode,
                         position: {
@@ -307,7 +312,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         const clientX = (event.clientX - targetPosition.left) / zoom;
         const clientY = (event.clientY - targetPosition.top) / zoom;
 
-        const emojis = this.state.get('note').emojis.filter((emoji) => {
+        const emojis = this.state.get('note').content.emojis.filter((emoji) => {
           return !(
             clientX >= emoji.position.x &&
             clientX <= emoji.position.x + width &&
@@ -323,8 +328,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
               {
                 data: {
                   type: 'note',
-                  node: {
-                    id: this.state.get('note').id,
+                  id: this.state.get('note').id,
+                  content: {
                     emojis: [...emojis],
                   },
                 },
@@ -350,31 +355,34 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   }
 
   public isOwner() {
-    return this.state.get('userId') === this.state.get('note').ownerId;
+    return this.state.get('userId') === this.state.get('note').content.ownerId;
   }
 
   public checkBgColor() {
     this.store
-      .select(selectPanels)
-      .pipe(untilDestroyed(this))
+      .select(boardFeature.selectNodes)
+      .pipe(
+        map((nodes) => nodes.filter(isPanel)),
+        untilDestroyed(this)
+      )
       .subscribe((panels) => {
-        const position = this.state.get('note').position;
+        const position = this.state.get('note').content.position;
 
         this.findPanel(position, panels);
       });
   }
 
-  public findPanel(position: Point, panels: Panel[]) {
+  public findPanel(position: Point, panels: TuNode<Panel>[]) {
     const insidePanel = panels.find((panel) => {
       return (
-        position.x >= panel.position.x &&
-        position.x < panel.position.x + panel.width &&
-        position.y >= panel.position.y &&
-        position.y < panel.position.y + panel.height
+        position.x >= panel.content.position.x &&
+        position.x < panel.content.position.x + panel.content.width &&
+        position.y >= panel.content.position.y &&
+        position.y < panel.content.position.y + panel.content.height
       );
     });
 
-    const color = insidePanel?.color ?? '#fdab61';
+    const color = insidePanel?.content.color ?? '#fdab61';
 
     this.nativeElement.style.setProperty('--custom-fg', '#000');
     this.nativeElement.style.setProperty('--custom-bg', lighter(color, 70));
@@ -383,9 +391,9 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
   public edit() {
     this.state.set({
-      initialText: this.state.get('note').text,
+      initialText: this.state.get('note').content.text,
       edit: true,
-      editText: this.state.get('note').text,
+      editText: this.state.get('note').content.text,
     });
 
     this.state.connect(
@@ -402,7 +410,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   public nodeType: NodeType = 'note';
 
   public get position() {
-    return this.state.get('note').position;
+    return this.state.get('note').content.position;
   }
 
   public get preventDrag() {
@@ -420,8 +428,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
             {
               data: {
                 type: 'note',
-                node: {
-                  id: this.state.get('note').id,
+                id: this.state.get('note').id,
+                content: {
                   text: value,
                 },
               },
@@ -473,14 +481,18 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       .select('note')
       .pipe(untilDestroyed(this))
       .subscribe((note) => {
-        this.nativeElement.style.transform = `translate(${note.position.x}px, ${note.position.y}px)`;
+        this.nativeElement.style.transform = `translate(${note.content.position.x}px, ${note.content.position.y}px)`;
       });
 
     this.state.hold(
       this.state.select('note').pipe(
-        map((note) => note.position),
+        map((note) => note.content.position),
         distinctUntilChanged(),
-        concatLatestFrom(() => this.store.select(selectPanels))
+        concatLatestFrom(() =>
+          this.store
+            .select(boardFeature.selectNodes)
+            .pipe(map((nodes) => nodes.filter(isPanel)))
+        )
       ),
       ([position, panels]) => {
         this.findPanel(position, panels);
@@ -488,7 +500,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     );
 
     const user$: Observable<User> = this.store
-      .select(selectUserById(this.state.get('note').ownerId))
+      .select(selectUserById(this.state.get('note').content.ownerId))
       .pipe(filter((user): user is User => !!user));
 
     this.state.connect(
@@ -513,12 +525,14 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     this.state.connect(
       'highlight',
       combineLatest([
-        this.store.select(isUserHighlighted(this.state.get('note').ownerId)),
+        this.store.select(
+          isUserHighlighted(this.state.get('note').content.ownerId)
+        ),
         this.store.select(pageFeature.selectShowUserVotes).pipe(
           map((userVotes) => {
             return !!this.state
               .get('note')
-              .votes.find((vote) => vote.userId === userVotes);
+              .content.votes.find((vote) => vote.userId === userVotes);
           })
         ),
       ]).pipe(
@@ -537,7 +551,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
               {
                 data: {
                   type: 'note',
-                  node: this.state.get('note'),
+                  id: this.state.get('note').id,
                 },
                 op: 'remove',
               },
@@ -558,7 +572,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     this.store.dispatch(
       PageActions.setNoteDrawing({
         id: this.state.get('note').id,
-        drawing: [...this.state.get('note').drawing, ...newLine],
+        drawing: [...this.state.get('note').content.drawing, ...newLine],
       })
     );
   }
@@ -574,7 +588,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
     const sizeSearch = (fontSize: number) => {
       const height = this.noteHeight(
-        this.state.get('note').text,
+        this.state.get('note').content.text,
         realSize,
         `${fontSize}px "Open Sans", -apple-system, system-ui, sans-serif`,
         1.1

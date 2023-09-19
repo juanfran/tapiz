@@ -16,7 +16,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { NodeType, Panel } from '@team-up/board-commons';
+import { NodeType, Panel, TuNode } from '@team-up/board-commons';
 import {
   selectCanvasMode,
   selectFocusId,
@@ -31,7 +31,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ResizableDirective } from '../../directives/resize.directive';
 
 interface State {
-  panel: Panel;
+  panel: TuNode<Panel>;
   focus: boolean;
   draggable: boolean;
   mode: string;
@@ -48,17 +48,17 @@ interface State {
 })
 export class PanelComponent implements OnInit, Draggable, Resizable {
   @Input()
-  public set panel(panel: Panel) {
+  public set panel(panel: TuNode<Panel>) {
     this.state.set({ panel });
     this.setCssVariables();
   }
 
   @HostBinding('style.width.px') get width() {
-    return this.state.get('panel')?.width ?? '0';
+    return this.state.get('panel')?.content.width ?? '0';
   }
 
   @HostBinding('style.height.px') get height() {
-    return this.state.get('panel')?.height ?? '0';
+    return this.state.get('panel')?.content.height ?? '0';
   }
 
   @HostBinding('class.focus') get focus() {
@@ -98,7 +98,7 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
   }
 
   public get position() {
-    return this.state.get('panel').position;
+    return this.state.get('panel').content.position;
   }
 
   public get preventDrag() {
@@ -129,7 +129,7 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
     this.state
       .select('panel')
       .pipe(
-        map((it) => it.position),
+        map((it) => it.content.position),
         untilDestroyed(this)
       )
       .subscribe((position) => {
@@ -155,7 +155,7 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
               {
                 data: {
                   type: 'panel',
-                  node: this.state.get('panel'),
+                  id: this.state.get('panel').id,
                 },
                 op: 'remove',
               },
@@ -176,7 +176,7 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
     const dialogRef = this.dialog.open(m.PanelSettingsComponent, {
       width: '400px',
       data: {
-        panel: this.state.get('panel'),
+        panel: this.state.get('panel').content,
       },
     });
 
@@ -192,8 +192,8 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
             {
               data: {
                 type: 'panel',
-                node: {
-                  id: this.state.get('panel').id,
+                id: this.state.get('panel').id,
+                content: {
                   ...result,
                 },
               },
@@ -212,36 +212,45 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
       return;
     }
 
-    if (panel.backgroundColor) {
+    if (panel.content.backgroundColor) {
       this.nativeElement.style.setProperty(
         '--backgroundColor',
-        panel.backgroundColor
+        panel.content.backgroundColor
       );
     }
 
-    if (panel.fontColor) {
-      this.nativeElement.style.setProperty('--fontColor', panel.fontColor);
+    if (panel.content.fontColor) {
+      this.nativeElement.style.setProperty(
+        '--fontColor',
+        panel.content.fontColor
+      );
     }
 
-    if (panel.fontSize) {
-      this.nativeElement.style.setProperty('--fontSize', panel.fontSize + 'px');
+    if (panel.content.fontSize) {
+      this.nativeElement.style.setProperty(
+        '--fontSize',
+        panel.content.fontSize + 'px'
+      );
     }
 
-    if (panel.borderColor) {
-      this.nativeElement.style.setProperty('--borderColor', panel.borderColor);
+    if (panel.content.borderColor) {
+      this.nativeElement.style.setProperty(
+        '--borderColor',
+        panel.content.borderColor
+      );
     }
 
-    if (panel.borderWidth) {
+    if (panel.content.borderWidth) {
       this.nativeElement.style.setProperty(
         '--borderWidth',
-        panel.borderWidth + 'px'
+        panel.content.borderWidth + 'px'
       );
     }
 
-    if (panel.borderRadius) {
+    if (panel.content.borderRadius) {
       this.nativeElement.style.setProperty(
         '--borderRadius',
-        panel.borderRadius + 'px'
+        panel.content.borderRadius + 'px'
       );
     }
   }
