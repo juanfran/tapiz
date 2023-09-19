@@ -1,29 +1,13 @@
 import { Action, createFeature, createReducer, on } from '@ngrx/store';
 import { PageActions } from '../actions/page.actions';
-import {
-  Note,
-  Image,
-  User,
-  applyDiff,
-  Group,
-  Panel,
-  Text,
-  Vector,
-} from '@team-up/board-commons';
+import { applyDiff, CommonState } from '@team-up/board-commons';
 import { produce, enablePatches } from 'immer';
 import { BoardActions } from '../actions/board.actions';
 
 enablePatches();
 
-export interface BoardState {
+export interface BoardState extends CommonState {
   name: string;
-  notes: Note[];
-  images: Image[];
-  users: User[];
-  groups: Group[];
-  panels: Panel[];
-  texts: Text[];
-  vectors: Vector[];
 }
 
 const initialBoardState: BoardState = {
