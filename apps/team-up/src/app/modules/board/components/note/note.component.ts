@@ -103,6 +103,10 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     return this.state.get('highlight');
   }
 
+  @HostBinding('class.voting') get voting() {
+    return this.state.get('voting');
+  }
+
   public readonly viewModel$ = this.state.select().pipe(
     map((state) => {
       return {

@@ -6,4 +6,8 @@ export interface Group {
   position: Point;
   width: number;
   height: number;
+  votes: {
+    userId: string;
+    vote: number;
+  }[];
 }

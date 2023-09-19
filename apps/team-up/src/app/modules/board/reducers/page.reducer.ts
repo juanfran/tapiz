@@ -257,10 +257,8 @@ const reducer = createReducer(
   }),
   on(PageActions.readyToVote, (state): PageState => {
     if (state.voting) {
-      state.boardCursor = 'default';
       state.voting = false;
     } else {
-      state.boardCursor = 'crosshair';
       state.voting = true;
     }
     return state;

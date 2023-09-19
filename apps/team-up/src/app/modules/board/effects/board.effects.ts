@@ -183,6 +183,7 @@ export class BoardEffects {
                       position: zone.position,
                       width: width,
                       height: height,
+                      votes: [],
                     },
                   },
                   op: 'add',

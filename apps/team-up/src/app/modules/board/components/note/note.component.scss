@@ -86,6 +86,10 @@ textarea {
   &.drawing canvas {
     pointer-events: all;
   }
+
+  &.voting {
+    cursor: crosshair;
+  }
 }
 
 .text {
