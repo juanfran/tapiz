@@ -1,6 +1,5 @@
 import { CommonState, User } from '@team-up/board-commons';
 import * as WebSocket from 'ws';
-import { produce } from 'immer';
 import { Client } from './client';
 import db from './db';
 import { Request } from 'express';
@@ -13,7 +12,7 @@ export class Server {
   private pendingBoardUpdates = new Set<string>();
 
   public clients: Client[] = [];
-  public state: Record<string, CommonState> = {};
+  private state: Record<string, CommonState> = {};
 
   public start(server: HTTPServer | HTTPSServer) {
     this.wss = new WebSocket.Server({ server });
@@ -85,10 +84,8 @@ export class Server {
     return this.state[boardId];
   }
 
-  public setState(boardId: string, fn: (state: CommonState) => void) {
-    const nextState = produce(this.state[boardId], (draft) => {
-      return fn(draft);
-    });
+  public setState(boardId: string, fn: (state: CommonState) => CommonState) {
+    const nextState = fn(this.state[boardId]);
 
     this.updateBoard(boardId, nextState);
   }
@@ -109,10 +106,14 @@ export class Server {
 
           return it;
         });
+
+        return state;
       });
     } else {
       this.setState(boardId, (state) => {
         state.users.push(user);
+
+        return state;
       });
     }
   }

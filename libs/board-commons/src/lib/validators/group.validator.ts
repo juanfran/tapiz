@@ -16,17 +16,10 @@ const group = z.object({
   height: z.number().nonnegative().safe(),
 });
 
-export const patchGroup = group.partial().extend({
-  id: z.string().max(255),
-});
+export const patchGroup = group.partial();
 
-export const newGroup = group
-  .partial()
-  .extend({
-    id: z.string().max(255),
-  })
-  .required({
-    position: true,
-    width: true,
-    height: true,
-  });
+export const newGroup = group.partial().required({
+  position: true,
+  width: true,
+  height: true,
+});

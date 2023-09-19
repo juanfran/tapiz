@@ -16,7 +16,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { NodeType, Vector } from '@team-up/board-commons';
+import { NodeType, TuNode, Vector } from '@team-up/board-commons';
 import {
   selectCanvasMode,
   selectFocusId,
@@ -33,7 +33,7 @@ import { compose, rotateDEG, translate, toCSS } from 'transformation-matrix';
 import { Rotatable } from '../../models/rotatable.model';
 
 interface State {
-  vector: Vector;
+  vector: TuNode<Vector>;
   draggable: boolean;
   focus: boolean;
   mode: string;
@@ -57,16 +57,16 @@ export class VectorComponent
   implements OnInit, Draggable, Resizable, Rotatable
 {
   @Input()
-  public set vector(vector: Vector) {
+  public set vector(vector: TuNode<Vector>) {
     this.state.set({ vector });
   }
 
   @HostBinding('style.width.px') get width() {
-    return this.state.get('vector')?.width ?? '0';
+    return this.state.get('vector')?.content.width ?? '0';
   }
 
   @HostBinding('style.height.px') get height() {
-    return this.state.get('vector')?.height ?? '0';
+    return this.state.get('vector')?.content.height ?? '0';
   }
 
   @HostBinding('class') get mode() {
@@ -112,11 +112,11 @@ export class VectorComponent
   }
 
   public get position() {
-    return this.state.get('vector').position;
+    return this.state.get('vector').content.position;
   }
 
   public get rotation() {
-    return this.state.get('vector').rotation;
+    return this.state.get('vector').content.rotation;
   }
 
   public get preventDrag() {
@@ -140,7 +140,10 @@ export class VectorComponent
     this.vector$
       .pipe(
         map((it) => {
-          return { position: it.position, rotation: it.rotation };
+          return {
+            position: it.content.position,
+            rotation: it.content.rotation,
+          };
         }),
         untilDestroyed(this)
       )
@@ -157,10 +160,7 @@ export class VectorComponent
             history: true,
             actions: [
               {
-                data: {
-                  type: 'vector',
-                  node: this.state.get('vector'),
-                },
+                data: this.state.get('vector'),
                 op: 'remove',
               },
             ],

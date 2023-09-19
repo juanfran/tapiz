@@ -24,14 +24,6 @@ import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
 
 import {
-  selectGroups,
-  selectImages,
-  selectNotes,
-  selectTexts,
-  selectVectors,
-} from '../selectors/board.selectors';
-
-import {
   selectBoardCursor,
   selectCanvasMode,
   selectMoveEnabled,
@@ -72,7 +64,14 @@ import { boardFeature } from '../reducers/board.reducer';
 import { TitleComponent } from '../../../shared/title/title.component';
 import { ResizableDirective } from '../directives/resize.directive';
 import { FollowUserComponent } from '@/app/shared/follow-user/follow-user.component';
-import { Point } from '@team-up/board-commons';
+import {
+  Point,
+  isGroup,
+  isImage,
+  isNote,
+  isText,
+  isVector,
+} from '@team-up/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
 import { appFeature } from '@/app/+state/app.reducer';
@@ -115,12 +114,24 @@ import { StopHighlightComponent } from '@/app/shared/stop-highlight/stop-highlig
   hostDirectives: [CopyPasteDirective],
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
-  public readonly notes$ = this.store.select(selectNotes);
   public readonly boardId$ = this.store.select(selectBoardId);
-  public readonly images$ = this.store.select(selectImages);
-  public readonly vectors$ = this.store.select(selectVectors);
-  public readonly texts$ = this.store.select(selectTexts);
-  public readonly groups$ = this.store.select(selectGroups);
+  public readonly nodes$ = this.store.select(boardFeature.selectNodes);
+
+  public readonly notes$ = this.nodes$.pipe(
+    map((nodes) => nodes.filter(isNote))
+  );
+  public readonly images$ = this.nodes$.pipe(
+    map((nodes) => nodes.filter(isImage))
+  );
+  public readonly vectors$ = this.nodes$.pipe(
+    map((nodes) => nodes.filter(isVector))
+  );
+  public readonly texts$ = this.nodes$.pipe(
+    map((nodes) => nodes.filter(isText))
+  );
+  public readonly groups$ = this.nodes$.pipe(
+    map((nodes) => nodes.filter(isGroup))
+  );
   public readonly canvasMode$ = this.store.select(selectCanvasMode);
   public readonly newNote$ = new Subject<MouseEvent>();
   public readonly drawing = this.store.selectSignal(selectDrawing);
@@ -239,7 +250,8 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
                 {
                   data: {
                     type: 'note',
-                    node: note,
+                    id: v4(),
+                    content: note,
                   },
                   op: 'add',
                 },
@@ -360,8 +372,8 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
                     {
                       data: {
                         type: 'image',
-                        node: {
-                          id: v4(),
+                        id: v4(),
+                        content: {
                           url: reader.result as string,
                           width: 0,
                           height: 0,

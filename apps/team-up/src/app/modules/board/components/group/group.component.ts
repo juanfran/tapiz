@@ -19,7 +19,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { Group, NodeType } from '@team-up/board-commons';
+import { Group, NodeType, TuNode } from '@team-up/board-commons';
 import { BoardMoveService } from '../../services/board-move.service';
 import { selectFocusId } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
@@ -31,7 +31,7 @@ import { ResizeHandlerDirective } from '../../directives/resize-handler.directiv
 
 interface State {
   edit: boolean;
-  group: Group;
+  group: TuNode<Group>;
   editText: string;
   focus: boolean;
   draggable: boolean;
@@ -53,16 +53,16 @@ export class GroupComponent
   implements AfterViewInit, OnInit, Draggable, Resizable
 {
   @Input()
-  public set group(group: Group) {
+  public set group(group: TuNode<Group>) {
     this.state.set({ group });
   }
 
   @HostBinding('style.width.px') get width() {
-    return this.state.get('group')?.width ?? '0';
+    return this.state.get('group')?.content.width ?? '0';
   }
 
   @HostBinding('style.height.px') get height() {
-    return this.state.get('group')?.height ?? '0';
+    return this.state.get('group')?.content.height ?? '0';
   }
 
   @HostBinding('class.focus') get focus() {
@@ -81,7 +81,7 @@ export class GroupComponent
     map((state) => {
       return {
         ...state,
-        votes: state.group.votes.reduce((prev, it) => {
+        votes: state.group.content.votes.reduce((prev, it) => {
           return prev + it.vote;
         }, 0),
       };
@@ -119,7 +119,7 @@ export class GroupComponent
     }
 
     if (this.state.get('voting')) {
-      let votes = this.state.get('group').votes;
+      let votes = this.state.get('group').content.votes;
 
       let currentUserVote = votes.find(
         (vote) => vote.userId === this.state.get('userId')
@@ -160,8 +160,8 @@ export class GroupComponent
               {
                 data: {
                   type: 'group',
-                  node: {
-                    id: this.state.get('group').id,
+                  id: this.state.get('group').id,
+                  content: {
                     votes,
                   },
                 },
@@ -199,7 +199,7 @@ export class GroupComponent
   public edit() {
     this.state.set({
       edit: true,
-      editText: this.state.get('group').title,
+      editText: this.state.get('group').content.title,
     });
 
     this.state.connect(
@@ -214,7 +214,7 @@ export class GroupComponent
   }
 
   public get position() {
-    return this.state.get('group').position;
+    return this.state.get('group').content.position;
   }
 
   public get preventDrag() {
@@ -239,8 +239,8 @@ export class GroupComponent
             {
               data: {
                 type: 'group',
-                node: {
-                  id: this.state.get('group').id,
+                id: this.state.get('group').id,
+                content: {
                   title: value.trim(),
                 },
               },
@@ -294,7 +294,7 @@ export class GroupComponent
       .subscribe((group) => {
         (
           this.el.nativeElement as HTMLElement
-        ).style.transform = `translate(${group.position.x}px, ${group.position.y}px)`;
+        ).style.transform = `translate(${group.content.position.x}px, ${group.content.position.y}px)`;
       });
 
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
@@ -311,7 +311,7 @@ export class GroupComponent
           map((userVotes) => {
             return !!this.state
               .get('group')
-              .votes.find((vote) => vote.userId === userVotes);
+              .content.votes.find((vote) => vote.userId === userVotes);
           })
         )
         .pipe(
@@ -330,7 +330,7 @@ export class GroupComponent
               {
                 data: {
                   type: 'group',
-                  node: this.state.get('group'),
+                  id: this.state.get('group').id,
                 },
                 op: 'remove',
               },

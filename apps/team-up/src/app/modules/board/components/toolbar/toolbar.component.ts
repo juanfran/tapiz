@@ -109,8 +109,8 @@ export class ToolbarComponent {
                 {
                   data: {
                     type: 'text',
-                    node: {
-                      id: v4(),
+                    id: v4(),
+                    content: {
                       text: 'Text',
                       position: textPosition,
                       width: 200,
@@ -163,7 +163,8 @@ export class ToolbarComponent {
                 {
                   data: {
                     type: 'note',
-                    node: note,
+                    id: v4(),
+                    content: note,
                   },
                   op: 'add',
                 },
@@ -290,8 +291,8 @@ export class ToolbarComponent {
                 {
                   data: {
                     type: 'image',
-                    node: {
-                      id: v4(),
+                    id: v4(),
+                    content: {
                       url,
                       position: {
                         x: -position.x / zoom,

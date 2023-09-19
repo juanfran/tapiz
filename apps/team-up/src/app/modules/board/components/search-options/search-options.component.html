@@ -14,7 +14,7 @@
       <mat-option
         *ngFor="let option of options$ | async"
         [value]="option">
-        {{ option.text }}
+        {{ option.content.text }}
       </mat-option>
     </mat-autocomplete>
   </mat-form-field>

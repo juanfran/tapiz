@@ -1,6 +1,7 @@
 import {
   applyDiff,
   BoardCommonActions,
+  NodeAdd,
   Point,
   StateActions,
   Validators,
@@ -83,7 +84,7 @@ export class Client {
   ) {
     const moveMessage = messages.pop();
 
-    if (!moveMessage) {
+    if (!moveMessage || !this.boardId) {
       return;
     }
 
@@ -98,8 +99,8 @@ export class Client {
     const action: StateActions = {
       data: {
         type: 'user',
-        node: {
-          id: this.id,
+        id: this.id,
+        content: {
           ...result.data,
         },
       },
@@ -133,8 +134,8 @@ export class Client {
     const actionState: StateActions = {
       data: {
         type: 'user',
-        node: {
-          id: this.id,
+        id: this.id,
+        content: {
           visible: action.data.visible,
         },
       },
@@ -173,7 +174,7 @@ export class Client {
   public close() {
     this.server.setState(this.boardId, (state) => {
       if (!state?.users) {
-        return;
+        return state;
       }
 
       state.users = state.users.map((user) => {
@@ -186,13 +187,15 @@ export class Client {
 
         return user;
       });
+
+      return state;
     });
 
     const action: StateActions = {
       data: {
         type: 'user',
-        node: {
-          id: this.id,
+        id: this.id,
+        content: {
           connected: false,
           cursor: null,
         },
@@ -254,82 +257,33 @@ export class Client {
       this.isAdmin = admins.includes(this.id);
 
       const initStateActions: StateActions[] = [
-        ...board.users.map(
-          (it) =>
-            ({
-              data: {
-                type: 'user',
-                node: it,
-              },
-              op: 'add',
-            } as StateActions)
-        ),
-        ...board.notes.map(
-          (it) =>
-            ({
-              data: {
-                type: 'note',
-                node: it,
-              },
-              op: 'add',
-            } as StateActions)
-        ),
-        ...board.groups.map(
-          (it) =>
-            ({
-              data: {
-                type: 'group',
-                node: it,
-              },
-              op: 'add',
-            } as StateActions)
-        ),
-        ...board.panels.map(
-          (it) =>
-            ({
-              data: {
-                type: 'panel',
-                node: it,
-              },
-              op: 'add',
-            } as StateActions)
-        ),
-        ...board.images.map(
-          (it) =>
-            ({
-              data: {
-                type: 'image',
-                node: it,
-              },
-              op: 'add',
-            } as StateActions)
-        ),
-        ...board.texts.map(
-          (it) =>
-            ({
-              data: {
-                type: 'text',
-                node: it,
-              },
-              op: 'add',
-            } as StateActions)
-        ),
-        ...board.vectors.map(
-          (it) =>
-            ({
-              data: {
-                type: 'vector',
-                node: it,
-              },
-              op: 'add',
-            } as StateActions)
-        ),
+        ...board.users.map((it) => {
+          const add: NodeAdd = {
+            data: {
+              type: 'user',
+              id: it.id,
+              content: it,
+            },
+            op: 'add',
+          };
+
+          return add;
+        }),
+        ...board.nodes.map((it) => {
+          const add: NodeAdd = {
+            data: it,
+            op: 'add',
+          };
+
+          return add;
+        }),
       ];
 
       const userAction: StateActions = {
         data: {
           type: 'user',
-          node: user,
+          id: this.id,
+          content: user,
         },
         op: isAlreadyInBoard ? 'patch' : 'add',
       };

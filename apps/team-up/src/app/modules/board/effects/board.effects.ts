@@ -119,8 +119,8 @@ export class BoardEffects {
         );
       }),
       map(({ actions }) => {
-        if ('id' in actions[0].data.node) {
-          return PageActions.setFocusId({ focusId: actions[0].data.node.id });
+        if ('id' in actions[0].data) {
+          return PageActions.setFocusId({ focusId: actions[0].data.id });
         }
 
         return { type: 'noop' };
@@ -177,8 +177,8 @@ export class BoardEffects {
                 {
                   data: {
                     type: 'group',
-                    node: {
-                      id: v4(),
+                    id: v4(),
+                    content: {
                       title: '',
                       position: zone.position,
                       width: width,
@@ -218,8 +218,8 @@ export class BoardEffects {
                 {
                   data: {
                     type: 'panel',
-                    node: {
-                      id: v4(),
+                    id: v4(),
+                    content: {
                       title: '',
                       position: zone.position,
                       width: width,

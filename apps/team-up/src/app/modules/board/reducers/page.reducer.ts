@@ -1,4 +1,4 @@
-import { Action, createFeature, createReducer, on } from '@ngrx/store';
+import { createFeature, createReducer, on } from '@ngrx/store';
 import {
   Point,
   ZoneConfig,
@@ -10,7 +10,6 @@ import {
 import { wsOpen } from '@/app/modules/ws/ws.actions';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
-import { produce } from 'immer';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 
 export interface PageState {
@@ -61,7 +60,7 @@ const initialPageState: PageState = {
     x: 0,
     y: 0,
   },
-  moveEnabled: true,
+  moveEnabled: false,
   zone: null,
   userHighlight: null,
   showUserVotes: null,
@@ -91,8 +90,10 @@ const initialPageState: PageState = {
 const reducer = createReducer(
   initialPageState,
   on(wsOpen, (state): PageState => {
-    state.open = true;
-    return state;
+    return {
+      ...state,
+      open: true,
+    };
   }),
   on(PageActions.initBoard, (state, { userId }): PageState => {
     return {
@@ -109,37 +110,45 @@ const reducer = createReducer(
   on(
     PageActions.fetchBoardSuccess,
     (state, { isAdmin, isPublic }): PageState => {
-      state.isAdmin = isAdmin;
-      state.isPublic = isPublic;
-      state.loaded = true;
-
-      return state;
+      return {
+        ...state,
+        isAdmin,
+        isPublic,
+        loaded: true,
+        moveEnabled: true,
+      };
     }
   ),
   on(PageActions.joinBoard, (state, { boardId }): PageState => {
-    state.boardId = boardId;
-
-    return state;
+    return {
+      ...state,
+      boardId,
+    };
   }),
   on(PageActions.setUserView, (state, { zoom, position }): PageState => {
-    state.zoom = zoom;
-    state.position = position;
-
-    return state;
+    return {
+      ...state,
+      zoom,
+      position,
+    };
   }),
   on(PageActions.setInitZone, (state, { initZone }): PageState => {
-    state.initZone = initZone;
-
-    return state;
+    return {
+      ...state,
+      initZone,
+    };
   }),
   on(PageActions.setMoveEnabled, (state, { enabled }): PageState => {
-    state.moveEnabled = enabled;
-
-    return state;
+    return {
+      ...state,
+      moveEnabled: enabled,
+    };
   }),
   on(BoardActions.setVisible, (state, { visible }): PageState => {
-    state.visible = visible;
-    return state;
+    return {
+      ...state,
+      visible,
+    };
   }),
   on(BoardActions.batchNodeActions, (state, { actions }): PageState => {
     if (actions.length === 1) {
@@ -147,21 +156,32 @@ const reducer = createReducer(
 
       if (action.op === 'add') {
         if (action.data.type === 'group' || action.data.type === 'panel') {
-          state.initZone = null;
-          state.moveEnabled = true;
-          state.zone = null;
+          state = {
+            ...state,
+            initZone: null,
+            moveEnabled: true,
+            zone: null,
+          };
         } else if (action.data.type === 'text') {
-          state.boardCursor = 'default';
+          state = {
+            ...state,
+            boardCursor: 'default',
+          };
         }
       } else if (action.op === 'remove') {
-        const id = action.data.node.id;
+        const id = action.data.id;
 
         if (state.focusId.includes(id)) {
-          state.focusId = state.focusId.filter((it) => it !== id);
+          state = {
+            ...state,
+            focusId: state.focusId.filter((it) => it !== id),
+          };
         }
       }
     }
-    return state;
+    return {
+      ...state,
+    };
   }),
   on(
     PageActions.setFocusId,
@@ -171,23 +191,29 @@ const reducer = createReducer(
       }
 
       if (ctrlKey) {
-        state.focusId = state.focusId.filter((it) => !!it);
-        state.focusId.push(focusId);
+        state = {
+          ...state,
+          focusId: [...state.focusId.filter((it) => !!it), focusId],
+        };
       } else {
-        state.focusId = [focusId];
+        state = {
+          ...state,
+          focusId: [focusId],
+        };
       }
 
       return state;
     }
   ),
   on(PageActions.setZone, (state, { zone }): PageState => {
-    state.zone = zone;
-
-    return state;
+    return {
+      ...state,
+      zone,
+    };
   }),
   on(BoardActions.setState, (state, { data }): PageState => {
     const currentUser = data.find(
-      (it) => it.data.type === 'user' && it.data.node.id === state.userId
+      (it) => it.data.type === 'user' && it.data.id === state.userId
     ) as User | undefined;
 
     let visible = state.visible;
@@ -202,12 +228,17 @@ const reducer = createReducer(
     };
   }),
   on(PageActions.changeCanvasMode, (state, { canvasMode }): PageState => {
-    state.canvasMode = canvasMode;
-    state.focusId = [];
-
-    return state;
+    return {
+      ...state,
+      canvasMode,
+      focusId: [],
+    };
   }),
   on(PageActions.toggleUserHighlight, (state, { id }): PageState => {
+    state = {
+      ...state,
+    };
+
     state.showUserVotes = null;
 
     if (state.userHighlight === id) {
@@ -219,6 +250,10 @@ const reducer = createReducer(
     return state;
   }),
   on(PageActions.toggleShowVotes, (state, { userId }): PageState => {
+    state = {
+      ...state,
+    };
+
     state.userHighlight = null;
 
     if (state.showUserVotes === userId) {
@@ -230,12 +265,17 @@ const reducer = createReducer(
     return state;
   }),
   on(PageActions.stopHighlight, (state): PageState => {
-    state.userHighlight = null;
-    state.showUserVotes = null;
-
-    return state;
+    return {
+      ...state,
+      userHighlight: null,
+      showUserVotes: null,
+    };
   }),
   on(PageActions.setPopupOpen, (state, { popup }): PageState => {
+    state = {
+      ...state,
+    };
+
     state.popupOpen = popup;
 
     state.emoji = null;
@@ -252,35 +292,50 @@ const reducer = createReducer(
     return state;
   }),
   on(PageActions.textToolbarClick, (state): PageState => {
-    state.boardCursor = 'text';
-    return state;
+    return {
+      ...state,
+      boardCursor: 'text',
+    };
   }),
   on(PageActions.readyToVote, (state): PageState => {
-    if (state.voting) {
-      state.voting = false;
-    } else {
-      state.voting = true;
-    }
-    return state;
+    return {
+      ...state,
+      voting: state.voting ? false : true,
+    };
   }),
   on(PageActions.selectEmoji, (state, { emoji }): PageState => {
-    state.boardCursor = 'crosshair';
-    state.emoji = emoji;
-
-    return state;
+    return {
+      ...state,
+      boardCursor: 'crosshair',
+      emoji: emoji,
+    };
   }),
   on(PageActions.fetchCocomaterialTagsSuccess, (state, { tags }): PageState => {
-    state.cocomaterial.tags = tags;
-
-    return state;
+    return {
+      ...state,
+      cocomaterial: {
+        ...state.cocomaterial,
+        tags,
+      },
+    };
   }),
   on(PageActions.fetchVectorsSuccess, (state, { vectors, page }): PageState => {
+    state = {
+      ...state,
+    };
+
     if (page === 1) {
-      state.cocomaterial.vectors = vectors;
+      state.cocomaterial = {
+        ...state.cocomaterial,
+        vectors,
+      };
     } else if (state.cocomaterial.vectors) {
-      state.cocomaterial.vectors = {
-        ...vectors,
-        results: [...state.cocomaterial.vectors.results, ...vectors.results],
+      state.cocomaterial = {
+        ...state.cocomaterial,
+        vectors: {
+          ...vectors,
+          results: [...state.cocomaterial.vectors.results, ...vectors.results],
+        },
       };
     }
 
@@ -289,32 +344,47 @@ const reducer = createReducer(
     return state;
   }),
   on(PageActions.readyToDraw, (state): PageState => {
-    state.dragEnabled = false;
-    state.drawing = true;
-
-    return state;
+    return {
+      ...state,
+      dragEnabled: false,
+      drawing: true,
+    };
   }),
   on(PageActions.readyToSearch, (state): PageState => {
-    state.searching = true;
-
-    return state;
+    return {
+      ...state,
+      searching: true,
+    };
   }),
   on(PageActions.setDrawingParams, (state, { size, color }): PageState => {
-    state.drawingColor = color;
-    state.drawingSize = size;
-
-    return state;
+    return {
+      ...state,
+      drawingColor: color,
+      drawingSize: size,
+    };
   }),
   on(PageActions.pasteNodes, (state, { nodes }): PageState => {
+    state = {
+      ...state,
+    };
+
+    state.additionalContext = {
+      ...state.additionalContext,
+    };
+
     nodes.forEach((it) => {
-      state.additionalContext[it.node.id] = 'pasted';
+      state.additionalContext[it.id] = 'pasted';
     });
 
-    state.focusId = nodes.map((it) => it.node.id);
+    state.focusId = nodes.map((it) => it.id);
 
     return state;
   }),
   on(PageActions.followUser, (state, { id }): PageState => {
+    state = {
+      ...state,
+    };
+
     if (state.follow === id) {
       state.follow = '';
     } else {
@@ -330,17 +400,14 @@ const reducer = createReducer(
     return state;
   }),
   on(PageActions.setBoardPrivacy, (state, { isPublic }): PageState => {
-    state.isPublic = isPublic;
-
-    return state;
+    return {
+      ...state,
+      isPublic,
+    };
   })
 );
 
 export const pageFeature = createFeature({
   name: 'page',
-  reducer: (state: PageState = initialPageState, action: Action) => {
-    return produce(state, (draft: PageState) => {
-      return reducer(draft, action);
-    });
-  },
+  reducer,
 });

@@ -47,12 +47,7 @@ export const boardRouter = router({
         req.input.name,
         req.ctx.user.sub,
         {
-          notes: [],
-          groups: [],
-          panels: [],
-          images: [],
-          texts: [],
-          vectors: [],
+          nodes: [],
         } as DBState,
         team?.id ?? null
       );

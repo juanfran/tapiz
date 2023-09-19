@@ -1,24 +1,15 @@
-import { Action, createFeature, createReducer, on } from '@ngrx/store';
+import { createFeature, createReducer, on } from '@ngrx/store';
 import { PageActions } from '../actions/page.actions';
 import { applyDiff, CommonState } from '@team-up/board-commons';
-import { produce, enablePatches } from 'immer';
 import { BoardActions } from '../actions/board.actions';
-
-enablePatches();
-
 export interface BoardState extends CommonState {
   name: string;
 }
 
 const initialBoardState: BoardState = {
   name: '',
-  notes: [],
-  images: [],
   users: [],
-  groups: [],
-  panels: [],
-  texts: [],
-  vectors: [],
+  nodes: [],
 };
 
 const reducer = createReducer(
@@ -29,17 +20,17 @@ const reducer = createReducer(
       ...initialBoardState,
     };
   }),
-  on(PageActions.fetchBoardSuccess, (state, { name }): BoardState => {
-    state.name = name;
 
-    return state;
-  }),
-
-  on(BoardActions.setBoardName, (state, { name }): BoardState => {
-    state.name = name;
-
-    return state;
-  }),
+  on(
+    BoardActions.setBoardName,
+    PageActions.fetchBoardSuccess,
+    (state, { name }): BoardState => {
+      return {
+        ...state,
+        name,
+      };
+    }
+  ),
   on(BoardActions.batchNodeActions, (state, action): BoardState => {
     action.actions;
 
@@ -61,13 +52,8 @@ const reducer = createReducer(
   }),
   on(BoardActions.setState, (state, { data }): BoardState => {
     const commonState = {
-      notes: state.notes,
       users: state.users,
-      groups: state.groups,
-      panels: state.panels,
-      images: state.images,
-      texts: state.texts,
-      vectors: state.vectors,
+      nodes: state.nodes,
     };
 
     const newState = data.reduce((acc, action) => {
@@ -101,9 +87,5 @@ const reducer = createReducer(
 
 export const boardFeature = createFeature({
   name: 'board',
-  reducer: (state: BoardState = initialBoardState, action: Action) => {
-    return produce(state, (draft: BoardState) => {
-      return reducer(draft, action);
-    });
-  },
+  reducer,
 });

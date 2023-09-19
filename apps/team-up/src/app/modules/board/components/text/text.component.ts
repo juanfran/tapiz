@@ -17,7 +17,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { NodeType, Text } from '@team-up/board-commons';
+import { NodeType, Text, TuNode } from '@team-up/board-commons';
 import { selectFocusId } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
 import { BoardMoveService } from '../../services/board-move.service';
@@ -28,7 +28,7 @@ import { ResizeHandlerDirective } from '../../directives/resize-handler.directiv
 import { ResizableDirective } from '../../directives/resize.directive';
 
 interface State {
-  node: Text;
+  node: TuNode<Text>;
   draggable: boolean;
   focus: boolean;
   edit: boolean;
@@ -48,16 +48,16 @@ export class TextComponent
   implements OnInit, Draggable, AfterViewInit, Resizable
 {
   @Input()
-  public set text(node: Text) {
+  public set text(node: TuNode<Text>) {
     this.state.set({ node });
   }
 
   @HostBinding('style.width.px') get width() {
-    return this.state.get('node')?.width ?? '0';
+    return this.state.get('node')?.content.width ?? '0';
   }
 
   @HostBinding('style.height.px') get height() {
-    return this.state.get('node')?.height ?? '0';
+    return this.state.get('node')?.content.height ?? '0';
   }
 
   @HostBinding('class.focus') get focus() {
@@ -67,30 +67,13 @@ export class TextComponent
   public readonly viewModel$ = this.state.select().pipe(
     map((state) => {
       return {
-        toolbar: state.focus && !state.edit,
+        toolbar: state.edit,
         ...state,
       };
     })
   );
 
   @ViewChild('textarea') textarea!: ElementRef;
-
-  public plugins = [
-    'advlist',
-    'autolink',
-    'lists',
-    'link',
-    'charmap',
-    'anchor',
-    'visualblocks',
-    'code',
-  ];
-
-  public toolbar = [
-    `bold italic | fontsize |
-    alignleft aligncenter alignright alignjustify |
-    bullist numlist outdent indent`,
-  ];
 
   constructor(
     private el: ElementRef,
@@ -114,7 +97,7 @@ export class TextComponent
   }
 
   public get position() {
-    return this.state.get('node').position;
+    return this.state.get('node').content.position;
   }
 
   public get preventDrag() {
@@ -131,20 +114,10 @@ export class TextComponent
     return this.el.nativeElement as HTMLElement;
   }
 
-  public dblclick(event: MouseEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    this.edit();
-    requestAnimationFrame(() => {
-      this.focusTextarea();
-    });
-  }
-
   public edit() {
     this.state.set({
       edit: true,
-      editText: this.state.get('node').text,
+      editText: this.state.get('node').content.text,
     });
 
     this.state.connect(
@@ -159,8 +132,8 @@ export class TextComponent
               {
                 data: {
                   type: 'text',
-                  node: {
-                    id: this.state.get('node').id,
+                  id: this.state.get('node').id,
+                  content: {
                     text: value.trim(),
                   },
                 },
@@ -195,8 +168,8 @@ export class TextComponent
             {
               data: {
                 type: 'text',
-                node: {
-                  id: this.state.get('node').id,
+                id: this.state.get('node').id,
+                content: {
                   color,
                 },
               },
@@ -219,8 +192,8 @@ export class TextComponent
             {
               data: {
                 type: 'text',
-                node: {
-                  id: this.state.get('node').id,
+                id: this.state.get('node').id,
+                content: {
                   size,
                 },
               },
@@ -240,6 +213,12 @@ export class TextComponent
       return {
         focus: focusId.includes(state.node.id),
       };
+    });
+
+    this.state.hold(this.state.select('focus'), (focus) => {
+      if (focus) {
+        this.edit();
+      }
     });
 
     this.store
@@ -262,7 +241,7 @@ export class TextComponent
     this.state
       .select('node')
       .pipe(
-        map((it) => it.position),
+        map((it) => it.content.position),
         untilDestroyed(this)
       )
       .subscribe((position) => {
@@ -280,7 +259,7 @@ export class TextComponent
               {
                 data: {
                   type: 'text',
-                  node: this.state.get('node'),
+                  id: this.state.get('node').id,
                 },
                 op: 'remove',
               },
@@ -291,8 +270,11 @@ export class TextComponent
     });
 
     this.state.hold(this.state.select('node'), (node) => {
-      this.el.nativeElement.style.setProperty('--size', `${node.size}px`);
-      this.el.nativeElement.style.setProperty('--color', node.color);
+      this.el.nativeElement.style.setProperty(
+        '--size',
+        `${node.content.size}px`
+      );
+      this.el.nativeElement.style.setProperty('--color', node.content.color);
     });
   }
 

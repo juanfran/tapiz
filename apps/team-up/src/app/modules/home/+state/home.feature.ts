@@ -7,7 +7,6 @@ import {
   TeamMember,
   SortBoard,
 } from '@team-up/board-commons';
-import { produce } from 'immer';
 import { HomeActions } from './home.actions';
 
 export interface HomeState {
@@ -40,6 +39,9 @@ const reducer = createReducer(
     HomeActions.initTeamPage,
     HomeActions.initStarredPage,
     (state, action): HomeState => {
+      state = {
+        ...state,
+      };
       state.invitations = [];
       state.members = [];
       state.boards = [];
@@ -53,112 +55,133 @@ const reducer = createReducer(
     }
   ),
   on(HomeActions.fetchBoardsSuccess, (state, { boards }): HomeState => {
-    state.boards = boards;
-
-    return state;
+    return {
+      ...state,
+      boards,
+    };
   }),
   on(
     HomeActions.removeBoard,
     HomeActions.leaveBoard,
     (state, { id }): HomeState => {
-      state.boards = state.boards.filter((board) => {
-        return board.id !== id;
-      });
-
-      return state;
+      return {
+        ...state,
+        boards: state.boards.filter((board) => {
+          return board.id !== id;
+        }),
+      };
     }
   ),
   on(HomeActions.fetchTeamsSuccess, (state, { teams }): HomeState => {
-    state.teams = teams;
-
-    return state;
+    return {
+      ...state,
+      teams,
+    };
   }),
   on(HomeActions.createTeamSuccess, (state, { team }): HomeState => {
+    state = {
+      ...state,
+    };
     state.teams.unshift(team);
 
     return state;
   }),
   on(HomeActions.deleteTeamSuccess, (state, { id }): HomeState => {
-    state.teams = state.teams.filter((team) => {
-      return team.id !== id;
-    });
-
-    return state;
+    return {
+      ...state,
+      teams: state.teams.filter((team) => {
+        return team.id !== id;
+      }),
+    };
   }),
   on(HomeActions.fetchTeamsInvitationsSuccess, (state, { invitations }) => {
-    state.invitations = invitations.map((invitation) => {
-      return {
-        id: invitation.id,
-        email: invitation.email,
-        role: invitation.role,
-      } as Invitation;
-    });
-
-    return state;
+    return {
+      ...state,
+      invitations: invitations.map((invitation) => {
+        return {
+          id: invitation.id,
+          email: invitation.email,
+          role: invitation.role,
+        } as Invitation;
+      }),
+    };
   }),
   on(HomeActions.initTeamMembersModal, (state) => {
-    state.invitations = [];
-    state.members = [];
-
-    return state;
+    return {
+      ...state,
+      invitations: [],
+      members: [],
+    };
   }),
   on(HomeActions.fetchTeamMembersSuccess, (state, { members }) => {
-    state.members = members;
-
-    return state;
+    return {
+      ...state,
+      members,
+    };
   }),
   on(HomeActions.inviteToTeamSuccess, (state, { invitation }) => {
-    state.invitations.unshift(invitation);
-
-    return state;
+    return {
+      ...state,
+      invitations: [invitation, ...state.invitations],
+    };
   }),
   on(HomeActions.deleteTeamInvitation, (state, { id }) => {
-    state.invitations = state.invitations.filter((invitation) => {
-      return invitation.id !== id;
-    });
-
-    return state;
+    return {
+      ...state,
+      invitations: state.invitations.filter((invitation) => {
+        return invitation.id !== id;
+      }),
+    };
   }),
   on(HomeActions.renameTeam, (state, { id, name }) => {
-    state.teams = state.teams.map((team) => {
-      if (team.id === id) {
-        team.name = name;
-      }
+    return {
+      ...state,
+      teams: state.teams.map((team) => {
+        if (team.id === id) {
+          team.name = name;
+        }
 
-      return team;
-    });
-
-    return state;
+        return team;
+      }),
+    };
   }),
   on(HomeActions.fetchUserInvitationsSuccess, (state, { invitations }) => {
-    state.userInvitations = invitations;
-
-    return state;
+    return {
+      ...state,
+      userInvitations: invitations,
+    };
   }),
   on(HomeActions.acceptInvitation, (state, { invitation }) => {
-    state.userInvitations = state.userInvitations.filter((inv) => {
-      return inv.id !== invitation.id;
-    });
-
-    return state;
+    return {
+      ...state,
+      userInvitations: state.userInvitations.filter((inv) => {
+        return inv.id !== invitation.id;
+      }),
+    };
   }),
   on(HomeActions.rejectInvitation, (state, { invitation }) => {
-    state.userInvitations = state.userInvitations.filter((inv) => {
-      return inv.id !== invitation.id;
-    });
-
-    return state;
+    return {
+      ...state,
+      userInvitations: state.userInvitations.filter((inv) => {
+        return inv.id !== invitation.id;
+      }),
+    };
   }),
   on(HomeActions.leaveTeam, (state, { id }) => {
-    state.teams = state.teams.filter((team) => {
-      return team.id !== id;
-    });
-
-    return state;
+    return {
+      ...state,
+      teams: state.teams.filter((team) => {
+        return team.id !== id;
+      }),
+    };
   }),
   on(
     HomeActions.deleteTeamMemberSuccess,
     (state, { id, teamId, currentUserId }) => {
+      state = {
+        ...state,
+      };
+
       if (id === currentUserId) {
         state.teams = state.teams.filter((team) => {
           return team.id !== teamId;
@@ -175,6 +198,10 @@ const reducer = createReducer(
   on(
     HomeActions.changeRoleSuccess,
     (state, { memberId, teamId, currentUserId, role }) => {
+      state = {
+        ...state,
+      };
+
       if (memberId === currentUserId) {
         state.teams = state.teams.map((team) => {
           if (team.id === teamId) {
@@ -197,49 +224,64 @@ const reducer = createReducer(
     }
   ),
   on(HomeActions.duplicateBoardSuccess, (state, { board }) => {
-    state.boards.unshift(board);
-
-    return state;
+    return {
+      ...state,
+      boards: [board, ...state.boards],
+    };
   }),
   on(HomeActions.renameBoard, (state, { id, name }) => {
-    state.boards = state.boards.map((board) => {
-      if (board.id === id) {
-        board.name = name;
-      }
+    return {
+      ...state,
+      boards: state.boards.map((board) => {
+        if (board.id === id) {
+          board.name = name;
+        }
 
-      return board;
-    });
-
-    return state;
+        return board;
+      }),
+    };
   }),
   on(HomeActions.starBoard, (state, { id }) => {
-    state.boards = state.boards.map((board) => {
-      if (board.id === id) {
-        board.starred = true;
-      }
+    return {
+      ...state,
+      boards: state.boards.map((board) => {
+        if (board.id === id) {
+          return {
+            ...board,
+            starred: true,
+          };
+        }
 
-      return board;
-    });
-
-    return state;
+        return board;
+      }),
+    };
   }),
   on(HomeActions.unstarBoard, (state, { id }) => {
-    state.boards = state.boards.map((board) => {
-      if (board.id === id) {
-        board.starred = false;
-      }
+    return {
+      ...state,
+      boards: state.boards.map((board) => {
+        if (board.id === id) {
+          return {
+            ...board,
+            starred: false,
+          };
+        }
 
-      return board;
-    });
-
-    return state;
+        return board;
+      }),
+    };
   }),
   on(HomeActions.changeBoardSortBy, (state, { sortBy }) => {
-    state.sortBy = sortBy;
-
-    return state;
+    return {
+      ...state,
+      sortBy,
+    };
   }),
   on(HomeActions.transferBoard, (state, { id, teamId }) => {
+    state = {
+      ...state,
+    };
+
     state.boards = state.boards.map((board) => {
       if (board.id === id) {
         board.teamId = teamId;
@@ -260,9 +302,5 @@ const reducer = createReducer(
 
 export const homeFeature = createFeature({
   name: 'home',
-  reducer: (state: HomeState = initialHomeState, action: Action) => {
-    return produce(state, (draft: HomeState) => {
-      return reducer(draft, action);
-    });
-  },
+  reducer,
 });

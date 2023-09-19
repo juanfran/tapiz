@@ -11,10 +11,6 @@ const vector = z.object({
   rotation: z.number().safe(),
 });
 
-export const patchVector = vector.partial().extend({
-  id: z.string().max(255),
-});
+export const patchVector = vector.partial();
 
-export const newVector = vector.extend({
-  id: z.string().max(255),
-});
+export const newVector = vector;

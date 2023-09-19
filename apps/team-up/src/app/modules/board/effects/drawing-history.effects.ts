@@ -73,9 +73,9 @@ export class DrawingHistoryEffects {
                   {
                     data: {
                       type: 'note',
-                      node: {
-                        id: action.id,
-                        drawing: note?.drawing ?? [],
+                      id: action.id,
+                      content: {
+                        drawing: note?.content.drawing ?? [],
                       },
                     },
                     op: 'patch',

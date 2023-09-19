@@ -1,6 +1,6 @@
 <div class="title">
   <ng-container *ngIf="viewModel$ | async as vm">
-    {{ vm.panel.title }}
+    {{ vm.panel.content.title }}
 
     <button
       *ngIf="vm.mode === 'composeMode'"

@@ -1,6 +1,6 @@
 <img
   #image
-  [attr.src]="(image$ | push).url"
+  [attr.src]="(image$ | push).content.url"
   (load)="loadImage()" />
 
 <team-up-resize-handler></team-up-resize-handler>
