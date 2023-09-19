@@ -40,4 +40,22 @@
       background-color: #a672f8;
     }
   }
+
+  &.voting {
+    cursor: crosshair;
+  }
+
+  &.highlight {
+    z-index: 6;
+  }
+}
+
+.vote {
+  background-color: rgba(0, 0, 0, 0.15);
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  font-size: 12px;
+  border-radius: 10px;
+  text-align: center;
 }

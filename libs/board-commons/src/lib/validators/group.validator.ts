@@ -6,6 +6,12 @@ const group = z.object({
     x: z.number().safe(),
     y: z.number().safe(),
   }),
+  votes: z.array(
+    z.object({
+      userId: z.string().max(255),
+      vote: z.number().int().min(0),
+    })
+  ),
   width: z.number().nonnegative().safe(),
   height: z.number().nonnegative().safe(),
 });

@@ -35,6 +35,9 @@ interface State {
   editText: string;
   focus: boolean;
   draggable: boolean;
+  highlight: boolean;
+  voting: boolean;
+  userId: string;
 }
 @UntilDestroy()
 @Component({
@@ -66,7 +69,24 @@ export class GroupComponent
     return this.state.get('focus');
   }
 
-  public readonly viewModel$ = this.state.select();
+  @HostBinding('class.highlight') get highlight() {
+    return this.state.get('highlight');
+  }
+
+  @HostBinding('class.voting') get voting() {
+    return this.state.get('voting');
+  }
+
+  public readonly viewModel$ = this.state.select().pipe(
+    map((state) => {
+      return {
+        ...state,
+        votes: state.group.votes.reduce((prev, it) => {
+          return prev + it.vote;
+        }, 0),
+      };
+    })
+  );
 
   @ViewChildren('textarea') textarea!: QueryList<ElementRef>;
 
@@ -79,6 +99,9 @@ export class GroupComponent
     private resizableDirective: ResizableDirective,
     private cd: ChangeDetectorRef
   ) {
+    this.state.connect('voting', this.store.select(pageFeature.selectVoting));
+    this.state.connect('userId', this.store.select(pageFeature.selectUserId));
+
     this.state.set({ draggable: true });
 
     this.state.hold(this.state.select('focus'), () => this.cd.markForCheck());
@@ -95,16 +118,75 @@ export class GroupComponent
       event.stopPropagation();
     }
 
-    this.store.dispatch(
-      PageActions.setFocusId({
-        focusId: this.state.get('group').id,
-        ctrlKey: event.ctrlKey,
-      })
-    );
+    if (this.state.get('voting')) {
+      let votes = this.state.get('group').votes;
+
+      let currentUserVote = votes.find(
+        (vote) => vote.userId === this.state.get('userId')
+      );
+
+      if (currentUserVote) {
+        votes = votes.map((vote) => {
+          if (vote.userId === this.state.get('userId')) {
+            return {
+              ...vote,
+              vote: event.button === 2 ? vote.vote - 1 : vote.vote + 1,
+            };
+          }
+
+          return vote;
+        });
+      } else {
+        votes = [
+          ...votes,
+          {
+            userId: this.state.get('userId'),
+            vote: event.button === 2 ? -1 : 1,
+          },
+        ];
+      }
+
+      currentUserVote = votes.find(
+        (vote) => vote.userId === this.state.get('userId')
+      );
+
+      votes = votes.filter((vote) => vote.vote !== 0);
+
+      if (currentUserVote && currentUserVote.vote >= 0) {
+        this.store.dispatch(
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [
+              {
+                data: {
+                  type: 'group',
+                  node: {
+                    id: this.state.get('group').id,
+                    votes,
+                  },
+                },
+                op: 'patch',
+              },
+            ],
+          })
+        );
+      }
+    } else {
+      this.store.dispatch(
+        PageActions.setFocusId({
+          focusId: this.state.get('group').id,
+          ctrlKey: event.ctrlKey,
+        })
+      );
+    }
   }
 
   @HostListener('dblclick', ['$event'])
   public dblclick(event: MouseEvent) {
+    if (this.state.get('voting')) {
+      return;
+    }
+
     event.preventDefault();
     event.stopPropagation();
 
@@ -220,6 +302,24 @@ export class GroupComponent
         focus: focusId.includes(state.group.id),
       };
     });
+
+    this.state.connect(
+      'highlight',
+      this.store
+        .select(pageFeature.selectShowUserVotes)
+        .pipe(
+          map((userVotes) => {
+            return !!this.state
+              .get('group')
+              .votes.find((vote) => vote.userId === userVotes);
+          })
+        )
+        .pipe(
+          map((highlight) => {
+            return highlight;
+          })
+        )
+    );
 
     hotkeys('delete', () => {
       if (this.state.get('focus')) {

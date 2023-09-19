@@ -203,7 +203,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       .select(selectBoardCursor)
       .pipe(untilDestroyed(this))
       .subscribe((cursor) => {
-        this.el.nativeElement.style.cursor = cursor;
+        this.el.nativeElement.style.setProperty('--default-cursor', cursor);
 
         if (cursor === 'text') {
           this.el.nativeElement.classList.add(`cursor-text`);
