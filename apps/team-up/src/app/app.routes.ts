@@ -1,12 +1,9 @@
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes } from '@angular/router';
 import { LoginComponent } from './modules/board/components/login/login.component';
-import { AuthGuard } from './modules/board/guards/auth.guard';
 import { PageNotFoundComponent } from './modules/board/components/page-not-found/page-not-found.component';
-import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { AuthGuard } from './modules/board/guards/auth.guard';
 
-const routes: Routes = [
+export const APP_ROUTES: Routes = [
   {
     path: '',
     loadChildren: () =>
@@ -26,17 +23,3 @@ const routes: Routes = [
   { path: '404', component: PageNotFoundComponent },
   { path: '**', pathMatch: 'full', component: PageNotFoundComponent },
 ];
-@NgModule({
-  imports: [
-    RouterModule.forRoot(routes, { bindToComponentInputs: true }),
-    MatSnackBarModule,
-  ],
-  providers: [
-    {
-      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
-      useValue: { appearance: 'outline', subscriptSizing: 'dynamic' },
-    },
-  ],
-  schemas: [CUSTOM_ELEMENTS_SCHEMA],
-})
-export class AppModule {}

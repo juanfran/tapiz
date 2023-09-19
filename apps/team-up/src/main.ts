@@ -4,29 +4,29 @@ import {
   importProvidersFrom,
   inject,
   provideZoneChangeDetection,
+  isDevMode,
 } from '@angular/core';
 
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { environment } from './environments/environment';
 import { AppComponent } from './app/app.component';
-import { provideRouter } from '@angular/router';
-import {
-  StoreDevtoolsModule,
-  provideStoreDevtools,
-} from '@ngrx/store-devtools';
+import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideStore } from '@ngrx/store';
 import { provideRouterStore } from '@ngrx/router-store';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
-import { ApiRestInterceptorModule } from './app/commons/api-rest-interceptor/api-rest-interceptor.module';
 import {
-  withInterceptorsFromDi,
-  provideHttpClient,
-} from '@angular/common/http';
-import { AppModule } from './app/app.module';
+  provideAnimations,
+  provideNoopAnimations,
+} from '@angular/platform-browser/animations';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { configFactory, ConfigService } from './app/services/config.service';
 import { appFeature } from './app/+state/app.reducer';
+import { APP_ROUTES } from './app/app.routes';
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { authInterceptor } from './app/commons/api-rest-interceptor/api-rest-interceptor.service';
 
 if (environment.production) {
   enableProdMode();
@@ -45,14 +45,9 @@ bootstrapApplication(AppComponent, {
         return initializeApp(inject(ConfigService).config.firebaseConfig);
       }),
       provideAuth(() => getAuth()),
-      AppModule,
-      ApiRestInterceptorModule,
-      BrowserModule,
-      BrowserAnimationsModule.withConfig({
-        disableAnimations: prefersReducedMotion(),
-      }),
-      !environment.production ? StoreDevtoolsModule.instrument() : []
+      MatSnackBarModule
     ),
+    prefersReducedMotion() ? provideAnimations() : provideNoopAnimations(),
     provideStore(
       {
         app: appFeature.reducer,
@@ -68,7 +63,9 @@ bootstrapApplication(AppComponent, {
         },
       }
     ),
-    !environment.production ? provideStoreDevtools() : [],
+    provideStoreDevtools({
+      logOnly: !isDevMode(),
+    }),
     provideRouterStore(),
     {
       provide: APP_INITIALIZER,
@@ -76,11 +73,15 @@ bootstrapApplication(AppComponent, {
       multi: true,
       deps: [ConfigService],
     },
-    provideHttpClient(withInterceptorsFromDi()),
-    provideRouter([]),
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideRouter(APP_ROUTES, withComponentInputBinding()),
     provideZoneChangeDetection({
       eventCoalescing: true,
       runCoalescing: true,
     }),
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: { appearance: 'outline', subscriptSizing: 'dynamic' },
+    },
   ],
 }).catch((err) => console.error(err));

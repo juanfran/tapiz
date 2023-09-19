@@ -1,50 +1,38 @@
-import { Injectable } from '@angular/core';
-import {
-  HttpInterceptor,
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpErrorResponse,
-  HttpHeaders,
-} from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { inject } from '@angular/core';
+import { HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { ConfigService } from '@/app/services/config.service';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class ApiRestInterceptorService implements HttpInterceptor {
-  constructor(private router: Router, private configService: ConfigService) {}
+import { HttpInterceptorFn } from '@angular/common/http';
+import { throwError } from 'rxjs';
 
-  public intercept(
-    req: HttpRequest<unknown>,
-    next: HttpHandler
-  ): Observable<HttpEvent<unknown>> {
-    if (
-      this.configService.config &&
-      (req.url.includes(this.configService.config.API) ||
-        req.url.includes(this.configService.config.WS))
-    ) {
-      const request = req.clone({
-        headers: new HttpHeaders({
-          'Content-Type': 'application/json',
-        }),
-        withCredentials: true,
-      });
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const configService = inject(ConfigService);
+  const router = inject(Router);
 
-      return next.handle(request).pipe(
-        catchError((err: HttpErrorResponse) => {
-          if (err.status === 401) {
-            void this.router.navigate(['/login']);
-          }
+  if (
+    configService.config &&
+    (req.url.includes(configService.config.API) ||
+      req.url.includes(configService.config.WS))
+  ) {
+    const request = req.clone({
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+      }),
+      withCredentials: true,
+    });
 
-          return throwError(() => err);
-        })
-      );
-    }
+    return next(request).pipe(
+      catchError((err: HttpErrorResponse) => {
+        if (err.status === 401) {
+          void router.navigate(['/login']);
+        }
 
-    return next.handle(req);
+        return throwError(() => err);
+      })
+    );
   }
-}
+
+  return next(req);
+};
