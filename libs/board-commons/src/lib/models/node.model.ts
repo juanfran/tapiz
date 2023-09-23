@@ -1,5 +1,3 @@
-export type NodeType = 'note' | 'group' | 'panel' | 'text' | 'image' | 'vector';
-
 export interface TuNode<T = object> {
   id: string;
   type: string;

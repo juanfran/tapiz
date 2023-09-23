@@ -17,7 +17,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { NodeType, Text, TuNode } from '@team-up/board-commons';
+import { Text, TuNode } from '@team-up/board-commons';
 import { selectFocusId } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
 import { BoardMoveService } from '../../services/board-move.service';
@@ -104,7 +104,7 @@ export class TextComponent
     return !this.state.get('draggable') || !this.state.get('focus');
   }
 
-  public nodeType: NodeType = 'text';
+  public nodeType = 'text';
 
   public get id() {
     return this.state.get('node').id;

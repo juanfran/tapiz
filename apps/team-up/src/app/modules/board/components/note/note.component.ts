@@ -30,7 +30,6 @@ import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
 import {
   Drawing,
-  NodeType,
   Note,
   Panel,
   TuNode,
@@ -407,7 +406,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     );
   }
 
-  public nodeType: NodeType = 'note';
+  public nodeType = 'note';
 
   public get position() {
     return this.state.get('note').content.position;

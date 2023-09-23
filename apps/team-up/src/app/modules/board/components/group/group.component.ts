@@ -19,7 +19,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { Group, NodeType, TuNode } from '@team-up/board-commons';
+import { Group, TuNode } from '@team-up/board-commons';
 import { BoardMoveService } from '../../services/board-move.service';
 import { selectFocusId } from '../../selectors/page.selectors';
 import hotkeys from 'hotkeys-js';
@@ -341,7 +341,7 @@ export class GroupComponent
     });
   }
 
-  public nodeType: NodeType = 'group';
+  public nodeType = 'group';
 
   public get id() {
     return this.state.get('group').id;

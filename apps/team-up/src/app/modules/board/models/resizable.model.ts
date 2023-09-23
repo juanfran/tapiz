@@ -1,7 +1,7 @@
-import { NodeType, Point } from '@team-up/board-commons';
+import { Point } from '@team-up/board-commons';
 
 export interface Resizable {
-  nodeType: NodeType;
+  nodeType: string;
   width: number;
   height: number;
   rotation?: number;

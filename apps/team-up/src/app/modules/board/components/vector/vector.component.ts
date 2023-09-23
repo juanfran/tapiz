@@ -16,7 +16,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { NodeType, TuNode, Vector } from '@team-up/board-commons';
+import { TuNode, Vector } from '@team-up/board-commons';
 import {
   selectCanvasMode,
   selectFocusId,
@@ -79,7 +79,7 @@ export class VectorComponent
 
   public readonly vector$ = this.state.select('vector');
 
-  public nodeType: NodeType = 'vector';
+  public nodeType = 'vector';
 
   public get id() {
     return this.state.get('vector').id;

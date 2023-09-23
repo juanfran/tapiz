@@ -24,7 +24,7 @@ import {
   selectPosition,
   selectZoom,
 } from '../selectors/page.selectors';
-import { NodeType, Point } from '@team-up/board-commons';
+import { Point } from '@team-up/board-commons';
 import { PageActions } from '../actions/page.actions';
 import { BoardActions } from '../actions/board.actions';
 @Injectable({
@@ -59,7 +59,7 @@ export class MultiDragService {
     {
       init: Point;
       final: Point | null;
-      type: NodeType;
+      type: string;
     }
   >();
 
@@ -242,7 +242,7 @@ export class MultiDragService {
   private endDrag() {
     const actions: {
       id: string;
-      nodeType: NodeType;
+      nodeType: string;
       initialPosition: Point;
       finalPosition: Point;
     }[] = [];

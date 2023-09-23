@@ -16,7 +16,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { NodeType, Panel, TuNode } from '@team-up/board-commons';
+import { Panel, TuNode } from '@team-up/board-commons';
 import {
   selectCanvasMode,
   selectFocusId,
@@ -67,7 +67,7 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
 
   public readonly viewModel$ = this.state.select();
 
-  public nodeType: NodeType = 'panel';
+  public nodeType = 'panel';
 
   public get id() {
     return this.state.get('panel').id;

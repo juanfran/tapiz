@@ -1,9 +1,4 @@
-import {
-  CommonState,
-  NodeType,
-  StateActions,
-  Validators,
-} from '@team-up/board-commons';
+import { CommonState, StateActions, Validators } from '@team-up/board-commons';
 
 import { validate as noteValidator } from '@team-up/board-commons/validators/note';
 
@@ -19,14 +14,14 @@ const validations = {
     image: Validators.newImage,
     vector: Validators.newVector,
     text: Validators.newText,
-  } as Record<NodeType, unknown>,
+  } as Record<string, unknown>,
   patch: {
     panel: Validators.patchPanel,
     group: Validators.patchGroup,
     image: Validators.patchImage,
     vector: Validators.patchVector,
     text: Validators.patchText,
-  } as Record<NodeType, unknown>,
+  } as Record<string, unknown>,
 };
 
 export const validateAction = (
@@ -46,7 +41,7 @@ export const validateAction = (
     );
   } else {
     if (msg.op === 'patch' || msg.op === 'remove') {
-      const validator = validations['patch'][msg.data.type as NodeType];
+      const validator = validations['patch'][msg.data.type];
 
       // check if the element present in the state
       if (Array.isArray(state[stateType])) {
@@ -88,7 +83,7 @@ export const validateAction = (
         }
       }
     } else if (msg.op === 'add') {
-      const validator = validations['new'][msg.data.type as NodeType];
+      const validator = validations['new'][msg.data.type];
 
       if (validator) {
         const validatorResult = (validator as ZodAny).safeParse(

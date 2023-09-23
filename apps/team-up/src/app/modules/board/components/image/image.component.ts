@@ -17,7 +17,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '../../models/draggable.model';
-import { Image, NodeType, TuNode } from '@team-up/board-commons';
+import { Image, TuNode } from '@team-up/board-commons';
 import {
   selectCanvasMode,
   selectFocusId,
@@ -145,7 +145,7 @@ export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
     return !this.state.get('draggable') || !this.state.get('focus');
   }
 
-  public nodeType: NodeType = 'image';
+  public nodeType = 'image';
 
   public get id() {
     return this.state.get('image').id;

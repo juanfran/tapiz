@@ -5,7 +5,6 @@ import {
   ZoneConfig,
   User,
   Board,
-  NodeType,
   CocomaterialTag,
   CocomaterialApiListVectors,
   Drawing,
@@ -36,7 +35,7 @@ export const PageActions = createActionGroup({
     'End drag node': props<{
       nodes: {
         id: string;
-        nodeType: NodeType;
+        nodeType: string;
         initialPosition: Point;
         finalPosition: Point;
       }[];

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { type CommonState } from './models/common-state.model';
-import type { NodeType, StateActions } from './models/node.model';
+import type { StateActions } from './models/node.model';
 import { Point } from './models/point.model';
 import { BoardCommonActions } from './board-common-actions';
 import { User } from './models/user.model';
@@ -133,13 +133,3 @@ export function optimize(actions: StateActions[] | unknown[]) {
   return [...notOptimized, ...Object.values(optimizedTmp)];
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
-
-export const NodeState: Record<NodeType | 'user', string> = {
-  note: 'notes',
-  group: 'groups',
-  image: 'images',
-  text: 'texts',
-  panel: 'panels',
-  user: 'users',
-  vector: 'vectors',
-};

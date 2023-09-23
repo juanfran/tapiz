@@ -1,7 +1,7 @@
-import { NodeType, Point } from '@team-up/board-commons';
+import { Point } from '@team-up/board-commons';
 
 export interface Rotatable {
-  nodeType: NodeType;
+  nodeType: string;
   rotation: number;
   nativeElement: HTMLElement;
   position: Point;
