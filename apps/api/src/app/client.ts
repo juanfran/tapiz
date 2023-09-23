@@ -204,6 +204,11 @@ export class Client {
     };
 
     this.server.sendAll(this.boardId, this.getSetStateAction([action]), []);
+    this.server.clientClose(this);
+
+    if (!this.server.connectedBoardClients(this.boardId).length) {
+      this.server.emptyBoard(this.boardId);
+    }
   }
 
   private updateSendAllStateAction(action: StateActions) {

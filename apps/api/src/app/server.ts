@@ -21,6 +21,10 @@ export class Server {
     return this.wss;
   }
 
+  public clientClose(client: Client) {
+    this.clients = this.clients.filter((it) => it !== client);
+  }
+
   public async connection(ws: WebSocket, req: Request) {
     if (req.headers.cookie) {
       const cookies = cookie.parse(req.headers.cookie);
@@ -44,14 +48,15 @@ export class Server {
     ws.close();
   }
 
+  public connectedBoardClients(boardId: string) {
+    return this.clients.filter((it) => it.boardId === boardId);
+  }
+
   public sendAll(boardId: string, message: unknown, exclude: Client[] = []) {
-    const boardClients = this.clients.filter((it) => it.boardId === boardId);
+    const boardClients = this.connectedBoardClients(boardId);
 
     boardClients.forEach((client) => {
-      if (
-        !exclude.includes(client) &&
-        client.ws.readyState === WebSocket.OPEN
-      ) {
+      if (!exclude.includes(client)) {
         client.send(message);
       }
     });
@@ -88,6 +93,10 @@ export class Server {
     const nextState = fn(this.state[boardId]);
 
     this.updateBoard(boardId, nextState);
+  }
+
+  public emptyBoard(boardId: string) {
+    delete this.state[boardId];
   }
 
   public isUserInBoard(boardId: string, userId: User['id']) {

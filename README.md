@@ -40,7 +40,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Real time home boards
 - [ ] Real time members & permissions
 - [ ] Read only board
-- [ ] Delete board from memory if there is no active users
 
 ## TODO, code refactor
 
