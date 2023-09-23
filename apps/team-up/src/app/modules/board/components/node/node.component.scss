@@ -1,0 +1,5 @@
+:host {
+  display: flex;
+  position: relative;
+  z-index: var(--z-index-node, 1);
+}

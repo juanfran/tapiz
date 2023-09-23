@@ -1,5 +1,7 @@
 import { CommonState, StateActions, Validators } from '@team-up/board-commons';
 
+import { PERSONAL_TOKEN_VALIDATOR } from '@team-up/board-commons/validators/token.validator';
+
 import { validate as noteValidator } from '@team-up/board-commons/validators/note';
 
 import { type ZodAny } from 'zod';
@@ -22,16 +24,63 @@ const validations = {
     vector: Validators.patchVector,
     text: Validators.patchText,
   } as Record<string, unknown>,
+  newValidators: [
+    {
+      type: 'token',
+      validator: PERSONAL_TOKEN_VALIDATOR,
+    },
+  ],
 };
 
 export const validateAction = (
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   msg: StateActions,
   state: CommonState,
   userId: string
 ) => {
-  const stateType = msg.data.type as keyof CommonState;
   const customValidators = msg.data.type in validations.custom;
+
+  const validatorConfig = validations.newValidators.find(
+    (it) => it.type === msg.data.type
+  );
+
+  if (validatorConfig) {
+    if (msg.op === 'add') {
+      const result = validatorConfig.validator.add(msg.data, userId, state);
+
+      if (result.success) {
+        return {
+          op: 'add',
+          data: result.data,
+        };
+      }
+    } else if (msg.op === 'patch') {
+      const node = state.nodes.find((it) => it.id === msg.data.id);
+
+      if (!node) {
+        return false;
+      }
+
+      const result = validatorConfig.validator.patch(msg.data, userId, state);
+
+      if (result.success) {
+        return {
+          op: 'patch',
+          data: result.data,
+        };
+      }
+    } else if (msg.op === 'remove') {
+      const result = validatorConfig.validator.remove(msg.data, userId, state);
+
+      if (result.success) {
+        return {
+          op: 'remove',
+          data: result.data,
+        };
+      }
+    }
+
+    return false;
+  }
 
   if (customValidators) {
     return validations.custom[msg.data.type as keyof typeof validations.custom](
@@ -44,14 +93,10 @@ export const validateAction = (
       const validator = validations['patch'][msg.data.type];
 
       // check if the element present in the state
-      if (Array.isArray(state[stateType])) {
-        const node = (state[stateType] as Array<{ id: string }>).find(
-          (it) => it.id === msg.data.id
-        );
+      const node = state.nodes.find((it) => it.id === msg.data.id);
 
-        if (!node) {
-          return false;
-        }
+      if (!node) {
+        return false;
       }
 
       if (msg.op === 'remove') {

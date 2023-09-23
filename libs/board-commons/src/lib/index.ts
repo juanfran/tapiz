@@ -16,6 +16,7 @@ export * from './models/drawing.model';
 export * from './models/role.model';
 export * from './models/team.model';
 export * from './models/member.model';
+export * from './models/token.model';
 export * from './models/invitation.model';
 export * from './models/sort-board.model';
 export * from './state-tools';

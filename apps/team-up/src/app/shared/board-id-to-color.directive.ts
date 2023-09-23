@@ -1,42 +1,67 @@
 import { Directive, ElementRef, Input, inject } from '@angular/core';
 import { contrast } from '../modules/board/components/note/contrast';
 
+const colors = [
+  '#FF7F7F',
+  '#7FAAFF',
+  '#FFFF7F',
+  '#7FFF7F',
+  '#FFBF7F',
+  '#BF7FBF',
+  '#7FBFBF',
+  '#FF7FAA',
+  '#FFAA7F',
+  '#AABF7F',
+  '#BF7F7F',
+  '#7F7FAA',
+  '#BFBFAA',
+  '#FFAAFF',
+  '#AA7F7F',
+  '#AAFFBF',
+  '#7FAABF',
+  '#FFBFBE',
+] as const;
+
+export const BoardColors = colors.map((backgroundColor) => {
+  const color =
+    contrast(backgroundColor, '#ffffff') > 2 ? '#ffffff' : '#000000';
+
+  return {
+    backgroundColor,
+    color,
+  };
+});
+
 @Directive({
   selector: '[teamUpBoardIdToColor]',
   standalone: true,
+  exportAs: 'teamUpBoardIdToColor',
 })
 export class BoardIdToColorDirective {
   private elementRef = inject(ElementRef<HTMLElement>);
 
   @Input({ required: true }) set teamUpBoardIdToColor(boardId: string) {
-    this.uuidToColor(boardId);
+    this.idToColor(boardId);
   }
 
-  private colors = [
-    '#FF7F7F',
-    '#7FAAFF',
-    '#FFFF7F',
-    '#7FFF7F',
-    '#FFBF7F',
-    '#BF7FBF',
-  ];
+  private colors = BoardColors;
 
-  public uuidToColor(uuid: string) {
+  public color = '';
+  public backgroundColor = '';
+
+  public idToColor(id: string) {
     let hash = 0;
-    for (let i = 0; i < uuid.length; i++) {
-      hash = hash * 31 + uuid.charCodeAt(i);
-      hash = hash % Number.MAX_SAFE_INTEGER; // Para evitar desbordamientos
+    for (let i = 0; i < id.length; i++) {
+      hash = hash * 31 + id.charCodeAt(i);
+      hash = hash % Number.MAX_SAFE_INTEGER;
     }
 
-    // Uso del módulo para obtener una distribución equitativa
     const index = Math.abs(hash) % this.colors.length;
 
-    this.elementRef.nativeElement.style.backgroundColor = this.colors[index];
+    this.backgroundColor = this.colors[index].backgroundColor;
+    this.color = this.colors[index].color;
 
-    if (contrast(this.colors[index], '#ffffff') > 2) {
-      this.elementRef.nativeElement.style.color = '#ffffff';
-    } else {
-      this.elementRef.nativeElement.style.color = '#000000';
-    }
+    this.elementRef.nativeElement.style.backgroundColor = this.backgroundColor;
+    this.elementRef.nativeElement.style.color = this.color;
   }
 }

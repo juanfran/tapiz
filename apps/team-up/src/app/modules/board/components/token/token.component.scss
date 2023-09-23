@@ -1,0 +1,25 @@
+:host {
+  aspect-ratio: 1/1;
+  user-select: none;
+  block-size: 100px;
+  background-color: var(--bg);
+  border-radius: 50px;
+  box-shadow: inset 0px 0px 0px 5px transparent;
+
+  &.focus {
+    box-shadow: inset 0px 0px 0px 5px var(--primary-color);
+  }
+}
+
+.edit, .text {
+  aspect-ratio: 1/1;
+  block-size: 100%;
+  outline: none;
+  white-space: nowrap;
+  font-size: var(--font-size-40);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  color: var(--color);
+}

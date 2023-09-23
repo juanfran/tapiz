@@ -37,6 +37,8 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { RxLet } from '@rx-angular/template/let';
 import { MatIconModule } from '@angular/material/icon';
+import { TokenSelectorComponent } from '../token-selector/token-selector.component';
+import { Token } from '@team-up/board-commons/models/token.model';
 
 interface State {
   visible: boolean;
@@ -60,6 +62,7 @@ interface State {
     MatButtonModule,
     AsyncPipe,
     MatIconModule,
+    TokenSelectorComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -155,7 +158,6 @@ export class ToolbarComponent {
               y: (-position.y + event.pageY) / zoom,
             },
           });
-
           this.store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
@@ -267,6 +269,54 @@ export class ToolbarComponent {
     this.store.dispatch(
       PageActions.selectEmoji({ emoji: emojiEvent.detail.emoji as NativeEmoji })
     );
+  }
+
+  public token() {
+    if (this.state.get('popupOpen') === 'token') {
+      this.popupOpen('');
+      return;
+    }
+
+    this.popupOpen('token');
+  }
+
+  public tokenSelected(
+    token: Pick<Token, 'backgroundColor' | 'color' | 'text'>
+  ) {
+    this.toolbarSubscription = this.boardMoveService
+      .nextMouseDown()
+      .pipe(
+        withLatestFrom(
+          this.store.select(selectZoom),
+          this.store.select(selectPosition)
+        )
+      )
+      .subscribe({
+        next: ([event, zoom, position]) => {
+          this.store.dispatch(
+            BoardActions.batchNodeActions({
+              history: true,
+              actions: [
+                {
+                  data: {
+                    type: 'token',
+                    id: v4(),
+                    content: {
+                      ...token,
+                      position: {
+                        x: (-position.x + event.pageX) / zoom - 50,
+                        y: (-position.y + event.pageY) / zoom - 50,
+                      },
+                    },
+                  },
+                  op: 'add',
+                },
+              ],
+            })
+          );
+        },
+        complete: () => this.popupOpen(''),
+      });
   }
 
   public popupOpen(popupName: string) {
