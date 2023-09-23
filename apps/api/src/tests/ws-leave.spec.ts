@@ -21,6 +21,7 @@ jest.mock('../app/auth', () => {
 describe('ws', () => {
   let ws: WebSocket;
   let wsServer: Server;
+  const port = 8001;
 
   const send = (obj: unknown) => {
     return new Promise((resolve) => {
@@ -37,7 +38,7 @@ describe('ws', () => {
     await createMultipleUsers();
 
     const server = http.createServer();
-    server.listen(8000);
+    server.listen(port);
 
     wsServer = startWsServer(server);
   });
@@ -51,7 +52,7 @@ describe('ws', () => {
   }
 
   beforeAll((done) => {
-    ws = new WebSocket(`ws://localhost:8000`, {
+    ws = new WebSocket(`ws://localhost:${port}`, {
       headers: {
         Cookie: 'auth=1',
       },
