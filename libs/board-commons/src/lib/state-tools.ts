@@ -80,12 +80,10 @@ export function applyDiff(
   }
 
   // move to the top
-  if (action.data.type === 'note' || action.data.type === 'vector') {
-    const index = state.nodes.findIndex((it) => action.data.id === it.id);
+  const index = state.nodes.findIndex((it) => action.data.id === it.id);
 
-    if (index !== -1) {
-      state.nodes.push(state.nodes.splice(index, 1)[0]);
-    }
+  if (index !== -1) {
+    state.nodes.push(state.nodes.splice(index, 1)[0]);
   }
 
   return {

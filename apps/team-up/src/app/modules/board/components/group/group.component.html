@@ -8,7 +8,7 @@
         (input)="setText($event)"
         (keydown.enter)="enter($event)"
         (focus)="selectTextarea($event)"
-        contenteditable
+        contenteditable="plaintext-only"
         >{{ vm.editText }}</span
       >
     </ng-container>

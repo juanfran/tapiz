@@ -121,6 +121,16 @@
       </div>
       <div
         class="toolbar-button-container"
+        [class.active]="vm.popupOpen === 'token'">
+        <button
+          (click)="token()"
+          class="toolbar-button">
+          <mat-icon class="material-icons-outlined">circle</mat-icon>
+        </button>
+        <div class="toolbar-tooltip">Token</div>
+      </div>
+      <div
+        class="toolbar-button-container"
         [class.active]="vm.popupOpen === 'search'">
         <button
           class="toolbar-button"
@@ -161,8 +171,16 @@
   </div>
 
   <div
+    class="tokens"
+    *ngIf="vm.popupOpen === 'token'">
+    <team-up-token-selector (selectToken)="tokenSelected($event)" />
+  </div>
+
+  <div
     class="emojis"
     *ngIf="vm.popupOpen === 'emoji'">
-    <emoji-picker (emoji-click)="emojiSelected($event)"></emoji-picker>
+    <emoji-picker
+      (emoji-click)="emojiSelected($event)"
+      class="light"></emoji-picker>
   </div>
 </ng-container>

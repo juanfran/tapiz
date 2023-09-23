@@ -77,6 +77,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { appFeature } from '@/app/+state/app.reducer';
 import { RotateDirective } from '../directives/rotate.directive';
 import { StopHighlightComponent } from '@/app/shared/stop-highlight/stop-highlight';
+import { NodesComponent } from '../components/nodes/nodes.component';
 
 @UntilDestroy()
 @Component({
@@ -110,6 +111,7 @@ import { StopHighlightComponent } from '@/app/shared/stop-highlight/stop-highlig
     RotateDirective,
     StopHighlightComponent,
     MatProgressBarModule,
+    NodesComponent,
   ],
   hostDirectives: [CopyPasteDirective],
 })
