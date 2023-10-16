@@ -81,8 +81,8 @@ const reducer = createReducer(
   on(HomeActions.createTeamSuccess, (state, { team }): HomeState => {
     state = {
       ...state,
+      teams: [team, ...state.teams],
     };
-    state.teams.unshift(team);
 
     return state;
   }),
@@ -290,7 +290,10 @@ const reducer = createReducer(
 
     state.boards = state.boards.map((board) => {
       if (board.id === id) {
-        board.teamId = teamId;
+        return {
+          ...board,
+          teamId,
+        };
       }
 
       return board;
