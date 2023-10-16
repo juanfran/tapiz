@@ -138,7 +138,10 @@ const reducer = createReducer(
       ...state,
       teams: state.teams.map((team) => {
         if (team.id === id) {
-          team.name = name;
+          return {
+            ...team,
+            name,
+          };
         }
 
         return team;
@@ -234,7 +237,10 @@ const reducer = createReducer(
       ...state,
       boards: state.boards.map((board) => {
         if (board.id === id) {
-          board.name = name;
+          return {
+            ...board,
+            name,
+          };
         }
 
         return board;
