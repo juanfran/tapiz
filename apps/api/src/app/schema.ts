@@ -10,7 +10,7 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { DBState } from '@team-up/board-commons';
+import { TuNode } from '@team-up/board-commons';
 
 export const roleEnum = pgEnum('role', ['admin', 'member']);
 export const roleEnumWithGuest = pgEnum('role', ['admin', 'member', 'guest']);
@@ -28,7 +28,7 @@ export const usersRelations = relations(accounts, ({ many }) => ({
 export const boards = pgTable('boards', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: varchar('name', { length: 256 }).notNull(),
-  board: json('board').$type<DBState>().notNull(),
+  board: json('board').$type<TuNode[]>().notNull(),
   createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
   teamId: uuid('team_id').references(() => teams.id, { onDelete: 'cascade' }),
   public: boolean('public').notNull().default(false),

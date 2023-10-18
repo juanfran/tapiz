@@ -1,5 +1,4 @@
 import { type Type } from '@angular/core';
-import { CommonState } from './common-state.model';
 
 export interface TuNode<T = object> {
   id: string;
@@ -42,7 +41,7 @@ export interface NodeValidator {
   add: (
     data: TuNode,
     userId: string,
-    state: CommonState
+    state: TuNode[]
   ) =>
     | {
         success: true;
@@ -52,7 +51,7 @@ export interface NodeValidator {
   patch: (
     data: TuNode,
     userId: string,
-    state: CommonState
+    state: TuNode[]
   ) =>
     | {
         success: true;
@@ -62,7 +61,7 @@ export interface NodeValidator {
   remove: (
     data: NodeRemove['data'],
     userId: string,
-    state: CommonState
+    state: TuNode[]
   ) =>
     | {
         success: true;

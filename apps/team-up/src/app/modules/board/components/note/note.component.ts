@@ -37,7 +37,6 @@ import {
   isPanel,
 } from '@team-up/board-commons';
 import { BoardMoveService } from '../../services/board-move.service';
-import { selectUserById, usernameById } from '../../selectors/board.selectors';
 import {
   isUserHighlighted,
   selectDrawing,
@@ -56,7 +55,9 @@ import { concatLatestFrom } from '@ngrx/effects';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import { DrawingDirective } from '../../directives/drawing.directive';
 import { pageFeature } from '../../reducers/page.reducer';
-import { boardFeature } from '../../reducers/board.reducer';
+import { HistoryService } from '@/app/services/history.service';
+import { BoardFacade } from '@/app/services/board-facade.service';
+import { filterNil } from '@/app/commons/operators/filter-nil';
 interface State {
   edit: boolean;
   note: TuNode<Note>;
@@ -130,7 +131,9 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     private state: RxState<State>,
     private store: Store,
     private boardDragDirective: BoardDragDirective,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private historyService: HistoryService,
+    private boardFacade: BoardFacade
   ) {
     this.state.set({
       textSize: 56,
@@ -143,7 +146,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       .subscribe((note) => {
         this.state.connect(
           'username',
-          this.store.select(usernameById(note.content.ownerId))
+          this.boardFacade.usernameById(note.content.ownerId)
         );
       });
 
@@ -157,6 +160,14 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         '--text-size',
         `${this.state.get('textSize')}px`
       );
+    });
+
+    this.state.hold(this.state.select('edit'), (edit) => {
+      if (edit) {
+        this.historyService.initEdit(this.state.get('note'));
+      } else {
+        this.historyService.finishEdit(this.state.get('note'));
+      }
     });
   }
 
@@ -358,8 +369,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   }
 
   public checkBgColor() {
-    this.store
-      .select(boardFeature.selectNodes)
+    this.boardFacade
+      .getNodes()
       .pipe(
         map((nodes) => nodes.filter(isPanel)),
         untilDestroyed(this)
@@ -422,7 +433,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
       this.store.dispatch(
         BoardActions.batchNodeActions({
-          history: true,
+          history: false,
           actions: [
             {
               data: {
@@ -488,8 +499,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         map((note) => note.content.position),
         distinctUntilChanged(),
         concatLatestFrom(() =>
-          this.store
-            .select(boardFeature.selectNodes)
+          this.boardFacade
+            .getNodes()
             .pipe(map((nodes) => nodes.filter(isPanel)))
         )
       ),
@@ -498,9 +509,12 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       }
     );
 
-    const user$: Observable<User> = this.store
-      .select(selectUserById(this.state.get('note').content.ownerId))
-      .pipe(filter((user): user is User => !!user));
+    const user$: Observable<User> = this.boardFacade
+      .selectUserById(this.state.get('note').content.ownerId)
+      .pipe(
+        map((node) => node?.content),
+        filterNil()
+      );
 
     this.state.connect(
       'visible',

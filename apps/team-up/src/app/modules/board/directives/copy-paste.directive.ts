@@ -6,7 +6,7 @@ import { selectFocusId } from '../selectors/page.selectors';
 import { v4 } from 'uuid';
 import { NodeAdd, Point, TuNode } from '@team-up/board-commons';
 import { PageActions } from '../actions/page.actions';
-import { boardFeature } from '../reducers/board.reducer';
+import { BoardFacade } from '@/app/services/board-facade.service';
 
 @Directive({
   selector: '[teamUpCopyPaste]',
@@ -22,11 +22,12 @@ export class CopyPasteDirective {
   }
 
   private store = inject(Store);
+  private boardFacade = inject(BoardFacade);
   private copyNode: TuNode[] = [];
 
   public copy() {
-    this.store
-      .select(boardFeature.selectNodes)
+    this.boardFacade
+      .getNodes()
       .pipe(
         take(1),
         concatLatestFrom(() => [this.store.select(selectFocusId)])
@@ -67,6 +68,6 @@ export class CopyPasteDirective {
       };
     });
 
-    this.store.dispatch(PageActions.pasteNodes({ nodes }));
+    this.store.dispatch(PageActions.pasteNodes({ nodes, history: true }));
   }
 }

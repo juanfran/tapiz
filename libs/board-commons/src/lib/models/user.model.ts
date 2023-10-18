@@ -1,3 +1,4 @@
+import { TuNode } from './node.model';
 import { Point } from './point.model';
 
 export interface User {
@@ -9,3 +10,5 @@ export interface User {
   position?: Point;
   zoom?: number;
 }
+
+export type UserNode = TuNode<User>;

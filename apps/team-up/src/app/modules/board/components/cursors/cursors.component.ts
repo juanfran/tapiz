@@ -1,7 +1,7 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { selectCursors } from '../../selectors/board.selectors';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+
 import { NgFor, NgIf, AsyncPipe } from '@angular/common';
+import { BoardFacade } from '@/app/services/board-facade.service';
 
 @Component({
   selector: 'team-up-cursors',
@@ -12,7 +12,6 @@ import { NgFor, NgIf, AsyncPipe } from '@angular/common';
   imports: [NgFor, NgIf, AsyncPipe],
 })
 export class CursorsComponent {
-  public users$ = this.store.select(selectCursors());
-
-  constructor(private store: Store) {}
+  private boardFacade = inject(BoardFacade);
+  public users$ = this.boardFacade.selectCursors();
 }

@@ -2,10 +2,9 @@ import WebSocket from 'ws';
 
 import { startWsServer } from '../app/ws-server';
 import { startDB } from '../app/db/init-db';
-import { BoardCommonActions } from '@team-up/board-commons';
 import * as http from 'http';
 import { createMultipleUsers, getAuth, getUserCaller } from './test-helpers';
-import { getBoard, getBoardUser } from '../app/db/board-db';
+import { getBoardUser } from '../app/db/board-db';
 import { Server } from '../app/server';
 
 jest.mock('../app/auth', () => {

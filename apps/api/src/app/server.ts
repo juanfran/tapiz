@@ -1,18 +1,21 @@
-import { CommonState, User } from '@team-up/board-commons';
+import type { StateActions, TuNode, UserNode } from '@team-up/board-commons';
 import * as WebSocket from 'ws';
 import { Client } from './client';
 import db from './db';
-import { Request } from 'express';
+import type { Request } from 'express';
 import * as cookie from 'cookie';
 import { verifyToken } from './auth';
-import { Server as HTTPServer } from 'http';
-import { Server as HTTPSServer } from 'https';
+import type { Server as HTTPServer } from 'http';
+import type { Server as HTTPSServer } from 'https';
+import { syncNodeBox } from '@team-up/sync-node-box';
+import { Subscription, throttleTime } from 'rxjs';
+
 export class Server {
   private wss!: WebSocket.Server;
-  private pendingBoardUpdates = new Set<string>();
 
   public clients: Client[] = [];
-  private state: Record<string, CommonState> = {};
+  private state: Record<string, ReturnType<typeof syncNodeBox>> = {};
+  private stateSubscriptions: Record<string, Subscription> = {};
 
   public start(server: HTTPServer | HTTPSServer) {
     this.wss = new WebSocket.Server({ server });
@@ -64,70 +67,108 @@ export class Server {
 
   public async createBoard(boardId: string) {
     if (!this.state[boardId]) {
+      if (this.stateSubscriptions[boardId]) {
+        this.emptyBoard(boardId);
+      }
+
       const board = await db.board.getBoard(boardId);
 
       if (!board) {
         throw new Error('board not found');
       }
 
-      const users = await this.getBoardUsers(boardId);
+      const boardNodes = board.board ?? [];
 
-      this.updateBoard(boardId, {
-        ...board.board,
-        users: users.map((it) => {
+      this.state[boardId] = syncNodeBox({ history: 0 });
+
+      this.stateSubscriptions[boardId] = this.state[boardId]
+        .sync()
+        .pipe(throttleTime(500))
+        .subscribe((state) => {
+          db.board.updateBoard(boardId, state);
+        });
+
+      this.updateBoard(
+        boardId,
+        boardNodes.map((it) => {
+          if (it.type !== 'user') {
+            return it;
+          }
+
           return {
             ...it,
-            connected: false,
-            cursor: null,
-          };
-        }),
-      });
+            content: {
+              ...it.content,
+              connected: false,
+              cursor: null,
+            },
+          } as UserNode;
+        })
+      );
     }
   }
 
-  public getBoard(boardId: string): CommonState | undefined {
-    return this.state[boardId];
+  public getBoard(boardId: string): TuNode[] | undefined {
+    if (!this.state[boardId]) {
+      return;
+    }
+
+    return this.state[boardId].get();
   }
 
-  public setState(boardId: string, fn: (state: CommonState) => CommonState) {
-    const nextState = fn(this.state[boardId]);
+  public setState(boardId: string, fn: (state: TuNode[]) => TuNode[]) {
+    const nextState = fn(this.state[boardId].get());
 
     this.updateBoard(boardId, nextState);
   }
 
   public emptyBoard(boardId: string) {
+    db.board.updateBoard(boardId, this.state[boardId].get());
+
     delete this.state[boardId];
+
+    if (this.stateSubscriptions[boardId]) {
+      this.stateSubscriptions[boardId].unsubscribe();
+      delete this.stateSubscriptions[boardId];
+    }
   }
 
-  public isUserInBoard(boardId: string, userId: User['id']) {
-    return this.state[boardId].users.some((it) => it.id === userId);
+  public getStateBoardUsers(boardId: string) {
+    const state = this.getBoard(boardId);
+
+    return state?.filter((node) => node.type === 'user') ?? [];
   }
 
-  public userJoin(boardId: string, user: User) {
+  public isUserInBoard(boardId: string, userId: UserNode['id']) {
+    const users = this.getStateBoardUsers(boardId);
+
+    return users.some((it) => it.id === userId);
+  }
+
+  public userJoin(boardId: string, user: UserNode) {
     const isAlreadyInState = this.isUserInBoard(boardId, user.id);
+    const board = this.state[boardId];
 
     if (isAlreadyInState) {
-      this.setState(boardId, (state) => {
-        state.users = state.users.map((it) => {
+      board.update((state) => {
+        return state.map((it) => {
           if (it.id === user.id) {
             return user;
           }
 
           return it;
         });
-
-        return state;
       });
     } else {
-      this.setState(boardId, (state) => {
-        state.users.push(user);
+      board.update((state) => {
+        state.push(user);
 
         return state;
       });
     }
   }
 
-  public getBoardUser(boardId: string, userId: User['id']) {
+  public getBoardUser(boardId: string, userId: UserNode['id']) {
     return db.board.getBoardUser(boardId, userId);
   }
 
@@ -137,30 +178,21 @@ export class Server {
 
   public setUserVisibility(
     boardId: string,
-    userId: User['id'],
+    userId: UserNode['id'],
     visible: boolean
   ) {
     db.board.updateAccountBoard(boardId, userId, visible);
   }
 
-  public persistBoard(boardId: string) {
-    if (this.pendingBoardUpdates.has(boardId)) {
-      return;
-    }
-
-    this.pendingBoardUpdates.add(boardId);
-
-    setTimeout(() => {
-      db.board.updateBoard(boardId, this.state[boardId]);
-      this.pendingBoardUpdates.delete(boardId);
-    }, 500);
+  public applyAction(boardId: string, actions: StateActions[]) {
+    return this.state[boardId].actions(actions);
   }
 
   public updateBoardName(boardId: string, name: string) {
     db.board.updateBoardName(boardId, name);
   }
 
-  private updateBoard(boardId: string, state: CommonState) {
-    this.state[boardId] = state;
+  private updateBoard(boardId: string, state: TuNode[]) {
+    this.state[boardId].update(() => state);
   }
 }

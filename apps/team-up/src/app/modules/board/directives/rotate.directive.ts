@@ -1,10 +1,12 @@
-import { ApplicationRef, DestroyRef, Directive, inject } from '@angular/core';
+import { DestroyRef, Directive, inject } from '@angular/core';
 import { MoveService } from '../services/move.service';
 import { filterNil } from '@/app/commons/operators/filter-nil';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../actions/board.actions';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Rotatable } from '../models/rotatable.model';
+import { BoardFacade } from '@/app/services/board-facade.service';
+import { StateActions } from '@team-up/board-commons';
 
 @Directive({
   selector: '[teamUpRotate]',
@@ -13,8 +15,8 @@ import { Rotatable } from '../models/rotatable.model';
 export class RotateDirective {
   private moveService = inject(MoveService);
   private store = inject(Store);
-  private appRef = inject(ApplicationRef);
   private destroyRef = inject(DestroyRef);
+  private boardFacade = inject(BoardFacade);
 
   private host?: Rotatable;
 
@@ -36,13 +38,39 @@ export class RotateDirective {
 
     const host = this.host;
 
+    const onStart = () => {
+      this.boardFacade.patchHistory((history) => {
+        if (this.host) {
+          const nodeAction: StateActions = {
+            data: {
+              type: this.host.nodeType,
+              id: this.host.id,
+              content: {
+                rotation: this.host.rotation,
+                position: {
+                  x: this.host.position.x,
+                  y: this.host.position.y,
+                },
+              },
+            },
+            op: 'patch',
+          };
+
+          history.past.unshift([nodeAction]);
+          history.future = [];
+        }
+
+        return history;
+      });
+    };
+
     this.moveService
-      .listenRotation(this.rotateHandler, host)
+      .listenRotation(this.rotateHandler, host, onStart)
       .pipe(filterNil(), takeUntilDestroyed(this.destroyRef))
       .subscribe((path) => {
         this.store.dispatch(
           BoardActions.batchNodeActions({
-            history: true,
+            history: false,
             actions: [
               {
                 data: {
@@ -54,8 +82,7 @@ export class RotateDirective {
                       x: path.x,
                       y: path.y,
                     },
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  } as any,
+                  },
                 },
                 op: 'patch',
               },

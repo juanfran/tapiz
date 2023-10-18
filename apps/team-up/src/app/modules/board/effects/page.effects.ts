@@ -13,10 +13,10 @@ import { PageActions } from '../actions/page.actions';
 import { selectBoardId, selectCocomaterial } from '../selectors/page.selectors';
 import { BoardApiService } from '../../../services/board-api.service';
 import { BoardActions } from '../actions/board.actions';
-import { selectNoteFocus } from '../selectors/board.selectors';
 import { pageFeature } from '../reducers/page.reducer';
 import { filterNil } from '@/app/commons/operators/filter-nil';
 import { ActivatedRoute } from '@angular/router';
+import { BoardFacade } from '@/app/services/board-facade.service';
 
 @Injectable()
 export class PageEffects {
@@ -74,7 +74,7 @@ export class PageEffects {
   public cleanDrawing$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.cleanNoteDrawing),
-      concatLatestFrom(() => [this.store.select(selectNoteFocus)]),
+      concatLatestFrom(() => [this.boardFacade.selectNoteFocus()]),
       map(([, note]) => note),
       filterNil(),
       map((note) => {
@@ -229,6 +229,7 @@ export class PageEffects {
     private actions$: Actions,
     private store: Store,
     private boardApiService: BoardApiService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private boardFacade: BoardFacade
   ) {}
 }

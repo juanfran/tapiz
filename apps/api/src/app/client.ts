@@ -1,9 +1,9 @@
 import {
-  applyDiff,
   BoardCommonActions,
   NodeAdd,
   Point,
   StateActions,
+  UserNode,
   Validators,
 } from '@team-up/board-commons';
 import * as WebSocket from 'ws';
@@ -16,7 +16,7 @@ import { z } from 'zod';
 // init();
 
 export class Client {
-  public boardId!: string;
+  public boardId?: string;
   public isAdmin!: boolean;
   public sendTimeout?: ReturnType<typeof setTimeout>;
   public pendingMsgs: unknown[] = [];
@@ -112,6 +112,10 @@ export class Client {
   }
 
   private async updateBoardName(message: { name: string }) {
+    if (!this.boardId) {
+      return;
+    }
+
     const action = Validators.changeBoardName.safeParse(message);
 
     if (!action.success) {
@@ -123,6 +127,10 @@ export class Client {
   }
 
   private updateUserVisibility(message: { visible?: boolean }) {
+    if (!this.boardId) {
+      return;
+    }
+
     const action = Validators.patchUserVisibility.safeParse(message);
 
     if (!action.success) {
@@ -146,6 +154,10 @@ export class Client {
   }
 
   public parseStateActionMessage(message: StateActions[]) {
+    if (!this.boardId) {
+      return;
+    }
+
     const state = this.server.getBoard(this.boardId);
 
     if (!state) {
@@ -162,8 +174,6 @@ export class Client {
       validationResult.forEach((action) => {
         this.updateSendAllStateAction(action);
       });
-
-      this.server.persistBoard(this.boardId);
     }
   }
 
@@ -172,20 +182,24 @@ export class Client {
   }
 
   public close() {
-    this.server.setState(this.boardId, (state) => {
-      if (!state?.users) {
-        return state;
-      }
+    if (!this.boardId) {
+      return;
+    }
 
-      state.users = state.users.map((user) => {
-        if (user.id === this.id) {
+    this.server.setState(this.boardId, (state) => {
+      state = state.map((node) => {
+        if (node.type !== 'user') {
+          return node;
+        }
+
+        if (node.id === this.id) {
           return {
-            ...user,
+            ...node,
             connected: false,
           };
         }
 
-        return user;
+        return node;
       });
 
       return state;
@@ -205,13 +219,18 @@ export class Client {
 
     this.server.sendAll(this.boardId, this.getSetStateAction([action]), []);
     this.server.clientClose(this);
+    const boardId = this.boardId;
 
-    if (!this.server.connectedBoardClients(this.boardId).length) {
-      this.server.emptyBoard(this.boardId);
+    if (!this.server.connectedBoardClients(boardId).length) {
+      this.server.emptyBoard(boardId);
     }
   }
 
   private updateSendAllStateAction(action: StateActions) {
+    if (!this.boardId) {
+      return;
+    }
+
     this.updateStateWithAction(action);
     this.server.sendAll(this.boardId, this.getSetStateAction([action]), [this]);
   }
@@ -239,12 +258,16 @@ export class Client {
       await this.server.createBoard(this.boardId);
       const boardUser = await this.server.getBoardUser(this.boardId, this.id);
 
-      const user = {
-        name: this.username,
+      const user: UserNode = {
+        type: 'user',
         id: this.id,
-        visible: boardUser?.visible ?? false,
-        connected: true,
-        cursor: null,
+        content: {
+          id: this.id,
+          name: this.username,
+          visible: boardUser?.visible ?? false,
+          connected: true,
+          cursor: null,
+        },
       };
 
       const isAlreadyInBoard = this.server.isUserInBoard(this.boardId, this.id);
@@ -262,19 +285,7 @@ export class Client {
       this.isAdmin = admins.includes(this.id);
 
       const initStateActions: StateActions[] = [
-        ...board.users.map((it) => {
-          const add: NodeAdd = {
-            data: {
-              type: 'user',
-              id: it.id,
-              content: it,
-            },
-            op: 'add',
-          };
-
-          return add;
-        }),
-        ...board.nodes.map((it) => {
+        ...board.map((it) => {
           const add: NodeAdd = {
             data: it,
             op: 'add',
@@ -285,11 +296,7 @@ export class Client {
       ];
 
       const userAction: StateActions = {
-        data: {
-          type: 'user',
-          id: this.id,
-          content: user,
-        },
+        data: user,
         op: isAlreadyInBoard ? 'patch' : 'add',
       };
 
@@ -335,8 +342,10 @@ export class Client {
   }
 
   private updateStateWithAction(action: StateActions) {
-    this.server.setState(this.boardId, (state) => {
-      return applyDiff(action, state);
-    });
+    if (!this.boardId) {
+      return;
+    }
+
+    this.server.applyAction(this.boardId, [action]);
   }
 }

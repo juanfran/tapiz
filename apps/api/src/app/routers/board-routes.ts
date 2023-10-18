@@ -8,7 +8,7 @@ import {
 import { TRPCError } from '@trpc/server';
 import db from '../db';
 import { z } from 'zod';
-import { Board, DBState } from '@team-up/board-commons';
+import { Board } from '@team-up/board-commons';
 import { checkBoardAccess, revokeBoardAccess } from '../global';
 
 export const boardRouter = router({
@@ -46,9 +46,7 @@ export const boardRouter = router({
       const newBoard = await db.board.createBoard(
         req.input.name,
         req.ctx.user.sub,
-        {
-          nodes: [],
-        } as DBState,
+        [],
         team?.id ?? null
       );
 

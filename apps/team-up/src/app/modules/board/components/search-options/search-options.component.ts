@@ -15,7 +15,6 @@ import {
 import { MatOptionModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
-import { selectUsers } from '../../selectors/board.selectors';
 import {
   Observable,
   combineLatest,
@@ -26,7 +25,7 @@ import {
 import { PageActions } from '../../actions/page.actions';
 import { selectUserId } from '../../selectors/page.selectors';
 import { Note, TuNode, isNote } from '@team-up/board-commons';
-import { boardFeature } from '../../reducers/board.reducer';
+import { BoardFacade } from '@/app/services/board-facade.service';
 @Component({
   selector: 'team-up-search-options',
   templateUrl: './search-options.component.html',
@@ -49,10 +48,11 @@ export class SearchOptionsComponent implements AfterViewInit {
   });
 
   public store = inject(Store);
-  public notes$ = this.store
-    .select(boardFeature.selectNodes)
+  public boardFacade = inject(BoardFacade);
+  public notes$ = this.boardFacade
+    .getNodes()
     .pipe(map((nodes) => nodes.filter(isNote)));
-  public users$ = this.store.select(selectUsers);
+  public users$ = this.boardFacade.getUsers();
   public currentUser$ = this.store.select(selectUserId);
   public visibleNotes$ = combineLatest([this.notes$, this.users$]).pipe(
     withLatestFrom(this.currentUser$),
@@ -65,7 +65,7 @@ export class SearchOptionsComponent implements AfterViewInit {
             return true;
           }
 
-          return user.visible;
+          return user.content.visible;
         }
 
         return true;

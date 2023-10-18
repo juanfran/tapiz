@@ -2,11 +2,11 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { pageFeature } from '../../modules/board/reducers/page.reducer';
-import { boardFeature } from '../../modules/board/reducers/board.reducer';
 import { map, switchMap } from 'rxjs';
 import { filterNil } from '../../commons/operators/filter-nil';
 import { PageActions } from '../../modules/board/actions/page.actions';
 import { MatButtonModule } from '@angular/material/button';
+import { BoardFacade } from '@/app/services/board-facade.service';
 
 @Component({
   selector: 'team-up-follow-user',
@@ -29,12 +29,13 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class FollowUserComponent {
   private store = inject(Store);
+  private boardFacade = inject(BoardFacade);
 
   public userToFollow$ = this.store.select(pageFeature.selectFollow).pipe(
     switchMap((follow) => {
-      return this.store.select(boardFeature.selectUsers).pipe(
+      return this.boardFacade.getUsers().pipe(
         map((users) => {
-          return users.find((user) => user.id === follow);
+          return users.find((user) => user.id === follow)?.content;
         })
       );
     })

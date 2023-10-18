@@ -8,7 +8,6 @@ import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
-import { selectName } from '../../selectors/board.selectors';
 import {
   selectCanvasMode,
   selectIsAdmin,
@@ -23,6 +22,7 @@ import { RxLet } from '@rx-angular/template/let';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { ShareBoardComponent } from '../share-board/share-board.component';
+import { pageFeature } from '../../reducers/page.reducer';
 
 interface State {
   edit: boolean;
@@ -57,7 +57,7 @@ export class HeaderComponent {
   ) {
     this.state.set({ edit: false });
     this.state.connect('canvasMode', this.store.select(selectCanvasMode));
-    this.state.connect('name', this.store.select(selectName));
+    this.state.connect('name', this.store.select(pageFeature.selectName));
     this.state.connect('isAdmin', this.store.select(selectIsAdmin));
   }
 

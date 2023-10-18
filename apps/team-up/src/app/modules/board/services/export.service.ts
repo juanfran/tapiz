@@ -1,42 +1,36 @@
-import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { first } from 'rxjs/operators';
-import { selectBoardState } from '../selectors/board.selectors';
-import { Note, TuNode, isNote } from '@team-up/board-commons';
+import { Injectable, inject } from '@angular/core';
+import { Note, TuNode, UserNode, isNote } from '@team-up/board-commons';
+import { BoardFacade } from '@/app/services/board-facade.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ExportService {
-  constructor(private store: Store) {}
+  private boardFacade = inject(BoardFacade);
 
   public getExportFile(): Promise<string> {
     return new Promise((resolve) => {
-      this.store
-        .select(selectBoardState)
-        .pipe(first())
-        .subscribe((state) => {
-          const exportedNotes = state.nodes
-            .filter((it): it is TuNode<Note> => isNote(it))
-            .map((note) => {
-              const user = state.users.find(
-                (user) => user.id === note.content.ownerId
-              );
+      const nodes = this.boardFacade.get();
+      const users = nodes.filter((it): it is UserNode => it.type === 'user');
 
-              return {
-                owner: user?.name,
-                text: note.content.text,
-              };
-            });
+      const exportedNotes = nodes
+        .filter((it): it is TuNode<Note> => isNote(it))
+        .map((note) => {
+          const user = users.find((user) => user.id === note.content.ownerId);
 
-          const aFileParts = [JSON.stringify(exportedNotes, null, 4)];
-
-          resolve(
-            URL.createObjectURL(
-              new Blob(aFileParts, { type: 'application/octet-binary' })
-            )
-          );
+          return {
+            owner: user?.content.name,
+            text: note.content.text,
+          };
         });
+
+      const aFileParts = [JSON.stringify(exportedNotes, null, 4)];
+
+      resolve(
+        URL.createObjectURL(
+          new Blob(aFileParts, { type: 'application/octet-binary' })
+        )
+      );
     });
   }
 }

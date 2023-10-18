@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
-import { type CommonState } from '../../models/common-state.model';
-import { type StateActions } from '../../models/node.model';
+import { TuNode, type StateActions } from '../../models/node.model';
 
 const note = z.object({
   text: z.string().max(140),
@@ -43,7 +42,7 @@ export const newNote = note;
 
 export const validate = (
   msg: StateActions,
-  _state: CommonState,
+  _state: TuNode[],
   _userId: string
 ): StateActions | false => {
   let validatorResult: unknown | null = null;

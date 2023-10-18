@@ -10,6 +10,7 @@ import {
   Drawing,
   Note,
   NodeAdd,
+  TuNode,
 } from '@team-up/board-commons';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 
@@ -65,12 +66,13 @@ export const PageActions = createActionGroup({
       history?: boolean;
     }>(),
     'Go to note': props<{ note: Note }>(),
-    'Paste nodes': props<{ nodes: NodeAdd['data'][] }>(),
+    'Paste nodes': props<{ nodes: NodeAdd['data'][]; history: boolean }>(),
     'Undo drawing': emptyProps(),
     'Redo drawing': emptyProps(),
     'Follow user': props<{ id: User['id'] }>(),
     'Set board privacy': props<{ isPublic: boolean }>(),
     'Toggle show votes': props<{ userId: string }>(),
     'Stop highlight': emptyProps(),
+    'Node snapshot': props<{ prev: TuNode; curr: TuNode }>(),
   },
 });

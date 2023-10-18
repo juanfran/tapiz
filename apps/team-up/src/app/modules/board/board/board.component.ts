@@ -60,7 +60,6 @@ import { DrawingOptionsComponent } from '../components/drawing-options/drawing-o
 import { SearchOptionsComponent } from '../components/search-options/search-options.component';
 import { Actions, ofType } from '@ngrx/effects';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
-import { boardFeature } from '../reducers/board.reducer';
 import { TitleComponent } from '../../../shared/title/title.component';
 import { ResizableDirective } from '../directives/resize.directive';
 import { FollowUserComponent } from '@/app/shared/follow-user/follow-user.component';
@@ -78,6 +77,7 @@ import { appFeature } from '@/app/+state/app.reducer';
 import { RotateDirective } from '../directives/rotate.directive';
 import { StopHighlightComponent } from '@/app/shared/stop-highlight/stop-highlight';
 import { NodesComponent } from '../components/nodes/nodes.component';
+import { BoardFacade } from '@/app/services/board-facade.service';
 
 @UntilDestroy()
 @Component({
@@ -117,7 +117,7 @@ import { NodesComponent } from '../components/nodes/nodes.component';
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly boardId$ = this.store.select(selectBoardId);
-  public readonly nodes$ = this.store.select(boardFeature.selectNodes);
+  public readonly nodes$ = this.boardFacade.getNodes();
 
   public readonly notes$ = this.nodes$.pipe(
     map((nodes) => nodes.filter(isNote))
@@ -138,7 +138,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly newNote$ = new Subject<MouseEvent>();
   public readonly drawing = this.store.selectSignal(selectDrawing);
   public readonly search = this.store.selectSignal(selectSearching);
-  public readonly boardTitle = this.store.selectSignal(boardFeature.selectName);
+  public readonly boardTitle = this.store.selectSignal(pageFeature.selectName);
   public readonly folloUser = this.store.selectSignal(pageFeature.selectFollow);
   public readonly loaded = this.store.selectSignal(pageFeature.selectLoaded);
 
@@ -182,7 +182,8 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     private el: ElementRef,
     private route: ActivatedRoute,
     private notesService: NotesService,
-    private actions: Actions
+    private actions: Actions,
+    private boardFacade: BoardFacade
   ) {
     this.store
       .select(appFeature.selectUserId)
