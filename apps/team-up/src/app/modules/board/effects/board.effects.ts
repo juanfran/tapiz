@@ -19,9 +19,53 @@ import { selectZone } from '../selectors/page.selectors';
 import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
 import { StateActions } from '@team-up/board-commons';
+import { BoardFacade } from '@/app/services/board-facade.service';
 
 @Injectable()
 export class BoardEffects {
+  public initBoard$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(PageActions.initBoard),
+        tap(() => {
+          this.boardFacade.start();
+        })
+      );
+    },
+    {
+      dispatch: false,
+    }
+  );
+
+  public batchNodeActions$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(BoardActions.batchNodeActions),
+        tap((batch) => {
+          this.boardFacade.applyActions(batch.actions, batch.history);
+          this.wsService.send(batch.actions);
+        })
+      );
+    },
+    {
+      dispatch: false,
+    }
+  );
+
+  public setState$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(BoardActions.setState),
+        tap(({ data }) => {
+          this.boardFacade.applyActions(data);
+        })
+      );
+    },
+    {
+      dispatch: false,
+    }
+  );
+
   public wsUpdateStateName$ = createEffect(
     () => {
       return this.actions$
@@ -37,24 +81,7 @@ export class BoardEffects {
     }
   );
 
-  public wsUpdateState$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(BoardActions.batchNodeActions),
-        map((batch) => {
-          return batch.actions;
-        }),
-        tap((action) => {
-          this.wsService.send(action);
-        })
-      );
-    },
-    {
-      dispatch: false,
-    }
-  );
-
-  public wsUpdateStatePaste$ = createEffect(
+  public pasteNodes$ = createEffect(
     () => {
       return this.actions$.pipe(
         ofType(PageActions.pasteNodes),
@@ -66,6 +93,7 @@ export class BoardEffects {
             };
           });
 
+          this.boardFacade.applyActions(batchActions, true);
           this.wsService.send(batchActions);
         })
       );
@@ -243,6 +271,7 @@ export class BoardEffects {
     private actions$: Actions,
     private wsService: WsService,
     private boardApiService: BoardApiService,
-    private store: Store
+    private store: Store,
+    private boardFacade: BoardFacade
   ) {}
 }

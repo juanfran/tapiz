@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { boardFeature } from '../../reducers/board.reducer';
 import { RxFor } from '@rx-angular/template/for';
 import { NodeComponent } from '../node/node.component';
 import { map } from 'rxjs/operators';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
+import { BoardFacade } from '@/app/services/board-facade.service';
 
 @Component({
   selector: 'team-up-nodes',
@@ -20,12 +19,15 @@ import { BoardDragDirective } from '../../directives/board-drag.directive';
   providers: [],
 })
 export class NodesComponent {
-  private store = inject(Store);
+  private boardFacade = inject(BoardFacade);
 
-  public nodes$ = this.store.select(boardFeature.selectNodes).pipe(
+  public nodes$ = this.boardFacade.getNodes().pipe(
     map((it) => {
       return it.filter(
-        (it) => !['note', 'image', 'group', 'panel', 'vector'].includes(it.type)
+        (it) =>
+          !['note', 'image', 'group', 'panel', 'vector', 'user'].includes(
+            it.type
+          )
       );
     })
   );

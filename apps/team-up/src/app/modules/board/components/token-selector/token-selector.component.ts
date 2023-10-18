@@ -7,7 +7,6 @@ import {
   EventEmitter,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { selectUsers } from '../../selectors/board.selectors';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import {
@@ -15,6 +14,7 @@ import {
   BoardIdToColorDirective,
 } from '@/app/shared/board-id-to-color.directive';
 import { RxFor } from '@rx-angular/template/for';
+import { BoardFacade } from '@/app/services/board-facade.service';
 
 @Component({
   selector: 'team-up-token-selector',
@@ -68,19 +68,24 @@ export class TokenSelectorComponent {
   }>();
 
   private store = inject(Store);
+  private boardFacade = inject(BoardFacade);
 
   public users = toSignal(
-    this.store.select(selectUsers).pipe(
+    this.boardFacade.getUsers().pipe(
       map((users) => {
-        return users.map((user) => ({
-          id: user.id,
-          name: user.name
-            .split(' ')
-            .slice(0, 2)
-            .map((it) => it[0])
-            .join('')
-            .toUpperCase(),
-        }));
+        return users
+          .map((user) => {
+            return user.content;
+          })
+          .map((user) => ({
+            id: user.id,
+            name: user.name
+              .split(' ')
+              .slice(0, 2)
+              .map((it) => it[0])
+              .join('')
+              .toUpperCase(),
+          }));
       })
     )
   );

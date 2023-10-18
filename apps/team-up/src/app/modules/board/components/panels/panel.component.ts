@@ -1,12 +1,11 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Panel, TuNode, isPanel } from '@team-up/board-commons';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { PanelComponent } from '../panel/panel.component';
 import { NgFor, AsyncPipe } from '@angular/common';
 import { ResizableDirective } from '../../directives/resize.directive';
-import { boardFeature } from '../../reducers/board.reducer';
 import { map } from 'rxjs';
+import { BoardFacade } from '@/app/services/board-facade.service';
 
 @Component({
   selector: 'team-up-panels',
@@ -23,11 +22,11 @@ import { map } from 'rxjs';
   ],
 })
 export class PanelsComponent {
-  public panels$ = this.store
-    .select(boardFeature.selectNodes)
-    .pipe(map((nodes) => nodes.filter(isPanel)));
+  private boardFacade = inject(BoardFacade);
 
-  constructor(private store: Store) {}
+  public panels$ = this.boardFacade
+    .getNodes()
+    .pipe(map((nodes) => nodes.filter(isPanel)));
 
   public trackById(index: number, panel: TuNode<Panel>) {
     return panel.id;

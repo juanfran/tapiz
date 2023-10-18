@@ -72,7 +72,8 @@ export class MoveService {
   public listenIncrementalAreaSelector(
     el: HTMLElement,
     host: Resizable,
-    position: ResizePosition
+    position: ResizePosition,
+    onStart: () => void
   ) {
     const mouseDown$ = fromEvent<MouseEvent>(el, 'mousedown');
 
@@ -90,6 +91,8 @@ export class MoveService {
 
     return mouseDown$.pipe(
       switchMap(() => {
+        onStart();
+
         return mouseMove$.pipe(
           takeUntil(mouseUp$),
           withLatestFrom(this.store.select(selectZoom)),
@@ -176,7 +179,7 @@ export class MoveService {
     );
   }
 
-  public listenRotation(el: HTMLElement, host: Rotatable) {
+  public listenRotation(el: HTMLElement, host: Rotatable, onStart: () => void) {
     const mouseUp$ = fromEvent<MouseEvent>(window, 'mouseup');
     const R2D = 180 / Math.PI;
 
@@ -190,6 +193,8 @@ export class MoveService {
 
     return mouseDown$.pipe(
       switchMap(([, userPosition]) => {
+        onStart();
+
         return mouseMove$.pipe(
           takeUntil(mouseUp$),
           concatLatestFrom(() => this.store.select(selectZoom)),

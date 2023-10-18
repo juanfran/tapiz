@@ -1,4 +1,4 @@
-import { CommonState, StateActions, Validators } from '@team-up/board-commons';
+import { StateActions, TuNode, Validators } from '@team-up/board-commons';
 
 import { PERSONAL_TOKEN_VALIDATOR } from '@team-up/board-commons/validators/token.validator';
 
@@ -34,7 +34,7 @@ const validations = {
 
 export const validateAction = (
   msg: StateActions,
-  state: CommonState,
+  state: TuNode[],
   userId: string
 ) => {
   const customValidators = msg.data.type in validations.custom;
@@ -54,7 +54,7 @@ export const validateAction = (
         };
       }
     } else if (msg.op === 'patch') {
-      const node = state.nodes.find((it) => it.id === msg.data.id);
+      const node = state.find((it) => it.id === msg.data.id);
 
       if (!node) {
         return false;
@@ -93,7 +93,7 @@ export const validateAction = (
       const validator = validations['patch'][msg.data.type];
 
       // check if the element present in the state
-      const node = state.nodes.find((it) => it.id === msg.data.id);
+      const node = state.find((it) => it.id === msg.data.id);
 
       if (!node) {
         return false;
@@ -156,7 +156,7 @@ export const validateAction = (
 
 export const validation = (
   msg: StateActions[],
-  state: CommonState,
+  state: TuNode[],
   userId: string
 ) => {
   if (Array.isArray(msg)) {

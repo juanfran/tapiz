@@ -1,7 +1,7 @@
 import { eq, and, or, desc, notInArray } from 'drizzle-orm';
 import { db } from './init-db';
 import * as schema from '../schema';
-import { DBState, User } from '@team-up/board-commons';
+import type { TuNode, UserNode } from '@team-up/board-commons';
 import { SetNonNullable } from 'type-fest';
 import * as team from './team-db';
 import { getUserTeam } from './team-db';
@@ -89,7 +89,7 @@ export async function getBoardAdmins(boardId: string) {
   return Array.from(ids);
 }
 
-export async function getBoardUser(boardId: string, userId: User['id']) {
+export async function getBoardUser(boardId: string, userId: UserNode['id']) {
   const results = await db
     .select()
     .from(schema.acountsToBoards)
@@ -268,7 +268,7 @@ export async function getAllBoardAdmins(boardId: string) {
 export async function createBoard(
   name = 'New board',
   ownerId: string,
-  board: DBState,
+  board: TuNode[],
   teamId: string | null
 ) {
   const result = await db
@@ -328,19 +328,20 @@ export async function joinBoard(
   }
 }
 
-export async function updateBoard(id: string, board: DBState) {
-  const dbState = {
-    nodes: board.nodes,
-  } as DBState;
+export async function updateBoard(id: string, board: TuNode[]) {
+  if (!board) {
+    console.trace();
+  }
+
   return db
     .update(schema.boards)
-    .set({ board: dbState })
+    .set({ board })
     .where(eq(schema.boards.id, id));
 }
 
 export async function updateAccountBoard(
   boardId: string,
-  userId: User['id'],
+  userId: UserNode['id'],
   visible: boolean
 ) {
   return db

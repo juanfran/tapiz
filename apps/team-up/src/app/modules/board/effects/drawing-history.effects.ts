@@ -5,12 +5,14 @@ import { EMPTY, of } from 'rxjs';
 import { filter, mergeMap, tap } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
-import { selectNote } from '../selectors/board.selectors';
+import { BoardFacade } from '@/app/services/board-facade.service';
+import { Note, TuNode } from '@team-up/board-commons';
 
 @Injectable()
 export class DrawingHistoryEffects {
   private actions$ = inject(Actions);
   private store = inject(Store);
+  private boardFacade = inject(BoardFacade);
 
   public history: {
     undoable: { action: Action; inverseAction: Action[] }[];
@@ -59,8 +61,11 @@ export class DrawingHistoryEffects {
       return this.actions$.pipe(
         ofType(PageActions.setNoteDrawing),
         filter((action) => !action.history),
-        concatLatestFrom((action) => this.store.select(selectNote(action.id))),
-        tap(([action, note]) => {
+        concatLatestFrom((action) => this.boardFacade.selectNode(action.id)),
+        filter(([, node]) => node?.type === 'note'),
+        tap(([action, nodes]) => {
+          const note = nodes as TuNode<Note> | undefined;
+
           this.newUndoneAction(
             {
               ...action,

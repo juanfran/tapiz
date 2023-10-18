@@ -25,7 +25,8 @@
       "@/*": ["apps/team-up/src/*"],
       "@team-up/api/*": ["apps/api/src/*"],
       "@team-up/board-commons": ["libs/board-commons/src/index.ts"],
-      "@team-up/board-commons/*": ["libs/board-commons/src/lib/*"]
+      "@team-up/board-commons/*": ["libs/board-commons/src/lib/*"],
+      "@team-up/sync-node-box": ["libs/sync-node-box/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

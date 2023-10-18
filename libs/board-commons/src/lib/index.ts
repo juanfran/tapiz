@@ -7,7 +7,6 @@ export * from './models/point.model';
 export * from './models/vote.model';
 export * from './models/user.model';
 export * from './models/zone.model';
-export * from './models/common-state.model';
 export * from './models/config.model';
 export * from './models/node.model';
 export * from './models/text.model';

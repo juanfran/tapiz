@@ -1,6 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { selectUsers } from '../../selectors/board.selectors';
 import {
   selectUserHighlight,
   selectUserId,
@@ -16,6 +15,7 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { NgIf, NgFor, NgClass, AsyncPipe } from '@angular/common';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
 import { pageFeature } from '../../reducers/page.reducer';
+import { BoardFacade } from '@/app/services/board-facade.service';
 
 interface State {
   visible: boolean;
@@ -52,9 +52,18 @@ interface ComponentViewModel {
   ],
 })
 export class UsersComponent {
-  constructor(private store: Store, private state: RxState<State>) {
+  constructor(
+    private store: Store,
+    private state: RxState<State>,
+    private boardFacade: BoardFacade
+  ) {
     this.state.connect('visible', this.store.select(selectVisible));
-    this.state.connect('users', this.store.select(selectUsers));
+    this.state.connect(
+      'users',
+      this.boardFacade
+        .getUsers()
+        .pipe(map((users) => users.map((user) => user.content)))
+    );
     this.state.connect('userId', this.store.select(selectUserId));
     this.state.connect('userHighlight', this.store.select(selectUserHighlight));
     this.state.connect('follow', this.store.select(pageFeature.selectFollow));

@@ -12,11 +12,13 @@ import {
   ViewChild,
   OnChanges,
   SimpleChanges,
+  signal,
 } from '@angular/core';
 import { Token, TuNode } from '@team-up/board-commons';
 import { DynamicComponent } from '../node/dynamic-component';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
+import { HistoryService } from '@/app/services/history.service';
 
 @Component({
   selector: 'team-up-token',
@@ -24,17 +26,17 @@ import { BoardActions } from '../../actions/board.actions';
   template: `
     <div
       class="text"
-      *ngIf="!edit">
+      *ngIf="!edit()">
       {{ node.content.text }}
     </div>
     <!-- prettier-ignore -->
     <div
-      *ngIf="edit"
+      *ngIf="edit()"
       #contenteditable
       (keydown.enter)="enter($event)"
       (input)="setText($event)"
       class="edit"
-      contenteditable="plaintext-only">{{ editableText }}</div>
+      contenteditable>{{ editableText }}</div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
@@ -51,6 +53,7 @@ export class TokenComponent implements OnInit, OnChanges, DynamicComponent {
 
   private el = inject(ElementRef<HTMLElement>);
   private store = inject(Store);
+  private historyService = inject(HistoryService);
 
   @Input({ required: true })
   public node!: TuNode<Token>;
@@ -64,15 +67,16 @@ export class TokenComponent implements OnInit, OnChanges, DynamicComponent {
 
   @HostListener('dblclick', ['$event'])
   public mousedown(event: MouseEvent) {
-    if (!this.edit) {
+    if (!this.edit()) {
       event.preventDefault();
       event.stopPropagation();
       this.editableText = this.node.content.text;
-      this.edit = true;
+      this.edit.set(true);
+      this.historyService.initEdit(this.node);
     }
   }
 
-  public edit = false;
+  public edit = signal(false);
   public editableText = '';
 
   public get zIndex() {
@@ -90,7 +94,14 @@ export class TokenComponent implements OnInit, OnChanges, DynamicComponent {
   public enter(event: Event) {
     event.preventDefault();
 
-    this.edit = false;
+    this.cancelEdit();
+  }
+
+  public cancelEdit() {
+    if (this.edit()) {
+      this.historyService.finishEdit(this.node);
+      this.edit.set(false);
+    }
   }
 
   public setText(event: Event) {
@@ -98,7 +109,7 @@ export class TokenComponent implements OnInit, OnChanges, DynamicComponent {
 
     this.store.dispatch(
       BoardActions.batchNodeActions({
-        history: true,
+        history: false,
         actions: [
           {
             data: {
@@ -116,12 +127,12 @@ export class TokenComponent implements OnInit, OnChanges, DynamicComponent {
   }
 
   public preventDelete() {
-    return this.edit;
+    return this.edit();
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
     if (changes['focus'] && !this.focus) {
-      this.edit = false;
+      this.cancelEdit();
     }
   }
 }

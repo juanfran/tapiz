@@ -13,6 +13,7 @@ import { PageActions } from '../actions/page.actions';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 
 export interface PageState {
+  name: string;
   loaded: boolean;
   visible: boolean;
   focusId: string[];
@@ -49,6 +50,7 @@ export interface PageState {
 }
 
 const initialPageState: PageState = {
+  name: '',
   loaded: false,
   visible: true,
   focusId: [],
@@ -107,11 +109,18 @@ const reducer = createReducer(
       userId: state.userId,
     };
   }),
+  on(BoardActions.setBoardName, (state, { name }): PageState => {
+    return {
+      ...state,
+      name,
+    };
+  }),
   on(
     PageActions.fetchBoardSuccess,
-    (state, { isAdmin, isPublic }): PageState => {
+    (state, { isAdmin, isPublic, name }): PageState => {
       return {
         ...state,
+        name,
         isAdmin,
         isPublic,
         loaded: true,

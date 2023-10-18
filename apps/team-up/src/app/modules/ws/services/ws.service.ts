@@ -72,7 +72,9 @@ export class WsService {
   private poolLoop() {
     if (this.pool.length) {
       const optimizedPool = optimize(this.pool);
-      this.ws.send(JSON.stringify(optimizedPool));
+      if (this.ws.readyState === 1) {
+        this.ws.send(JSON.stringify(optimizedPool));
+      }
       this.pool = [];
     }
 
