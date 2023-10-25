@@ -39,8 +39,9 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Real time home boards
 - [ ] Real time members & permissions
 - [ ] Read only board
-- [ ] Usernames
+- [ ] Usernames or display name (use email as id mentio using display name)
 - [ ] Standalone nodes
+- [ ] Comments
 
 ## TODO, code refactor
 
