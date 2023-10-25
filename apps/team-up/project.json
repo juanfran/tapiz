@@ -85,7 +85,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": ["apps/team-up/**/*.ts", "apps/team-up/**/*.html"]
       }

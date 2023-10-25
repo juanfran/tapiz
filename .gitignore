@@ -47,3 +47,5 @@ apps/team-up/src/assets/firebase.json
 apps/api/src/app/sessions/*
 
 firebase/*
+
+.nx/cache
