@@ -35,11 +35,12 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Select note color
 - [ ] Drawing component or drawing everywhere
 - [ ] Planning Poker
-- [ ] Personal token
 - [ ] Placeholder boards home
 - [ ] Real time home boards
 - [ ] Real time members & permissions
 - [ ] Read only board
+- [ ] Usernames
+- [ ] Standalone nodes
 
 ## TODO, code refactor
 
