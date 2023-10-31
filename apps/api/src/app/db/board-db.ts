@@ -173,7 +173,6 @@ export async function getBoardUsers(boardId: string) {
   const results = await db
     .select({
       id: schema.acountsToBoards.accountId,
-      visible: schema.acountsToBoards.visible,
       role: schema.acountsToBoards.role,
       accounts: {
         name: schema.accounts.name,
@@ -190,7 +189,6 @@ export async function getBoardUsers(boardId: string) {
     .filter((it): it is SetNonNullable<typeof it> => !!it.accounts)
     .map((result) => ({
       id: result.id,
-      visible: result.visible,
       name: result.accounts.name,
       role: result.role,
     }));
@@ -280,7 +278,6 @@ export async function createBoard(
     accountId: ownerId,
     boardId: result[0].id,
     role: 'admin',
-    visible: false,
   });
 
   return result[0];
@@ -323,7 +320,6 @@ export async function joinBoard(
     await db.insert(schema.acountsToBoards).values({
       accountId: userId,
       boardId,
-      visible: false,
     });
   }
 }
@@ -337,22 +333,6 @@ export async function updateBoard(id: string, board: TuNode[]) {
     .update(schema.boards)
     .set({ board })
     .where(eq(schema.boards.id, id));
-}
-
-export async function updateAccountBoard(
-  boardId: string,
-  userId: UserNode['id'],
-  visible: boolean
-) {
-  return db
-    .update(schema.acountsToBoards)
-    .set({ visible })
-    .where(
-      and(
-        eq(schema.acountsToBoards.accountId, userId),
-        eq(schema.acountsToBoards.boardId, boardId)
-      )
-    );
 }
 
 export async function rename(id: string, name: string) {

@@ -1,18 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { StateActions } from './models/node.model';
-import { Point } from './models/point.model';
-import { BoardCommonActions } from './board-common-actions';
 
 /* group patchs over the same object, example moving mouse */
 export function optimize(actions: StateActions[] | unknown[]) {
   const isStateAction = (action: any): action is StateActions => {
     return 'op' in action && 'data' in action;
-  };
-
-  const isMouseMoveAction = (
-    action: any
-  ): action is { type: string; position: Point; cursor: Point } => {
-    return action.type === BoardCommonActions.moveUser;
   };
 
   const optimizedTmp: Record<string, any> = {};
@@ -21,9 +13,7 @@ export function optimize(actions: StateActions[] | unknown[]) {
   let key = '';
 
   actions.forEach((action) => {
-    if (isMouseMoveAction(action)) {
-      key = 'mouse-move';
-    } else if (!isStateAction(action)) {
+    if (!isStateAction(action)) {
       notOptimized.push(action);
       return;
     } else {
@@ -40,6 +30,12 @@ export function optimize(actions: StateActions[] | unknown[]) {
     }
   });
 
-  return [...notOptimized, ...Object.values(optimizedTmp)];
+  const result = [...notOptimized, ...Object.values(optimizedTmp)];
+
+  result.forEach((action) => {
+    delete action.history;
+  });
+
+  return result;
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */

@@ -5,5 +5,4 @@ export const BoardCommonActions = {
   moveUser: `${ActionType} MoveUser`,
   setState: `${ActionType} Set state`,
   batchNodeActions: `${ActionType} Batch node actions`,
-  setVisible: `${ActionType} Set visible`,
 };

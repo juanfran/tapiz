@@ -15,7 +15,6 @@ import { NativeEmoji } from 'emoji-picker-element/shared';
 export interface PageState {
   name: string;
   loaded: boolean;
-  visible: boolean;
   focusId: string[];
   open: boolean;
   initZone: ZoneConfig | null;
@@ -52,7 +51,6 @@ export interface PageState {
 const initialPageState: PageState = {
   name: '',
   loaded: false,
-  visible: true,
   focusId: [],
   open: false,
   initZone: null,
@@ -153,12 +151,6 @@ const reducer = createReducer(
       moveEnabled: enabled,
     };
   }),
-  on(BoardActions.setVisible, (state, { visible }): PageState => {
-    return {
-      ...state,
-      visible,
-    };
-  }),
   on(BoardActions.batchNodeActions, (state, { actions }): PageState => {
     if (actions.length === 1) {
       const action = actions[0];
@@ -218,22 +210,6 @@ const reducer = createReducer(
     return {
       ...state,
       zone,
-    };
-  }),
-  on(BoardActions.setState, (state, { data }): PageState => {
-    const currentUser = data.find(
-      (it) => it.data.type === 'user' && it.data.id === state.userId
-    ) as User | undefined;
-
-    let visible = state.visible;
-
-    if (currentUser) {
-      visible = currentUser.visible;
-    }
-
-    return {
-      ...state,
-      visible,
     };
   }),
   on(PageActions.changeCanvasMode, (state, { canvasMode }): PageState => {

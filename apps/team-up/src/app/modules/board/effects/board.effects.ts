@@ -68,13 +68,11 @@ export class BoardEffects {
 
   public wsUpdateStateName$ = createEffect(
     () => {
-      return this.actions$
-        .pipe(ofType(BoardActions.setBoardName, BoardActions.setVisible))
-        .pipe(
-          tap((action) => {
-            this.wsService.send([action]);
-          })
-        );
+      return this.actions$.pipe(ofType(BoardActions.setBoardName)).pipe(
+        tap((action) => {
+          this.wsService.send([action]);
+        })
+      );
     },
     {
       dispatch: false,

@@ -67,7 +67,7 @@ describe('ws', () => {
 
     const board = await getBoardUser(board1.id, getAuth(1).sub);
 
-    expect(board?.visible).toEqual(false);
+    expect(board?.accountId).toBeTruthy();
     expect(ws.OPEN).toEqual(WebSocket.OPEN);
   });
 
@@ -97,20 +97,6 @@ describe('ws', () => {
       const boardResult = await getBoard(board1);
 
       expect(boardResult?.name).toEqual('new board name');
-      expect(ws.OPEN).toEqual(WebSocket.OPEN);
-    });
-
-    it('set visibility', async () => {
-      const action = {
-        visible: true,
-        type: BoardCommonActions.setVisible,
-      };
-
-      await send(action);
-
-      const account = await getBoardUser(board1, getAuth(1).sub);
-
-      expect(account?.visible).toBe(true);
       expect(ws.OPEN).toEqual(WebSocket.OPEN);
     });
   });

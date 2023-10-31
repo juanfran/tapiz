@@ -6,7 +6,6 @@ import * as textValidators from './text.validator';
 import * as vectorValidators from './vector.validator';
 import * as userValidators from './user.validator';
 import * as stateActionValidators from './state-action.validator';
-import * as userMoveValidators from './user-move.validator';
 
 export const Validators = {
   ...changeBoardNameValidators,
@@ -17,5 +16,4 @@ export const Validators = {
   ...vectorValidators,
   ...userValidators,
   ...stateActionValidators,
-  ...userMoveValidators,
 };

@@ -71,7 +71,7 @@ describe('ws', () => {
 
     const board = await getBoardUser(board1.id, getAuth(1).sub);
 
-    expect(board?.visible).toEqual(false);
+    expect(board?.accountId).toBeTruthy();
     expect(ws.OPEN).toEqual(WebSocket.OPEN);
     expect(wsServer.clients.length).toEqual(1);
     expect(wsServer.getBoard(board1.id)).toBeTruthy();

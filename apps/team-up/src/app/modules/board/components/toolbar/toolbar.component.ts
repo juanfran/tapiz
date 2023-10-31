@@ -12,7 +12,6 @@ import {
   selectPopupOpen,
   selectPosition,
   selectUserId,
-  selectVisible,
   selectZoom,
 } from '../../selectors/page.selectors';
 import { take, withLatestFrom } from 'rxjs/operators';
@@ -41,7 +40,6 @@ import { TokenSelectorComponent } from '../token-selector/token-selector.compone
 import { Token } from '@team-up/board-commons/models/token.model';
 
 interface State {
-  visible: boolean;
   popupOpen: string;
 }
 
@@ -81,7 +79,6 @@ export class ToolbarComponent {
     private notesService: NotesService,
     private dialog: MatDialog
   ) {
-    this.state.connect('visible', this.store.select(selectVisible));
     this.state.connect('popupOpen', this.store.select(selectPopupOpen));
   }
 
