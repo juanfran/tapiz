@@ -9,6 +9,7 @@ import { type ZodAny } from 'zod';
 const validations = {
   custom: {
     note: noteValidator,
+    user: Validators.userValidator,
   },
   new: {
     panel: Validators.newPanel,

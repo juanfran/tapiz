@@ -9,7 +9,6 @@ export const {
   selectUserId,
   selectInitZone,
   selectFocusId,
-  selectVisible,
   selectCanvasMode,
   selectZone,
   selectUserHighlight,

@@ -81,13 +81,6 @@ export class Server {
 
       this.state[boardId] = syncNodeBox({ history: 0 });
 
-      this.stateSubscriptions[boardId] = this.state[boardId]
-        .sync()
-        .pipe(throttleTime(500))
-        .subscribe((state) => {
-          db.board.updateBoard(boardId, state);
-        });
-
       this.updateBoard(
         boardId,
         boardNodes.map((it) => {
@@ -105,6 +98,12 @@ export class Server {
           } as UserNode;
         })
       );
+      this.stateSubscriptions[boardId] = this.state[boardId]
+        .sync()
+        .pipe(throttleTime(2000))
+        .subscribe((state) => {
+          db.board.updateBoard(boardId, state);
+        });
     }
   }
 
@@ -153,7 +152,14 @@ export class Server {
       board.update((state) => {
         return state.map((it) => {
           if (it.id === user.id) {
-            return user;
+            return {
+              ...it,
+              content: {
+                ...it.content,
+                username: user.content.name,
+                connected: true,
+              },
+            };
           }
 
           return it;
@@ -174,14 +180,6 @@ export class Server {
 
   public getBoardUsers(boardId: string) {
     return db.board.getBoardUsers(boardId);
-  }
-
-  public setUserVisibility(
-    boardId: string,
-    userId: UserNode['id'],
-    visible: boolean
-  ) {
-    db.board.updateAccountBoard(boardId, userId, visible);
   }
 
   public applyAction(boardId: string, actions: StateActions[]) {

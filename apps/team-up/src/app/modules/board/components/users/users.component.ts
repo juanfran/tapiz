@@ -3,13 +3,12 @@ import { Store } from '@ngrx/store';
 import {
   selectUserHighlight,
   selectUserId,
-  selectVisible,
 } from '../../selectors/page.selectors';
 import { RxState } from '@rx-angular/state';
 import { PageActions } from '../../actions/page.actions';
 import { BoardActions } from '../../actions/board.actions';
 import { User } from '@team-up/board-commons';
-import { Observable } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { NgIf, NgFor, NgClass, AsyncPipe } from '@angular/common';
@@ -22,6 +21,7 @@ interface State {
   users: User[];
   userId: User['id'];
   userHighlight: User['id'] | null;
+  currentUser?: User;
   follow: string;
 }
 
@@ -57,7 +57,6 @@ export class UsersComponent {
     private state: RxState<State>,
     private boardFacade: BoardFacade
   ) {
-    this.state.connect('visible', this.store.select(selectVisible));
     this.state.connect(
       'users',
       this.boardFacade
@@ -67,16 +66,27 @@ export class UsersComponent {
     this.state.connect('userId', this.store.select(selectUserId));
     this.state.connect('userHighlight', this.store.select(selectUserHighlight));
     this.state.connect('follow', this.store.select(pageFeature.selectFollow));
+    this.state.connect(
+      'currentUser',
+      combineLatest([
+        this.state.select('users'),
+        this.state.select('userId'),
+      ]).pipe(
+        map(([users, userId]) => {
+          return users.find((user) => user.id === userId);
+        })
+      )
+    );
   }
 
   public readonly viewModel$: Observable<ComponentViewModel> = this.state
     .select()
     .pipe(
-      map(({ visible, users, userId, userHighlight, follow }) => {
+      map(({ users, userId, currentUser, userHighlight, follow }) => {
         return {
-          visible,
+          visible: currentUser?.visible ?? false,
           users: users.filter((user) => user.id !== userId),
-          currentUser: users.find((user) => user.id === userId),
+          currentUser,
           userHighlight,
           follow,
         };
@@ -85,7 +95,21 @@ export class UsersComponent {
 
   public toggleVisibility() {
     this.store.dispatch(
-      BoardActions.setVisible({ visible: !this.state.get('visible') })
+      BoardActions.batchNodeActions({
+        history: false,
+        actions: [
+          {
+            data: {
+              type: 'user',
+              id: this.state.get('userId'),
+              content: {
+                visible: !this.state.get('currentUser')?.visible,
+              },
+            },
+            op: 'patch',
+          },
+        ],
+      })
     );
   }
 

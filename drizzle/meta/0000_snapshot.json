@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "93b13aa8-a5f6-4cc3-aa18-365f0ae9e4e0",
+  "id": "5c84656c-a35e-40b4-9161-dd9593d37f69",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "accounts": {
@@ -55,13 +55,6 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
-        },
-        "visible": {
-          "name": "visible",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
         },
         "role": {
           "name": "role",

@@ -1,7 +1,6 @@
 import {
   BoardCommonActions,
   NodeAdd,
-  Point,
   StateActions,
   UserNode,
   Validators,
@@ -45,23 +44,8 @@ export class Client {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public processMsg(pendingMessages: any) {
+  public processMsg(messages: any) {
     //saveMsg(message);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const messages: any[] = [];
-    const mouseMove: { position: Point; cursor: Point; zoom: number }[] = [];
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    pendingMessages.forEach((it: any) => {
-      if (it.type !== BoardCommonActions.moveUser) {
-        messages.push(it);
-      } else {
-        mouseMove.push(it);
-      }
-    });
-
-    this.mouseMoves(mouseMove);
 
     if (messages.length) {
       if ('action' in messages[0] && messages[0].action === 'join') {
@@ -71,44 +55,10 @@ export class Client {
         this.isAdmin
       ) {
         this.updateBoardName(messages[0]);
-      } else if (BoardCommonActions.setVisible === messages[0].type) {
-        this.updateUserVisibility(messages[0]);
       } else {
         this.parseStateActionMessage(messages);
       }
     }
-  }
-
-  private mouseMoves(
-    messages: { position: Point; cursor: Point; zoom: number }[]
-  ) {
-    const moveMessage = messages.pop();
-
-    if (!moveMessage || !this.boardId) {
-      return;
-    }
-
-    const result = Validators.userMove.safeParse({
-      ...moveMessage,
-    });
-
-    if (!result.success) {
-      return;
-    }
-
-    const action: StateActions = {
-      data: {
-        type: 'user',
-        id: this.id,
-        content: {
-          ...result.data,
-        },
-      },
-      op: 'patch',
-    };
-
-    this.updateStateWithAction(action);
-    this.server.sendAll(this.boardId, this.getSetStateAction([action]), [this]);
   }
 
   private async updateBoardName(message: { name: string }) {
@@ -124,33 +74,6 @@ export class Client {
 
     this.server.updateBoardName(this.boardId, action.data.name);
     this.server.sendAll(this.boardId, action.data, [this]);
-  }
-
-  private updateUserVisibility(message: { visible?: boolean }) {
-    if (!this.boardId) {
-      return;
-    }
-
-    const action = Validators.patchUserVisibility.safeParse(message);
-
-    if (!action.success) {
-      return;
-    }
-
-    this.server.setUserVisibility(this.boardId, this.id, action.data.visible);
-
-    const actionState: StateActions = {
-      data: {
-        type: 'user',
-        id: this.id,
-        content: {
-          visible: action.data.visible,
-        },
-      },
-      op: 'patch',
-    };
-
-    this.updateSendAllStateAction(actionState);
   }
 
   public parseStateActionMessage(message: StateActions[]) {
@@ -256,15 +179,13 @@ export class Client {
 
     try {
       await this.server.createBoard(this.boardId);
-      const boardUser = await this.server.getBoardUser(this.boardId, this.id);
-
       const user: UserNode = {
         type: 'user',
         id: this.id,
         content: {
           id: this.id,
           name: this.username,
-          visible: boardUser?.visible ?? false,
+          visible: false,
           connected: true,
           cursor: null,
         },
@@ -279,6 +200,10 @@ export class Client {
       if (!board) {
         return;
       }
+
+      const userInBoard = board.find((it) => it.id === this.id) as UserNode;
+
+      user.content.visible = userInBoard?.content.visible ?? false;
 
       const admins = await db.board.getAllBoardAdmins(this.boardId);
 

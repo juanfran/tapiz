@@ -141,6 +141,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly boardTitle = this.store.selectSignal(pageFeature.selectName);
   public readonly folloUser = this.store.selectSignal(pageFeature.selectFollow);
   public readonly loaded = this.store.selectSignal(pageFeature.selectLoaded);
+  public readonly userId = this.store.selectSignal(selectUserId);
 
   @ViewChild('workLayer', { read: ElementRef }) public workLayer!: ElementRef;
 
@@ -327,17 +328,24 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       mousePosition: Point,
       zoom: number
     ) => {
-      const action = BoardActions.moveUser({
-        position: {
-          x: Math.round(position.x),
-          y: Math.round(position.y),
+      const action = {
+        data: {
+          type: 'user',
+          id: this.userId(),
+          content: {
+            position: {
+              x: Math.round(position.x),
+              y: Math.round(position.y),
+            },
+            cursor: {
+              x: Math.round((-position.x + mousePosition.x) / zoom),
+              y: Math.round((-position.y + mousePosition.y) / zoom),
+            },
+            zoom: Math.round(zoom * 100) / 100,
+          },
         },
-        cursor: {
-          x: Math.round((-position.x + mousePosition.x) / zoom),
-          y: Math.round((-position.y + mousePosition.y) / zoom),
-        },
-        zoom,
-      });
+        op: 'patch',
+      };
 
       this.wsService.send([action]);
     };
