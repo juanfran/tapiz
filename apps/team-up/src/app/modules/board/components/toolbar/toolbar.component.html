@@ -131,6 +131,16 @@
       </div>
       <div
         class="toolbar-button-container"
+        [class.active]="vm.popupOpen === 'estimation'">
+        <button
+          class="toolbar-button"
+          (click)="estimation()">
+          <mat-icon class="material-icons-outlined">style</mat-icon>
+        </button>
+        <div class="toolbar-tooltip">Estimation</div>
+      </div>
+      <div
+        class="toolbar-button-container"
         [class.active]="vm.popupOpen === 'search'">
         <button
           class="toolbar-button"

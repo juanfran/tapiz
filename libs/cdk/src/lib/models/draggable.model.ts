@@ -6,4 +6,5 @@ export declare interface Draggable {
   nativeElement: HTMLElement;
   id: string;
   nodeType: string;
+  handler?: HTMLElement;
 }

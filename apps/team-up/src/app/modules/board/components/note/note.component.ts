@@ -27,7 +27,7 @@ import {
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
-import { Draggable } from '../../models/draggable.model';
+import { Draggable } from '@team-up/cdk/models/draggable.model';
 import {
   Drawing,
   Note,

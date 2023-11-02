@@ -34,6 +34,7 @@ import {
   selectZoom,
   selectDrawing,
   selectSearching,
+  selectDragEnabled,
 } from '../selectors/page.selectors';
 
 import { BoardMoveService } from '../services/board-move.service';
@@ -78,6 +79,7 @@ import { RotateDirective } from '../directives/rotate.directive';
 import { StopHighlightComponent } from '@/app/shared/stop-highlight/stop-highlight';
 import { NodesComponent } from '../components/nodes/nodes.component';
 import { BoardFacade } from '@/app/services/board-facade.service';
+import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
 
 @UntilDestroy()
 @Component({
@@ -120,19 +122,19 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly nodes$ = this.boardFacade.getNodes();
 
   public readonly notes$ = this.nodes$.pipe(
-    map((nodes) => nodes.filter(isNote))
+    map((nodes) => nodes.filter(isNote)),
   );
   public readonly images$ = this.nodes$.pipe(
-    map((nodes) => nodes.filter(isImage))
+    map((nodes) => nodes.filter(isImage)),
   );
   public readonly vectors$ = this.nodes$.pipe(
-    map((nodes) => nodes.filter(isVector))
+    map((nodes) => nodes.filter(isVector)),
   );
   public readonly texts$ = this.nodes$.pipe(
-    map((nodes) => nodes.filter(isText))
+    map((nodes) => nodes.filter(isText)),
   );
   public readonly groups$ = this.nodes$.pipe(
-    map((nodes) => nodes.filter(isGroup))
+    map((nodes) => nodes.filter(isGroup)),
   );
   public readonly canvasMode$ = this.store.select(selectCanvasMode);
   public readonly newNote$ = new Subject<MouseEvent>();
@@ -184,8 +186,48 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     private route: ActivatedRoute,
     private notesService: NotesService,
     private actions: Actions,
-    private boardFacade: BoardFacade
+    private boardFacade: BoardFacade,
+    private multiDragService: MultiDragService,
   ) {
+    this.multiDragService.setUp({
+      dragEnabled: this.store.select(selectDragEnabled),
+      zoom: this.store.select(selectZoom),
+      relativePosition: this.store.select(selectPosition),
+      move: (draggable, position) => {
+        this.store.dispatch(
+          BoardActions.batchNodeActions({
+            history: false,
+            actions: [
+              {
+                data: {
+                  type: draggable.nodeType,
+                  id: draggable.id,
+                  content: {
+                    position,
+                  },
+                },
+                op: 'patch',
+              },
+            ],
+          }),
+        );
+      },
+      end: (dragElements) => {
+        const actions = dragElements.map((action) => {
+          return {
+            nodeType: action.nodeType,
+            id: action.id,
+            initialPosition: action.initialPosition,
+            finalPosition: action.finalPosition,
+          };
+        });
+
+        if (actions.length) {
+          this.store.dispatch(PageActions.endDragNode({ nodes: actions }));
+        }
+      },
+    });
+
     this.store
       .select(appFeature.selectUserId)
       .pipe(take(1))
@@ -193,7 +235,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         this.store.dispatch(
           PageActions.initBoard({
             userId,
-          })
+          }),
         );
       });
 
@@ -208,7 +250,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     fromEvent<MouseEvent>(this.el.nativeElement, 'wheel', { passive: false })
       .pipe(
         filter((event: MouseEvent) => event.ctrlKey),
-        untilDestroyed(this)
+        untilDestroyed(this),
       )
       .subscribe((event: MouseEvent) => {
         event.preventDefault();
@@ -234,8 +276,8 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
           this.store.select(selectZoom),
           this.store.select(selectPosition),
           this.store.select(selectUserId),
-          this.store.select(selectCanvasMode)
-        )
+          this.store.select(selectCanvasMode),
+        ),
       )
       .subscribe(([event, zoom, position, userId, canvasMode]) => {
         if (canvasMode === 'editMode') {
@@ -260,7 +302,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
                   op: 'add',
                 },
               ],
-            })
+            }),
           );
         }
       });
@@ -278,9 +320,9 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         untilDestroyed(this),
         withLatestFrom(
           this.store.select(selectZoom),
-          this.store.select(selectPosition)
+          this.store.select(selectPosition),
         ),
-        throttleTime(0, animationFrameScheduler)
+        throttleTime(0, animationFrameScheduler),
       )
       .subscribe(([mousePosition, zoom, position]) => {
         updateUserPosition(position, mousePosition, zoom);
@@ -289,15 +331,15 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     const userView$ = merge(
       this.boardZoomService.zoomMove$,
       this.boardMoveService.boardMove$.pipe(
-        withLatestFrom(this.store.select(selectZoom))
-      )
+        withLatestFrom(this.store.select(selectZoom)),
+      ),
     ).pipe(
       map(([move, zoom]) => {
         return {
           move,
           zoom,
         };
-      })
+      }),
     );
 
     userView$
@@ -305,9 +347,9 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         untilDestroyed(this),
         withLatestFrom(
           this.boardMoveService.mouseMove$,
-          this.store.select(selectMoveEnabled)
+          this.store.select(selectMoveEnabled),
         ),
-        filter(([, , moveEnabled]) => moveEnabled)
+        filter(([, , moveEnabled]) => moveEnabled),
       )
       .subscribe(([{ move, zoom }, mousePosition]) => {
         this.store.dispatch(
@@ -317,7 +359,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
               x: Math.round(move.x),
               y: Math.round(move.y),
             },
-          })
+          }),
         );
 
         updateUserPosition(move, mousePosition, zoom);
@@ -326,7 +368,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     const updateUserPosition = (
       position: Point,
       mousePosition: Point,
-      zoom: number
+      zoom: number,
     ) => {
       const action = {
         data: {
@@ -398,7 +440,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
                       op: 'add',
                     },
                   ],
-                })
+                }),
               );
             };
 
@@ -420,7 +462,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         .select(selectOpen)
         .pipe(
           filter((open) => open),
-          first()
+          first(),
         )
         .subscribe(() => {
           const boardId = this.route.snapshot.paramMap.get('id');
@@ -447,7 +489,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       },
       () => {
         console.error('connection failed');
-      }
+      },
     );
   }
 

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { TuNode, type StateActions } from '../../models/node.model';
+import { type StateActions } from '../../models/node.model';
 
 const note = z.object({
   text: z.string().max(140),
@@ -8,7 +8,7 @@ const note = z.object({
     z.object({
       userId: z.string().max(255),
       vote: z.number().int().min(0),
-    })
+    }),
   ),
   position: z.object({
     x: z.number().safe(),
@@ -21,7 +21,7 @@ const note = z.object({
         x: z.number().safe(),
         y: z.number().safe(),
       }),
-    })
+    }),
   ),
   drawing: z.array(
     z.object({
@@ -31,7 +31,7 @@ const note = z.object({
       y: z.number().safe(),
       nX: z.number().safe(),
       nY: z.number().safe(),
-    })
+    }),
   ),
   ownerId: z.string().max(255),
 });
@@ -40,11 +40,7 @@ export const patchNote = note.partial();
 
 export const newNote = note;
 
-export const validate = (
-  msg: StateActions,
-  _state: TuNode[],
-  _userId: string
-): StateActions | false => {
+export const validate = (msg: StateActions): StateActions | false => {
   let validatorResult: unknown | null = null;
 
   if (msg.op === 'add') {

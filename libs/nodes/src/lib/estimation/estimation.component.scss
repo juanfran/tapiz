@@ -1,0 +1,11 @@
+:host {
+  background-color: var(--white);
+  display: block;
+  inline-size: 900px;
+  padding: var(--spacing-4);
+}
+
+.header {
+  display: flex;
+  justify-content: flex-end;
+}

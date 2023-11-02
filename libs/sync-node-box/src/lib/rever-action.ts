@@ -5,14 +5,28 @@ import { diff } from './diff';
 export function reverseAction(
   nodes: TuNode[],
   action: StateActions
-): StateActions {
-  const node = nodes.find((node) => node.id === action.data.id);
+): StateActions | null {
+  let node;
+
+  if (action.parent) {
+    const parent = nodes.find((it) => it.id === action.parent);
+
+    if (!parent) {
+      return null;
+    }
+
+    node = (parent.children || []).find((node) => node.id === action.data.id);
+  } else {
+    node = nodes.find((node) => node.id === action.data.id);
+  }
+
   if (node) {
     if (action.op === 'patch') {
       const nodeDiff = diff(action.data, node);
 
       return {
         op: 'patch',
+        parent: action.parent,
         data: {
           id: action.data.id,
           type: action.data.type,
@@ -22,6 +36,7 @@ export function reverseAction(
     } else if (action.op === 'remove' && node) {
       return {
         op: 'add',
+        parent: action.parent,
         data: node,
       };
     }
@@ -29,6 +44,7 @@ export function reverseAction(
 
   return {
     op: 'remove',
+    parent: action.parent,
     data: {
       id: action.data.id,
       type: action.data.type,

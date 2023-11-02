@@ -17,8 +17,6 @@ import {
 import { RxState } from '@rx-angular/state';
 import { Point, TuNode } from '@team-up/board-commons';
 import { distinctUntilChanged, filter, fromEvent, map, take } from 'rxjs';
-import { Draggable } from '../../models/draggable.model';
-import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Store } from '@ngrx/store';
 import { selectFocusId } from '../../selectors/page.selectors';
 import { BoardActions } from '../../actions/board.actions';
@@ -29,7 +27,7 @@ import { DynamicComponent } from './dynamic-component';
 
 interface State {
   position: Point;
-  node: TuNode;
+  node: TuNode<{ position: Point }>;
   focus: boolean;
 }
 
@@ -42,9 +40,8 @@ interface State {
   imports: [CommonModule],
   providers: [RxState],
 })
-export class NodeComponent implements OnInit, Draggable {
-  private state = inject(RxState<State>);
-  private boardDragDirective = inject(BoardDragDirective);
+export class NodeComponent implements OnInit {
+  private state = inject(RxState) as RxState<State>;
   private el = inject(ElementRef<HTMLElement>);
   private store = inject(Store);
   private cmp?: ComponentRef<DynamicComponent>;
@@ -52,7 +49,7 @@ export class NodeComponent implements OnInit, Draggable {
 
   @Input({ required: true })
   public set node(node: TuNode) {
-    this.state.set({ node });
+    this.state.set({ node: node as TuNode<{ position: Point }> });
   }
 
   @ViewChild('nodeHost', { read: ViewContainerRef })
@@ -72,31 +69,13 @@ export class NodeComponent implements OnInit, Draggable {
     return this.el.nativeElement;
   }
 
-  public get id() {
-    return this.state.get('node').id;
-  }
-
-  public get nodeType() {
-    return this.state.get('node').type;
-  }
-
-  public get preventDrag() {
-    return !this.state.get('focus');
-  }
-
-  public get position() {
-    return this.state.get('position');
-  }
-
   public ngOnInit() {
-    this.boardDragDirective.setHost(this);
-
     loadNode(this.state.get('node').type).then((node) => {
       this.loadComponent(node.component as Type<DynamicComponent>);
     });
 
     this.state.hold(this.state.select('node'), (node) => {
-      this.state.set({ position: node.content.position as Point });
+      this.state.set({ position: node.content.position });
     });
 
     this.state.hold(
@@ -163,17 +142,16 @@ export class NodeComponent implements OnInit, Draggable {
       .select(pageFeature.selectAdditionalContext)
       .pipe(take(1))
       .subscribe((context) => {
-        const pasted = context[this.id] === 'pasted';
+        const pasted = context[this.state.get('node').id] === 'pasted';
         this.cmp = this.nodeHost.createComponent(component);
 
         this.cmp.setInput('node', this.state.get('node'));
         this.cmp.setInput('focus', this.state.get('focus'));
-        this.cmp.setInput('pasted', pasted);
-        const zIndex = (this.cmp.instance as { zIndex?: number })?.zIndex;
 
-        if (zIndex) {
-          this.nativeElement.style.setProperty('--z-index-node', zIndex);
-        }
+        this.cmp.setInput('pasted', pasted);
+        const zIndex = (this.cmp.instance as { zIndex?: number })?.zIndex ?? 1;
+
+        this.nativeElement.style.setProperty('--z-index-node', zIndex);
       });
   }
 }

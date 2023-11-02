@@ -1,0 +1,33 @@
+:host {
+  --form-size: 450px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.story {
+  display: flex;
+  gap: var(--spacing-4);
+}
+
+
+.actions {
+  display: flex;
+  gap: var(--spacing-4);
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  inline-size: var(--form-size);
+  border-block-end: 1px solid var(--accent);
+  padding-block-end: var(--spacing-4);
+}
+
+.add-story {
+  margin-inline-start: calc(var(--form-size) / 2 - 16px) ;
+}

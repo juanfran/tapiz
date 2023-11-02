@@ -84,7 +84,7 @@ describe('syncNodeBox', () => {
           },
         },
       ],
-      true
+      true,
     );
 
     box.undo();
@@ -110,7 +110,7 @@ describe('syncNodeBox', () => {
           },
         },
       ],
-      true
+      true,
     );
 
     box.undo();
@@ -141,7 +141,7 @@ describe('syncNodeBox', () => {
           },
         },
       ],
-      true
+      true,
     );
 
     box.undo();
@@ -176,15 +176,15 @@ describe('syncNodeBox', () => {
     // Perform 3 actions
     box.actions(
       [{ op: 'add', data: { id: '1', type: 'test1', content: {} } }],
-      true
+      true,
     );
     box.actions(
       [{ op: 'add', data: { id: '2', type: 'test2', content: {} } }],
-      true
+      true,
     );
     box.actions(
       [{ op: 'add', data: { id: '3', type: 'test3', content: {} } }],
-      true
+      true,
     );
 
     // Undo twice (reaching the history limit)
@@ -210,5 +210,61 @@ describe('syncNodeBox', () => {
     // After performing a new action, redo should not bring back node2
     box.redo();
     expect(box.get()).toEqual([node1, node3]);
+  });
+
+  it('actions with parent', () => {
+    const box = syncNodeBox();
+
+    const children = [
+      { id: '3', type: 'test3', content: { title: 'content children 1' } },
+      { id: '4', type: 'test4', content: { title: 'content children 2' } },
+    ];
+
+    box.update(() => {
+      return [
+        { id: '1', type: 'test5', content: {} },
+        { id: '2', type: 'test6', content: {}, children: children },
+      ];
+    });
+
+    const addNode: TuNode = { id: 'new-1', type: 'test3', content: {} };
+    const patchNode: TuNode = {
+      ...children[1],
+      content: {
+        title: 'content children 2 update',
+      },
+    };
+
+    box.actions(
+      [
+        {
+          op: 'add',
+          data: addNode,
+          parent: '2',
+        },
+        {
+          op: 'patch',
+          data: patchNode,
+          parent: '2',
+        },
+      ],
+      true,
+    );
+
+    let content = box.get();
+
+    expect(content[1].children).toEqual([children[0], addNode, patchNode]);
+
+    box.undo();
+
+    content = box.get();
+
+    expect(content[1].children).toEqual(children);
+
+    box.redo();
+
+    content = box.get();
+
+    expect(content[1].children).toEqual([children[0], addNode, patchNode]);
   });
 });
