@@ -1,6 +1,7 @@
 import { StateActions, TuNode, Validators } from '@team-up/board-commons';
 
 import { PERSONAL_TOKEN_VALIDATOR } from '@team-up/board-commons/validators/token.validator';
+import { ESTIMATION_VALIDATORS } from '@team-up/nodes/estimation/estimation.validator';
 
 import { validate as noteValidator } from '@team-up/board-commons/validators/note';
 
@@ -30,19 +31,34 @@ const validations = {
       type: 'token',
       validator: PERSONAL_TOKEN_VALIDATOR,
     },
+    ...ESTIMATION_VALIDATORS,
   ],
 };
 
 export const validateAction = (
   msg: StateActions,
   state: TuNode[],
-  userId: string
+  userId: string,
 ) => {
   const customValidators = msg.data.type in validations.custom;
 
   const validatorConfig = validations.newValidators.find(
-    (it) => it.type === msg.data.type
+    (it) => it.type === msg.data.type,
   );
+
+  const findNode = (id: string, parentId?: string) => {
+    if (parentId) {
+      const parent = state.find((it) => it.id === parentId);
+
+      if (!parent || !parent.children) {
+        return;
+      }
+
+      return parent.children.find((it) => it.id === id);
+    } else {
+      return state.find((it) => it.id === id);
+    }
+  };
 
   if (validatorConfig) {
     if (msg.op === 'add') {
@@ -52,30 +68,49 @@ export const validateAction = (
         return {
           op: 'add',
           data: result.data,
+          parent: msg.parent,
         };
       }
     } else if (msg.op === 'patch') {
-      const node = state.find((it) => it.id === msg.data.id);
+      const node = findNode(msg.data.id, msg.parent);
 
       if (!node) {
         return false;
       }
 
-      const result = validatorConfig.validator.patch(msg.data, userId, state);
+      const result = validatorConfig.validator.patch(
+        msg.data,
+        userId,
+        state,
+        node,
+      );
 
       if (result.success) {
         return {
           op: 'patch',
           data: result.data,
+          parent: msg.parent,
         };
       }
     } else if (msg.op === 'remove') {
-      const result = validatorConfig.validator.remove(msg.data, userId, state);
+      const node = findNode(msg.data.id, msg.parent);
+
+      if (!node) {
+        return false;
+      }
+
+      const result = validatorConfig.validator.remove(
+        msg.data,
+        userId,
+        state,
+        node,
+      );
 
       if (result.success) {
         return {
           op: 'remove',
           data: result.data,
+          parent: msg.parent,
         };
       }
     }
@@ -87,7 +122,7 @@ export const validateAction = (
     return validations.custom[msg.data.type as keyof typeof validations.custom](
       msg,
       state,
-      userId
+      userId,
     );
   } else {
     if (msg.op === 'patch' || msg.op === 'remove') {
@@ -111,7 +146,7 @@ export const validateAction = (
       } else if (msg.op === 'patch') {
         if (validator) {
           const validatorResult = (validator as ZodAny).safeParse(
-            msg.data.content
+            msg.data.content,
           );
 
           if (!validatorResult.success) {
@@ -133,7 +168,7 @@ export const validateAction = (
 
       if (validator) {
         const validatorResult = (validator as ZodAny).safeParse(
-          msg.data.content
+          msg.data.content,
         );
 
         if (!validatorResult.success) {
@@ -158,7 +193,7 @@ export const validateAction = (
 export const validation = (
   msg: StateActions[],
   state: TuNode[],
-  userId: string
+  userId: string,
 ) => {
   if (Array.isArray(msg)) {
     msg = msg.filter((it) => Validators.stateAction.safeParse(it).success);

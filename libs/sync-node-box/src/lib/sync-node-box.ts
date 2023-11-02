@@ -46,11 +46,15 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
   const addToHistory = (actions: StateActions[]) => {
     const currentState = getState();
 
-    actions = actions.map((it) => {
-      return reverseAction(currentState, it);
-    });
+    const newActions = actions
+      .map((it) => {
+        return reverseAction(currentState, it);
+      })
+      .filter((it): it is StateActions => !!it);
 
-    nodesHistory.past.unshift(actions);
+    if (newActions.length) {
+      nodesHistory.past.unshift(newActions);
+    }
 
     if (nodesHistory.past.length > boxOptions.history) {
       nodesHistory.past.pop();
@@ -75,6 +79,19 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
 
       setState(
         actions.reduce((state, action) => {
+          if (action.parent) {
+            return state.map((it) => {
+              if (it.id === action.parent) {
+                return {
+                  ...it,
+                  children: applyAction(it.children ?? [], action),
+                };
+              }
+
+              return it;
+            });
+          }
+
           return applyAction(state, action);
         }, currentState)
       );

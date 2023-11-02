@@ -277,6 +277,49 @@ export class ToolbarComponent {
     this.popupOpen('token');
   }
 
+  public estimation() {
+    if (this.state.get('popupOpen') === 'estimation') {
+      this.popupOpen('');
+      return;
+    }
+
+    this.popupOpen('estimation');
+
+    this.toolbarSubscription = this.boardMoveService
+      .nextMouseDown()
+      .pipe(
+        withLatestFrom(
+          this.store.select(selectZoom),
+          this.store.select(selectPosition)
+        )
+      )
+      .subscribe({
+        next: ([event, zoom, position]) => {
+          this.store.dispatch(
+            BoardActions.batchNodeActions({
+              history: true,
+              actions: [
+                {
+                  data: {
+                    type: 'estimation',
+                    id: v4(),
+                    content: {
+                      position: {
+                        x: (-position.x + event.pageX) / zoom,
+                        y: (-position.y + event.pageY) / zoom,
+                      },
+                    },
+                  },
+                  op: 'add',
+                },
+              ],
+            })
+          );
+        },
+        complete: () => this.popupOpen(''),
+      });
+  }
+
   public tokenSelected(
     token: Pick<Token, 'backgroundColor' | 'color' | 'text'>
   ) {

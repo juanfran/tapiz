@@ -20,7 +20,7 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { RouterLink } from '@angular/router';
 import { RxLet } from '@rx-angular/template/let';
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ShareBoardComponent } from '../share-board/share-board.component';
 import { pageFeature } from '../../reducers/page.reducer';
 
@@ -45,6 +45,7 @@ interface State {
     AutoFocusDirective,
     ClickOutsideDirective,
     MatIconModule,
+    MatDialogModule,
   ],
 })
 export class HeaderComponent {
@@ -53,7 +54,7 @@ export class HeaderComponent {
     private store: Store,
     public state: RxState<State>,
     public cd: ChangeDetectorRef,
-    public dialog: MatDialog
+    public dialog: MatDialog,
   ) {
     this.state.set({ edit: false });
     this.state.connect('canvasMode', this.store.select(selectCanvasMode));
@@ -67,7 +68,7 @@ export class HeaderComponent {
     this.store.dispatch(
       PageActions.changeCanvasMode({
         canvasMode: mode,
-      })
+      }),
     );
   }
 
@@ -78,7 +79,7 @@ export class HeaderComponent {
       },
       () => {
         console.error('export error');
-      }
+      },
     );
   }
 

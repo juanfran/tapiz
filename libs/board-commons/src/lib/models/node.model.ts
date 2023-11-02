@@ -1,24 +1,28 @@
 import { type Type } from '@angular/core';
 
-export interface TuNode<T = object> {
+export interface TuNode<C = object, T = string> {
   id: string;
-  type: string;
-  content: T;
+  type: T;
+  content: C;
+  children?: TuNode[];
 }
 
 export interface NodeAdd {
   op: 'add';
   data: TuNode;
+  parent?: string;
 }
 
 export interface NodePatch {
   op: 'patch';
   data: TuNode;
+  parent?: string;
 }
 
 export interface NodeRemove {
   op: 'remove';
   data: Pick<TuNode, 'id' | 'type'>;
+  parent?: string;
 }
 
 export type StateActions = NodeAdd | NodePatch | NodeRemove;
@@ -51,7 +55,8 @@ export interface NodeValidator {
   patch: (
     data: TuNode,
     userId: string,
-    state: TuNode[]
+    state: TuNode[],
+    node: TuNode
   ) =>
     | {
         success: true;
@@ -61,7 +66,8 @@ export interface NodeValidator {
   remove: (
     data: NodeRemove['data'],
     userId: string,
-    state: TuNode[]
+    state: TuNode[],
+    node: TuNode
   ) =>
     | {
         success: true;

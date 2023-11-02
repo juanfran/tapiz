@@ -1,6 +1,9 @@
-import { ApplicationRef, Injectable, inject } from '@angular/core';
+import { ApplicationRef, DestroyRef, Injectable, inject } from '@angular/core';
+import { filterNil } from 'ngxtension/filter-nil';
 import {
+  Observable,
   Subject,
+  Subscription,
   animationFrameScheduler,
   distinctUntilChanged,
   filter,
@@ -17,16 +20,9 @@ import {
 } from 'rxjs';
 import { Draggable } from '../models/draggable.model';
 import { concatLatestFrom } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
-import { filterNil } from '../../../commons/operators/filter-nil';
-import {
-  selectDragEnabled,
-  selectPosition,
-  selectZoom,
-} from '../selectors/page.selectors';
 import { Point } from '@team-up/board-commons';
-import { PageActions } from '../actions/page.actions';
-import { BoardActions } from '../actions/board.actions';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -51,7 +47,6 @@ export class MultiDragService {
     this.#mouseUp$.next(mouseUp);
   }
 
-  private store = inject(Store);
   private appRef = inject(ApplicationRef);
 
   private dragElements = new Map<
@@ -63,23 +58,61 @@ export class MultiDragService {
     }
   >();
 
+  private subscriptions = new Map<Draggable['id'], Subscription>();
+
   private snap = 50;
+  private setUpConfig?: {
+    dragEnabled: Observable<boolean>;
+    zoom: Observable<number>;
+    relativePosition: Observable<Point>;
+    move: (draggable: Draggable, position: Point) => void;
+    end: (
+      dragged: {
+        id: string;
+        nodeType: string;
+        initialPosition: Point;
+        finalPosition: Point;
+      }[]
+    ) => void;
+  };
 
-  public draggableElements: Draggable[] = [];
+  public draggableElements: {
+    draggableCmp: Draggable;
+    destroyRef: DestroyRef;
+  }[] = [];
 
-  public add(draggable: Draggable) {
-    this.draggableElements.push(draggable);
+  public setUp(setUpConfig: MultiDragService['setUpConfig']) {
+    this.setUpConfig = setUpConfig;
+  }
 
-    this.listen(draggable);
+  public add(draggable: Draggable, destroyRef: DestroyRef) {
+    this.draggableElements.push({ draggableCmp: draggable, destroyRef });
+
+    destroyRef.onDestroy(() => {
+      this.remove(draggable);
+    });
+
+    this.listen(draggable, destroyRef);
   }
 
   public remove(draggable: Draggable) {
     this.draggableElements = this.draggableElements.filter(
-      (d) => d !== draggable
+      (d) => d.draggableCmp !== draggable
     );
+
+    if (this.subscriptions.has(draggable.id)) {
+      this.subscriptions.get(draggable.id)?.unsubscribe();
+      this.subscriptions.delete(draggable.id);
+    }
   }
 
-  public listen(draggable: Draggable) {
+  public listen(draggable: Draggable, destroyRef: DestroyRef) {
+    const setUpConfig = this.setUpConfig;
+
+    if (!setUpConfig) {
+      throw new Error('MultiDragService.setUp() must be called before use');
+    }
+
     const keydown$ = fromEvent<KeyboardEvent>(document, 'keydown');
     const keyup$ = fromEvent<KeyboardEvent>(document, 'keyup');
     const controlPressed$ = merge(keydown$, keyup$).pipe(
@@ -87,8 +120,10 @@ export class MultiDragService {
       startWith(false)
     );
 
+    const handler = draggable.handler ?? draggable.nativeElement;
+
     const mouseDown$ = merge(
-      fromEvent<MouseEvent>(draggable.nativeElement, 'mousedown').pipe(
+      fromEvent<MouseEvent>(handler, 'mousedown').pipe(
         tap((event) => {
           this.updateSharedMouseDown(event);
         })
@@ -101,11 +136,13 @@ export class MultiDragService {
           return false;
         }
 
-        return !draggable.preventDrag;
+        return true;
       }),
-      concatLatestFrom(() => this.store.select(selectDragEnabled)),
+      concatLatestFrom(() => setUpConfig.dragEnabled),
       filter(([, dragEnabled]) => dragEnabled),
-      map(([event]) => event)
+      map(([event]) => {
+        return event;
+      })
     );
 
     const mouseUp$ = merge(
@@ -140,10 +177,7 @@ export class MultiDragService {
           y: mouseMove.clientY,
         };
       }),
-      withLatestFrom(
-        this.store.select(selectZoom),
-        this.store.select(selectPosition)
-      ),
+      withLatestFrom(setUpConfig.zoom, setUpConfig.relativePosition),
       map(([move, zoom, position]) => {
         const posX = -position.x + move.x;
         const posY = -position.y + move.y;
@@ -156,10 +190,7 @@ export class MultiDragService {
     );
 
     const move$ = mouseDown$.pipe(
-      withLatestFrom(
-        this.store.select(selectZoom),
-        this.store.select(selectPosition)
-      ),
+      withLatestFrom(setUpConfig.zoom, setUpConfig.relativePosition),
       switchMap(([event, zoom, position]) => {
         const initialPosition = draggable.position ?? { x: 0, y: 0 };
 
@@ -188,9 +219,13 @@ export class MultiDragService {
       })
     );
 
-    move$
+    const moveSubscription = move$
       .pipe(
+        takeUntilDestroyed(destroyRef),
         withLatestFrom(controlPressed$),
+        filter(() => {
+          return !draggable.preventDrag;
+        }),
         map(([move, ctrlPressed]) => {
           let finalPosition = {
             x: Math.round(move.x - startPositionDiff.x),
@@ -217,26 +252,12 @@ export class MultiDragService {
           });
         }
 
-        this.store.dispatch(
-          BoardActions.batchNodeActions({
-            history: false,
-            actions: [
-              {
-                data: {
-                  type: draggable.nodeType,
-                  id: draggable.id,
-                  content: {
-                    position,
-                  },
-                },
-                op: 'patch',
-              },
-            ],
-          })
-        );
+        this.setUpConfig?.move(draggable, position);
 
         this.appRef.tick();
       });
+
+    this.subscriptions.set(draggable.id, moveSubscription);
   }
 
   private endDrag() {
@@ -250,17 +271,15 @@ export class MultiDragService {
     this.dragElements.forEach((dragElement, id) => {
       if (dragElement.final) {
         actions.push({
-          nodeType: dragElement.type,
           id,
+          nodeType: dragElement.type,
           initialPosition: dragElement.init,
           finalPosition: dragElement.final,
         });
       }
     });
 
-    if (actions.length) {
-      this.store.dispatch(PageActions.endDragNode({ nodes: actions }));
-    }
+    this.setUpConfig?.end(actions);
 
     this.dragElements.clear();
   }

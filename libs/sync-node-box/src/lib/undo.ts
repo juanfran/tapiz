@@ -14,13 +14,30 @@ export function undo(
     return [nodes, history, []];
   }
 
-  const futureActions = actions.map((it) => {
-    return reverseAction(nodes, it);
-  });
+  const futureActions = actions
+    .map((it) => {
+      return reverseAction(nodes, it);
+    })
+    .filter((it): it is StateActions => !!it);
 
-  history.future.unshift(futureActions);
+  if (futureActions.length) {
+    history.future.unshift(futureActions);
+  }
 
   const newState = actions.reduce((state, action) => {
+    if (action.parent) {
+      return state.map((it) => {
+        if (it.id === action.parent) {
+          return {
+            ...it,
+            children: applyAction(it.children ?? [], action),
+          };
+        }
+
+        return it;
+      });
+    }
+
     return applyAction(state, action);
   }, nodes);
 

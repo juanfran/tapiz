@@ -5,6 +5,7 @@ import { StateActions, UserNode, isNote } from '@team-up/board-commons';
 import { syncNodeBox } from '@team-up/sync-node-box';
 import { Observable, combineLatest, map } from 'rxjs';
 import { pageFeature } from '../modules/board/reducers/page.reducer';
+import { concatLatestFrom } from '@ngrx/effects';
 
 @Injectable({ providedIn: 'root' })
 export class BoardFacade {
@@ -51,9 +52,16 @@ export class BoardFacade {
 
   public selectCursors() {
     return this.getUsers().pipe(
-      map((users) =>
-        users.filter((user) => !!user.content.cursor && user.content.connected)
-      ),
+      concatLatestFrom(() => this.store.select(pageFeature.selectUserId)),
+      map(([users, currentUser]) => {
+        return users.filter((user) => {
+          return (
+            !!user.content.cursor &&
+            user.content.connected &&
+            user.id !== currentUser
+          );
+        });
+      }),
       map((nodes) => nodes.map((it) => it.content))
     );
   }

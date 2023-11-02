@@ -7,8 +7,6 @@ import { RxState } from '@rx-angular/state';
 import { Board } from '@team-up/board-commons';
 import { BoardListComponent } from '../board-list/board-list.component';
 import { homeFeature } from '../../+state/home.feature';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
 import { BoardListHeaderComponent } from '../board-list-header/board-list-header.component';
 interface State {
   boards: Board[];
@@ -32,9 +30,6 @@ interface State {
     CommonModule,
     TitleComponent,
     BoardListComponent,
-    MatDialogModule,
-    MatButtonModule,
-    MatDialogModule,
     BoardListHeaderComponent,
   ],
 })

@@ -15,13 +15,30 @@ export function redo(
     return [nodes, history, []];
   }
 
-  const pastActions = actions.map((it) => {
-    return reverseAction(nodes, it);
-  });
+  const pastActions = actions
+    .map((it) => {
+      return reverseAction(nodes, it);
+    })
+    .filter((it): it is StateActions => !!it);
 
-  history.past.unshift(pastActions);
+  if (pastActions.length) {
+    history.past.unshift(pastActions);
+  }
 
   const newState = actions.reduce((state, action) => {
+    if (action.parent) {
+      return state.map((it) => {
+        if (it.id === action.parent) {
+          return {
+            ...it,
+            children: applyAction(it.children ?? [], action),
+          };
+        }
+
+        return it;
+      });
+    }
+
     return applyAction(state, action);
   }, nodes);
 
