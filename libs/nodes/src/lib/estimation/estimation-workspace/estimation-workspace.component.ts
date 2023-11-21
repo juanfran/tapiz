@@ -67,18 +67,20 @@ import { NodesStore } from '@team-up/nodes/services/nodes.store';
         @for (user of nodesStore.users(); track user.id) {
           @if (nodesStore.userId() !== user.id) {
             <div class="user">
-              <p>
+              <p
+                class="user-name"
+                [title]="user.name">
                 {{ user.name }}
-                @if (getUserVote(user, story.id); as userVote) {
-                  @if (story.show) {
-                    <span class="user-vote">{{ userVote }}</span>
-                  } @else {
-                    <span class="user-vote">?</span>
-                  }
-                } @else {
-                  <span class="user-vote empty">?</span>
-                }
               </p>
+              @if (getUserVote(user, story.id); as userVote) {
+                @if (story.show) {
+                  <p class="user-vote">{{ userVote }}</p>
+                } @else {
+                  <p class="user-vote">?</p>
+                }
+              } @else {
+                <p class="user-vote empty">?</p>
+              }
             </div>
           }
         }
