@@ -22,7 +22,7 @@ export class HistoryEffects {
           history: false,
           actions,
         });
-      })
+      }),
     );
   });
 
@@ -36,7 +36,7 @@ export class HistoryEffects {
           history: false,
           actions,
         });
-      })
+      }),
     );
   });
 
@@ -64,12 +64,12 @@ export class HistoryEffects {
 
             return history;
           });
-        })
+        }),
       );
     },
     {
       dispatch: false,
-    }
+    },
   );
 
   public snapShot$ = createEffect(
@@ -92,12 +92,12 @@ export class HistoryEffects {
 
             return history;
           });
-        })
+        }),
       );
     },
     {
       dispatch: false,
-    }
+    },
   );
 
   constructor(private actions$: Actions) {}

@@ -6,7 +6,7 @@ export function finalizeWithValue<T>(callback: (value: T) => void) {
       let lastValue: T;
       return source.pipe(
         tap((value) => (lastValue = value)),
-        finalize(() => callback(lastValue))
+        finalize(() => callback(lastValue)),
       );
     });
 }

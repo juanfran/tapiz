@@ -29,12 +29,12 @@ export class BoardEffects {
         ofType(PageActions.initBoard),
         tap(() => {
           this.boardFacade.start();
-        })
+        }),
       );
     },
     {
       dispatch: false,
-    }
+    },
   );
 
   public batchNodeActions$ = createEffect(
@@ -44,12 +44,12 @@ export class BoardEffects {
         tap((batch) => {
           this.boardFacade.applyActions(batch.actions, batch.history);
           this.wsService.send(batch.actions);
-        })
+        }),
       );
     },
     {
       dispatch: false,
-    }
+    },
   );
 
   public setState$ = createEffect(
@@ -58,12 +58,12 @@ export class BoardEffects {
         ofType(BoardActions.setState),
         tap(({ data }) => {
           this.boardFacade.applyActions(data);
-        })
+        }),
       );
     },
     {
       dispatch: false,
-    }
+    },
   );
 
   public wsUpdateStateName$ = createEffect(
@@ -71,12 +71,12 @@ export class BoardEffects {
       return this.actions$.pipe(ofType(BoardActions.setBoardName)).pipe(
         tap((action) => {
           this.wsService.send([action]);
-        })
+        }),
       );
     },
     {
       dispatch: false,
-    }
+    },
   );
 
   public pasteNodes$ = createEffect(
@@ -93,12 +93,12 @@ export class BoardEffects {
 
           this.boardFacade.applyActions(batchActions, true);
           this.wsService.send(batchActions);
-        })
+        }),
       );
     },
     {
       dispatch: false,
-    }
+    },
   );
 
   public joinBoard$ = createEffect(() => {
@@ -125,14 +125,14 @@ export class BoardEffects {
               return of(
                 PageActions.boardNotFound({
                   id: action.boardId,
-                })
+                }),
               );
             }
 
             return EMPTY;
-          })
+          }),
         );
-      })
+      }),
     );
   });
 
@@ -153,7 +153,7 @@ export class BoardEffects {
       }),
       filter((it) => {
         return it.type !== 'noop';
-      })
+      }),
     );
   });
 
@@ -163,23 +163,23 @@ export class BoardEffects {
         ofType(PageActions.boardNotFound),
         tap(() => {
           this.router.navigate(['/404']);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   public resetPopupOnChangeMode$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.changeCanvasMode),
-      map(() => PageActions.setPopupOpen({ popup: '' }))
+      map(() => PageActions.setPopupOpen({ popup: '' })),
     );
   });
 
   public moveEnabledOnChangeMode$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.changeCanvasMode),
-      map(() => PageActions.setMoveEnabled({ enabled: true }))
+      map(() => PageActions.setMoveEnabled({ enabled: true })),
     );
   });
 
@@ -215,12 +215,12 @@ export class BoardEffects {
                   op: 'add',
                 },
               ],
-            })
+            }),
           );
         }
 
         return EMPTY;
-      })
+      }),
     );
   });
 
@@ -255,12 +255,12 @@ export class BoardEffects {
                   op: 'add',
                 },
               ],
-            })
+            }),
           );
         }
 
         return EMPTY;
-      })
+      }),
     );
   });
 
@@ -270,6 +270,6 @@ export class BoardEffects {
     private wsService: WsService,
     private boardApiService: BoardApiService,
     private store: Store,
-    private boardFacade: BoardFacade
+    private boardFacade: BoardFacade,
   ) {}
 }

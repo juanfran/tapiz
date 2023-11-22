@@ -24,6 +24,6 @@ export class ConfirmComponent {
         color: string;
       };
       align?: 'start' | 'center' | 'end';
-    }
+    },
   ) {}
 }

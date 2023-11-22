@@ -87,7 +87,7 @@ export class RotateDirective {
                 op: 'patch',
               },
             ],
-          })
+          }),
         );
       });
   }

@@ -43,7 +43,7 @@ bootstrapApplication(AppComponent, {
         return initializeApp(inject(ConfigService).config.firebaseConfig);
       }),
       provideAuth(() => getAuth()),
-      MatSnackBarModule
+      MatSnackBarModule,
     ),
     prefersReducedMotion() ? provideAnimationsAsync() : provideNoopAnimations(),
     provideStore(
@@ -59,7 +59,7 @@ bootstrapApplication(AppComponent, {
           strictActionSerializability: true,
           strictActionTypeUniqueness: true,
         },
-      }
+      },
     ),
     provideStoreDevtools({
       logOnly: !isDevMode(),

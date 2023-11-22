@@ -45,7 +45,7 @@ export class BoardZoomService {
 
         return true;
       }),
-      map(([event]) => event)
+      map(([event]) => event),
     );
 
     this.zoom$ = wheel$.pipe(
@@ -87,14 +87,14 @@ export class BoardZoomService {
       distinctUntilChanged((prev, curr) => {
         return prev.zoom === curr.zoom;
       }),
-      share()
+      share(),
     );
 
     this.zoomMove$ = this.zoom$.pipe(
       startWith({ zoom: 1, point: { x: 0, y: 0 } }),
       withLatestFrom(
         this.store.select(selectZoom),
-        this.store.select(selectPosition)
+        this.store.select(selectPosition),
       ),
       map(([zoomEvent, prevZoomEvent, position]) => {
         const xs = (zoomEvent.point.x - position.x) / prevZoomEvent;
@@ -107,7 +107,7 @@ export class BoardZoomService {
           },
           zoomEvent.zoom,
         ];
-      })
+      }),
     );
   }
 }

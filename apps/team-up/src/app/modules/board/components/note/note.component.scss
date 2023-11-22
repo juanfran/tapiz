@@ -64,7 +64,11 @@ textarea {
   }
 
   &:not(.visible) .text {
-    font-family: "Redacted Script", -apple-system, system-ui, sans-serif;
+    font-family:
+      "Redacted Script",
+      -apple-system,
+      system-ui,
+      sans-serif;
   }
 
   &.highlight {
@@ -98,7 +102,11 @@ textarea {
 
 .text,
 textarea {
-  font-family: "Open Sans", -apple-system, system-ui, sans-serif;
+  font-family:
+    "Open Sans",
+    -apple-system,
+    system-ui,
+    sans-serif;
   font-size: var(--text-size);
   overflow: hidden;
   line-height: 1.1;
@@ -119,7 +127,9 @@ textarea {
 
 .emoji {
   position: absolute;
-  font-family: "Twemoji Mozilla","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji","EmojiOne Color","Android Emoji",sans-serif;
+  font-family: "Twemoji Mozilla", "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji", "EmojiOne Color", "Android Emoji",
+    sans-serif;
   font-size: 1.375rem;
   z-index: -1;
   width: var(--emoji-width);
@@ -130,7 +140,6 @@ textarea {
 .characters {
   color: var(--custom-main);
 }
-
 
 .vote,
 .name,

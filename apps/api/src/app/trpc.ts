@@ -119,7 +119,7 @@ const boardMemberCheck = boardCheck.unstable_pipe(async (opts) => {
 
   const haveAccess = await db.board.haveAccess(
     inputs.boardId,
-    opts.ctx.user.sub
+    opts.ctx.user.sub,
   );
 
   if (!haveAccess) {
@@ -128,7 +128,7 @@ const boardMemberCheck = boardCheck.unstable_pipe(async (opts) => {
 
   const userBoard = await db.board.getBoardUser(
     inputs.boardId,
-    opts.ctx.user.sub
+    opts.ctx.user.sub,
   );
 
   return opts.next({

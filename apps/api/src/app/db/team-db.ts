@@ -39,8 +39,8 @@ export async function getUserTeam(teamId: string, userId: string) {
     .where(
       and(
         eq(schema.teamMembers.teamId, teamId),
-        eq(schema.teamMembers.accountId, userId)
-      )
+        eq(schema.teamMembers.accountId, userId),
+      ),
     );
 
   return team.at(0);
@@ -52,7 +52,7 @@ export async function getUserTeams(userId: string): Promise<UserTeam[]> {
     .from(schema.teams)
     .leftJoin(
       schema.teamMembers,
-      eq(schema.teamMembers.teamId, schema.teams.id)
+      eq(schema.teamMembers.teamId, schema.teams.id),
     )
     .where(eq(schema.teamMembers.accountId, userId));
 
@@ -75,7 +75,7 @@ export async function deleteTeam(teamId: string) {
 export async function changeRole(
   teamId: string,
   userId: string,
-  role: 'admin' | 'member'
+  role: 'admin' | 'member',
 ) {
   return db
     .update(schema.teamMembers)
@@ -83,22 +83,22 @@ export async function changeRole(
     .where(
       and(
         eq(schema.teamMembers.teamId, teamId),
-        eq(schema.teamMembers.accountId, userId)
-      )
+        eq(schema.teamMembers.accountId, userId),
+      ),
     );
 }
 
 export async function deleteStarredBoardsByUser(
   userId: string,
-  boardIds: string[]
+  boardIds: string[],
 ) {
   await db
     .delete(schema.starreds)
     .where(
       and(
         eq(schema.starreds.accountId, userId),
-        inArray(schema.starreds.boardId, boardIds)
-      )
+        inArray(schema.starreds.boardId, boardIds),
+      ),
     );
 }
 
@@ -108,8 +108,8 @@ export async function deleteMember(teamId: string, userId: string) {
     .where(
       and(
         eq(schema.teamMembers.teamId, teamId),
-        eq(schema.teamMembers.accountId, userId)
-      )
+        eq(schema.teamMembers.accountId, userId),
+      ),
     );
 
   const boards = await getUsersBoardsByTeam(userId, teamId);
@@ -119,7 +119,7 @@ export async function deleteMember(teamId: string, userId: string) {
   if (ids.length) {
     await deleteStarredBoardsByUser(
       userId,
-      boards.map((it) => it.id)
+      boards.map((it) => it.id),
     );
   }
 }
@@ -131,8 +131,8 @@ export async function getTeamAdmins(teamId: string) {
     .where(
       and(
         eq(schema.teamMembers.teamId, teamId),
-        eq(schema.teamMembers.role, 'admin')
-      )
+        eq(schema.teamMembers.role, 'admin'),
+      ),
     );
 
   return admins;
@@ -146,7 +146,7 @@ export async function getTeamMembers(teamId: string) {
     .leftJoin(schema.teams, eq(schema.teamMembers.teamId, schema.teams.id))
     .leftJoin(
       schema.accounts,
-      eq(schema.teamMembers.accountId, schema.accounts.id)
+      eq(schema.teamMembers.accountId, schema.accounts.id),
     );
 
   return response

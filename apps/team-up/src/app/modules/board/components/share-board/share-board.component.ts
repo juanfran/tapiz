@@ -101,7 +101,7 @@ export class ShareBoardComponent {
     this.store.dispatch(
       PageActions.setBoardPrivacy({
         isPublic: visibility === 'public',
-      })
+      }),
     );
   }
 

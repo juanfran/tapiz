@@ -16,7 +16,11 @@ html,
 body {
   background-color: var(--white);
   color: var(--color-black);
-  font-family: "Raleway", -apple-system, system-ui, sans-serif;
+  font-family:
+    "Raleway",
+    -apple-system,
+    system-ui,
+    sans-serif;
   margin: 0;
   padding: 0;
 }
@@ -207,7 +211,6 @@ main {
       block-size: 16px;
     }
   }
-
 
   &:hover {
     background-color: var(--accent--ui);

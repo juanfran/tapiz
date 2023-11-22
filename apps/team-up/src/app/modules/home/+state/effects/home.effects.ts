@@ -23,12 +23,12 @@ export const initHomeFeatchTeams$ = createEffect(
         teams.reverse();
 
         return HomeActions.fetchTeamsSuccess({ teams });
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const createTeam$ = createEffect(
@@ -40,12 +40,12 @@ export const createTeam$ = createEffect(
       }),
       map((team) => {
         return HomeActions.createTeamSuccess({ team });
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const createTeamSuccess$ = createEffect(
@@ -54,13 +54,13 @@ export const createTeamSuccess$ = createEffect(
       ofType(HomeActions.createTeamSuccess),
       tap((team) => {
         void router.navigate(['/team', team.team.id]);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const deleteTeam$ = createEffect(
@@ -71,14 +71,14 @@ export const deleteTeam$ = createEffect(
         return teamApiService.deleteTeam(action.id).pipe(
           map(() => {
             return HomeActions.deleteTeamSuccess({ id: action.id });
-          })
+          }),
         );
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const deleteTeamSuccess$ = createEffect(
@@ -87,20 +87,20 @@ export const deleteTeamSuccess$ = createEffect(
       ofType(HomeActions.deleteTeamSuccess),
       tap(() => {
         void router.navigate(['/']);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const createBoard$ = createEffect(
   (
     actions$ = inject(Actions),
     boardApiService = inject(BoardApiService),
-    router = inject(Router)
+    router = inject(Router),
   ) => {
     return actions$.pipe(
       ofType(HomeActions.createBoard),
@@ -109,13 +109,13 @@ export const createBoard$ = createEffect(
       }),
       tap((result) => {
         void router.navigate(['/board', result.id]);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const deleteBoard$ = createEffect(
@@ -124,13 +124,13 @@ export const deleteBoard$ = createEffect(
       ofType(HomeActions.removeBoard),
       mergeMap((action) => {
         return boardApiService.removeBoard(action.id);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const leaveBoard$ = createEffect(
@@ -139,13 +139,13 @@ export const leaveBoard$ = createEffect(
       ofType(HomeActions.leaveBoard),
       mergeMap((action) => {
         return boardApiService.leaveBoard(action.id);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const duplicateBoard$ = createEffect(
@@ -157,12 +157,12 @@ export const duplicateBoard$ = createEffect(
       }),
       map((board) => {
         return HomeActions.duplicateBoardSuccess({ board });
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const fetchBoards$ = createEffect(
@@ -173,21 +173,21 @@ export const fetchBoards$ = createEffect(
         return boardApiService.fetchBoards().pipe(
           map((boards) => {
             return HomeActions.fetchBoardsSuccess({ boards });
-          })
+          }),
         );
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const removeAccount$ = createEffect(
   (
     actions$ = inject(Actions),
     userApiService = inject(UserApiService),
-    authService = inject(AuthService)
+    authService = inject(AuthService),
   ) => {
     return actions$.pipe(
       ofType(HomeActions.removeAccount),
@@ -195,15 +195,15 @@ export const removeAccount$ = createEffect(
         return userApiService.removeAccount().pipe(
           tap(() => {
             authService.logout();
-          })
+          }),
         );
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const inviteToTeam$ = createEffect(
@@ -215,7 +215,7 @@ export const inviteToTeam$ = createEffect(
           .inviteToTeam(
             action.id,
             action.invitation.email,
-            action.invitation.role
+            action.invitation.role,
           )
           .pipe(
             map((invitation) => {
@@ -223,21 +223,21 @@ export const inviteToTeam$ = createEffect(
                 id: action.id,
                 invitation,
               });
-            })
+            }),
           );
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const fetchTeamInvitations$ = createEffect(
   (
     actions$ = inject(Actions),
     teamApiService = inject(TeamApiService),
-    store = inject(Store)
+    store = inject(Store),
   ) => {
     return actions$.pipe(
       ofType(HomeActions.initTeamMembersModal),
@@ -246,7 +246,7 @@ export const fetchTeamInvitations$ = createEffect(
           map((teams) => {
             return teams.find((team) => team.id === action.teamId);
           }),
-          filterNil()
+          filterNil(),
         );
       }),
       filter(([, team]) => {
@@ -256,21 +256,21 @@ export const fetchTeamInvitations$ = createEffect(
         return teamApiService.teamInvitations(team.id).pipe(
           map((invitations) => {
             return HomeActions.fetchTeamsInvitationsSuccess({ invitations });
-          })
+          }),
         );
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const fetchTeamMembers$ = createEffect(
   (
     actions$ = inject(Actions),
     teamApiService = inject(TeamApiService),
-    store = inject(Store)
+    store = inject(Store),
   ) => {
     return actions$.pipe(
       ofType(HomeActions.initTeamMembersModal),
@@ -279,7 +279,7 @@ export const fetchTeamMembers$ = createEffect(
           map((teams) => {
             return teams.find((team) => team.id === action.teamId);
           }),
-          filterNil()
+          filterNil(),
         );
       }),
       filter(([, team]) => {
@@ -289,14 +289,14 @@ export const fetchTeamMembers$ = createEffect(
         return teamApiService.teamMembers(team.id).pipe(
           map((members) => {
             return HomeActions.fetchTeamMembersSuccess({ members });
-          })
+          }),
         );
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const deleteInvitation$ = createEffect(
@@ -305,13 +305,13 @@ export const deleteInvitation$ = createEffect(
       ofType(HomeActions.deleteTeamInvitation),
       mergeMap((action) => {
         return userApiService.cancelInvitation(action.id);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const changeInvitationRole = createEffect(
@@ -325,14 +325,14 @@ export const changeInvitationRole = createEffect(
               id: action.id,
               role: action.role,
             });
-          })
+          }),
         );
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const deleteTeamMember$ = createEffect(
@@ -340,7 +340,7 @@ export const deleteTeamMember$ = createEffect(
     actions$ = inject(Actions),
     teamApiService = inject(TeamApiService),
     store = inject(Store),
-    router = inject(Router)
+    router = inject(Router),
   ) => {
     return actions$.pipe(
       ofType(HomeActions.deleteTeamMember),
@@ -359,21 +359,21 @@ export const deleteTeamMember$ = createEffect(
               teamId: action.teamId,
               currentUserId: userId,
             });
-          })
+          }),
         );
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const changeRole$ = createEffect(
   (
     actions$ = inject(Actions),
     teamApiService = inject(TeamApiService),
-    store = inject(Store)
+    store = inject(Store),
   ) => {
     return actions$.pipe(
       ofType(HomeActions.changeRole),
@@ -391,14 +391,14 @@ export const changeRole$ = createEffect(
                 role: action.role,
                 currentUserId: userId,
               });
-            })
+            }),
           );
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const renameTeam$ = createEffect(
@@ -407,13 +407,13 @@ export const renameTeam$ = createEffect(
       ofType(HomeActions.renameTeam),
       mergeMap((action) => {
         return teamApiService.renameTeam(action.id, action.name);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const initHomeInvitations$ = createEffect(
@@ -425,12 +425,12 @@ export const initHomeInvitations$ = createEffect(
       }),
       map((invitations) => {
         return HomeActions.fetchUserInvitationsSuccess({ invitations });
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const acceptInvitation$ = createEffect(
@@ -443,14 +443,14 @@ export const acceptInvitation$ = createEffect(
             return HomeActions.acceptInvitationSuccess({
               invitation: action.invitation,
             });
-          })
+          }),
         );
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const rejectInvitation$ = createEffect(
@@ -459,20 +459,20 @@ export const rejectInvitation$ = createEffect(
       ofType(HomeActions.rejectInvitation),
       mergeMap((action) => {
         return userApiService.cancelInvitation(action.invitation.id);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const leaveTeam$ = createEffect(
   (
     actions$ = inject(Actions),
     teamApiService = inject(TeamApiService),
-    router = inject(Router)
+    router = inject(Router),
   ) => {
     return actions$.pipe(
       ofType(HomeActions.leaveTeam),
@@ -481,13 +481,13 @@ export const leaveTeam$ = createEffect(
       }),
       tap(() => {
         router.navigate(['/']);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const fetchTeamBoards$ = createEffect(
@@ -498,14 +498,14 @@ export const fetchTeamBoards$ = createEffect(
         return boardApiService.fetchTeamBoards(action.teamId).pipe(
           map((boards) => {
             return HomeActions.fetchBoardsSuccess({ boards });
-          })
+          }),
         );
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const renameBoard$ = createEffect(
@@ -514,13 +514,13 @@ export const renameBoard$ = createEffect(
       ofType(HomeActions.renameBoard),
       mergeMap((action) => {
         return boardApiService.renameBoard(action.id, action.name);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const addStar$ = createEffect(
@@ -529,13 +529,13 @@ export const addStar$ = createEffect(
       ofType(HomeActions.starBoard),
       mergeMap((action) => {
         return boardApiService.addStar(action.id);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const removeStar$ = createEffect(
@@ -544,13 +544,13 @@ export const removeStar$ = createEffect(
       ofType(HomeActions.unstarBoard),
       mergeMap((action) => {
         return boardApiService.removeStar(action.id);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const initStarredPage$ = createEffect(
@@ -561,14 +561,14 @@ export const initStarredPage$ = createEffect(
         return boardApiService.fetchStarredBoards().pipe(
           map((boards) => {
             return HomeActions.fetchBoardsSuccess({ boards });
-          })
+          }),
         );
-      })
+      }),
     );
   },
   {
     functional: true,
-  }
+  },
 );
 
 export const changeSortBy$ = createEffect(
@@ -577,13 +577,13 @@ export const changeSortBy$ = createEffect(
       ofType(HomeActions.changeBoardSortBy),
       tap((action) => {
         localStorage.setItem('boardSortBy', action.sortBy);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );
 
 export const transferBoard$ = createEffect(
@@ -592,11 +592,11 @@ export const transferBoard$ = createEffect(
       ofType(HomeActions.transferBoard),
       mergeMap((action) => {
         return boardApiService.transferBoard(action.id, action.teamId);
-      })
+      }),
     );
   },
   {
     functional: true,
     dispatch: false,
-  }
+  },
 );

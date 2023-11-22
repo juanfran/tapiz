@@ -15,7 +15,10 @@ export class WsService {
   private notificationService = inject(NotificationService);
   private router = inject(Router);
 
-  constructor(private store: Store, private configService: ConfigService) {
+  constructor(
+    private store: Store,
+    private configService: ConfigService,
+  ) {
     this.poolLoop();
   }
 

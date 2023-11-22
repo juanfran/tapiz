@@ -77,7 +77,7 @@ export class ToolbarComponent {
     private store: Store,
     private boardMoveService: BoardMoveService,
     private notesService: NotesService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
   ) {
     this.state.connect('popupOpen', this.store.select(selectPopupOpen));
   }
@@ -92,8 +92,8 @@ export class ToolbarComponent {
       .pipe(
         withLatestFrom(
           this.store.select(selectZoom),
-          this.store.select(selectPosition)
-        )
+          this.store.select(selectPosition),
+        ),
       )
       .subscribe({
         next: ([event, zoom, position]) => {
@@ -122,7 +122,7 @@ export class ToolbarComponent {
                   op: 'add',
                 },
               ],
-            })
+            }),
           );
         },
         complete: () => this.popupOpen(''),
@@ -143,8 +143,8 @@ export class ToolbarComponent {
         withLatestFrom(
           this.store.select(selectZoom),
           this.store.select(selectPosition),
-          this.store.select(selectUserId)
-        )
+          this.store.select(selectUserId),
+        ),
       )
       .subscribe({
         next: ([event, zoom, position, userId]) => {
@@ -168,7 +168,7 @@ export class ToolbarComponent {
                   op: 'add',
                 },
               ],
-            })
+            }),
           );
         },
         complete: () => this.popupOpen(''),
@@ -181,7 +181,7 @@ export class ToolbarComponent {
       this.store.dispatch(
         PageActions.setInitZone({
           initZone: null,
-        })
+        }),
       );
       return;
     }
@@ -192,7 +192,7 @@ export class ToolbarComponent {
         initZone: {
           type: 'group',
         },
-      })
+      }),
     );
   }
 
@@ -250,7 +250,7 @@ export class ToolbarComponent {
         initZone: {
           type: 'panel',
         },
-      })
+      }),
     );
   }
 
@@ -264,7 +264,9 @@ export class ToolbarComponent {
 
   public emojiSelected(emojiEvent: EmojiClickEvent) {
     this.store.dispatch(
-      PageActions.selectEmoji({ emoji: emojiEvent.detail.emoji as NativeEmoji })
+      PageActions.selectEmoji({
+        emoji: emojiEvent.detail.emoji as NativeEmoji,
+      }),
     );
   }
 
@@ -290,8 +292,8 @@ export class ToolbarComponent {
       .pipe(
         withLatestFrom(
           this.store.select(selectZoom),
-          this.store.select(selectPosition)
-        )
+          this.store.select(selectPosition),
+        ),
       )
       .subscribe({
         next: ([event, zoom, position]) => {
@@ -313,7 +315,7 @@ export class ToolbarComponent {
                   op: 'add',
                 },
               ],
-            })
+            }),
           );
         },
         complete: () => this.popupOpen(''),
@@ -321,15 +323,15 @@ export class ToolbarComponent {
   }
 
   public tokenSelected(
-    token: Pick<Token, 'backgroundColor' | 'color' | 'text'>
+    token: Pick<Token, 'backgroundColor' | 'color' | 'text'>,
   ) {
     this.toolbarSubscription = this.boardMoveService
       .nextMouseDown()
       .pipe(
         withLatestFrom(
           this.store.select(selectZoom),
-          this.store.select(selectPosition)
-        )
+          this.store.select(selectPosition),
+        ),
       )
       .subscribe({
         next: ([event, zoom, position]) => {
@@ -352,7 +354,7 @@ export class ToolbarComponent {
                   op: 'add',
                 },
               ],
-            })
+            }),
           );
         },
         complete: () => this.popupOpen(''),
@@ -396,7 +398,7 @@ export class ToolbarComponent {
                   op: 'add',
                 },
               ],
-            })
+            }),
           );
         });
     }

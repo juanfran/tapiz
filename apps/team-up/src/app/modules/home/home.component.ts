@@ -55,7 +55,7 @@ export class HomeComponent {
     this.state.connect('teams', this.store.select(homeFeature.selectTeams));
     this.state.connect(
       'invitations',
-      this.store.select(homeFeature.selectUserInvitations)
+      this.store.select(homeFeature.selectUserInvitations),
     );
   }
 

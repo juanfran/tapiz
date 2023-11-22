@@ -121,8 +121,8 @@ export class TeamComponent {
         teams: this.store.select(homeFeature.selectTeams),
       }).pipe(
         map(({ teamId, teams }) => teams.find((team) => team.id === teamId)),
-        filterNil()
-      )
+        filterNil(),
+      ),
     );
 
     this.state.connect('boards', this.store.select(homeFeature.selectBoards));
@@ -151,7 +151,7 @@ export class TeamComponent {
       .pipe(filter((it) => it))
       .subscribe(() => {
         this.store.dispatch(
-          HomeActions.deleteTeam({ id: this.state.get('teamId') })
+          HomeActions.deleteTeam({ id: this.state.get('teamId') }),
         );
       });
   }
@@ -173,7 +173,7 @@ export class TeamComponent {
           HomeActions.renameTeam({
             id: this.state.get('teamId'),
             name,
-          })
+          }),
         );
       });
   }
@@ -210,7 +210,7 @@ export class TeamComponent {
       .pipe(filter((it) => it))
       .subscribe(() => {
         this.store.dispatch(
-          HomeActions.leaveTeam({ id: this.state.get('teamId') })
+          HomeActions.leaveTeam({ id: this.state.get('teamId') }),
         );
       });
   }

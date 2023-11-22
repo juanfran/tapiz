@@ -8,14 +8,14 @@ import {
 export const BoardActions = {
   setBoardName: createAction(
     BoardCommonActions.setBoardName,
-    props<{ name: string }>()
+    props<{ name: string }>(),
   ),
   batchNodeActions: createAction(
     BoardCommonActions.batchNodeActions,
-    props<BachStateActions>()
+    props<BachStateActions>(),
   ),
   setState: createAction(
     BoardCommonActions.setState,
-    props<{ data: StateActions[] }>()
+    props<{ data: StateActions[] }>(),
   ),
 };

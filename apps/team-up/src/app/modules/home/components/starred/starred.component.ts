@@ -54,7 +54,7 @@ export class StarredComponent {
       'boards',
       this.store
         .select(homeFeature.selectBoards)
-        .pipe(map((boards) => boards.filter((it) => it.starred)))
+        .pipe(map((boards) => boards.filter((it) => it.starred))),
     );
   }
 
@@ -71,7 +71,7 @@ export class StarredComponent {
           HomeActions.createBoard({
             name: newBoard.name,
             teamId: newBoard.teamId,
-          })
+          }),
         );
       });
   }

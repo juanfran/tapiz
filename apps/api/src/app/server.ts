@@ -40,7 +40,7 @@ export class Server {
             this,
             user['name'] ?? 'anonymous',
             user.sub,
-            user.email
+            user.email,
           );
           this.clients.push(client);
           return;
@@ -96,7 +96,7 @@ export class Server {
               cursor: null,
             },
           } as UserNode;
-        })
+        }),
       );
       this.stateSubscriptions[boardId] = this.state[boardId]
         .sync()

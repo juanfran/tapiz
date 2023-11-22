@@ -228,7 +228,7 @@ export class MembersComponent implements OnChanges {
       .split(',')
       .map((email: string) => email.trim())
       .filter((email) =>
-        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)
+        /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email),
       );
 
     if (emails.length) {
@@ -238,7 +238,7 @@ export class MembersComponent implements OnChanges {
             email,
             role: this.form.value.role as Invitation['role'],
           };
-        })
+        }),
       );
     }
 

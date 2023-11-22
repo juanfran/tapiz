@@ -93,7 +93,7 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
           }
 
           return applyAction(state, action);
-        }, currentState)
+        }, currentState),
       );
 
       return getState();
@@ -110,7 +110,7 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
 
       const [newState, newHistory, actionsApplied] = undo(
         currentState,
-        nodesHistory
+        nodesHistory,
       );
 
       if (actionsApplied.length) {
@@ -132,7 +132,7 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
 
       const [newState, newHistory, actionsApplied] = redo(
         currentState,
-        nodesHistory
+        nodesHistory,
       );
 
       if (actionsApplied.length) {

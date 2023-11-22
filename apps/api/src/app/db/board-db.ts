@@ -22,8 +22,8 @@ export async function updateLastAccessedAt(boardId: string, userId: string) {
     .where(
       and(
         eq(schema.acountsToBoards.accountId, userId),
-        eq(schema.acountsToBoards.boardId, boardId)
-      )
+        eq(schema.acountsToBoards.boardId, boardId),
+      ),
     );
 }
 
@@ -72,8 +72,8 @@ export async function getBoardAdmins(boardId: string) {
     .where(
       and(
         eq(schema.acountsToBoards.boardId, boardId),
-        eq(schema.acountsToBoards.role, 'admin')
-      )
+        eq(schema.acountsToBoards.role, 'admin'),
+      ),
     );
 
   boards.forEach((board) => {
@@ -96,8 +96,8 @@ export async function getBoardUser(boardId: string, userId: UserNode['id']) {
     .where(
       and(
         eq(schema.acountsToBoards.boardId, boardId),
-        eq(schema.acountsToBoards.accountId, userId)
-      )
+        eq(schema.acountsToBoards.accountId, userId),
+      ),
     );
 
   return results.at(0);
@@ -123,24 +123,24 @@ export async function getBoards(userId: string) {
       schema.acountsToBoards,
       and(
         eq(schema.boards.id, schema.acountsToBoards.boardId),
-        eq(schema.acountsToBoards.accountId, userId)
-      )
+        eq(schema.acountsToBoards.accountId, userId),
+      ),
     )
     .leftJoin(
       schema.starreds,
       and(
         eq(schema.starreds.accountId, userId),
-        eq(schema.starreds.boardId, schema.boards.id)
-      )
+        eq(schema.starreds.boardId, schema.boards.id),
+      ),
     )
     .where(
       and(
         or(
           eq(schema.boards.public, true),
-          eq(schema.acountsToBoards.role, 'admin')
+          eq(schema.acountsToBoards.role, 'admin'),
         ),
-        inArray
-      )
+        inArray,
+      ),
     );
 
   const boards = boardsRaw
@@ -181,7 +181,7 @@ export async function getBoardUsers(boardId: string) {
     .from(schema.acountsToBoards)
     .leftJoin(
       schema.accounts,
-      eq(schema.accounts.id, schema.acountsToBoards.accountId)
+      eq(schema.accounts.id, schema.acountsToBoards.accountId),
     )
     .where(eq(schema.acountsToBoards.boardId, boardId));
 
@@ -216,15 +216,15 @@ export async function getUsersBoardsByTeam(userId: string, teamId: string) {
       schema.starreds,
       and(
         eq(schema.starreds.accountId, userId),
-        eq(schema.starreds.boardId, schema.boards.id)
-      )
+        eq(schema.starreds.boardId, schema.boards.id),
+      ),
     )
     .leftJoin(
       schema.acountsToBoards,
       and(
         eq(schema.boards.id, schema.acountsToBoards.boardId),
-        eq(schema.acountsToBoards.accountId, userId)
-      )
+        eq(schema.acountsToBoards.accountId, userId),
+      ),
     )
     .where(eq(schema.boards.teamId, teamId))
     .orderBy(desc(schema.boards.createdAt));
@@ -252,7 +252,7 @@ export async function getAllBoardAdmins(boardId: string) {
 
   if (board.teamId) {
     teamAdmins = (await team.getTeamAdmins(board.teamId)).map(
-      (it) => it.accountId
+      (it) => it.accountId,
     );
   }
 
@@ -267,7 +267,7 @@ export async function createBoard(
   name = 'New board',
   ownerId: string,
   board: TuNode[],
-  teamId: string | null
+  teamId: string | null,
 ) {
   const result = await db
     .insert(schema.boards)
@@ -293,27 +293,27 @@ export async function leaveBoard(userId: string, boardId: string) {
     .where(
       and(
         eq(schema.acountsToBoards.accountId, userId),
-        eq(schema.acountsToBoards.boardId, boardId)
-      )
+        eq(schema.acountsToBoards.boardId, boardId),
+      ),
     );
 }
 
 export async function joinBoard(
   userId: string,
-  boardId: string
+  boardId: string,
 ): Promise<void> {
   const result = await db
     .select()
     .from(schema.boards)
     .leftJoin(
       schema.acountsToBoards,
-      eq(schema.boards.id, schema.acountsToBoards.boardId)
+      eq(schema.boards.id, schema.acountsToBoards.boardId),
     )
     .where(
       and(
         eq(schema.acountsToBoards.accountId, userId),
-        eq(schema.acountsToBoards.boardId, boardId)
-      )
+        eq(schema.acountsToBoards.boardId, boardId),
+      ),
     );
 
   if (result && !result.length) {
@@ -342,7 +342,7 @@ export async function rename(id: string, name: string) {
 export async function changeRole(
   boardId: string,
   userId: string,
-  role: 'admin' | 'member'
+  role: 'admin' | 'member',
 ) {
   return db
     .update(schema.acountsToBoards)
@@ -350,8 +350,8 @@ export async function changeRole(
     .where(
       and(
         eq(schema.acountsToBoards.boardId, boardId),
-        eq(schema.acountsToBoards.accountId, userId)
-      )
+        eq(schema.acountsToBoards.accountId, userId),
+      ),
     );
 }
 
@@ -361,8 +361,8 @@ export async function deleteMember(boardId: string, userId: string) {
     .where(
       and(
         eq(schema.acountsToBoards.boardId, boardId),
-        eq(schema.acountsToBoards.accountId, userId)
-      )
+        eq(schema.acountsToBoards.accountId, userId),
+      ),
     );
 }
 
@@ -392,8 +392,8 @@ export async function removeStarredBoard(userId: string, boardId: string) {
     .where(
       and(
         eq(schema.starreds.accountId, userId),
-        eq(schema.starreds.boardId, boardId)
-      )
+        eq(schema.starreds.boardId, boardId),
+      ),
     );
 }
 

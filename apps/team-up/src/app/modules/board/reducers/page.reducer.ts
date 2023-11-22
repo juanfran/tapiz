@@ -124,7 +124,7 @@ const reducer = createReducer(
         loaded: true,
         moveEnabled: true,
       };
-    }
+    },
   ),
   on(PageActions.joinBoard, (state, { boardId }): PageState => {
     return {
@@ -204,7 +204,7 @@ const reducer = createReducer(
       }
 
       return state;
-    }
+    },
   ),
   on(PageActions.setZone, (state, { zone }): PageState => {
     return {
@@ -389,7 +389,7 @@ const reducer = createReducer(
       ...state,
       isPublic,
     };
-  })
+  }),
 );
 
 export const pageFeature = createFeature({

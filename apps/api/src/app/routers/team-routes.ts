@@ -17,7 +17,7 @@ export const teamRouter = router({
     .input(
       z.object({
         teamId: z.string().uuid(),
-      })
+      }),
     )
     .query(async (req) => {
       const invitations = await db.team.getTeamInvitations(req.input.teamId);
@@ -28,7 +28,7 @@ export const teamRouter = router({
     .input(
       z.object({
         teamId: z.string().uuid(),
-      })
+      }),
     )
     .query(async (req) => {
       const members = await db.team.getTeamMembers(req.input.teamId);
@@ -41,18 +41,18 @@ export const teamRouter = router({
         teamId: z.string().uuid(),
         email: z.string().email().max(256),
         role: z.enum(['admin', 'member']),
-      })
+      }),
     )
     .mutation(async (req) => {
       const invitedUser = await db.user.getUserByEmail(req.input.email);
 
       let invitations = await db.user.getUserInvitationsByEmail(
-        req.input.email
+        req.input.email,
       );
 
       if (invitedUser) {
         const userInvitations = await db.user.getUserInvitations(
-          invitedUser.id
+          invitedUser.id,
         );
         invitations = [...invitations, ...userInvitations];
       }
@@ -68,7 +68,7 @@ export const teamRouter = router({
       if (invitedUser) {
         const member = await db.team.getUserTeam(
           req.input.teamId,
-          invitedUser.id
+          invitedUser.id,
         );
 
         if (member) {
@@ -82,7 +82,7 @@ export const teamRouter = router({
         {
           teamId: req.input.teamId,
         },
-        req.input.role
+        req.input.role,
       );
 
       return invitation;
@@ -108,13 +108,13 @@ export const teamRouter = router({
         teamId: z.string().uuid(),
         userId: z.string().max(256),
         role: z.enum(['admin', 'member']),
-      })
+      }),
     )
     .mutation(async (req) => {
       await db.team.changeRole(
         req.input.teamId,
         req.input.userId,
-        req.input.role
+        req.input.role,
       );
 
       return {
@@ -126,12 +126,12 @@ export const teamRouter = router({
       z.object({
         teamId: z.string().uuid(),
         memberId: z.string().max(256),
-      })
+      }),
     )
     .mutation(async (req) => {
       const teamMembers = await db.team.getTeamMembers(req.input.teamId);
       const admins = teamMembers.filter(
-        (member) => member.role === 'admin' && member.id !== req.input.memberId
+        (member) => member.role === 'admin' && member.id !== req.input.memberId,
       );
 
       if (!admins.length) {
@@ -148,7 +148,7 @@ export const teamRouter = router({
     .input(
       z.object({
         teamId: z.string().uuid(),
-      })
+      }),
     )
     .mutation(async (req) => {
       await db.team.deleteMember(req.input.teamId, req.ctx.user.sub);
@@ -162,7 +162,7 @@ export const teamRouter = router({
       z.object({
         teamId: z.string().uuid(),
         name: z.string().min(1).max(255),
-      })
+      }),
     )
     .mutation(async (req) => {
       await db.team.renameTeam(req.input.teamId, req.input.name);
@@ -176,7 +176,7 @@ export const teamRouter = router({
       z.object({
         inviteId: z.string().uuid(),
         role: z.enum(['member', 'admin']),
-      })
+      }),
     )
     .mutation(async (req) => {
       const invitation = await db.user.getInvitation(req.input.inviteId);
@@ -188,7 +188,7 @@ export const teamRouter = router({
       const admins = await db.team.getTeamAdmins(invitation.teamId);
 
       const isAdmin = !!admins.find(
-        (admin) => admin.accountId === req.ctx.user.sub
+        (admin) => admin.accountId === req.ctx.user.sub,
       );
 
       if (!isAdmin) {

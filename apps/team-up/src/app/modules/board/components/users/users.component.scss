@@ -51,7 +51,9 @@
   justify-content: space-between;
   margin: 0 0 0.5rem 0;
   padding: 0;
-  transition: background 0.5s ease, color 0.5s ease;
+  transition:
+    background 0.5s ease,
+    color 0.5s ease;
 
   .icon-svg {
     fill: var(--primary-color);
@@ -158,4 +160,3 @@
     }
   }
 }
-

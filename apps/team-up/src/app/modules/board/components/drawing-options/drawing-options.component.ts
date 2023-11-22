@@ -38,7 +38,7 @@ export class DrawingOptionsComponent {
           PageActions.setDrawingParams({
             color: value.color,
             size: value.size,
-          })
+          }),
         );
       }
     });

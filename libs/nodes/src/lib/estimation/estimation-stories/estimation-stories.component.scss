@@ -13,7 +13,6 @@ form {
   gap: var(--spacing-4);
 }
 
-
 .actions {
   display: flex;
   gap: var(--spacing-4);
@@ -29,5 +28,5 @@ form {
 }
 
 .add-story {
-  margin-inline-start: calc(var(--form-size) / 2 - 16px) ;
+  margin-inline-start: calc(var(--form-size) / 2 - 16px);
 }

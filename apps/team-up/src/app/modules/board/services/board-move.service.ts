@@ -40,7 +40,7 @@ export class BoardMoveService {
 
         return false;
       }),
-      share()
+      share(),
     );
 
     this.mouseUp$ = fromEvent<MouseEvent>(window, 'mouseup');
@@ -53,7 +53,7 @@ export class BoardMoveService {
           y: Math.round(mouseMove.clientY),
         };
       }),
-      share()
+      share(),
     );
 
     this.move$ = this.mouseDown$.pipe(
@@ -66,10 +66,10 @@ export class BoardMoveService {
               y: mouseMovePrev.y - mouseMoveCurr.y,
             };
           }),
-          takeUntil(this.mouseUp$)
+          takeUntil(this.mouseUp$),
         );
       }),
-      share()
+      share(),
     );
 
     this.boardMove$ = this.move$.pipe(
@@ -79,7 +79,7 @@ export class BoardMoveService {
           x: position.x - moveDiff.x,
           y: position.y - moveDiff.y,
         } as Point;
-      })
+      }),
     );
   }
 
@@ -93,7 +93,7 @@ export class BoardMoveService {
 
     return this.mouseDown$.pipe(
       first(),
-      takeUntil(this.currentMouseDownWatch$)
+      takeUntil(this.currentMouseDownWatch$),
     );
   }
 }

@@ -50,7 +50,7 @@ export const userRouter = router({
         db.board.deleteBoard(board.id);
       } else if (members.length > 1) {
         const newOwner = members.find(
-          (member) => member.id !== req.ctx.user.sub
+          (member) => member.id !== req.ctx.user.sub,
         );
 
         if (newOwner) {
@@ -75,7 +75,7 @@ export const userRouter = router({
     await db.user.createUser(
       req.ctx.user.sub,
       req.ctx.user.name,
-      req.ctx.user.email
+      req.ctx.user.email,
     );
 
     return true;
@@ -94,7 +94,7 @@ export const userRouter = router({
       const result = await db.user.acceptInvitation(
         req.ctx.user.sub,
         req.ctx.user.email,
-        req.input.inviteId
+        req.input.inviteId,
       );
 
       if (!result) {
@@ -125,7 +125,7 @@ export const userRouter = router({
           const admins = await db.team.getTeamAdmins(invitation.teamId);
 
           const isAdmin = !!admins.find(
-            (admin) => admin.accountId === req.ctx.user.sub
+            (admin) => admin.accountId === req.ctx.user.sub,
           );
 
           if (!isAdmin) {

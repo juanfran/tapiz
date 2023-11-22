@@ -9,8 +9,6 @@
   width: 5px;
 }
 
-
-
 :host {
   --backgroundColor: var(--white);
   --fontColor: var(--black);
@@ -46,7 +44,11 @@
   color: var(--fontColor);
   cursor: pointer;
   display: flex;
-  font-family: "Nunito", -apple-system, system-ui, sans-serif;
+  font-family:
+    "Nunito",
+    -apple-system,
+    system-ui,
+    sans-serif;
   font-size: var(--fontSize);
   min-height: 45px;
   margin-top: 10px;

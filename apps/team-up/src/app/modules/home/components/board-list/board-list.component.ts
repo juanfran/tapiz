@@ -138,7 +138,7 @@ export class BoardListComponent {
           HomeActions.transferBoard({
             id: board.id,
             teamId: newBoard.teamId ?? null,
-          })
+          }),
         );
       });
   }
@@ -160,7 +160,7 @@ export class BoardListComponent {
           HomeActions.renameBoard({
             id: board.id,
             name,
-          })
+          }),
         );
       });
   }
@@ -169,7 +169,7 @@ export class BoardListComponent {
     this.store.dispatch(
       HomeActions.starBoard({
         id: board.id,
-      })
+      }),
     );
   }
 
@@ -177,7 +177,7 @@ export class BoardListComponent {
     this.store.dispatch(
       HomeActions.unstarBoard({
         id: board.id,
-      })
+      }),
     );
   }
 
@@ -185,7 +185,7 @@ export class BoardListComponent {
     this.store.dispatch(
       HomeActions.changeBoardSortBy({
         sortBy,
-      })
+      }),
     );
   }
 }

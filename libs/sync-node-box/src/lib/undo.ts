@@ -4,7 +4,7 @@ import { applyAction } from './apply-action';
 import { reverseAction } from './rever-action';
 export function undo(
   nodes: TuNode[],
-  history: SyncNodeBoxHistory
+  history: SyncNodeBoxHistory,
 ): [TuNode[], SyncNodeBoxHistory, StateActions[]] {
   history = { ...history };
 

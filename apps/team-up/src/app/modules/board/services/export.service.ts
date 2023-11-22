@@ -28,8 +28,8 @@ export class ExportService {
 
       resolve(
         URL.createObjectURL(
-          new Blob(aFileParts, { type: 'application/octet-binary' })
-        )
+          new Blob(aFileParts, { type: 'application/octet-binary' }),
+        ),
       );
     });
   }

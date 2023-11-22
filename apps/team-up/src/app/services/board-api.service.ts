@@ -71,13 +71,13 @@ export class BoardApiService {
       this.trpc.board.transferBoard.mutate({
         boardId,
         teamId: teamId ?? undefined,
-      })
+      }),
     );
   }
 
   public getCocomaterialTags() {
     return this.http.get<CocomaterialTag[]>(
-      `https://cocomaterial.com/api/tags`
+      `https://cocomaterial.com/api/tags`,
     );
   }
 
@@ -101,7 +101,7 @@ export class BoardApiService {
               };
             }),
           };
-        })
+        }),
       );
   }
 }

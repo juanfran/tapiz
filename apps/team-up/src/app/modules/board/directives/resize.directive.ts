@@ -29,7 +29,7 @@ export class ResizableDirective {
 
   public setHandler(
     handler: HTMLElement,
-    position: ResizePosition = 'bottom-right'
+    position: ResizePosition = 'bottom-right',
   ) {
     this.resizeHandler = handler;
     this.listen(position);
@@ -68,7 +68,7 @@ export class ResizableDirective {
         this.resizeHandler,
         this.host,
         position,
-        onStart
+        onStart,
       )
       .pipe(filterNil(), takeUntilDestroyed(this.destroyRef))
       .subscribe((size) => {
@@ -93,7 +93,7 @@ export class ResizableDirective {
                   op: 'patch',
                 },
               ],
-            })
+            }),
           );
 
           this.appRef.tick();

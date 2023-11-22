@@ -80,7 +80,7 @@ export class ZoneComponent {
     private store: Store,
     private state: RxState<State>,
     private cdRef: ChangeDetectorRef,
-    private boardMoveService: BoardMoveService
+    private boardMoveService: BoardMoveService,
   ) {
     const initZone$ = this.store
       .select(selectInitZone)
@@ -94,7 +94,7 @@ export class ZoneComponent {
         if (this.nextClickSubscription) {
           this.nextClickSubscription.unsubscribe();
         }
-      }
+      },
     );
 
     this.state.connect('zone', this.store.select(selectZone));
@@ -108,7 +108,7 @@ export class ZoneComponent {
       .pipe(
         withLatestFrom(
           this.store.select(selectZoom),
-          this.store.select(selectPosition)
+          this.store.select(selectPosition),
         ),
         switchMap(([mouseDownEvent, zoom, position]) => {
           this.store.dispatch(PageActions.setMoveEnabled({ enabled: false }));
@@ -137,16 +137,16 @@ export class ZoneComponent {
                 x: (-position.x + mouseDownEvent.clientX) / zoom,
                 y: (-position.y + mouseDownEvent.clientY) / zoom,
               },
-            })
+            }),
           );
-        })
+        }),
       )
       .subscribe({
         next: (zone) => {
           this.store.dispatch(
             PageActions.setZone({
               zone,
-            })
+            }),
           );
           this.appRef.tick();
         },

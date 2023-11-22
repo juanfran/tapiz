@@ -55,13 +55,13 @@ export class UsersComponent {
   constructor(
     private store: Store,
     private state: RxState<State>,
-    private boardFacade: BoardFacade
+    private boardFacade: BoardFacade,
   ) {
     this.state.connect(
       'users',
       this.boardFacade
         .getUsers()
-        .pipe(map((users) => users.map((user) => user.content)))
+        .pipe(map((users) => users.map((user) => user.content))),
     );
     this.state.connect('userId', this.store.select(selectUserId));
     this.state.connect('userHighlight', this.store.select(selectUserHighlight));
@@ -74,8 +74,8 @@ export class UsersComponent {
       ]).pipe(
         map(([users, userId]) => {
           return users.find((user) => user.id === userId);
-        })
-      )
+        }),
+      ),
     );
   }
 
@@ -90,7 +90,7 @@ export class UsersComponent {
           userHighlight,
           follow,
         };
-      })
+      }),
     );
 
   public toggleVisibility() {
@@ -109,7 +109,7 @@ export class UsersComponent {
             op: 'patch',
           },
         ],
-      })
+      }),
     );
   }
 

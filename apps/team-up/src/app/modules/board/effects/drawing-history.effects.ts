@@ -35,7 +35,7 @@ export class DrawingHistoryEffects {
         }
 
         return EMPTY;
-      })
+      }),
     );
   });
 
@@ -52,7 +52,7 @@ export class DrawingHistoryEffects {
         }
 
         return EMPTY;
-      })
+      }),
     );
   });
 
@@ -87,14 +87,14 @@ export class DrawingHistoryEffects {
                   },
                 ],
               }),
-            ]
+            ],
           );
-        })
+        }),
       );
     },
     {
       dispatch: false,
-    }
+    },
   );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

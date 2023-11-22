@@ -5,7 +5,7 @@ import { reverseAction } from './rever-action';
 
 export function redo(
   nodes: TuNode[],
-  history: SyncNodeBoxHistory
+  history: SyncNodeBoxHistory,
 ): [TuNode[], SyncNodeBoxHistory, StateActions[]] {
   history = { ...history };
 

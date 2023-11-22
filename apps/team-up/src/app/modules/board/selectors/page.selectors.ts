@@ -38,7 +38,7 @@ export const isUserHighlighActive = () => {
     selectShowUserVotes,
     (id, userVotes) => {
       return id ? !!id : !!userVotes;
-    }
+    },
   );
 };
 

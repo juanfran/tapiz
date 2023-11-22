@@ -13,7 +13,7 @@ import { appFeature } from '@/app/+state/app.reducer';
 
 export const AuthGuard: CanActivateFn = (
   next: ActivatedRouteSnapshot,
-  state: RouterStateSnapshot
+  state: RouterStateSnapshot,
 ) => {
   const store = inject(Store);
   const router = inject(Router);
@@ -31,8 +31,8 @@ export const AuthGuard: CanActivateFn = (
           sessionStorage.setItem('url', state.url);
 
           return router.parseUrl('/login');
-        })
+        }),
       );
-    })
+    }),
   );
 };

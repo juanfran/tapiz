@@ -73,7 +73,7 @@ export class RenameBoardComponent {
     @Inject(MAT_DIALOG_DATA)
     public data: {
       name: string;
-    }
+    },
   ) {
     this.form.patchValue({
       name: data.name,

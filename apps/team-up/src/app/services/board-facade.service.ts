@@ -36,7 +36,7 @@ export class BoardFacade {
 
   public getUsers(): Observable<UserNode[]> {
     return this.getNodes().pipe(
-      map((nodes) => nodes.filter((it): it is UserNode => it.type === 'user'))
+      map((nodes) => nodes.filter((it): it is UserNode => it.type === 'user')),
     );
   }
 
@@ -46,7 +46,7 @@ export class BoardFacade {
 
   public selectUserById(id: string) {
     return this.getUsers().pipe(
-      map((nodes) => nodes.find((it) => it.id === id))
+      map((nodes) => nodes.find((it) => it.id === id)),
     );
   }
 
@@ -62,7 +62,7 @@ export class BoardFacade {
           );
         });
       }),
-      map((nodes) => nodes.map((it) => it.content))
+      map((nodes) => nodes.map((it) => it.content)),
     );
   }
 
@@ -72,7 +72,7 @@ export class BoardFacade {
         const user = users.find((user) => userId === user.id);
 
         return user?.content.name ?? '';
-      })
+      }),
     );
   }
 
@@ -80,7 +80,7 @@ export class BoardFacade {
     return this.getNodes().pipe(
       map((nodes) => {
         return nodes.find((node) => node.id === id);
-      })
+      }),
     );
   }
 
@@ -91,7 +91,7 @@ export class BoardFacade {
     ]).pipe(
       map(([focusId, nodes]) => {
         return nodes.filter(isNote).find((note) => focusId.includes(note.id));
-      })
+      }),
     );
   }
 

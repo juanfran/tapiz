@@ -18,12 +18,12 @@ app.use(
   cors({
     credentials: true,
     origin: true,
-  })
+  }),
 );
 
 app.use(
   '/api/trpc',
-  createExpressMiddleware({ router: appRouter, createContext })
+  createExpressMiddleware({ router: appRouter, createContext }),
 );
 
 const port = 8000;

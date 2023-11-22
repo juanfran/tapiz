@@ -53,21 +53,21 @@ export class TeamMembersComponent {
     public data: {
       teamId: string;
       title: string;
-    }
+    },
   ) {
     this.store.dispatch(
-      HomeActions.initTeamMembersModal({ teamId: data.teamId })
+      HomeActions.initTeamMembersModal({ teamId: data.teamId }),
     );
 
     this.state.connect(
       'invitations',
-      this.store.select(homeFeature.selectInvitations)
+      this.store.select(homeFeature.selectInvitations),
     );
 
     this.state.connect('members', this.store.select(homeFeature.selectMembers));
     this.state.connect(
       'currentUserId',
-      this.store.select(appFeature.selectUserId)
+      this.store.select(appFeature.selectUserId),
     );
   }
 
@@ -81,7 +81,7 @@ export class TeamMembersComponent {
 
   public onDeleteMember(memberId: string) {
     this.store.dispatch(
-      HomeActions.deleteTeamMember({ id: memberId, teamId: this.data.teamId })
+      HomeActions.deleteTeamMember({ id: memberId, teamId: this.data.teamId }),
     );
 
     if (this.state.get('currentUserId') === memberId) {
@@ -100,7 +100,7 @@ export class TeamMembersComponent {
         HomeActions.changeInvitationRole({
           id: invitation.id,
           role,
-        })
+        }),
       );
     }
   }
@@ -114,7 +114,7 @@ export class TeamMembersComponent {
           teamId: this.data.teamId,
           memberId: member.id,
           role,
-        })
+        }),
       );
 
       if (this.state.get('currentUserId') === member.id) {
@@ -124,7 +124,7 @@ export class TeamMembersComponent {
   }
 
   public onInvited(
-    invitations: Required<Pick<Invitation, 'email' | 'role'>>[]
+    invitations: Required<Pick<Invitation, 'email' | 'role'>>[],
   ) {
     invitations.forEach((invitation) => {
       const role = invitation.role;
@@ -137,7 +137,7 @@ export class TeamMembersComponent {
               email: invitation.email,
               role,
             },
-          })
+          }),
         );
       }
     });

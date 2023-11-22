@@ -55,7 +55,7 @@ export async function invite(
     teamId?: string;
     boardId?: string;
   },
-  role: Role
+  role: Role,
 ) {
   const invitation = await db
     .insert(schema.invitations)
@@ -81,7 +81,7 @@ export async function inviteByEmail(
     teamId?: string;
     boardId?: string;
   },
-  role: Role
+  role: Role,
 ) {
   const invitation = await db
     .insert(schema.invitations)
@@ -103,7 +103,7 @@ export async function inviteByEmail(
 export function addTeamMember(
   userId: string,
   teamId: string,
-  role: 'admin' | 'member'
+  role: 'admin' | 'member',
 ) {
   return db.insert(schema.teamMembers).values({
     accountId: userId,
@@ -115,7 +115,7 @@ export function addTeamMember(
 export function addBoardMember(
   userId: string,
   boardId: string,
-  role: 'admin' | 'member' | 'guest'
+  role: 'admin' | 'member' | 'guest',
 ) {
   return db.insert(schema.acountsToBoards).values({
     accountId: userId,
@@ -127,7 +127,7 @@ export function addBoardMember(
 export async function acceptInvitation(
   userId: string,
   email: string,
-  invitationId: string
+  invitationId: string,
 ) {
   const invitations = await db
     .select()
@@ -137,9 +137,9 @@ export async function acceptInvitation(
         eq(schema.invitations.id, invitationId),
         or(
           eq(schema.invitations.userId, userId),
-          eq(schema.invitations.email, email)
-        )
-      )
+          eq(schema.invitations.email, email),
+        ),
+      ),
     );
 
   if (!invitations.length) {
@@ -162,7 +162,7 @@ export async function acceptInvitation(
 }
 
 export async function getUserInvitations(
-  userId: string
+  userId: string,
 ): Promise<UserInvitation[]> {
   const invitations = await db
     .select()
@@ -180,7 +180,7 @@ export async function getUserInvitations(
 }
 
 export async function getUserInvitationsByEmail(
-  email: string
+  email: string,
 ): Promise<UserInvitation[]> {
   const invitations = await db
     .select()

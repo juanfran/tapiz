@@ -8,7 +8,7 @@ import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import { AppRouter } from '@team-up/api/app';
 
 export const configFactory = (
-  config: ConfigService
+  config: ConfigService,
 ): (() => Observable<boolean>) => {
   return () => config.loadAppConfig();
 };
@@ -26,7 +26,7 @@ export class ConfigService {
   public loadAppConfig(): Observable<boolean> {
     return zip(
       this.http.get<Config>(environment.config),
-      this.http.get<FirebaseOptions>(environment.firebase)
+      this.http.get<FirebaseOptions>(environment.firebase),
     ).pipe(
       map(([mainConfig, firebase]) => {
         this.config = {
@@ -40,7 +40,7 @@ export class ConfigService {
       catchError(() => {
         console.error('Error loading config');
         return of(false);
-      })
+      }),
     );
   }
 

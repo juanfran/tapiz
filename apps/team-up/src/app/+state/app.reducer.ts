@@ -17,7 +17,7 @@ const reducer = createReducer(
       ...state,
       userId,
     };
-  })
+  }),
 );
 
 export const appFeature = createFeature({

@@ -36,9 +36,9 @@ export class FollowUserComponent {
       return this.boardFacade.getUsers().pipe(
         map((users) => {
           return users.find((user) => user.id === follow)?.content;
-        })
+        }),
       );
-    })
+    }),
   );
 
   public stopFollowingUser() {
@@ -52,7 +52,7 @@ export class FollowUserComponent {
           PageActions.setUserView({
             zoom: user.zoom,
             position: user.position,
-          })
+          }),
         );
       }
     });

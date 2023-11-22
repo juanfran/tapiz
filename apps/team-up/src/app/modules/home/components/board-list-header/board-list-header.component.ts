@@ -55,7 +55,7 @@ export class BoardListHeaderComponent {
           HomeActions.createBoard({
             name: newBoard.name,
             teamId: newBoard.teamId ?? undefined,
-          })
+          }),
         );
       });
   }

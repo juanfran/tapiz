@@ -75,7 +75,7 @@ export class DrawingDirective {
 
     const mouseMove$ = fromEvent<MouseEvent>(
       this.elementRef.nativeElement,
-      'mousemove'
+      'mousemove',
     ).pipe(
       takeUntil(mouseUp$),
       throttleTime(0, animationFrameScheduler),
@@ -87,12 +87,12 @@ export class DrawingDirective {
           this.drawing.emit(this.drawingEvents);
           this.drawingEvents = [];
         }
-      })
+      }),
     );
 
     const mouseDown$ = fromEvent<MouseEvent>(
       this.elementRef.nativeElement,
-      'mousedown'
+      'mousedown',
     );
 
     mouseDown$
@@ -112,10 +112,10 @@ export class DrawingDirective {
                   color: this.color(),
                 } as MouseDrawingEvent;
               },
-              { nX: null, nY: null, x: 0, y: 0 } as MouseDrawingEvent
-            )
+              { nX: null, nY: null, x: 0, y: 0 } as MouseDrawingEvent,
+            ),
           );
-        })
+        }),
       )
       .subscribe((event: MouseDrawingEvent) => {
         if (event.nX !== null && event.nY !== null) {

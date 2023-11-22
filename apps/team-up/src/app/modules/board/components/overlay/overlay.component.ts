@@ -28,7 +28,7 @@ export class OverlayComponent {
   constructor(
     private el: ElementRef,
     private state: RxState<State>,
-    private store: Store
+    private store: Store,
   ) {
     this.state.connect('highlight', this.store.select(isUserHighlighActive()));
   }

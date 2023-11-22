@@ -45,7 +45,7 @@ export interface NodeValidator {
   add: (
     data: TuNode,
     userId: string,
-    state: TuNode[]
+    state: TuNode[],
   ) =>
     | {
         success: true;
@@ -56,7 +56,7 @@ export interface NodeValidator {
     data: TuNode,
     userId: string,
     state: TuNode[],
-    node: TuNode
+    node: TuNode,
   ) =>
     | {
         success: true;
@@ -67,7 +67,7 @@ export interface NodeValidator {
     data: NodeRemove['data'],
     userId: string,
     state: TuNode[],
-    node: TuNode
+    node: TuNode,
   ) =>
     | {
         success: true;

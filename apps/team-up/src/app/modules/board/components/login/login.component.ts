@@ -33,7 +33,7 @@ export class LoginComponent {
     private router: Router,
     private store: Store,
     private snackBar: MatSnackBar,
-    private userApiService: UserApiService
+    private userApiService: UserApiService,
   ) {}
 
   public async loginGoogle() {

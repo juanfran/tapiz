@@ -72,7 +72,7 @@ export class MultiDragService {
         nodeType: string;
         initialPosition: Point;
         finalPosition: Point;
-      }[]
+      }[],
     ) => void;
   };
 
@@ -97,7 +97,7 @@ export class MultiDragService {
 
   public remove(draggable: Draggable) {
     this.draggableElements = this.draggableElements.filter(
-      (d) => d.draggableCmp !== draggable
+      (d) => d.draggableCmp !== draggable,
     );
 
     if (this.subscriptions.has(draggable.id)) {
@@ -117,7 +117,7 @@ export class MultiDragService {
     const keyup$ = fromEvent<KeyboardEvent>(document, 'keyup');
     const controlPressed$ = merge(keydown$, keyup$).pipe(
       map((event) => event.ctrlKey),
-      startWith(false)
+      startWith(false),
     );
 
     const handler = draggable.handler ?? draggable.nativeElement;
@@ -126,9 +126,9 @@ export class MultiDragService {
       fromEvent<MouseEvent>(handler, 'mousedown').pipe(
         tap((event) => {
           this.updateSharedMouseDown(event);
-        })
+        }),
       ),
-      this.mouseDown$.pipe(filterNil())
+      this.mouseDown$.pipe(filterNil()),
     ).pipe(
       distinctUntilChanged(),
       filter((e) => {
@@ -142,19 +142,19 @@ export class MultiDragService {
       filter(([, dragEnabled]) => dragEnabled),
       map(([event]) => {
         return event;
-      })
+      }),
     );
 
     const mouseUp$ = merge(
       fromEvent(window, 'mouseup').pipe(
         tap((event) => {
           this.updateSharedMouseUp(event as MouseEvent);
-        })
+        }),
       ),
-      this.mouseUp$
+      this.mouseUp$,
     ).pipe(
       map(() => true),
-      distinctUntilChanged()
+      distinctUntilChanged(),
     );
 
     let startPositionDiff = { x: 0, y: 0 };
@@ -166,9 +166,9 @@ export class MultiDragService {
           // prevent select text on drag note
           event.preventDefault();
           this.updateSharedMouseMove(event);
-        })
+        }),
       ),
-      this.mouseMove$.pipe(filterNil())
+      this.mouseMove$.pipe(filterNil()),
     ).pipe(
       distinctUntilChanged(),
       map((mouseMove) => {
@@ -186,7 +186,7 @@ export class MultiDragService {
           x: posX / zoom,
           y: posY / zoom,
         };
-      })
+      }),
     );
 
     const move$ = mouseDown$.pipe(
@@ -214,9 +214,9 @@ export class MultiDragService {
           takeUntil(mouseUp$),
           finalize(() => {
             this.endDrag();
-          })
+          }),
         );
-      })
+      }),
     );
 
     const moveSubscription = move$
@@ -240,7 +240,7 @@ export class MultiDragService {
           }
 
           return finalPosition;
-        })
+        }),
       )
       .subscribe((position) => {
         const draggableElement = this.dragElements.get(draggable.id);

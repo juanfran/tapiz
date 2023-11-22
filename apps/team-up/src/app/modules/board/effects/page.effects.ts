@@ -29,9 +29,9 @@ export class PageEffects {
         return this.boardApiService.getCocomaterialTags().pipe(
           map((tags) => {
             return PageActions.fetchCocomaterialTagsSuccess({ tags });
-          })
+          }),
         );
-      })
+      }),
     );
   });
 
@@ -46,9 +46,9 @@ export class PageEffects {
               vectors,
               page: 1,
             });
-          })
+          }),
         );
-      })
+      }),
     );
   });
 
@@ -65,9 +65,9 @@ export class PageEffects {
                 vectors,
                 page: cocomaterial.page + 1,
               });
-            })
+            }),
           );
-      })
+      }),
     );
   });
 
@@ -82,7 +82,7 @@ export class PageEffects {
           id: note.id,
           drawing: [],
         });
-      })
+      }),
     );
   });
 
@@ -105,7 +105,7 @@ export class PageEffects {
             },
           ],
         });
-      })
+      }),
     );
   });
 
@@ -132,7 +132,7 @@ export class PageEffects {
             y,
           },
         });
-      })
+      }),
     );
   });
 
@@ -143,7 +143,7 @@ export class PageEffects {
         return PageActions.setPopupOpen({
           popup: '',
         });
-      })
+      }),
     );
   });
 
@@ -159,12 +159,12 @@ export class PageEffects {
             JSON.stringify({
               zoom: action.zoom,
               position: action.position,
-            })
+            }),
           );
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   public restoreUserView$ = createEffect(() => {
@@ -208,7 +208,7 @@ export class PageEffects {
           zoom,
           position,
         });
-      })
+      }),
     );
   });
 
@@ -219,10 +219,10 @@ export class PageEffects {
         concatLatestFrom(() => [this.store.select(selectBoardId)]),
         switchMap(([{ isPublic }, boardId]) => {
           return this.boardApiService.setBoardPrivacy(boardId, isPublic);
-        })
+        }),
       );
     },
-    { dispatch: false }
+    { dispatch: false },
   );
 
   constructor(
@@ -230,6 +230,6 @@ export class PageEffects {
     private store: Store,
     private boardApiService: BoardApiService,
     private route: ActivatedRoute,
-    private boardFacade: BoardFacade
+    private boardFacade: BoardFacade,
   ) {}
 }

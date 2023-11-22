@@ -21,7 +21,7 @@ export const testRouter = router({
     .input(
       z.object({
         teamId: z.string().uuid(),
-      })
+      }),
     )
     .query((req) => {
       return {
@@ -33,7 +33,7 @@ export const testRouter = router({
     .input(
       z.object({
         teamId: z.string().uuid(),
-      })
+      }),
     )
     .query((req) => {
       return {
@@ -45,7 +45,7 @@ export const testRouter = router({
     .input(
       z.object({
         teamId: z.string().uuid(),
-      })
+      }),
     )
     .query((req) => {
       return {
@@ -57,7 +57,7 @@ export const testRouter = router({
     .input(
       z.object({
         boardId: z.string().uuid(),
-      })
+      }),
     )
     .query((req) => {
       return {
@@ -69,7 +69,7 @@ export const testRouter = router({
     .input(
       z.object({
         boardId: z.string().uuid(),
-      })
+      }),
     )
     .query((req) => {
       return {
@@ -81,7 +81,7 @@ export const testRouter = router({
     .input(
       z.object({
         boardId: z.string().uuid(),
-      })
+      }),
     )
     .query((req) => {
       return {

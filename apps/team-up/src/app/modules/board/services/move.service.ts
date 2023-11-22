@@ -50,7 +50,7 @@ export class MoveService {
           x: mouseMove.clientX,
           y: mouseMove.clientY,
         };
-      })
+      }),
     );
 
     return mouseDown$.pipe(
@@ -63,9 +63,9 @@ export class MoveService {
               y: -(initialPosition.y - mouseMove.y),
             };
           }),
-          endWith(null)
+          endWith(null),
         );
-      })
+      }),
     );
   }
 
@@ -73,7 +73,7 @@ export class MoveService {
     el: HTMLElement,
     host: Resizable,
     position: ResizePosition,
-    onStart: () => void
+    onStart: () => void,
   ) {
     const mouseDown$ = fromEvent<MouseEvent>(el, 'mousedown');
 
@@ -86,7 +86,7 @@ export class MoveService {
           x: mouseMove.clientX,
           y: mouseMove.clientY,
         };
-      })
+      }),
     );
 
     return mouseDown$.pipe(
@@ -125,11 +125,11 @@ export class MoveService {
             const angle = rotation * (Math.PI / 180);
             const deltaX = Math.round(
               mouseMove.diffX * Math.cos(angle) +
-                mouseMove.diffY * Math.sin(angle)
+                mouseMove.diffY * Math.sin(angle),
             );
             const deltaY = Math.round(
               mouseMove.diffY * Math.cos(angle) -
-                mouseMove.diffX * Math.sin(angle)
+                mouseMove.diffX * Math.sin(angle),
             );
 
             let newWidth = host.width;
@@ -137,7 +137,7 @@ export class MoveService {
 
             let currentMatrix = compose(
               translate(host.position.x, host.position.y),
-              rotate(angle)
+              rotate(angle),
             );
 
             if (position === 'top-left') {
@@ -173,9 +173,9 @@ export class MoveService {
               height: newHeight,
             };
           }),
-          endWith(null)
+          endWith(null),
         );
-      })
+      }),
     );
   }
 
@@ -184,11 +184,11 @@ export class MoveService {
     const R2D = 180 / Math.PI;
 
     const mouseDown$ = fromEvent<MouseEvent>(el, 'mousedown').pipe(
-      concatLatestFrom(() => this.store.select(selectPosition))
+      concatLatestFrom(() => this.store.select(selectPosition)),
     );
 
     const mouseMove$ = fromEvent<MouseEvent>(window, 'mousemove').pipe(
-      throttleTime(0, animationFrameScheduler)
+      throttleTime(0, animationFrameScheduler),
     );
 
     return mouseDown$.pipe(
@@ -203,7 +203,7 @@ export class MoveService {
               x: mouseMove.pageX / zoom - userPosition.x / zoom,
               y: mouseMove.pageY / zoom - userPosition.y / zoom,
             };
-          })
+          }),
         );
       }),
       map((event) => {
@@ -216,7 +216,7 @@ export class MoveService {
 
         currentMatrix = compose(
           currentMatrix,
-          rotateDEG(-host.rotation, center.x, center.y)
+          rotateDEG(-host.rotation, center.x, center.y),
         );
 
         const decomposedCalculateCenter = decomposeTSR(currentMatrix);
@@ -232,7 +232,7 @@ export class MoveService {
 
         currentMatrix = compose(
           currentMatrix,
-          rotateDEG(angle, center.x, center.y)
+          rotateDEG(angle, center.x, center.y),
         );
 
         const decomposed = decomposeTSR(currentMatrix);
@@ -242,7 +242,7 @@ export class MoveService {
           x: decomposed.translate.tx,
           y: decomposed.translate.ty,
         };
-      })
+      }),
     );
   }
 }

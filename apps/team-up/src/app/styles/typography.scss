@@ -14,7 +14,11 @@
 }
 
 @mixin font-small {
-  font-family: "Raleway", -apple-system, system-ui, sans-serif;
+  font-family:
+    "Raleway",
+    -apple-system,
+    system-ui,
+    sans-serif;
   font-size: var(--font-size-small);
   font-weight: 200;
   letter-spacing: normal;
@@ -22,7 +26,11 @@
 }
 
 @mixin font-body {
-  font-family: "Raleway", -apple-system, system-ui, sans-serif;
+  font-family:
+    "Raleway",
+    -apple-system,
+    system-ui,
+    sans-serif;
   font-size: var(--font-size-medium);
   font-weight: 400;
   letter-spacing: normal;
@@ -30,7 +38,11 @@
 }
 
 @mixin font-heading-4 {
-  font-family: "Raleway", -apple-system, system-ui, sans-serif;
+  font-family:
+    "Raleway",
+    -apple-system,
+    system-ui,
+    sans-serif;
   font-size: var(--font-size-heading-4);
   font-weight: 400;
   letter-spacing: normal;
@@ -38,7 +50,11 @@
 }
 
 @mixin font-heading-3 {
-  font-family: "Raleway", -apple-system, system-ui, sans-serif;
+  font-family:
+    "Raleway",
+    -apple-system,
+    system-ui,
+    sans-serif;
   font-size: var(--font-size-heading-3);
   font-weight: 400;
   letter-spacing: normal;
@@ -46,7 +62,11 @@
 }
 
 @mixin font-heading-2 {
-  font-family: "Raleway", -apple-system, system-ui, sans-serif;
+  font-family:
+    "Raleway",
+    -apple-system,
+    system-ui,
+    sans-serif;
   font-size: var(--font-size-heading-2);
   font-weight: 400;
   letter-spacing: normal;
@@ -54,7 +74,11 @@
 }
 
 @mixin font-heading-1 {
-  font-family: "Raleway", -apple-system, system-ui, sans-serif;
+  font-family:
+    "Raleway",
+    -apple-system,
+    system-ui,
+    sans-serif;
   font-size: var(--font-size-heading-1);
   font-weight: 400;
   letter-spacing: normal;

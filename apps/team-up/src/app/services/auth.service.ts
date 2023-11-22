@@ -48,16 +48,19 @@ export class AuthService {
         filter((userId) => {
           return userId.length > 0;
         }),
-        take(1)
+        take(1),
       )
       .subscribe(() => {
         onAuthStateChanged(this.auth, async (user) => {
           if (user) {
             this.refreshToken();
 
-            setInterval(async () => {
-              this.refreshToken(true);
-            }, 55 * 60 * 1000);
+            setInterval(
+              async () => {
+                this.refreshToken(true);
+              },
+              55 * 60 * 1000,
+            );
           } else {
             this.logout();
           }

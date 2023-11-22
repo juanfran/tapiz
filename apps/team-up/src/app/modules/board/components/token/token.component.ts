@@ -49,7 +49,7 @@ export class TokenComponent
   implements OnInit, OnChanges, DynamicComponent, Draggable
 {
   @ViewChild('contenteditable') set contenteditable(
-    el: ElementRef | undefined
+    el: ElementRef | undefined,
   ) {
     if (el) {
       focustContentEditable(el.nativeElement);
@@ -98,7 +98,7 @@ export class TokenComponent
     this.el.nativeElement.style.setProperty('--color', this.node.content.color);
     this.el.nativeElement.style.setProperty(
       '--bg',
-      this.node.content.backgroundColor
+      this.node.content.backgroundColor,
     );
   }
 
@@ -153,7 +153,7 @@ export class TokenComponent
             op: 'patch',
           },
         ],
-      })
+      }),
     );
   }
 

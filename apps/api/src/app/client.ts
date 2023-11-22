@@ -25,7 +25,7 @@ export class Client {
     private server: Server,
     public username: string,
     public id: string,
-    public email: string
+    public email: string,
   ) {
     this.ws.on('message', this.incomingMessage.bind(this));
     this.ws.on('close', this.close.bind(this));

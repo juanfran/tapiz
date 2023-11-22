@@ -52,7 +52,7 @@ export const acountsToBoards = pgTable(
   },
   (t) => ({
     pk: primaryKey(t.accountId, t.boardId),
-  })
+  }),
 );
 
 export const accountsToBoardsRelations = relations(
@@ -66,7 +66,7 @@ export const accountsToBoardsRelations = relations(
       fields: [acountsToBoards.accountId],
       references: [accounts.id],
     }),
-  })
+  }),
 );
 
 export const starreds = pgTable(
@@ -81,7 +81,7 @@ export const starreds = pgTable(
   },
   (t) => ({
     pk: primaryKey(t.accountId, t.boardId),
-  })
+  }),
 );
 
 export const teams = pgTable('teams', {
@@ -102,7 +102,7 @@ export const teamMembers = pgTable(
   },
   (t) => ({
     pk: primaryKey(t.teamId, t.accountId),
-  })
+  }),
 );
 
 export const teamRelations = relations(teams, ({ many }) => ({
@@ -148,7 +148,7 @@ export const invitations = pgTable(
     unqBoard: unique().on(t.boardId, t.userId),
     unqTeamEmail: unique().on(t.teamId, t.email),
     unqBoardEmail: unique().on(t.boardId, t.email),
-  })
+  }),
 );
 
 export const invitationRelations = relations(invitations, ({ one }) => ({

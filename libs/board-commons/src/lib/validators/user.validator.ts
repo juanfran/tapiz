@@ -19,7 +19,7 @@ const patchUser = user.partial();
 export const userValidator = (
   msg: StateActions,
   _state: TuNode[],
-  userId: string
+  userId: string,
 ): StateActions | false => {
   let validatorResult: unknown | null = null;
 

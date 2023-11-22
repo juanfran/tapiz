@@ -25,7 +25,7 @@ export class TeamApiService {
   public inviteToTeam(
     teamId: string,
     email: string,
-    role: 'admin' | 'member'
+    role: 'admin' | 'member',
   ): Observable<Invitation> {
     return from(this.trpc.team.invite.mutate({ teamId, email, role }));
   }
@@ -59,7 +59,7 @@ export class TeamApiService {
       this.trpc.team.editInviteRole.mutate({
         inviteId: invitationId,
         role,
-      })
+      }),
     );
   }
 }

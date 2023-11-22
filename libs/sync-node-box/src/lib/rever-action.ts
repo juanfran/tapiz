@@ -4,7 +4,7 @@ import { diff } from './diff';
 
 export function reverseAction(
   nodes: TuNode[],
-  action: StateActions
+  action: StateActions,
 ): StateActions | null {
   let node;
 

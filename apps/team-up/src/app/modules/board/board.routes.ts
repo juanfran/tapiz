@@ -19,7 +19,7 @@ export const boardRoutes: Route[] = [
         BoardEffects,
         HistoryEffects,
         PageEffects,
-        DrawingHistoryEffects
+        DrawingHistoryEffects,
       ),
     ],
   },

@@ -10,7 +10,7 @@ const group = z.object({
     z.object({
       userId: z.string().max(255),
       vote: z.number().int().min(0),
-    })
+    }),
   ),
   width: z.number().nonnegative().safe(),
   height: z.number().nonnegative().safe(),

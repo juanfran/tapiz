@@ -16,7 +16,8 @@
     "regenerate": "nx run api:run-script:regenerate",
     "generate": "drizzle-kit generate:pg",
     "studio": "npx drizzle-kit studio",
-    "lint": "nx run-many --all --target=lint --parallel"
+    "lint": "nx run-many --all --target=lint --parallel",
+    "format": "nx format:write --libs-and-apps"
   },
   "private": true,
   "dependencies": {

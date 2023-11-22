@@ -72,7 +72,7 @@ export class SearchOptionsComponent implements AfterViewInit {
       });
 
       return filteredNotes;
-    })
+    }),
   );
 
   public options$!: Observable<TuNode<Note>[]>;
@@ -88,12 +88,12 @@ export class SearchOptionsComponent implements AfterViewInit {
         map(([value, notes]) => {
           if (value) {
             return notes.filter((note) =>
-              this.normalizeText(note.content.text).includes(value)
+              this.normalizeText(note.content.text).includes(value),
             );
           }
 
           return notes;
-        })
+        }),
       );
     }
   }

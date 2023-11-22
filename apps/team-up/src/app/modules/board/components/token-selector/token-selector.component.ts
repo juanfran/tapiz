@@ -86,8 +86,8 @@ export class TokenSelectorComponent {
               .join('')
               .toUpperCase(),
           }));
-      })
-    )
+      }),
+    ),
   );
 
   public colors = BoardColors;

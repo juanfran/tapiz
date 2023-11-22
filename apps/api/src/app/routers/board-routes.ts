@@ -17,7 +17,7 @@ export const boardRouter = router({
       z.object({
         name: z.string().min(1).max(255),
         teamId: z.string().uuid().optional(),
-      })
+      }),
     )
     .mutation(async (req) => {
       let team;
@@ -47,7 +47,7 @@ export const boardRouter = router({
         req.input.name,
         req.ctx.user.sub,
         [],
-        team?.id ?? null
+        team?.id ?? null,
       );
 
       return {
@@ -92,7 +92,7 @@ export const boardRouter = router({
         req.ctx.board.name,
         req.ctx.user.sub,
         req.ctx.board.board,
-        req.ctx.board.teamId
+        req.ctx.board.teamId,
       );
 
       return {
@@ -107,7 +107,7 @@ export const boardRouter = router({
       z.object({
         boardId: z.string().uuid(),
         isPublic: z.boolean(),
-      })
+      }),
     )
     .mutation(async (req) => {
       await db.board.setBoardPrivacy(req.input.boardId, req.input.isPublic);
@@ -144,7 +144,7 @@ export const boardRouter = router({
       z.object({
         boardId: z.string().uuid(),
         name: z.string().max(255),
-      })
+      }),
     )
     .mutation(async (req) => {
       await db.board.rename(req.input.boardId, req.input.name);
@@ -183,7 +183,7 @@ export const boardRouter = router({
       z.object({
         boardId: z.string().uuid(),
         teamId: z.string().uuid().optional(),
-      })
+      }),
     )
     .mutation(async (req) => {
       await db.board.transferBoard(req.input.boardId, req.input.teamId ?? null);

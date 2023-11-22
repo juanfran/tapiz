@@ -14,7 +14,11 @@
   border-radius: 8px;
   color: var(--white);
   display: flex;
-  font-family: "Work Sans", -apple-system, system-ui, sans-serif;
+  font-family:
+    "Work Sans",
+    -apple-system,
+    system-ui,
+    sans-serif;
   justify-content: center;
   left: 100%;
   min-height: 2rem;
@@ -39,7 +43,11 @@
   }
 
   label {
-    font-family: "Raleway", -apple-system, system-ui, sans-serif;
+    font-family:
+      "Raleway",
+      -apple-system,
+      system-ui,
+      sans-serif;
     font-size: 1.3rem;
     margin-bottom: 0.25rem;
   }
@@ -123,14 +131,22 @@
   .popup-title {
     bottom: 100%;
     color: var(--primary-color);
-    font-family: "Raleway", -apple-system, system-ui, sans-serif;
+    font-family:
+      "Raleway",
+      -apple-system,
+      system-ui,
+      sans-serif;
     font-size: 0.625rem;
     position: absolute;
     right: 0.25rem;
   }
 
   label {
-    font-family: "Raleway", -apple-system, system-ui, sans-serif;
+    font-family:
+      "Raleway",
+      -apple-system,
+      system-ui,
+      sans-serif;
     font-size: 0.625rem;
     margin-bottom: 0.25rem;
   }

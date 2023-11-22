@@ -65,7 +65,7 @@ export class CocomaterialComponent {
   constructor(
     private state: RxState<State>,
     private store: Store,
-    public dialogRef: MatDialogRef<CocomaterialComponent>
+    public dialogRef: MatDialogRef<CocomaterialComponent>,
   ) {
     this.state.set({
       tags: [],
@@ -74,14 +74,14 @@ export class CocomaterialComponent {
 
     this.state.connect(
       'allTags',
-      this.store.select(selectCocomaterial).pipe(map((cc) => cc.tags))
+      this.store.select(selectCocomaterial).pipe(map((cc) => cc.tags)),
     );
 
     this.state.connect(
       'vectors',
       this.store
         .select(selectCocomaterial)
-        .pipe(map((cc) => cc.vectors?.results ?? []))
+        .pipe(map((cc) => cc.vectors?.results ?? [])),
     );
 
     const search = this.form.get('search');
@@ -93,8 +93,8 @@ export class CocomaterialComponent {
           startWith(null),
           map((tag: string | null) => {
             return tag ? this.filter(tag) : this.state.get('allTags');
-          })
-        )
+          }),
+        ),
       );
     }
 
@@ -102,11 +102,11 @@ export class CocomaterialComponent {
       this.state.select('tags').pipe(
         map((tags) => {
           return tags.map((tag) => tag.slug);
-        })
+        }),
       ),
       (tags) => {
         this.store.dispatch(PageActions.fetchVectors({ tags }));
-      }
+      },
     );
   }
 
@@ -149,7 +149,7 @@ export class CocomaterialComponent {
   public selected(event: MatAutocompleteSelectedEvent): void {
     this.state.set('tags', (state) => {
       const tag = state.allTags.find(
-        (tag) => tag.slug === event.option.viewValue
+        (tag) => tag.slug === event.option.viewValue,
       );
 
       if (tag) {
@@ -191,7 +191,7 @@ export class CocomaterialComponent {
                   op: 'add',
                 },
               ],
-            })
+            }),
           );
         }
       });

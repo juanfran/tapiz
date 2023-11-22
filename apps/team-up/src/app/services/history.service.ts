@@ -43,7 +43,7 @@ export class HistoryService {
               ...node,
               content: diffCurr,
             },
-          })
+          }),
         );
       }
     }

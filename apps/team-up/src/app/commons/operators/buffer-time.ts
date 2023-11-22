@@ -1,7 +1,7 @@
 import { Observable, exhaustMap, map, tap, timer } from 'rxjs';
 
 export function bufferTime<T>(
-  time: number
+  time: number,
 ): (source$: Observable<T>) => Observable<T[]> {
   let acc: T[] = [];
 
@@ -16,7 +16,7 @@ export function bufferTime<T>(
       map(() => acc),
       tap(() => {
         acc = [];
-      })
+      }),
     );
   };
 }

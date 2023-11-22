@@ -52,7 +52,7 @@ const reducer = createReducer(
       }
 
       return state;
-    }
+    },
   ),
   on(HomeActions.fetchBoardsSuccess, (state, { boards }): HomeState => {
     return {
@@ -70,7 +70,7 @@ const reducer = createReducer(
           return board.id !== id;
         }),
       };
-    }
+    },
   ),
   on(HomeActions.fetchTeamsSuccess, (state, { teams }): HomeState => {
     return {
@@ -196,7 +196,7 @@ const reducer = createReducer(
       });
 
       return state;
-    }
+    },
   ),
   on(
     HomeActions.changeRoleSuccess,
@@ -224,7 +224,7 @@ const reducer = createReducer(
       });
 
       return state;
-    }
+    },
   ),
   on(HomeActions.duplicateBoardSuccess, (state, { board }) => {
     return {
@@ -306,7 +306,7 @@ const reducer = createReducer(
     }
 
     return state;
-  })
+  }),
 );
 
 export const homeFeature = createFeature({

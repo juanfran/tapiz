@@ -30,7 +30,7 @@ export class CopyPasteDirective {
       .getNodes()
       .pipe(
         take(1),
-        concatLatestFrom(() => [this.store.select(selectFocusId)])
+        concatLatestFrom(() => [this.store.select(selectFocusId)]),
       )
       .subscribe(([nodes, focusId]) => {
         this.copyNode = [];
@@ -50,7 +50,7 @@ export class CopyPasteDirective {
               }
 
               return newNode;
-            })
+            }),
           );
         }
       });
