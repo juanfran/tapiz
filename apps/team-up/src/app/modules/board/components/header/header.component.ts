@@ -13,7 +13,7 @@ import {
   selectIsAdmin,
 } from '../../selectors/page.selectors';
 import { ExportService } from '../../services/export.service';
-import { ClickOutsideDirective } from '../../directives/click-outside.directive';
+import { ClickOutsideDirective } from '@team-up/ui/click-outside/click-outside.directive';
 import { AutoFocusDirective } from '../../directives/autofocus.directive';
 import { NgIf } from '@angular/common';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';

@@ -74,5 +74,6 @@ export const PageActions = createActionGroup({
     'Toggle show votes': props<{ userId: string }>(),
     'Stop highlight': emptyProps(),
     'Node snapshot': props<{ prev: TuNode; curr: TuNode }>(),
+    'Lock board': props<{ lock: boolean }>(),
   },
 });

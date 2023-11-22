@@ -1,13 +1,11 @@
 import { z } from 'zod';
 import { StateActions, TuNode } from '../models/node.model';
+import { CommonBoardValidation } from './common-board-validation';
 
 const user = z.object({
+  ...CommonBoardValidation,
   visible: z.boolean(),
   cursor: z.object({
-    x: z.number().safe(),
-    y: z.number().safe(),
-  }),
-  position: z.object({
     x: z.number().safe(),
     y: z.number().safe(),
   }),

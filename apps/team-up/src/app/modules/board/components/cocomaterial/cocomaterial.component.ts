@@ -15,6 +15,7 @@ import { CocomaterialTag, CocomaterialApiVector } from '@team-up/board-commons';
 import { Store } from '@ngrx/store';
 import {
   selectCocomaterial,
+  selectLayer,
   selectPosition,
   selectZoom,
 } from '../../selectors/page.selectors';
@@ -59,6 +60,7 @@ export class CocomaterialComponent {
   @ViewChild('tagInput') tagInput!: ElementRef<HTMLInputElement>;
 
   public readonly viewModel$ = this.state.select();
+  public readonly layer = this.store.selectSignal(selectLayer);
 
   public separatorKeysCodes: number[] = [ENTER, COMMA];
 
@@ -186,6 +188,7 @@ export class CocomaterialComponent {
                         y: (-position.y + event.pageY) / zoom - 75,
                       },
                       rotation: 0,
+                      layer: this.layer(),
                     },
                   },
                   op: 'add',

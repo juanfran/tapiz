@@ -6,6 +6,7 @@ export interface Text {
   color: string;
   size: number;
   position: Point;
+  layer: number;
   width: number;
   height: number;
 }

@@ -61,30 +61,17 @@ team-up-header {
 }
 
 .edit-mode {
-  team-up-panels,
-  team-up-text {
+  ::ng-deep .layer-1 {
     pointer-events: none;
   }
+}
 
-  /* stylelint-disable */
-  team-up-group ::ng-deep {
-    .title,
-    .resize {
-      pointer-events: all;
-    }
+.compose-mode {
+  ::ng-deep  .layer-0 {
+    pointer-events: none;
   }
-  /* stylelint-enable */
 }
 
 .container.loading {
   display: none;
-}
-
-.compose-mode {
-  team-up-note,
-  team-up-image,
-  team-up-vector,
-  team-up-group {
-    pointer-events: none;
-  }
 }

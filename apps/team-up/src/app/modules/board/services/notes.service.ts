@@ -5,9 +5,8 @@ import { Note } from '@team-up/board-commons';
   providedIn: 'root',
 })
 export class NotesService {
-  getNew(data: Pick<Note, 'ownerId' | 'position'>): Note {
+  getNew(data: Pick<Note, 'ownerId' | 'position' | 'layer'>): Note {
     return {
-      ...data,
       text: '',
       votes: [],
       emojis: [],

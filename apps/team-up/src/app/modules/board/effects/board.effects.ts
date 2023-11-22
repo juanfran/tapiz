@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { WsService } from '@/app/modules/ws/services/ws.service';
 import { EMPTY, of } from 'rxjs';
@@ -8,14 +8,13 @@ import {
   mergeMap,
   switchMap,
   tap,
-  withLatestFrom,
   catchError,
   filter,
 } from 'rxjs/operators';
 import { v4 } from 'uuid';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
-import { selectZone } from '../selectors/page.selectors';
+import { selectLayer, selectZone } from '../selectors/page.selectors';
 import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
 import { StateActions } from '@team-up/board-commons';
@@ -186,8 +185,11 @@ export class BoardEffects {
   public zoneToGroup$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.zoneToGroup),
-      withLatestFrom(this.store.select(selectZone)),
-      mergeMap(([, zone]) => {
+      concatLatestFrom(() => [
+        this.store.select(selectZone),
+        this.store.select(selectLayer),
+      ]),
+      mergeMap(([, zone, layer]) => {
         if (zone) {
           let { width, height } = zone;
 
@@ -210,6 +212,7 @@ export class BoardEffects {
                       width: width,
                       height: height,
                       votes: [],
+                      layer,
                     },
                   },
                   op: 'add',
@@ -227,8 +230,11 @@ export class BoardEffects {
   public zoneToPanel$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.zoneToPanel),
-      withLatestFrom(this.store.select(selectZone)),
-      mergeMap(([, zone]) => {
+      concatLatestFrom(() => [
+        this.store.select(selectZone),
+        this.store.select(selectLayer),
+      ]),
+      mergeMap(([, zone, layer]) => {
         if (zone) {
           let { width, height } = zone;
 
@@ -250,6 +256,7 @@ export class BoardEffects {
                       position: zone.position,
                       width: width,
                       height: height,
+                      layer,
                     },
                   },
                   op: 'add',

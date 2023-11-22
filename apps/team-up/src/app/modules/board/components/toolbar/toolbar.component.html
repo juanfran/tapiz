@@ -1,183 +1,180 @@
 <ng-container *rxLet="model$; let vm">
   <div class="toolbar">
-    <ng-container *ngIf="(canvasMode$ | async) === 'editMode'">
+    <div
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'note'">
+      <button
+        (click)="note()"
+        class="toolbar-button">
+        <team-up-svg-icon
+          icon="add"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Note</div>
+    </div>
+    <div
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'group'">
+      <button
+        class="toolbar-button"
+        (click)="group()">
+        <team-up-svg-icon
+          icon="template"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Group</div>
+    </div>
+    <div
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'vote'">
+      <button
+        class="toolbar-button"
+        (click)="vote()">
+        <team-up-svg-icon
+          icon="voting_chip"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Vote</div>
+    </div>
+    <div
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'emoji'">
+      <button
+        class="toolbar-button"
+        (click)="emoji()">
+        <team-up-svg-icon
+          icon="mood"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Add emoji</div>
+    </div>
+    <div
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'draw'">
+      <button
+        class="toolbar-button"
+        (click)="draw()">
+        <team-up-svg-icon
+          icon="edit"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Draw</div>
+    </div>
+    <div
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'cocomaterial'">
+      <button
+        class="toolbar-button"
+        (click)="cocomaterial()">
+        <team-up-svg-icon
+          icon="cocomaterial"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Cocomaterial</div>
+    </div>
+    <div
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'image'">
+      <button
+        class="toolbar-button"
+        (click)="popupOpen('image')">
+        <team-up-svg-icon
+          icon="picture"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Image</div>
       <div
-        class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'note'">
-        <button
-          (click)="note()"
-          class="toolbar-button">
-          <team-up-svg-icon
-            icon="add"
-            class="icon-svg"></team-up-svg-icon>
-        </button>
-        <div class="toolbar-tooltip">Note</div>
-      </div>
-      <div
-        class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'group'">
-        <button
-          class="toolbar-button"
-          (click)="group()">
-          <team-up-svg-icon
-            icon="template"
-            class="icon-svg"></team-up-svg-icon>
-        </button>
-        <div class="toolbar-tooltip">Group</div>
-      </div>
-      <div
-        class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'vote'">
-        <button
-          class="toolbar-button"
-          (click)="vote()">
-          <team-up-svg-icon
-            icon="voting_chip"
-            class="icon-svg"></team-up-svg-icon>
-        </button>
-        <div class="toolbar-tooltip">Vote</div>
-      </div>
-      <div
-        class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'emoji'">
-        <button
-          class="toolbar-button"
-          (click)="emoji()">
-          <team-up-svg-icon
-            icon="mood"
-            class="icon-svg"></team-up-svg-icon>
-        </button>
-        <div class="toolbar-tooltip">Add emoji</div>
-      </div>
-      <div
-        class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'draw'">
-        <button
-          class="toolbar-button"
-          (click)="draw()">
-          <team-up-svg-icon
-            icon="edit"
-            class="icon-svg"></team-up-svg-icon>
-        </button>
-        <div class="toolbar-tooltip">Draw</div>
-      </div>
-      <div
-        class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'cocomaterial'">
-        <button
-          class="toolbar-button"
-          (click)="cocomaterial()">
-          <team-up-svg-icon
-            icon="cocomaterial"
-            class="icon-svg"></team-up-svg-icon>
-        </button>
-        <div class="toolbar-tooltip">Cocomaterial</div>
-      </div>
-      <div
-        class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'image'">
-        <button
-          class="toolbar-button"
-          (click)="popupOpen('image')">
-          <team-up-svg-icon
-            icon="picture"
-            class="icon-svg"></team-up-svg-icon>
-        </button>
-        <div class="toolbar-tooltip">Image</div>
-        <div
-          class="toolbar-container"
-          *ngIf="vm.popupOpen === 'image'">
-          <div class="toolbar-popup image-popup">
-            <form
-              [formGroup]="imageForm"
-              (submit)="newImage()">
-              <span class="popup-title">Image url</span>
-              <input
-                teamUpAutofocus
-                formControlName="url"
-                autocomplete="off"
-                matInput
-                class="image-url-field" />
-              <div class="actions">
-                <button
-                  class="submit"
-                  type="submit"
-                  mat-raised-button
-                  color="primary">
-                  Submit
-                </button>
-                <button
-                  (click)="popupOpen('')"
-                  class="cancel"
-                  type="text"
-                  mat-raised-button
-                  color="warn">
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
+        class="toolbar-container"
+        *ngIf="vm.popupOpen === 'image'">
+        <div class="toolbar-popup image-popup">
+          <form
+            [formGroup]="imageForm"
+            (submit)="newImage()">
+            <span class="popup-title">Image url</span>
+            <input
+              teamUpAutofocus
+              formControlName="url"
+              autocomplete="off"
+              matInput
+              class="image-url-field" />
+            <div class="actions">
+              <button
+                class="submit"
+                type="submit"
+                mat-raised-button
+                color="primary">
+                Submit
+              </button>
+              <button
+                (click)="popupOpen('')"
+                class="cancel"
+                type="text"
+                mat-raised-button
+                color="warn">
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-      <div
-        class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'token'">
-        <button
-          (click)="token()"
-          class="toolbar-button">
-          <mat-icon class="material-icons-outlined">circle</mat-icon>
-        </button>
-        <div class="toolbar-tooltip">Token</div>
-      </div>
-      <div
-        class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'estimation'">
-        <button
-          class="toolbar-button"
-          (click)="estimation()">
-          <mat-icon class="material-icons-outlined">style</mat-icon>
-        </button>
-        <div class="toolbar-tooltip">Estimation</div>
-      </div>
-      <div
-        class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'search'">
-        <button
-          class="toolbar-button"
-          (click)="search()">
-          <mat-icon>search</mat-icon>
-        </button>
-        <div class="toolbar-tooltip">Search</div>
-      </div>
-    </ng-container>
+    </div>
+    <div
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'token'">
+      <button
+        (click)="token()"
+        class="toolbar-button">
+        <mat-icon class="material-icons-outlined">circle</mat-icon>
+      </button>
+      <div class="toolbar-tooltip">Token</div>
+    </div>
+    <div
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'estimation'">
+      <button
+        class="toolbar-button"
+        (click)="estimation()">
+        <mat-icon class="material-icons-outlined">style</mat-icon>
+      </button>
+      <div class="toolbar-tooltip">Estimation</div>
+    </div>
 
-    <ng-container *ngIf="(canvasMode$ | async) === 'composeMode'">
-      <div
-        class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'text'">
-        <button
-          class="toolbar-button"
-          (click)="text()">
-          <team-up-svg-icon
-            icon="letter"
-            class="icon-svg"></team-up-svg-icon>
-        </button>
-        <div class="toolbar-tooltip">Text</div>
-      </div>
+    <div
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'text'">
+      <button
+        class="toolbar-button"
+        (click)="text()">
+        <team-up-svg-icon
+          icon="letter"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Text</div>
+    </div>
 
-      <div
-        class="toolbar-button-container"
-        [class.active]="vm.popupOpen === 'panel'">
-        <button
-          class="toolbar-button"
-          (click)="panel()">
-          <team-up-svg-icon
-            icon="panel"
-            class="icon-svg"></team-up-svg-icon>
-        </button>
-        <div class="toolbar-tooltip">Panel</div>
-      </div>
-    </ng-container>
+    <div
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'panel'">
+      <button
+        class="toolbar-button"
+        (click)="panel()">
+        <team-up-svg-icon
+          icon="panel"
+          class="icon-svg"></team-up-svg-icon>
+      </button>
+      <div class="toolbar-tooltip">Panel</div>
+    </div>
+
+    <div
+      class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'search'">
+      <button
+        class="toolbar-button"
+        (click)="search()">
+        <mat-icon>search</mat-icon>
+      </button>
+      <div class="toolbar-tooltip">Search</div>
+    </div>
   </div>
 
   <div

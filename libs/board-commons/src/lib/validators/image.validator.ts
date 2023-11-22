@@ -1,10 +1,8 @@
 import { z } from 'zod';
+import { CommonBoardValidation } from './common-board-validation';
 
 const image = z.object({
-  position: z.object({
-    x: z.number().safe(),
-    y: z.number().safe(),
-  }),
+  ...CommonBoardValidation,
   width: z.number().nonnegative().safe(),
   height: z.number().nonnegative().safe(),
   url: z.string().max(1000),
