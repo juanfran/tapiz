@@ -19,13 +19,13 @@ import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '@team-up/cdk/models/draggable.model';
 import { Text, TuNode } from '@team-up/board-commons';
 import { selectFocusId } from '../../selectors/page.selectors';
-import hotkeys from 'hotkeys-js';
 import { BoardMoveService } from '../../services/board-move.service';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { pageFeature } from '../../reducers/page.reducer';
 import { Resizable } from '../../models/resizable.model';
 import { ResizeHandlerDirective } from '../../directives/resize-handler.directive';
 import { ResizableDirective } from '../../directives/resize.directive';
+import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 
 interface State {
   node: TuNode<Text>;
@@ -40,7 +40,7 @@ interface State {
   templateUrl: './text.component.html',
   styleUrls: ['./text.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState],
+  providers: [RxState, HotkeysService],
   standalone: true,
   imports: [NgIf, AsyncPipe, ResizeHandlerDirective],
 })
@@ -70,7 +70,7 @@ export class TextComponent
         toolbar: state.edit,
         ...state,
       };
-    })
+    }),
   );
 
   @ViewChild('textarea') textarea!: ElementRef;
@@ -81,7 +81,8 @@ export class TextComponent
     private store: Store,
     private boardDragDirective: BoardDragDirective,
     private boardMoveService: BoardMoveService,
-    private resizableDirective: ResizableDirective
+    private resizableDirective: ResizableDirective,
+    private hotkeysService: HotkeysService,
   ) {
     this.state.set({ draggable: true, edit: false });
   }
@@ -92,7 +93,7 @@ export class TextComponent
       PageActions.setFocusId({
         focusId: this.state.get('node').id,
         ctrlKey: event.ctrlKey,
-      })
+      }),
     );
   }
 
@@ -140,14 +141,14 @@ export class TextComponent
                 op: 'patch',
               },
             ],
-          })
+          }),
         );
 
         return {
           ...state,
           edit: false,
         };
-      }
+      },
     );
   }
 
@@ -176,7 +177,7 @@ export class TextComponent
               op: 'patch',
             },
           ],
-        })
+        }),
       );
     }
   }
@@ -200,7 +201,7 @@ export class TextComponent
               op: 'patch',
             },
           ],
-        })
+        }),
       );
     }
   }
@@ -227,12 +228,12 @@ export class TextComponent
         first(),
         withLatestFrom(
           this.store.select(pageFeature.selectAdditionalContext),
-          this.state.select('node').pipe(map((node) => node.id))
+          this.state.select('node').pipe(map((node) => node.id)),
         ),
         filter(([id, context, nodeId]) => {
           return id.includes(nodeId) && context[nodeId] !== 'pasted';
         }),
-        untilDestroyed(this)
+        untilDestroyed(this),
       )
       .subscribe(() => {
         this.edit();
@@ -242,15 +243,14 @@ export class TextComponent
       .select('node')
       .pipe(
         map((it) => it.content.position),
-        untilDestroyed(this)
+        untilDestroyed(this),
       )
       .subscribe((position) => {
-        (
-          this.el.nativeElement as HTMLElement
-        ).style.transform = `translate(${position.x}px, ${position.y}px)`;
+        (this.el.nativeElement as HTMLElement).style.transform =
+          `translate(${position.x}px, ${position.y}px)`;
       });
 
-    hotkeys('delete', () => {
+    this.hotkeysService.listen({ key: 'Delete' }).subscribe(() => {
       if (this.state.get('focus')) {
         this.store.dispatch(
           BoardActions.batchNodeActions({
@@ -264,7 +264,7 @@ export class TextComponent
                 op: 'remove',
               },
             ],
-          })
+          }),
         );
       }
     });
@@ -272,7 +272,7 @@ export class TextComponent
     this.state.hold(this.state.select('node'), (node) => {
       this.el.nativeElement.style.setProperty(
         '--size',
-        `${node.content.size}px`
+        `${node.content.size}px`,
       );
       this.el.nativeElement.style.setProperty('--color', node.content.color);
     });

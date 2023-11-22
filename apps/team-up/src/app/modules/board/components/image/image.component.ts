@@ -22,7 +22,6 @@ import {
   selectCanvasMode,
   selectFocusId,
 } from '../../selectors/page.selectors';
-import hotkeys from 'hotkeys-js';
 import { RxPush } from '@rx-angular/template/push';
 import { Resizable } from '../../models/resizable.model';
 import { ResizableDirective } from '../../directives/resize.directive';
@@ -32,6 +31,7 @@ import { RotateHandlerDirective } from '../../directives/rotate-handler.directiv
 import { RotateDirective } from '../../directives/rotate.directive';
 import { compose, rotateDEG, translate, toCSS } from 'transformation-matrix';
 import { Rotatable } from '../../models/rotatable.model';
+import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 
 interface State {
   image: TuNode<Image>;
@@ -45,7 +45,7 @@ interface State {
   templateUrl: './image.component.html',
   styleUrls: ['./image.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState],
+  providers: [RxState, HotkeysService],
   standalone: true,
   imports: [
     RxPush,
@@ -87,7 +87,8 @@ export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
     private boardDragDirective: BoardDragDirective,
     private resizableDirective: ResizableDirective,
     private rotateDirective: RotateDirective,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private hotkeysService: HotkeysService,
   ) {
     this.state.set({ draggable: true });
   }
@@ -98,7 +99,7 @@ export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
       PageActions.setFocusId({
         focusId: this.state.get('image').id,
         ctrlKey: event.ctrlKey,
-      })
+      }),
     );
   }
 
@@ -124,7 +125,7 @@ export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
               op: 'patch',
             },
           ],
-        })
+        }),
       );
     }
   }
@@ -177,15 +178,15 @@ export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
             rotation: it.content.rotation,
           };
         }),
-        untilDestroyed(this)
+        untilDestroyed(this),
       )
       .subscribe(({ position, rotation }) => {
         this.nativeElement.style.transform = toCSS(
-          compose(translate(position.x, position.y), rotateDEG(rotation))
+          compose(translate(position.x, position.y), rotateDEG(rotation)),
         );
       });
 
-    hotkeys('delete', () => {
+    this.hotkeysService.listen({ key: 'Delete' }).subscribe(() => {
       if (this.state.get('focus')) {
         this.store.dispatch(
           BoardActions.batchNodeActions({
@@ -199,7 +200,7 @@ export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
                 op: 'remove',
               },
             ],
-          })
+          }),
         );
       }
     });

@@ -48,7 +48,6 @@ import {
   selectZoom,
 } from '../../selectors/page.selectors';
 import { Observable, combineLatest } from 'rxjs';
-import hotkeys from 'hotkeys-js';
 import { lighter } from './contrast';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 import { concatLatestFrom } from '@ngrx/effects';
@@ -58,6 +57,7 @@ import { pageFeature } from '../../reducers/page.reducer';
 import { HistoryService } from '@/app/services/history.service';
 import { BoardFacade } from '@/app/services/board-facade.service';
 import { filterNil } from '@/app/commons/operators/filter-nil';
+import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 interface State {
   edit: boolean;
   note: TuNode<Note>;
@@ -78,7 +78,7 @@ interface State {
   templateUrl: './note.component.html',
   styleUrls: ['./note.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState],
+  providers: [RxState, HotkeysService],
   standalone: true,
   imports: [NgIf, NgFor, AsyncPipe, DrawingDirective],
 })
@@ -120,7 +120,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
           return prev + it.vote;
         }, 0),
       };
-    })
+    }),
   );
 
   @ViewChildren('textarea') textarea!: QueryList<ElementRef>;
@@ -133,7 +133,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     private boardDragDirective: BoardDragDirective,
     private cd: ChangeDetectorRef,
     private historyService: HistoryService,
-    private boardFacade: BoardFacade
+    private boardFacade: BoardFacade,
+    private hotkeysService: HotkeysService,
   ) {
     this.state.set({
       textSize: 56,
@@ -146,7 +147,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       .subscribe((note) => {
         this.state.connect(
           'username',
-          this.boardFacade.usernameById(note.content.ownerId)
+          this.boardFacade.usernameById(note.content.ownerId),
         );
       });
 
@@ -158,7 +159,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     this.state.hold(this.state.select('textSize'), () => {
       this.el.nativeElement.style.setProperty(
         '--text-size',
-        `${this.state.get('textSize')}px`
+        `${this.state.get('textSize')}px`,
       );
     });
 
@@ -183,7 +184,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       let votes = this.state.get('note').content.votes;
 
       let currentUserVote = votes.find(
-        (vote) => vote.userId === this.state.get('userId')
+        (vote) => vote.userId === this.state.get('userId'),
       );
 
       if (currentUserVote) {
@@ -208,7 +209,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       }
 
       currentUserVote = votes.find(
-        (vote) => vote.userId === this.state.get('userId')
+        (vote) => vote.userId === this.state.get('userId'),
       );
 
       votes = votes.filter((vote) => vote.vote !== 0);
@@ -229,7 +230,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
                 op: 'patch',
               },
             ],
-          })
+          }),
         );
       }
     } else {
@@ -237,7 +238,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         PageActions.setFocusId({
           focusId: this.state.get('note').id,
           ctrlKey: event.ctrlKey,
-        })
+        }),
       );
     }
   }
@@ -266,7 +267,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       .pipe(
         take(1),
         filter((it): it is NativeEmoji => !!it),
-        concatLatestFrom(() => this.store.select(selectZoom))
+        concatLatestFrom(() => this.store.select(selectZoom)),
       )
       .subscribe(([emoji, zoom]) => {
         const { width, height } = this.emojisSize();
@@ -299,7 +300,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
                 op: 'patch',
               },
             ],
-          })
+          }),
         );
       });
   }
@@ -313,7 +314,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         filter((it) => it === 'emoji'),
         switchMap(() => {
           return this.store.select(selectZoom);
-        })
+        }),
       )
       .subscribe((zoom) => {
         const targetPosition = this.nativeElement.getBoundingClientRect();
@@ -346,7 +347,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
                 op: 'patch',
               },
             ],
-          })
+          }),
         );
       });
   }
@@ -355,10 +356,10 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     const styles = getComputedStyle(this.nativeElement);
 
     const width = Number(
-      styles.getPropertyValue('--emoji-width').replace('px', '')
+      styles.getPropertyValue('--emoji-width').replace('px', ''),
     );
     const height = Number(
-      styles.getPropertyValue('--emoji-height').replace('px', '')
+      styles.getPropertyValue('--emoji-height').replace('px', ''),
     );
 
     return { width, height };
@@ -373,7 +374,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       .getNodes()
       .pipe(
         map((nodes) => nodes.filter(isPanel)),
-        untilDestroyed(this)
+        untilDestroyed(this),
       )
       .subscribe((panels) => {
         const position = this.state.get('note').content.position;
@@ -413,7 +414,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
           ...state,
           edit: false,
         };
-      }
+      },
     );
   }
 
@@ -446,7 +447,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
               op: 'patch',
             },
           ],
-        })
+        }),
       );
     }
   }
@@ -474,12 +475,12 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         first(),
         withLatestFrom(
           this.store.select(pageFeature.selectAdditionalContext),
-          this.state.select('note').pipe(map((note) => note.id))
+          this.state.select('note').pipe(map((note) => note.id)),
         ),
         filter(([id, context, noteId]) => {
           return id.includes(noteId) && context[noteId] !== 'pasted';
         }),
-        untilDestroyed(this)
+        untilDestroyed(this),
       )
       .subscribe(() => {
         this.edit();
@@ -501,19 +502,19 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         concatLatestFrom(() =>
           this.boardFacade
             .getNodes()
-            .pipe(map((nodes) => nodes.filter(isPanel)))
-        )
+            .pipe(map((nodes) => nodes.filter(isPanel))),
+        ),
       ),
       ([position, panels]) => {
         this.findPanel(position, panels);
-      }
+      },
     );
 
     const user$: Observable<User> = this.boardFacade
       .selectUserById(this.state.get('note').content.ownerId)
       .pipe(
         map((node) => node?.content),
-        filterNil()
+        filterNil(),
       );
 
     this.state.connect(
@@ -525,8 +526,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
           }
 
           return user.visible;
-        })
-      )
+        }),
+      ),
     );
 
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
@@ -539,23 +540,23 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       'highlight',
       combineLatest([
         this.store.select(
-          isUserHighlighted(this.state.get('note').content.ownerId)
+          isUserHighlighted(this.state.get('note').content.ownerId),
         ),
         this.store.select(pageFeature.selectShowUserVotes).pipe(
           map((userVotes) => {
             return !!this.state
               .get('note')
               .content.votes.find((vote) => vote.userId === userVotes);
-          })
+          }),
         ),
       ]).pipe(
         map(([highlight, showVotes]) => {
           return highlight ? highlight : showVotes;
-        })
-      )
+        }),
+      ),
     );
 
-    hotkeys('delete', () => {
+    this.hotkeysService.listen({ key: 'Delete' }).subscribe(() => {
       if (this.state.get('focus')) {
         this.store.dispatch(
           BoardActions.batchNodeActions({
@@ -569,7 +570,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
                 op: 'remove',
               },
             ],
-          })
+          }),
         );
       }
     });
@@ -586,7 +587,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
       PageActions.setNoteDrawing({
         id: this.state.get('note').id,
         drawing: [...this.state.get('note').content.drawing, ...newLine],
-      })
+      }),
     );
   }
 
@@ -604,7 +605,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
         this.state.get('note').content.text,
         realSize,
         `${fontSize}px "Open Sans", -apple-system, system-ui, sans-serif`,
-        1.1
+        1.1,
       );
 
       if (height > realSize - 10) {
@@ -621,7 +622,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     texto: string,
     width: number,
     font: string,
-    lineHeight: number
+    lineHeight: number,
   ) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');

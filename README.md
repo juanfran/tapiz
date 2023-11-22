@@ -32,16 +32,16 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Image & Vector can also be used in compose mode
 - [ ] Bookmarks
 - [ ] Performance not render not visible nodes
-- [ ] Select note color
+- [ ] Select note color & format text
 - [ ] Drawing component or drawing everywhere
-- [ ] Planning Poker
 - [ ] Placeholder boards home
 - [ ] Real time home boards
 - [ ] Real time members & permissions
 - [ ] Read only board
-- [ ] Usernames or display name (use email as id mentio using display name)
+- [ ] Usernames or display name (use email as id mention using display name)
 - [ ] Standalone nodes
 - [ ] Comments
+- [ ] Aligment scale
 
 ## TODO, code refactor
 

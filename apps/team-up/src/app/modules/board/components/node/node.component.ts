@@ -12,18 +12,17 @@ import {
   Type,
   HostListener,
   ComponentRef,
-  DestroyRef,
 } from '@angular/core';
 import { RxState } from '@rx-angular/state';
 import { Point, TuNode } from '@team-up/board-commons';
-import { distinctUntilChanged, filter, fromEvent, map, take } from 'rxjs';
+import { distinctUntilChanged, map, take } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { selectFocusId } from '../../selectors/page.selectors';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { pageFeature } from '../../reducers/page.reducer';
 import { DynamicComponent } from './dynamic-component';
+import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 
 interface State {
   position: Point;
@@ -38,14 +37,14 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [CommonModule],
-  providers: [RxState],
+  providers: [RxState, HotkeysService],
 })
 export class NodeComponent implements OnInit {
   private state = inject(RxState) as RxState<State>;
   private el = inject(ElementRef<HTMLElement>);
   private store = inject(Store);
   private cmp?: ComponentRef<DynamicComponent>;
-  private destroyRef = inject(DestroyRef);
+  private hotkeysService = inject(HotkeysService);
 
   @Input({ required: true })
   public set node(node: TuNode) {
@@ -61,7 +60,7 @@ export class NodeComponent implements OnInit {
       PageActions.setFocusId({
         focusId: this.state.get('node').id,
         ctrlKey: event.ctrlKey,
-      })
+      }),
     );
   }
 
@@ -82,14 +81,14 @@ export class NodeComponent implements OnInit {
       this.state.select('position').pipe(distinctUntilChanged()),
       (position) => {
         this.nativeElement.style.transform = `translate(${position.x}px, ${position.y}px)`;
-      }
+      },
     );
 
     this.state.connect(
       'focus',
       this.store
         .select(selectFocusId)
-        .pipe(map((it) => it.includes(this.state.get('node').id)))
+        .pipe(map((it) => it.includes(this.state.get('node').id))),
     );
 
     this.state.hold(this.state.select('focus'), (focus) => {
@@ -100,14 +99,9 @@ export class NodeComponent implements OnInit {
       this.cmp?.setInput('node', focus);
     });
 
-    fromEvent<KeyboardEvent>(document, 'keydown')
-      .pipe(
-        filter((event: KeyboardEvent) => event.key === 'Delete'),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe(() => {
-        this.onDeletePress();
-      });
+    this.hotkeysService.listen({ key: 'Delete' }).subscribe(() => {
+      this.onDeletePress();
+    });
   }
 
   private onDeletePress() {
@@ -132,7 +126,7 @@ export class NodeComponent implements OnInit {
               op: 'remove',
             },
           ],
-        })
+        }),
       );
     }
   }

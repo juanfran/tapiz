@@ -21,7 +21,6 @@ import {
   selectCanvasMode,
   selectFocusId,
 } from '../../selectors/page.selectors';
-import hotkeys from 'hotkeys-js';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { pageFeature } from '../../reducers/page.reducer';
 import { Resizable } from '../../models/resizable.model';
@@ -29,6 +28,7 @@ import { ResizeHandlerDirective } from '../../directives/resize-handler.directiv
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { ResizableDirective } from '../../directives/resize.directive';
+import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 
 interface State {
   panel: TuNode<Panel>;
@@ -42,7 +42,7 @@ interface State {
   templateUrl: './panel.component.html',
   styleUrls: ['./panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState],
+  providers: [RxState, HotkeysService],
   standalone: true,
   imports: [NgIf, AsyncPipe, MatIconModule, ResizeHandlerDirective],
 })
@@ -80,7 +80,8 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
     private boardDragDirective: BoardDragDirective,
     private resizableDirective: ResizableDirective,
     private cd: ChangeDetectorRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private hotkeysService: HotkeysService,
   ) {
     this.state.set({ draggable: true });
 
@@ -93,7 +94,7 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
       PageActions.setFocusId({
         focusId: this.state.get('panel').id,
         ctrlKey: event.ctrlKey,
-      })
+      }),
     );
   }
 
@@ -112,12 +113,12 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
         first(),
         withLatestFrom(
           this.store.select(pageFeature.selectAdditionalContext),
-          this.state.select('panel').pipe(map((panel) => panel.id))
+          this.state.select('panel').pipe(map((panel) => panel.id)),
         ),
         filter(([id, context, panelId]) => {
           return id.includes(panelId) && context[panelId] !== 'pasted';
         }),
-        untilDestroyed(this)
+        untilDestroyed(this),
       )
       .subscribe(() => {
         this.openSettings();
@@ -130,12 +131,11 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
       .select('panel')
       .pipe(
         map((it) => it.content.position),
-        untilDestroyed(this)
+        untilDestroyed(this),
       )
       .subscribe((position) => {
-        (
-          this.el.nativeElement as HTMLElement
-        ).style.transform = `translate(${position.x}px, ${position.y}px)`;
+        (this.el.nativeElement as HTMLElement).style.transform =
+          `translate(${position.x}px, ${position.y}px)`;
       });
 
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
@@ -146,7 +146,7 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
 
     this.state.connect('mode', this.store.select(selectCanvasMode));
 
-    hotkeys('delete', () => {
+    this.hotkeysService.listen({ key: 'Delete' }).subscribe(() => {
       if (this.state.get('focus')) {
         this.store.dispatch(
           BoardActions.batchNodeActions({
@@ -160,7 +160,7 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
                 op: 'remove',
               },
             ],
-          })
+          }),
         );
       }
     });
@@ -200,7 +200,7 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
               op: 'patch',
             },
           ],
-        })
+        }),
       );
     });
   }
@@ -215,42 +215,42 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
     if (panel.content.backgroundColor) {
       this.nativeElement.style.setProperty(
         '--backgroundColor',
-        panel.content.backgroundColor
+        panel.content.backgroundColor,
       );
     }
 
     if (panel.content.fontColor) {
       this.nativeElement.style.setProperty(
         '--fontColor',
-        panel.content.fontColor
+        panel.content.fontColor,
       );
     }
 
     if (panel.content.fontSize) {
       this.nativeElement.style.setProperty(
         '--fontSize',
-        panel.content.fontSize + 'px'
+        panel.content.fontSize + 'px',
       );
     }
 
     if (panel.content.borderColor) {
       this.nativeElement.style.setProperty(
         '--borderColor',
-        panel.content.borderColor
+        panel.content.borderColor,
       );
     }
 
     if (panel.content.borderWidth) {
       this.nativeElement.style.setProperty(
         '--borderWidth',
-        panel.content.borderWidth + 'px'
+        panel.content.borderWidth + 'px',
       );
     }
 
     if (panel.content.borderRadius) {
       this.nativeElement.style.setProperty(
         '--borderRadius',
-        panel.content.borderRadius + 'px'
+        panel.content.borderRadius + 'px',
       );
     }
   }

@@ -22,12 +22,12 @@ import { Draggable } from '@team-up/cdk/models/draggable.model';
 import { Group, TuNode } from '@team-up/board-commons';
 import { BoardMoveService } from '../../services/board-move.service';
 import { selectFocusId } from '../../selectors/page.selectors';
-import hotkeys from 'hotkeys-js';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { pageFeature } from '../../reducers/page.reducer';
 import { Resizable } from '../../models/resizable.model';
 import { ResizableDirective } from '../../directives/resize.directive';
 import { ResizeHandlerDirective } from '../../directives/resize-handler.directive';
+import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 
 interface State {
   edit: boolean;
@@ -45,7 +45,7 @@ interface State {
   templateUrl: './group.component.html',
   styleUrls: ['./group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState],
+  providers: [RxState, HotkeysService],
   standalone: true,
   imports: [NgIf, AsyncPipe, ResizeHandlerDirective],
 })
@@ -85,7 +85,7 @@ export class GroupComponent
           return prev + it.vote;
         }, 0),
       };
-    })
+    }),
   );
 
   @ViewChildren('textarea') textarea!: QueryList<ElementRef>;
@@ -97,7 +97,8 @@ export class GroupComponent
     private store: Store,
     private boardDragDirective: BoardDragDirective,
     private resizableDirective: ResizableDirective,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private hotkeysService: HotkeysService,
   ) {
     this.state.connect('voting', this.store.select(pageFeature.selectVoting));
     this.state.connect('userId', this.store.select(pageFeature.selectUserId));
@@ -106,7 +107,7 @@ export class GroupComponent
 
     this.state.hold(this.state.select('focus'), () => this.cd.markForCheck());
     this.state.hold(this.state.select('edit'), (edit) =>
-      this.state.set({ draggable: !edit })
+      this.state.set({ draggable: !edit }),
     );
   }
 
@@ -122,7 +123,7 @@ export class GroupComponent
       let votes = this.state.get('group').content.votes;
 
       let currentUserVote = votes.find(
-        (vote) => vote.userId === this.state.get('userId')
+        (vote) => vote.userId === this.state.get('userId'),
       );
 
       if (currentUserVote) {
@@ -147,7 +148,7 @@ export class GroupComponent
       }
 
       currentUserVote = votes.find(
-        (vote) => vote.userId === this.state.get('userId')
+        (vote) => vote.userId === this.state.get('userId'),
       );
 
       votes = votes.filter((vote) => vote.vote !== 0);
@@ -168,7 +169,7 @@ export class GroupComponent
                 op: 'patch',
               },
             ],
-          })
+          }),
         );
       }
     } else {
@@ -176,7 +177,7 @@ export class GroupComponent
         PageActions.setFocusId({
           focusId: this.state.get('group').id,
           ctrlKey: event.ctrlKey,
-        })
+        }),
       );
     }
   }
@@ -209,7 +210,7 @@ export class GroupComponent
           ...state,
           edit: false,
         };
-      }
+      },
     );
   }
 
@@ -247,7 +248,7 @@ export class GroupComponent
               op: 'patch',
             },
           ],
-        })
+        }),
       );
     }
   }
@@ -274,12 +275,12 @@ export class GroupComponent
         first(),
         withLatestFrom(
           this.store.select(pageFeature.selectAdditionalContext),
-          this.state.select('group').pipe(map((group) => group.id))
+          this.state.select('group').pipe(map((group) => group.id)),
         ),
         filter(([id, context, groupId]) => {
           return id.includes(groupId) && context[groupId] !== 'pasted';
         }),
-        untilDestroyed(this)
+        untilDestroyed(this),
       )
       .subscribe(() => {
         this.edit();
@@ -292,9 +293,8 @@ export class GroupComponent
       .select('group')
       .pipe(untilDestroyed(this))
       .subscribe((group) => {
-        (
-          this.el.nativeElement as HTMLElement
-        ).style.transform = `translate(${group.content.position.x}px, ${group.content.position.y}px)`;
+        (this.el.nativeElement as HTMLElement).style.transform =
+          `translate(${group.content.position.x}px, ${group.content.position.y}px)`;
       });
 
     this.state.connect(this.store.select(selectFocusId), (state, focusId) => {
@@ -312,16 +312,16 @@ export class GroupComponent
             return !!this.state
               .get('group')
               .content.votes.find((vote) => vote.userId === userVotes);
-          })
+          }),
         )
         .pipe(
           map((highlight) => {
             return highlight;
-          })
-        )
+          }),
+        ),
     );
 
-    hotkeys('delete', () => {
+    this.hotkeysService.listen({ key: 'Delete' }).subscribe(() => {
       if (this.state.get('focus')) {
         this.store.dispatch(
           BoardActions.batchNodeActions({
@@ -335,7 +335,7 @@ export class GroupComponent
                 op: 'remove',
               },
             ],
-          })
+          }),
         );
       }
     });
