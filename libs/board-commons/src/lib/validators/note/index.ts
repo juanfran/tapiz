@@ -1,8 +1,10 @@
 import { z } from 'zod';
 
 import { type StateActions } from '../../models/node.model';
+import { CommonBoardValidation } from '../common-board-validation';
 
 const note = z.object({
+  ...CommonBoardValidation,
   text: z.string().max(140),
   votes: z.array(
     z.object({
@@ -10,10 +12,6 @@ const note = z.object({
       vote: z.number().int().min(0),
     }),
   ),
-  position: z.object({
-    x: z.number().safe(),
-    y: z.number().safe(),
-  }),
   emojis: z.array(
     z.object({
       unicode: z.string().max(255),

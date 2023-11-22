@@ -74,7 +74,7 @@ export class PageEffects {
   public cleanDrawing$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.cleanNoteDrawing),
-      concatLatestFrom(() => [this.boardFacade.selectNoteFocus()]),
+      concatLatestFrom(() => [this.boardFacade.selectNoteFocus$]),
       map(([, note]) => note),
       filterNil(),
       map((note) => {

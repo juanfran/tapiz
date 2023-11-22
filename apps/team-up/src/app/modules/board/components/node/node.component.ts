@@ -12,6 +12,7 @@ import {
   Type,
   HostListener,
   ComponentRef,
+  HostBinding,
 } from '@angular/core';
 import { RxState } from '@rx-angular/state';
 import { Point, TuNode } from '@team-up/board-commons';
@@ -26,7 +27,7 @@ import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 
 interface State {
   position: Point;
-  node: TuNode<{ position: Point }>;
+  node: TuNode<{ position: Point; layer: number }>;
   focus: boolean;
 }
 
@@ -46,9 +47,13 @@ export class NodeComponent implements OnInit {
   private cmp?: ComponentRef<DynamicComponent>;
   private hotkeysService = inject(HotkeysService);
 
+  @HostBinding('class') get layer() {
+    return `layer-${this.state.get('node').content.layer}`;
+  }
+
   @Input({ required: true })
   public set node(node: TuNode) {
-    this.state.set({ node: node as TuNode<{ position: Point }> });
+    this.state.set({ node: node as State['node'] });
   }
 
   @ViewChild('nodeHost', { read: ViewContainerRef })

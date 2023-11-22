@@ -58,6 +58,7 @@ import { HistoryService } from '@/app/services/history.service';
 import { BoardFacade } from '@/app/services/board-facade.service';
 import { filterNil } from '@/app/commons/operators/filter-nil';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
+
 interface State {
   edit: boolean;
   note: TuNode<Note>;
@@ -90,6 +91,10 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     });
 
     this.calculateTextSize();
+  }
+
+  @HostBinding('class') get layer() {
+    return `layer-${this.state.get('note').content.layer}`;
   }
 
   @HostBinding('class.drawing') get drawing() {

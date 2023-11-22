@@ -3,9 +3,19 @@ import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { StateActions, UserNode, isNote } from '@team-up/board-commons';
 import { syncNodeBox } from '@team-up/sync-node-box';
-import { Observable, combineLatest, map } from 'rxjs';
+import {
+  Observable,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+  share,
+} from 'rxjs';
 import { pageFeature } from '../modules/board/reducers/page.reducer';
 import { concatLatestFrom } from '@ngrx/effects';
+import { filterNil } from 'ngxtension/filter-nil';
+import * as R from 'remeda';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({ providedIn: 'root' })
 export class BoardFacade {
@@ -84,16 +94,31 @@ export class BoardFacade {
     );
   }
 
-  public selectNoteFocus() {
-    return combineLatest([
-      this.store.select(pageFeature.selectFocusId),
-      this.getNodes(),
-    ]).pipe(
-      map(([focusId, nodes]) => {
-        return nodes.filter(isNote).find((note) => focusId.includes(note.id));
-      }),
-    );
-  }
+  public readonly selectFocusNodes$ = combineLatest([
+    this.store.select(pageFeature.selectFocusId),
+    this.getNodes(),
+  ]).pipe(
+    map(([focusId, nodes]) => {
+      return nodes.filter((note) => focusId.includes(note.id));
+    }),
+    distinctUntilChanged((prev, curre) => {
+      return R.equals(prev, curre);
+    }),
+    share(),
+  );
+
+  public readonly selectFocusNodes = toSignal(this.selectFocusNodes$);
+
+  public readonly selectNoteFocus$ = this.selectFocusNodes$.pipe(
+    filterNil(),
+    filter((nodes) => {
+      return isNote(nodes[0]);
+    }),
+    map((nodes) => {
+      return nodes[0];
+    }),
+    share(),
+  );
 
   public undo() {
     return this.board.undo();

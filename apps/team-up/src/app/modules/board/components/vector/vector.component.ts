@@ -70,7 +70,11 @@ export class VectorComponent
   }
 
   @HostBinding('class') get mode() {
-    return this.state.get('mode');
+    return (
+      this.state.get('mode') +
+      ' ' +
+      `layer-${this.state.get('vector').content.layer}`
+    );
   }
 
   @HostBinding('class.focus') get focus() {

@@ -5,6 +5,7 @@ import { Point } from './point.model';
 export interface Note {
   text: string;
   position: Point;
+  layer: number;
   ownerId: string;
   votes: {
     userId: string;

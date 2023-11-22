@@ -65,6 +65,10 @@ export class GroupComponent
     return this.state.get('group')?.content.height ?? '0';
   }
 
+  @HostBinding('class') get layer() {
+    return `layer-${this.state.get('group').content.layer}`;
+  }
+
   @HostBinding('class.focus') get focus() {
     return this.state.get('focus');
   }

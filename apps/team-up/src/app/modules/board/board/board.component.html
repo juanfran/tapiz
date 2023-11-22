@@ -4,11 +4,13 @@
   [class.compose-mode]="(canvasMode$ | async) === 'composeMode'"
   [class.loading]="!loaded()"
   class="container">
-  <team-up-header></team-up-header>
-  <team-up-users></team-up-users>
-  <team-up-toolbar></team-up-toolbar>
-  <team-up-drawing-options *ngIf="drawing()"></team-up-drawing-options>
-  <team-up-search-options *ngIf="search()"></team-up-search-options>
+  @defer {
+    <team-up-header></team-up-header>
+    <team-up-users></team-up-users>
+    <team-up-toolbar></team-up-toolbar>
+    <team-up-drawing-options *ngIf="drawing()"></team-up-drawing-options>
+    <team-up-search-options *ngIf="search()"></team-up-search-options>
+  }
   <div
     class="work-layer"
     #workLayer>
@@ -16,43 +18,50 @@
       <team-up-overlay></team-up-overlay>
       <team-up-zone></team-up-zone>
       <team-up-cursors></team-up-cursors>
-      <ng-container *ngFor="let note of notes$ | async; trackBy: trackById">
-        <team-up-note
-          teamUpBoardDrag
-          [note]="note"></team-up-note>
-      </ng-container>
-      <ng-container *ngFor="let image of images$ | async; trackBy: trackById">
-        <team-up-image
-          teamUpBoardDrag
-          teamUpResize
-          teamUpRotate
-          [image]="image"></team-up-image>
-      </ng-container>
-      <ng-container *ngFor="let group of groups$ | async; trackBy: trackById">
-        <team-up-group
-          teamUpBoardDrag
-          teamUpResize
-          [group]="group"></team-up-group>
-      </ng-container>
-      <ng-container *ngFor="let text of texts$ | async; trackBy: trackById">
-        <team-up-text
-          teamUpBoardDrag
-          teamUpResize
-          [text]="text"></team-up-text>
-      </ng-container>
-      <ng-container *ngFor="let vector of vectors$ | async; trackBy: trackById">
-        <team-up-vector
-          teamUpBoardDrag
-          teamUpResize
-          teamUpRotate
-          [vector]="vector"></team-up-vector>
-      </ng-container>
-      <team-up-panels></team-up-panels>
-      <team-up-nodes />
+      @defer {
+        <ng-container *ngFor="let note of notes$ | async; trackBy: trackById">
+          <team-up-note
+            teamUpBoardDrag
+            [note]="note"></team-up-note>
+        </ng-container>
+        <ng-container *ngFor="let image of images$ | async; trackBy: trackById">
+          <team-up-image
+            teamUpBoardDrag
+            teamUpResize
+            teamUpRotate
+            [image]="image"></team-up-image>
+        </ng-container>
+        <ng-container *ngFor="let group of groups$ | async; trackBy: trackById">
+          <team-up-group
+            teamUpBoardDrag
+            teamUpResize
+            [group]="group"></team-up-group>
+        </ng-container>
+        <ng-container *ngFor="let text of texts$ | async; trackBy: trackById">
+          <team-up-text
+            teamUpBoardDrag
+            teamUpResize
+            [text]="text"></team-up-text>
+        </ng-container>
+        <ng-container
+          *ngFor="let vector of vectors$ | async; trackBy: trackById">
+          <team-up-vector
+            teamUpBoardDrag
+            teamUpResize
+            teamUpRotate
+            [vector]="vector"></team-up-vector>
+        </ng-container>
+        <team-up-panels></team-up-panels>
+        <team-up-nodes />
+      }
     </ng-container>
   </div>
-  <team-up-follow-user></team-up-follow-user>
-  <team-up-stop-highlight></team-up-stop-highlight>
+  @defer {
+    <team-up-follow-user></team-up-follow-user>
+    <team-up-stop-highlight></team-up-stop-highlight>
+    <team-up-context-menu />
+    <team-up-board-context-menu />
+  }
 </div>
 
 <div

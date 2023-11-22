@@ -1,11 +1,9 @@
 import { z } from 'zod';
+import { CommonBoardValidation } from './common-board-validation';
 
 const panel = z.object({
+  ...CommonBoardValidation,
   title: z.string().max(1000),
-  position: z.object({
-    x: z.number().safe(),
-    y: z.number().safe(),
-  }),
   width: z.number().nonnegative().safe(),
   height: z.number().nonnegative().safe(),
   color: z.string().length(7).regex(/^#/).nullable(),

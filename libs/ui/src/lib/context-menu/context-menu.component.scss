@@ -1,0 +1,35 @@
+:host {
+  display: contents;
+}
+
+.menu {
+  border-radius: var(--radius-2);
+  padding: var(--size-2);
+  inline-size: 300px;
+  background-color: #fff;
+  position: absolute;
+  z-index: 100;
+  display: none;
+  &.open {
+    display: block;
+  }
+}
+
+.item {
+  align-items: center;
+  display: flex;
+  gap: var(--size-2);
+  border-radius: var(--radius-1);
+  padding-inline: var(--size-1);
+  padding-block: var(--size-2);
+  inline-size: 100%;;
+
+  .help {
+    color: var(--gray-5);
+    margin-inline-start: auto;
+  }
+
+  &:hover {
+    background-color: var(--gray-2);
+  }
+}

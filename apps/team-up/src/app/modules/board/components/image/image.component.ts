@@ -71,7 +71,11 @@ export class ImageComponent implements OnInit, Draggable, Resizable, Rotatable {
   }
 
   @HostBinding('class') get mode() {
-    return this.state.get('mode');
+    return (
+      this.state.get('mode') +
+      ' ' +
+      `layer-${this.state.get('image').content.layer}`
+    );
   }
 
   @HostBinding('class.focus') get focus() {

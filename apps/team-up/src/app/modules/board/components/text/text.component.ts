@@ -52,6 +52,10 @@ export class TextComponent
     this.state.set({ node });
   }
 
+  @HostBinding('class') get layer() {
+    return `layer-${this.state.get('node').content.layer}`;
+  }
+
   @HostBinding('style.width.px') get width() {
     return this.state.get('node')?.content.width ?? '0';
   }

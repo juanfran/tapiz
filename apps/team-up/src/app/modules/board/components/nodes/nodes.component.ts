@@ -29,9 +29,15 @@ export class NodesComponent {
     map((it) => {
       return it.filter(
         (it) =>
-          !['note', 'image', 'group', 'panel', 'vector', 'user'].includes(
-            it.type,
-          ),
+          ![
+            'note',
+            'image',
+            'group',
+            'panel',
+            'vector',
+            'text',
+            'user',
+          ].includes(it.type),
       );
     }),
   );

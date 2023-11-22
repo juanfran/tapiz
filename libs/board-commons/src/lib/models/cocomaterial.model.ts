@@ -34,6 +34,7 @@ export interface Vector {
   width: number;
   height: number;
   position: Point;
+  layer: number;
   rotation: number;
 }
 

@@ -28,7 +28,8 @@
       "@team-up/board-commons/*": ["libs/board-commons/src/lib/*"],
       "@team-up/cdk/*": ["libs/cdk/src/lib/*"],
       "@team-up/nodes/*": ["libs/nodes/src/lib/*"],
-      "@team-up/sync-node-box": ["libs/sync-node-box/src/index.ts"]
+      "@team-up/sync-node-box": ["libs/sync-node-box/src/index.ts"],
+      "@team-up/ui/*": ["libs/ui/src/lib/*"],
     }
   },
   "exclude": ["node_modules", "tmp"]

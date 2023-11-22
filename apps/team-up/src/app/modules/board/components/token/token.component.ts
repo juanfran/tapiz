@@ -21,7 +21,6 @@ import { BoardActions } from '../../actions/board.actions';
 import { HistoryService } from '@/app/services/history.service';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '@team-up/cdk/models/draggable.model';
-
 @Component({
   selector: 'team-up-token',
   styleUrls: ['./token.component.scss'],

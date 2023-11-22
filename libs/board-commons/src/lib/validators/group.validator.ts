@@ -1,11 +1,9 @@
 import { z } from 'zod';
+import { CommonBoardValidation } from './common-board-validation';
 
 const group = z.object({
+  ...CommonBoardValidation,
   title: z.string().max(1000),
-  position: z.object({
-    x: z.number().safe(),
-    y: z.number().safe(),
-  }),
   votes: z.array(
     z.object({
       userId: z.string().max(255),

@@ -1,14 +1,12 @@
 import { z } from 'zod';
 import { NodeValidator } from '../models/node.model';
+import { CommonBoardValidation } from './common-board-validation';
 
 const token = z.object({
+  ...CommonBoardValidation,
   color: z.string().length(7).regex(/^#/).nullable(),
   backgroundColor: z.string().length(7).regex(/^#/).nullable(),
   text: z.string().max(1000),
-  position: z.object({
-    x: z.number().safe(),
-    y: z.number().safe(),
-  }),
 });
 
 export const PERSONAL_TOKEN_VALIDATOR: NodeValidator = {

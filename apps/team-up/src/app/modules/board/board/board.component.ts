@@ -9,6 +9,7 @@ import {
   HostBinding,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { rxEffect } from 'ngxtension/rx-effect';
 import { animationFrameScheduler, fromEvent, merge, Subject, zip } from 'rxjs';
 import {
   map,
@@ -17,6 +18,7 @@ import {
   first,
   take,
   throttleTime,
+  pairwise,
 } from 'rxjs/operators';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
@@ -35,6 +37,7 @@ import {
   selectDrawing,
   selectSearching,
   selectDragEnabled,
+  selectLayer,
 } from '../selectors/page.selectors';
 
 import { BoardMoveService } from '../services/board-move.service';
@@ -80,6 +83,9 @@ import { StopHighlightComponent } from '@/app/shared/stop-highlight/stop-highlig
 import { NodesComponent } from '../components/nodes/nodes.component';
 import { BoardFacade } from '@/app/services/board-facade.service';
 import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
+import { ContextMenuComponent } from '@team-up/ui/context-menu/context-menu.component';
+import { ContextMenuStore } from '@team-up/ui/context-menu/context-menu.store';
+import { BoardContextMenuComponent } from '../components/board-context-menu/board-contextmenu.component';
 
 @UntilDestroy()
 @Component({
@@ -114,6 +120,8 @@ import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
     StopHighlightComponent,
     MatProgressBarModule,
     NodesComponent,
+    ContextMenuComponent,
+    BoardContextMenuComponent,
   ],
   hostDirectives: [CopyPasteDirective],
 })
@@ -144,6 +152,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly folloUser = this.store.selectSignal(pageFeature.selectFollow);
   public readonly loaded = this.store.selectSignal(pageFeature.selectLoaded);
   public readonly userId = this.store.selectSignal(selectUserId);
+  public readonly layer = this.store.selectSignal(selectLayer);
 
   @ViewChild('workLayer', { read: ElementRef }) public workLayer!: ElementRef;
 
@@ -178,17 +187,37 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   }
 
   constructor(
+    public el: ElementRef,
     private wsService: WsService,
     private store: Store,
     private boardZoomService: BoardZoomService,
     private boardMoveService: BoardMoveService,
-    private el: ElementRef,
     private route: ActivatedRoute,
     private notesService: NotesService,
     private actions: Actions,
     private boardFacade: BoardFacade,
     private multiDragService: MultiDragService,
+    private contextMenuStore: ContextMenuStore,
   ) {
+    rxEffect(
+      this.contextMenuStore.open$.pipe(
+        pairwise(),
+        filter(([prev, curr]) => prev !== curr),
+        map(([, curr]) => {
+          return curr;
+        }),
+      ),
+      {
+        next: (open) => {
+          this.store.dispatch(
+            PageActions.lockBoard({
+              lock: open,
+            }),
+          );
+        },
+      },
+    );
+
     this.multiDragService.setUp({
       dragEnabled: this.store.select(selectDragEnabled),
       zoom: this.store.select(selectZoom),
@@ -283,6 +312,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         if (canvasMode === 'editMode') {
           const note = this.notesService.getNew({
             ownerId: userId,
+            layer: this.layer(),
             position: {
               x: (-position.x + event.pageX) / zoom,
               y: (-position.y + event.pageY) / zoom,
@@ -434,6 +464,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
                             x: (-position.x + event.clientX) / zoom,
                             y: (-position.y + event.clientY) / zoom,
                           },
+                          layer: this.layer(),
                           rotation: 0,
                         },
                       },

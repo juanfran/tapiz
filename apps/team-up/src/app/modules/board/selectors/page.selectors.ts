@@ -47,3 +47,7 @@ export const isUserHighlighted = (userId: string) => {
     return id === userId;
   });
 };
+
+export const selectLayer = createSelector(selectCanvasMode, (canvasMode) => {
+  return canvasMode === 'editMode' ? 0 : 1;
+});

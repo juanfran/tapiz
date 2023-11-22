@@ -1,17 +1,44 @@
 import { z } from 'zod';
 import { NodeValidator, EstimationResult } from '@team-up/board-commons';
+import { CommonBoardValidation } from '@team-up/board-commons/validators/common-board-validation';
+
+const estimationBoard = z.object({
+  ...CommonBoardValidation,
+});
 
 const ESTIMATION_VALIDATOR: NodeValidator = {
   add: (data) => {
+    const validation = estimationBoard.safeParse(data.content);
+
+    if (validation.success) {
+      return {
+        success: true,
+        data: {
+          ...data,
+          content: validation.data,
+        },
+      };
+    }
+
     return {
-      success: true,
-      data,
+      success: false,
     };
   },
   patch: (data) => {
+    const validation = estimationBoard.partial().safeParse(data.content);
+
+    if (validation.success) {
+      return {
+        success: true,
+        data: {
+          ...data,
+          content: validation.data,
+        },
+      };
+    }
+
     return {
-      success: true,
-      data,
+      success: false,
     };
   },
   remove: (data) => {

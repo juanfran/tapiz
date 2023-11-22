@@ -9,6 +9,7 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import {
   selectCanvasMode,
+  selectLayer,
   selectPopupOpen,
   selectPosition,
   selectUserId,
@@ -71,6 +72,7 @@ export class ToolbarComponent {
     url: new FormControl('', [Validators.required]),
   });
   public toolbarSubscription?: Subscription;
+  public readonly layer = this.store.selectSignal(selectLayer);
 
   constructor(
     public state: RxState<State>,
@@ -113,6 +115,7 @@ export class ToolbarComponent {
                     content: {
                       text: 'Text',
                       position: textPosition,
+                      layer: this.layer(),
                       width: 200,
                       height: 50,
                       color: '#000',
@@ -149,6 +152,7 @@ export class ToolbarComponent {
       .subscribe({
         next: ([event, zoom, position, userId]) => {
           const note = this.notesService.getNew({
+            layer: this.layer(),
             ownerId: userId,
             position: {
               x: (-position.x + event.pageX) / zoom,
@@ -306,6 +310,7 @@ export class ToolbarComponent {
                     type: 'estimation',
                     id: v4(),
                     content: {
+                      layer: this.layer(),
                       position: {
                         x: (-position.x + event.pageX) / zoom,
                         y: (-position.y + event.pageY) / zoom,
@@ -345,6 +350,7 @@ export class ToolbarComponent {
                     id: v4(),
                     content: {
                       ...token,
+                      layer: this.layer(),
                       position: {
                         x: (-position.x + event.pageX) / zoom - 50,
                         y: (-position.y + event.pageY) / zoom - 50,
@@ -386,6 +392,7 @@ export class ToolbarComponent {
                     id: v4(),
                     content: {
                       url,
+                      layer: this.layer(),
                       position: {
                         x: -position.x / zoom,
                         y: -position.y / zoom,

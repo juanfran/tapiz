@@ -390,6 +390,21 @@ const reducer = createReducer(
       isPublic,
     };
   }),
+  on(PageActions.lockBoard, (state, { lock }): PageState => {
+    if (lock) {
+      return {
+        ...state,
+        moveEnabled: false,
+        dragEnabled: false,
+      };
+    }
+
+    return {
+      ...state,
+      moveEnabled: true,
+      dragEnabled: true,
+    };
+  }),
 );
 
 export const pageFeature = createFeature({

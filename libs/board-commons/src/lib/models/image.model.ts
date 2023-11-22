@@ -6,6 +6,7 @@ export interface Image {
   width: number;
   height: number;
   position: Point;
+  layer: number;
   rotation: number;
 }
 
