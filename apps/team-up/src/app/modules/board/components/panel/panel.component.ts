@@ -53,6 +53,10 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
     this.setCssVariables();
   }
 
+  @HostBinding('class') get layer() {
+    return `layer-${this.state.get('panel').content.layer}`;
+  }
+
   @HostBinding('style.width.px') get width() {
     return this.state.get('panel')?.content.width ?? '0';
   }

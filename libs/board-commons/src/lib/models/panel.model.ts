@@ -4,6 +4,7 @@ import { Point } from './point.model';
 export interface Panel {
   title: string;
   position: Point;
+  layer: number;
   width: number;
   height: number;
   color?: string;

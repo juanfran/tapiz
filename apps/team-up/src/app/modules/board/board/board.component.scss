@@ -63,12 +63,20 @@ team-up-header {
 .edit-mode {
   ::ng-deep .layer-1 {
     pointer-events: none;
+
+    .hide-non-active-layer {
+      display: none;
+    }
   }
 }
 
 .compose-mode {
   ::ng-deep  .layer-0 {
     pointer-events: none;
+
+    .hide-non-active-layer {
+      display: none;
+    }
   }
 }
 

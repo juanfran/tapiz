@@ -3,13 +3,12 @@
     {{ vm.panel.content.title }}
 
     <button
-      *ngIf="vm.mode === 'composeMode'"
       (click)="openSettings()"
       type="button"
       title="Settings"
       mat-fab
       aria-label="Settings"
-      class="settings">
+      class="settings hide-non-active-layer">
       <mat-icon>settings</mat-icon>
     </button>
   </ng-container>
