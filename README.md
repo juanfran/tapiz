@@ -29,7 +29,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] D&D cocomaterial on add
 - [ ] Search boards
 - [ ] Empty boards placeholder
-- [ ] Image & Vector can also be used in compose mode
 - [ ] Bookmarks
 - [ ] Performance not render not visible nodes
 - [ ] Select note color & format text
@@ -41,7 +40,6 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Usernames or display name (use email as id mention using display name)
 - [ ] Standalone nodes
 - [ ] Comments
-- [ ] Aligment scale
 
 ## TODO, code refactor
 
