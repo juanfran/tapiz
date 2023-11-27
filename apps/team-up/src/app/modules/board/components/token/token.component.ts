@@ -7,12 +7,11 @@ import {
   OnInit,
   inject,
   ElementRef,
-  HostBinding,
   HostListener,
   ViewChild,
-  OnChanges,
-  SimpleChanges,
   signal,
+  Signal,
+  Injector,
 } from '@angular/core';
 import { Token, TuNode } from '@team-up/board-commons';
 import { DynamicComponent } from '../node/dynamic-component';
@@ -21,6 +20,8 @@ import { BoardActions } from '../../actions/board.actions';
 import { HistoryService } from '@/app/services/history.service';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '@team-up/cdk/models/draggable.model';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 @Component({
   selector: 'team-up-token',
   styleUrls: ['./token.component.scss'],
@@ -28,7 +29,7 @@ import { Draggable } from '@team-up/cdk/models/draggable.model';
     <div
       class="text"
       *ngIf="!edit()">
-      {{ node.content.text }}
+      {{ node().content.text }}
     </div>
     <!-- prettier-ignore -->
     <div
@@ -43,10 +44,11 @@ import { Draggable } from '@team-up/cdk/models/draggable.model';
   standalone: true,
   imports: [CommonModule, BoardDragDirective],
   hostDirectives: [BoardDragDirective],
+  host: {
+    '[class.focus]': 'focus()',
+  },
 })
-export class TokenComponent
-  implements OnInit, OnChanges, DynamicComponent, Draggable
-{
+export class TokenComponent implements OnInit, DynamicComponent, Draggable {
   @ViewChild('contenteditable') set contenteditable(
     el: ElementRef | undefined,
   ) {
@@ -59,28 +61,25 @@ export class TokenComponent
   private store = inject(Store);
   private historyService = inject(HistoryService);
   private boardDragDirective = inject(BoardDragDirective);
+  private injector = inject(Injector);
 
   @Input({ required: true })
-  public node!: TuNode<Token>;
+  public node!: Signal<TuNode<Token>>;
 
   @Input()
-  public pasted!: boolean;
+  public pasted!: Signal<boolean>;
 
-  @HostBinding('class.focus')
   @Input()
-  public focus!: boolean;
-
-  @Input({ required: true })
-  public userId!: string;
+  public focus!: Signal<boolean>;
 
   @HostListener('dblclick', ['$event'])
   public mousedown(event: MouseEvent) {
     if (!this.edit()) {
       event.preventDefault();
       event.stopPropagation();
-      this.editableText = this.node.content.text;
+      this.editableText = this.node().content.text;
       this.edit.set(true);
-      this.historyService.initEdit(this.node);
+      this.historyService.initEdit(this.node());
     }
   }
 
@@ -92,12 +91,23 @@ export class TokenComponent
   }
 
   public ngOnInit() {
+    toObservable(this.focus, {
+      injector: this.injector,
+    })
+      .pipe(filter((it) => !it))
+      .subscribe(() => {
+        this.cancelEdit();
+      });
+
     this.boardDragDirective.setHost(this);
 
-    this.el.nativeElement.style.setProperty('--color', this.node.content.color);
+    this.el.nativeElement.style.setProperty(
+      '--color',
+      this.node().content.color,
+    );
     this.el.nativeElement.style.setProperty(
       '--bg',
-      this.node.content.backgroundColor,
+      this.node().content.backgroundColor,
     );
   }
 
@@ -110,15 +120,15 @@ export class TokenComponent
   }
 
   public get id() {
-    return this.node.id;
+    return this.node().id;
   }
 
   public get nodeType() {
-    return this.node.type;
+    return this.node().type;
   }
 
   public get position() {
-    return this.node.content.position;
+    return this.node().content.position;
   }
 
   public enter(event: Event) {
@@ -129,7 +139,7 @@ export class TokenComponent
 
   public cancelEdit() {
     if (this.edit()) {
-      this.historyService.finishEdit(this.node);
+      this.historyService.finishEdit(this.node());
       this.edit.set(false);
     }
   }
@@ -144,7 +154,7 @@ export class TokenComponent
           {
             data: {
               type: 'token',
-              id: this.node.id,
+              id: this.node().id,
               content: {
                 text,
               },
@@ -158,11 +168,5 @@ export class TokenComponent
 
   public preventDelete() {
     return this.edit();
-  }
-
-  public ngOnChanges(changes: SimpleChanges): void {
-    if (changes['focus'] && !this.focus) {
-      this.cancelEdit();
-    }
   }
 }

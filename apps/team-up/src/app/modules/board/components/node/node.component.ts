@@ -13,6 +13,7 @@ import {
   HostListener,
   ComponentRef,
   HostBinding,
+  signal,
 } from '@angular/core';
 import { RxState } from '@rx-angular/state';
 import { Point, TuNode } from '@team-up/board-commons';
@@ -96,14 +97,6 @@ export class NodeComponent implements OnInit {
         .pipe(map((it) => it.includes(this.state.get('node').id))),
     );
 
-    this.state.hold(this.state.select('focus'), (focus) => {
-      this.cmp?.setInput('focus', focus);
-    });
-
-    this.state.hold(this.state.select('node'), (focus) => {
-      this.cmp?.setInput('node', focus);
-    });
-
     this.hotkeysService.listen({ key: 'Delete' }).subscribe(() => {
       this.onDeletePress();
     });
@@ -141,11 +134,11 @@ export class NodeComponent implements OnInit {
       .select(pageFeature.selectAdditionalContext)
       .pipe(take(1))
       .subscribe((context) => {
-        const pasted = context[this.state.get('node').id] === 'pasted';
+        const pasted = signal(context[this.state.get('node').id] === 'pasted');
         this.cmp = this.nodeHost.createComponent(component);
 
-        this.cmp.setInput('node', this.state.get('node'));
-        this.cmp.setInput('focus', this.state.get('focus'));
+        this.cmp.setInput('node', this.state.signal('node'));
+        this.cmp.setInput('focus', this.state.signal('focus'));
 
         this.cmp.setInput('pasted', pasted);
         const zIndex = (this.cmp.instance as { zIndex?: number })?.zIndex ?? 1;

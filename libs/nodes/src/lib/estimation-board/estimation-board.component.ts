@@ -4,8 +4,12 @@ import {
   Component,
   DestroyRef,
   ElementRef,
+  Injector,
   Input,
+  OnInit,
+  Signal,
   ViewChild,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -20,6 +24,7 @@ import { EstimationComponent } from '../estimation/estimation.component';
 import * as R from 'remeda';
 import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
 import { NodesStore } from '../services/nodes.store';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'team-up-estimation-board',
@@ -33,7 +38,7 @@ import { NodesStore } from '../services/nodes.store';
     </div>
     <ng-container *ngIf="parentId()">
       <team-up-estimation
-        [class.focus]="focus"
+        [class.focus]="focus()"
         [nodes]="estimation()"
         [userId]="nodesStore.userId()"
         [parentId]="parentId()"></team-up-estimation>
@@ -42,23 +47,15 @@ import { NodesStore } from '../services/nodes.store';
   styleUrls: ['./estimation-board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EstimationBoardComponent implements AfterViewInit {
+export class EstimationBoardComponent implements AfterViewInit, OnInit {
   @Input({ required: true })
-  public set node(node: TuNode<EstimationBoard, 'estimation'>) {
-    this.estimationNode = node;
-    const children = (node.children as EstimationNodes[]) ?? [];
+  public node!: Signal<TuNode<EstimationBoard, 'estimation'>>;
 
-    if (!R.equals(children, this.estimation())) {
-      this.estimation.set((node.children as EstimationNodes[]) ?? []);
-    }
-    this.parentId.set(node.id);
-  }
+  @Input()
+  public pasted!: Signal<boolean>;
 
-  @Input({ required: true })
-  public focus = false;
-
-  @Input({ required: true })
-  public pasted = false;
+  @Input()
+  public focus!: Signal<boolean>;
 
   @ViewChild('drag')
   public drag!: ElementRef<HTMLButtonElement>;
@@ -66,30 +63,44 @@ export class EstimationBoardComponent implements AfterViewInit {
   private el = inject(ElementRef<HTMLElement>);
   private multiDragService = inject(MultiDragService);
   private destroyRef = inject(DestroyRef);
+  private injector = inject(Injector);
 
   public nodesStore = inject(NodesStore);
   public estimation = signal<EstimationNodes[]>([]);
-  public parentId = signal<string>('');
-  public estimationNode!: TuNode<EstimationBoard, 'estimation'>;
+  public parentId = computed(() => {
+    return this.node().id;
+  });
+
+  public ngOnInit() {
+    toObservable(this.node, {
+      injector: this.injector,
+    }).subscribe((node) => {
+      const children = (node.children as EstimationNodes[]) ?? [];
+
+      if (!R.equals(children, this.estimation())) {
+        this.estimation.set((node.children as EstimationNodes[]) ?? []);
+      }
+    });
+  }
 
   public get nativeElement() {
     return this.el.nativeElement;
   }
 
   public get preventDrag() {
-    return !this.focus;
+    return !this.focus();
   }
 
   public get id() {
-    return this.estimationNode.id;
+    return this.node().id;
   }
 
   public get nodeType() {
-    return this.estimationNode.type;
+    return this.node().type;
   }
 
   public get position() {
-    return this.estimationNode.content.position;
+    return this.node().content.position;
   }
 
   public get handler() {
