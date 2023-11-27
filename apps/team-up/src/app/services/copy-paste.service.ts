@@ -48,6 +48,15 @@ export class CopyPasteService {
             y: (it.content.position as Point).y + (options?.incY ?? 0),
           };
         }
+
+        if (it.children) {
+          it.children = it.children.map((child) => {
+            return {
+              ...child,
+              id: v4(),
+            };
+          });
+        }
       }
 
       return {
