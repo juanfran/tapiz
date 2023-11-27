@@ -33,6 +33,7 @@ import { NodesStore } from '../services/nodes.store';
     </div>
     <ng-container *ngIf="parentId()">
       <team-up-estimation
+        [class.focus]="focus"
         [nodes]="estimation()"
         [userId]="nodesStore.userId()"
         [parentId]="parentId()"></team-up-estimation>
