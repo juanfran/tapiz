@@ -19,6 +19,8 @@ export * from './models/token.model';
 export * from './models/estimation.model';
 export * from './models/invitation.model';
 export * from './models/sort-board.model';
+export * from './models/resizable.model';
+export * from './models/rotatable.model';
 export * from './state-tools';
 export * from './board-common-actions';
 export * from './validators/index';

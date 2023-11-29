@@ -39,6 +39,7 @@ import { RxLet } from '@rx-angular/template/let';
 import { MatIconModule } from '@angular/material/icon';
 import { TokenSelectorComponent } from '../token-selector/token-selector.component';
 import { Token } from '@team-up/board-commons/models/token.model';
+import { Text } from '@team-up/board-commons';
 
 interface State {
   popupOpen: string;
@@ -104,6 +105,17 @@ export class ToolbarComponent {
             y: (-position.y + event.pageY) / zoom,
           };
 
+          const text: Text = {
+            text: 'Text',
+            position: textPosition,
+            layer: this.layer(),
+            width: 200,
+            height: 50,
+            color: '#000',
+            size: 32,
+            rotation: 0,
+          };
+
           this.store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
@@ -112,15 +124,7 @@ export class ToolbarComponent {
                   data: {
                     type: 'text',
                     id: v4(),
-                    content: {
-                      text: 'Text',
-                      position: textPosition,
-                      layer: this.layer(),
-                      width: 200,
-                      height: 50,
-                      color: '#000',
-                      size: 32,
-                    },
+                    content: text,
                   },
                   op: 'add',
                 },

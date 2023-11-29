@@ -19,15 +19,13 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '@team-up/cdk/models/draggable.model';
-import { Group, TuNode } from '@team-up/board-commons';
+import { Group, TuNode, Resizable } from '@team-up/board-commons';
 import { BoardMoveService } from '../../services/board-move.service';
 import { selectFocusId } from '../../selectors/page.selectors';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { pageFeature } from '../../reducers/page.reducer';
-import { Resizable } from '../../models/resizable.model';
-import { ResizableDirective } from '../../directives/resize.directive';
-import { ResizeHandlerDirective } from '../../directives/resize-handler.directive';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
+import { ResizeHandlerSingleComponent } from '@team-up/ui/resize';
 
 interface State {
   edit: boolean;
@@ -47,7 +45,7 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState, HotkeysService],
   standalone: true,
-  imports: [NgIf, AsyncPipe, ResizeHandlerDirective],
+  imports: [NgIf, AsyncPipe, ResizeHandlerSingleComponent],
 })
 export class GroupComponent
   implements AfterViewInit, OnInit, Draggable, Resizable
@@ -100,7 +98,6 @@ export class GroupComponent
     private state: RxState<State>,
     private store: Store,
     private boardDragDirective: BoardDragDirective,
-    private resizableDirective: ResizableDirective,
     private cd: ChangeDetectorRef,
     private hotkeysService: HotkeysService,
   ) {
@@ -291,7 +288,6 @@ export class GroupComponent
       });
 
     this.boardDragDirective.setHost(this);
-    this.resizableDirective.setHost(this);
 
     this.state
       .select('group')

@@ -1,14 +1,16 @@
-import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Injectable } from '@angular/core';
 import { TuNode } from '@team-up/board-commons';
-import { PageActions } from '../modules/board/actions/page.actions';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HistoryService {
-  private store = inject(Store);
+  private eventSubject: Subject<{ prev: TuNode; curr: TuNode }> = new Subject();
+
   public editingNodes = new Map<string, TuNode>();
+
+  public event$ = this.eventSubject.asObservable();
 
   public initEdit(node: TuNode) {
     this.editingNodes.set(node.id, node);
@@ -33,18 +35,16 @@ export class HistoryService {
       });
 
       if (Object.keys(diffCurr).length) {
-        this.store.dispatch(
-          PageActions.nodeSnapshot({
-            prev: {
-              ...previousState,
-              content: diffPrev,
-            },
-            curr: {
-              ...node,
-              content: diffCurr,
-            },
-          }),
-        );
+        this.eventSubject.next({
+          prev: {
+            ...previousState,
+            content: diffPrev,
+          },
+          curr: {
+            ...node,
+            content: diffCurr,
+          },
+        });
       }
     }
   }

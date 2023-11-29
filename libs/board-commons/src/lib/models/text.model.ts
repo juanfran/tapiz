@@ -9,6 +9,7 @@ export interface Text {
   layer: number;
   width: number;
   height: number;
+  rotation: number;
 }
 
 export function isText(node: TuNode): node is TuNode<Text> {

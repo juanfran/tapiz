@@ -8,6 +8,7 @@ const text = z.object({
   height: z.number().nonnegative().safe(),
   color: z.string().min(4).max(7),
   size: z.number().positive().safe(),
+  rotation: z.number().safe(),
 });
 
 export const patchText = text.partial();

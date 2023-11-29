@@ -1,14 +1,3 @@
-.draggable-icon {
-  border-bottom: solid 1px #ccc;
-  border-right: solid 1px #ccc;
-  bottom: -0.5rem;
-  display: none;
-  height: 5px;
-  position: absolute;
-  right: -0.5rem;
-  width: 5px;
-}
-
 :host {
   --backgroundColor: var(--white);
   --fontColor: var(--black);
@@ -57,14 +46,6 @@
   white-space: pre-wrap;
 }
 
-.resize {
-  bottom: -25px;
-  cursor: se-resize;
-  height: 50px;
-  position: absolute;
-  right: -25px;
-  width: 50px;
-}
 
 .settings {
   color: currentColor;
