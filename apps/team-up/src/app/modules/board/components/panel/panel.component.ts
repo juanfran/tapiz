@@ -23,12 +23,10 @@ import {
 } from '../../selectors/page.selectors';
 import { NgIf, AsyncPipe } from '@angular/common';
 import { pageFeature } from '../../reducers/page.reducer';
-import { Resizable } from '../../models/resizable.model';
-import { ResizeHandlerDirective } from '../../directives/resize-handler.directive';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
-import { ResizableDirective } from '../../directives/resize.directive';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
+import { ResizeHandlerSingleComponent } from '@team-up/ui/resize';
 
 interface State {
   panel: TuNode<Panel>;
@@ -44,9 +42,9 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState, HotkeysService],
   standalone: true,
-  imports: [NgIf, AsyncPipe, MatIconModule, ResizeHandlerDirective],
+  imports: [NgIf, AsyncPipe, MatIconModule, ResizeHandlerSingleComponent],
 })
-export class PanelComponent implements OnInit, Draggable, Resizable {
+export class PanelComponent implements OnInit, Draggable {
   @Input()
   public set panel(panel: TuNode<Panel>) {
     this.state.set({ panel });
@@ -82,7 +80,6 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
     private state: RxState<State>,
     private store: Store,
     private boardDragDirective: BoardDragDirective,
-    private resizableDirective: ResizableDirective,
     private cd: ChangeDetectorRef,
     private dialog: MatDialog,
     private hotkeysService: HotkeysService,
@@ -129,7 +126,6 @@ export class PanelComponent implements OnInit, Draggable, Resizable {
       });
 
     this.boardDragDirective.setHost(this);
-    this.resizableDirective.setHost(this);
 
     this.state
       .select('panel')

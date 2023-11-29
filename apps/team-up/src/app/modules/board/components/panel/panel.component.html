@@ -1,5 +1,5 @@
-<div class="title">
-  <ng-container *ngIf="viewModel$ | async as vm">
+<ng-container *ngIf="viewModel$ | async as vm">
+  <div class="title">
     {{ vm.panel.content.title }}
 
     <button
@@ -11,7 +11,6 @@
       class="settings hide-non-active-layer">
       <mat-icon>settings</mat-icon>
     </button>
-  </ng-container>
-</div>
-<div teamUpResizeHandler></div>
-<div class="draggable-icon"></div>
+  </div>
+  <team-up-resize-single [node]="vm.panel" />
+</ng-container>

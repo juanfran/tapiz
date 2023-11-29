@@ -54,7 +54,7 @@ import { concatLatestFrom } from '@ngrx/effects';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 import { DrawingDirective } from '../../directives/drawing.directive';
 import { pageFeature } from '../../reducers/page.reducer';
-import { HistoryService } from '@/app/services/history.service';
+import { HistoryService } from '@team-up/nodes/services/history.service';
 import { BoardFacade } from '@/app/services/board-facade.service';
 import { filterNil } from '@/app/commons/operators/filter-nil';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';

@@ -25,10 +25,25 @@ import { PageActions } from '../../actions/page.actions';
 import { pageFeature } from '../../reducers/page.reducer';
 import { DynamicComponent } from './dynamic-component';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
+import { filterNil } from 'ngxtension/filter-nil';
+import { compose, rotateDEG, translate, toCSS } from 'transformation-matrix';
 
 interface State {
-  position: Point;
-  node: TuNode<{ position: Point; layer: number }>;
+  position: {
+    point: Point;
+    rotation: number;
+  };
+  size: {
+    width: number;
+    height: number;
+  };
+  node: TuNode<{
+    position: Point;
+    layer: number;
+    rotation?: number;
+    width?: number;
+    height?: number;
+  }>;
   focus: boolean;
 }
 
@@ -79,16 +94,7 @@ export class NodeComponent implements OnInit {
       this.loadComponent(node.component as Type<DynamicComponent>);
     });
 
-    this.state.hold(this.state.select('node'), (node) => {
-      this.state.set({ position: node.content.position });
-    });
-
-    this.state.hold(
-      this.state.select('position').pipe(distinctUntilChanged()),
-      (position) => {
-        this.nativeElement.style.transform = `translate(${position.x}px, ${position.y}px)`;
-      },
-    );
+    this.positionState();
 
     this.state.connect(
       'focus',
@@ -100,6 +106,59 @@ export class NodeComponent implements OnInit {
     this.hotkeysService.listen({ key: 'Delete' }).subscribe(() => {
       this.onDeletePress();
     });
+  }
+
+  private positionState() {
+    this.state.hold(this.state.select('node'), (node) => {
+      const content = node.content;
+
+      this.state.set({
+        position: {
+          point: content.position,
+          rotation: content?.rotation ?? 0,
+        },
+      });
+
+      if ('width' in node.content && 'height' in node.content) {
+        this.state.set({
+          size: {
+            width: node.content.width as number,
+            height: node.content.height as number,
+          },
+        });
+      }
+    });
+
+    this.state.hold(
+      this.state.select('position').pipe(
+        distinctUntilChanged((prev, cur) => {
+          return (
+            prev.point.x === cur.point.x &&
+            prev.point.y === cur.point.y &&
+            prev.rotation === cur.rotation
+          );
+        }),
+        filterNil(),
+      ),
+      ({ point, rotation }) => {
+        this.nativeElement.style.transform = toCSS(
+          compose(translate(point.x, point.y), rotateDEG(rotation)),
+        );
+      },
+    );
+
+    this.state.hold(
+      this.state.select('size').pipe(
+        distinctUntilChanged(
+          (prev, cur) => prev.width === cur.width && prev.height === cur.height,
+        ),
+        filterNil(),
+      ),
+      (size) => {
+        this.nativeElement.style.width = `${size.width}px`;
+        this.nativeElement.style.height = `${size.height}px`;
+      },
+    );
   }
 
   private onDeletePress() {

@@ -7,6 +7,7 @@ import {
   HostListener,
   OnDestroy,
   HostBinding,
+  inject,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { rxEffect } from 'ngxtension/rx-effect';
@@ -47,10 +48,7 @@ import { NotesService } from '../services/notes.service';
 import { WsService } from '@/app/modules/ws/services/ws.service';
 import { v4 } from 'uuid';
 import { PanelsComponent } from '../components/panels/panel.component';
-import { VectorComponent } from '../components/vector/vector.component';
-import { TextComponent } from '../components/text/text.component';
 import { GroupComponent } from '../components/group/group.component';
-import { ImageComponent } from '../components/image/image.component';
 import { BoardDragDirective } from '../directives/board-drag.directive';
 import { NoteComponent } from '../components/note/note.component';
 import { CursorsComponent } from '../components/cursors/cursors.component';
@@ -65,20 +63,11 @@ import { SearchOptionsComponent } from '../components/search-options/search-opti
 import { Actions, ofType } from '@ngrx/effects';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { TitleComponent } from '../../../shared/title/title.component';
-import { ResizableDirective } from '../directives/resize.directive';
 import { FollowUserComponent } from '@/app/shared/follow-user/follow-user.component';
-import {
-  Point,
-  isGroup,
-  isImage,
-  isNote,
-  isText,
-  isVector,
-} from '@team-up/board-commons';
+import { Point, StateActions, isGroup, isNote } from '@team-up/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
 import { appFeature } from '@/app/+state/app.reducer';
-import { RotateDirective } from '../directives/rotate.directive';
 import { StopHighlightComponent } from '@/app/shared/stop-highlight/stop-highlight';
 import { NodesComponent } from '../components/nodes/nodes.component';
 import { BoardFacade } from '@/app/services/board-facade.service';
@@ -86,6 +75,10 @@ import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
 import { ContextMenuComponent } from '@team-up/ui/context-menu/context-menu.component';
 import { ContextMenuStore } from '@team-up/ui/context-menu/context-menu.store';
 import { BoardContextMenuComponent } from '../components/board-context-menu/board-contextmenu.component';
+import { HistoryService } from '@team-up/nodes/services/history.service';
+import { MoveService } from '@team-up/cdk/services/move.service';
+import { ResizeService } from '@team-up/ui/resize/resize.service';
+import { RotateService } from '@team-up/ui/rotate/rotate.service';
 
 @UntilDestroy()
 @Component({
@@ -105,18 +98,13 @@ import { BoardContextMenuComponent } from '../components/board-context-menu/boar
     CursorsComponent,
     NoteComponent,
     BoardDragDirective,
-    ResizableDirective,
-    ImageComponent,
     GroupComponent,
-    TextComponent,
-    VectorComponent,
     PanelsComponent,
     DrawingOptionsComponent,
     SearchOptionsComponent,
     TitleComponent,
     FollowUserComponent,
     MatDialogModule,
-    RotateDirective,
     StopHighlightComponent,
     MatProgressBarModule,
     NodesComponent,
@@ -129,17 +117,10 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly boardId$ = this.store.select(selectBoardId);
   public readonly nodes$ = this.boardFacade.getNodes();
 
+  public readonly historyService = inject(HistoryService);
+
   public readonly notes$ = this.nodes$.pipe(
     map((nodes) => nodes.filter(isNote)),
-  );
-  public readonly images$ = this.nodes$.pipe(
-    map((nodes) => nodes.filter(isImage)),
-  );
-  public readonly vectors$ = this.nodes$.pipe(
-    map((nodes) => nodes.filter(isVector)),
-  );
-  public readonly texts$ = this.nodes$.pipe(
-    map((nodes) => nodes.filter(isText)),
   );
   public readonly groups$ = this.nodes$.pipe(
     map((nodes) => nodes.filter(isGroup)),
@@ -198,6 +179,9 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     private boardFacade: BoardFacade,
     private multiDragService: MultiDragService,
     private contextMenuStore: ContextMenuStore,
+    private moveService: MoveService,
+    private resizeService: ResizeService,
+    private rotateService: RotateService,
   ) {
     rxEffect(
       this.contextMenuStore.open$.pipe(
@@ -217,6 +201,73 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         },
       },
     );
+
+    this.historyService.event$.pipe(untilDestroyed(this)).subscribe((event) => {
+      this.store.dispatch(PageActions.nodeSnapshot(event));
+    });
+
+    this.rotateService.onStart$.pipe(untilDestroyed(this)).subscribe((node) => {
+      this.boardFacade.patchHistory((history) => {
+        const nodeAction: StateActions = {
+          data: node,
+          op: 'patch',
+        };
+        history.past.unshift([nodeAction]);
+        history.future = [];
+
+        return history;
+      });
+    });
+
+    this.rotateService.onRotate$
+      .pipe(untilDestroyed(this))
+      .subscribe((node) => {
+        this.store.dispatch(
+          BoardActions.batchNodeActions({
+            history: false,
+            actions: [
+              {
+                data: node,
+                op: 'patch',
+              },
+            ],
+          }),
+        );
+      });
+
+    this.resizeService.onStart$.pipe(untilDestroyed(this)).subscribe((node) => {
+      this.boardFacade.patchHistory((history) => {
+        const nodeAction: StateActions = {
+          data: node,
+          op: 'patch',
+        };
+        history.past.unshift([nodeAction]);
+        history.future = [];
+
+        return history;
+      });
+    });
+
+    this.resizeService.onResize$
+      .pipe(untilDestroyed(this))
+      .subscribe((node) => {
+        this.store.dispatch(
+          BoardActions.batchNodeActions({
+            history: false,
+            actions: [
+              {
+                data: node,
+                op: 'patch',
+              },
+            ],
+          }),
+        );
+      });
+
+    this.moveService.setUp({
+      zoom: this.store.select(selectZoom),
+      relativePosition: this.store.select(selectPosition),
+    });
 
     this.multiDragService.setUp({
       dragEnabled: this.store.select(selectDragEnabled),

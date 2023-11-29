@@ -1,5 +1,5 @@
-<div class="title">
-  <ng-container *ngIf="viewModel$ | async as vm">
+<ng-container *ngIf="viewModel$ | async as vm">
+  <div class="title">
     <ng-container *ngIf="vm.edit">
       <span
         #textarea
@@ -22,6 +22,7 @@
         {{ vm.votes }}
       </div>
     </ng-container>
-  </ng-container>
-</div>
-<div teamUpResizeHandler></div>
+  </div>
+
+  <team-up-resize-single [node]="vm.group" />
+</ng-container>

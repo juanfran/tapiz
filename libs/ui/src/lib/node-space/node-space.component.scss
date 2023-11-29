@@ -1,0 +1,25 @@
+:host {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.content {
+  inline-size: 100%;
+  block-size: 100%;
+  user-select: none;
+}
+
+.drag-outline {
+  cursor: grab;
+  outline: 3px dotted var(--primary-color);
+
+}
+
+.rotate-wrapper {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  bottom: -40px;
+  width: 100%;
+}

@@ -28,16 +28,7 @@ export class NodesComponent {
   public nodes$ = this.boardFacade.getNodes().pipe(
     map((it) => {
       return it.filter(
-        (it) =>
-          ![
-            'note',
-            'image',
-            'group',
-            'panel',
-            'vector',
-            'text',
-            'user',
-          ].includes(it.type),
+        (it) => !['note', 'group', 'panel', 'user'].includes(it.type),
       );
     }),
   );

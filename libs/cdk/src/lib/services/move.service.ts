@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { fromEvent, animationFrameScheduler } from 'rxjs';
+import { fromEvent, animationFrameScheduler, Observable } from 'rxjs';
 import {
   map,
   switchMap,
@@ -7,36 +7,36 @@ import {
   throttleTime,
   endWith,
   withLatestFrom,
-  scan,
+  tap,
 } from 'rxjs/operators';
-import { Store } from '@ngrx/store';
-import { selectPosition, selectZoom } from '../selectors/page.selectors';
-import { Resizable, ResizePosition } from '../models/resizable.model';
-import { filterNil } from '@/app/commons/operators/filter-nil';
-
+import type {
+  Resizable,
+  ResizePosition,
+  Point,
+  RotatableHost,
+} from '@team-up/board-commons';
 import {
   compose,
   decomposeTSR,
   rotate,
   rotateDEG,
   translate,
-  fromString,
 } from 'transformation-matrix';
-import { Rotatable } from '../models/rotatable.model';
 import { concatLatestFrom } from '@ngrx/effects';
-
-interface Move {
-  x: number;
-  y: number;
-  diffX: number;
-  diffY: number;
-}
+import { filterNil } from 'ngxtension/filter-nil';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MoveService {
-  constructor(private store: Store) {}
+  private setUpConfig?: {
+    zoom: Observable<number>;
+    relativePosition: Observable<Point>;
+  };
+
+  public setUp(setUpConfig: MoveService['setUpConfig']) {
+    this.setUpConfig = setUpConfig;
+  }
 
   public listenAreaSelector(el: HTMLElement) {
     const mouseDown$ = fromEvent<MouseEvent>(el, 'mousedown');
@@ -75,50 +75,60 @@ export class MoveService {
     position: ResizePosition,
     onStart: () => void,
   ) {
-    const mouseDown$ = fromEvent<MouseEvent>(el, 'mousedown');
+    const setUpConfig = this.setUpConfig;
+
+    if (!setUpConfig) {
+      throw new Error('MoveService.setUp() must be called before use');
+    }
+
+    const mouseDown$ = fromEvent<MouseEvent>(el, 'mousedown').pipe(
+      tap((event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }),
+      withLatestFrom(setUpConfig.zoom),
+      map(([mouseDown, zoom]) => {
+        return {
+          x: mouseDown.x / zoom,
+          y: mouseDown.y / zoom,
+        };
+      }),
+    );
 
     const mouseUp$ = fromEvent<MouseEvent>(window, 'mouseup');
 
     const mouseMove$ = fromEvent<MouseEvent>(window, 'mousemove').pipe(
       throttleTime(0, animationFrameScheduler),
-      map((mouseMove) => {
+      withLatestFrom(setUpConfig.zoom),
+      map(([mouseDown, zoom]) => {
         return {
-          x: mouseMove.clientX,
-          y: mouseMove.clientY,
+          x: mouseDown.x / zoom,
+          y: mouseDown.y / zoom,
         };
       }),
     );
 
     return mouseDown$.pipe(
-      switchMap(() => {
+      switchMap((event) => {
+        const initialPosition = {
+          x: event.x,
+          y: event.y,
+          hostX: host.position.x,
+          hostY: host.position.y,
+          width: host.width,
+          height: host.height,
+        };
+
         onStart();
 
         return mouseMove$.pipe(
           takeUntil(mouseUp$),
-          withLatestFrom(this.store.select(selectZoom)),
-          map(([mouseMoveEvent, zoom]) => {
+          map((mouseMove) => {
             return {
-              x: mouseMoveEvent.x / zoom,
-              y: mouseMoveEvent.y / zoom,
+              diffX: mouseMove.x - initialPosition.x,
+              diffY: mouseMove.y - initialPosition.y,
             };
           }),
-          scan((acc: Move | null, curr) => {
-            if (!acc) {
-              return {
-                x: curr.x,
-                y: curr.y,
-                diffX: 0,
-                diffY: 0,
-              } as Move;
-            }
-
-            return {
-              x: curr.x,
-              y: curr.y,
-              diffX: curr.x - acc.x,
-              diffY: curr.y - acc.y,
-            } as Move;
-          }, null),
           filterNil(),
           map((mouseMove) => {
             const rotation = host.rotation ?? 0;
@@ -132,11 +142,11 @@ export class MoveService {
                 mouseMove.diffX * Math.sin(angle),
             );
 
-            let newWidth = host.width;
-            let newHeight = host.height;
+            let newWidth = initialPosition.width;
+            let newHeight = initialPosition.height;
 
             let currentMatrix = compose(
-              translate(host.position.x, host.position.y),
+              translate(initialPosition.hostX, initialPosition.hostY),
               rotate(angle),
             );
 
@@ -179,12 +189,22 @@ export class MoveService {
     );
   }
 
-  public listenRotation(el: HTMLElement, host: Rotatable, onStart: () => void) {
+  public listenRotation(
+    el: HTMLElement,
+    host: RotatableHost,
+    onStart: () => void,
+  ) {
+    const setUpConfig = this.setUpConfig;
+
+    if (!setUpConfig) {
+      throw new Error('MoveService.setUp() must be called before use');
+    }
+
     const mouseUp$ = fromEvent<MouseEvent>(window, 'mouseup');
     const R2D = 180 / Math.PI;
 
     const mouseDown$ = fromEvent<MouseEvent>(el, 'mousedown').pipe(
-      concatLatestFrom(() => this.store.select(selectPosition)),
+      concatLatestFrom(() => setUpConfig.relativePosition),
     );
 
     const mouseMove$ = fromEvent<MouseEvent>(window, 'mousemove').pipe(
@@ -197,11 +217,11 @@ export class MoveService {
 
         return mouseMove$.pipe(
           takeUntil(mouseUp$),
-          concatLatestFrom(() => this.store.select(selectZoom)),
+          concatLatestFrom(() => setUpConfig.zoom),
           map(([mouseMove, zoom]) => {
             return {
-              x: mouseMove.pageX / zoom - userPosition.x / zoom,
-              y: mouseMove.pageY / zoom - userPosition.y / zoom,
+              x: mouseMove.x / zoom - userPosition.x / zoom,
+              y: mouseMove.y / zoom - userPosition.y / zoom,
             };
           }),
         );
@@ -212,7 +232,10 @@ export class MoveService {
           y: host.height / 2,
         };
 
-        let currentMatrix = fromString(host.nativeElement.style.transform);
+        let currentMatrix = compose(
+          translate(host.position.x, host.position.y),
+          rotateDEG(host.rotation),
+        );
 
         currentMatrix = compose(
           currentMatrix,
@@ -227,7 +250,6 @@ export class MoveService {
 
         const diffX = centerX - event.x;
         const diffY = event.y - centerY;
-
         const angle = Math.atan2(diffX, diffY) * R2D;
 
         currentMatrix = compose(

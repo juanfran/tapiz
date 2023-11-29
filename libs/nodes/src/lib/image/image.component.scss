@@ -1,0 +1,16 @@
+:host {
+  display: block;
+  position: absolute;
+  inline-size: 100%;
+  block-size: 100%;
+  z-index: 3;
+
+}
+
+img {
+  user-select: none;
+  display: block;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
