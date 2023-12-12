@@ -48,7 +48,7 @@ import {
   selectZoom,
 } from '../../selectors/page.selectors';
 import { Observable, combineLatest } from 'rxjs';
-import { lighter } from './contrast';
+import { lighter } from '@team-up/cdk/utils/colors';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 import { concatLatestFrom } from '@ngrx/effects';
 import { NgIf, NgFor, AsyncPipe } from '@angular/common';

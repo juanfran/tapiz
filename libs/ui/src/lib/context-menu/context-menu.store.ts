@@ -68,6 +68,26 @@ export class ContextMenuStore {
     const { element, items } = options;
 
     element.addEventListener('contextmenu', (event: Event) => {
+      if (!event.target) {
+        return;
+      }
+
+      const el = event.target as HTMLElement;
+
+      if (el.tagName.toUpperCase() !== 'team-up-board'.toUpperCase()) {
+        const isProsemirror = el.closest('.ProseMirror');
+
+        if (isProsemirror) {
+          return;
+        }
+
+        const inWorkLayer = el.closest('.work-layer');
+
+        if (!inWorkLayer) {
+          return;
+        }
+      }
+
       event.preventDefault();
       event.stopPropagation();
 

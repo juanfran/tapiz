@@ -107,7 +107,9 @@ export class BoardFacade {
     share(),
   );
 
-  public readonly selectFocusNodes = toSignal(this.selectFocusNodes$);
+  public readonly selectFocusNodes = toSignal(this.selectFocusNodes$, {
+    initialValue: [],
+  });
 
   public readonly selectNoteFocus$ = this.selectFocusNodes$.pipe(
     filterNil(),

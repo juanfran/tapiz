@@ -3,7 +3,6 @@ import {
   DestroyRef,
   ElementRef,
   Input,
-  ViewChild,
   afterNextRender,
   inject,
 } from '@angular/core';

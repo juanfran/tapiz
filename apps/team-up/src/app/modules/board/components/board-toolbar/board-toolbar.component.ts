@@ -46,9 +46,9 @@ interface State {
 }
 
 @Component({
-  selector: 'team-up-toolbar',
-  templateUrl: './toolbar.component.html',
-  styleUrls: ['./toolbar.component.scss'],
+  selector: 'team-up-board-toolbar',
+  templateUrl: './board-toolbar.component.html',
+  styleUrls: ['./board-toolbar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
   standalone: true,
@@ -66,7 +66,7 @@ interface State {
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class ToolbarComponent {
+export class BoardToolbarComponent {
   public readonly model$ = this.state.select();
   public canvasMode$ = this.store.select(selectCanvasMode);
   public imageForm = new FormGroup({
@@ -106,7 +106,7 @@ export class ToolbarComponent {
           };
 
           const text: Text = {
-            text: 'Text',
+            text: '<p>Text</p>',
             position: textPosition,
             layer: this.layer(),
             width: 200,

@@ -1,0 +1,31 @@
+.link-menu {
+  display: none;
+  background-color: var(--gray-12);
+  border-radius: var(--radius-2);
+  padding: var(--size-2) var(--size-4);
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 999;
+
+  a {
+    color: var(--gray-0);
+    max-inline-size: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-decoration: none;
+    font-weight: var(--font-weight-9);
+    display: block;
+    max-inline-size: 350px;
+    font-size: var(--font-size-0);
+  }
+
+  .arrow {
+    position: absolute;
+    background: var(--gray-12);
+    width: 8px;
+    height: 8px;
+    transform: rotate(45deg);
+  }
+}

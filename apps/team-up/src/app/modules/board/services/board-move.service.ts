@@ -35,6 +35,13 @@ export class BoardMoveService {
         if (targetElement.tagName.toLowerCase() === 'team-up-board') {
           e.preventDefault();
           e.stopPropagation();
+
+          if (document.activeElement) {
+            (document.activeElement as HTMLElement).blur();
+          }
+
+          workLayer.focus();
+
           return true;
         }
 

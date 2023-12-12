@@ -1,5 +1,5 @@
 import { Directive, ElementRef, Input, inject } from '@angular/core';
-import { contrast } from '../modules/board/components/note/contrast';
+import { contrast } from '@team-up/cdk/utils/colors';
 
 const colors = [
   '#FF7F7F',

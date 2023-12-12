@@ -4,46 +4,23 @@
   position: absolute;
   inline-size: 100%;
   block-size: 100%;
-  z-index: 3;
 
   &.toolbar {
     outline: 1px solid #000;
   }
-}
 
-.text {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-size: var(--size);
-  color: var(--color);
+  ::ng-deep {
+    .ProseMirror,
+    .text {
+      outline: none;
+
+      p {
+        margin-block-end: var(--size-1);
+      }
+    }
+  }
 }
 
 .readonly {
-  user-select: none;
-}
-
-.textarea {
-  background: transparent;
-  border: none;
-  height: 100%;
-  outline: none;
-  overflow: hidden;
-  resize: none;
-  width: 100%;
-}
-
-.toolbar {
-  align-items: center;
-  background: var(--primary-color-background);
-  border-radius: 8px;
-  padding: 10px;
-  display: flex;
-  height: 50px;
-  position: absolute;
-  top: -55px;
-
-  input {
-    user-select: none;
-    margin-right: 10px;
-  }
+  pointer-events: none;
 }

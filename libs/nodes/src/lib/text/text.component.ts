@@ -4,7 +4,6 @@ import {
   Input,
   ElementRef,
   OnInit,
-  ViewChild,
   HostBinding,
   HostListener,
   Signal,
@@ -12,7 +11,6 @@ import {
   effect,
   inject,
   Injector,
-  AfterViewInit,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
@@ -22,7 +20,10 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { BoardActions } from '@team-up/board-commons/actions/board.actions';
 import { HistoryService } from '../services/history.service';
 import { NodeSpaceComponent } from '@team-up/ui/node-space';
+import { ToolbarComponent } from '@team-up/ui/toolbar';
+import { EditorViewComponent } from '@team-up/ui/editor-view';
 import { filter, pairwise } from 'rxjs';
+import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
 
 @Component({
   selector: 'team-up-text',
@@ -32,41 +33,32 @@ import { filter, pairwise } from 'rxjs';
       [resize]="true"
       [rotate]="true"
       [enabled]="!edit() && focus()">
-      @if (edit()) {
-        <div class="toolbar">
-          <input
-            type="color"
-            [value]="node().content.color"
-            (change)="newColor($event)" />
-
-          <input
-            type="number"
-            [value]="node().content.size"
-            (change)="newSize($event)" />
-        </div>
-        <span
-          #textarea
-          class="textarea text"
-          role="textbox"
-          contenteditable
-          >{{ editText() }}</span
-        >
-      } @else {
-        <span class="readonly text">{{ editText() }}</span>
-      }
+      <team-up-editor-view
+        [class.readonly]="!edit()"
+        #editorView="editorView"
+        [id]="node().id"
+        [toolbar]="edit()"
+        [content]="node().content.text"
+        [focus]="edit()"
+        (contentChange)="newContent.set($event)" />
     </team-up-node-space>
   `,
   styleUrls: ['./text.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState, HotkeysService],
   standalone: true,
-  imports: [NodeSpaceComponent],
+  imports: [
+    NodeSpaceComponent,
+    ToolbarComponent,
+    EditorViewComponent,
+    SafeHtmlPipe,
+  ],
   host: {
     '[class.focus]': 'focus()',
     '[class.toolbar]': 'edit()',
   },
 })
-export class TextComponent implements OnInit, AfterViewInit {
+export class TextComponent implements OnInit {
   private injector = inject(Injector);
   private historyService = inject(HistoryService);
   private el = inject(ElementRef);
@@ -83,12 +75,11 @@ export class TextComponent implements OnInit, AfterViewInit {
 
   public edit = signal(false);
   public editText = signal('');
+  public newContent = signal('');
 
   @HostBinding('class') get layer() {
     return `layer-${this.node().content.layer}`;
   }
-
-  @ViewChild('textarea') textarea?: ElementRef<HTMLTextAreaElement>;
 
   public get zIndex() {
     return 2;
@@ -120,12 +111,7 @@ export class TextComponent implements OnInit, AfterViewInit {
   public startEdit() {
     this.historyService.initEdit(this.node());
     this.edit.set(true);
-  }
-
-  public focusTextarea() {
-    if (this.textarea?.nativeElement) {
-      (this.textarea.nativeElement as HTMLTextAreaElement).focus();
-    }
+    this.newContent.set(this.node().content.text);
   }
 
   public newColor(e: Event) {
@@ -193,9 +179,7 @@ export class TextComponent implements OnInit, AfterViewInit {
         filter(([prev, next]) => prev && !next),
       )
       .subscribe(() => {
-        if (!this.focus() && this.textarea) {
-          const value = this.textarea.nativeElement.innerText.trim();
-
+        if (!this.focus() && this.edit()) {
           this.store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
@@ -205,7 +189,7 @@ export class TextComponent implements OnInit, AfterViewInit {
                     type: 'text',
                     id: this.node().id,
                     content: {
-                      text: value,
+                      text: this.newContent(),
                     },
                   },
                   op: 'patch',
@@ -214,7 +198,6 @@ export class TextComponent implements OnInit, AfterViewInit {
             }),
           );
 
-          this.editText.set(value);
           this.cancelEdit();
         }
       });
@@ -228,12 +211,6 @@ export class TextComponent implements OnInit, AfterViewInit {
     if (this.edit()) {
       this.historyService.finishEdit(this.node());
       this.edit.set(false);
-    }
-  }
-
-  public ngAfterViewInit(): void {
-    if (this.focus()) {
-      this.focusTextarea();
     }
   }
 }
