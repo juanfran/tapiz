@@ -7,7 +7,7 @@
   @defer {
     <team-up-header></team-up-header>
     <team-up-users></team-up-users>
-    <team-up-toolbar></team-up-toolbar>
+    <team-up-board-toolbar />
     <team-up-drawing-options *ngIf="drawing()"></team-up-drawing-options>
     <team-up-search-options *ngIf="search()"></team-up-search-options>
   }
@@ -39,6 +39,7 @@
     <team-up-stop-highlight></team-up-stop-highlight>
     <team-up-context-menu />
     <team-up-board-context-menu />
+    <team-up-node-toolbar />
   }
 </div>
 

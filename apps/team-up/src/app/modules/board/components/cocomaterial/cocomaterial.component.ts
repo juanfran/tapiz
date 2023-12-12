@@ -22,9 +22,9 @@ import {
 import { map, startWith, take, withLatestFrom } from 'rxjs';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { PageActions } from '../../actions/page.actions';
-import { SafeHtmlPipe } from '../../pipes/safe-html/safe-html.pipe';
 import { SvgBackgroundDirective } from '../../directives/svg-background.directive';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
 import { BoardActions } from '../../actions/board.actions';
 import { MatDialogRef } from '@angular/material/dialog';
 import { v4 } from 'uuid';

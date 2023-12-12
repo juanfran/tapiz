@@ -5,7 +5,6 @@ import { BehaviorSubject } from 'rxjs';
 import { rxActions } from '@rx-angular/state/actions';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '@team-up/board-commons/actions/board.actions';
-import { ContextMenuStore } from '@team-up/ui/context-menu/context-menu.store';
 
 interface NodesState {
   users: User[];
@@ -26,8 +25,6 @@ export class NodesStore {
   // todo: find a better way to connect page state with nodes state, work for standalone nodes
   public users$ = new BehaviorSubject<User[]>([]);
   public userId$ = new BehaviorSubject('');
-
-  private contextMenuStore = inject(ContextMenuStore);
 
   actions = rxActions<{
     deleteNodes: { nodes: { id: string; type: string }[]; history?: boolean };
@@ -61,39 +58,6 @@ export class NodesStore {
       );
     });
   });
-
-  public preBuildContextMenu(options: { el: HTMLElement; node: () => TuNode }) {
-    this.contextMenuStore.config({
-      element: options.el,
-      items: () => {
-        return [
-          {
-            label: 'Copy',
-            icon: 'content_copy',
-            help: 'Ctrl + C',
-            action: () => {
-              this.actions.copyNodes({ nodes: [options.node()] });
-            },
-          },
-          {
-            label: 'Delete',
-            icon: 'delete',
-            help: 'Supr',
-            action: () => {
-              this.actions.deleteNodes({
-                nodes: [
-                  {
-                    id: options.node().id,
-                    type: options.node().type,
-                  },
-                ],
-              });
-            },
-          },
-        ];
-      },
-    });
-  }
 
   users = this.#state.signal('users');
   userId = this.#state.signal('userId');

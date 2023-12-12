@@ -1,0 +1,119 @@
+:host {
+  background-color: var(--gray-12);
+  border-radius: var(--radius-2);
+  display: flex;
+  padding-inline: var(--size-2);
+
+  button {
+    color: var(--gray-0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    block-size: 36px;
+  }
+
+  &.show {
+    &::ng-deep .menubar {
+      display: block;
+    }
+  }
+}
+
+.text {
+  display: none;
+}
+
+.active {
+  background-color: var(--brand);
+}
+
+.type-color {
+  label {
+    padding: var(--size-2);
+    block-size: 100%;
+    inline-size: 100%;
+    cursor: pointer;
+  }
+
+  .color-picker {
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    visibility: hidden;
+  }
+}
+
+.color {
+  inline-size: 20px;
+  block-size: 20px;
+  border-radius: var(--radius-round);
+  border: 1px solid transparent;
+}
+
+.divider {
+  display: flex;
+  inline-size: 1px;
+  block-size: 100%;
+  background-color: var(--gray-8);
+  margin-inline: var(--size-2);
+}
+
+.select-divider {
+  display: flex;
+  block-size: 1px;
+  background-color: var(--gray-8);
+  margin-block: var(--size-2);
+}
+
+
+.menu {
+  display: inline-flex;
+  flex-direction: column;
+  inline-size: 180px;
+  background-color: var(--gray-12);
+  padding: var(--size-3) 0;
+}
+
+.input-select {
+  padding: 0 var(--size-3);
+  input {
+    inline-size: 100%;
+    block-size: 30px;
+  }
+}
+
+.menu .item {
+  inline-size: 100%;
+}
+
+.menu-item,
+.standalone-item {
+  background-color: transparent;
+  cursor: pointer;
+  border: none;
+  color: var(--gray-0);
+
+  user-select: none;
+  min-width: 64px;
+  line-height: 36px;
+  padding: 0 var(--size-3);
+
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex: 1;
+
+  &:hover {
+    background-color: var(--gray-8);
+  }
+}
+
+.standalone-item {
+  &:hover {
+    background-color: var(--gray-8);
+  }
+}
+
+.menu-item.active {
+  background-color: var(--brand);
+}

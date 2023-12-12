@@ -55,7 +55,7 @@ import { CursorsComponent } from '../components/cursors/cursors.component';
 import { ZoneComponent } from '../components/zone/zone.component';
 import { OverlayComponent } from '../components/overlay/overlay.component';
 import { CommonModule } from '@angular/common';
-import { ToolbarComponent } from '../components/toolbar/toolbar.component';
+import { BoardToolbarComponent } from '../components/board-toolbar/board-toolbar.component';
 import { UsersComponent } from '../components/users/users.component';
 import { HeaderComponent } from '../components/header/header.component';
 import { DrawingOptionsComponent } from '../components/drawing-options/drawing-options.component';
@@ -79,6 +79,7 @@ import { HistoryService } from '@team-up/nodes/services/history.service';
 import { MoveService } from '@team-up/cdk/services/move.service';
 import { ResizeService } from '@team-up/ui/resize/resize.service';
 import { RotateService } from '@team-up/ui/rotate/rotate.service';
+import { NodeToolbarComponent } from '../components/node-toolbar/node-toolbar.component';
 
 @UntilDestroy()
 @Component({
@@ -92,7 +93,7 @@ import { RotateService } from '@team-up/ui/rotate/rotate.service';
     CommonModule,
     HeaderComponent,
     UsersComponent,
-    ToolbarComponent,
+    BoardToolbarComponent,
     OverlayComponent,
     ZoneComponent,
     CursorsComponent,
@@ -110,6 +111,7 @@ import { RotateService } from '@team-up/ui/rotate/rotate.service';
     NodesComponent,
     ContextMenuComponent,
     BoardContextMenuComponent,
+    NodeToolbarComponent,
   ],
   hostDirectives: [CopyPasteDirective],
 })
@@ -317,12 +319,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
             userId,
           }),
         );
-      });
-
-    fromEvent(document, 'contextmenu')
-      .pipe(untilDestroyed(this))
-      .subscribe((event) => {
-        event.preventDefault();
       });
   }
 
