@@ -47,4 +47,3 @@ This is an alpha release and not yet ready for production use. Please open an is
 - [ ] Refactor css
 - [ ] Deprecated RX operators
 - [ ] Board Size limit
-- [ ] Memory leak hotkeys without unbind
