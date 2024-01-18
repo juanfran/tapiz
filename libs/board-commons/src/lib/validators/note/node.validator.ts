@@ -38,7 +38,7 @@ export const patchNote = note.partial();
 
 export const newNote = note;
 
-export const validate = (msg: StateActions): StateActions | false => {
+export const noteValidator = (msg: StateActions): StateActions | false => {
   let validatorResult: unknown | null = null;
 
   if (msg.op === 'add') {

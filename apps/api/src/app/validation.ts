@@ -3,7 +3,7 @@ import { StateActions, TuNode, Validators } from '@team-up/board-commons';
 import { PERSONAL_TOKEN_VALIDATOR } from '@team-up/board-commons/validators/token.validator';
 import { ESTIMATION_VALIDATORS } from '@team-up/nodes/estimation/estimation.validator';
 
-import { validate as noteValidator } from '@team-up/board-commons/validators/note';
+import { noteValidator } from '@team-up/board-commons/validators/note/node.validator';
 
 import { type ZodAny } from 'zod';
 
