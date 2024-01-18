@@ -153,7 +153,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
             types: ['heading', 'paragraph'],
           }),
           Link.configure({
-            openOnClick: false,
+            openOnClick: true,
           }),
           FontFamily.configure({
             types: ['textStyle'],

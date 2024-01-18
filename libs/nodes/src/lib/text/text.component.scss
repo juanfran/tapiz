@@ -23,4 +23,11 @@
 
 .readonly {
   pointer-events: none;
+
+  ::ng-deep {
+    a {
+      pointer-events: auto;
+      cursor: pointer;
+    }
+  }
 }
