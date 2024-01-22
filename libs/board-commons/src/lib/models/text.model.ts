@@ -3,8 +3,6 @@ import { Point } from './point.model';
 
 export interface Text {
   text: string;
-  color: string;
-  size: number;
   position: Point;
   layer: number;
   width: number;

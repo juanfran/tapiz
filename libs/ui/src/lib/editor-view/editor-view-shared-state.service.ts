@@ -1,6 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Signal } from '@angular/core';
+import { TuNode } from '@team-up/board-commons';
 import type { Editor } from '@tiptap/core';
 import { BehaviorSubject } from 'rxjs';
+import { NodeToolbar } from '../toolbar/node-toolbar.model';
 
 @Injectable({
   providedIn: 'root',
@@ -11,14 +13,22 @@ export class EditorViewSharedStateService {
       string,
       {
         view: Editor;
+        layoutOptions: boolean;
+        node: Signal<TuNode<NodeToolbar>>;
       }
     >
   >(new Map());
 
-  addNode(id: string, view: Editor) {
+  addNode(
+    node: Signal<TuNode<NodeToolbar>>,
+    view: Editor,
+    layoutOptions = false,
+  ) {
     this.#nodes.next(
-      this.#nodes.getValue().set(id, {
+      this.#nodes.getValue().set(node().id, {
         view,
+        layoutOptions,
+        node,
       }),
     );
   }

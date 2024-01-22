@@ -10,10 +10,11 @@ import {
   signal,
   inject,
   Injector,
+  effect,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { Text, TuNode } from '@team-up/board-commons';
+import { Panel, TuNode } from '@team-up/board-commons';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { BoardActions } from '@team-up/board-commons/actions/board.actions';
@@ -25,24 +26,27 @@ import { filter, pairwise } from 'rxjs';
 import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
 
 @Component({
-  selector: 'team-up-text',
+  selector: 'team-up-panel',
   template: `
     <team-up-node-space
       [node]="node()"
       [resize]="true"
       [rotate]="true"
       [enabled]="!edit() && focus()">
-      <team-up-editor-view
-        [class.readonly]="!edit()"
-        #editorView="editorView"
-        [node]="node()"
-        [toolbar]="edit()"
-        [content]="node().content.text"
-        [focus]="edit()"
-        (contentChange)="newContent.set($event)" />
+      <div class="editor-wrapper">
+        <team-up-editor-view
+          #editorView="editorView"
+          [class.readonly]="!edit()"
+          [node]="node()"
+          [toolbar]="edit()"
+          [layoutToolbarOptions]="true"
+          [content]="node().content.text"
+          [focus]="edit()"
+          (contentChange)="newContent.set($event)" />
+      </div>
     </team-up-node-space>
   `,
-  styleUrls: ['./text.component.scss'],
+  styleUrls: ['./panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState, HotkeysService],
   standalone: true,
@@ -57,14 +61,14 @@ import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
     '[class.toolbar]': 'edit()',
   },
 })
-export class TextComponent implements OnInit {
+export class PanelComponent implements OnInit {
   private injector = inject(Injector);
   private historyService = inject(HistoryService);
   private el = inject(ElementRef);
   private store = inject(Store);
 
   @Input({ required: true })
-  public node!: Signal<TuNode<Text>>;
+  public node!: Signal<TuNode<Panel>>;
 
   @Input()
   public pasted!: Signal<boolean>;
@@ -92,6 +96,12 @@ export class TextComponent implements OnInit {
 
       this.startEdit();
     }
+  }
+
+  constructor() {
+    effect(() => {
+      this.setCssVariables(this.node());
+    });
   }
 
   public startEdit() {
@@ -197,6 +207,47 @@ export class TextComponent implements OnInit {
     if (this.edit()) {
       this.historyService.finishEdit(this.node());
       this.edit.set(false);
+    }
+  }
+
+  public get nativeElement(): HTMLElement {
+    return this.el.nativeElement as HTMLElement;
+  }
+
+  private setCssVariables(panel: TuNode<Panel>) {
+    if (panel.content.backgroundColor) {
+      this.nativeElement.style.setProperty(
+        '--backgroundColor',
+        panel.content.backgroundColor,
+      );
+    }
+
+    if (panel.content.borderColor) {
+      this.nativeElement.style.setProperty(
+        '--borderColor',
+        panel.content.borderColor,
+      );
+    }
+
+    if (panel.content.borderWidth) {
+      this.nativeElement.style.setProperty(
+        '--borderWidth',
+        panel.content.borderWidth + 'px',
+      );
+    }
+
+    if (panel.content.borderRadius) {
+      this.nativeElement.style.setProperty(
+        '--borderRadius',
+        panel.content.borderRadius + 'px',
+      );
+    }
+
+    if (panel.content.textAlign) {
+      this.nativeElement.style.setProperty(
+        '--textAlign',
+        panel.content.textAlign,
+      );
     }
   }
 }

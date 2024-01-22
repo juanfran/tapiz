@@ -6,12 +6,6 @@
   position: relative;
   width: 100vw;
   cursor: var(--default-cursor, auto);
-
-  &.cursor-text {
-    team-up-panels {
-      pointer-events: none;
-    }
-  }
 }
 
 .work-layer {

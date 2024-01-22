@@ -17,7 +17,7 @@ import { PageActions } from '../actions/page.actions';
 import { selectLayer, selectZone } from '../selectors/page.selectors';
 import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
-import { StateActions } from '@team-up/board-commons';
+import { Panel, StateActions } from '@team-up/board-commons';
 import { BoardFacade } from '@/app/services/board-facade.service';
 
 @Injectable()
@@ -243,6 +243,15 @@ export class BoardEffects {
             height = 300;
           }
 
+          const panel: Panel = {
+            text: '',
+            position: zone.position,
+            width: width,
+            height: height,
+            layer,
+            rotation: 0,
+          };
+
           return of(
             BoardActions.batchNodeActions({
               history: true,
@@ -251,13 +260,7 @@ export class BoardEffects {
                   data: {
                     type: 'panel',
                     id: v4(),
-                    content: {
-                      title: '',
-                      position: zone.position,
-                      width: width,
-                      height: height,
-                      layer,
-                    },
+                    content: panel,
                   },
                   op: 'add',
                 },
