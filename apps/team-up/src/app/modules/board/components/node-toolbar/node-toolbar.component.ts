@@ -24,7 +24,10 @@ import { EditorViewSharedStateService } from '@team-up/ui/editor-view';
       <team-up-toolbar
         [editor]="toolbar.view"
         [x]="toolbar.x"
-        [y]="toolbar.y" />
+        [y]="toolbar.y"
+        [node]="toolbar.node()"
+        [closeMenus]="closeMenus"
+        [layoutOptions]="toolbar.layoutOptions" />
     }
   `,
   styleUrl: './node-toolbar.component.scss',
@@ -45,6 +48,8 @@ export class NodeToolbarComponent {
     }>[]
   >;
 
+  closeMenus = this.#store.select(pageFeature.selectZoom);
+
   toolbars = toSignal(
     combineLatest([
       this.#nodes,
@@ -56,9 +61,11 @@ export class NodeToolbarComponent {
         return {
           nodes,
           zoom,
-          toolbarNodes: Array.from(toolbarNodes).map(([id, { view }]) => {
-            return { id, view };
-          }),
+          toolbarNodes: Array.from(toolbarNodes).map(
+            ([id, { view, layoutOptions, node }]) => {
+              return { id, view, layoutOptions, node };
+            },
+          ),
           position,
         };
       }),
@@ -83,6 +90,8 @@ export class NodeToolbarComponent {
           return {
             id: node.id,
             view: toolbar.view,
+            node: toolbar.node,
+            layoutOptions: toolbar.layoutOptions,
             x,
             y,
           };

@@ -47,7 +47,6 @@ import { ActivatedRoute } from '@angular/router';
 import { NotesService } from '../services/notes.service';
 import { WsService } from '@/app/modules/ws/services/ws.service';
 import { v4 } from 'uuid';
-import { PanelsComponent } from '../components/panels/panel.component';
 import { GroupComponent } from '../components/group/group.component';
 import { BoardDragDirective } from '../directives/board-drag.directive';
 import { NoteComponent } from '../components/note/note.component';
@@ -100,7 +99,6 @@ import { NodeToolbarComponent } from '../components/node-toolbar/node-toolbar.co
     NoteComponent,
     BoardDragDirective,
     GroupComponent,
-    PanelsComponent,
     DrawingOptionsComponent,
     SearchOptionsComponent,
     TitleComponent,

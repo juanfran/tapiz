@@ -27,9 +27,7 @@ export class NodesComponent {
 
   public nodes$ = this.boardFacade.getNodes().pipe(
     map((it) => {
-      return it.filter(
-        (it) => !['note', 'group', 'panel', 'user'].includes(it.type),
-      );
+      return it.filter((it) => !['note', 'group', 'user'].includes(it.type));
     }),
   );
 

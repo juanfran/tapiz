@@ -8,6 +8,7 @@ import {
   Input,
   OnDestroy,
   Output,
+  Signal,
   ViewChild,
   WritableSignal,
   effect,
@@ -26,6 +27,7 @@ import FontFamily from '@tiptap/extension-font-family';
 import { ToolbarComponent } from '../toolbar';
 import { EditorViewSharedStateService } from './editor-view-shared-state.service';
 import { BubbleMenu } from './bubble-menu';
+import { TuNode } from '@team-up/board-commons';
 
 @Component({
   selector: 'team-up-editor-view',
@@ -63,15 +65,29 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
 
   #content = signal('');
   #toolbar = signal(false);
+  #layoutToolbarOptions = signal(false);
+  #node = signal<TuNode | null>(null);
 
-  @Input({ required: true }) id!: string;
+  @Input({ required: true }) set node(node: TuNode) {
+    this.#node.set(node);
+  }
 
   @Input() set toolbar(value: boolean) {
     this.#toolbar.set(value);
+
+    if (value) {
+      this.#showToolbar();
+    } else {
+      this.#hideToolbar();
+    }
   }
 
   @Input() set content(value: string) {
     this.#content.set(value);
+  }
+
+  @Input() set layoutToolbarOptions(value: boolean) {
+    this.#layoutToolbarOptions.set(value);
   }
 
   @Output()
@@ -98,21 +114,6 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
         this.#editor()?.view.focus();
       }
     });
-
-    effect(
-      () => {
-        const instance = this.#editor();
-
-        if (instance && this.#toolbar()) {
-          this.#editorViewSharedStateService.addNode(this.id, instance);
-        } else {
-          this.#editor()?.commands.blur();
-          this.#editor()?.commands.setTextSelection(0);
-          this.#editorViewSharedStateService.removeNode(this.id);
-        }
-      },
-      { allowSignalWrites: true },
-    );
 
     effect(() => {
       const instance = this.#editor();
@@ -197,6 +198,39 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     this.#editor()?.destroy();
-    this.#editorViewSharedStateService.removeNode(this.id);
+
+    const nodeId = this.#node()?.id;
+
+    if (nodeId) {
+      this.#editorViewSharedStateService.removeNode(nodeId);
+    }
+  }
+
+  #showToolbar() {
+    const node = this.#node();
+
+    if (!node) {
+      return;
+    }
+
+    const instance = this.#editor();
+
+    if (instance) {
+      this.#editorViewSharedStateService.addNode(
+        this.#node.asReadonly() as Signal<TuNode>,
+        instance,
+        this.#layoutToolbarOptions(),
+      );
+    }
+  }
+
+  #hideToolbar() {
+    const nodeId = this.#node()?.id;
+
+    if (nodeId) {
+      this.#editor()?.commands.blur();
+      this.#editor()?.commands.setTextSelection(0);
+      this.#editorViewSharedStateService.removeNode(nodeId);
+    }
   }
 }

@@ -3,9 +3,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   ElementRef,
   Input,
   OnInit,
+  ViewChild,
   inject,
   signal,
 } from '@angular/core';
@@ -22,6 +24,12 @@ import {
   CdkMenuTrigger,
 } from '@angular/cdk/menu';
 import { Level } from '@tiptap/extension-heading';
+import { Observable, filter } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NodeToolbar } from './node-toolbar.model';
+import { TuNode } from '@team-up/board-commons';
+import { Store } from '@ngrx/store';
+import { BoardActions } from '@team-up/board-commons/actions/board.actions';
 
 @Component({
   selector: 'team-up-toolbar',
@@ -99,6 +107,104 @@ import { Level } from '@tiptap/extension-heading';
         }
       </div>
     }
+
+    @if (layoutOptions) {
+      <div class="type-icon">
+        <button
+          title="Layout"
+          [cdkMenuTriggerFor]="menuLayout">
+          <mat-icon>dashboard</mat-icon>
+        </button>
+
+        <ng-template #menuLayout>
+          <div
+            class="menu-layout"
+            cdkMenu>
+            <div class="field">
+              <label class="color-picker-layout">
+                Background color
+
+                <div
+                  class="color"
+                  [style.background-color]="
+                    node.content.backgroundColor ?? '#FFF'
+                  ">
+                  <div class="color-picker">
+                    <input
+                      type="color"
+                      [value]="node.content.backgroundColor"
+                      (change)="updateNode($event, 'backgroundColor')" />
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="color-picker-layout">
+                Border color
+
+                <div
+                  class="color"
+                  [style.background-color]="
+                    node.content.borderColor ?? '#e8e9ea'
+                  ">
+                  <div class="color-picker">
+                    <input
+                      type="color"
+                      [value]="node.content.borderColor"
+                      (change)="updateNode($event, 'borderColor')" />
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="input-layout">
+                Border radius
+
+                <input
+                  type="number"
+                  [value]="node.content.borderRadius ?? 0"
+                  (change)="updateNode($event, 'borderRadius')" />
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="input-layout">
+                Border width
+
+                <input
+                  type="number"
+                  [value]="node.content.borderWidth ?? 1"
+                  (change)="updateNode($event, 'borderWidth')" />
+              </label>
+            </div>
+
+            <div class="field">
+              <label class="input-layout"> Text aligment </label>
+
+              <div class="buttons">
+                <button
+                  [class.active]="node.content.textAlign === 'start'"
+                  (click)="updateNodeValue('start', 'textAlign')">
+                  <mat-icon>vertical_align_top</mat-icon>
+                </button>
+                <button
+                  [class.active]="node.content.textAlign === 'center'"
+                  (click)="updateNodeValue('center', 'textAlign')">
+                  <mat-icon>vertical_align_center</mat-icon>
+                </button>
+                <button
+                  [class.active]="node.content.textAlign === 'end'"
+                  (click)="updateNodeValue('end', 'textAlign')">
+                  <mat-icon>vertical_align_bottom</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </ng-template>
+      </div>
+    }
   `,
   styleUrl: './toolbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -113,12 +219,17 @@ import { Level } from '@tiptap/extension-heading';
   ],
 })
 export class ToolbarComponent implements OnInit, AfterViewInit {
+  @ViewChild(CdkMenu) menu?: CdkMenu;
+
   #cd = inject(ChangeDetectorRef);
   #el = inject(ElementRef);
   #x = signal<number>(0);
   #y = signal<number>(0);
+  #destroyRef = inject(DestroyRef);
+  #store = inject(Store);
 
   @Input({ required: true }) editor!: Editor;
+  @Input({ required: true }) node!: TuNode<NodeToolbar>;
 
   @Input({ required: true }) set x(value: number) {
     this.#x.set(value);
@@ -134,6 +245,12 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
       this.#refreshPositon();
     }
   }
+
+  @Input()
+  layoutOptions = false;
+
+  @Input()
+  closeMenus?: Observable<unknown>;
 
   menuItems: MenuItem[] = [
     {
@@ -356,7 +473,7 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
         this.editor.chain().focus().setColor(color).run();
       },
       enabled: true,
-      name: 'Set color',
+      name: 'Font color',
       color: () => {
         const color =
           this.editor.getAttributes('textStyle')['color'] ?? '#000000';
@@ -381,6 +498,62 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
     this.editor.on('transaction', () => {
       this.#cd.detectChanges();
     });
+
+    this.closeMenus
+      ?.pipe(
+        takeUntilDestroyed(this.#destroyRef),
+        filter(() => !!this.menu),
+      )
+      .subscribe(() => {
+        if (document.activeElement) {
+          (document.activeElement as HTMLElement).blur();
+        }
+        document.body.focus();
+      });
+  }
+
+  updateNode(event: Event, key: keyof NodeToolbar) {
+    const target = event.target as HTMLInputElement;
+
+    const isNumber = target.type === 'number';
+
+    this.#store.dispatch(
+      BoardActions.batchNodeActions({
+        history: true,
+        actions: [
+          {
+            op: 'patch',
+            data: {
+              id: this.node.id,
+              type: this.node.type,
+              content: {
+                [key]: isNumber ? Number(target.value) : target.value,
+              },
+            },
+          },
+        ],
+      }),
+    );
+  }
+
+  updateNodeValue(value: string, key: keyof NodeToolbar) {
+    this.#store.dispatch(
+      BoardActions.batchNodeActions({
+        history: true,
+        actions: [
+          {
+            op: 'patch',
+            data: {
+              id: this.node.id,
+              type: this.node.type,
+              content: {
+                [key]: value,
+              },
+            },
+          },
+        ],
+      }),
+    );
   }
 
   ngAfterViewInit(): void {

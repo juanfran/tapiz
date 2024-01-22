@@ -1,0 +1,50 @@
+
+:host {
+  --backgroundColor: var(--white);
+  --borderColor: #e8e9ea;
+  --borderWidth: 1px;
+  --borderRadius: 0;
+  --textAlign: 'start'
+
+  display: block;
+  position: absolute;
+  inline-size: 100%;
+  block-size: 100%;
+  background-color: var(--backgroundColor);
+  border: var(--borderWidth) solid var(--borderColor);
+  border-radius: var(--borderRadius);
+
+  team-up-editor-view {
+    inline-size: 100%;
+    padding: var(--spacing-3);
+  }
+
+  ::ng-deep {
+    .ProseMirror,
+    .text {
+      outline: none;
+
+      p {
+        margin-block-end: var(--size-1);
+      }
+    }
+  }
+}
+
+.readonly {
+  pointer-events: none;
+
+  ::ng-deep {
+    a {
+      pointer-events: auto;
+      cursor: pointer;
+    }
+  }
+}
+
+.editor-wrapper {
+  inline-size: 100%;
+  block-size: 100%;
+  display: flex;
+  align-items: var(--textAlign);
+}

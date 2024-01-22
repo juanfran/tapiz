@@ -34,13 +34,19 @@
     inline-size: 100%;
     cursor: pointer;
   }
+}
 
-  .color-picker {
-    overflow: hidden;
-    width: 1px;
-    height: 1px;
-    visibility: hidden;
-  }
+.color-picker {
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  visibility: hidden;
+}
+
+.color-picker-layout {
+  display: flex;
+  inline-size: 100%;
+  justify-content: space-between;
 }
 
 .color {
@@ -66,12 +72,47 @@
 }
 
 
-.menu {
+.menu,
+.menu-layout {
   display: inline-flex;
   flex-direction: column;
   inline-size: 180px;
   background-color: var(--gray-12);
   padding: var(--size-3) 0;
+}
+
+.menu-layout {
+  color: var(--gray-0);
+  padding: var(--size-3);
+  inline-size: 290px;
+  gap: var(--size-3);
+
+  .field {
+    display: flex;
+    gap: var(--size-3);
+  }
+
+  input[type="number"] {
+    inline-size: 50px;
+  }
+
+  .buttons {
+    display: flex;
+  }
+
+  button {
+    color: var(--gray-0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-2);
+  }
+}
+
+.input-layout {
+  display: flex;
+  inline-size: 100%;
+  justify-content: space-between;
 }
 
 .input-select {

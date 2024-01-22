@@ -111,8 +111,6 @@ export class BoardToolbarComponent {
             layer: this.layer(),
             width: 200,
             height: 50,
-            color: '#000',
-            size: 32,
             rotation: 0,
           };
 
