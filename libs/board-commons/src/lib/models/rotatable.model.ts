@@ -1,4 +1,4 @@
-import { Point } from '@team-up/board-commons';
+import { Point } from '../models/point.model';
 
 export interface Rotatable {
   rotation: number;

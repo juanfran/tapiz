@@ -1,16 +1,16 @@
-import { BoardApiService } from '@/app/services/board-api.service';
+import { BoardApiService } from '../../../../services/board-api.service';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { exhaustMap, filter, map, mergeMap, switchMap, tap } from 'rxjs';
 import { HomeActions } from '../home.actions';
-import { AuthService } from '@/app/services/auth.service';
-import { TeamApiService } from '@/app/services/team-api.service';
+import { AuthService } from '../../../../services/auth.service';
+import { TeamApiService } from '../../../../services/team-api.service';
 import { homeFeature } from '../home.feature';
 import { Store } from '@ngrx/store';
-import { filterNil } from '@/app/commons/operators/filter-nil';
-import { UserApiService } from '@/app/services/user-api.service';
-import { appFeature } from '@/app/+state/app.reducer';
+import { filterNil } from '../../../../commons/operators/filter-nil';
+import { UserApiService } from '../../../../services/user-api.service';
+import { appFeature } from '../../../../+state/app.reducer';
 
 export const initHomeFeatchTeams$ = createEffect(
   (actions$ = inject(Actions), teamApiService = inject(TeamApiService)) => {

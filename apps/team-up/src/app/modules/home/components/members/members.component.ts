@@ -1,5 +1,5 @@
-import { ModalHeaderComponent } from '@/app/shared/modal-header/modal-header.component';
-import { trackByProp } from '@/app/shared/track-by-prop';
+import { ModalHeaderComponent } from '../../../../shared/modal-header/modal-header.component';
+import { trackByProp } from '../../../../shared/track-by-prop';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,

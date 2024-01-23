@@ -1,10 +1,10 @@
-import { ConfigService } from '@/app/services/config.service';
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { wsOpen } from '../ws.actions';
 import { optimize } from '@team-up/board-commons';
-import { NotificationService } from '@/app/shared/notification/notification.service';
 import { Router } from '@angular/router';
+import { NotificationService } from '../../../shared/notification/notification.service';
+import { ConfigService } from '../../../services/config.service';
 
 @Injectable({
   providedIn: 'root',

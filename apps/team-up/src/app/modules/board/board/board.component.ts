@@ -45,7 +45,6 @@ import { BoardMoveService } from '../services/board-move.service';
 import { BoardZoomService } from '../services/board-zoom.service';
 import { ActivatedRoute } from '@angular/router';
 import { NotesService } from '../services/notes.service';
-import { WsService } from '@/app/modules/ws/services/ws.service';
 import { v4 } from 'uuid';
 import { GroupComponent } from '../components/group/group.component';
 import { BoardDragDirective } from '../directives/board-drag.directive';
@@ -62,14 +61,10 @@ import { SearchOptionsComponent } from '../components/search-options/search-opti
 import { Actions, ofType } from '@ngrx/effects';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { TitleComponent } from '../../../shared/title/title.component';
-import { FollowUserComponent } from '@/app/shared/follow-user/follow-user.component';
 import { Point, StateActions, isGroup, isNote } from '@team-up/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
-import { appFeature } from '@/app/+state/app.reducer';
-import { StopHighlightComponent } from '@/app/shared/stop-highlight/stop-highlight';
 import { NodesComponent } from '../components/nodes/nodes.component';
-import { BoardFacade } from '@/app/services/board-facade.service';
 import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
 import { ContextMenuComponent } from '@team-up/ui/context-menu/context-menu.component';
 import { ContextMenuStore } from '@team-up/ui/context-menu/context-menu.store';
@@ -79,6 +74,11 @@ import { MoveService } from '@team-up/cdk/services/move.service';
 import { ResizeService } from '@team-up/ui/resize/resize.service';
 import { RotateService } from '@team-up/ui/rotate/rotate.service';
 import { NodeToolbarComponent } from '../components/node-toolbar/node-toolbar.component';
+import { WsService } from '../../ws/services/ws.service';
+import { FollowUserComponent } from '../../../shared/follow-user/follow-user.component';
+import { StopHighlightComponent } from '../../../shared/stop-highlight/stop-highlight';
+import { BoardFacade } from '../../../services/board-facade.service';
+import { appFeature } from '../../../+state/app.reducer';
 
 @UntilDestroy()
 @Component({

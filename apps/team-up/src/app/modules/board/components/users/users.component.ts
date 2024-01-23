@@ -14,7 +14,7 @@ import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { NgIf, NgFor, NgClass, AsyncPipe } from '@angular/common';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
 import { pageFeature } from '../../reducers/page.reducer';
-import { BoardFacade } from '@/app/services/board-facade.service';
+import { BoardFacade } from '../../../../services/board-facade.service';
 
 interface State {
   visible: boolean;

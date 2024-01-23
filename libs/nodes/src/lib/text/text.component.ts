@@ -24,6 +24,10 @@ import { EditorViewComponent } from '@team-up/ui/editor-view';
 import { filter, pairwise } from 'rxjs';
 import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
 
+import { syncNodeBox } from '@team-up/sync-node-box';
+
+console.log(syncNodeBox);
+
 @Component({
   selector: 'team-up-text',
   template: `

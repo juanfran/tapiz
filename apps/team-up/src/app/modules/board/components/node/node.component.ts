@@ -1,4 +1,4 @@
-import { loadNode } from '@/app/register-node';
+import { loadNode } from '../../../../register-node';
 import { CommonModule } from '@angular/common';
 import {
   Component,

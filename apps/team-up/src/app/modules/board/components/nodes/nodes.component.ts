@@ -4,7 +4,7 @@ import { RxFor } from '@rx-angular/template/for';
 import { NodeComponent } from '../node/node.component';
 import { map } from 'rxjs/operators';
 import { NodesStore } from '@team-up/nodes/services/nodes.store';
-import { BoardFacade } from '@/app/services/board-facade.service';
+import { BoardFacade } from '../../../../services/board-facade.service';
 import { Store } from '@ngrx/store';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { selectUserId } from '../../selectors/page.selectors';

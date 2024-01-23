@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Note, TuNode, UserNode, isNote } from '@team-up/board-commons';
-import { BoardFacade } from '@/app/services/board-facade.service';
+import { BoardFacade } from '../../../services/board-facade.service';
 
 @Injectable({
   providedIn: 'root',

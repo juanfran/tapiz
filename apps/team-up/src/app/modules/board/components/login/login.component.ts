@@ -11,8 +11,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { AppActions } from '@/app/+state/app.actions';
-import { UserApiService } from '@/app/services/user-api.service';
+import { AppActions } from '../../../../+state/app.actions';
+import { UserApiService } from '../../../../services/user-api.service';
 
 @Component({
   selector: 'team-up-login',

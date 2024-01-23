@@ -17,7 +17,7 @@ import {
 } from '@team-up/board-commons';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { NodesStore } from '@team-up/nodes/services/nodes.store';
+import { NodesStore } from '../../services/nodes.store';
 
 @Component({
   selector: 'team-up-estimation-workspace',

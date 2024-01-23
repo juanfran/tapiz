@@ -1,4 +1,4 @@
-import { ModalHeaderComponent } from '@/app/shared/modal-header/modal-header.component';
+import { ModalHeaderComponent } from '../../../../shared/modal-header/modal-header.component';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {

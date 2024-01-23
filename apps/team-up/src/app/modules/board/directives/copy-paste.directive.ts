@@ -3,8 +3,8 @@ import { Store } from '@ngrx/store';
 import { take } from 'rxjs';
 import { concatLatestFrom } from '@ngrx/effects';
 import { selectFocusId } from '../selectors/page.selectors';
-import { BoardFacade } from '@/app/services/board-facade.service';
-import { CopyPasteService } from '@/app/services/copy-paste.service';
+import { BoardFacade } from '../../../services/board-facade.service';
+import { CopyPasteService } from '../../../services/copy-paste.service';
 
 @Directive({
   selector: '[teamUpCopyPaste]',

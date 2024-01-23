@@ -4,7 +4,7 @@ import { map, tap } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
 import { StateActions } from '@team-up/board-commons';
-import { BoardFacade } from '@/app/services/board-facade.service';
+import { BoardFacade } from '../../../services/board-facade.service';
 import { WsService } from '../../ws/services/ws.service';
 
 @Injectable()

@@ -5,7 +5,7 @@ import { EMPTY, of } from 'rxjs';
 import { filter, mergeMap, tap } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
-import { BoardFacade } from '@/app/services/board-facade.service';
+import { BoardFacade } from '../../../services/board-facade.service';
 import { Note, TuNode } from '@team-up/board-commons';
 
 @Injectable()

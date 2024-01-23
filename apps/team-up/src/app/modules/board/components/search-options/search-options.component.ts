@@ -25,7 +25,7 @@ import {
 import { PageActions } from '../../actions/page.actions';
 import { selectUserId } from '../../selectors/page.selectors';
 import { Note, TuNode, isNote } from '@team-up/board-commons';
-import { BoardFacade } from '@/app/services/board-facade.service';
+import { BoardFacade } from '../../../../services/board-facade.service';
 @Component({
   selector: 'team-up-search-options',
   templateUrl: './search-options.component.html',

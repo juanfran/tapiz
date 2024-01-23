@@ -6,10 +6,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { ModalHeaderComponent } from '@/app/shared/modal-header/modal-header.component';
 import { Store } from '@ngrx/store';
 import { homeFeature } from '../../+state/home.feature';
 import { MatSelectModule } from '@angular/material/select';
+import { ModalHeaderComponent } from '../../../../shared/modal-header/modal-header.component';
 
 @Component({
   selector: 'team-up-transfer-board',

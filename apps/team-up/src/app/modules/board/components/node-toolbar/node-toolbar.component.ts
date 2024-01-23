@@ -1,4 +1,4 @@
-import { BoardFacade } from '@/app/services/board-facade.service';
+import { BoardFacade } from '../../../../services/board-facade.service';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 

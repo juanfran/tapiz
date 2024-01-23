@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import { NodeValidator, EstimationResult } from '@team-up/board-commons';
-import { CommonBoardValidation } from '@team-up/board-commons/validators/common-board-validation';
+import { NodeValidator } from '../models/node.model';
+import { EstimationResult } from '../models/estimation.model';
+import { CommonBoardValidation } from './common-board-validation';
 
 const estimationBoard = z.object({
   ...CommonBoardValidation,

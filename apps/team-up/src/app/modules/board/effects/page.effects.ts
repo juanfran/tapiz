@@ -14,9 +14,9 @@ import { selectBoardId, selectCocomaterial } from '../selectors/page.selectors';
 import { BoardApiService } from '../../../services/board-api.service';
 import { BoardActions } from '../actions/board.actions';
 import { pageFeature } from '../reducers/page.reducer';
-import { filterNil } from '@/app/commons/operators/filter-nil';
+import { filterNil } from '../../../commons/operators/filter-nil';
 import { ActivatedRoute } from '@angular/router';
-import { BoardFacade } from '@/app/services/board-facade.service';
+import { BoardFacade } from '../../../services/board-facade.service';
 
 @Injectable()
 export class PageEffects {

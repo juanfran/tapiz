@@ -1,5 +1,3 @@
-import { BoardFacade } from '@/app/services/board-facade.service';
-import { CopyPasteService } from '@/app/services/copy-paste.service';
 import { Component, OnInit, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { NodesStore } from '@team-up/nodes/services/nodes.store';
@@ -12,6 +10,8 @@ import { pageFeature } from '../../reducers/page.reducer';
 import { BoardComponent } from '../../board/board.component';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
+import { CopyPasteService } from '../../../../services/copy-paste.service';
+import { BoardFacade } from '../../../../services/board-facade.service';
 
 @Component({
   selector: 'team-up-board-context-menu',

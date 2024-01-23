@@ -12,9 +12,9 @@ import { map } from 'rxjs';
 import {
   BoardColors,
   BoardIdToColorDirective,
-} from '@/app/shared/board-id-to-color.directive';
+} from '../../../../shared/board-id-to-color.directive';
 import { RxFor } from '@rx-angular/template/for';
-import { BoardFacade } from '@/app/services/board-facade.service';
+import { BoardFacade } from '../../../../services/board-facade.service';
 
 @Component({
   selector: 'team-up-token-selector',

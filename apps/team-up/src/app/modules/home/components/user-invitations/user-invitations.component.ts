@@ -1,4 +1,3 @@
-import { trackByProp } from '@/app/shared/track-by-prop';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
 import { UserInvitation } from '@team-up/board-commons';
 import { HomeActions } from '../../+state/home.actions';
+import { trackByProp } from '../../../../shared/track-by-prop';
 
 @Component({
   selector: 'team-up-user-invitations',

@@ -1,4 +1,4 @@
-import { TitleComponent } from '@/app/shared/title/title.component';
+import { TitleComponent } from '../../../../shared/title/title.component';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';

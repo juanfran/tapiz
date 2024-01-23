@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { WsService } from '@/app/modules/ws/services/ws.service';
+import { WsService } from '../../../modules/ws/services/ws.service';
 import { EMPTY, of } from 'rxjs';
 import {
   map,
@@ -18,7 +18,7 @@ import { selectLayer, selectZone } from '../selectors/page.selectors';
 import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
 import { Panel, StateActions } from '@team-up/board-commons';
-import { BoardFacade } from '@/app/services/board-facade.service';
+import { BoardFacade } from '../../../services/board-facade.service';
 
 @Injectable()
 export class BoardEffects {

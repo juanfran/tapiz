@@ -1,4 +1,4 @@
-import { focustContentEditable } from '@/app/shared/focus-content-editable';
+import { focustContentEditable } from '../../../../shared/focus-content-editable';
 import { CommonModule } from '@angular/common';
 import {
   Component,

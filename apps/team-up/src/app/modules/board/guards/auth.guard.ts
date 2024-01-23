@@ -8,8 +8,8 @@ import { inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { filter, map, switchMap } from 'rxjs/operators';
 
-import { AuthService } from '@/app/services/auth.service';
-import { appFeature } from '@/app/+state/app.reducer';
+import { AuthService } from '../../../services/auth.service';
+import { appFeature } from '../../../+state/app.reducer';
 
 export const AuthGuard: CanActivateFn = (
   next: ActivatedRouteSnapshot,

@@ -3,7 +3,6 @@ import { RxState } from '@rx-angular/state';
 import { UserTeam, UserInvitation } from '@team-up/board-commons';
 import { MatMenuModule } from '@angular/material/menu';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '@/app/services/auth.service';
 import { Store } from '@ngrx/store';
 import { HomeActions } from './+state/home.actions';
 import { RouterModule } from '@angular/router';
@@ -11,12 +10,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CreateTeamComponent } from './components/create-team/create-team.component';
 import { homeFeature } from './+state/home.feature';
-import { trackByProp } from '@/app/shared/track-by-prop';
-import { ConfirmComponent } from '@/app/shared/confirm-action/confirm-actions.component';
 import { filter } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
 import { UserInvitationsComponent } from './components/user-invitations/user-invitations.component';
+import { AuthService } from '../../services/auth.service';
+import { trackByProp } from '../../shared/track-by-prop';
+import { ConfirmComponent } from '../../shared/confirm-action/confirm-actions.component';
 
 interface State {
   teams: UserTeam[];

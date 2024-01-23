@@ -1,4 +1,3 @@
-import { ConfigService } from '@/app/services/config.service';
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 
@@ -9,6 +8,7 @@ import {
   Team,
 } from '@team-up/board-commons';
 import { Observable, from, map } from 'rxjs';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root',

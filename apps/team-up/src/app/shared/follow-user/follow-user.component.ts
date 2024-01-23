@@ -6,7 +6,7 @@ import { map, switchMap } from 'rxjs';
 import { filterNil } from '../../commons/operators/filter-nil';
 import { PageActions } from '../../modules/board/actions/page.actions';
 import { MatButtonModule } from '@angular/material/button';
-import { BoardFacade } from '@/app/services/board-facade.service';
+import { BoardFacade } from '../../services/board-facade.service';
 
 @Component({
   selector: 'team-up-follow-user',

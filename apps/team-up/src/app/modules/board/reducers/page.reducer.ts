@@ -7,7 +7,7 @@ import {
   CocomaterialTag,
   CocomaterialApiListVectors,
 } from '@team-up/board-commons';
-import { wsOpen } from '@/app/modules/ws/ws.actions';
+import { wsOpen } from '../../../modules/ws/ws.actions';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
 import { NativeEmoji } from 'emoji-picker-element/shared';

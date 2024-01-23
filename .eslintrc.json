@@ -10,11 +10,28 @@
           "error",
           {
             "enforceBuildableLibDependency": true,
-            "allow": ["@"],
+            "allow": [],
             "depConstraints": [
               {
-                "sourceTag": "*",
-                "onlyDependOnLibsWithTags": ["*"]
+                "sourceTag": "scope:web",
+                "onlyDependOnLibsWithTags": ["scope:web", "type:util", "type:ui", "type:feature"]
+              },
+              {
+                "sourceTag": "scope:server",
+                "onlyDependOnLibsWithTags": ["scope:server", "type:util", "type:feature"],
+                "bannedExternalImports": ["@angular/*"]
+              },
+              {
+                "sourceTag": "type:feature",
+                "onlyDependOnLibsWithTags": ["type:feature", "type:ui", "type:util"]
+              },
+              {
+                "sourceTag": "type:ui",
+                "onlyDependOnLibsWithTags": ["type:ui", "type:util"]
+              },
+              {
+                "sourceTag": "type:util",
+                "onlyDependOnLibsWithTags": ["type:util"]
               }
             ]
           }

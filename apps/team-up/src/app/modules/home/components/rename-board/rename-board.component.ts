@@ -16,7 +16,7 @@ import {
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { ModalHeaderComponent } from '@/app/shared/modal-header/modal-header.component';
+import { ModalHeaderComponent } from '../../../../shared/modal-header/modal-header.component';
 
 @Component({
   selector: 'team-up-rename-board',

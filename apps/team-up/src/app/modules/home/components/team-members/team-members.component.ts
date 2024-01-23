@@ -12,7 +12,7 @@ import { Store } from '@ngrx/store';
 import { HomeActions } from '../../+state/home.actions';
 import { RxState } from '@rx-angular/state';
 import { homeFeature } from '../../+state/home.feature';
-import { appFeature } from '@/app/+state/app.reducer';
+import { appFeature } from '../../../../+state/app.reducer';
 
 interface TeamMembersComponentState {
   invitations: Invitation[];

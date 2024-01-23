@@ -1,9 +1,6 @@
 import { props, createAction } from '@ngrx/store';
-import {
-  BoardCommonActions,
-  BachStateActions,
-  StateActions,
-} from '@team-up/board-commons';
+import { BoardCommonActions } from '../board-common-actions';
+import { BachStateActions, StateActions } from '../models/node.model';
 
 export const BoardActions = {
   setBoardName: createAction(

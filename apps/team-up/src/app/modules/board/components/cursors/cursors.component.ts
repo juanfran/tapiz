@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 
 import { NgFor, NgIf, AsyncPipe } from '@angular/common';
-import { BoardFacade } from '@/app/services/board-facade.service';
+import { BoardFacade } from '../../../../services/board-facade.service';
 
 @Component({
   selector: 'team-up-cursors',

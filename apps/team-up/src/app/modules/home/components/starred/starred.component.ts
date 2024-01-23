@@ -1,4 +1,4 @@
-import { TitleComponent } from '@/app/shared/title/title.component';
+import { TitleComponent } from '../../../../shared/title/title.component';
 import { Component, inject } from '@angular/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CreateBoardComponent } from '../create-board/create-board.component';

@@ -1,4 +1,3 @@
-import { TitleComponent } from '@/app/shared/title/title.component';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -11,18 +10,18 @@ import { RxState } from '@rx-angular/state';
 import { Board, UserTeam } from '@team-up/board-commons';
 import { homeFeature } from '../../+state/home.feature';
 import { combineLatest, filter, map } from 'rxjs';
-
-import { filterNil } from '@/app/commons/operators/filter-nil';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { ConfirmComponent } from '@/app/shared/confirm-action/confirm-actions.component';
 import { HomeActions } from '../../+state/home.actions';
 import { TeamMembersComponent } from '../team-members/team-members.component';
 import { RenameTeamComponent } from '../rename-team/rename-team.component';
 import { MatButtonModule } from '@angular/material/button';
 import { BoardListComponent } from '../board-list/board-list.component';
 import { BoardListHeaderComponent } from '../board-list-header/board-list-header.component';
+import { ConfirmComponent } from '../../../../shared/confirm-action/confirm-actions.component';
+import { TitleComponent } from '../../../../shared/title/title.component';
+import { filterNil } from 'ngxtension/filter-nil';
 
 interface State {
   teamId: string;
