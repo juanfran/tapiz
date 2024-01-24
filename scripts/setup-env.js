@@ -4,7 +4,7 @@ import { writeFileSync } from 'fs';
 dotenv.config();
 
 const front = ['API', 'WS'];
-const frontConfig: Record<string, unknown> = {};
+const frontConfig = {};
 
 front.forEach((key) => {
   frontConfig[key] = process.env[key];
