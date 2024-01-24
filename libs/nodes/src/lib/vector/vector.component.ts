@@ -7,7 +7,7 @@ import {
 import { RxState } from '@rx-angular/state';
 import { TuNode, Vector } from '@team-up/board-commons';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
-import { NodeSpaceComponent } from '@team-up/ui/node-space';
+import { NodeSpaceComponent } from '../node-space';
 import { CommonModule } from '@angular/common';
 
 @Component({

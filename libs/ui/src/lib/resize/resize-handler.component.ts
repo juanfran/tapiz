@@ -20,15 +20,19 @@ import { ResizeService } from './resize.service';
   template: `
     <div
       #topLeft
+      [style.transform]="'scale(' + scale + ')'"
       class="no-drag resize-point top-left"></div>
     <div
       #topRight
+      [style.transform]="'scale(' + scale + ')'"
       class="no-drag resize-point top-right"></div>
     <div
       #bottomLeft
+      [style.transform]="'scale(' + scale + ')'"
       class="no-drag resize-point bottom-left"></div>
     <div
       #bottomRight
+      [style.transform]="'scale(' + scale + ')'"
       class="no-drag resize-point bottom-right"></div>
   `,
   styles: [
@@ -82,6 +86,9 @@ export class ResizeHandlerComponent implements Resizable {
 
   @Input({ required: true })
   public node!: TuNode<Resizable>;
+
+  @Input()
+  public scale = 1;
 
   public get nodeType() {
     return this.node.type;

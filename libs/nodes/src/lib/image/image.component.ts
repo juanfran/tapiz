@@ -11,7 +11,7 @@ import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
 import { Image, TuNode } from '@team-up/board-commons';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
-import { NodeSpaceComponent } from '@team-up/ui/node-space';
+import { NodeSpaceComponent } from '../node-space';
 import { CommonModule } from '@angular/common';
 import { BoardActions } from '@team-up/board-commons/actions/board.actions';
 

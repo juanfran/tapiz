@@ -62,7 +62,7 @@
     "firebase-admin": "^11.10.1",
     "messageformat": "^2.3.0",
     "ngx-infinite-scroll": "^17.0.0",
-    "ngxtension": "^1.4.0",
+    "ngxtension": "^1.12.0",
     "open-props": "^1.6.12",
     "postgres": "^3.3.5",
     "remeda": "^1.26.0",

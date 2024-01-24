@@ -19,7 +19,7 @@ import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { BoardActions } from '@team-up/board-commons/actions/board.actions';
 import { HistoryService } from '../services/history.service';
-import { NodeSpaceComponent } from '@team-up/ui/node-space';
+import { NodeSpaceComponent } from '../node-space';
 import { ToolbarComponent } from '@team-up/ui/toolbar';
 import { EditorViewComponent } from '@team-up/ui/editor-view';
 import { filter, pairwise } from 'rxjs';
