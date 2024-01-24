@@ -1,6 +1,6 @@
 import { eq, and, or } from 'drizzle-orm';
-import { db } from './init-db';
-import * as schema from '../schema';
+import { db } from './init-db.js';
+import * as schema from '../schema.js';
 import { Invitation, Role, UserInvitation } from '@team-up/board-commons';
 
 export async function getUser(id: string) {

@@ -1,6 +1,6 @@
 import type { TuNode, StateActions } from '@team-up/board-commons';
 
-import { diff } from './diff';
+import { diff } from './diff.js';
 
 export function reverseAction(
   nodes: TuNode[],

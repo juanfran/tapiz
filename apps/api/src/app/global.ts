@@ -1,5 +1,5 @@
-import db from './db';
-import { type Server } from './server';
+import db from './db/index.js';
+import { type Server } from './server.js';
 
 let server: Server | null = null;
 

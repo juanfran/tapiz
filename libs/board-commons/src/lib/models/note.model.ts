@@ -1,6 +1,6 @@
-import { Drawing } from './drawing.model';
-import { TuNode } from './node.model';
-import { Point } from './point.model';
+import { Drawing } from './drawing.model.js';
+import { TuNode } from './node.model.js';
+import { Point } from './point.model.js';
 
 export interface Note {
   text: string;

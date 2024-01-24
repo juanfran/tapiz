@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import { writeFileSync, readFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 
 dotenv.config();
 
@@ -14,5 +14,5 @@ writeFileSync(
   './apps/team-up/src/assets/config.json',
   JSON.stringify({
     ...frontConfig,
-  })
+  }),
 );

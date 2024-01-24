@@ -1,4 +1,4 @@
-import { Point } from './point.model';
+import { Point } from './point.model.js';
 
 export interface Token {
   color: string;

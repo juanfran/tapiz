@@ -1,7 +1,7 @@
 import { inferAsyncReturnType } from '@trpc/server';
-import { verifyToken } from './auth';
 import cookieParser from 'cookie-parser';
 import { CreateExpressContextOptions } from '@trpc/server/adapters/express';
+import { verifyToken } from './auth.js';
 
 export async function createContext({ req }: CreateExpressContextOptions) {
   async function getUserFromHeader() {

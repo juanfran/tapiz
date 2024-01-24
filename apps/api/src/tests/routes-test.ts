@@ -8,7 +8,7 @@ import {
   boardProcedure,
   boardAdminProcedure,
   boardMemberProcedure,
-} from '../app/trpc';
+} from '../app/trpc.js';
 
 export const testRouter = router({
   protected: protectedProcedure.query((req) => {

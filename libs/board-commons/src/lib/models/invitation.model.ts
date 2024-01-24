@@ -1,5 +1,5 @@
-import { Board } from './board.model';
-import { Team } from './team.model';
+import { Board } from './board.model.js';
+import { Team } from './team.model.js';
 
 export interface Invitation {
   id: string;

@@ -1,7 +1,7 @@
 import { StateActions, TuNode } from '@team-up/board-commons';
-import { SyncNodeBoxHistory } from './models';
-import { applyAction } from './apply-action';
-import { reverseAction } from './rever-action';
+import { SyncNodeBoxHistory } from './models.js';
+import { applyAction } from './apply-action.js';
+import { reverseAction } from './rever-action.js';
 export function undo(
   nodes: TuNode[],
   history: SyncNodeBoxHistory,

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CommonBoardValidation } from './common-board-validation';
+import { CommonBoardValidation } from './common-board-validation.js';
 
 const panel = z.object({
   ...CommonBoardValidation,

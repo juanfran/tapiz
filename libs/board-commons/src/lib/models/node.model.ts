@@ -1,5 +1,3 @@
-import { type Type } from '@angular/core';
-
 export interface TuNode<C = object, T = string> {
   id: string;
   type: T;
@@ -37,7 +35,7 @@ interface NodeValidatorError {
 }
 
 export interface NodeConfig {
-  loadComponent: () => Promise<Type<unknown>>;
+  loadComponent: () => Promise<unknown>;
   config?: unknown;
 }
 

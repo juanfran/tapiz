@@ -1,24 +1,24 @@
 import type { StateActions, TuNode, UserNode } from '@team-up/board-commons';
-import * as WebSocket from 'ws';
-import { Client } from './client';
-import db from './db';
+import { WebSocket, WebSocketServer } from 'ws';
+import { Client } from './client.js';
+import db from './db/index.js';
 import type { Request } from 'express';
 import * as cookie from 'cookie';
-import { verifyToken } from './auth';
+import { verifyToken } from './auth.js';
 import type { Server as HTTPServer } from 'http';
 import type { Server as HTTPSServer } from 'https';
 import { syncNodeBox } from '@team-up/sync-node-box';
 import { Subscription, throttleTime } from 'rxjs';
 
 export class Server {
-  private wss!: WebSocket.Server;
+  private wss!: WebSocketServer;
 
   public clients: Client[] = [];
   private state: Record<string, ReturnType<typeof syncNodeBox>> = {};
   private stateSubscriptions: Record<string, Subscription> = {};
 
   public start(server: HTTPServer | HTTPSServer) {
-    this.wss = new WebSocket.Server({ server });
+    this.wss = new WebSocketServer({ server });
     this.wss.on('connection', this.connection.bind(this));
 
     return this.wss;

@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { StateActions, TuNode } from '../models/node.model';
-import { CommonBoardValidation } from './common-board-validation';
+import { StateActions, TuNode } from '../models/node.model.js';
+import { CommonBoardValidation } from './common-board-validation.js';
 
 const user = z.object({
   ...CommonBoardValidation,

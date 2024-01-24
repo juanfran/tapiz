@@ -1,9 +1,9 @@
 import { and, desc, eq, inArray } from 'drizzle-orm';
-import { db } from './init-db';
-import * as schema from '../schema';
+import { db } from './init-db.js';
+import * as schema from '../schema.js';
 import { TeamInvitation, TeamMember, UserTeam } from '@team-up/board-commons';
 import { SetNonNullable } from 'type-fest';
-import { getUsersBoardsByTeam } from './board-db';
+import { getUsersBoardsByTeam } from './board-db.js';
 
 export async function createTeam(name: string, userId: string) {
   const teams = await db.insert(schema.teams).values({ name }).returning();

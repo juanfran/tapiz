@@ -6,7 +6,7 @@ import { environment } from '../../environments/environment';
 import { FirebaseOptions } from 'firebase/app';
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { AppRouter } from '@team-up/api/app';
+import { AppRouter } from '@team-up/api/app/init-server';
 
 export const configFactory = (
   config: ConfigService,

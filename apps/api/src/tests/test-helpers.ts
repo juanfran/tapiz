@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { randEmail, randFirstName, randUuid } from '@ngneat/falso';
-import { appRouter } from '../app/routers';
+import { appRouter } from '../app/routers/index.js';
 
 export async function errorCall(call: () => Promise<unknown>) {
   try {

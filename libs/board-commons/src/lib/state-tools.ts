@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { StateActions } from './models/node.model';
+import type { StateActions } from './models/node.model.js';
 
 /* group patchs over the same object, example moving mouse */
 export function optimize(actions: StateActions[] | unknown[]) {

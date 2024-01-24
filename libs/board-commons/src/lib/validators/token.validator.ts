@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { NodeValidator } from '../models/node.model';
-import { CommonBoardValidation } from './common-board-validation';
+import { NodeValidator } from '../models/node.model.js';
+import { CommonBoardValidation } from './common-board-validation.js';
 
 const token = z.object({
   ...CommonBoardValidation,

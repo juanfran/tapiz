@@ -1,1 +1,1 @@
-export * from './lib/sync-node-box';
+export * from './lib/sync-node-box.js';

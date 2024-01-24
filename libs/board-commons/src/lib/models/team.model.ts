@@ -1,4 +1,4 @@
-import { Member } from './member.model';
+import { Member } from './member.model.js';
 
 export interface Team {
   id: string;

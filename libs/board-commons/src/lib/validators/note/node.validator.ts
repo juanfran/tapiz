@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-import { type StateActions } from '../../models/node.model';
-import { CommonBoardValidation } from '../common-board-validation';
+import { type StateActions } from '../../models/node.model.js';
+import { CommonBoardValidation } from '../common-board-validation.js';
 
 const note = z.object({
   ...CommonBoardValidation,

@@ -2,11 +2,10 @@ import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import cors from 'cors';
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import { createContext } from './auth.context';
-
-import { appRouter } from './routers';
-import { startWsServer } from './ws-server';
-import { setServer } from './global';
+import { createContext } from './auth.context.js';
+import { appRouter } from './routers/index.js';
+import { startWsServer } from './ws-server.js';
+import { setServer } from './global.js';
 
 export type AppRouter = typeof appRouter;
 

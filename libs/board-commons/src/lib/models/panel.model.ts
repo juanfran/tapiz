@@ -1,5 +1,5 @@
-import { TuNode } from './node.model';
-import { Point } from './point.model';
+import { TuNode } from './node.model.js';
+import { Point } from './point.model.js';
 
 export interface Panel {
   text: string;

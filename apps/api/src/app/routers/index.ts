@@ -1,7 +1,7 @@
-import { router } from '../trpc';
-import { teamRouter } from './team-routes';
-import { boardRouter } from './board-routes';
-import { userRouter } from './user-routes';
+import { router } from '../trpc.js';
+import { teamRouter } from './team-routes.js';
+import { boardRouter } from './board-routes.js';
+import { userRouter } from './user-routes.js';
 
 export const appRouter = router({
   user: userRouter,

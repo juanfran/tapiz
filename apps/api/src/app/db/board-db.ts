@@ -1,10 +1,10 @@
 import { eq, and, or, desc, notInArray } from 'drizzle-orm';
-import { db } from './init-db';
-import * as schema from '../schema';
+import { db } from './init-db.js';
+import * as schema from '../schema.js';
 import type { TuNode, UserNode } from '@team-up/board-commons';
 import { SetNonNullable } from 'type-fest';
-import * as team from './team-db';
-import { getUserTeam } from './team-db';
+import * as team from './team-db.js';
+import { getUserTeam } from './team-db.js';
 
 export async function getBoard(boardId: string) {
   const results = await db

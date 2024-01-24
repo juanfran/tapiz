@@ -5,10 +5,10 @@ import {
   UserNode,
   Validators,
 } from '@team-up/board-commons';
-import * as WebSocket from 'ws';
-import { Server } from './server';
-import db from './db';
-import { validation } from './validation';
+import { Server } from './server.js';
+import { WebSocket } from 'ws';
+import db from './db/index.js';
+import { validation } from './validation.js';
 import { z } from 'zod';
 // import { saveMsg, init } from './save-session';
 

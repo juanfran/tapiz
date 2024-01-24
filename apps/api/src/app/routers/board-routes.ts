@@ -1,15 +1,15 @@
+import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
+import { Board } from '@team-up/board-commons';
 import {
   boardAdminProcedure,
   boardMemberProcedure,
   protectedProcedure,
   router,
   teamMemberProcedure,
-} from '../trpc';
-import { TRPCError } from '@trpc/server';
-import db from '../db';
-import { z } from 'zod';
-import { Board } from '@team-up/board-commons';
-import { checkBoardAccess, revokeBoardAccess } from '../global';
+} from '../trpc.js';
+import db from '../db/index.js';
+import { checkBoardAccess, revokeBoardAccess } from '../global.js';
 
 export const boardRouter = router({
   create: protectedProcedure

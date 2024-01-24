@@ -1,8 +1,8 @@
-import { protectedProcedure, router } from '../trpc';
-import db from '../db';
-import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { getUserInvitationsByEmail } from '../db/user-db';
+import { z } from 'zod';
+import { protectedProcedure, router } from '../trpc.js';
+import db from '../db/index.js';
+import { getUserInvitationsByEmail } from '../db/user-db.js';
 
 export const userRouter = router({
   removeAccount: protectedProcedure.mutation(async (req) => {

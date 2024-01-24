@@ -1,11 +1,11 @@
 import type { StateActions, TuNode } from '@team-up/board-commons';
 
-import { applyAction } from './apply-action';
 import { BehaviorSubject, distinctUntilChanged, shareReplay } from 'rxjs';
-import { SyncNodeBoxHistory, SyncNodeBoxOptions } from './models';
-import { undo } from './undo';
-import { redo } from './redo';
-import { reverseAction } from './rever-action';
+import { applyAction } from './apply-action.js';
+import { SyncNodeBoxHistory, SyncNodeBoxOptions } from './models.js';
+import { undo } from './undo.js';
+import { redo } from './redo.js';
+import { reverseAction } from './rever-action.js';
 
 export function syncNodeBox(options?: SyncNodeBoxOptions) {
   const nodes = new BehaviorSubject<TuNode[]>([]);
@@ -80,7 +80,7 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
       setState(
         actions.reduce((state, action) => {
           if (action.parent) {
-            return state.map((it) => {
+            return state.map((it: TuNode<object, string>) => {
               if (it.id === action.parent) {
                 return {
                   ...it,

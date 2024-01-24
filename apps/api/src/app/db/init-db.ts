@@ -2,9 +2,10 @@ import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 
-import Config from '../config';
+import Config from '../config.js';
 
 export let db: PostgresJsDatabase;
+export let psqlClient: postgres.Sql;
 
 async function waitDb() {
   const connection = `postgres://${Config.DB_USER}:${Config.DB_PASSWORD}@${Config.DB_HOST}:${Config.DB_PORT}/${Config.DB_DATABASE}`;
@@ -13,9 +14,9 @@ async function waitDb() {
 
   await migrate(drizzle(migrationClient), { migrationsFolder: 'drizzle' });
 
-  const queryClient = postgres(connection);
+  psqlClient = postgres(connection);
 
-  db = drizzle(queryClient);
+  db = drizzle(psqlClient);
 
   return db;
 }

@@ -1,8 +1,8 @@
-import { protectedProcedure, router, teamAdminProcedure } from '../trpc';
 import { TRPCError } from '@trpc/server';
-import db from '../db';
 import { z } from 'zod';
-import { revokeBoardAccess } from '../global';
+import { protectedProcedure, router, teamAdminProcedure } from '../trpc.js';
+import db from '../db/index.js';
+import { revokeBoardAccess } from '../global.js';
 
 export const teamRouter = router({
   new: protectedProcedure

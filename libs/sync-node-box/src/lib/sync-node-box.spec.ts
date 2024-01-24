@@ -1,5 +1,5 @@
 import type { StateActions, TuNode } from '@team-up/board-commons';
-import { syncNodeBox } from './sync-node-box';
+import { syncNodeBox } from './sync-node-box.js';
 
 describe('syncNodeBox', () => {
   it('should initialize with an empty state', () => {
