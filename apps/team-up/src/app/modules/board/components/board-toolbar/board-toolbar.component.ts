@@ -106,7 +106,7 @@ export class BoardToolbarComponent {
           };
 
           const text: Text = {
-            text: '<p>Text</p>',
+            text: '<p></p>',
             position: textPosition,
             layer: this.layer(),
             width: 200,

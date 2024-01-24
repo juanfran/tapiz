@@ -60,7 +60,6 @@ import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
 export class TextComponent implements OnInit {
   private injector = inject(Injector);
   private historyService = inject(HistoryService);
-  private el = inject(ElementRef);
   private store = inject(Store);
 
   @Input({ required: true })

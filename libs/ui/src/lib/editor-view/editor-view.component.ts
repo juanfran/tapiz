@@ -194,6 +194,10 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
     if (this.#focus()) {
       this.#editor()?.view.focus();
     }
+
+    if (this.#toolbar()) {
+      this.#showToolbar();
+    }
   }
 
   ngOnDestroy(): void {
@@ -208,20 +212,17 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
 
   #showToolbar() {
     const node = this.#node();
+    const instance = this.#editor();
 
-    if (!node) {
+    if (!node || !instance) {
       return;
     }
 
-    const instance = this.#editor();
-
-    if (instance) {
-      this.#editorViewSharedStateService.addNode(
-        this.#node.asReadonly() as Signal<TuNode>,
-        instance,
-        this.#layoutToolbarOptions(),
-      );
-    }
+    this.#editorViewSharedStateService.addNode(
+      this.#node.asReadonly() as Signal<TuNode>,
+      instance,
+      this.#layoutToolbarOptions(),
+    );
   }
 
   #hideToolbar() {
