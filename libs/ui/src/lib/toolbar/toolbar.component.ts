@@ -320,6 +320,11 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
           name: 'Mono',
           value: 'mono',
         },
+        {
+          type: 'text',
+          name: 'Handwriting',
+          value: 'handwritting',
+        },
       ],
       active: (fontFamily: string) => {
         if (fontFamily === 'raleway') {
