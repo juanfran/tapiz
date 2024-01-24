@@ -8,17 +8,6 @@
   &.toolbar {
     outline: 1px solid #000;
   }
-
-  ::ng-deep {
-    .ProseMirror,
-    .text {
-      outline: none;
-
-      p {
-        margin-block-end: var(--size-1);
-      }
-    }
-  }
 }
 
 .readonly {

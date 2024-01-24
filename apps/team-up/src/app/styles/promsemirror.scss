@@ -1,0 +1,21 @@
+.ProseMirror {
+  outline: none;
+
+  p {
+    margin-block-end: var(--size-1);
+    font-size: var(--size-5);
+  }
+
+  h1 {
+    font-size: var(--size-14);
+  }
+
+  h2 {
+
+    font-size: var(--size-12);
+  }
+
+  h3 {
+    font-size: var(--size-10);
+  }
+}
