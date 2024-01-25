@@ -22,4 +22,10 @@
   position: absolute;
   bottom: -40px;
   width: 100%;
+  pointer-events: none;
+
+  team-up-rotate-handler {
+    pointer-events: all;
+    transform-origin: top;
+  }
 }

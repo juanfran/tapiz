@@ -35,10 +35,10 @@ import { NodesStore } from '../services/nodes.store';
       }
 
       @if (isRotable(node)) {
-        <div
-          class="rotate-wrapper"
-          [style.transform]="'scale(' + scale() + ')'">
-          <team-up-rotate-handler [node]="node" />
+        <div class="rotate-wrapper">
+          <team-up-rotate-handler
+            [node]="node"
+            [style.transform]="'scale(' + scale() + ')'" />
         </div>
       }
     }
