@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { ConfigService } from './config.service';
+import { APIConfigService } from './api-config.service';
 import { Observable, from } from 'rxjs';
 import { Invitation, TeamInvitation } from '@team-up/board-commons';
 
@@ -7,8 +7,8 @@ import { Invitation, TeamInvitation } from '@team-up/board-commons';
   providedIn: 'root',
 })
 export class TeamApiService {
-  private configService = inject(ConfigService);
-  private trpc = this.configService.getTrpcConfig();
+  private apiConfigService = inject(APIConfigService);
+  private trpc = this.apiConfigService.getTrpcConfig();
 
   public fetchTeams() {
     return from(this.trpc.team.getAll.query());

@@ -8,7 +8,6 @@ npm-debug.log
 node_modules
 
 dist
-firebase
 
 database-seed.sql
 

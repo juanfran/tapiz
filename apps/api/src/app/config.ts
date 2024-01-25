@@ -8,4 +8,5 @@ export default {
   DB_PORT_HOST: Number(process.env['DB_PORT_HOST']),
   DB_PORT: Number(process.env['DB_PORT']),
   DB_USER: process.env['POSTGRES_USER'],
+  GOOGLE_CLIENT_ID: process.env['GOOGLE_CLIENT_ID'],
 };

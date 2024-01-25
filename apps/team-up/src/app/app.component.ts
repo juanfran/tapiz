@@ -16,6 +16,6 @@ export class AppComponent {
   public title = 'team up';
 
   constructor(private authService: AuthService) {
-    this.authService.initAuth();
+    this.authService.configureLogin();
   }
 }

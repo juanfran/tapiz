@@ -8,15 +8,15 @@ import {
   Team,
 } from '@team-up/board-commons';
 import { Observable, from, map } from 'rxjs';
-import { ConfigService } from './config.service';
+import { APIConfigService } from './api-config.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BoardApiService {
-  private configService = inject(ConfigService);
+  private apiConfigService = inject(APIConfigService);
   private http = inject(HttpClient);
-  private trpc = this.configService.getTrpcConfig();
+  private trpc = this.apiConfigService.getTrpcConfig();
 
   public fetchBoards() {
     return from(this.trpc.board.boards.query());

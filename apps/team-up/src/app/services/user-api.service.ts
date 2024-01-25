@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { ConfigService } from './config.service';
 import { from } from 'rxjs';
+import { APIConfigService } from './api-config.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserApiService {
-  private configService = inject(ConfigService);
-  private trpc = this.configService.getTrpcConfig();
+  private apiConfigService = inject(APIConfigService);
+  private trpc = this.apiConfigService.getTrpcConfig();
 
   public cancelInvitation(invitationId: string) {
     return from(this.trpc.user.cancelInvite.mutate({ inviteId: invitationId }));

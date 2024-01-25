@@ -3,7 +3,7 @@ import { writeFileSync } from 'fs';
 
 dotenv.config();
 
-const front = ['API', 'WS'];
+const front = ['API', 'WS', 'GOOGLE_CLIENT_ID'];
 const frontConfig = {};
 
 front.forEach((key) => {
