@@ -2,13 +2,10 @@ import {
   enableProdMode,
   APP_INITIALIZER,
   importProvidersFrom,
-  inject,
   provideZoneChangeDetection,
   isDevMode,
 } from '@angular/core';
 
-import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
-import { getAuth, provideAuth } from '@angular/fire/auth';
 import { environment } from './environments/environment';
 import { AppComponent } from './app/app.component';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
@@ -23,6 +20,7 @@ import { configFactory, ConfigService } from './app/services/config.service';
 import { appFeature } from './app/+state/app.reducer';
 import { APP_ROUTES } from './app/app.routes';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { provideOAuthClient } from 'angular-oauth2-oidc';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { authInterceptor } from './app/commons/api-rest-interceptor/api-rest-interceptor.service';
 
@@ -38,13 +36,7 @@ export function prefersReducedMotion(): boolean {
 
 bootstrapApplication(AppComponent, {
   providers: [
-    importProvidersFrom(
-      provideFirebaseApp(() => {
-        return initializeApp(inject(ConfigService).config.firebaseConfig);
-      }),
-      provideAuth(() => getAuth()),
-      MatSnackBarModule,
-    ),
+    importProvidersFrom(MatSnackBarModule),
     prefersReducedMotion() ? provideAnimationsAsync() : provideNoopAnimations(),
     provideStore(
       {
@@ -71,6 +63,7 @@ bootstrapApplication(AppComponent, {
       multi: true,
       deps: [ConfigService],
     },
+    provideOAuthClient(),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(APP_ROUTES, withComponentInputBinding()),
     provideZoneChangeDetection({

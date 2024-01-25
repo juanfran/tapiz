@@ -72,6 +72,12 @@ export const userRouter = router({
     };
   }),
   login: protectedProcedure.query(async (req) => {
+    const user = await db.user.getUser(req.ctx.user.sub);
+
+    if (user) {
+      return true;
+    }
+
     await db.user.createUser(
       req.ctx.user.sub,
       req.ctx.user.name,

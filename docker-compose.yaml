@@ -26,8 +26,6 @@ services:
       - .env
     environment:
       - NODE_ENV=production
-    volumes:
-      - ./firebase:/home/team-up/firebase
 
   web:
     restart: always
@@ -40,8 +38,6 @@ services:
       - '${WEB_PORT}:80'
     env_file:
       - .env
-    volumes:
-      - ${FIREBASE_CONFIG}:/usr/share/nginx/html/assets/firebase.json
 
 volumes:
   pgdata:

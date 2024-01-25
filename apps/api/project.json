@@ -62,7 +62,7 @@
       "executor": "nx:run-commands",
       "outputs": [],
       "options": {
-        "command": "ts-node --project apps/api/tsconfig.app.json apps/api/src/app/regenerate.ts"
+        "command": "node apps/api/src/app/regenerate.js"
       }
     }
   },

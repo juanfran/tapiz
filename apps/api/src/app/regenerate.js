@@ -1,5 +1,13 @@
 import postgres from 'postgres';
-import Config from './config.js';
+const Config = {
+  DB_DATABASE: process.env['POSTGRES_DB'] ?? 'db',
+  DB_HOST: process.env['POSTGRES_HOST'] ?? 'localhost',
+  DB_PASSWORD: process.env['POSTGRES_PASSWORD'],
+  DB_PORT_HOST: Number(process.env['DB_PORT_HOST']),
+  DB_PORT: Number(process.env['DB_PORT']),
+  DB_USER: process.env['POSTGRES_USER'],
+  GOOGLE_CLIENT_ID: process.env['GOOGLE_CLIENT_ID'],
+};
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import { drizzle } from 'drizzle-orm/postgres-js';
 

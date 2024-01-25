@@ -1,87 +1,73 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { Auth, onAuthStateChanged } from '@angular/fire/auth';
+import { Injectable, inject, isDevMode } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { User } from '@team-up/board-commons';
-import { User as FirebaseUser } from 'firebase/auth';
-import { BehaviorSubject, filter, take } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { AppActions } from '../+state/app.actions';
-import { appFeature } from '../+state/app.reducer';
+import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
+import { ConfigService } from './config.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private store = inject(Store);
-  private auth = inject(Auth);
+  private oauthService = inject(OAuthService);
   private router = inject(Router);
   private http = inject(HttpClient);
   private authReady$ = new BehaviorSubject<boolean>(false);
+  private configService = inject(ConfigService);
+
+  public configureLogin() {
+    const authCodeFlowConfig: AuthConfig = {
+      issuer: 'https://accounts.google.com',
+      redirectUri: window.location.origin + '/login-redirect',
+      clientId: this.configService.config.GOOGLE_CLIENT_ID,
+      scope: 'openid profile email',
+      strictDiscoveryDocumentValidation: !isDevMode(),
+      clearHashAfterLogin: !isDevMode(),
+      showDebugInformation: false,
+    };
+
+    this.oauthService.events.subscribe((event) => {
+      if (event.type === 'token_received' || event.type === 'token_refreshed') {
+        document.cookie = `auth=${this.oauthService.getIdToken()}; path=/`;
+      }
+    });
+
+    this.oauthService.configure(authCodeFlowConfig);
+    this.oauthService.setupAutomaticSilentRefresh();
+
+    this.initAuth();
+  }
 
   public get authReady() {
     return this.authReady$.asObservable();
   }
 
-  public getUser() {
-    return this.http.get<User>(`http://localhost:8000/user`);
+  public async loginGoogle() {
+    this.oauthService.initLoginFlow();
   }
 
-  public initAuth() {
-    const userStr = localStorage.getItem('user');
+  private initAuth() {
+    this.oauthService.loadDiscoveryDocumentAndTryLogin().then(() => {
+      const identity = this.oauthService.getIdentityClaims();
 
-    if (userStr) {
-      const user: FirebaseUser = JSON.parse(userStr);
-
-      if (user['uid']) {
-        this.store.dispatch(AppActions.setUserId({ userId: user['uid'] }));
-      } else {
-        this.router.navigate(['/login']);
+      if (!identity) {
+        this.logout();
+        return;
       }
-    } else {
+
+      this.store.dispatch(AppActions.setUserId({ userId: identity['sub'] }));
       this.authReady$.next(true);
-    }
-
-    this.store
-      .select(appFeature.selectUserId)
-      .pipe(
-        filter((userId) => {
-          return userId.length > 0;
-        }),
-        take(1),
-      )
-      .subscribe(() => {
-        onAuthStateChanged(this.auth, async (user) => {
-          if (user) {
-            this.refreshToken();
-
-            setInterval(
-              async () => {
-                this.refreshToken(true);
-              },
-              55 * 60 * 1000,
-            );
-          } else {
-            this.logout();
-          }
-        });
-      });
+    });
   }
 
   public logout() {
-    this.auth.signOut();
+    this.oauthService.logOut();
     document.cookie = '';
     localStorage.removeItem('user');
     this.store.dispatch(AppActions.setUserId({ userId: '' }));
     this.router.navigate(['/login']);
-  }
-
-  private async refreshToken(forceRefresh = false) {
-    if (this.auth.currentUser) {
-      const idToken = await this.auth.currentUser.getIdToken(forceRefresh);
-      document.cookie = `auth=${idToken};path=/`;
-
-      this.authReady$.next(true);
-    }
   }
 }
