@@ -111,17 +111,6 @@ export class BoardFacade {
     initialValue: [],
   });
 
-  public readonly selectNoteFocus$ = this.selectFocusNodes$.pipe(
-    filterNil(),
-    filter((nodes) => {
-      return isNote(nodes[0]);
-    }),
-    map((nodes) => {
-      return nodes[0];
-    }),
-    share(),
-  );
-
   public undo() {
     return this.board.undo();
   }

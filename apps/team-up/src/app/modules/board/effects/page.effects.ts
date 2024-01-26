@@ -17,6 +17,7 @@ import { pageFeature } from '../reducers/page.reducer';
 import { filterNil } from '../../../commons/operators/filter-nil';
 import { ActivatedRoute } from '@angular/router';
 import { BoardFacade } from '../../../services/board-facade.service';
+import { isNote } from '@team-up/board-commons';
 
 @Injectable()
 export class PageEffects {
@@ -74,9 +75,14 @@ export class PageEffects {
   public cleanDrawing$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.cleanNoteDrawing),
-      concatLatestFrom(() => [this.boardFacade.selectNoteFocus$]),
-      map(([, note]) => note),
+      map(() => {
+        const nodes = this.boardFacade.selectFocusNodes();
+        return nodes.at(0);
+      }),
       filterNil(),
+      filter((node) => {
+        return isNote(node);
+      }),
       map((note) => {
         return PageActions.setNoteDrawing({
           id: note.id,
