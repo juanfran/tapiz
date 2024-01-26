@@ -13,37 +13,3 @@ You can get started with Teamup locally or self-host it with docker.
 ## Current status
 
 This is an alpha release and not yet ready for production use. Please open an issue with feedback about the current features and any issues you encounter. Let us know if you have any suggestions for new features.
-
-## TODO, features
-
-- [ ] Vote counter
-- [ ] Multilanguage
-- [ ] Shapes
-- [ ] Templates
-- [ ] Timer
-- [ ] Export with groups & panels
-- [ ] Multi board (one board with multiples ¿views?, easy to move between phases in retrospectives)
-- [ ] Reactions (emoji animation not persisted)
-- [ ] Components (kanban, grid, etc)
-- [ ] Arrows (connect nodes)
-- [ ] D&D cocomaterial on add
-- [ ] Search boards
-- [ ] Empty boards placeholder
-- [ ] Bookmarks
-- [ ] Performance not render not visible nodes
-- [ ] Select note color & format text
-- [ ] Drawing component or drawing everywhere
-- [ ] Placeholder boards home
-- [ ] Real time home boards
-- [ ] Real time members & permissions
-- [ ] Read only board
-- [ ] Usernames or display name (use email as id mention using display name)
-- [ ] Standalone nodes
-- [ ] Comments
-
-## TODO, code refactor
-
-- [ ] Refactor toolbar
-- [ ] Refactor css
-- [ ] Deprecated RX operators
-- [ ] Board Size limit
