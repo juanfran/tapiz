@@ -12,6 +12,7 @@ import { HomeActions } from './home.actions';
 export interface HomeState {
   boards: Board[];
   teams: UserTeam[];
+  loadingBoards: boolean;
   invitations: Invitation[];
   members: TeamMember[];
   userInvitations: UserInvitation[];
@@ -24,6 +25,7 @@ const sortBy = localStorage.getItem('boardSortBy') ?? '-createdAt';
 const initialHomeState: HomeState = {
   boards: [],
   teams: [],
+  loadingBoards: false,
   invitations: [],
   members: [],
   userInvitations: [],
@@ -54,9 +56,20 @@ const reducer = createReducer(
       return state;
     },
   ),
+  on(
+    HomeActions.initHome,
+    HomeActions.initAllBoardsPage,
+    (state): HomeState => {
+      return {
+        ...state,
+        loadingBoards: true,
+      };
+    },
+  ),
   on(HomeActions.fetchBoardsSuccess, (state, { boards }): HomeState => {
     return {
       ...state,
+      loadingBoards: false,
       boards,
     };
   }),
