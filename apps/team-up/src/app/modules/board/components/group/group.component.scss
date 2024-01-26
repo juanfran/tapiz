@@ -35,7 +35,6 @@
   cursor: grab;
   padding: 1rem;
   position: absolute;
-  z-index: 2;
 
   &.focus {
     border-color: #a672f8;
@@ -50,7 +49,7 @@
   }
 
   &.highlight {
-    z-index: 6;
+    z-index: var(--board-hightlight-node-layer);
   }
 }
 

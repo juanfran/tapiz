@@ -78,10 +78,6 @@ export class TextComponent implements OnInit {
     return `layer-${this.node().content.layer}`;
   }
 
-  public get zIndex() {
-    return 2;
-  }
-
   @HostListener('dblclick', ['$event'])
   public mousedown(event: MouseEvent) {
     if (!this.edit()) {

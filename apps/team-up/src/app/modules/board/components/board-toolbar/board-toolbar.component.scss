@@ -29,7 +29,7 @@
   position: absolute;
   top: 0;
   transition: all 0.5s ease;
-  z-index: 5;
+  z-index: var(--board-tools-layer);
 
   &::before {
     background: #1f1f1f;

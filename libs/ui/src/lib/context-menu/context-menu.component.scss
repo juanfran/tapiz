@@ -8,7 +8,7 @@
   inline-size: 300px;
   background-color: #fff;
   position: absolute;
-  z-index: 100;
+  z-index: var(--board-tools-layer);
   display: none;
   &.open {
     display: block;

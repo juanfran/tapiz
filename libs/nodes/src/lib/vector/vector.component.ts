@@ -38,8 +38,4 @@ export class VectorComponent {
 
   @Input({ required: true })
   public focus!: Signal<boolean>;
-
-  public get zIndex() {
-    return 2;
-  }
 }

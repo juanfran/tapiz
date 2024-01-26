@@ -50,7 +50,7 @@ textarea {
   padding: var(--spacing-2);
   position: absolute;
   width: 300px;
-  z-index: 4;
+  z-index: var(--board-important-item-layer);
   will-change: transform;
 
   canvas {
@@ -72,7 +72,7 @@ textarea {
   }
 
   &.highlight {
-    z-index: 8;
+    z-index: var(--board-hightlight-node-layer);
   }
 
   &.focus {

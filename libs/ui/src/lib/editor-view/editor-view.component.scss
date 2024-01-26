@@ -10,7 +10,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 999;
+  z-index: var(--board-tools-layer);
 
   a {
     color: var(--gray-0);

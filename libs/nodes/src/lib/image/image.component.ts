@@ -52,10 +52,6 @@ export class ImageComponent {
   @Input({ required: true })
   public focus!: Signal<boolean>;
 
-  public get zIndex() {
-    return 2;
-  }
-
   public loadImage() {
     const image = this.node();
 

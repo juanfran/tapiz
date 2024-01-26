@@ -1,4 +1,5 @@
 @import "colors.scss";
+@import "open-props/style";
 @import "@angular/cdk/overlay-prebuilt.css";
 @import "@angular/material/prebuilt-themes/deeppurple-amber.css";
 @import "override-material.scss";
@@ -7,12 +8,11 @@
 @import "fonts.scss";
 @import "responsive.scss";
 @import "spacing.scss";
-@import "z-index.scss";
 @import "generic.scss";
 @import "forms.scss";
 @import "menu.scss";
 @import "promsemirror.scss";
-@import "open-props/style";
+@import "layers.scss";
 
 .edit-mode {
   --primary-color: var(--purple);

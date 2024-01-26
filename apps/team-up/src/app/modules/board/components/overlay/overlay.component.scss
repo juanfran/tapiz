@@ -8,5 +8,5 @@
   top: 0;
   transform: scale(100);
   width: 100vw;
-  z-index: 7;
+  z-index: var(--board-overlay-layer);
 }
