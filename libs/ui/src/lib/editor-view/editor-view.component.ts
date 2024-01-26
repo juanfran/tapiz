@@ -20,7 +20,6 @@ import StarterKit from '@tiptap/starter-kit';
 import { Editor } from '@tiptap/core';
 import { Color } from '@tiptap/extension-color';
 import TextStyle from '@tiptap/extension-text-style';
-import Text from '@tiptap/extension-text';
 import TextAlign from '@tiptap/extension-text-align';
 import Link from '@tiptap/extension-link';
 import FontFamily from '@tiptap/extension-font-family';
@@ -147,7 +146,6 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
               levels: [1, 2, 3],
             },
           }),
-          Text,
           TextStyle,
           Color,
           TextAlign.configure({
