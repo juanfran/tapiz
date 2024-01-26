@@ -312,7 +312,7 @@ const reducer = createReducer(
       return board;
     });
 
-    if (state.currentTeamId !== teamId) {
+    if (state.currentTeamId && state.currentTeamId !== teamId) {
       state.boards = state.boards.filter((board) => {
         return board.id !== id;
       });
