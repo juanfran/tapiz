@@ -21,7 +21,7 @@ interface State {
   styleUrls: ['./all-boards.component.scss'],
   template: `
     <team-up-title title="Boards"></team-up-title>
-    <team-up-board-list-header>
+    <team-up-board-list-header [showCreate]="!!boards().length">
       <h1>Boards</h1>
     </team-up-board-list-header>
     @if (boards().length) {

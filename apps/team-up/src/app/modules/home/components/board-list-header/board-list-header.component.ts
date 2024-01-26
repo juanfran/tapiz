@@ -22,12 +22,14 @@ import { HomeActions } from '../../+state/home.actions';
         <ng-content></ng-content>
       </div>
 
-      <button
-        mat-flat-button
-        (click)="createBoard()"
-        color="primary">
-        Create board
-      </button>
+      @if (showCreate) {
+        <button
+          mat-flat-button
+          (click)="createBoard()"
+          color="primary">
+          Create board
+        </button>
+      }
     </header>
   `,
   styleUrls: ['./board-list-header.component.scss'],
@@ -39,6 +41,9 @@ export class BoardListHeaderComponent {
 
   @Input()
   public teamId?: string;
+
+  @Input()
+  public showCreate = true;
 
   public createBoard() {
     const dialogRef = this.dialog.open(CreateBoardComponent, {
