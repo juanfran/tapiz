@@ -221,7 +221,13 @@ const reducer = createReducer(
       if (memberId === currentUserId) {
         state.teams = state.teams.map((team) => {
           if (team.id === teamId) {
-            team.teamMember.role = role;
+            return {
+              ...team,
+              teamMember: {
+                ...team.teamMember,
+                role,
+              },
+            };
           }
 
           return team;
@@ -230,7 +236,10 @@ const reducer = createReducer(
 
       state.members = state.members.map((member) => {
         if (member.id === memberId) {
-          member.role = role;
+          return {
+            ...member,
+            role,
+          };
         }
 
         return member;
