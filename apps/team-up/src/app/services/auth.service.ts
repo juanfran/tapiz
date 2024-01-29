@@ -1,6 +1,5 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, isDevMode } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 import { AppActions } from '../+state/app.actions';
@@ -14,7 +13,6 @@ export class AuthService {
   private store = inject(Store);
   private oauthService = inject(OAuthService);
   private router = inject(Router);
-  private http = inject(HttpClient);
   private authReady$ = new BehaviorSubject<boolean>(false);
   private configService = inject(ConfigService);
 
@@ -54,7 +52,9 @@ export class AuthService {
       const identity = this.oauthService.getIdentityClaims();
 
       if (!identity) {
-        this.logout();
+        this.store.dispatch(AppActions.setUserId({ userId: '' }));
+        this.authReady$.next(true);
+
         return;
       }
 

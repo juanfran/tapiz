@@ -17,7 +17,10 @@ export class LoginRedirectComponent {
       .login()
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
-        this.router.navigate(['/']);
+        const url = sessionStorage.getItem('url') ?? '/';
+        sessionStorage.removeItem('url');
+
+        this.router.navigate([url]);
       });
   }
 }
