@@ -11,7 +11,7 @@ import { User } from '@team-up/board-commons';
 import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
-import { NgIf, NgFor, NgClass, AsyncPipe } from '@angular/common';
+import { NgClass, AsyncPipe } from '@angular/common';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
 import { pageFeature } from '../../reducers/page.reducer';
 import { BoardFacade } from '../../../../services/board-facade.service';
@@ -23,6 +23,7 @@ interface State {
   userHighlight: User['id'] | null;
   currentUser?: User;
   follow: string;
+  showUsers: boolean;
 }
 
 interface ComponentViewModel {
@@ -31,6 +32,7 @@ interface ComponentViewModel {
   currentUser?: User;
   userHighlight: User['id'] | null;
   follow: string;
+  showUsers: boolean;
 }
 
 @Component({
@@ -41,8 +43,6 @@ interface ComponentViewModel {
   providers: [RxState],
   standalone: true,
   imports: [
-    NgIf,
-    NgFor,
     SvgIconComponent,
     NgClass,
     AsyncPipe,
@@ -63,6 +63,18 @@ export class UsersComponent {
         .getUsers()
         .pipe(map((users) => users.map((user) => user.content))),
     );
+    this.state.connect(
+      'showUsers',
+      this.boardFacade.getSettings().pipe(
+        map((settings) => {
+          if (!settings) {
+            return true;
+          }
+
+          return !settings.content.anonymousMode;
+        }),
+      ),
+    );
     this.state.connect('userId', this.store.select(selectUserId));
     this.state.connect('userHighlight', this.store.select(selectUserHighlight));
     this.state.connect('follow', this.store.select(pageFeature.selectFollow));
@@ -82,15 +94,18 @@ export class UsersComponent {
   public readonly viewModel$: Observable<ComponentViewModel> = this.state
     .select()
     .pipe(
-      map(({ users, userId, currentUser, userHighlight, follow }) => {
-        return {
-          visible: currentUser?.visible ?? false,
-          users: users.filter((user) => user.id !== userId),
-          currentUser,
-          userHighlight,
-          follow,
-        };
-      }),
+      map(
+        ({ users, userId, currentUser, userHighlight, follow, showUsers }) => {
+          return {
+            visible: currentUser?.visible ?? false,
+            users: users.filter((user) => user.id !== userId),
+            currentUser,
+            userHighlight,
+            follow,
+            showUsers,
+          };
+        },
+      ),
     );
 
   public toggleVisibility() {
@@ -123,9 +138,5 @@ export class UsersComponent {
 
   public showVotes(userId: User['id']) {
     this.store.dispatch(PageActions.toggleShowVotes({ userId }));
-  }
-
-  public trackById(_: number, user: User) {
-    return user.id;
   }
 }

@@ -44,6 +44,7 @@ export interface NodeValidator {
     data: TuNode,
     userId: string,
     state: TuNode[],
+    isAdmin: boolean,
   ) =>
     | {
         success: true;
@@ -55,6 +56,7 @@ export interface NodeValidator {
     userId: string,
     state: TuNode[],
     node: TuNode,
+    isAdmin: boolean,
   ) =>
     | {
         success: true;
@@ -66,6 +68,7 @@ export interface NodeValidator {
     userId: string,
     state: TuNode[],
     node: TuNode,
+    isAdmin: boolean,
   ) =>
     | {
         success: true;

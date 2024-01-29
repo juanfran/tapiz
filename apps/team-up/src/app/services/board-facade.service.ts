@@ -1,21 +1,29 @@
 import { Injectable, inject } from '@angular/core';
 
 import { Store } from '@ngrx/store';
-import { StateActions, UserNode, isNote } from '@team-up/board-commons';
+import {
+  BoardSettings,
+  StateActions,
+  TuNode,
+  UserNode,
+  isNote,
+} from '@team-up/board-commons';
 import { syncNodeBox } from '@team-up/sync-node-box';
 import {
   Observable,
   combineLatest,
   distinctUntilChanged,
-  filter,
   map,
   share,
 } from 'rxjs';
 import { pageFeature } from '../modules/board/reducers/page.reducer';
 import { concatLatestFrom } from '@ngrx/effects';
-import { filterNil } from 'ngxtension/filter-nil';
 import * as R from 'remeda';
 import { toSignal } from '@angular/core/rxjs-interop';
+
+const isBoardSettings = (it: TuNode): it is TuNode<BoardSettings> => {
+  return it.type === 'settings';
+};
 
 @Injectable({ providedIn: 'root' })
 export class BoardFacade {
@@ -47,6 +55,16 @@ export class BoardFacade {
   public getUsers(): Observable<UserNode[]> {
     return this.getNodes().pipe(
       map((nodes) => nodes.filter((it): it is UserNode => it.type === 'user')),
+    );
+  }
+
+  public getSettings(): Observable<TuNode<BoardSettings> | undefined> {
+    return this.getNodes().pipe(
+      map((nodes) => {
+        return nodes.find((it) => isBoardSettings(it)) as
+          | TuNode<BoardSettings>
+          | undefined;
+      }),
     );
   }
 

@@ -80,11 +80,20 @@ export async function getBoardAdmins(boardId: string) {
     ids.add(board.accountId);
   });
 
-  const teamAdmins = await team.getTeamAdmins(boardId);
+  const resultTeam = await db
+    .select({ teamId: schema.boards.teamId })
+    .from(schema.boards)
+    .where(eq(schema.boards.id, boardId));
 
-  teamAdmins.forEach((team) => {
-    ids.add(team.accountId);
-  });
+  const teamId = resultTeam.at(0)?.teamId;
+
+  if (teamId) {
+    const teamAdmins = await team.getTeamAdmins(teamId);
+
+    teamAdmins.forEach((team) => {
+      ids.add(team.accountId);
+    });
+  }
 
   return Array.from(ids);
 }

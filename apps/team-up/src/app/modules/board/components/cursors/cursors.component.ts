@@ -1,17 +1,47 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  computed,
+} from '@angular/core';
 
-import { NgFor, NgIf, AsyncPipe } from '@angular/common';
 import { BoardFacade } from '../../../../services/board-facade.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'team-up-cursors',
-  templateUrl: './cursors.component.html',
+  template: `
+    @if (showCursors()) {
+      @for (user of users(); track user.id) {
+        @if (user.cursor) {
+          <div
+            class="cursor"
+            [style.top.px]="user.cursor.y"
+            [style.left.px]="user.cursor.x">
+            <span>{{ user.name.charAt(0).toUpperCase() }}</span>
+          </div>
+        }
+      }
+    }
+  `,
   styleUrls: ['./cursors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgFor, NgIf, AsyncPipe],
+  imports: [],
 })
 export class CursorsComponent {
-  private boardFacade = inject(BoardFacade);
-  public users$ = this.boardFacade.selectCursors();
+  #boardFacade = inject(BoardFacade);
+  users = toSignal(this.#boardFacade.selectCursors());
+
+  #settings = toSignal(this.#boardFacade.getSettings());
+
+  showCursors = computed(() => {
+    const settings = this.#settings();
+
+    if (!settings) {
+      return true;
+    }
+
+    return !settings.content.anonymousMode;
+  });
 }
