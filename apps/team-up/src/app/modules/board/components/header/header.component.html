@@ -33,8 +33,17 @@
     </ng-container>
   </div>
   <div class="header-end">
+    @if (vm.isAdmin) {
+      <button
+        title="Settings"
+        class="button-action"
+        (click)="settings()">
+        <mat-icon>settings</mat-icon>
+      </button>
+    }
     <button
-      class="share"
+      title="Share"
+      class="button-action"
       (click)="share()">
       <mat-icon>share</mat-icon>
     </button>

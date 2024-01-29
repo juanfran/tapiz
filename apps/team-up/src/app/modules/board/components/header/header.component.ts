@@ -23,6 +23,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ShareBoardComponent } from '../share-board/share-board.component';
 import { pageFeature } from '../../reducers/page.reducer';
+import { BoardSettingsComponent } from '../board-settings/board-settings.component';
 
 interface State {
   edit: boolean;
@@ -107,6 +108,13 @@ export class HeaderComponent {
 
   public share() {
     this.dialog.open(ShareBoardComponent, {
+      width: '600px',
+      autoFocus: 'dialog',
+    });
+  }
+
+  public settings() {
+    this.dialog.open(BoardSettingsComponent, {
       width: '600px',
       autoFocus: 'dialog',
     });

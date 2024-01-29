@@ -87,7 +87,7 @@ export class Client {
       return;
     }
 
-    const validationResult = validation(message, state, this.id);
+    const validationResult = validation(message, state, this.id, this.isAdmin);
 
     if (!validationResult.length) {
       return;

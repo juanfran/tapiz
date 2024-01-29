@@ -2,6 +2,7 @@ import { StateActions, TuNode, Validators } from '@team-up/board-commons';
 
 import { PERSONAL_TOKEN_VALIDATOR } from '@team-up/board-commons/validators/token.validator.js';
 import { ESTIMATION_VALIDATORS } from '@team-up/board-commons/validators/estimation.validator.js';
+import { SETTINGS_VALIDATOR } from '@team-up/board-commons/validators/settings.validators.js';
 
 import { noteValidator } from '@team-up/board-commons/validators/note/node.validator.js';
 
@@ -31,6 +32,10 @@ const validations = {
       type: 'token',
       validator: PERSONAL_TOKEN_VALIDATOR,
     },
+    {
+      type: 'settings',
+      validator: SETTINGS_VALIDATOR,
+    },
     ...ESTIMATION_VALIDATORS,
   ],
 };
@@ -39,6 +44,7 @@ export const validateAction = (
   msg: StateActions,
   state: TuNode[],
   userId: string,
+  isAdmin: boolean,
 ) => {
   const customValidators = msg.data.type in validations.custom;
 
@@ -62,7 +68,12 @@ export const validateAction = (
 
   if (validatorConfig) {
     if (msg.op === 'add') {
-      const result = validatorConfig.validator.add(msg.data, userId, state);
+      const result = validatorConfig.validator.add(
+        msg.data,
+        userId,
+        state,
+        isAdmin,
+      );
 
       if (result.success) {
         return {
@@ -83,6 +94,7 @@ export const validateAction = (
         userId,
         state,
         node,
+        isAdmin,
       );
 
       if (result.success) {
@@ -104,6 +116,7 @@ export const validateAction = (
         userId,
         state,
         node,
+        isAdmin,
       );
 
       if (result.success) {
@@ -194,12 +207,13 @@ export const validation = (
   msg: StateActions[],
   state: TuNode[],
   userId: string,
+  isAdmin: boolean,
 ) => {
   if (Array.isArray(msg)) {
     msg = msg.filter((it) => Validators.stateAction.safeParse(it).success);
 
     const actions = msg.map((it) => {
-      return validateAction(it, state, userId);
+      return validateAction(it, state, userId, isAdmin);
     });
 
     if (actions.every((it) => it)) {

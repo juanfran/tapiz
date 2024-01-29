@@ -350,36 +350,13 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
           this.store.select(selectZoom),
           this.store.select(selectPosition),
           this.store.select(selectUserId),
-          this.store.select(selectCanvasMode),
         ),
       )
-      .subscribe(([event, zoom, position, userId, canvasMode]) => {
-        if (canvasMode === 'editMode') {
-          const note = this.notesService.getNew({
-            ownerId: userId,
-            layer: this.layer(),
-            position: {
-              x: (-position.x + event.pageX) / zoom,
-              y: (-position.y + event.pageY) / zoom,
-            },
-          });
-
-          this.store.dispatch(
-            BoardActions.batchNodeActions({
-              history: true,
-              actions: [
-                {
-                  data: {
-                    type: 'note',
-                    id: v4(),
-                    content: note,
-                  },
-                  op: 'add',
-                },
-              ],
-            }),
-          );
-        }
+      .subscribe(([event, zoom, position, userId]) => {
+        this.notesService.createNote(userId, {
+          x: (-position.x + event.clientX) / zoom,
+          y: (-position.y + event.clientY) / zoom,
+        });
       });
 
     this.boardMoveService.listen(this.el.nativeElement);

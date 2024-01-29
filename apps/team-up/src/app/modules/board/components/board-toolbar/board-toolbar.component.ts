@@ -153,29 +153,10 @@ export class BoardToolbarComponent {
       )
       .subscribe({
         next: ([event, zoom, position, userId]) => {
-          const note = this.notesService.getNew({
-            layer: this.layer(),
-            ownerId: userId,
-            position: {
-              x: (-position.x + event.pageX) / zoom,
-              y: (-position.y + event.pageY) / zoom,
-            },
+          this.notesService.createNote(userId, {
+            x: (-position.x + event.clientX) / zoom,
+            y: (-position.y + event.clientY) / zoom,
           });
-          this.store.dispatch(
-            BoardActions.batchNodeActions({
-              history: true,
-              actions: [
-                {
-                  data: {
-                    type: 'note',
-                    id: v4(),
-                    content: note,
-                  },
-                  op: 'add',
-                },
-              ],
-            }),
-          );
         },
         complete: () => this.popupOpen(''),
       });

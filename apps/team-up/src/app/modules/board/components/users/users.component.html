@@ -1,45 +1,53 @@
-<ng-container *ngIf="viewModel$ | async as vm">
+@if (viewModel$ | async; as vm) {
   <div class="right-col-toolbar users">
     <button class="title-container">
       <h2 class="title">People</h2>
     </button>
     <div class="user-container">
+      @if (vm.showUsers) {
+        @for (user of vm.users; track user.id) {
+          <button
+            [cdkMenuTriggerFor]="menu"
+            [cdkMenuTriggerData]="{ user: user }"
+            [class.offline]="!user.connected"
+            [class.active]="user.id === vm.userHighlight"
+            class="user">
+            <team-up-svg-icon
+              icon="user"
+              class="icon-svg"></team-up-svg-icon>
+            <p class="username">
+              <span
+                class="name"
+                [title]="user.name"
+                >{{ user.name }}</span
+              >
+            </p>
+          </button>
+        }
+      } @else {
+        <div class="no-users">
+          <p>Anonymous mode</p>
+        </div>
+      }
+    </div>
+    @if (vm.currentUser) {
       <button
-        *ngFor="let user of vm.users; trackBy: trackById"
+        class="user me"
         [cdkMenuTriggerFor]="menu"
-        [cdkMenuTriggerData]="{ user: user }"
-        [class.offline]="!user.connected"
-        [class.active]="user.id === vm.userHighlight"
-        class="user">
+        [cdkMenuTriggerData]="{ user: vm.currentUser }">
         <team-up-svg-icon
           icon="user"
           class="icon-svg"></team-up-svg-icon>
         <p class="username">
           <span
             class="name"
-            [title]="user.name"
-            >{{ user.name }}</span
+            [title]="vm.currentUser.name"
+            >{{ vm.currentUser.name }}</span
           >
+          <span class="myself">(me)</span>
         </p>
       </button>
-    </div>
-    <button
-      *ngIf="vm.currentUser"
-      class="user me"
-      [cdkMenuTriggerFor]="menu"
-      [cdkMenuTriggerData]="{ user: vm.currentUser }">
-      <team-up-svg-icon
-        icon="user"
-        class="icon-svg"></team-up-svg-icon>
-      <p class="username">
-        <span
-          class="name"
-          [title]="vm.currentUser.name"
-          >{{ vm.currentUser.name }}</span
-        >
-        <span class="myself">(me)</span>
-      </p>
-    </button>
+    }
   </div>
   <div class="right-col-toolbar">
     <div class="title-container">
@@ -52,8 +60,11 @@
       <div class="slider-wrapper">
         <div class="slider-dot"></div>
       </div>
-      <span *ngIf="!vm.visible">Disabled</span>
-      <span *ngIf="vm.visible">Enabled</span>
+      @if (vm.visible) {
+        <span>Enabled</span>
+      } @else {
+        <span>Disabled</span>
+      }
     </button>
   </div>
 
@@ -68,8 +79,11 @@
         cdkMenuItem
         class="menu-item"
         (cdkMenuItemTriggered)="follow(user.id)">
-        <ng-container *ngIf="!vm.follow">Follow</ng-container>
-        <ng-container *ngIf="vm.follow">Unfollow</ng-container>
+        @if (vm.follow) {
+          Unfollow
+        } @else {
+          Follow
+        }
       </button>
       <button
         cdkMenuItem
@@ -85,4 +99,4 @@
       </button>
     </div>
   </ng-template>
-</ng-container>
+}
