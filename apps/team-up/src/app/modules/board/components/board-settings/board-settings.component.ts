@@ -86,8 +86,6 @@ export class BoardSettingsComponent {
     effect(() => {
       const settings = this.#settings();
 
-      console.log(settings);
-
       if (settings) {
         this.form.patchValue(settings.content);
       }
