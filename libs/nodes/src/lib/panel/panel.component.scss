@@ -14,7 +14,8 @@
   border: var(--borderWidth) solid var(--borderColor);
   border-radius: var(--borderRadius);
 
-  team-up-editor-view {
+  team-up-editor-view,
+  .rich-text {
     inline-size: 100%;
     padding: var(--spacing-3);
   }

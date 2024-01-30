@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { map, tap } from 'rxjs/operators';
+import { filter, map, tap } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
 import { StateActions } from '@team-up/board-commons';
@@ -15,6 +15,9 @@ export class HistoryEffects {
   public undo$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.undo),
+      filter(() => {
+        return !document.activeElement?.getAttribute('contenteditable');
+      }),
       map(() => {
         const actions = this.boardFacade.undo();
 
@@ -29,6 +32,9 @@ export class HistoryEffects {
   public redo$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.redo),
+      filter(() => {
+        return !document.activeElement?.getAttribute('contenteditable');
+      }),
       map(() => {
         const actions = this.boardFacade.redo();
 

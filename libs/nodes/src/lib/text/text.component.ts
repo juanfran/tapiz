@@ -31,14 +31,20 @@ import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
       [resize]="true"
       [rotate]="true"
       [enabled]="!edit() && focus()">
-      <team-up-editor-view
-        [class.readonly]="!edit()"
-        #editorView="editorView"
-        [node]="node()"
-        [toolbar]="edit()"
-        [content]="node().content.text"
-        [focus]="edit()"
-        (contentChange)="newContent.set($event)" />
+      @if (!edit()) {
+        <div
+          class="rich-text"
+          [innerHTML]="node().content.text | safeHtml"></div>
+      } @else {
+        <team-up-editor-view
+          [class.readonly]="!edit()"
+          #editorView="editorView"
+          [node]="node()"
+          [toolbar]="edit()"
+          [content]="node().content.text"
+          [focus]="edit()"
+          (contentChange)="newContent.set($event)" />
+      }
     </team-up-node-space>
   `,
   styleUrls: ['./text.component.scss'],
