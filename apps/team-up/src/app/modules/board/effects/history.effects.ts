@@ -6,6 +6,7 @@ import { PageActions } from '../actions/page.actions';
 import { StateActions } from '@team-up/board-commons';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { WsService } from '../../ws/services/ws.service';
+import { isInputField } from '@team-up/cdk/utils/is-input-field';
 
 @Injectable()
 export class HistoryEffects {
@@ -16,7 +17,7 @@ export class HistoryEffects {
     return this.actions$.pipe(
       ofType(PageActions.undo),
       filter(() => {
-        return !document.activeElement?.getAttribute('contenteditable');
+        return !isInputField();
       }),
       map(() => {
         const actions = this.boardFacade.undo();
@@ -33,7 +34,7 @@ export class HistoryEffects {
     return this.actions$.pipe(
       ofType(PageActions.redo),
       filter(() => {
-        return !document.activeElement?.getAttribute('contenteditable');
+        return !isInputField();
       }),
       map(() => {
         const actions = this.boardFacade.redo();

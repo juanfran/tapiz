@@ -17,7 +17,7 @@ import {
 } from '@angular/core';
 import { RxState } from '@rx-angular/state';
 import { Point, TuNode } from '@team-up/board-commons';
-import { distinctUntilChanged, map, take } from 'rxjs';
+import { distinctUntilChanged, filter, map, take } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { selectFocusId } from '../../selectors/page.selectors';
 import { BoardActions } from '../../actions/board.actions';
@@ -27,6 +27,7 @@ import { DynamicComponent } from './dynamic-component';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { filterNil } from 'ngxtension/filter-nil';
 import { compose, rotateDEG, translate, toCSS } from 'transformation-matrix';
+import { isInputField } from '@team-up/cdk/utils/is-input-field';
 
 interface State {
   position: {
@@ -103,9 +104,16 @@ export class NodeComponent implements OnInit {
         .pipe(map((it) => it.includes(this.state.get('node').id))),
     );
 
-    this.hotkeysService.listen({ key: 'Delete' }).subscribe(() => {
-      this.onDeletePress();
-    });
+    this.hotkeysService
+      .listen({ key: 'Delete' })
+      .pipe(
+        filter(() => {
+          return !isInputField();
+        }),
+      )
+      .subscribe(() => {
+        this.onDeletePress();
+      });
   }
 
   private positionState() {

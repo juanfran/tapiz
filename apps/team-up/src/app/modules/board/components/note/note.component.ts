@@ -58,6 +58,7 @@ import { HistoryService } from '@team-up/nodes/services/history.service';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { filterNil } from '../../../../commons/operators/filter-nil';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
+import { isInputField } from '@team-up/cdk/utils/is-input-field';
 
 interface State {
   edit: boolean;
@@ -562,7 +563,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     );
 
     this.hotkeysService.listen({ key: 'Delete' }).subscribe(() => {
-      if (this.state.get('focus')) {
+      if (this.state.get('focus') && !isInputField()) {
         this.store.dispatch(
           BoardActions.batchNodeActions({
             history: true,
