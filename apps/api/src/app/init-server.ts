@@ -1,38 +1,65 @@
-import { createExpressMiddleware } from '@trpc/server/adapters/express';
-import cors from 'cors';
-import express from 'express';
-import cookieParser from 'cookie-parser';
+import Fastify from 'fastify';
 import { createContext } from './auth.context.js';
 import { appRouter } from './routers/index.js';
-import { startWsServer } from './ws-server.js';
-import { setServer } from './global.js';
+import fastifyCookie from '@fastify/cookie';
+import cors from '@fastify/cors';
+import ws from '@fastify/websocket';
+
+import {
+  fastifyTRPCPlugin,
+  FastifyTRPCPluginOptions,
+} from '@trpc/server/adapters/fastify';
+import { Server } from './server.js';
 
 export type AppRouter = typeof appRouter;
 
-export const app = express();
+const fastify = Fastify({
+  logger: false,
+  maxParamLength: 5000,
+});
 
-app.use(express.json());
-app.use(cookieParser());
-app.use(
-  cors({
-    credentials: true,
-    origin: true,
-  }),
-);
+fastify.register(fastifyCookie, {
+  hook: 'onRequest',
+  parseOptions: {},
+});
 
-app.use(
-  '/api/trpc',
-  createExpressMiddleware({ router: appRouter, createContext }),
-);
+fastify.register(fastifyTRPCPlugin, {
+  prefix: '/api/trpc',
+  trpcOptions: {
+    router: appRouter,
+    createContext,
+    onError({ path, error }) {
+      // report to error monitoring
+      console.error(`Error in tRPC handler on path '${path}':`, error);
+    },
+  } satisfies FastifyTRPCPluginOptions<AppRouter>['trpcOptions'],
+});
+
+fastify.register(cors, {
+  credentials: true,
+  origin: true,
+});
+
+fastify.register(ws);
+
+fastify.register(async function (fastify) {
+  let server: Server | null = null;
+
+  fastify.get('/events', { websocket: true }, (connection, req) => {
+    if (!server) {
+      server = new Server();
+    }
+
+    server.connection(connection.socket, req);
+  });
+});
 
 const port = 8000;
 
 export function startApiServer() {
-  const httpServer = app.listen(port, () => {
+  fastify.listen({ port }, (err) => {
+    if (err) throw err;
+
     console.log(`http://localhost:${port}`);
   });
-
-  const server = startWsServer(httpServer);
-
-  setServer(server);
 }

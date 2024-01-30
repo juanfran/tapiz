@@ -1,9 +1,12 @@
 import WebSocket from 'ws';
 
-import { startWsServer } from '../app/ws-server';
 import { startDB } from '../app/db/init-db';
-import * as http from 'http';
-import { createMultipleUsers, getAuth, getUserCaller } from './test-helpers';
+import {
+  createMultipleUsers,
+  getAuth,
+  getUserCaller,
+  initTestServer,
+} from './test-helpers';
 import { getBoardUser } from '../app/db/board-db';
 import { Server } from '../app/server';
 
@@ -35,11 +38,7 @@ describe('ws', () => {
   beforeAll(async () => {
     await startDB();
     await createMultipleUsers();
-
-    const server = http.createServer();
-    server.listen(port);
-
-    wsServer = startWsServer(server);
+    wsServer = await initTestServer(port);
   });
 
   function onClose() {
@@ -51,7 +50,7 @@ describe('ws', () => {
   }
 
   beforeAll((done) => {
-    ws = new WebSocket(`ws://localhost:${port}`, {
+    ws = new WebSocket(`ws://localhost:${port}/events`, {
       headers: {
         Cookie: 'auth=1',
       },

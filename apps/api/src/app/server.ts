@@ -1,54 +1,39 @@
 import type { StateActions, TuNode, UserNode } from '@team-up/board-commons';
-import { WebSocket, WebSocketServer } from 'ws';
+import type { WebSocket } from 'ws';
 import { Client } from './client.js';
 import db from './db/index.js';
-import type { Request } from 'express';
-import * as cookie from 'cookie';
+
 import { verifyToken } from './auth.js';
-import type { Server as HTTPServer } from 'http';
-import type { Server as HTTPSServer } from 'https';
 import { syncNodeBox } from '@team-up/sync-node-box';
 import { Subscription, throttleTime } from 'rxjs';
+import { FastifyRequest } from 'fastify';
 
 export class Server {
-  private wss!: WebSocketServer;
-
   public clients: Client[] = [];
   private state: Record<string, ReturnType<typeof syncNodeBox>> = {};
   private stateSubscriptions: Record<string, Subscription> = {};
-
-  public start(server: HTTPServer | HTTPSServer) {
-    this.wss = new WebSocketServer({ server });
-    this.wss.on('connection', this.connection.bind(this));
-
-    return this.wss;
-  }
 
   public clientClose(client: Client) {
     this.clients = this.clients.filter((it) => it !== client);
   }
 
-  public async connection(ws: WebSocket, req: Request) {
-    if (req.headers.cookie) {
-      const cookies = cookie.parse(req.headers.cookie);
-
-      if (cookies['auth']) {
-        const user = await verifyToken(cookies['auth']);
-        if (user && user['name']) {
-          const client = new Client(
-            ws,
-            this,
-            user['name'] ?? 'anonymous',
-            user.sub,
-            user.email,
-          );
-          this.clients.push(client);
-          return;
-        }
+  public async connection(wss: WebSocket, req: FastifyRequest) {
+    if (req.cookies['auth']) {
+      const user = await verifyToken(req.cookies['auth']);
+      if (user && user['name']) {
+        const client = new Client(
+          wss,
+          this,
+          user['name'] ?? 'anonymous',
+          user.sub,
+          user.email,
+        );
+        this.clients.push(client);
+        return;
       }
     }
 
-    ws.close();
+    wss.close();
   }
 
   public connectedBoardClients(boardId: string) {
