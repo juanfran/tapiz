@@ -9,6 +9,7 @@ import {
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
+  MAT_AUTOCOMPLETE_SCROLL_STRATEGY_FACTORY_PROVIDER,
   MatAutocompleteModule,
   MatAutocompleteSelectedEvent,
 } from '@angular/material/autocomplete';
@@ -26,6 +27,7 @@ import { PageActions } from '../../actions/page.actions';
 import { selectUserId } from '../../selectors/page.selectors';
 import { Note, TuNode, isNote } from '@team-up/board-commons';
 import { BoardFacade } from '../../../../services/board-facade.service';
+
 @Component({
   selector: 'team-up-search-options',
   templateUrl: './search-options.component.html',
@@ -39,6 +41,7 @@ import { BoardFacade } from '../../../../services/board-facade.service';
     MatOptionModule,
     CommonModule,
   ],
+  providers: [MAT_AUTOCOMPLETE_SCROLL_STRATEGY_FACTORY_PROVIDER],
 })
 export class SearchOptionsComponent implements AfterViewInit {
   @ViewChild('search') searchInput!: ElementRef<HTMLInputElement>;
