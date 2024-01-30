@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 // eslint-disable-next-line @nx/enforce-module-boundaries
-import { AppRouter } from '@team-up/api/app/init-server';
+import type { AppRouter } from '@team-up/api/app/trpc-type';
 import { AuthService } from './auth.service';
 import { ConfigService } from './config.service';
 

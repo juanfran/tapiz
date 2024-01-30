@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 import { createContext } from './auth.context.js';
-import { appRouter } from './routers/index.js';
+import { AppRouter, appRouter } from './routers/index.js';
 import fastifyCookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import ws from '@fastify/websocket';
@@ -10,8 +10,6 @@ import {
   FastifyTRPCPluginOptions,
 } from '@trpc/server/adapters/fastify';
 import { Server } from './server.js';
-
-export type AppRouter = typeof appRouter;
 
 const fastify = Fastify({
   logger: false,

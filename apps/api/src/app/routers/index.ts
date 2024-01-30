@@ -8,3 +8,5 @@ export const appRouter = router({
   board: boardRouter,
   team: teamRouter,
 });
+
+export type AppRouter = typeof appRouter;
