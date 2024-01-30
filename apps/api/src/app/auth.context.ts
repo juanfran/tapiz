@@ -1,11 +1,10 @@
 import { inferAsyncReturnType } from '@trpc/server';
-import cookieParser from 'cookie-parser';
-import { CreateExpressContextOptions } from '@trpc/server/adapters/express';
+import { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { verifyToken } from './auth.js';
 
-export async function createContext({ req }: CreateExpressContextOptions) {
+export async function createContext({ req }: CreateFastifyContextOptions) {
   async function getUserFromHeader() {
-    const cookies = cookieParser.JSONCookies(req.cookies);
+    const cookies = req.cookies;
 
     if (cookies['auth'] && typeof cookies['auth'] === 'string') {
       return await verifyToken(cookies['auth']);

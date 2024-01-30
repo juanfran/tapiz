@@ -6,7 +6,7 @@ import {
   Validators,
 } from '@team-up/board-commons';
 import { Server } from './server.js';
-import { WebSocket } from 'ws';
+import type { WebSocket } from 'ws';
 import db from './db/index.js';
 import { validation } from './validation.js';
 import { z } from 'zod';

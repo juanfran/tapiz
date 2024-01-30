@@ -1,10 +1,13 @@
 import WebSocket from 'ws';
 
-import { startWsServer } from '../app/ws-server';
 import { startDB } from '../app/db/init-db';
 import { BoardCommonActions } from '@team-up/board-commons';
-import * as http from 'http';
-import { createMultipleUsers, getAuth, getUserCaller } from './test-helpers';
+import {
+  createMultipleUsers,
+  getAuth,
+  getUserCaller,
+  initTestServer,
+} from './test-helpers';
 import { getBoard, getBoardUser } from '../app/db/board-db';
 
 jest.mock('../app/auth', () => {
@@ -19,6 +22,7 @@ jest.mock('../app/auth', () => {
 
 describe('ws', () => {
   let ws: WebSocket;
+  const port = 8011;
 
   const send = (obj: unknown) => {
     return new Promise((resolve) => {
@@ -33,15 +37,11 @@ describe('ws', () => {
   beforeAll(async () => {
     await startDB();
     await createMultipleUsers();
-
-    const server = http.createServer();
-    server.listen(8000);
-
-    startWsServer(server);
+    await initTestServer(port);
   });
 
   beforeAll((done) => {
-    ws = new WebSocket(`ws://localhost:8000`, {
+    ws = new WebSocket(`ws://localhost:${port}/events`, {
       headers: {
         Cookie: 'auth=1',
       },

@@ -1,6 +1,10 @@
 import { TRPCError } from '@trpc/server';
 import { randEmail, randFirstName, randUuid } from '@ngneat/falso';
 import { appRouter } from '../app/routers/index.js';
+import Fastify from 'fastify';
+import fastifyCookie from '@fastify/cookie';
+import ws from '@fastify/websocket';
+import { Server } from '../app/server.js';
 
 export async function errorCall(call: () => Promise<unknown>) {
   try {
@@ -45,5 +49,36 @@ export const createMultipleUsers = async (size = usersTest.length) => {
 export const getUserCaller = (userIndex: number) => {
   return appRouter.createCaller({
     user: getAuth(userIndex),
+  });
+};
+
+export const initTestServer = (port: number): Promise<Server> => {
+  return new Promise((resolve) => {
+    const fastify = Fastify({
+      logger: true,
+      maxParamLength: 5000,
+    });
+
+    fastify.register(fastifyCookie, {
+      hook: 'onRequest',
+      parseOptions: {},
+    });
+
+    fastify.register(ws);
+
+    const server = new Server();
+
+    fastify.register(async function (fastify) {
+      fastify.get('/events', { websocket: true }, (connection, req) => {
+        server.connection(connection.socket, req);
+      });
+    });
+
+    fastify.listen({ port }, (err) => {
+      if (err) throw err;
+
+      console.log(`http://localhost:${port}`);
+      resolve(server);
+    });
   });
 };
