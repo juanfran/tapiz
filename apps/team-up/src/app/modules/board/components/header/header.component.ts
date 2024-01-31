@@ -15,7 +15,7 @@ import {
 import { ExportService } from '../../services/export.service';
 import { ClickOutsideDirective } from '@team-up/ui/click-outside/click-outside.directive';
 import { AutoFocusDirective } from '../../directives/autofocus.directive';
-import { NgIf } from '@angular/common';
+
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { RouterLink } from '@angular/router';
 import { RxLet } from '@rx-angular/template/let';
@@ -42,7 +42,6 @@ interface State {
     RxLet,
     RouterLink,
     SvgIconComponent,
-    NgIf,
     AutoFocusDirective,
     ClickOutsideDirective,
     MatIconModule,

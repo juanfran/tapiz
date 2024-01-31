@@ -30,14 +30,13 @@ interface State {
     BoardListHeaderComponent,
   ],
   template: `
-    <ng-container *ngIf="model$ | async as vm">
+    @if (model$ | async; as vm) {
       <team-up-title title="Starred"></team-up-title>
       <team-up-board-list-header>
         <h1>Starred</h1>
       </team-up-board-list-header>
-
       <team-up-board-list [boards]="vm.boards"></team-up-board-list>
-    </ng-container>
+    }
   `,
 })
 export class StarredComponent {

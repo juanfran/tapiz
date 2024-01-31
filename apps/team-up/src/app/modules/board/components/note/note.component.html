@@ -1,10 +1,10 @@
-<ng-container *ngIf="viewModel$ | async as vm">
-  <div
-    *ngIf="vm.votes > 0"
-    class="vote">
-    {{ vm.votes }}
-  </div>
-  <ng-container *ngIf="vm.edit">
+@if (viewModel$ | async; as vm) {
+  @if (vm.votes > 0) {
+    <div class="vote">
+      {{ vm.votes }}
+    </div>
+  }
+  @if (vm.edit) {
     <textarea
       #textarea
       maxlength="140"
@@ -12,30 +12,29 @@
       (focus)="selectTextarea($event)"
       >{{ vm.editText }}</textarea
     >
-  </ng-container>
-
-  <ng-container *ngIf="!vm.edit">
+  }
+  @if (!vm.edit) {
     <div class="text">{{ vm.note.content.text }}</div>
-  </ng-container>
-
+  }
   <div
     class="name"
     [title]="vm.username">
     {{ vm.username }}
   </div>
   <div class="characters">{{ vm.note.content.text.length }}/140</div>
-
-  <div
-    *ngFor="let emoji of vm.note.content.emojis"
-    class="emoji"
-    [style.left.px]="emoji.position.x"
-    [style.top.px]="emoji.position.y">
-    {{ emoji.unicode }}
-  </div>
-  <canvas
-    *ngIf="vm.visible"
-    [teamUpDrawing]="vm.note.content.drawing"
-    (drawing)="setDrawing($event)"
-    width="300"
-    height="300"></canvas>
-</ng-container>
+  @for (emoji of vm.note.content.emojis; track emoji) {
+    <div
+      class="emoji"
+      [style.left.px]="emoji.position.x"
+      [style.top.px]="emoji.position.y">
+      {{ emoji.unicode }}
+    </div>
+  }
+  @if (vm.visible) {
+    <canvas
+      [teamUpDrawing]="vm.note.content.drawing"
+      (drawing)="setDrawing($event)"
+      width="300"
+      height="300"></canvas>
+  }
+}

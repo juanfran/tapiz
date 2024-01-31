@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import {
@@ -25,35 +24,40 @@ import { trackByProp } from '../../../../shared/track-by-prop';
     </h1>
 
     <div class="invitations">
-      <div
-        class="invitation"
-        *ngFor="let invitation of data.invitations; trackBy: trackByUserId">
-        <div
-          class="invitation-info"
-          *ngIf="invitation.team">
-          <div class="invitation-title">Team: {{ invitation.team.name }}</div>
+      @for (
+        invitation of data.invitations;
+        track trackByUserId($index, invitation)
+      ) {
+        <div class="invitation">
+          @if (invitation.team) {
+            <div class="invitation-info">
+              <div class="invitation-title">
+                Team: {{ invitation.team.name }}
+              </div>
+            </div>
+          }
+          <div class="invitation-actions">
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="acceptInvitation(invitation)">
+              <mat-icon>check</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="rejectInvitation(invitation)">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
         </div>
-        <div class="invitation-actions">
-          <button
-            mat-icon-button
-            color="primary"
-            (click)="acceptInvitation(invitation)">
-            <mat-icon>check</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            color="warn"
-            (click)="rejectInvitation(invitation)">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-      </div>
+      }
     </div>
   `,
   styleUrls: ['./user-invitations.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatDialogModule, MatButtonModule],
+  imports: [MatIconModule, MatDialogModule, MatButtonModule],
 })
 export class UserInvitationsComponent {
   public dialogRef = inject(MatDialogRef);

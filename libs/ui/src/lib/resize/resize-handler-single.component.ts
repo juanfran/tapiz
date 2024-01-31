@@ -6,7 +6,7 @@ import {
   afterNextRender,
   inject,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MoveService } from '@team-up/cdk/services/move.service';
 import { Resizable, ResizePosition, TuNode } from '@team-up/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -16,7 +16,7 @@ import { ResizeService } from './resize.service';
 @Component({
   selector: 'team-up-resize-single',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   template: `<ng-content></ng-content>`,
   styles: `
       :host {

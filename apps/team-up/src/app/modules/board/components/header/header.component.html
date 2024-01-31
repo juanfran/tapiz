@@ -7,7 +7,7 @@
       class="icon-svg"></team-up-svg-icon>
   </button>
   <div class="mode">
-    <ng-container *ngIf="vm.edit">
+    @if (vm.edit) {
       <span
         #textarea
         teamUpAutofocus
@@ -18,19 +18,20 @@
         contenteditable
         >{{ vm.name }}</span
       >
-    </ng-container>
-    <button
-      *ngIf="!vm.edit && vm.isAdmin"
-      class="edit-name"
-      (click)="editName()">
-      <team-up-svg-icon
-        icon="edit"
-        class="icon-svg"></team-up-svg-icon>
+    }
+    @if (!vm.edit && vm.isAdmin) {
+      <button
+        class="edit-name"
+        (click)="editName()">
+        <team-up-svg-icon
+          icon="edit"
+          class="icon-svg"></team-up-svg-icon>
+        <span class="board-name">{{ vm.name }}</span>
+      </button>
+    }
+    @if (!vm.isAdmin) {
       <span class="board-name">{{ vm.name }}</span>
-    </button>
-    <ng-container *ngIf="!vm.isAdmin">
-      <span class="board-name">{{ vm.name }}</span>
-    </ng-container>
+    }
   </div>
   <div class="header-end">
     @if (vm.isAdmin) {

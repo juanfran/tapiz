@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -22,7 +22,6 @@ import { pageFeature } from '../../reducers/page.reducer';
   selector: 'team-up-share-board',
   standalone: true,
   imports: [
-    CommonModule,
     MatIconModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -67,17 +66,18 @@ import { pageFeature } from '../../reducers/page.reducer';
       >Include position</mat-checkbox
     >
 
-    <mat-button-toggle-group
-      *ngIf="isAdmin()"
-      class="board-visibility"
-      (change)="newVisibility($event.value)"
-      [(ngModel)]="visibility"
-      aria-label="Board visibility">
-      <mat-button-toggle value="private">Only Team</mat-button-toggle>
-      <mat-button-toggle value="public"
-        >Everyone with the url</mat-button-toggle
-      >
-    </mat-button-toggle-group>
+    @if (isAdmin()) {
+      <mat-button-toggle-group
+        class="board-visibility"
+        (change)="newVisibility($event.value)"
+        [(ngModel)]="visibility"
+        aria-label="Board visibility">
+        <mat-button-toggle value="private">Only Team</mat-button-toggle>
+        <mat-button-toggle value="public"
+          >Everyone with the url</mat-button-toggle
+        >
+      </mat-button-toggle-group>
+    }
   `,
   styleUrls: ['./share-board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

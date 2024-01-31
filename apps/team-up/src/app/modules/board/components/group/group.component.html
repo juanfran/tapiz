@@ -1,6 +1,6 @@
-<ng-container *ngIf="viewModel$ | async as vm">
+@if (viewModel$ | async; as vm) {
   <div class="title">
-    <ng-container *ngIf="vm.edit">
+    @if (vm.edit) {
       <span
         #textarea
         class="textarea"
@@ -11,18 +11,15 @@
         contenteditable
         >{{ vm.editText }}</span
       >
-    </ng-container>
-
-    <ng-container *ngIf="!vm.edit">
+    }
+    @if (!vm.edit) {
       {{ vm.group.content.title }}
-
-      <div
-        *ngIf="vm.votes > 0"
-        class="vote">
-        {{ vm.votes }}
-      </div>
-    </ng-container>
+      @if (vm.votes > 0) {
+        <div class="vote">
+          {{ vm.votes }}
+        </div>
+      }
+    }
   </div>
-
   <team-up-resize-single [node]="vm.group" />
-</ng-container>
+}

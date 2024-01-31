@@ -1,5 +1,5 @@
 import { focustContentEditable } from '../../../../shared/focus-content-editable';
-import { CommonModule } from '@angular/common';
+
 import {
   Component,
   ChangeDetectionStrategy,
@@ -26,23 +26,24 @@ import { filter } from 'rxjs';
   selector: 'team-up-token',
   styleUrls: ['./token.component.scss'],
   template: `
-    <div
-      class="text"
-      *ngIf="!edit()">
-      {{ node().content.text }}
-    </div>
+    @if (!edit()) {
+      <div class="text">
+        {{ node().content.text }}
+      </div>
+    }
     <!-- prettier-ignore -->
-    <div
-      *ngIf="edit()"
-      #contenteditable
-      (keydown.enter)="enter($event)"
-      (input)="setText($event)"
-      class="edit"
+    @if (edit()) {
+      <div
+        #contenteditable
+        (keydown.enter)="enter($event)"
+        (input)="setText($event)"
+        class="edit"
       contenteditable>{{ editableText }}</div>
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, BoardDragDirective],
+  imports: [BoardDragDirective],
   hostDirectives: [BoardDragDirective],
   host: {
     '[class.focus]': 'focus()',

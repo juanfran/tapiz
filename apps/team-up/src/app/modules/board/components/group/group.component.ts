@@ -22,7 +22,7 @@ import { Draggable } from '@team-up/cdk/models/draggable.model';
 import { Group, TuNode, Resizable } from '@team-up/board-commons';
 import { BoardMoveService } from '../../services/board-move.service';
 import { selectFocusId } from '../../selectors/page.selectors';
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { pageFeature } from '../../reducers/page.reducer';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { ResizeHandlerSingleComponent } from '@team-up/ui/resize';
@@ -45,7 +45,7 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState, HotkeysService],
   standalone: true,
-  imports: [NgIf, AsyncPipe, ResizeHandlerSingleComponent],
+  imports: [AsyncPipe, ResizeHandlerSingleComponent],
 })
 export class GroupComponent
   implements AfterViewInit, OnInit, Draggable, Resizable

@@ -6,7 +6,7 @@ import {
   ViewChild,
   inject,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MoveService } from '@team-up/cdk/services/move.service';
 import { Rotatable, TuNode } from '@team-up/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -17,7 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 @Component({
   selector: 'team-up-rotate-handler',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [MatIconModule],
   template: `
     <div
       #handler

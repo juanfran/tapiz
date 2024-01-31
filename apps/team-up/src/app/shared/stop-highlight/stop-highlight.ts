@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Store } from '@ngrx/store';
 import { PageActions } from '../../modules/board/actions/page.actions';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,16 +8,17 @@ import { isUserHighlighActive } from '../../modules/board/selectors/page.selecto
 @Component({
   selector: 'team-up-stop-highlight',
   standalone: true,
-  imports: [CommonModule, MatButtonModule],
+  imports: [MatButtonModule],
   template: `
     <div class="wrapper">
-      <button
-        *ngIf="highlight()"
-        (click)="stop()"
-        mat-raised-button
-        color="primary">
-        Stop highlight user
-      </button>
+      @if (highlight()) {
+        <button
+          (click)="stop()"
+          mat-raised-button
+          color="primary">
+          Stop highlight user
+        </button>
+      }
       <div></div>
     </div>
   `,

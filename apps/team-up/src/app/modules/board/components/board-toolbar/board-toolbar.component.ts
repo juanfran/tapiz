@@ -34,7 +34,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { AutoFocusDirective } from '../../directives/autofocus.directive';
 import { MatInputModule } from '@angular/material/input';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { RxLet } from '@rx-angular/template/let';
 import { MatIconModule } from '@angular/material/icon';
 import { TokenSelectorComponent } from '../token-selector/token-selector.component';
@@ -54,7 +54,6 @@ interface State {
   standalone: true,
   imports: [
     RxLet,
-    NgIf,
     SvgIconComponent,
     ReactiveFormsModule,
     MatInputModule,

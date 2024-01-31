@@ -14,13 +14,14 @@ import { BoardFacade } from '../../services/board-facade.service';
   imports: [CommonModule, MatButtonModule],
   template: `
     <div class="wrapper">
-      <button
-        *ngIf="userToFollow$ | async"
-        (click)="stopFollowingUser()"
-        mat-raised-button
-        color="primary">
-        Stop following user
-      </button>
+      @if (userToFollow$ | async) {
+        <button
+          (click)="stopFollowingUser()"
+          mat-raised-button
+          color="primary">
+          Stop following user
+        </button>
+      }
       <div></div>
     </div>
   `,

@@ -63,94 +63,89 @@ import { Invitation, Member } from '@team-up/board-commons';
         </button>
       </div>
     </form>
-    <mat-dialog-content
-      class="members"
-      *ngIf="invitations.length || members.length">
-      <h2>Members</h2>
-
-      <div
-        class="members-list invitations"
-        *ngIf="invitations.length">
-        <div
-          class="member"
-          *ngFor="let invitation of invitations; trackBy: trackByInvitationId">
-          <ng-container
-            *ngTemplateOutlet="
-              memberTpl;
-              context: {
-                member: {
-                  id: invitation.id,
-                  name: invitation.email,
-                  role: invitation.role
-                }
-              }
-            ">
-          </ng-container>
-        </div>
-      </div>
-
-      <div class="members-list">
-        <div
-          class="member"
-          *ngFor="let member of members; trackBy: trackByMemberId">
-          <ng-container
-            *ngTemplateOutlet="
-              memberTpl;
-              context: {
-                member: {
-                  id: member.id,
-                  name: member.name,
-                  email: member.email,
-                  role: member.role
-                }
-              }
-            ">
-          </ng-container>
-        </div>
-      </div>
-
-      <ng-template
-        #memberTpl
-        let-member="member">
-        <div class="user-info">
-          <div class="name">
-            {{ member.name }}
-
-            <span
-              class="pending"
-              *ngIf="!member.email">
-              (Pending)
-            </span>
+    @if (invitations.length || members.length) {
+      <mat-dialog-content class="members">
+        <h2>Members</h2>
+        @if (invitations.length) {
+          <div class="members-list invitations">
+            @for (
+              invitation of invitations;
+              track trackByInvitationId($index, invitation)
+            ) {
+              <div class="member">
+                <ng-container
+                  *ngTemplateOutlet="
+                    memberTpl;
+                    context: {
+                      member: {
+                        id: invitation.id,
+                        name: invitation.email,
+                        role: invitation.role
+                      }
+                    }
+                  ">
+                </ng-container>
+              </div>
+            }
           </div>
-          <div
-            class="email"
-            *ngIf="member.email">
-            {{ member.email }}
-          </div>
+        }
+        <div class="members-list">
+          @for (member of members; track trackByMemberId($index, member)) {
+            <div class="member">
+              <ng-container
+                *ngTemplateOutlet="
+                  memberTpl;
+                  context: {
+                    member: {
+                      id: member.id,
+                      name: member.name,
+                      email: member.email,
+                      role: member.role
+                    }
+                  }
+                ">
+              </ng-container>
+            </div>
+          }
         </div>
-        <ng-container
-          *ngIf="!(member.role === 'admin' && lastAdmin) || !member.email">
-          <mat-form-field
-            class="role-select"
-            placeholder="role">
-            <mat-label>Role</mat-label>
-            <mat-select
-              [value]="member.role"
-              (valueChange)="onRoleChange($event, member.id, !member.email)">
-              <mat-option value="member">Member</mat-option>
-              <mat-option value="admin">Admin</mat-option>
-            </mat-select>
-          </mat-form-field>
-
-          <button
-            title="Delete member"
-            tuIconButton
-            (click)="onDeleteMember(member.id, !member.email)">
-            <mat-icon>close</mat-icon>
-          </button>
-        </ng-container>
-      </ng-template>
-    </mat-dialog-content>
+        <ng-template
+          #memberTpl
+          let-member="member">
+          <div class="user-info">
+            <div class="name">
+              {{ member.name }}
+              @if (!member.email) {
+                <span class="pending"> (Pending) </span>
+              }
+            </div>
+            @if (member.email) {
+              <div class="email">
+                {{ member.email }}
+              </div>
+            }
+          </div>
+          @if (!(member.role === 'admin' && lastAdmin) || !member.email) {
+            <mat-form-field
+              class="role-select"
+              placeholder="role">
+              <mat-label>Role</mat-label>
+              <mat-select
+                [value]="member.role"
+                (valueChange)="onRoleChange($event, member.id, !member.email)">
+                <mat-option value="member">Member</mat-option>
+                <mat-option value="admin">Admin</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <button
+              title="Delete member"
+              tuIconButton
+              (click)="onDeleteMember(member.id, !member.email)">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </ng-template>
+      </mat-dialog-content>
+    }
   `,
   styleUrls: ['./members.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

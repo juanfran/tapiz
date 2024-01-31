@@ -11,11 +11,11 @@
       #auto="matAutocomplete"
       [hideSingleSelectionIndicator]="true"
       (optionSelected)="selected($event)">
-      <mat-option
-        *ngFor="let option of options$ | async"
-        [value]="option.content">
-        {{ option.content.text }}
-      </mat-option>
+      @for (option of options$ | async; track option) {
+        <mat-option [value]="option.content">
+          {{ option.content.text }}
+        </mat-option>
+      }
     </mat-autocomplete>
   </mat-form-field>
 </form>

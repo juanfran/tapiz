@@ -4,7 +4,7 @@ import {
   Input,
   inject,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
@@ -15,7 +15,7 @@ import { HomeActions } from '../../+state/home.actions';
 @Component({
   selector: 'team-up-board-list-header',
   standalone: true,
-  imports: [CommonModule, MatButtonModule],
+  imports: [MatButtonModule],
   template: `
     <header>
       <div class="content">

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,7 +15,6 @@ import { ModalHeaderComponent } from '../../../../shared/modal-header/modal-head
   selector: 'team-up-transfer-board',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatFormFieldModule,
@@ -33,11 +32,9 @@ import { ModalHeaderComponent } from '../../../../shared/modal-header/modal-head
         <mat-label>Team</mat-label>
         <mat-select formControlName="team">
           <mat-option [value]="null">No team</mat-option>
-          <mat-option
-            *ngFor="let team of teams()"
-            [value]="team.id"
-            >{{ team.name }}</mat-option
-          >
+          @for (team of teams(); track team) {
+            <mat-option [value]="team.id">{{ team.name }}</mat-option>
+          }
         </mat-select>
       </mat-form-field>
       <div class="actions">

@@ -23,7 +23,7 @@ interface TeamMembersComponentState {
 @Component({
   selector: 'team-up-team-members',
   template: `
-    <ng-container *ngIf="model$ | async as vm">
+    @if (model$ | async; as vm) {
       <team-up-members
         title="Team members"
         [invitations]="vm.invitations"
@@ -34,7 +34,7 @@ interface TeamMembersComponentState {
         (roleInvitationChanged)="onRoleInvitationChanged($event)"
         (roleMemberChanged)="onRoleMemberChanged($event)"
         (closeDialog)="onCloseDialog()"></team-up-members>
-    </ng-container>
+    }
   `,
   styleUrls: ['./team-members.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -4,7 +4,7 @@ import {
   Input,
   inject,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -12,7 +12,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 @Component({
   selector: 'team-up-modal-header',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule],
+  imports: [MatButtonModule, MatIconModule],
   template: `
     <h1 class="title">
       {{ title }}

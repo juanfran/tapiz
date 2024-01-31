@@ -40,42 +40,46 @@
         <div
           class="menu"
           cdkMenu>
-          <button
-            *ngIf="!board.starred"
-            cdkMenuItem
-            class="menu-item menu-item-icon"
-            title="Star"
-            (cdkMenuItemTriggered)="addStar(board)">
-            <mat-icon fontIcon="star"></mat-icon>
-            Star
-          </button>
-          <button
-            *ngIf="board.starred"
-            cdkMenuItem
-            class="menu-item menu-item-icon"
-            title="Unstar"
-            (cdkMenuItemTriggered)="removeStar(board)">
-            <mat-icon fontIcon="star"></mat-icon>
-            Unstar
-          </button>
-          <button
-            cdkMenuItem
-            class="menu-item menu-item-icon"
-            title="Rename board"
-            *ngIf="board.role === 'admin'"
-            (cdkMenuItemTriggered)="renameBoard(board)">
-            <mat-icon fontIcon="edit"></mat-icon>
-            Rename board
-          </button>
-          <button
-            cdkMenuItem
-            class="menu-item menu-item-icon"
-            title="Transfer board"
-            *ngIf="board.role === 'admin'"
-            (cdkMenuItemTriggered)="transferBoard(board)">
-            <mat-icon fontIcon="drive_file_move"></mat-icon>
-            Transfer board
-          </button>
+          @if (!board.starred) {
+            <button
+              cdkMenuItem
+              class="menu-item menu-item-icon"
+              title="Star"
+              (cdkMenuItemTriggered)="addStar(board)">
+              <mat-icon fontIcon="star"></mat-icon>
+              Star
+            </button>
+          }
+          @if (board.starred) {
+            <button
+              cdkMenuItem
+              class="menu-item menu-item-icon"
+              title="Unstar"
+              (cdkMenuItemTriggered)="removeStar(board)">
+              <mat-icon fontIcon="star"></mat-icon>
+              Unstar
+            </button>
+          }
+          @if (board.role === 'admin') {
+            <button
+              cdkMenuItem
+              class="menu-item menu-item-icon"
+              title="Rename board"
+              (cdkMenuItemTriggered)="renameBoard(board)">
+              <mat-icon fontIcon="edit"></mat-icon>
+              Rename board
+            </button>
+          }
+          @if (board.role === 'admin') {
+            <button
+              cdkMenuItem
+              class="menu-item menu-item-icon"
+              title="Transfer board"
+              (cdkMenuItemTriggered)="transferBoard(board)">
+              <mat-icon fontIcon="drive_file_move"></mat-icon>
+              Transfer board
+            </button>
+          }
           <button
             cdkMenuItem
             class="menu-item menu-item-icon"
@@ -84,24 +88,26 @@
             <mat-icon fontIcon="content_copy"></mat-icon>
             Duplicate
           </button>
-          <button
-            cdkMenuItem
-            class="menu-item menu-item-icon"
-            title="Delete board"
-            *ngIf="board.role === 'admin'"
-            (cdkMenuItemTriggered)="deleteBoard(board)">
-            <mat-icon fontIcon="delete"></mat-icon>
-            Delete board
-          </button>
-          <button
-            cdkMenuItem
-            class="menu-item menu-item-icon"
-            title="Leave project"
-            *ngIf="board.role === 'guest'"
-            (cdkMenuItemTriggered)="leaveBoard(board)">
-            <mat-icon fontIcon="directions_walk"></mat-icon>
-            Leave project
-          </button>
+          @if (board.role === 'admin') {
+            <button
+              cdkMenuItem
+              class="menu-item menu-item-icon"
+              title="Delete board"
+              (cdkMenuItemTriggered)="deleteBoard(board)">
+              <mat-icon fontIcon="delete"></mat-icon>
+              Delete board
+            </button>
+          }
+          @if (board.role === 'guest') {
+            <button
+              cdkMenuItem
+              class="menu-item menu-item-icon"
+              title="Leave project"
+              (cdkMenuItemTriggered)="leaveBoard(board)">
+              <mat-icon fontIcon="directions_walk"></mat-icon>
+              Leave project
+            </button>
+          }
         </div>
       </ng-template>
     </div>

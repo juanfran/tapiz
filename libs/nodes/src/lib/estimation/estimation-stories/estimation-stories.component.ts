@@ -6,7 +6,7 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   FormArray,
   FormControl,
@@ -27,7 +27,6 @@ export { BoardActions } from '@team-up/board-commons/actions/board.actions';
   selector: 'team-up-estimation-stories',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatInputModule,
@@ -38,37 +37,35 @@ export { BoardActions } from '@team-up/board-commons/actions/board.actions';
     <form
       (ngSubmit)="save()"
       [formGroup]="form">
-      <div
-        class="story"
-        *ngFor="let story of stories; let i = index">
-        <ng-container [formGroup]="story">
-          <div class="fields">
-            <mat-form-field>
-              <mat-label>Story title</mat-label>
-              <input
-                matInput
-                formControlName="title"
-                type="text" />
-            </mat-form-field>
-
-            <mat-form-field>
-              <mat-label>Description</mat-label>
-              <textarea
-                matInput
-                formControlName="description"></textarea>
-            </mat-form-field>
-          </div>
-
-          <button
-            type="button"
-            (click)="deleteStory(i)"
-            mat-mini-fab
-            color="warn"
-            aria-label="Delete story">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </ng-container>
-      </div>
+      @for (story of stories; track story; let i = $index) {
+        <div class="story">
+          <ng-container [formGroup]="story">
+            <div class="fields">
+              <mat-form-field>
+                <mat-label>Story title</mat-label>
+                <input
+                  matInput
+                  formControlName="title"
+                  type="text" />
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Description</mat-label>
+                <textarea
+                  matInput
+                  formControlName="description"></textarea>
+              </mat-form-field>
+            </div>
+            <button
+              type="button"
+              (click)="deleteStory(i)"
+              mat-mini-fab
+              color="warn"
+              aria-label="Delete story">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </ng-container>
+        </div>
+      }
 
       <button
         class="add-story"
@@ -90,14 +87,15 @@ export { BoardActions } from '@team-up/board-commons/actions/board.actions';
           Save
         </button>
 
-        <button
-          *ngIf="showCancel"
-          type="button"
-          (click)="closeConfig.emit()"
-          mat-raised-button
-          color="warn">
-          Cancel
-        </button>
+        @if (showCancel) {
+          <button
+            type="button"
+            (click)="closeConfig.emit()"
+            mat-raised-button
+            color="warn">
+            Cancel
+          </button>
+        }
       </div>
     </form>
   `,

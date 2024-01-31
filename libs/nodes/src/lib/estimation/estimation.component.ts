@@ -6,7 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import type {
   EstimationConfig,
   EstimationConfigNode,
@@ -32,7 +32,6 @@ export { BoardActions } from '@team-up/board-commons/actions/board.actions';
   selector: 'team-up-estimation',
   standalone: true,
   imports: [
-    CommonModule,
     MatSelectModule,
     FormsModule,
     InitEstimationComponent,
@@ -42,8 +41,8 @@ export { BoardActions } from '@team-up/board-commons/actions/board.actions';
     EstimationWorkspaceComponent,
   ],
   template: `
-    <ng-container *ngIf="config() as estimationConfig">
-      <ng-container *ngIf="screen() === 'main'">
+    @if (config(); as estimationConfig) {
+      @if (screen() === 'main') {
         <div class="header">
           <button
             [matMenuTriggerFor]="menu"
@@ -52,7 +51,6 @@ export { BoardActions } from '@team-up/board-commons/actions/board.actions';
             class="config-stories-button">
             <mat-icon>settings</mat-icon>
           </button>
-
           <mat-menu #menu="matMenu">
             <button
               mat-menu-item
@@ -71,35 +69,35 @@ export { BoardActions } from '@team-up/board-commons/actions/board.actions';
             </button>
           </mat-menu>
         </div>
+        @if (estimationConfig.content.stories.length) {
+          <team-up-estimation-workspace
+            [estimation]="estimationConfig.content"
+            [results]="results()"
+            (setStep)="setEstimationStep($event)"
+            (vote)="vote($event)"
+            (storyVisibility)="
+              setStoryVisibility($event)
+            "></team-up-estimation-workspace>
+        }
+      }
+      @if (screen() === 'stories') {
+        <team-up-estimation-stories
+          [estimationStories]="estimationConfig.content.stories"
+          [showCancel]="!!estimationConfig.content.stories.length"
+          (addStory)="onAddStory($event)"
+          (closeConfig)="screen.set('main')"></team-up-estimation-stories>
+      }
+      @if (screen() === 'scales') {
+        <team-up-init-estimation
+          [scale]="estimationConfig.content.scale"
+          (completeSetup)="editScale($event)"></team-up-init-estimation>
+      }
+    }
 
-        <team-up-estimation-workspace
-          *ngIf="estimationConfig.content.stories.length"
-          [estimation]="estimationConfig.content"
-          [results]="results()"
-          (setStep)="setEstimationStep($event)"
-          (vote)="vote($event)"
-          (storyVisibility)="
-            setStoryVisibility($event)
-          "></team-up-estimation-workspace>
-      </ng-container>
-
-      <team-up-estimation-stories
-        *ngIf="screen() === 'stories'"
-        [estimationStories]="estimationConfig.content.stories"
-        [showCancel]="!!estimationConfig.content.stories.length"
-        (addStory)="onAddStory($event)"
-        (closeConfig)="screen.set('main')"></team-up-estimation-stories>
-
-      <team-up-init-estimation
-        *ngIf="screen() === 'scales'"
-        [scale]="estimationConfig.content.scale"
-        (completeSetup)="editScale($event)"></team-up-init-estimation>
-    </ng-container>
-
-    <ng-container *ngIf="!config()">
+    @if (!config()) {
       <team-up-init-estimation
         (completeSetup)="onCompleteSetup($event)"></team-up-init-estimation>
-    </ng-container>
+    }
   `,
   styleUrls: ['./estimation.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

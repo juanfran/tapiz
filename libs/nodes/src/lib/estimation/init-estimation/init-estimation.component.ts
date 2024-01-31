@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,7 +14,7 @@ import { EstimationConfig } from '@team-up/board-commons';
 @Component({
   selector: 'team-up-init-estimation',
   standalone: true,
-  imports: [CommonModule, MatSelectModule, FormsModule, MatButtonModule],
+  imports: [MatSelectModule, FormsModule, MatButtonModule],
   template: `
     <form
       (ngSubmit)="onSubmit()"

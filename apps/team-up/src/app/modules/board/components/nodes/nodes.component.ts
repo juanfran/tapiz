@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RxFor } from '@rx-angular/template/for';
 import { NodeComponent } from '../node/node.component';
@@ -17,7 +16,7 @@ import { selectUserId, selectZoom } from '../../selectors/page.selectors';
     [node]="node" />`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, RxFor, NodeComponent],
+  imports: [RxFor, NodeComponent],
   providers: [],
 })
 export class NodesComponent {

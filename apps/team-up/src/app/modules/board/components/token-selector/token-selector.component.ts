@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import {
   Component,
   ChangeDetectionStrategy,
@@ -57,7 +56,7 @@ import { BoardFacade } from '../../../../services/board-facade.service';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule, BoardIdToColorDirective, RxFor],
+  imports: [BoardIdToColorDirective, RxFor],
 })
 export class TokenSelectorComponent {
   @Output()

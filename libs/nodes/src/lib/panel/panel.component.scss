@@ -1,12 +1,9 @@
-
 :host {
   --backgroundColor: var(--white);
   --borderColor: #e8e9ea;
   --borderWidth: 1px;
   --borderRadius: 0;
-  --textAlign: 'start'
-
-  display: block;
+  --textAlign: "start" display: block;
   position: absolute;
   inline-size: 100%;
   block-size: 100%;

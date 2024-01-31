@@ -8,7 +8,7 @@ import {
   computed,
   inject,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   EstimationConfig,
   EstimationResultNode,
@@ -22,27 +22,27 @@ import { NodesStore } from '../../services/nodes.store';
 @Component({
   selector: 'team-up-estimation-workspace',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule],
+  imports: [MatButtonModule, MatIconModule],
   template: `
     <div class="nav">
-      <div
-        class="move"
-        *ngIf="stories().length > 1">
-        <button
-          mat-icon-button
-          [disabled]="step() === 0"
-          (click)="setStep.emit(step() - 1)"
-          color="primary">
-          <mat-icon>chevron_left</mat-icon>
-        </button>
-        <button
-          mat-icon-button
-          [disabled]="step() === stories().length - 1"
-          (click)="setStep.emit(step() + 1)"
-          color="primary">
-          <mat-icon>chevron_right</mat-icon>
-        </button>
-      </div>
+      @if (stories().length > 1) {
+        <div class="move">
+          <button
+            mat-icon-button
+            [disabled]="step() === 0"
+            (click)="setStep.emit(step() - 1)"
+            color="primary">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            [disabled]="step() === stories().length - 1"
+            (click)="setStep.emit(step() + 1)"
+            color="primary">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      }
       <div class="steps">{{ step() + 1 }} / {{ stories().length }}</div>
     </div>
 

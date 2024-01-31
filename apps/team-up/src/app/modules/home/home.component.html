@@ -1,4 +1,4 @@
-<ng-container *ngIf="model$ | async as vm">
+@if (model$ | async; as vm) {
   <div class="header">
     <a
       class="logo"
@@ -6,17 +6,16 @@
       <img src="/assets/svg/elephants.svg" />
       <span class="team">Team</span><span class="up">Up</span>
     </a>
-
     <div class="inline-end-header">
-      <button
-        [matBadge]="vm.invitations.length"
-        matBadgeColor="warn"
-        (click)="openInvitationDialog()"
-        type="button"
-        *ngIf="vm.invitations.length">
-        <mat-icon>mail</mat-icon>
-      </button>
-
+      @if (vm.invitations.length) {
+        <button
+          [matBadge]="vm.invitations.length"
+          matBadgeColor="warn"
+          (click)="openInvitationDialog()"
+          type="button">
+          <mat-icon>mail</mat-icon>
+        </button>
+      }
       <div class="user-menu">
         <button
           mat-icon-button
@@ -61,7 +60,6 @@
           >
         </li>
       </ul>
-
       <div class="teams">
         <h4>
           Teams
@@ -74,14 +72,16 @@
           </button>
         </h4>
         <ul>
-          <li *ngFor="let team of vm.teams; trackById">
-            <a
-              class="menu-option"
-              [routerLink]="['/team', team.id]"
-              routerLinkActive="active"
-              >{{ team.name }}</a
-            >
-          </li>
+          @for (team of vm.teams; track team) {
+            <li>
+              <a
+                class="menu-option"
+                [routerLink]="['/team', team.id]"
+                routerLinkActive="active"
+                >{{ team.name }}</a
+              >
+            </li>
+          }
         </ul>
       </div>
     </nav>
@@ -89,4 +89,4 @@
       <router-outlet></router-outlet>
     </div>
   </div>
-</ng-container>
+}

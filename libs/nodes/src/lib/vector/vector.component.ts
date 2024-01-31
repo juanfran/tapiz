@@ -8,7 +8,6 @@ import { RxState } from '@rx-angular/state';
 import { TuNode, Vector } from '@team-up/board-commons';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { NodeSpaceComponent } from '../node-space';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'team-up-vector',
@@ -27,7 +26,7 @@ import { CommonModule } from '@angular/common';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState, HotkeysService],
   standalone: true,
-  imports: [CommonModule, NodeSpaceComponent],
+  imports: [NodeSpaceComponent],
 })
 export class VectorComponent {
   @Input({ required: true })

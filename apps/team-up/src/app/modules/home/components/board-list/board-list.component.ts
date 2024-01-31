@@ -6,7 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RxFor } from '@rx-angular/template/for';
 import { Board, SortBoard } from '@team-up/board-commons';
 import { Router, RouterModule } from '@angular/router';
@@ -27,7 +27,6 @@ import { TransferBoardComponent } from '../transfer-board/transfer-board.compone
   selector: 'team-up-board-list',
   standalone: true,
   imports: [
-    CommonModule,
     CdkMenuTrigger,
     CdkMenu,
     CdkMenuItem,

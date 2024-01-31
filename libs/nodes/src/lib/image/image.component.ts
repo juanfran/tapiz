@@ -12,7 +12,7 @@ import { RxState } from '@rx-angular/state';
 import { Image, TuNode } from '@team-up/board-commons';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { NodeSpaceComponent } from '../node-space';
-import { CommonModule } from '@angular/common';
+
 import { BoardActions } from '@team-up/board-commons/actions/board.actions';
 
 @Component({
@@ -33,7 +33,7 @@ import { BoardActions } from '@team-up/board-commons/actions/board.actions';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState, HotkeysService],
   standalone: true,
-  imports: [CommonModule, NodeSpaceComponent],
+  imports: [NodeSpaceComponent],
   host: {
     '[class.focus]': 'focus()',
   },

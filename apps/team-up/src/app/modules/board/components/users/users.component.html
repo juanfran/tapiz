@@ -74,17 +74,18 @@
     <div
       class="menu"
       cdkMenu>
-      <button
-        *ngIf="vm.currentUser?.id !== user.id"
-        cdkMenuItem
-        class="menu-item"
-        (cdkMenuItemTriggered)="follow(user.id)">
-        @if (vm.follow) {
-          Unfollow
-        } @else {
-          Follow
-        }
-      </button>
+      @if (vm.currentUser?.id !== user.id) {
+        <button
+          cdkMenuItem
+          class="menu-item"
+          (cdkMenuItemTriggered)="follow(user.id)">
+          @if (vm.follow) {
+            Unfollow
+          } @else {
+            Follow
+          }
+        </button>
+      }
       <button
         cdkMenuItem
         class="menu-item"

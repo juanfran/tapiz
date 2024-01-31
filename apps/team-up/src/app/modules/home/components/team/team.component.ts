@@ -33,13 +33,12 @@ interface State {
   selector: 'team-up-team',
   styleUrls: ['./team.component.scss'],
   template: `
-    <ng-container *ngIf="model$ | async as vm">
-      <ng-container *ngIf="vm.team">
+    @if (model$ | async; as vm) {
+      @if (vm.team) {
         <team-up-title [title]="'Team ' + vm.team.name"></team-up-title>
         <team-up-board-list-header [teamId]="vm.team.id">
           <div class="team-name">
             <h1>{{ vm.team.name }}</h1>
-
             <button
               tuIconButton
               [matMenuTriggerFor]="menu"
@@ -48,15 +47,15 @@ interface State {
               <mat-icon>more_vert </mat-icon>
             </button>
             <mat-menu #menu="matMenu">
-              <button
-                (click)="leaveTeam()"
-                mat-menu-item
-                *ngIf="vm.team.teamMember.role !== 'admin'">
-                <mat-icon>logout</mat-icon>
-                <span>Leave</span>
-              </button>
-
-              <ng-container *ngIf="vm.team.teamMember.role === 'admin'">
+              @if (vm.team.teamMember.role !== 'admin') {
+                <button
+                  (click)="leaveTeam()"
+                  mat-menu-item>
+                  <mat-icon>logout</mat-icon>
+                  <span>Leave</span>
+                </button>
+              }
+              @if (vm.team.teamMember.role === 'admin') {
                 <button
                   mat-menu-item
                   (click)="rename()">
@@ -75,14 +74,13 @@ interface State {
                   <mat-icon>delete</mat-icon>
                   <span>Delete</span>
                 </button>
-              </ng-container>
+              }
             </mat-menu>
           </div>
         </team-up-board-list-header>
-
         <team-up-board-list [boards]="vm.boards"></team-up-board-list>
-      </ng-container>
-    </ng-container>
+      }
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,

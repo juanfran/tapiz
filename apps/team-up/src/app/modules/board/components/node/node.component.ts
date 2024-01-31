@@ -1,5 +1,5 @@
 import { loadNode } from '../../../../register-node';
-import { CommonModule } from '@angular/common';
+
 import {
   Component,
   ChangeDetectionStrategy,
@@ -54,7 +54,7 @@ interface State {
   template: ` <ng-container #nodeHost></ng-container>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   providers: [RxState, HotkeysService],
 })
 export class NodeComponent implements OnInit {

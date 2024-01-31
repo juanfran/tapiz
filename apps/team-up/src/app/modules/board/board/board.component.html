@@ -8,30 +8,34 @@
     <team-up-header></team-up-header>
     <team-up-users></team-up-users>
     <team-up-board-toolbar />
-    <team-up-drawing-options *ngIf="drawing()"></team-up-drawing-options>
-    <team-up-search-options *ngIf="search()"></team-up-search-options>
+    @if (drawing()) {
+      <team-up-drawing-options></team-up-drawing-options>
+    }
+    @if (search()) {
+      <team-up-search-options></team-up-search-options>
+    }
   }
   <div
     class="work-layer"
     #workLayer>
-    <ng-container *ngIf="boardId$ | async">
+    @if (boardId$ | async) {
       <team-up-overlay></team-up-overlay>
       <team-up-zone></team-up-zone>
       <team-up-cursors></team-up-cursors>
       @defer {
-        <ng-container *ngFor="let note of notes$ | async; trackBy: trackById">
+        @for (note of notes$ | async; track trackById($index, note)) {
           <team-up-note
             teamUpBoardDrag
             [note]="note"></team-up-note>
-        </ng-container>
-        <ng-container *ngFor="let group of groups$ | async; trackBy: trackById">
+        }
+        @for (group of groups$ | async; track trackById($index, group)) {
           <team-up-group
             teamUpBoardDrag
             [group]="group"></team-up-group>
-        </ng-container>
+        }
         <team-up-nodes />
       }
-    </ng-container>
+    }
   </div>
   @defer {
     <team-up-follow-user></team-up-follow-user>
@@ -42,8 +46,8 @@
   }
 </div>
 
-<div
-  *ngIf="!loaded()"
-  class="loading-bar">
-  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-</div>
+@if (!loaded()) {
+  <div class="loading-bar">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+}

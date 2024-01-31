@@ -13,7 +13,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   EstimationBoard,
   TuNode,
@@ -29,20 +29,20 @@ import { toObservable } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'team-up-estimation-board',
   standalone: true,
-  imports: [CommonModule, EstimationComponent, MatIconModule],
+  imports: [EstimationComponent, MatIconModule],
   template: `
     <div class="drag-indicator">
       <button #drag>
         <mat-icon>drag_indicator</mat-icon>
       </button>
     </div>
-    <ng-container *ngIf="parentId()">
+    @if (parentId()) {
       <team-up-estimation
         [class.focus]="focus()"
         [nodes]="estimation()"
         [userId]="nodesStore.userId()"
         [parentId]="parentId()"></team-up-estimation>
-    </ng-container>
+    }
   `,
   styleUrls: ['./estimation-board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

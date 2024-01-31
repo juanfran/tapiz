@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   MAT_SNACK_BAR_DATA,
   MatSnackBarRef,
@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 @Component({
   selector: 'team-up-notification',
   standalone: true,
-  imports: [CommonModule, MatButtonModule, MatIconModule],
+  imports: [MatButtonModule, MatIconModule],
   template: `
     {{ data.message }}
 

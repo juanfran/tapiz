@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import {
   FormControl,
   FormGroup,
@@ -20,7 +20,6 @@ import { MatSelectModule } from '@angular/material/select';
   selector: 'team-up-create-board',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatFormFieldModule,
@@ -45,11 +44,9 @@ import { MatSelectModule } from '@angular/material/select';
       <mat-form-field>
         <mat-label>Team</mat-label>
         <mat-select formControlName="team">
-          <mat-option
-            *ngFor="let team of teams()"
-            [value]="team.id"
-            >{{ team.name }}</mat-option
-          >
+          @for (team of teams(); track team) {
+            <mat-option [value]="team.id">{{ team.name }}</mat-option>
+          }
         </mat-select>
       </mat-form-field>
       <div class="actions">

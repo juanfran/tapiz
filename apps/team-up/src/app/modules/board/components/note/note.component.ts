@@ -51,7 +51,7 @@ import { Observable, combineLatest } from 'rxjs';
 import { lighter } from '@team-up/cdk/utils/colors';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 import { concatLatestFrom } from '@ngrx/effects';
-import { NgIf, NgFor, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { DrawingDirective } from '../../directives/drawing.directive';
 import { pageFeature } from '../../reducers/page.reducer';
 import { HistoryService } from '@team-up/nodes/services/history.service';
@@ -82,7 +82,7 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState, HotkeysService],
   standalone: true,
-  imports: [NgIf, NgFor, AsyncPipe, DrawingDirective],
+  imports: [AsyncPipe, DrawingDirective],
 })
 export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   @Input()
