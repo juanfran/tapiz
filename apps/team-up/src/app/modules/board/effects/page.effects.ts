@@ -5,6 +5,7 @@ import {
   filter,
   map,
   switchMap,
+  take,
   tap,
   throttleTime,
   withLatestFrom,
@@ -230,6 +231,31 @@ export class PageEffects {
     },
     { dispatch: false },
   );
+
+  public goToUser$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.goToUser),
+      switchMap(({ id }) => {
+        return this.boardFacade.getUsers().pipe(
+          map((users) => {
+            return users.find((user) => user.id === id)?.content;
+          }),
+          take(1),
+        );
+      }),
+      map((user) => {
+        if (user?.position && user?.zoom) {
+          return PageActions.setUserView({
+            zoom: user.zoom,
+            position: user.position,
+          });
+        }
+
+        return null;
+      }),
+      filterNil(),
+    );
+  });
 
   constructor(
     private actions$: Actions,

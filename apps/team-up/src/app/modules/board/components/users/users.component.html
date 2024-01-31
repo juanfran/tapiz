@@ -85,6 +85,13 @@
             Follow
           }
         </button>
+
+        <button
+          cdkMenuItem
+          class="menu-item"
+          (cdkMenuItemTriggered)="goToUser(user.id)">
+          Go to user
+        </button>
       }
       <button
         cdkMenuItem

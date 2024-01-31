@@ -136,6 +136,10 @@ export class UsersComponent {
     this.store.dispatch(PageActions.followUser({ id: userId }));
   }
 
+  public goToUser(userId: User['id']) {
+    this.store.dispatch(PageActions.goToUser({ id: userId }));
+  }
+
   public showVotes(userId: User['id']) {
     this.store.dispatch(PageActions.toggleShowVotes({ userId }));
   }

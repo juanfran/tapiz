@@ -70,6 +70,7 @@ export const PageActions = createActionGroup({
     'Undo drawing': emptyProps(),
     'Redo drawing': emptyProps(),
     'Follow user': props<{ id: User['id'] }>(),
+    'Go to user': props<{ id: User['id'] }>(),
     'Set board privacy': props<{ isPublic: boolean }>(),
     'Toggle show votes': props<{ userId: string }>(),
     'Stop highlight': emptyProps(),
