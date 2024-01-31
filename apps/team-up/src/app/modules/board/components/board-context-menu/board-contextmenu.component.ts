@@ -12,6 +12,9 @@ import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { CopyPasteService } from '../../../../services/copy-paste.service';
 import { BoardFacade } from '../../../../services/board-facade.service';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { VotesModalComponent } from '../votes-modal/votes-modal.component';
+import { Group, Note, TuNode } from '@team-up/board-commons';
 
 @Component({
   selector: 'team-up-board-context-menu',
@@ -20,6 +23,7 @@ import { BoardFacade } from '../../../../services/board-facade.service';
     display: none;
   }`,
   standalone: true,
+  imports: [MatDialogModule],
 })
 export class BoardContextMenuComponent implements OnInit {
   private contextMenuStore = inject(ContextMenuStore);
@@ -28,6 +32,7 @@ export class BoardContextMenuComponent implements OnInit {
   private boardFacade = inject(BoardFacade);
   private store = inject(Store);
   private boardComponent = inject(BoardComponent);
+  private dialog = inject(MatDialog);
 
   public readonly boardMode = this.store.selectSignal(
     pageFeature.selectCanvasMode,
@@ -124,6 +129,27 @@ export class BoardContextMenuComponent implements OnInit {
                     focusId: '',
                   }),
                 );
+              },
+            });
+          }
+
+          const showVotesNode = currentNodes
+            .filter((node) => {
+              return node.type === 'note' || node.type === 'group';
+            })
+            .at(0) as TuNode<Group | Note> | undefined;
+
+          if (showVotesNode && showVotesNode.content.votes.length) {
+            actions.push({
+              label: 'Show votes',
+              icon: 'visibility',
+              action: () => {
+                this.dialog.open(VotesModalComponent, {
+                  width: '400px',
+                  data: {
+                    node: showVotesNode,
+                  },
+                });
               },
             });
           }
