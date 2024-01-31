@@ -16,17 +16,26 @@ import {
   signal,
 } from '@angular/core';
 
-import StarterKit from '@tiptap/starter-kit';
 import { Editor } from '@tiptap/core';
 import { Color } from '@tiptap/extension-color';
-import TextStyle from '@tiptap/extension-text-style';
-import TextAlign from '@tiptap/extension-text-align';
-import Link from '@tiptap/extension-link';
-import FontFamily from '@tiptap/extension-font-family';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { TextAlign } from '@tiptap/extension-text-align';
+import { Link } from '@tiptap/extension-link';
+import { FontFamily } from '@tiptap/extension-font-family';
 import { ToolbarComponent } from '../toolbar';
 import { EditorViewSharedStateService } from './editor-view-shared-state.service';
 import { BubbleMenu } from './bubble-menu';
 import { TuNode } from '@team-up/board-commons';
+import { Heading } from '@tiptap/extension-heading';
+import { Paragraph } from '@tiptap/extension-paragraph';
+import { BulletList } from '@tiptap/extension-bullet-list';
+import { OrderedList } from '@tiptap/extension-ordered-list';
+import { Strike } from '@tiptap/extension-strike';
+import { Italic } from '@tiptap/extension-italic';
+import { Bold } from '@tiptap/extension-bold';
+import { Document } from '@tiptap/extension-document';
+import { Text } from '@tiptap/extension-text';
+import { ListItem } from '@tiptap/extension-list-item';
 
 @Component({
   selector: 'team-up-editor-view',
@@ -141,10 +150,17 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
       new Editor({
         element: this.editor.nativeElement,
         extensions: [
-          StarterKit.configure({
-            heading: {
-              levels: [1, 2, 3],
-            },
+          ListItem,
+          Text,
+          Document,
+          OrderedList,
+          Italic,
+          Bold,
+          Paragraph,
+          BulletList,
+          Strike,
+          Heading.configure({
+            levels: [1, 2, 3],
           }),
           TextStyle,
           Color,
