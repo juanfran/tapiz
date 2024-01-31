@@ -1,5 +1,5 @@
 import { TRPCError, initTRPC } from '@trpc/server';
-import { AuthContext } from './auth.context.js';
+import type { AuthContext } from './auth.context.js';
 import db from './db/index.js';
 
 const t = initTRPC.create();

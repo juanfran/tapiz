@@ -18,8 +18,11 @@ export class Server {
   }
 
   public async connection(wss: WebSocket, req: FastifyRequest) {
-    if (req.cookies['auth']) {
-      const user = await verifyToken(req.cookies['auth']);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cookies = (req as any).cookies;
+
+    if (cookies['auth']) {
+      const user = await verifyToken(cookies['auth']);
       if (user && user['name']) {
         const client = new Client(
           wss,

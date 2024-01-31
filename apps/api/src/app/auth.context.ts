@@ -4,10 +4,11 @@ import { verifyToken } from './auth.js';
 
 export async function createContext({ req }: CreateFastifyContextOptions) {
   async function getUserFromHeader() {
-    const cookies = req.cookies;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cookies = (req as any).cookies;
 
     if (cookies['auth'] && typeof cookies['auth'] === 'string') {
-      return await verifyToken(cookies['auth']);
+      return (await verifyToken(cookies['auth'])) ?? null;
     }
 
     return null;
