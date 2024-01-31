@@ -10,13 +10,13 @@
     -apple-system,
     system-ui,
     sans-serif;
-  height: 35px;
-  padding: var(--spacing-1);
+  padding: var(--spacing-2);
   position: absolute;
   right: 10px;
   top: 10px;
   user-select: none;
   white-space: pre-wrap;
+  font-size: var(--font-size-5);
 }
 
 .textarea {
@@ -27,6 +27,7 @@
   padding: var(--spacing-1);
   resize: none;
   width: 100%;
+  font-size: var(--font-size-5);
 }
 
 :host {
@@ -55,10 +56,7 @@
 
 .vote {
   background-color: rgba(0, 0, 0, 0.15);
-  width: 20px;
-  height: 20px;
-  line-height: 20px;
-  font-size: 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-2);
   text-align: center;
+  font-size: var(--font-size-3);
 }
