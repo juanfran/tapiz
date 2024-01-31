@@ -244,7 +244,7 @@ export class BoardEffects {
           }
 
           const panel: Panel = {
-            text: '',
+            text: '<h2 style="text-align: center"></h2>',
             position: zone.position,
             width: width,
             height: height,
