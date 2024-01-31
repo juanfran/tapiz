@@ -5,6 +5,7 @@ import { concatLatestFrom } from '@ngrx/effects';
 import { selectFocusId } from '../selectors/page.selectors';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { CopyPasteService } from '../../../services/copy-paste.service';
+import { isInputField } from '@team-up/cdk/utils/is-input-field';
 
 @Directive({
   selector: '[teamUpCopyPaste]',
@@ -12,11 +13,15 @@ import { CopyPasteService } from '../../../services/copy-paste.service';
 })
 export class CopyPasteDirective {
   @HostListener('document:keydown.control.c') public copyEvent() {
-    this.copy();
+    if (!isInputField()) {
+      this.copy();
+    }
   }
 
   @HostListener('document:keydown.control.v') public pasteEvent() {
-    this.paste();
+    if (!isInputField()) {
+      this.paste();
+    }
   }
 
   private store = inject(Store);
