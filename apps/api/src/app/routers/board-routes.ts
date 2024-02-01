@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { Board } from '@team-up/board-commons';
+import { BoardUser } from '@team-up/board-commons';
 import {
   boardAdminProcedure,
   boardMemberProcedure,
@@ -98,9 +98,10 @@ export const boardRouter = router({
       return {
         id: newBoard.id,
         name: req.ctx.board.name,
-        role: 'admin',
+        role: req.ctx.userBoard?.role ?? 'guest',
+        isAdmin: true,
         createdAt: newBoard.createdAt,
-      } as Board;
+      } as BoardUser;
     }),
   changePrivacy: boardAdminProcedure
     .input(
@@ -123,16 +124,9 @@ export const boardRouter = router({
   board: boardMemberProcedure
     .input(z.object({ boardId: z.string().uuid() }))
     .query(async (req) => {
-      const admins = await db.board.getBoardAdmins(req.input.boardId);
-
-      const isAdmin = admins.includes(req.ctx.user.sub);
-
       db.board.updateLastAccessedAt(req.input.boardId, req.ctx.user.sub);
 
-      return {
-        ...req.ctx.board,
-        isAdmin,
-      };
+      return req.ctx.userBoard;
     }),
   teamBoards: teamMemberProcedure
     .input(z.object({ teamId: z.string().uuid() }))

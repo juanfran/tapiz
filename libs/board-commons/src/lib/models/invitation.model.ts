@@ -1,4 +1,4 @@
-import { Board } from './board.model.js';
+import { BoardUser } from './board.model.js';
 import { Team } from './team.model.js';
 
 export interface Invitation {
@@ -12,5 +12,5 @@ export interface UserInvitation {
   id: string;
   role: 'admin' | 'member' | 'guest';
   team?: Team;
-  board?: Board;
+  board?: BoardUser;
 }

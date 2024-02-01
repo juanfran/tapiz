@@ -1,6 +1,6 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import {
-  Board,
+  BoardUser,
   Invitation,
   Team,
   TeamInvitation,
@@ -16,12 +16,12 @@ export const HomeActions = createActionGroup({
   events: {
     'Init home': emptyProps(),
     'Init all boards page': emptyProps(),
-    'Fetch boards success': props<{ boards: Board[] }>(),
-    'Remove board': props<{ id: Board['id'] }>(),
-    'Leave board': props<{ id: Board['id'] }>(),
+    'Fetch boards success': props<{ boards: BoardUser[] }>(),
+    'Remove board': props<{ id: BoardUser['id'] }>(),
+    'Leave board': props<{ id: BoardUser['id'] }>(),
     'Create board': props<{ name: string; teamId?: Team['id'] }>(),
-    'Duplicate board': props<{ id: Board['id'] }>(),
-    'Duplicate board success': props<{ board: Board }>(),
+    'Duplicate board': props<{ id: BoardUser['id'] }>(),
+    'Duplicate board success': props<{ board: BoardUser }>(),
     'Remove account': emptyProps(),
     'Fetch teams success': props<{ teams: UserTeam[] }>(),
     'Create team': props<{ name: string }>(),
@@ -85,11 +85,14 @@ export const HomeActions = createActionGroup({
       id: Invitation['id'];
       role: TeamMember['role'];
     }>(),
-    'Rename board': props<{ id: Board['id']; name: string }>(),
-    'Star board': props<{ id: Board['id'] }>(),
-    'Unstar board': props<{ id: Board['id'] }>(),
+    'Rename board': props<{ id: BoardUser['id']; name: string }>(),
+    'Star board': props<{ id: BoardUser['id'] }>(),
+    'Unstar board': props<{ id: BoardUser['id'] }>(),
     'Init starred page': emptyProps(),
     'Change board sort by': props<{ sortBy: SortBoard }>(),
-    'Transfer board': props<{ id: Board['id']; teamId: Team['id'] | null }>(),
+    'Transfer board': props<{
+      id: BoardUser['id'];
+      teamId: Team['id'] | null;
+    }>(),
   },
 });

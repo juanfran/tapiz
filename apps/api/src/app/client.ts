@@ -76,7 +76,7 @@ export class Client {
     this.server.sendAll(this.boardId, action.data, [this]);
   }
 
-  public parseStateActionMessage(message: StateActions[]) {
+  public parseStateActionMessage(messages: StateActions[]) {
     if (!this.boardId) {
       return;
     }
@@ -87,16 +87,14 @@ export class Client {
       return;
     }
 
-    const validationResult = validation(message, state, this.id, this.isAdmin);
+    const validationResult = validation(messages, state, this.id, this.isAdmin);
 
     if (!validationResult.length) {
       return;
     }
 
     if (validationResult.length) {
-      validationResult.forEach((action) => {
-        this.updateSendAllStateAction(action);
-      });
+      this.updateSendAllStateActions(validationResult);
     }
   }
 
@@ -149,13 +147,13 @@ export class Client {
     }
   }
 
-  private updateSendAllStateAction(action: StateActions) {
+  private updateSendAllStateActions(actions: StateActions[]) {
     if (!this.boardId) {
       return;
     }
 
-    this.updateStateWithAction(action);
-    this.server.sendAll(this.boardId, this.getSetStateAction([action]), [this]);
+    this.updateStateWithActions(actions);
+    this.server.sendAll(this.boardId, this.getSetStateAction(actions), [this]);
   }
 
   private async join(message: { boardId: string }) {
@@ -205,9 +203,7 @@ export class Client {
 
       user.content.visible = userInBoard?.content.visible ?? false;
 
-      const admins = await db.board.getAllBoardAdmins(this.boardId);
-
-      this.isAdmin = admins.includes(this.id);
+      this.refreshIsAdmin();
 
       const initStateActions: StateActions[] = [
         ...board.map((it) => {
@@ -233,6 +229,16 @@ export class Client {
     } catch (e) {
       console.error(e);
     }
+  }
+
+  public async refreshIsAdmin() {
+    if (!this.boardId) {
+      return;
+    }
+
+    const admins = await db.board.getAllBoardAdmins(this.boardId);
+
+    this.isAdmin = admins.includes(this.id);
   }
 
   public getSetStateAction(action: StateActions[]) {
@@ -266,11 +272,11 @@ export class Client {
     }
   }
 
-  private updateStateWithAction(action: StateActions) {
+  private updateStateWithActions(actions: StateActions[]) {
     if (!this.boardId) {
       return;
     }
 
-    this.server.applyAction(this.boardId, [action]);
+    this.server.applyAction(this.boardId, actions);
   }
 }

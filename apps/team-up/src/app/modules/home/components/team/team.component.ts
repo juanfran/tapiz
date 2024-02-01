@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { Board, UserTeam } from '@team-up/board-commons';
+import { BoardUser, UserTeam } from '@team-up/board-commons';
 import { homeFeature } from '../../+state/home.feature';
 import { combineLatest, filter, map } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
@@ -26,7 +26,7 @@ import { filterNil } from 'ngxtension/filter-nil';
 interface State {
   teamId: string;
   team: UserTeam;
-  boards: Board[];
+  boards: BoardUser[];
 }
 
 @Component({

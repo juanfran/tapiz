@@ -6,7 +6,7 @@ import { filter, map } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { HomeActions } from '../../+state/home.actions';
 import { MatButtonModule } from '@angular/material/button';
-import { Board } from '@team-up/board-commons';
+import { BoardUser } from '@team-up/board-commons';
 import { RxState } from '@rx-angular/state';
 import { homeFeature } from '../../+state/home.feature';
 import { CommonModule } from '@angular/common';
@@ -14,7 +14,7 @@ import { BoardListComponent } from '../board-list/board-list.component';
 import { BoardListHeaderComponent } from '../board-list-header/board-list-header.component';
 
 interface State {
-  boards: Board[];
+  boards: BoardUser[];
 }
 
 @Component({

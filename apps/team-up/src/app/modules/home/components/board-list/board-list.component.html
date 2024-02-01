@@ -60,7 +60,7 @@
               Unstar
             </button>
           }
-          @if (board.role === 'admin') {
+          @if (board.isAdmin) {
             <button
               cdkMenuItem
               class="menu-item menu-item-icon"
@@ -70,7 +70,7 @@
               Rename board
             </button>
           }
-          @if (board.role === 'admin') {
+          @if (board.isAdmin) {
             <button
               cdkMenuItem
               class="menu-item menu-item-icon"
@@ -88,7 +88,7 @@
             <mat-icon fontIcon="content_copy"></mat-icon>
             Duplicate
           </button>
-          @if (board.role === 'admin') {
+          @if (board.isAdmin) {
             <button
               cdkMenuItem
               class="menu-item menu-item-icon"

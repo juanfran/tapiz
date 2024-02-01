@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 
 import {
-  Board,
+  BoardUser,
   CocomaterialApiListVectors,
   CocomaterialTag,
   Team,
@@ -30,7 +30,7 @@ export class BoardApiService {
     return from(this.trpc.board.starreds.query());
   }
 
-  public createBoard(board: Board['name'], teamId?: Team['id']) {
+  public createBoard(board: BoardUser['name'], teamId?: Team['id']) {
     return from(this.trpc.board.create.mutate({ name: board, teamId }));
   }
 
@@ -38,35 +38,35 @@ export class BoardApiService {
     return from(this.trpc.board.board.query({ boardId }));
   }
 
-  public removeBoard(boardId: Board['id']) {
+  public removeBoard(boardId: BoardUser['id']) {
     return from(this.trpc.board.delete.mutate({ boardId }));
   }
 
-  public leaveBoard(boardId: Board['id']) {
+  public leaveBoard(boardId: BoardUser['id']) {
     return from(this.trpc.board.leave.mutate({ boardId }));
   }
 
-  public duplicateBoard(boardId: Board['id']): Observable<Board> {
+  public duplicateBoard(boardId: BoardUser['id']): Observable<BoardUser> {
     return from(this.trpc.board.duplicate.mutate({ boardId }));
   }
 
-  public renameBoard(boardId: Board['id'], name: Board['name']) {
+  public renameBoard(boardId: BoardUser['id'], name: BoardUser['name']) {
     return from(this.trpc.board.rename.mutate({ boardId, name }));
   }
 
-  public setBoardPrivacy(boardId: Board['id'], isPublic: boolean) {
+  public setBoardPrivacy(boardId: BoardUser['id'], isPublic: boolean) {
     return from(this.trpc.board.changePrivacy.mutate({ boardId, isPublic }));
   }
 
-  public addStar(boardId: Board['id']) {
+  public addStar(boardId: BoardUser['id']) {
     return from(this.trpc.board.addStar.mutate({ boardId }));
   }
 
-  public removeStar(boardId: Board['id']) {
+  public removeStar(boardId: BoardUser['id']) {
     return from(this.trpc.board.removeStar.mutate({ boardId }));
   }
 
-  public transferBoard(boardId: Board['id'], teamId: Team['id'] | null) {
+  public transferBoard(boardId: BoardUser['id'], teamId: Team['id'] | null) {
     return from(
       this.trpc.board.transferBoard.mutate({
         boardId,

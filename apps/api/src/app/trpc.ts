@@ -126,10 +126,16 @@ const boardMemberCheck = boardCheck.unstable_pipe(async (opts) => {
     throw new TRPCError({ code: 'UNAUTHORIZED' });
   }
 
+  await db.board.joinBoard(opts.ctx.user.sub, inputs.boardId);
+
   const userBoard = await db.board.getBoardUser(
     inputs.boardId,
     opts.ctx.user.sub,
   );
+
+  if (!userBoard) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' });
+  }
 
   return opts.next({
     ctx: {

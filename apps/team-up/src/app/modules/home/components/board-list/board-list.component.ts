@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 
 import { RxFor } from '@rx-angular/template/for';
-import { Board, SortBoard } from '@team-up/board-commons';
+import { BoardUser, SortBoard } from '@team-up/board-commons';
 import { Router, RouterModule } from '@angular/router';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
 import { MatIconModule } from '@angular/material/icon';
@@ -47,7 +47,7 @@ export class BoardListComponent {
   private dialog = inject(MatDialog);
 
   public sortBy = this.store.selectSignal(homeFeature.selectSortBy);
-  public listBoards = signal([] as Board[]);
+  public listBoards = signal([] as BoardUser[]);
 
   public sortedBoards = computed(() => {
     const list = [...this.listBoards()];
@@ -76,7 +76,7 @@ export class BoardListComponent {
   });
 
   @Input()
-  public set boards(boards: Board[]) {
+  public set boards(boards: BoardUser[]) {
     this.listBoards.set(boards);
   }
 
@@ -85,15 +85,15 @@ export class BoardListComponent {
       a[fieldName] > b[fieldName] ? 1 : -1;
   }
 
-  public goBoard(board: Board) {
+  public goBoard(board: BoardUser) {
     this.router.navigate(['/board/', board.id]);
   }
 
-  public duplicateBoard(board: Board) {
+  public duplicateBoard(board: BoardUser) {
     this.store.dispatch(HomeActions.duplicateBoard({ id: board.id }));
   }
 
-  public deleteBoard(board: Board) {
+  public deleteBoard(board: BoardUser) {
     const dialogRef = this.dialog.open(ConfirmComponent, {
       data: {
         title: 'Are you sure?',
@@ -118,11 +118,11 @@ export class BoardListComponent {
       });
   }
 
-  public leaveBoard(board: Board) {
+  public leaveBoard(board: BoardUser) {
     this.store.dispatch(HomeActions.leaveBoard({ id: board.id }));
   }
 
-  public transferBoard(board: Board) {
+  public transferBoard(board: BoardUser) {
     const dialogRef = this.dialog.open(TransferBoardComponent, {
       width: '400px',
       data: {
@@ -142,7 +142,7 @@ export class BoardListComponent {
       });
   }
 
-  public renameBoard(board: Board) {
+  public renameBoard(board: BoardUser) {
     const dialogRef = this.dialog.open(RenameBoardComponent, {
       width: '400px',
       autoFocus: 'dialog',
@@ -164,7 +164,7 @@ export class BoardListComponent {
       });
   }
 
-  public addStar(board: Board) {
+  public addStar(board: BoardUser) {
     this.store.dispatch(
       HomeActions.starBoard({
         id: board.id,
@@ -172,7 +172,7 @@ export class BoardListComponent {
     );
   }
 
-  public removeStar(board: Board) {
+  public removeStar(board: BoardUser) {
     this.store.dispatch(
       HomeActions.unstarBoard({
         id: board.id,

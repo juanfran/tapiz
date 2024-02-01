@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { HomeActions } from '../../+state/home.actions';
 import { RxState } from '@rx-angular/state';
-import { Board } from '@team-up/board-commons';
+import { BoardUser } from '@team-up/board-commons';
 import { BoardListComponent } from '../board-list/board-list.component';
 import { homeFeature } from '../../+state/home.feature';
 import { BoardListHeaderComponent } from '../board-list-header/board-list-header.component';
@@ -13,7 +13,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { CreateBoardComponent } from '../create-board/create-board.component';
 import { filter } from 'rxjs';
 interface State {
-  boards: Board[];
+  boards: BoardUser[];
 }
 
 @Component({

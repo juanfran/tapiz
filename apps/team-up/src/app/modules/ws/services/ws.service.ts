@@ -56,6 +56,7 @@ export class WsService {
           message: 'Connection lost',
           action: 'Close',
           type: 'error',
+          durantion: 3000,
         });
 
         this.router.navigate(['/']);

@@ -89,8 +89,8 @@ describe('user', () => {
     const boards = await newAdmin.board.boards();
 
     expect(teams[0].teamMember.role).toEqual('admin');
-    expect(boards[0].role).toEqual('admin');
-    expect(boards[1].role).toEqual('admin');
+    expect(boards[0].isAdmin).toBeTruthy();
+    expect(boards[1].isAdmin).toBeTruthy();
   });
 
   describe('invites', () => {

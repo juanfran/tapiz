@@ -1,6 +1,6 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 import {
-  Board,
+  BoardUser,
   Invitation,
   UserTeam,
   UserInvitation,
@@ -10,7 +10,7 @@ import {
 import { HomeActions } from './home.actions';
 
 export interface HomeState {
-  boards: Board[];
+  boards: BoardUser[];
   teams: UserTeam[];
   loadingBoards: boolean;
   invitations: Invitation[];

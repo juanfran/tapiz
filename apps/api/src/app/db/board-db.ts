@@ -1,7 +1,7 @@
 import { eq, and, or, desc, notInArray } from 'drizzle-orm';
 import { db } from './init-db.js';
 import * as schema from '../schema.js';
-import type { TuNode, UserNode } from '@team-up/board-commons';
+import type { BoardUser, TuNode, UserNode } from '@team-up/board-commons';
 import { SetNonNullable } from 'type-fest';
 import * as team from './team-db.js';
 import { getUserTeam } from './team-db.js';
@@ -98,21 +98,72 @@ export async function getBoardAdmins(boardId: string) {
   return Array.from(ids);
 }
 
-export async function getBoardUser(boardId: string, userId: UserNode['id']) {
+export async function getBoardUser(
+  boardId: string,
+  userId: UserNode['id'],
+): Promise<BoardUser | undefined> {
   const results = await db
-    .select()
-    .from(schema.acountsToBoards)
-    .where(
+    .select({
+      boards: {
+        id: schema.boards.id,
+        name: schema.boards.name,
+        createdAt: schema.boards.createdAt,
+        teamId: schema.boards.teamId,
+        role: schema.acountsToBoards.role,
+        public: schema.boards.public,
+      },
+      starreds: schema.starreds,
+      accounts_boards: {
+        role: schema.acountsToBoards.role,
+        lastAccessedAt: schema.acountsToBoards.lastAccessedAt,
+      },
+      team_members: {
+        role: schema.teamMembers.role,
+      },
+    })
+    .from(schema.boards)
+    .leftJoin(
+      schema.starreds,
       and(
-        eq(schema.acountsToBoards.boardId, boardId),
+        eq(schema.starreds.accountId, userId),
+        eq(schema.starreds.boardId, schema.boards.id),
+      ),
+    )
+    .leftJoin(
+      schema.acountsToBoards,
+      and(
+        eq(schema.boards.id, schema.acountsToBoards.boardId),
         eq(schema.acountsToBoards.accountId, userId),
       ),
-    );
+    )
+    .leftJoin(
+      schema.teamMembers,
+      and(
+        eq(schema.teamMembers.teamId, schema.boards.teamId),
+        eq(schema.teamMembers.accountId, userId),
+      ),
+    )
+    .where(eq(schema.boards.id, boardId));
 
-  return results.at(0);
+  const result = results.at(0);
+
+  if (!result) {
+    return;
+  }
+
+  return {
+    ...result.boards,
+    role: result.accounts_boards?.role ?? 'member',
+    starred: !!result.starreds,
+    isAdmin:
+      result.team_members?.role === 'admin' ||
+      result.accounts_boards?.role === 'admin',
+    lastAccessedAt:
+      result.accounts_boards?.lastAccessedAt ?? result.boards.createdAt,
+  };
 }
 
-export async function getBoards(userId: string) {
+export async function getBoards(userId: string): Promise<BoardUser[]> {
   const teams = await team.getUserTeams(userId);
   const teamBoards = [];
 
@@ -126,7 +177,21 @@ export async function getBoards(userId: string) {
   const inArray = ids.length ? notInArray(schema.boards.id, ids) : undefined;
 
   const boardsRaw = await db
-    .select()
+    .select({
+      boards: {
+        id: schema.boards.id,
+        name: schema.boards.name,
+        createdAt: schema.boards.createdAt,
+        teamId: schema.boards.teamId,
+        role: schema.acountsToBoards.role,
+        public: schema.boards.public,
+      },
+      starreds: schema.starreds,
+      accounts_boards: {
+        role: schema.acountsToBoards.role,
+        lastAccessedAt: schema.acountsToBoards.lastAccessedAt,
+      },
+    })
     .from(schema.boards)
     .leftJoin(
       schema.acountsToBoards,
@@ -154,16 +219,21 @@ export async function getBoards(userId: string) {
 
   const boards = boardsRaw
     .filter((it): it is SetNonNullable<typeof it> => !!it.accounts_boards)
-    .map((result) => ({
-      id: result.boards.id,
-      name: result.boards.name,
-      teamId: result.boards.teamId,
-      createdAt: result.boards.createdAt,
-      role: result.accounts_boards.role,
-      starred: !!result.starreds,
-      lastAccessedAt:
-        result.accounts_boards.lastAccessedAt ?? result.boards.createdAt,
-    }));
+    .map((result) => {
+      const team = teams.find((it) => it.id === result.boards.teamId);
+      const teamRole = team?.teamMember.role ?? 'member';
+
+      return {
+        ...result.boards,
+        createdAt: result.boards.createdAt,
+        role: result.accounts_boards.role,
+        starred: !!result.starreds,
+        isAdmin:
+          teamRole === 'admin' || result.accounts_boards.role === 'admin',
+        lastAccessedAt:
+          result.accounts_boards.lastAccessedAt ?? result.boards.createdAt,
+      };
+    });
 
   const finalBoards = [...boards, ...teamBoards];
 
@@ -211,7 +281,10 @@ export async function getBoardsByTeam(teamId: string) {
     .orderBy(desc(schema.boards.createdAt));
 }
 
-export async function getUsersBoardsByTeam(userId: string, teamId: string) {
+export async function getUsersBoardsByTeam(
+  userId: string,
+  teamId: string,
+): Promise<BoardUser[]> {
   const userTeam = await getUserTeam(teamId, userId);
 
   if (!userTeam) {
@@ -219,7 +292,21 @@ export async function getUsersBoardsByTeam(userId: string, teamId: string) {
   }
 
   const results = await db
-    .select()
+    .select({
+      boards: {
+        id: schema.boards.id,
+        name: schema.boards.name,
+        createdAt: schema.boards.createdAt,
+        teamId: schema.boards.teamId,
+        role: schema.acountsToBoards.role,
+        public: schema.boards.public,
+      },
+      starreds: schema.starreds,
+      accounts_boards: {
+        role: schema.acountsToBoards.role,
+        lastAccessedAt: schema.acountsToBoards.lastAccessedAt,
+      },
+    })
     .from(schema.boards)
     .leftJoin(
       schema.starreds,
@@ -239,12 +326,11 @@ export async function getUsersBoardsByTeam(userId: string, teamId: string) {
     .orderBy(desc(schema.boards.createdAt));
 
   return results.map((result) => ({
-    id: result.boards.id,
-    name: result.boards.name,
-    createdAt: result.boards.createdAt,
-    role: userTeam.role,
+    ...result.boards,
+    role: result.accounts_boards?.role ?? 'member',
     starred: !!result.starreds,
-    teamId: result.boards.teamId,
+    isAdmin:
+      userTeam.role === 'admin' || result.accounts_boards?.role === 'admin',
     lastAccessedAt:
       result.accounts_boards?.lastAccessedAt ?? result.boards.createdAt,
   }));
@@ -312,7 +398,9 @@ export async function joinBoard(
   boardId: string,
 ): Promise<void> {
   const result = await db
-    .select()
+    .select({
+      id: schema.acountsToBoards.accountId,
+    })
     .from(schema.boards)
     .leftJoin(
       schema.acountsToBoards,

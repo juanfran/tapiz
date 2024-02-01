@@ -67,7 +67,7 @@ describe('ws', () => {
 
     const board = await getBoardUser(board1.id, getAuth(1).sub);
 
-    expect(board?.accountId).toBeTruthy();
+    expect(board).toBeTruthy();
     expect(ws.OPEN).toEqual(WebSocket.OPEN);
   });
 
