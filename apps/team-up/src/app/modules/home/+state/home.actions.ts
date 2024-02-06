@@ -16,6 +16,8 @@ export const HomeActions = createActionGroup({
   events: {
     'Init home': emptyProps(),
     'Init all boards page': emptyProps(),
+    'Fetch all boards': emptyProps(),
+    'Fetch team boards': props<{ teamId: Team['id'] }>(),
     'Fetch boards success': props<{ boards: BoardUser[] }>(),
     'Remove board': props<{ id: BoardUser['id'] }>(),
     'Leave board': props<{ id: BoardUser['id'] }>(),
@@ -23,6 +25,7 @@ export const HomeActions = createActionGroup({
     'Duplicate board': props<{ id: BoardUser['id'] }>(),
     'Duplicate board success': props<{ board: BoardUser }>(),
     'Remove account': emptyProps(),
+    'Fetch teams': emptyProps(),
     'Fetch teams success': props<{ teams: UserTeam[] }>(),
     'Create team': props<{ name: string }>(),
     'Create team success': props<{ team: UserTeam }>(),

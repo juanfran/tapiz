@@ -17,6 +17,7 @@ export async function createContext({ req }: CreateFastifyContextOptions) {
 
   return {
     user,
+    correlationId: req.headers['correlation-id'] as string,
   };
 }
 export type AuthContext = inferAsyncReturnType<typeof createContext>;

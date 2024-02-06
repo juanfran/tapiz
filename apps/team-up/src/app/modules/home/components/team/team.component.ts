@@ -9,7 +9,14 @@ import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
 import { BoardUser, UserTeam } from '@team-up/board-commons';
 import { homeFeature } from '../../+state/home.feature';
-import { combineLatest, filter, map } from 'rxjs';
+import {
+  combineLatest,
+  debounceTime,
+  filter,
+  map,
+  merge,
+  switchMap,
+} from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -22,6 +29,7 @@ import { BoardListHeaderComponent } from '../board-list-header/board-list-header
 import { ConfirmComponent } from '../../../../shared/confirm-action/confirm-actions.component';
 import { TitleComponent } from '../../../../shared/title/title.component';
 import { filterNil } from 'ngxtension/filter-nil';
+import { SubscriptionService } from '../../../../services/subscription.service';
 
 interface State {
   teamId: string;
@@ -99,6 +107,7 @@ export class TeamComponent {
   private state = inject(RxState) as RxState<State>;
   private store = inject(Store);
   private dialog = inject(MatDialog);
+  private subscriptionService = inject(SubscriptionService);
 
   public model$ = this.state.select();
 
@@ -123,6 +132,25 @@ export class TeamComponent {
     );
 
     this.state.connect('boards', this.store.select(homeFeature.selectBoards));
+
+    merge(
+      this.state.select('boards').pipe(
+        switchMap((boards) => {
+          return this.subscriptionService.watchBoardIds(
+            boards.map((it) => it.id),
+          );
+        }),
+      ),
+      this.subscriptionService
+        .teamMessages()
+        .pipe(filter((it) => it === this.state.get('teamId'))),
+    )
+      .pipe(debounceTime(100))
+      .subscribe(() => {
+        this.store.dispatch(
+          HomeActions.fetchTeamBoards({ teamId: this.state.get('teamId') }),
+        );
+      });
   }
 
   public deleteTeam() {
@@ -132,7 +160,7 @@ export class TeamComponent {
         description:
           'All boards and data will be deleted. This action cannot be undone.',
         confirm: {
-          text: 'Delete account',
+          text: 'Delete team',
           color: 'warn',
         },
         cancel: {

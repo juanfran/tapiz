@@ -5,11 +5,14 @@ import { Router } from '@angular/router';
 import { ConfigService } from '../../services/config.service';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { throwError } from 'rxjs';
+import { SubscriptionService } from '../../services/subscription.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const configService = inject(ConfigService);
   const router = inject(Router);
+  const subscriptionService = inject(SubscriptionService);
 
+  // update api-config.service.ts
   if (
     configService.config &&
     (req.url.includes(configService.config.API) ||
@@ -18,6 +21,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const request = req.clone({
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
+        'correlation-id': subscriptionService.correlationId,
       }),
       withCredentials: true,
     });

@@ -10,6 +10,8 @@ import {
   FastifyTRPCPluginOptions,
 } from '@trpc/server/adapters/fastify';
 import { Server } from './server.js';
+import { newSubscriptorConnection } from './subscriptor.js';
+import { setServer } from './global.js';
 
 const fastify = Fastify({
   logger: false,
@@ -46,9 +48,15 @@ fastify.register(async function (fastify) {
   fastify.get('/events', { websocket: true }, (connection, req) => {
     if (!server) {
       server = new Server();
+
+      setServer(server);
     }
 
     server.connection(connection.socket, req);
+  });
+
+  fastify.get('/sub', { websocket: true }, (connection) => {
+    newSubscriptorConnection(connection.socket);
   });
 });
 

@@ -1,8 +1,11 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-
 import { AuthService } from './services/auth.service';
 import './app-node';
+import { SubscriptionService } from './services/subscription.service';
+import { Store } from '@ngrx/store';
+
+import { appFeature } from './+state/app.reducer';
 
 @Component({
   selector: 'team-up-root',
@@ -13,9 +16,19 @@ import './app-node';
   imports: [RouterOutlet],
 })
 export class AppComponent {
-  public title = 'team up';
+  #authService = inject(AuthService);
+  #subscriptionService = inject(SubscriptionService);
+  #store = inject(Store);
 
-  constructor(private authService: AuthService) {
-    this.authService.configureLogin();
+  constructor() {
+    this.#store.select(appFeature.selectUserId).subscribe((userId) => {
+      if (userId) {
+        this.#subscriptionService.listen();
+      } else {
+        this.#subscriptionService.close();
+      }
+    });
+
+    this.#authService.configureLogin();
   }
 }

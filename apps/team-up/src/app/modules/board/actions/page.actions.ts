@@ -76,5 +76,6 @@ export const PageActions = createActionGroup({
     'Stop highlight': emptyProps(),
     'Node snapshot': props<{ prev: TuNode; curr: TuNode }>(),
     'Lock board': props<{ lock: boolean }>(),
+    'Refetch board': emptyProps(),
   },
 });
