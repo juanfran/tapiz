@@ -10,13 +10,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CreateTeamComponent } from './components/create-team/create-team.component';
 import { homeFeature } from './+state/home.feature';
-import { filter } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
 import { UserInvitationsComponent } from './components/user-invitations/user-invitations.component';
 import { AuthService } from '../../services/auth.service';
 import { trackByProp } from '../../shared/track-by-prop';
 import { ConfirmComponent } from '../../shared/confirm-action/confirm-actions.component';
+import { SubscriptionService } from '../../services/subscription.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface State {
   teams: UserTeam[];
@@ -45,6 +47,7 @@ export class HomeComponent {
   private store = inject(Store);
   private state = inject(RxState) as RxState<State>;
   private dialog = inject(MatDialog);
+  private subscriptionService = inject(SubscriptionService);
 
   public model$ = this.state.select();
   public trackById = trackByProp('id');
@@ -57,6 +60,20 @@ export class HomeComponent {
       'invitations',
       this.store.select(homeFeature.selectUserInvitations),
     );
+
+    this.state
+      .select('teams')
+      .pipe(
+        takeUntilDestroyed(),
+        switchMap((teams) => {
+          return this.subscriptionService.watchTeamIds(
+            teams.map((it) => it.id),
+          );
+        }),
+      )
+      .subscribe(() => {
+        this.store.dispatch(HomeActions.fetchTeams());
+      });
   }
 
   public openCreateTeamDialog() {

@@ -50,30 +50,10 @@ export class Client {
     if (messages.length) {
       if ('action' in messages[0] && messages[0].action === 'join') {
         this.join(messages[0]);
-      } else if (
-        BoardCommonActions.setBoardName === messages[0].type &&
-        this.isAdmin
-      ) {
-        this.updateBoardName(messages[0]);
       } else {
         this.parseStateActionMessage(messages);
       }
     }
-  }
-
-  private async updateBoardName(message: { name: string }) {
-    if (!this.boardId) {
-      return;
-    }
-
-    const action = Validators.changeBoardName.safeParse(message);
-
-    if (!action.success) {
-      return;
-    }
-
-    this.server.updateBoardName(this.boardId, action.data.name);
-    this.server.sendAll(this.boardId, action.data, [this]);
   }
 
   public parseStateActionMessage(messages: StateActions[]) {

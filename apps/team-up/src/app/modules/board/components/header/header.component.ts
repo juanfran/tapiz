@@ -30,6 +30,7 @@ interface State {
   canvasMode: string;
   name: string;
   isAdmin: boolean;
+  currentBoardName: string;
 }
 @Component({
   selector: 'team-up-header',
@@ -60,6 +61,10 @@ export class HeaderComponent {
     this.state.connect('canvasMode', this.store.select(selectCanvasMode));
     this.state.connect('name', this.store.select(pageFeature.selectName));
     this.state.connect('isAdmin', this.store.select(selectIsAdmin));
+    this.state.connect(
+      'currentBoardName',
+      this.store.select(pageFeature.selectName),
+    );
   }
 
   public model$ = this.state.select();
@@ -102,7 +107,10 @@ export class HeaderComponent {
     this.state.set({ edit: false });
 
     const name = (el.nativeElement as HTMLTextAreaElement).innerText;
-    this.store.dispatch(BoardActions.setBoardName({ name }));
+
+    if (name !== this.state.get().currentBoardName) {
+      this.store.dispatch(BoardActions.setBoardName({ name }));
+    }
   }
 
   public share() {

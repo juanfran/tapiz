@@ -79,6 +79,7 @@ import { FollowUserComponent } from '../../../shared/follow-user/follow-user.com
 import { StopHighlightComponent } from '../../../shared/stop-highlight/stop-highlight';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { appFeature } from '../../../+state/app.reducer';
+import { SubscriptionService } from '../../../services/subscription.service';
 
 @UntilDestroy()
 @Component({
@@ -182,6 +183,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     private moveService: MoveService,
     private resizeService: ResizeService,
     private rotateService: RotateService,
+    private subscriptionService: SubscriptionService,
   ) {
     rxEffect(
       this.contextMenuStore.open$.pipe(
@@ -318,6 +320,17 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
           }),
         );
       });
+
+    const boardId = this.route.snapshot.paramMap.get('id');
+
+    if (boardId) {
+      this.subscriptionService
+        .watchBoardIds([boardId])
+        .pipe(untilDestroyed(this))
+        .subscribe(() => {
+          this.store.dispatch(PageActions.refetchBoard());
+        });
+    }
   }
 
   public initBoard() {

@@ -15,7 +15,11 @@ import { appFeature } from '../../../../+state/app.reducer';
 export const initHomeFeatchTeams$ = createEffect(
   (actions$ = inject(Actions), teamApiService = inject(TeamApiService)) => {
     return actions$.pipe(
-      ofType(HomeActions.initHome, HomeActions.acceptInvitationSuccess),
+      ofType(
+        HomeActions.initHome,
+        HomeActions.acceptInvitationSuccess,
+        HomeActions.fetchTeams,
+      ),
       exhaustMap(() => {
         return teamApiService.fetchTeams();
       }),
@@ -168,7 +172,7 @@ export const duplicateBoard$ = createEffect(
 export const fetchBoards$ = createEffect(
   (actions$ = inject(Actions), boardApiService = inject(BoardApiService)) => {
     return actions$.pipe(
-      ofType(HomeActions.initAllBoardsPage),
+      ofType(HomeActions.initAllBoardsPage, HomeActions.fetchAllBoards),
       switchMap(() => {
         return boardApiService.fetchBoards().pipe(
           map((boards) => {
@@ -493,7 +497,7 @@ export const leaveTeam$ = createEffect(
 export const fetchTeamBoards$ = createEffect(
   (actions$ = inject(Actions), boardApiService = inject(BoardApiService)) => {
     return actions$.pipe(
-      ofType(HomeActions.initTeamPage),
+      ofType(HomeActions.initTeamPage, HomeActions.fetchTeamBoards),
       switchMap((action) => {
         return boardApiService.fetchTeamBoards(action.teamId).pipe(
           map((boards) => {

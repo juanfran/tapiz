@@ -4,6 +4,7 @@ import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import type { AppRouter } from '@team-up/api/app/trpc-type';
 import { AuthService } from './auth.service';
 import { ConfigService } from './config.service';
+import { SubscriptionService } from './subscription.service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +12,7 @@ import { ConfigService } from './config.service';
 export class APIConfigService {
   #configService = inject(ConfigService);
   #auth = inject(AuthService);
+  #subscriptionService = inject(SubscriptionService);
 
   public getTrpcConfig() {
     return createTRPCProxyClient<AppRouter>({
@@ -18,9 +20,14 @@ export class APIConfigService {
         httpBatchLink({
           url: this.#configService.config.API + '/trpc',
           fetch: async (url, options) => {
+            // update api-rest-interceptor.service.ts
             const response = await fetch(url, {
               ...options,
               credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+                'correlation-id': this.#subscriptionService.correlationId,
+              },
             });
 
             if (response.status === 401) {

@@ -1,5 +1,5 @@
 import { Injectable, inject, isDevMode } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 import { AppActions } from '../+state/app.actions';

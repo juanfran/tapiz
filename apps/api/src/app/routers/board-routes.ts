@@ -10,6 +10,7 @@ import {
 } from '../trpc.js';
 import db from '../db/index.js';
 import { checkBoardAccess, revokeBoardAccess } from '../global.js';
+import { triggerBoard, triggerTeam } from '../subscriptor.js';
 
 export const boardRouter = router({
   create: protectedProcedure
@@ -50,6 +51,10 @@ export const boardRouter = router({
         team?.id ?? null,
       );
 
+      if (team?.id) {
+        triggerTeam(team?.id, req.ctx.correlationId);
+      }
+
       return {
         id: newBoard.id,
         name: req.input.name,
@@ -64,6 +69,7 @@ export const boardRouter = router({
         await db.board.deleteBoard(req.input.boardId);
 
         revokeBoardAccess(req.input.boardId);
+        triggerBoard(req.input.boardId, req.ctx.correlationId);
 
         return {
           success: true,
@@ -143,6 +149,8 @@ export const boardRouter = router({
     .mutation(async (req) => {
       await db.board.rename(req.input.boardId, req.input.name);
 
+      triggerBoard(req.input.boardId, req.ctx.correlationId);
+
       return {
         success: true,
       };
@@ -181,6 +189,10 @@ export const boardRouter = router({
     )
     .mutation(async (req) => {
       await db.board.transferBoard(req.input.boardId, req.input.teamId ?? null);
+
+      if (!req.input.teamId) {
+        triggerBoard(req.input.boardId, req.ctx.correlationId);
+      }
 
       return {
         success: true,

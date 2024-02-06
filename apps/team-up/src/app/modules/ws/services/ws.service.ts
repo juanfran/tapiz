@@ -23,7 +23,7 @@ export class WsService {
   }
 
   public listen() {
-    this.ws = new WebSocket(`${this.configService.config.WS}`);
+    this.ws = new WebSocket(`${this.configService.config.WS}/events`);
 
     this.ws.addEventListener('open', () => {
       this.store.dispatch(wsOpen());

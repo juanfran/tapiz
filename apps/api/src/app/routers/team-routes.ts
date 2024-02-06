@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { protectedProcedure, router, teamAdminProcedure } from '../trpc.js';
 import db from '../db/index.js';
 import { revokeBoardAccess } from '../global.js';
+import { triggerTeam } from '../subscriptor.js';
 
 export const teamRouter = router({
   new: protectedProcedure
@@ -98,6 +99,8 @@ export const teamRouter = router({
 
       await db.team.deleteTeam(req.input.teamId);
 
+      triggerTeam(req.input.teamId, req.ctx.correlationId);
+
       return {
         success: true,
       };
@@ -116,6 +119,8 @@ export const teamRouter = router({
         req.input.userId,
         req.input.role,
       );
+
+      triggerTeam(req.input.teamId, req.ctx.correlationId);
 
       return {
         success: true,
@@ -166,6 +171,8 @@ export const teamRouter = router({
     )
     .mutation(async (req) => {
       await db.team.renameTeam(req.input.teamId, req.input.name);
+
+      triggerTeam(req.input.teamId, req.ctx.correlationId);
 
       return {
         success: true,

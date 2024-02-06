@@ -19,6 +19,7 @@ import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
 import { Panel, StateActions } from '@team-up/board-commons';
 import { BoardFacade } from '../../../services/board-facade.service';
+import { pageFeature } from '../reducers/page.reducer';
 
 @Injectable()
 export class BoardEffects {
@@ -65,11 +66,12 @@ export class BoardEffects {
     },
   );
 
-  public wsUpdateStateName$ = createEffect(
+  public updateBoardName$ = createEffect(
     () => {
       return this.actions$.pipe(ofType(BoardActions.setBoardName)).pipe(
-        tap((action) => {
-          this.wsService.send([action]);
+        concatLatestFrom(() => this.store.select(pageFeature.selectBoardId)),
+        mergeMap(([action, boardId]) => {
+          return this.boardApiService.renameBoard(boardId, action.name);
         }),
       );
     },
@@ -99,6 +101,24 @@ export class BoardEffects {
       dispatch: false,
     },
   );
+
+  public refetchBoard$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.refetchBoard),
+      concatLatestFrom(() => this.store.select(pageFeature.selectBoardId)),
+      switchMap(([, boardId]) => {
+        return this.boardApiService.getBoard(boardId).pipe(
+          map((board) => {
+            return PageActions.fetchBoardSuccess({
+              name: board.name,
+              isAdmin: board.isAdmin,
+              isPublic: board.public,
+            });
+          }),
+        );
+      }),
+    );
+  });
 
   public joinBoard$ = createEffect(() => {
     return this.actions$.pipe(
