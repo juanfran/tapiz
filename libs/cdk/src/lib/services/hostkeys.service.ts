@@ -1,6 +1,6 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter, fromEvent, tap } from 'rxjs';
+import { filter, fromEvent } from 'rxjs';
 
 interface HotkeysOptions {
   trigger?: 'keydown' | 'keyup';

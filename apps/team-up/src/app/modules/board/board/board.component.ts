@@ -35,7 +35,6 @@ import {
   selectBoardId,
   selectUserId,
   selectZoom,
-  selectDrawing,
   selectSearching,
   selectDragEnabled,
   selectLayer,
@@ -56,12 +55,18 @@ import { CommonModule } from '@angular/common';
 import { BoardToolbarComponent } from '../components/board-toolbar/board-toolbar.component';
 import { UsersComponent } from '../components/users/users.component';
 import { HeaderComponent } from '../components/header/header.component';
-import { DrawingOptionsComponent } from '../components/drawing-options/drawing-options.component';
 import { SearchOptionsComponent } from '../components/search-options/search-options.component';
 import { Actions, ofType } from '@ngrx/effects';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { TitleComponent } from '../../../shared/title/title.component';
-import { Point, StateActions, isGroup, isNote } from '@team-up/board-commons';
+import {
+  Drawing,
+  Point,
+  StateActions,
+  TuNode,
+  isGroup,
+  isNote,
+} from '@team-up/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NodesComponent } from '../components/nodes/nodes.component';
@@ -80,6 +85,9 @@ import { StopHighlightComponent } from '../../../shared/stop-highlight/stop-high
 import { BoardFacade } from '../../../services/board-facade.service';
 import { appFeature } from '../../../+state/app.reducer';
 import { SubscriptionService } from '../../../services/subscription.service';
+import { DrawingStore } from '@team-up/board-components/drawing/drawing.store';
+import { DrawingOptionsComponent } from '@team-up/board-components/drawing-options';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @UntilDestroy()
 @Component({
@@ -87,7 +95,7 @@ import { SubscriptionService } from '../../../services/subscription.service';
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [],
+  providers: [DrawingStore],
   standalone: true,
   imports: [
     CommonModule,
@@ -128,7 +136,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   );
   public readonly canvasMode$ = this.store.select(selectCanvasMode);
   public readonly newNote$ = new Subject<MouseEvent>();
-  public readonly drawing = this.store.selectSignal(selectDrawing);
+  public readonly drawing = this.drawingStore.drawing;
   public readonly search = this.store.selectSignal(selectSearching);
   public readonly boardTitle = this.store.selectSignal(pageFeature.selectName);
   public readonly folloUser = this.store.selectSignal(pageFeature.selectFollow);
@@ -184,6 +192,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     private resizeService: ResizeService,
     private rotateService: RotateService,
     private subscriptionService: SubscriptionService,
+    private drawingStore: DrawingStore,
   ) {
     rxEffect(
       this.contextMenuStore.open$.pipe(
@@ -331,6 +340,41 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
           this.store.dispatch(PageActions.refetchBoard());
         });
     }
+
+    this.dragConfig();
+  }
+
+  public dragConfig() {
+    // todo:  better way to sync
+    this.boardFacade.selectFocusNodes$
+      .pipe(untilDestroyed(this))
+      .subscribe((nodes) => {
+        this.drawingStore.selectNode$.next(nodes);
+      });
+
+    this.boardFacade
+      .getNodes()
+      .pipe(
+        untilDestroyed(this),
+        map((nodes) => {
+          return nodes.filter(
+            (node) => node.type === 'note' || node.type === 'panel',
+          ) as TuNode<{ drawing: Drawing[] }>[];
+        }),
+      )
+      .subscribe((nodes) => {
+        this.drawingStore.nodes$.next(nodes);
+      });
+
+    toObservable(this.drawingStore.drawing)
+      .pipe(untilDestroyed(this))
+      .subscribe((drawing) => {
+        this.store.dispatch(
+          PageActions.drawing({
+            drawing,
+          }),
+        );
+      });
   }
 
   public initBoard() {

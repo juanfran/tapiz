@@ -34,9 +34,6 @@ export interface PageState {
   voting: boolean;
   emoji: NativeEmoji | null;
   dragEnabled: boolean;
-  drawing: boolean;
-  drawingColor: string;
-  drawingSize: number;
   cocomaterial: {
     page: number;
     tags: CocomaterialTag[];
@@ -73,9 +70,6 @@ const initialPageState: PageState = {
   userId: '',
   emoji: null,
   dragEnabled: true,
-  drawing: false,
-  drawingColor: '#000000',
-  drawingSize: 5,
   cocomaterial: {
     page: 1,
     tags: [],
@@ -267,7 +261,6 @@ const reducer = createReducer(
     state.boardCursor = 'default';
     state.voting = false;
     state.dragEnabled = true;
-    state.drawing = false;
     state.searching = false;
 
     if (popup.length) {
@@ -328,24 +321,10 @@ const reducer = createReducer(
 
     return state;
   }),
-  on(PageActions.readyToDraw, (state): PageState => {
-    return {
-      ...state,
-      dragEnabled: false,
-      drawing: true,
-    };
-  }),
   on(PageActions.readyToSearch, (state): PageState => {
     return {
       ...state,
       searching: true,
-    };
-  }),
-  on(PageActions.setDrawingParams, (state, { size, color }): PageState => {
-    return {
-      ...state,
-      drawingColor: color,
-      drawingSize: size,
     };
   }),
   on(PageActions.pasteNodes, (state, { nodes }): PageState => {
@@ -403,6 +382,12 @@ const reducer = createReducer(
       ...state,
       moveEnabled: true,
       dragEnabled: true,
+    };
+  }),
+  on(PageActions.drawing, (state, { drawing }): PageState => {
+    return {
+      ...state,
+      dragEnabled: !drawing,
     };
   }),
 );

@@ -40,6 +40,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { TokenSelectorComponent } from '../token-selector/token-selector.component';
 import { Token } from '@team-up/board-commons/models/token.model';
 import { Text } from '@team-up/board-commons';
+import { DrawingStore } from '@team-up/board-components/drawing/drawing.store';
 
 interface State {
   popupOpen: string;
@@ -80,6 +81,7 @@ export class BoardToolbarComponent {
     private boardMoveService: BoardMoveService,
     private notesService: NotesService,
     private dialog: MatDialog,
+    private drawingStore: DrawingStore,
   ) {
     this.state.connect('popupOpen', this.store.select(selectPopupOpen));
   }
@@ -194,9 +196,10 @@ export class BoardToolbarComponent {
   public draw() {
     if (this.state.get('popupOpen') !== 'draw') {
       this.popupOpen('draw');
-      this.store.dispatch(PageActions.readyToDraw());
+      this.drawingStore.actions.readyToDraw();
     } else {
       this.popupOpen('');
+      this.drawingStore.actions.finishDrawing();
     }
   }
 

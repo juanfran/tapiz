@@ -270,6 +270,7 @@ export class BoardEffects {
             height: height,
             layer,
             rotation: 0,
+            drawing: [],
           };
 
           return of(

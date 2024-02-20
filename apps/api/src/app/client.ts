@@ -3,7 +3,6 @@ import {
   NodeAdd,
   StateActions,
   UserNode,
-  Validators,
 } from '@team-up/board-commons';
 import { Server } from './server.js';
 import type { WebSocket } from 'ws';

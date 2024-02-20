@@ -1,11 +1,6 @@
 import { TitleComponent } from '../../../../shared/title/title.component';
 
-import {
-  ChangeDetectionStrategy,
-  Component,
-  effect,
-  inject,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { HomeActions } from '../../+state/home.actions';
 import { BoardListComponent } from '../board-list/board-list.component';
@@ -14,7 +9,7 @@ import { BoardListHeaderComponent } from '../board-list-header/board-list-header
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateBoardComponent } from '../create-board/create-board.component';
-import { debounce, debounceTime, filter, switchAll, switchMap } from 'rxjs';
+import { debounceTime, filter, switchMap } from 'rxjs';
 import { SubscriptionService } from '../../../../services/subscription.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 

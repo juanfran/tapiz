@@ -13,6 +13,16 @@ const panel = z.object({
   color: z.string().length(7).regex(/^#/).nullable(),
   rotation: z.number().safe(),
   textAlign: z.enum(['start', 'center', 'end']).nullable(),
+  drawing: z.array(
+    z.object({
+      color: z.string().min(4).max(7),
+      size: z.number().positive().safe(),
+      x: z.number().safe(),
+      y: z.number().safe(),
+      nX: z.number().safe(),
+      nY: z.number().safe(),
+    }),
+  ),
 });
 
 export const patchPanel = panel.partial();

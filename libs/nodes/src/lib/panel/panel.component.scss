@@ -16,6 +16,10 @@
     inline-size: 100%;
     padding: var(--spacing-3);
   }
+
+  &.drawing canvas {
+    pointer-events: all;
+  }
 }
 
 .readonly {
@@ -34,4 +38,12 @@
   block-size: 100%;
   display: flex;
   align-items: var(--textAlign);
+}
+
+canvas {
+  pointer-events: none;
+  cursor: crosshair;
+  position: absolute;
+  top: 0;
+  left: 0;
 }

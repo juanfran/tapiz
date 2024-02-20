@@ -7,7 +7,6 @@ import {
   BoardUser,
   CocomaterialTag,
   CocomaterialApiListVectors,
-  Drawing,
   Note,
   NodeAdd,
   TuNode,
@@ -56,19 +55,9 @@ export const PageActions = createActionGroup({
       page: number;
     }>(),
     'Next vectors page': props<{ tags: string[] }>(),
-    'Ready to draw': emptyProps(),
     'Ready to search': emptyProps(),
-    'Set drawing params': props<{ color: string; size: number }>(),
-    'Clean note drawing': emptyProps(),
-    'Set note drawing': props<{
-      id: string;
-      drawing: Drawing[];
-      history?: boolean;
-    }>(),
     'Go to note': props<{ note: Note }>(),
     'Paste nodes': props<{ nodes: NodeAdd['data'][]; history: boolean }>(),
-    'Undo drawing': emptyProps(),
-    'Redo drawing': emptyProps(),
     'Follow user': props<{ id: User['id'] }>(),
     'Go to user': props<{ id: User['id'] }>(),
     'Set board privacy': props<{ isPublic: boolean }>(),
@@ -77,5 +66,6 @@ export const PageActions = createActionGroup({
     'Node snapshot': props<{ prev: TuNode; curr: TuNode }>(),
     'Lock board': props<{ lock: boolean }>(),
     'Refetch board': emptyProps(),
+    Drawing: props<{ drawing: boolean }>(),
   },
 });

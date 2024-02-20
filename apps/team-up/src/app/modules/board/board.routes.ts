@@ -7,7 +7,6 @@ import { pageFeature } from './reducers/page.reducer';
 import { BoardEffects } from './effects/board.effects';
 import { HistoryEffects } from './effects/history.effects';
 import { PageEffects } from './effects/page.effects';
-import { DrawingHistoryEffects } from './effects/drawing-history.effects';
 
 export const boardRoutes: Route[] = [
   {
@@ -15,12 +14,7 @@ export const boardRoutes: Route[] = [
     component: BoardComponent,
     providers: [
       provideState(pageFeature),
-      provideEffects(
-        BoardEffects,
-        HistoryEffects,
-        PageEffects,
-        DrawingHistoryEffects,
-      ),
+      provideEffects(BoardEffects, HistoryEffects, PageEffects),
     ],
   },
 ];

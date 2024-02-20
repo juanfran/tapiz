@@ -39,7 +39,6 @@ import {
 import { BoardMoveService } from '../../services/board-move.service';
 import {
   isUserHighlighted,
-  selectDrawing,
   selectEmoji,
   selectFocusId,
   selectPopupOpen,
@@ -52,13 +51,17 @@ import { lighter } from '@team-up/cdk/utils/colors';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 import { concatLatestFrom } from '@ngrx/effects';
 import { AsyncPipe } from '@angular/common';
-import { DrawingDirective } from '../../directives/drawing.directive';
+import {
+  DrawingDirective,
+  DrawingStore,
+} from '@team-up/board-components/drawing';
 import { pageFeature } from '../../reducers/page.reducer';
 import { HistoryService } from '@team-up/nodes/services/history.service';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { filterNil } from '../../../../commons/operators/filter-nil';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { isInputField } from '@team-up/cdk/utils/is-input-field';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 interface State {
   edit: boolean;
@@ -141,6 +144,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     private historyService: HistoryService,
     private boardFacade: BoardFacade,
     private hotkeysService: HotkeysService,
+    private drawingStore: DrawingStore,
   ) {
     this.state.set({
       textSize: 56,
@@ -159,7 +163,7 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
     this.state.connect('userId', this.store.select(selectUserId));
     this.state.connect('voting', this.store.select(selectVoting));
-    this.state.connect('drawing', this.store.select(selectDrawing));
+    this.state.connect('drawing', toObservable(this.drawingStore.drawing));
     this.state.hold(this.state.select('focus'), () => this.cd.markForCheck());
     this.state.hold(this.state.select('visible'), () => this.cd.markForCheck());
     this.state.hold(this.state.select('textSize'), () => {
@@ -589,12 +593,12 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   }
 
   public setDrawing(newLine: Drawing[]) {
-    this.store.dispatch(
-      PageActions.setNoteDrawing({
-        id: this.state.get('note').id,
-        drawing: [...this.state.get('note').content.drawing, ...newLine],
-      }),
-    );
+    this.drawingStore.actions.setDrawing({
+      id: this.state.get('note').id,
+      type: 'note',
+      drawing: [...this.state.get('note').content.drawing, ...newLine],
+      history: true,
+    });
   }
 
   public ngAfterViewInit() {

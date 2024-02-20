@@ -6,7 +6,7 @@ import { Subject } from 'rxjs';
   providedIn: 'root',
 })
 export class HistoryService {
-  private eventSubject: Subject<{ prev: TuNode; curr: TuNode }> = new Subject();
+  private eventSubject = new Subject<{ prev: TuNode; curr: TuNode }>();
 
   public editingNodes = new Map<string, TuNode>();
 

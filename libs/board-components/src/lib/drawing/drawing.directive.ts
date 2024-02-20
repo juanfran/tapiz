@@ -4,10 +4,11 @@ import {
   EventEmitter,
   Input,
   Output,
+  effect,
   inject,
+  signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import {
   animationFrameScheduler,
   filter,
@@ -19,13 +20,9 @@ import {
   takeUntil,
   throttleTime,
 } from 'rxjs';
-import {
-  selectDrawing,
-  selectDrawingColor,
-  selectDrawingSize,
-} from '../selectors/page.selectors';
 import { concatLatestFrom } from '@ngrx/effects';
 import { Drawing } from '@team-up/board-commons';
+import { DrawingStore } from './drawing.store';
 
 export interface MouseDrawingEvent {
   x: number;
@@ -41,14 +38,11 @@ export interface MouseDrawingEvent {
   standalone: true,
 })
 export class DrawingDirective {
+  #drawingStore = inject(DrawingStore);
+  #drawing = signal([] as Drawing[]);
+
   @Input() set teamUpDrawing(drawing: Drawing[]) {
-    const paintCanvas = this.elementRef.nativeElement;
-
-    this.context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
-
-    drawing.forEach((line) => {
-      this.drawLine(line);
-    });
+    this.#drawing.set(drawing);
   }
 
   @Input()
@@ -57,19 +51,26 @@ export class DrawingDirective {
   @Output() drawing = new EventEmitter<Drawing[]>();
 
   private context: CanvasRenderingContext2D;
-  private store = inject(Store);
   private elementRef = inject(ElementRef);
   private drawingEvents: Drawing[] = [];
-  private color = this.store.selectSignal(selectDrawingColor);
-  private size = this.store.selectSignal(selectDrawingSize);
+  private dragEnabled = toObservable(this.#drawingStore.drawing);
 
   constructor() {
+    effect(() => {
+      const paintCanvas = this.elementRef.nativeElement;
+      this.context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+
+      this.#drawing().forEach((line) => {
+        this.drawLine(line);
+      });
+    });
+
     const paintCanvas = this.elementRef.nativeElement;
     this.context = paintCanvas.getContext('2d');
     this.context.lineCap = 'round';
 
-    this.context.lineWidth = this.size();
-    this.context.strokeStyle = this.color();
+    this.context.lineWidth = this.#drawingStore.size();
+    this.context.strokeStyle = this.#drawingStore.color();
 
     const mouseUp$ = fromEvent(window, 'mouseup').pipe(map(() => false));
 
@@ -79,7 +80,7 @@ export class DrawingDirective {
     ).pipe(
       takeUntil(mouseUp$),
       throttleTime(0, animationFrameScheduler),
-      concatLatestFrom(() => this.store.select(selectDrawing)),
+      concatLatestFrom(() => this.dragEnabled),
       filter(([, dragEnabled]) => dragEnabled),
       map(([event]) => event),
       finalize(() => {
@@ -108,8 +109,8 @@ export class DrawingDirective {
                   y: acc.nY ?? event.offsetY,
                   nX: event.offsetX,
                   nY: event.offsetY,
-                  size: this.size(),
-                  color: this.color(),
+                  size: this.#drawingStore.size(),
+                  color: this.#drawingStore.color(),
                 } as MouseDrawingEvent;
               },
               { nX: null, nY: null, x: 0, y: 0 } as MouseDrawingEvent,
@@ -126,8 +127,8 @@ export class DrawingDirective {
   }
 
   public drawLine(event: Drawing) {
-    this.context.lineWidth = event.size ?? this.size();
-    this.context.strokeStyle = event.color ?? this.color();
+    this.context.lineWidth = event.size ?? this.#drawingStore.size();
+    this.context.strokeStyle = event.color ?? this.#drawingStore.color();
 
     this.context.beginPath();
     this.context.moveTo(event.x, event.y);
