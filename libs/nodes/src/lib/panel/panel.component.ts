@@ -14,7 +14,7 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { Panel, TuNode } from '@team-up/board-commons';
+import { Drawing, Panel, TuNode } from '@team-up/board-commons';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { BoardActions } from '@team-up/board-commons/actions/board.actions';
@@ -24,6 +24,10 @@ import { ToolbarComponent } from '@team-up/ui/toolbar';
 import { EditorViewComponent } from '@team-up/ui/editor-view';
 import { filter, pairwise } from 'rxjs';
 import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
+import {
+  DrawingDirective,
+  DrawingStore,
+} from '@team-up/board-components/drawing';
 
 @Component({
   selector: 'team-up-panel',
@@ -50,6 +54,12 @@ import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
             (contentChange)="newContent.set($event)" />
         }
       </div>
+
+      <canvas
+        [teamUpDrawing]="node().content.drawing"
+        (drawing)="setDrawing($event)"
+        [attr.width]="node().content.width"
+        [attr.height]="node().content.height"></canvas>
     </team-up-node-space>
   `,
   styleUrls: ['./panel.component.scss'],
@@ -61,6 +71,7 @@ import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
     ToolbarComponent,
     EditorViewComponent,
     SafeHtmlPipe,
+    DrawingDirective,
   ],
   host: {
     '[class.focus]': 'focus()',
@@ -72,6 +83,7 @@ export class PanelComponent implements OnInit {
   private historyService = inject(HistoryService);
   private el = inject(ElementRef);
   private store = inject(Store);
+  private drawingStore = inject(DrawingStore);
 
   @Input({ required: true })
   public node!: Signal<TuNode<Panel>>;
@@ -88,6 +100,10 @@ export class PanelComponent implements OnInit {
 
   @HostBinding('class') get layer() {
     return `layer-${this.node().content.layer}`;
+  }
+
+  @HostBinding('class.drawing') get drawing() {
+    return this.drawingStore.drawing();
   }
 
   @HostListener('dblclick', ['$event'])
@@ -110,6 +126,15 @@ export class PanelComponent implements OnInit {
     this.historyService.initEdit(this.node());
     this.edit.set(true);
     this.newContent.set(this.node().content.text);
+  }
+
+  public setDrawing(newLine: Drawing[]) {
+    this.drawingStore.actions.setDrawing({
+      id: this.node().id,
+      type: 'panel',
+      drawing: [...this.node().content.drawing, ...newLine],
+      history: true,
+    });
   }
 
   public newColor(e: Event) {

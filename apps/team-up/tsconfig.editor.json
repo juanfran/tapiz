@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "../../libs/board-components/src/lib/drawing/drawing.directive.ts"],
   "compilerOptions": {
     "types": ["jest", "node"]
   }

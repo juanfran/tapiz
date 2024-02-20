@@ -86,10 +86,7 @@ export class TokenComponent implements OnInit, DynamicComponent, Draggable {
 
   public edit = signal(false);
   public editableText = '';
-
-  public get zIndex() {
-    return 5;
-  }
+  public readonly zIndex = 5;
 
   public ngOnInit() {
     toObservable(this.focus, {

@@ -1,3 +1,4 @@
+import { Drawing } from './drawing.model.js';
 import { TuNode } from './node.model.js';
 import { Point } from './point.model.js';
 
@@ -14,6 +15,7 @@ export interface Panel {
   borderWidth?: number;
   borderRadius?: number;
   textAlign?: 'start' | 'center' | 'end';
+  drawing: Drawing[];
 }
 
 export function isPanel(node: TuNode): node is TuNode<Panel> {
