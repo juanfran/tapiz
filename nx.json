@@ -49,6 +49,14 @@
       "style": "scss"
     }
   },
+  "plugins": [
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
+    }
+  ],
   "defaultProject": "api",
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
