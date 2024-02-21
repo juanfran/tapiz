@@ -8,7 +8,15 @@ CREATE TABLE IF NOT EXISTS "accounts" (
 	"id" varchar(256) PRIMARY KEY NOT NULL,
 	"name" varchar(256) NOT NULL,
 	"email" varchar(320) NOT NULL,
-	CONSTRAINT "accounts_email_unique" UNIQUE("email")
+	"google_id" varchar(256),
+	CONSTRAINT "accounts_email_unique" UNIQUE("email"),
+	CONSTRAINT "accounts_google_id_unique" UNIQUE("google_id")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "account_session" (
+	"id" varchar PRIMARY KEY NOT NULL,
+	"expires_at" timestamp NOT NULL,
+	"user_id" varchar NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "accounts_boards" (
@@ -61,6 +69,12 @@ CREATE TABLE IF NOT EXISTS "teams" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" varchar(256) NOT NULL
 );
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "account_session" ADD CONSTRAINT "account_session_user_id_accounts_id_fk" FOREIGN KEY ("user_id") REFERENCES "accounts"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "accounts_boards" ADD CONSTRAINT "accounts_boards_account_id_accounts_id_fk" FOREIGN KEY ("account_id") REFERENCES "accounts"("id") ON DELETE cascade ON UPDATE no action;

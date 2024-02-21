@@ -2,7 +2,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
-import { AuthService } from '../../../../services/auth.service';
+import { ConfigService } from '../../../../services/config.service';
 
 @Component({
   selector: 'team-up-login',
@@ -13,9 +13,9 @@ import { AuthService } from '../../../../services/auth.service';
   imports: [MatButtonModule, MatIconModule, SvgIconComponent],
 })
 export class LoginComponent {
-  constructor(private authService: AuthService) {}
+  constructor(private configService: ConfigService) {}
 
   loginGoogle() {
-    this.authService.loginGoogle();
+    window.location.href = `${this.configService.config.API}/auth`;
   }
 }

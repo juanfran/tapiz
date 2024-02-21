@@ -16,7 +16,9 @@ import { APIConfigService } from './api-config.service';
 export class BoardApiService {
   private apiConfigService = inject(APIConfigService);
   private http = inject(HttpClient);
-  private trpc = this.apiConfigService.getTrpcConfig();
+  get trpc() {
+    return this.apiConfigService.trpc();
+  }
 
   public fetchBoards() {
     return from(this.trpc.board.boards.query());

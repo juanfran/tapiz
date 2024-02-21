@@ -3,6 +3,7 @@ import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 
 import Config from '../config.js';
+import { setPsqlClient } from '../auth.js';
 
 export let db: PostgresJsDatabase;
 export let psqlClient: postgres.Sql;
@@ -17,6 +18,8 @@ async function waitDb() {
   psqlClient = postgres(connection);
 
   db = drizzle(psqlClient);
+
+  setPsqlClient(psqlClient);
 
   return db;
 }

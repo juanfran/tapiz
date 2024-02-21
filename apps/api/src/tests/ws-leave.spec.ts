@@ -10,16 +10,6 @@ import {
 import { getBoardUser } from '../app/db/board-db';
 import { Server } from '../app/server';
 
-jest.mock('../app/auth', () => {
-  return {
-    verifyToken: (id: string) => {
-      const auth = getAuth(Number(id));
-
-      return Promise.resolve(auth);
-    },
-  };
-});
-
 describe('ws', () => {
   let ws: WebSocket;
   let wsServer: Server;

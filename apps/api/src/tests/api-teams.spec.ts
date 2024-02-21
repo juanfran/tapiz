@@ -7,6 +7,7 @@ import {
   getUserCaller,
   getAuth,
 } from './test-helpers';
+
 describe('Api - teams', () => {
   beforeAll(async () => {
     await startDB();

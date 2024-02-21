@@ -7,12 +7,16 @@ const Config = {
   DB_PORT: Number(process.env['DB_PORT']),
   DB_USER: process.env['POSTGRES_USER'],
   GOOGLE_CLIENT_ID: process.env['GOOGLE_CLIENT_ID'],
+  GOOGLE_CLIENT_SECRET: process.env['GOOGLE_CLIENT_SECRET'],
+  FRONTEND_URL: process.env['FRONTEND_URL'] ?? 'http://localhost:4300',
 };
 import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import { drizzle } from 'drizzle-orm/postgres-js';
 
 // delete database and recreate it with migrations
 export async function regenerateDatabase() {
+  console.log('regenerating database');
+
   const connectionMigration = `postgres://${Config.DB_USER}:${Config.DB_PASSWORD}@${Config.DB_HOST}:${Config.DB_PORT}/postgres`;
 
   const sql = postgres(connectionMigration, { max: 1 });

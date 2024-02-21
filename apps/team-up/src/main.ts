@@ -1,6 +1,5 @@
 import {
   enableProdMode,
-  APP_INITIALIZER,
   importProvidersFrom,
   provideZoneChangeDetection,
   isDevMode,
@@ -16,17 +15,14 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { configFactory, ConfigService } from './app/services/config.service';
+import { APP_CONFIG } from './app/services/config.service';
 import { appFeature } from './app/+state/app.reducer';
 import { APP_ROUTES } from './app/app.routes';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
-import { provideOAuthClient } from 'angular-oauth2-oidc';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { authInterceptor } from './app/commons/api-rest-interceptor/api-rest-interceptor.service';
-
-if (environment.production) {
-  enableProdMode();
-}
+import { provideEffects } from '@ngrx/effects';
+import * as appEffects from './app/+state/app.effects';
 
 export function prefersReducedMotion(): boolean {
   const mediaQueryList = window.matchMedia('(prefers-reduced-motion)');
@@ -34,45 +30,51 @@ export function prefersReducedMotion(): boolean {
   return mediaQueryList.matches;
 }
 
-bootstrapApplication(AppComponent, {
-  providers: [
-    importProvidersFrom(MatSnackBarModule),
-    prefersReducedMotion() ? provideAnimationsAsync() : provideNoopAnimations(),
-    provideStore(
-      {
-        app: appFeature.reducer,
-      },
-      {
-        metaReducers: !environment.production ? [] : [],
-        runtimeChecks: {
-          strictStateImmutability: true,
-          strictActionImmutability: true,
-          strictStateSerializability: true,
-          strictActionSerializability: true,
-          strictActionTypeUniqueness: true,
+fetch(environment.config).then(async (response) => {
+  const config = await response.json();
+
+  if (environment.production) {
+    enableProdMode();
+  }
+
+  bootstrapApplication(AppComponent, {
+    providers: [
+      { provide: APP_CONFIG, useValue: config },
+      importProvidersFrom(MatSnackBarModule),
+      prefersReducedMotion()
+        ? provideAnimationsAsync()
+        : provideNoopAnimations(),
+      provideStore(
+        {
+          app: appFeature.reducer,
         },
+        {
+          metaReducers: !environment.production ? [] : [],
+          runtimeChecks: {
+            strictStateImmutability: true,
+            strictActionImmutability: true,
+            strictStateSerializability: true,
+            strictActionSerializability: true,
+            strictActionTypeUniqueness: true,
+          },
+        },
+      ),
+      provideEffects(appEffects),
+      provideStoreDevtools({
+        logOnly: !isDevMode(),
+      }),
+      provideRouterStore(),
+
+      provideHttpClient(withInterceptors([authInterceptor])),
+      provideRouter(APP_ROUTES, withComponentInputBinding()),
+      provideZoneChangeDetection({
+        eventCoalescing: true,
+        runCoalescing: true,
+      }),
+      {
+        provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+        useValue: { appearance: 'outline', subscriptSizing: 'dynamic' },
       },
-    ),
-    provideStoreDevtools({
-      logOnly: !isDevMode(),
-    }),
-    provideRouterStore(),
-    {
-      provide: APP_INITIALIZER,
-      useFactory: configFactory,
-      multi: true,
-      deps: [ConfigService],
-    },
-    provideOAuthClient(),
-    provideHttpClient(withInterceptors([authInterceptor])),
-    provideRouter(APP_ROUTES, withComponentInputBinding()),
-    provideZoneChangeDetection({
-      eventCoalescing: true,
-      runCoalescing: true,
-    }),
-    {
-      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
-      useValue: { appearance: 'outline', subscriptSizing: 'dynamic' },
-    },
-  ],
-}).catch((err) => console.error(err));
+    ],
+  }).catch((err) => console.error(err));
+});

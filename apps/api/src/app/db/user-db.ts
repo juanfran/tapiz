@@ -12,6 +12,15 @@ export async function getUser(id: string) {
   return users.at(0);
 }
 
+export async function getUserByGoogleId(id: string) {
+  const users = await db
+    .select()
+    .from(schema.accounts)
+    .where(eq(schema.accounts.googleId, id));
+
+  return users.at(0);
+}
+
 export async function getUserByName(name: string) {
   const users = await db
     .select()
@@ -34,10 +43,15 @@ export async function deleteAccount(userId: string): Promise<unknown> {
   return db.delete(schema.accounts).where(eq(schema.accounts.id, userId));
 }
 
-export async function createUser(userId: string, name: string, email: string) {
+export async function createUser(
+  userId: string,
+  name: string,
+  email: string,
+  googleId: string,
+) {
   const insertedUser = await db
     .insert(schema.accounts)
-    .values({ id: userId, name, email })
+    .values({ id: userId, name, email, googleId })
     .onConflictDoUpdate({
       target: schema.accounts.id,
       set: {

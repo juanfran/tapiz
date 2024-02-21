@@ -8,7 +8,10 @@ import { Invitation, TeamInvitation } from '@team-up/board-commons';
 })
 export class TeamApiService {
   private apiConfigService = inject(APIConfigService);
-  private trpc = this.apiConfigService.getTrpcConfig();
+
+  get trpc() {
+    return this.apiConfigService.trpc();
+  }
 
   public fetchTeams() {
     return from(this.trpc.team.getAll.query());

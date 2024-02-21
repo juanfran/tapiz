@@ -19,6 +19,15 @@ export const accounts = pgTable('accounts', {
   id: varchar('id', { length: 256 }).primaryKey(),
   name: varchar('name', { length: 256 }).notNull(),
   email: varchar('email', { length: 320 }).notNull().unique(),
+  googleId: varchar('google_id', { length: 256 }).unique(),
+});
+
+export const accountsToSession = pgTable('account_session', {
+  id: varchar('id').primaryKey(),
+  expiresAt: timestamp('expires_at').notNull(),
+  userId: varchar('user_id')
+    .notNull()
+    .references(() => accounts.id),
 });
 
 export const usersRelations = relations(accounts, ({ many }) => ({

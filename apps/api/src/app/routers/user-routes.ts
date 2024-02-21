@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { protectedProcedure, router } from '../trpc.js';
 import db from '../db/index.js';
 import { getUserInvitationsByEmail } from '../db/user-db.js';
+import { lucia } from '../auth.js';
 
 export const userRouter = router({
   removeAccount: protectedProcedure.mutation(async (req) => {
@@ -70,21 +71,6 @@ export const userRouter = router({
       name: req.ctx.user['name'],
       sub: req.ctx.user.sub,
     };
-  }),
-  login: protectedProcedure.query(async (req) => {
-    const user = await db.user.getUser(req.ctx.user.sub);
-
-    if (user) {
-      return true;
-    }
-
-    await db.user.createUser(
-      req.ctx.user.sub,
-      req.ctx.user.name,
-      req.ctx.user.email,
-    );
-
-    return true;
   }),
   invites: protectedProcedure.query(async (req) => {
     const email = req.ctx.user.email;
@@ -158,4 +144,11 @@ export const userRouter = router({
         success: true,
       };
     }),
+  logout: protectedProcedure.query(async (req) => {
+    await lucia.invalidateUserSessions(req.ctx.user.sub);
+
+    return {
+      success: true,
+    };
+  }),
 });

@@ -7,7 +7,9 @@ import { APIConfigService } from './api-config.service';
 })
 export class UserApiService {
   private apiConfigService = inject(APIConfigService);
-  private trpc = this.apiConfigService.getTrpcConfig();
+  get trpc() {
+    return this.apiConfigService.trpc();
+  }
 
   public cancelInvitation(invitationId: string) {
     return from(this.trpc.user.cancelInvite.mutate({ inviteId: invitationId }));
@@ -25,7 +27,7 @@ export class UserApiService {
     return from(this.trpc.user.removeAccount.mutate());
   }
 
-  public login() {
-    return from(this.trpc.user.login.query());
+  public logout() {
+    return from(this.trpc.user.logout.query());
   }
 }
