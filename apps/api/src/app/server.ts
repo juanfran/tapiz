@@ -3,10 +3,10 @@ import type { WebSocket } from 'ws';
 import { Client } from './client.js';
 import db from './db/index.js';
 
-import { verifyToken } from './auth.js';
 import { syncNodeBox } from '@team-up/sync-node-box';
 import { Subscription, throttleTime } from 'rxjs';
 import { FastifyRequest } from 'fastify';
+import { lucia, validateSession } from './auth.js';
 
 export class Server {
   public clients: Client[] = [];
@@ -20,17 +20,13 @@ export class Server {
   public async connection(wss: WebSocket, req: FastifyRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cookies = (req as any).cookies;
+    const sessionId = cookies[lucia.sessionCookieName];
 
-    if (cookies['auth']) {
-      const user = await verifyToken(cookies['auth']);
-      if (user && user['name']) {
-        const client = new Client(
-          wss,
-          this,
-          user['name'] ?? 'anonymous',
-          user.sub,
-          user.email,
-        );
+    if (sessionId) {
+      const { session, user } = await validateSession(sessionId);
+
+      if (session && user) {
+        const client = new Client(wss, this, user.name, user.id, user.email);
         this.clients.push(client);
         return;
       }

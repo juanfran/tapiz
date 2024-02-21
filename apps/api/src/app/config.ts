@@ -9,4 +9,7 @@ export default {
   DB_PORT: Number(process.env['DB_PORT']),
   DB_USER: process.env['POSTGRES_USER'],
   GOOGLE_CLIENT_ID: process.env['GOOGLE_CLIENT_ID'],
+  GOOGLE_CLIENT_SECRET: process.env['GOOGLE_CLIENT_SECRET'],
+  FRONTEND_URL: process.env['FRONTEND_URL'] ?? 'http://localhost:4300',
+  API_URL: process.env['API'] ?? 'http://localhost:8000/api',
 };

@@ -12,6 +12,8 @@ import {
 import { Server } from './server.js';
 import { newSubscriptorConnection } from './subscriptor.js';
 import { setServer } from './global.js';
+import { getAuthUrl } from './auth.js';
+import { googleCallback } from './routers/auth-routes.js';
 
 const fastify = Fastify({
   logger: false,
@@ -58,6 +60,14 @@ fastify.register(async function (fastify) {
   fastify.get('/sub', { websocket: true }, (connection) => {
     newSubscriptorConnection(connection.socket);
   });
+
+  fastify.get('/api/auth', async (req, rep) => {
+    const authUrl = await getAuthUrl(rep);
+
+    return rep.redirect(authUrl.href);
+  });
+
+  fastify.register(googleCallback);
 });
 
 const port = 8000;

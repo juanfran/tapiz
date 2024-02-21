@@ -4,7 +4,13 @@ import { appRouter } from '../app/routers/index.js';
 import Fastify from 'fastify';
 import fastifyCookie from '@fastify/cookie';
 import ws from '@fastify/websocket';
+import { initTRPC } from '@trpc/server';
 import { Server } from '../app/server.js';
+import db from '../app/db/index.js';
+
+const t = initTRPC.context().create();
+
+const { createCallerFactory } = t;
 
 export async function errorCall(call: () => Promise<unknown>) {
   try {
@@ -23,6 +29,7 @@ export const usersTest = [...Array(100)].map(() => {
     id: randUuid(),
     name: randFirstName(),
     email: randEmail(),
+    googleId: randUuid(),
   };
 });
 
@@ -31,13 +38,14 @@ export const getAuth = (userIndex: number) => {
     sub: usersTest[userIndex].id,
     name: usersTest[userIndex].name,
     email: usersTest[userIndex].email,
+    googleId: usersTest[userIndex].googleId,
   };
 };
 
 export const createUser = async (userIndex: number) => {
-  const caller = getUserCaller(userIndex);
+  const auth = getAuth(userIndex);
 
-  await caller.user.login();
+  await db.user.createUser(auth.sub, auth.name, auth.email, auth.googleId);
 };
 
 export const createMultipleUsers = async (size = usersTest.length) => {
@@ -47,7 +55,9 @@ export const createMultipleUsers = async (size = usersTest.length) => {
 };
 
 export const getUserCaller = (userIndex: number) => {
-  return appRouter.createCaller({
+  const createCaller = createCallerFactory(appRouter);
+
+  return createCaller({
     user: getAuth(userIndex),
   });
 };

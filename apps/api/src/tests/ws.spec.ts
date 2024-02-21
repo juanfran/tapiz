@@ -9,16 +9,6 @@ import {
 } from './test-helpers';
 import { getBoardUser } from '../app/db/board-db';
 
-jest.mock('../app/auth', () => {
-  return {
-    verifyToken: (id: string) => {
-      const auth = getAuth(Number(id));
-
-      return Promise.resolve(auth);
-    },
-  };
-});
-
 describe('ws', () => {
   let ws: WebSocket;
   const port = 8011;
