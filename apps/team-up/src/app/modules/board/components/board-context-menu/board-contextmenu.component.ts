@@ -15,6 +15,7 @@ import { BoardFacade } from '../../../../services/board-facade.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { VotesModalComponent } from '../votes-modal/votes-modal.component';
 import { Group, Note, TuNode } from '@team-up/board-commons';
+import { selectVoting } from '../../selectors/page.selectors';
 
 @Component({
   selector: 'team-up-board-context-menu',
@@ -33,6 +34,7 @@ export class BoardContextMenuComponent implements OnInit {
   private store = inject(Store);
   private boardComponent = inject(BoardComponent);
   private dialog = inject(MatDialog);
+  private voting = this.store.selectSignal(selectVoting);
 
   public readonly boardMode = this.store.selectSignal(
     pageFeature.selectCanvasMode,
@@ -41,6 +43,17 @@ export class BoardContextMenuComponent implements OnInit {
   ngOnInit() {
     this.contextMenuStore.config({
       element: this.boardComponent.el.nativeElement,
+      isValid: () => {
+        if (this.voting()) {
+          const currentNodes = this.boardFacade.selectFocusNodes();
+
+          return !currentNodes.some((node) => {
+            return node.type === 'note' || node.type === 'group';
+          });
+        }
+
+        return true;
+      },
       items: () => {
         const currentNodes = this.boardFacade.selectFocusNodes();
 

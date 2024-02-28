@@ -24,6 +24,7 @@ export interface ContextMenuItem {
 
 export interface ContextMenuOptions {
   element: HTMLElement;
+  isValid: (event: Event) => boolean;
   items: () => ContextMenuItem[];
 }
 
@@ -68,7 +69,10 @@ export class ContextMenuStore {
     const { element, items } = options;
 
     element.addEventListener('contextmenu', (event: Event) => {
-      if (!event.target) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (!event.target || !options.isValid(event)) {
         return;
       }
 
@@ -87,9 +91,6 @@ export class ContextMenuStore {
           return;
         }
       }
-
-      event.preventDefault();
-      event.stopPropagation();
 
       const pointerEvent = event as PointerEvent;
 
