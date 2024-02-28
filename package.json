@@ -34,6 +34,7 @@
     "@fastify/autoload": "^5.8.0",
     "@fastify/cookie": "^9.3.1",
     "@fastify/cors": "^9.0.0",
+    "@fastify/rate-limit": "^9.1.0",
     "@fastify/sensible": "^5.5.0",
     "@fastify/websocket": "^8.3.1",
     "@floating-ui/dom": "^1.5.4",

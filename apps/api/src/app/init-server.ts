@@ -20,6 +20,11 @@ const fastify = Fastify({
   maxParamLength: 5000,
 });
 
+await fastify.register(import('@fastify/rate-limit'), {
+  max: 150,
+  timeWindow: '1 minute',
+});
+
 fastify.register(fastifyCookie, {
   hook: 'onRequest',
   parseOptions: {},
