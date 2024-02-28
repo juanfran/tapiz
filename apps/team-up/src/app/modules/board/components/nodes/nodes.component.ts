@@ -6,7 +6,11 @@ import { NodesStore } from '@team-up/nodes/services/nodes.store';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { Store } from '@ngrx/store';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { selectUserId, selectZoom } from '../../selectors/page.selectors';
+import {
+  selectUserId,
+  selectZoom,
+  selectPrivateId,
+} from '../../selectors/page.selectors';
 
 @Component({
   selector: 'team-up-nodes',
@@ -46,6 +50,13 @@ export class NodesComponent {
       .pipe(takeUntilDestroyed())
       .subscribe((userId) => {
         this.nodesStore.userId$.next(userId);
+      });
+
+    this.store
+      .select(selectPrivateId)
+      .pipe(takeUntilDestroyed())
+      .subscribe((privateId) => {
+        this.nodesStore.privateId$.next(privateId);
       });
 
     this.store

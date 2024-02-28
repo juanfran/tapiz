@@ -39,40 +39,54 @@ export interface NodeConfig {
   config?: unknown;
 }
 
+type AddPatchResponse =
+  | {
+      success: true;
+      data: TuNode;
+    }
+  | NodeValidatorError;
+
+type RemoveResponse =
+  | {
+      success: true;
+      data: NodeRemove['data'];
+    }
+  | NodeValidatorError;
+
 export interface NodeValidator {
   add: (
     data: TuNode,
-    userId: string,
-    state: TuNode[],
-    isAdmin: boolean,
-  ) =>
-    | {
-        success: true;
-        data: TuNode;
-      }
-    | NodeValidatorError;
+    state: {
+      userId: string;
+      nodes: TuNode[];
+      isAdmin: boolean;
+      boardId: string;
+      userPrivateId: string;
+      parentNode?: TuNode;
+    },
+  ) => Promise<AddPatchResponse>;
   patch: (
     data: TuNode,
-    userId: string,
-    state: TuNode[],
-    node: TuNode,
-    isAdmin: boolean,
-  ) =>
-    | {
-        success: true;
-        data: TuNode;
-      }
-    | NodeValidatorError;
+    state: {
+      userId: string;
+      nodes: TuNode[];
+      isAdmin: boolean;
+      boardId: string;
+      userPrivateId: string;
+      node: TuNode;
+      parentNode?: TuNode;
+    },
+  ) => Promise<AddPatchResponse>;
   remove: (
     data: NodeRemove['data'],
-    userId: string,
-    state: TuNode[],
-    node: TuNode,
-    isAdmin: boolean,
-  ) =>
-    | {
-        success: true;
-        data: NodeRemove['data'];
-      }
-    | NodeValidatorError;
+    state: {
+      userId: string;
+      nodes: TuNode[];
+      isAdmin: boolean;
+      boardId: string;
+      userPrivateId: string;
+      node: TuNode;
+      parentNode?: TuNode;
+    },
+  ) => Promise<RemoveResponse>;
 }

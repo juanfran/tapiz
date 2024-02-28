@@ -99,15 +99,7 @@ export async function validateAuthorizationCode(
 }
 
 export async function validateSession(sessionId: string) {
-  return lucia.validateSession(sessionId) as Promise<{
-    user: {
-      id: string;
-      name: string;
-      googleId: string;
-      email: string;
-    } | null;
-    session: Session | null;
-  }>;
+  return lucia.validateSession(sessionId);
 }
 
 declare module 'lucia' {

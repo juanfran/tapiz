@@ -6,14 +6,14 @@ const settings = z.object({
 });
 
 export const SETTINGS_VALIDATOR: NodeValidator = {
-  add: (data, _userId, state, isAdmin) => {
-    if (!isAdmin) {
+  add: async (data, state) => {
+    if (!state.isAdmin) {
       return {
         success: false,
       };
     }
 
-    const setting = state.find((it) => it.type === 'settings');
+    const setting = state.nodes.find((it) => it.type === 'settings');
 
     if (setting) {
       return {
@@ -37,8 +37,8 @@ export const SETTINGS_VALIDATOR: NodeValidator = {
       success: false,
     };
   },
-  patch: (data, _userId, _state, isAdmin) => {
-    if (!isAdmin) {
+  patch: async (data, state) => {
+    if (!state.isAdmin) {
       return {
         success: false,
       };
@@ -60,8 +60,8 @@ export const SETTINGS_VALIDATOR: NodeValidator = {
       success: false,
     };
   },
-  remove: (data, _userId, _state, isAdmin) => {
-    if (!isAdmin) {
+  remove: async (data, state) => {
+    if (!state.isAdmin) {
       return {
         success: false,
       };

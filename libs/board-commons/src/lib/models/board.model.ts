@@ -15,3 +15,7 @@ export interface BoardUser extends Omit<Board, 'board'> {
   lastAccessedAt: string;
   isAdmin: boolean;
 }
+
+export interface PrivateBoardUser extends BoardUser {
+  privateId: string;
+}

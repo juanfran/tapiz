@@ -167,6 +167,17 @@
 
     <div
       class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'poll'">
+      <button
+        class="toolbar-button"
+        (click)="poll()">
+        <mat-icon class="material-icons-outlined">poll</mat-icon>
+      </button>
+      <div class="toolbar-tooltip">Poll</div>
+    </div>
+
+    <div
+      class="toolbar-button-container"
       [class.active]="vm.popupOpen === 'search'">
       <button
         class="toolbar-button"

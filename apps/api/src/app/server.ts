@@ -26,9 +26,19 @@ export class Server {
       const { session, user } = await validateSession(sessionId);
 
       if (session && user) {
-        const client = new Client(wss, this, user.name, user.id, user.email);
-        this.clients.push(client);
-        return;
+        const dbUser = await db.user.getUser(user.id);
+
+        if (dbUser) {
+          const client = new Client(
+            wss,
+            this,
+            dbUser.name,
+            dbUser.id,
+            dbUser.email,
+          );
+          this.clients.push(client);
+          return;
+        }
       }
     }
 

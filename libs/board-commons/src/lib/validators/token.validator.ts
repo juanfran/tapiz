@@ -10,7 +10,7 @@ const token = z.object({
 });
 
 export const PERSONAL_TOKEN_VALIDATOR: NodeValidator = {
-  add: (data) => {
+  add: async (data) => {
     const validation = token.safeParse(data.content);
 
     if (validation.success) {
@@ -27,7 +27,7 @@ export const PERSONAL_TOKEN_VALIDATOR: NodeValidator = {
       success: false,
     };
   },
-  patch: (data) => {
+  patch: async (data) => {
     const validation = token.partial().safeParse(data.content);
 
     if (validation.success) {
@@ -44,7 +44,7 @@ export const PERSONAL_TOKEN_VALIDATOR: NodeValidator = {
       success: false,
     };
   },
-  remove: (data) => {
+  remove: async (data) => {
     return {
       success: true,
       data,

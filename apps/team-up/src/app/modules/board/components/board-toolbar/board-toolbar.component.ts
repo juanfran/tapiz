@@ -39,7 +39,7 @@ import { RxLet } from '@rx-angular/template/let';
 import { MatIconModule } from '@angular/material/icon';
 import { TokenSelectorComponent } from '../token-selector/token-selector.component';
 import { Token } from '@team-up/board-commons/models/token.model';
-import { Text } from '@team-up/board-commons';
+import { PollBoard, Text } from '@team-up/board-commons';
 import { DrawingStore } from '@team-up/board-components/drawing/drawing.store';
 
 interface State {
@@ -241,6 +241,55 @@ export class BoardToolbarComponent {
         },
       }),
     );
+  }
+
+  public poll() {
+    if (this.state.get('popupOpen') === 'poll') {
+      this.popupOpen('');
+      return;
+    }
+
+    this.popupOpen('poll');
+
+    this.toolbarSubscription = this.boardMoveService
+      .nextMouseDown()
+      .pipe(
+        withLatestFrom(
+          this.store.select(selectZoom),
+          this.store.select(selectPosition),
+        ),
+      )
+      .subscribe({
+        next: ([event, zoom, position]) => {
+          const poll: PollBoard = {
+            title: '',
+            layer: this.layer(),
+            position: {
+              x: (-position.x + event.pageX) / zoom,
+              y: (-position.y + event.pageY) / zoom,
+            },
+            finished: false,
+            options: [],
+          };
+
+          this.store.dispatch(
+            BoardActions.batchNodeActions({
+              history: true,
+              actions: [
+                {
+                  data: {
+                    type: 'poll',
+                    id: v4(),
+                    content: poll,
+                  },
+                  op: 'add',
+                },
+              ],
+            }),
+          );
+        },
+        complete: () => this.popupOpen(''),
+      });
   }
 
   public emoji() {
