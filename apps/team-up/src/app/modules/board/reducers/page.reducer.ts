@@ -29,6 +29,7 @@ export interface PageState {
   canvasMode: string;
   popupOpen: string;
   isAdmin: boolean;
+  privateId: string;
   owners: string[];
   boardCursor: string;
   voting: boolean;
@@ -64,6 +65,7 @@ const initialPageState: PageState = {
   canvasMode: 'editMode',
   popupOpen: '',
   isAdmin: false,
+  privateId: '',
   owners: [],
   boardCursor: 'default',
   voting: false,
@@ -109,12 +111,13 @@ const reducer = createReducer(
   }),
   on(
     PageActions.fetchBoardSuccess,
-    (state, { isAdmin, isPublic, name }): PageState => {
+    (state, { isAdmin, isPublic, name, privateId }): PageState => {
       return {
         ...state,
         name,
         isAdmin,
         isPublic,
+        privateId,
         loaded: true,
         moveEnabled: true,
       };

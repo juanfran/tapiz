@@ -113,6 +113,7 @@ export class BoardEffects {
               name: board.name,
               isAdmin: board.isAdmin,
               isPublic: board.public,
+              privateId: board.privateId,
             });
           }),
         );
@@ -137,6 +138,7 @@ export class BoardEffects {
               name: board.name,
               isAdmin: board.isAdmin,
               isPublic: board.public,
+              privateId: board.privateId,
             });
           }),
           catchError((e) => {

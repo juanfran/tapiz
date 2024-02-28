@@ -107,6 +107,8 @@
     "@nx/jest": "18.0.4",
     "@nx/js": "^18.0.4",
     "@nx/node": "18.0.4",
+    "@nx/vite": "18.0.4",
+    "@nx/web": "18.0.4",
     "@nx/workspace": "18.0.4",
     "@schematics/angular": "17.1.1",
     "@swc-node/register": "1.8.0",
@@ -121,6 +123,8 @@
     "@types/ws": "^8.5.5",
     "@typescript-eslint/eslint-plugin": "6.20.0",
     "@typescript-eslint/parser": "6.20.0",
+    "@vitest/coverage-v8": "^1.0.4",
+    "@vitest/ui": "^1.0.4",
     "cypress": "^13.0.0",
     "drizzle-kit": "^0.19.13",
     "eslint": "8.48.0",
@@ -136,7 +140,10 @@
     "supertest": "^6.3.3",
     "ts-jest": "^29.1.0",
     "ts-node": "10.9.2",
-    "typescript": "5.3.3"
+    "typescript": "5.3.3",
+    "vite": "~5.0.0",
+    "vite-plugin-dts": "~2.3.0",
+    "vitest": "^1.0.4"
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.7",

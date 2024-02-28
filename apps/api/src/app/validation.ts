@@ -2,6 +2,7 @@ import { StateActions, TuNode, Validators } from '@team-up/board-commons';
 
 import { PERSONAL_TOKEN_VALIDATOR } from '@team-up/board-commons/validators/token.validator.js';
 import { ESTIMATION_VALIDATORS } from '@team-up/board-commons/validators/estimation.validator.js';
+import { POLL_VALIDATORS } from '@team-up/board-commons/validators/poll.validator.js';
 import { SETTINGS_VALIDATOR } from '@team-up/board-commons/validators/settings.validators.js';
 
 import { noteValidator } from '@team-up/board-commons/validators/note/node.validator.js';
@@ -37,14 +38,17 @@ const validations = {
       validator: SETTINGS_VALIDATOR,
     },
     ...ESTIMATION_VALIDATORS,
+    ...POLL_VALIDATORS,
   ],
 };
 
-export const validateAction = (
+export const validateAction = async (
   msg: StateActions,
-  state: TuNode[],
+  nodes: TuNode[],
   userId: string,
   isAdmin: boolean,
+  boardId: string,
+  userPrivateId: string,
 ) => {
   const customValidators = msg.data.type in validations.custom;
 
@@ -54,7 +58,7 @@ export const validateAction = (
 
   const findNode = (id: string, parentId?: string) => {
     if (parentId) {
-      const parent = state.find((it) => it.id === parentId);
+      const parent = nodes.find((it) => it.id === parentId);
 
       if (!parent || !parent.children) {
         return;
@@ -62,18 +66,26 @@ export const validateAction = (
 
       return parent.children.find((it) => it.id === id);
     } else {
-      return state.find((it) => it.id === id);
+      return nodes.find((it) => it.id === id);
     }
   };
 
+  let parentNode: TuNode | undefined;
+
+  if (msg.parent) {
+    parentNode = nodes.find((it) => it.id === msg.parent);
+  }
+
   if (validatorConfig) {
     if (msg.op === 'add') {
-      const result = validatorConfig.validator.add(
-        msg.data,
+      const result = await validatorConfig.validator.add(msg.data, {
         userId,
-        state,
+        nodes: nodes,
         isAdmin,
-      );
+        boardId,
+        userPrivateId,
+        parentNode,
+      });
 
       if (result.success) {
         return {
@@ -89,13 +101,15 @@ export const validateAction = (
         return false;
       }
 
-      const result = validatorConfig.validator.patch(
-        msg.data,
+      const result = await validatorConfig.validator.patch(msg.data, {
         userId,
-        state,
+        nodes,
         node,
         isAdmin,
-      );
+        boardId,
+        userPrivateId,
+        parentNode,
+      });
 
       if (result.success) {
         return {
@@ -111,13 +125,15 @@ export const validateAction = (
         return false;
       }
 
-      const result = validatorConfig.validator.remove(
-        msg.data,
+      const result = await validatorConfig.validator.remove(msg.data, {
         userId,
-        state,
+        nodes,
         node,
         isAdmin,
-      );
+        boardId,
+        userPrivateId,
+        parentNode,
+      });
 
       if (result.success) {
         return {
@@ -134,7 +150,7 @@ export const validateAction = (
   if (customValidators) {
     return validations.custom[msg.data.type as keyof typeof validations.custom](
       msg,
-      state,
+      nodes,
       userId,
     );
   } else {
@@ -142,7 +158,7 @@ export const validateAction = (
       const validator = validations['patch'][msg.data.type];
 
       // check if the element present in the state
-      const node = state.find((it) => it.id === msg.data.id);
+      const node = nodes.find((it) => it.id === msg.data.id);
 
       if (!node) {
         return false;
@@ -203,18 +219,22 @@ export const validateAction = (
   return false;
 };
 
-export const validation = (
+export const validation = async (
   msg: StateActions[],
   state: TuNode[],
   userId: string,
   isAdmin: boolean,
+  boardId: string,
+  privateId: string,
 ) => {
   if (Array.isArray(msg)) {
     msg = msg.filter((it) => Validators.stateAction.safeParse(it).success);
 
-    const actions = msg.map((it) => {
-      return validateAction(it, state, userId, isAdmin);
-    });
+    const actions = await Promise.all(
+      msg.map((it) => {
+        return validateAction(it, state, userId, isAdmin, boardId, privateId);
+      }),
+    );
 
     if (actions.every((it) => it)) {
       return actions as StateActions[];

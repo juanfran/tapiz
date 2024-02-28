@@ -56,6 +56,7 @@ export const acountsToBoards = pgTable(
     boardId: uuid('board_id')
       .notNull()
       .references(() => boards.id, { onDelete: 'cascade' }),
+    privateId: uuid('private_id').defaultRandom().notNull(),
     role: roleEnumWithGuest('role').notNull().default('member'),
     lastAccessedAt: timestamp('last_accessed_at', { mode: 'string' }),
   },

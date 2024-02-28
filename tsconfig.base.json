@@ -17,7 +17,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "lib": ["es2022", "dom"],
+    "lib": ["ESNext.Array", "es2022", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
@@ -29,7 +29,8 @@
       "@team-up/cdk/*": ["libs/cdk/src/lib/*"],
       "@team-up/nodes/*": ["libs/nodes/src/lib/*"],
       "@team-up/sync-node-box": ["libs/sync-node-box/src/index.ts"],
-      "@team-up/ui/*": ["libs/ui/src/lib/*"]
+      "@team-up/ui/*": ["libs/ui/src/lib/*"],
+      "@team-up/utils/*": ["libs/utils/src/lib/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

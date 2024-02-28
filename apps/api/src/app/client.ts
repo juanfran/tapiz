@@ -18,6 +18,7 @@ export class Client {
   public isAdmin!: boolean;
   public sendTimeout?: ReturnType<typeof setTimeout>;
   public pendingMsgs: unknown[] = [];
+  private privateId = '';
 
   constructor(
     public ws: WebSocket,
@@ -55,7 +56,7 @@ export class Client {
     }
   }
 
-  public parseStateActionMessage(messages: StateActions[]) {
+  public async parseStateActionMessage(messages: StateActions[]) {
     if (!this.boardId) {
       return;
     }
@@ -66,7 +67,14 @@ export class Client {
       return;
     }
 
-    const validationResult = validation(messages, state, this.id, this.isAdmin);
+    const validationResult = await validation(
+      messages,
+      state,
+      this.id,
+      this.isAdmin,
+      this.boardId,
+      this.privateId,
+    );
 
     if (!validationResult.length) {
       return;
@@ -173,8 +181,9 @@ export class Client {
       this.server.userJoin(this.boardId, user);
 
       const board = this.server.getBoard(this.boardId);
+      const boardUser = await this.server.getBoardUser(this.boardId, this.id);
 
-      if (!board) {
+      if (!boardUser || !board) {
         return;
       }
 
@@ -183,6 +192,7 @@ export class Client {
       user.content.visible = userInBoard?.content.visible ?? false;
 
       this.refreshIsAdmin();
+      this.privateId = boardUser.privateId;
 
       const initStateActions: StateActions[] = [
         ...board.map((it) => {

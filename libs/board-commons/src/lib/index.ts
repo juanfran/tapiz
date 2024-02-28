@@ -22,6 +22,7 @@ export * from './models/sort-board.model.js';
 export * from './models/resizable.model.js';
 export * from './models/rotatable.model.js';
 export * from './models/board-settings.model.js';
+export * from './models/poll.model.js';
 export * from './state-tools.js';
 export * from './board-common-actions.js';
 export * from './validators/index.js';

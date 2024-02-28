@@ -23,6 +23,7 @@ export const {
   selectCocomaterial,
   selectSearching,
   selectShowUserVotes,
+  selectPrivateId,
 } = pageFeature;
 
 export const isFocus = (id: string) => {

@@ -10,12 +10,14 @@ interface NodesState {
   users: User[];
   userId: string;
   zoom: number;
+  privateId: string;
 }
 
 const initialState: NodesState = {
   users: [],
   userId: '',
   zoom: 1,
+  privateId: '',
 };
 
 @Injectable({
@@ -28,6 +30,7 @@ export class NodesStore {
   public users$ = new BehaviorSubject<User[]>([]);
   public userId$ = new BehaviorSubject('');
   public zoom$ = new BehaviorSubject(1);
+  public privateId$ = new BehaviorSubject('');
 
   actions = rxActions<{
     deleteNodes: { nodes: { id: string; type: string }[]; history?: boolean };
@@ -40,6 +43,7 @@ export class NodesStore {
     connect('users', this.users$.asObservable());
     connect('userId', this.userId$.asObservable());
     connect('zoom', this.zoom$.asObservable());
+    connect('privateId', this.privateId$.asObservable());
 
     this.actions.copyNodes$.subscribe(({ nodes }) => {
       navigator.clipboard.writeText(JSON.stringify(nodes));
@@ -66,4 +70,5 @@ export class NodesStore {
   users = this.#state.signal('users');
   userId = this.#state.signal('userId');
   zoom = this.#state.signal('zoom');
+  privateId = this.#state.signal('privateId');
 }

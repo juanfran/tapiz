@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { protectedProcedure, router } from '../trpc.js';
+import { protectedProcedure, publicProcedure, router } from '../trpc.js';
 import db from '../db/index.js';
 import { getUserInvitationsByEmail } from '../db/user-db.js';
 import { lucia } from '../auth.js';
@@ -144,8 +144,12 @@ export const userRouter = router({
         success: true,
       };
     }),
-  logout: protectedProcedure.query(async (req) => {
-    await lucia.invalidateUserSessions(req.ctx.user.sub);
+  logout: publicProcedure.query(async (req) => {
+    const mayLogout = req.ctx as { user?: { sub: string } };
+
+    if (mayLogout.user) {
+      await lucia.invalidateUserSessions(mayLogout.user.sub);
+    }
 
     return {
       success: true,

@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "38ecb376-f4fb-4073-b27b-33f6322c3653",
+  "id": "80267edf-acff-4543-abd7-2359e3b1f3f1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "accounts": {
@@ -110,6 +110,13 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
+        },
+        "private_id": {
+          "name": "private_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "role": {
           "name": "role",

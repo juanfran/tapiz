@@ -1,7 +1,12 @@
 import { eq, and, or, desc, notInArray } from 'drizzle-orm';
 import { db } from './init-db.js';
 import * as schema from '../schema.js';
-import type { BoardUser, TuNode, UserNode } from '@team-up/board-commons';
+import type {
+  BoardUser,
+  PrivateBoardUser,
+  TuNode,
+  UserNode,
+} from '@team-up/board-commons';
 import { SetNonNullable } from 'type-fest';
 import * as team from './team-db.js';
 import { getUserTeam } from './team-db.js';
@@ -101,7 +106,7 @@ export async function getBoardAdmins(boardId: string) {
 export async function getBoardUser(
   boardId: string,
   userId: UserNode['id'],
-): Promise<BoardUser | undefined> {
+): Promise<PrivateBoardUser | undefined> {
   const results = await db
     .select({
       boards: {
@@ -116,6 +121,7 @@ export async function getBoardUser(
       accounts_boards: {
         role: schema.acountsToBoards.role,
         lastAccessedAt: schema.acountsToBoards.lastAccessedAt,
+        privateId: schema.acountsToBoards.privateId,
       },
       team_members: {
         role: schema.teamMembers.role,
@@ -151,15 +157,20 @@ export async function getBoardUser(
     return;
   }
 
+  const accounts_boards = result.accounts_boards;
+
+  if (!accounts_boards) {
+    return;
+  }
+
   return {
     ...result.boards,
-    role: result.accounts_boards?.role ?? 'member',
+    role: accounts_boards.role,
     starred: !!result.starreds,
+    privateId: accounts_boards.privateId,
     isAdmin:
-      result.team_members?.role === 'admin' ||
-      result.accounts_boards?.role === 'admin',
-    lastAccessedAt:
-      result.accounts_boards?.lastAccessedAt ?? result.boards.createdAt,
+      result.team_members?.role === 'admin' || accounts_boards.role === 'admin',
+    lastAccessedAt: accounts_boards.lastAccessedAt ?? result.boards.createdAt,
   };
 }
 

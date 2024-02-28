@@ -8,7 +8,7 @@ const estimationBoard = z.object({
 });
 
 const ESTIMATION_VALIDATOR: NodeValidator = {
-  add: (data) => {
+  add: async (data) => {
     const validation = estimationBoard.safeParse(data.content);
 
     if (validation.success) {
@@ -25,7 +25,7 @@ const ESTIMATION_VALIDATOR: NodeValidator = {
       success: false,
     };
   },
-  patch: (data) => {
+  patch: async (data) => {
     const validation = estimationBoard.partial().safeParse(data.content);
 
     if (validation.success) {
@@ -42,7 +42,7 @@ const ESTIMATION_VALIDATOR: NodeValidator = {
       success: false,
     };
   },
-  remove: (data) => {
+  remove: async (data) => {
     return {
       success: true,
       data,
@@ -66,7 +66,7 @@ const config = z.object({
 });
 
 const ESTIMATION_CONFIG_VALIDATOR: NodeValidator = {
-  add: (data) => {
+  add: async (data) => {
     const validation = config.safeParse(data.content);
 
     if (validation.success) {
@@ -83,7 +83,7 @@ const ESTIMATION_CONFIG_VALIDATOR: NodeValidator = {
       success: false,
     };
   },
-  patch: (data) => {
+  patch: async (data) => {
     const validation = config.partial().safeParse(data.content);
 
     if (validation.success) {
@@ -100,7 +100,7 @@ const ESTIMATION_CONFIG_VALIDATOR: NodeValidator = {
       success: false,
     };
   },
-  remove: () => {
+  remove: async () => {
     return {
       success: false,
     };
@@ -118,7 +118,7 @@ const result = z.object({
 });
 
 const ESTIMATION_RESULT_VALIDATOR: NodeValidator = {
-  add: (data, userId) => {
+  add: async (data, state) => {
     const validation = result.safeParse(data.content);
 
     if (validation.success) {
@@ -128,7 +128,7 @@ const ESTIMATION_RESULT_VALIDATOR: NodeValidator = {
           ...data,
           content: {
             ...validation.data,
-            userId,
+            userId: state.userId,
           },
         },
       };
@@ -138,10 +138,10 @@ const ESTIMATION_RESULT_VALIDATOR: NodeValidator = {
       success: false,
     };
   },
-  patch: (data, userId) => {
+  patch: async (data, state) => {
     const content = data.content as EstimationResult;
 
-    if (content.userId !== userId) {
+    if (content.userId !== state.userId) {
       return {
         success: false,
       };
@@ -163,10 +163,10 @@ const ESTIMATION_RESULT_VALIDATOR: NodeValidator = {
       success: false,
     };
   },
-  remove: (data, userId, _, node) => {
-    const content = node.content as EstimationResult;
+  remove: async (data, state) => {
+    const content = state.node.content as EstimationResult;
 
-    if (content.userId !== userId) {
+    if (content.userId !== state.userId) {
       return {
         success: false,
       };

@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS "account_session" (
 CREATE TABLE IF NOT EXISTS "accounts_boards" (
 	"account_id" varchar NOT NULL,
 	"board_id" uuid NOT NULL,
+	"private_id" uuid DEFAULT gen_random_uuid() NOT NULL,
 	"role" "role" DEFAULT 'member' NOT NULL,
 	"last_accessed_at" timestamp,
 	CONSTRAINT accounts_boards_account_id_board_id PRIMARY KEY("account_id","board_id")
