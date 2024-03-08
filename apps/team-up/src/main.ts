@@ -11,7 +11,6 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideStore } from '@ngrx/store';
 import { provideRouterStore } from '@ngrx/router-store';
-import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -41,9 +40,7 @@ fetch(environment.config).then(async (response) => {
     providers: [
       { provide: APP_CONFIG, useValue: config },
       importProvidersFrom(MatSnackBarModule),
-      prefersReducedMotion()
-        ? provideAnimationsAsync()
-        : provideNoopAnimations(),
+      provideAnimationsAsync(),
       provideStore(
         {
           app: appFeature.reducer,

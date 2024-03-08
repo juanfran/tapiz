@@ -16,6 +16,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { VotesModalComponent } from '../votes-modal/votes-modal.component';
 import { Group, Note, TuNode } from '@team-up/board-commons';
 import { selectVoting } from '../../selectors/page.selectors';
+import { CommentsStore } from '../comments/comments.store';
 
 @Component({
   selector: 'team-up-board-context-menu',
@@ -35,6 +36,7 @@ export class BoardContextMenuComponent implements OnInit {
   private boardComponent = inject(BoardComponent);
   private dialog = inject(MatDialog);
   private voting = this.store.selectSignal(selectVoting);
+  private commentsStore = inject(CommentsStore);
 
   public readonly boardMode = this.store.selectSignal(
     pageFeature.selectCanvasMode,
@@ -144,6 +146,20 @@ export class BoardContextMenuComponent implements OnInit {
                 );
               },
             });
+          }
+
+          if (currentNodes.length === 1) {
+            const canHaveComments = currentNodes[0].type === 'note';
+
+            if (canHaveComments) {
+              actions.push({
+                label: 'Comments',
+                icon: 'comments',
+                action: () => {
+                  this.commentsStore.setParentNode(currentNodes[0]['id']);
+                },
+              });
+            }
           }
 
           const showVotesNode = currentNodes

@@ -35,12 +35,18 @@ export class BoardZoomService {
       share(),
       concatLatestFrom(() => this.store.select(selectPopupOpen)),
       filter(([event, popup]) => {
+        const target = event.target as HTMLElement | undefined;
+
         if (popup === 'cocomaterial' || popup === 'search') {
           return false;
         }
 
-        if (event.target) {
-          return (event.target as HTMLElement).tagName !== 'EMOJI-PICKER';
+        if (target) {
+          if (target.closest('[board-noscroll]')) {
+            return false;
+          }
+
+          return target.tagName !== 'EMOJI-PICKER';
         }
 
         return true;

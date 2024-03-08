@@ -21,7 +21,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
 import { decrypt } from '@team-up/utils/crypto';
-import { NodesStore } from '@team-up/nodes/services/nodes.store';
+import { NodesStore } from '../../../services/nodes.store';
 
 @Component({
   selector: 'team-up-poll-options',

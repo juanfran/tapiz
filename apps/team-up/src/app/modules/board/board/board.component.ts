@@ -88,6 +88,7 @@ import { SubscriptionService } from '../../../services/subscription.service';
 import { DrawingStore } from '@team-up/board-components/drawing/drawing.store';
 import { DrawingOptionsComponent } from '@team-up/board-components/drawing-options';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { CommentsComponent } from '../components/comments/comments.component';
 
 @UntilDestroy()
 @Component({
@@ -119,6 +120,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
     ContextMenuComponent,
     BoardContextMenuComponent,
     NodeToolbarComponent,
+    CommentsComponent,
   ],
   hostDirectives: [CopyPasteDirective],
 })

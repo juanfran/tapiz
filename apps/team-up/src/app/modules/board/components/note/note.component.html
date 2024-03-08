@@ -1,9 +1,22 @@
 @if (viewModel$ | async; as vm) {
-  @if (vm.votes > 0) {
-    <div class="vote">
-      {{ vm.votes }}
-    </div>
-  }
+  <div class="top-info">
+    @if (vm.comments) {
+      <button
+        type="button"
+        class="comments"
+        (click)="openComments()">
+        {{ vm.comments }}
+
+        <mat-icon>comments</mat-icon>
+      </button>
+    }
+
+    @if (vm.votes > 0) {
+      <div class="vote">
+        {{ vm.votes }}
+      </div>
+    }
+  </div>
   @if (vm.edit) {
     <textarea
       #textarea

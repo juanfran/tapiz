@@ -10,7 +10,7 @@ import {
   inject,
 } from '@angular/core';
 import { PollBoard, PollBoardNode } from '@team-up/board-commons';
-import { decrypt, encrypt } from '@team-up/utils/crypto';
+import { encrypt } from '@team-up/utils/crypto';
 import { MatIconModule } from '@angular/material/icon';
 import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
 import { Store } from '@ngrx/store';

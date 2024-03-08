@@ -112,17 +112,38 @@ textarea {
   line-height: 1.1;
 }
 
-.vote {
+.top-info {
   position: absolute;
   right: 10px;
   top: 10px;
+  display: flex;
+  gap: 5px;
+}
+
+.vote {
   background-color: rgba(0, 0, 0, 0.15);
   width: 20px;
   height: 20px;
   line-height: 20px;
-  font-size: 15px;
+  font-weight: bold;
   border-radius: 10px;
   text-align: center;
+}
+
+.comments {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  padding: 0 5px;
+  gap: 5px;
+
+  mat-icon {
+    inline-size: 13px;
+    block-size: 13px;
+    font-size: 13px;
+  }
 }
 
 .emoji {
@@ -154,3 +175,4 @@ canvas {
   top: 0;
   left: 0;
 }
+
