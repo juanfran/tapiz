@@ -1,6 +1,6 @@
 Create component in `libs/nodes/src/lib/`.
 
-Add the action to `toolbar.component.html`.
+Add the action to `board-toolbar.component.html`.
 
 Add the new node to `apps/team-up/src/app/app-node.ts`.
 

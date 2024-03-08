@@ -3,6 +3,7 @@ import { StateActions, TuNode, Validators } from '@team-up/board-commons';
 import { PERSONAL_TOKEN_VALIDATOR } from '@team-up/board-commons/validators/token.validator.js';
 import { ESTIMATION_VALIDATORS } from '@team-up/board-commons/validators/estimation.validator.js';
 import { POLL_VALIDATORS } from '@team-up/board-commons/validators/poll.validator.js';
+import { COMMENTS_VALIDATORS } from '@team-up/board-commons/validators/comments.validator.js';
 import { SETTINGS_VALIDATOR } from '@team-up/board-commons/validators/settings.validators.js';
 
 import { noteValidator } from '@team-up/board-commons/validators/note/node.validator.js';
@@ -39,6 +40,7 @@ const validations = {
     },
     ...ESTIMATION_VALIDATORS,
     ...POLL_VALIDATORS,
+    ...COMMENTS_VALIDATORS,
   ],
 };
 

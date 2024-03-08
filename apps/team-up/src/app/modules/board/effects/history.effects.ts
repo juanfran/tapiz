@@ -13,39 +13,39 @@ export class HistoryEffects {
   private boardFacade = inject(BoardFacade);
   private wsService = inject(WsService);
 
-  public undo$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(PageActions.undo),
-      filter(() => {
-        return !isInputField();
-      }),
-      map(() => {
-        const actions = this.boardFacade.undo();
+  public undo$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(PageActions.undo),
+        filter(() => {
+          return !isInputField();
+        }),
+        tap(() => {
+          this.boardFacade.undo();
+        }),
+      );
+    },
+    {
+      dispatch: false,
+    },
+  );
 
-        return BoardActions.batchNodeActions({
-          history: false,
-          actions,
-        });
-      }),
-    );
-  });
-
-  public redo$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(PageActions.redo),
-      filter(() => {
-        return !isInputField();
-      }),
-      map(() => {
-        const actions = this.boardFacade.redo();
-
-        return BoardActions.batchNodeActions({
-          history: false,
-          actions,
-        });
-      }),
-    );
-  });
+  public redo$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(PageActions.redo),
+        filter(() => {
+          return !isInputField();
+        }),
+        tap(() => {
+          this.boardFacade.redo();
+        }),
+      );
+    },
+    {
+      dispatch: false,
+    },
+  );
 
   public endDrag$ = createEffect(
     () => {

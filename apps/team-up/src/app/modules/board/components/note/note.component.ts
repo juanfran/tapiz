@@ -11,6 +11,7 @@ import {
   OnInit,
   HostBinding,
   ChangeDetectorRef,
+  inject,
 } from '@angular/core';
 import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
@@ -62,6 +63,8 @@ import { filterNil } from '../../../../commons/operators/filter-nil';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { isInputField } from '@team-up/cdk/utils/is-input-field';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { MatIconModule } from '@angular/material/icon';
+import { CommentsStore } from '../../../../modules/board/components/comments/comments.store';
 
 interface State {
   edit: boolean;
@@ -76,6 +79,7 @@ interface State {
   voting: boolean;
   drawing: boolean;
   textSize: number;
+  comments: number;
 }
 @UntilDestroy()
 @Component({
@@ -85,7 +89,7 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState, HotkeysService],
   standalone: true,
-  imports: [AsyncPipe, DrawingDirective],
+  imports: [AsyncPipe, DrawingDirective, MatIconModule],
 })
 export class NoteComponent implements AfterViewInit, OnInit, Draggable {
   @Input()
@@ -134,6 +138,8 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
 
   @ViewChildren('textarea') textarea!: QueryList<ElementRef>;
 
+  private commentsStore = inject(CommentsStore);
+
   constructor(
     private el: ElementRef,
     private boardMoveService: BoardMoveService,
@@ -164,6 +170,17 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     this.state.connect('userId', this.store.select(selectUserId));
     this.state.connect('voting', this.store.select(selectVoting));
     this.state.connect('drawing', toObservable(this.drawingStore.drawing));
+    this.state.connect(
+      'comments',
+      this.state
+        .select('note')
+        .pipe(
+          map(
+            (note) =>
+              note.children?.filter((it) => it.type === 'comment').length ?? 0,
+          ),
+        ),
+    );
     this.state.hold(this.state.select('focus'), () => this.cd.markForCheck());
     this.state.hold(this.state.select('visible'), () => this.cd.markForCheck());
     this.state.hold(this.state.select('textSize'), () => {
@@ -626,6 +643,10 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     };
 
     sizeSearch(56);
+  }
+
+  public openComments() {
+    this.commentsStore.setParentNode(this.state.get('note').id);
   }
 
   private noteHeight(
