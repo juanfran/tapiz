@@ -7,6 +7,8 @@ import {
   Input,
   Signal,
   ViewChild,
+  computed,
+  effect,
   inject,
 } from '@angular/core';
 import { PollBoard, PollBoardNode } from '@team-up/board-commons';
@@ -42,7 +44,9 @@ import { PollResultsComponent } from './components/poll-results/poll-results.com
     CommonModule,
   ],
   template: `
-    <div class="drag-indicator">
+    <div
+      class="drag-indicator"
+      [style.visibility]="showDrag() ? 'visible' : 'hidden'">
       <button #drag>
         <mat-icon>drag_indicator</mat-icon>
       </button>
@@ -97,6 +101,14 @@ export class PollBoardComponent implements AfterViewInit {
   #nodesStore = inject(NodesStore);
   userId = this.#nodesStore.userId;
   users = this.#nodesStore.users;
+  canvasMode = this.#nodesStore.canvasMode;
+  showDrag = computed(() => {
+    if (this.canvasMode() === 'editMode') {
+      return this.node().content.layer === 0;
+    } else {
+      return this.node().content.layer === 1;
+    }
+  });
 
   get nativeElement() {
     return this.#el.nativeElement;

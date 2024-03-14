@@ -10,6 +10,7 @@ import {
   selectUserId,
   selectZoom,
   selectPrivateId,
+  selectCanvasMode,
 } from '../../selectors/page.selectors';
 
 @Component({
@@ -64,6 +65,13 @@ export class NodesComponent {
       .pipe(takeUntilDestroyed())
       .subscribe((zoom) => {
         this.nodesStore.zoom$.next(zoom);
+      });
+
+    this.store
+      .select(selectCanvasMode)
+      .pipe(takeUntilDestroyed())
+      .subscribe((canvasMode) => {
+        this.nodesStore.canvasMode$.next(canvasMode);
       });
   }
 }

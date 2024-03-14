@@ -11,6 +11,7 @@ interface NodesState {
   userId: string;
   zoom: number;
   privateId: string;
+  canvasMode: string;
 }
 
 const initialState: NodesState = {
@@ -18,6 +19,7 @@ const initialState: NodesState = {
   userId: '',
   zoom: 1,
   privateId: '',
+  canvasMode: 'editMode',
 };
 
 @Injectable({
@@ -31,6 +33,7 @@ export class NodesStore {
   public userId$ = new BehaviorSubject('');
   public zoom$ = new BehaviorSubject(1);
   public privateId$ = new BehaviorSubject('');
+  public canvasMode$ = new BehaviorSubject('editMode');
 
   actions = rxActions<{
     deleteNodes: { nodes: { id: string; type: string }[]; history?: boolean };
@@ -44,6 +47,7 @@ export class NodesStore {
     connect('userId', this.userId$.asObservable());
     connect('zoom', this.zoom$.asObservable());
     connect('privateId', this.privateId$.asObservable());
+    connect('canvasMode', this.canvasMode$.asObservable());
 
     this.actions.copyNodes$.subscribe(({ nodes }) => {
       navigator.clipboard.writeText(JSON.stringify(nodes));
@@ -71,4 +75,5 @@ export class NodesStore {
   userId = this.#state.signal('userId');
   zoom = this.#state.signal('zoom');
   privateId = this.#state.signal('privateId');
+  canvasMode = this.#state.signal('canvasMode');
 }

@@ -24,6 +24,7 @@ export interface EstimationResult {
 
 export interface EstimationBoard {
   position: Point;
+  layer: number;
 }
 
 export type EstimationConfigNode = TuNode<

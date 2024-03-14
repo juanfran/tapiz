@@ -31,7 +31,9 @@ import { toObservable } from '@angular/core/rxjs-interop';
   standalone: true,
   imports: [EstimationComponent, MatIconModule],
   template: `
-    <div class="drag-indicator">
+    <div
+      class="drag-indicator"
+      [style.visibility]="showDrag() ? 'visible' : 'hidden'">
       <button #drag>
         <mat-icon>drag_indicator</mat-icon>
       </button>
@@ -69,6 +71,15 @@ export class EstimationBoardComponent implements AfterViewInit, OnInit {
   public estimation = signal<EstimationNodes[]>([]);
   public parentId = computed(() => {
     return this.node().id;
+  });
+
+  canvasMode = this.nodesStore.canvasMode;
+  showDrag = computed(() => {
+    if (this.canvasMode() === 'editMode') {
+      return this.node().content.layer === 0;
+    } else {
+      return this.node().content.layer === 1;
+    }
   });
 
   public ngOnInit() {
