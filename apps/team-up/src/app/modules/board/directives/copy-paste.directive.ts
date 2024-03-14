@@ -13,7 +13,7 @@ import { isInputField } from '@team-up/cdk/utils/is-input-field';
 })
 export class CopyPasteDirective {
   @HostListener('document:keydown.control.c') public copyEvent() {
-    if (!isInputField()) {
+    if (!isInputField() && !(document.getSelection() ?? '').toString().length) {
       this.copy();
     }
   }
