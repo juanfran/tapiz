@@ -7,7 +7,6 @@ import {
   BoardUser,
   CocomaterialTag,
   CocomaterialApiListVectors,
-  Note,
   NodeAdd,
   TuNode,
 } from '@team-up/board-commons';

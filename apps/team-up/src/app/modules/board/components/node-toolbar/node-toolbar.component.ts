@@ -1,5 +1,10 @@
 import { BoardFacade } from '../../../../services/board-facade.service';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Signal,
+  inject,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { ToolbarComponent } from '@team-up/ui/toolbar';
@@ -16,6 +21,17 @@ import { pageFeature } from '../../reducers/page.reducer';
 import * as R from 'remeda';
 import { compose, rotateDEG, translate, Matrix } from 'transformation-matrix';
 import { EditorViewSharedStateService } from '@team-up/ui/editor-view';
+import { NodeToolbar } from '@team-up/ui/toolbar/node-toolbar.model';
+import type { Editor } from '@tiptap/core';
+
+interface Toolbar {
+  id: string;
+  view: Editor;
+  layoutOptions: boolean;
+  node: Signal<TuNode<NodeToolbar, string>>;
+  x: number;
+  y: number;
+}
 
 @Component({
   selector: 'team-up-node-toolbar',
@@ -70,32 +86,38 @@ export class NodeToolbarComponent {
         };
       }),
       map(({ nodes, zoom, toolbarNodes, position }) => {
-        return toolbarNodes.map((toolbar) => {
-          const node = nodes.find((n) => n.id === toolbar.id)!;
+        return toolbarNodes
+          .map((toolbar) => {
+            const node = nodes.find((n) => n.id === toolbar.id);
 
-          const matrix = compose(
-            translate(node.content.position.x, node.content.position.y),
-            rotateDEG(node.content.rotation),
-          );
+            if (!node) {
+              return;
+            }
 
-          const { x: centerX, y: topY } = this.getTopCenterPosition(
-            matrix,
-            node.content.width,
-            node.content.height,
-          );
+            const matrix = compose(
+              translate(node.content.position.x, node.content.position.y),
+              rotateDEG(node.content.rotation),
+            );
 
-          const x = centerX * zoom + position.x;
-          const y = topY * zoom + position.y;
+            const { x: centerX, y: topY } = this.getTopCenterPosition(
+              matrix,
+              node.content.width,
+              node.content.height,
+            );
 
-          return {
-            id: node.id,
-            view: toolbar.view,
-            node: toolbar.node,
-            layoutOptions: toolbar.layoutOptions,
-            x,
-            y,
-          };
-        });
+            const x = centerX * zoom + position.x;
+            const y = topY * zoom + position.y;
+
+            return {
+              id: node.id,
+              view: toolbar.view,
+              node: toolbar.node,
+              layoutOptions: toolbar.layoutOptions,
+              x,
+              y,
+            } as Toolbar;
+          })
+          .filter((it): it is Toolbar => !!it);
       }),
       distinctUntilChanged((prev, curr) => {
         return R.equals(prev, curr);

@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { filter, map, tap } from 'rxjs/operators';
-import { BoardActions } from '../actions/board.actions';
+import { filter, tap } from 'rxjs/operators';
 import { PageActions } from '../actions/page.actions';
 import { StateActions } from '@team-up/board-commons';
 import { BoardFacade } from '../../../services/board-facade.service';

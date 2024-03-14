@@ -40,8 +40,27 @@
     },
     {
       "files": ["*.ts", "*.tsx"],
-      "extends": ["plugin:@nx/typescript"],
-      "rules": {}
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@nx/typescript",
+        "prettier"
+      ],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": ["error"],
+        "no-multiple-empty-lines": [
+          2,
+          {
+            "max": 1
+          }
+        ],
+        "quotes": [
+          "error",
+          "single",
+          {
+            "avoidEscape": true
+          }
+        ]
+      }
     },
     {
       "files": ["*.js", "*.jsx"],

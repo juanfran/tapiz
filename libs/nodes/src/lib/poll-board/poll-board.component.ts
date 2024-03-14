@@ -8,7 +8,6 @@ import {
   Signal,
   ViewChild,
   computed,
-  effect,
   inject,
 } from '@angular/core';
 import { PollBoard, PollBoardNode } from '@team-up/board-commons';

@@ -79,13 +79,13 @@ export class BoardApiService {
 
   public getCocomaterialTags() {
     return this.http.get<CocomaterialTag[]>(
-      `https://cocomaterial.com/api/tags`,
+      'https://cocomaterial.com/api/tags',
     );
   }
 
   public getCocomaterialVectors(page = 1, page_size = 40, tags: string[] = []) {
     return this.http
-      .get<CocomaterialApiListVectors>(`https://cocomaterial.com/api/vectors`, {
+      .get<CocomaterialApiListVectors>('https://cocomaterial.com/api/vectors', {
         params: {
           page,
           page_size,

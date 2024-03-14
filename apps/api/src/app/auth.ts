@@ -1,7 +1,7 @@
 import { FastifyReply } from 'fastify';
 import Config from './config.js';
 import { Google, generateCodeVerifier, generateState } from 'arctic';
-import { Lucia, Session } from 'lucia';
+import { Lucia } from 'lucia';
 import { PostgresJsAdapter } from '@lucia-auth/adapter-postgresql';
 import postgres from 'postgres';
 

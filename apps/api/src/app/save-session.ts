@@ -22,7 +22,7 @@ export const runSession = () => {
   const cookie = '';
   const boardId = '';
 
-  const ws = new WebSocket(`ws://localhost:8000`, {
+  const ws = new WebSocket('ws://localhost:8000', {
     headers: {
       Cookie: `auth=${cookie}`,
     },

@@ -396,9 +396,9 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         this.el.nativeElement.style.setProperty('--default-cursor', cursor);
 
         if (cursor === 'text') {
-          this.el.nativeElement.classList.add(`cursor-text`);
+          this.el.nativeElement.classList.add('cursor-text');
         } else {
-          this.el.nativeElement.classList.remove(`cursor-text`);
+          this.el.nativeElement.classList.remove('cursor-text');
         }
       });
 

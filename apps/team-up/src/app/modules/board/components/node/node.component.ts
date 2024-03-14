@@ -51,7 +51,7 @@ interface State {
 @Component({
   selector: 'team-up-node',
   styleUrls: ['./node.component.scss'],
-  template: ` <ng-container #nodeHost></ng-container>`,
+  template: ' <ng-container #nodeHost></ng-container>',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [],

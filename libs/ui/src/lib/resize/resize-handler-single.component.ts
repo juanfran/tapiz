@@ -17,7 +17,7 @@ import { ResizeService } from './resize.service';
   selector: 'team-up-resize-single',
   standalone: true,
   imports: [],
-  template: `<ng-content></ng-content>`,
+  template: '<ng-content></ng-content>',
   styles: `
       :host {
         bottom: 0;

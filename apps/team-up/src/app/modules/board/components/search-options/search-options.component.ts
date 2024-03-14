@@ -15,13 +15,7 @@ import {
 } from '@angular/material/autocomplete';
 import { MatOptionModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
-import {
-  Observable,
-  combineLatest,
-  map,
-  startWith,
-  withLatestFrom,
-} from 'rxjs';
+import { combineLatest, map, startWith, withLatestFrom } from 'rxjs';
 import { PageActions } from '../../actions/page.actions';
 import { selectUserId } from '../../selectors/page.selectors';
 import {
