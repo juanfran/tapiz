@@ -81,12 +81,14 @@ export class PageEffects {
         return nodes.find((it) => it.id === nodeId) as TuNode<{
           position: Point;
           width?: number;
+          height?: number;
         }>;
       }),
       filterNil(),
       concatLatestFrom(() => [this.store.select(pageFeature.selectZoom)]),
       map(([node, zoom]) => {
         let width = node.content.width;
+        let height = node.content.height;
 
         const nodeWidths = {
           note: 300,
@@ -94,6 +96,7 @@ export class PageEffects {
         } as Record<string, number>;
 
         width ??= nodeWidths[node.type] || 0;
+        height ??= width;
 
         const x =
           -node.content.position.x * zoom +
@@ -102,7 +105,7 @@ export class PageEffects {
         const y =
           -node.content.position.y * zoom +
           document.body.clientHeight / 2 -
-          (width / 2) * zoom;
+          (height / 2) * zoom;
 
         return PageActions.setUserView({
           zoom,
