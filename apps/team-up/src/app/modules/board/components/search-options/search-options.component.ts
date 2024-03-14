@@ -1,10 +1,10 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  ViewChild,
+  afterRender,
   inject,
+  viewChild,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
@@ -14,7 +14,6 @@ import {
   MatAutocompleteSelectedEvent,
 } from '@angular/material/autocomplete';
 import { MatOptionModule } from '@angular/material/core';
-import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
 import {
   Observable,
@@ -25,8 +24,14 @@ import {
 } from 'rxjs';
 import { PageActions } from '../../actions/page.actions';
 import { selectUserId } from '../../selectors/page.selectors';
-import { Note, TuNode, isNote } from '@team-up/board-commons';
+import {
+  PanelNode,
+  PollBoardNode,
+  TextNode,
+  isNote,
+} from '@team-up/board-commons';
 import { BoardFacade } from '../../../../services/board-facade.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'team-up-search-options',
@@ -39,25 +44,24 @@ import { BoardFacade } from '../../../../services/board-facade.service';
     MatInputModule,
     MatAutocompleteModule,
     MatOptionModule,
-    CommonModule,
   ],
   providers: [MAT_AUTOCOMPLETE_SCROLL_STRATEGY_FACTORY_PROVIDER],
 })
-export class SearchOptionsComponent implements AfterViewInit {
-  @ViewChild('search') searchInput!: ElementRef<HTMLInputElement>;
+export class SearchOptionsComponent {
+  searchInput = viewChild.required<ElementRef<HTMLInputElement>>('search');
 
-  public form = new FormGroup({
+  form = new FormGroup({
     search: new FormControl('', { nonNullable: true }),
   });
 
-  public store = inject(Store);
-  public boardFacade = inject(BoardFacade);
-  public notes$ = this.boardFacade
-    .getNodes()
-    .pipe(map((nodes) => nodes.filter(isNote)));
-  public users$ = this.boardFacade.getUsers();
-  public currentUser$ = this.store.select(selectUserId);
-  public visibleNotes$ = combineLatest([this.notes$, this.users$]).pipe(
+  store = inject(Store);
+  boardFacade = inject(BoardFacade);
+  nodes = this.boardFacade.getNodes();
+
+  notes$ = this.nodes.pipe(map((nodes) => nodes.filter(isNote)));
+  users$ = this.boardFacade.getUsers();
+  currentUser$ = this.store.select(selectUserId);
+  visibleNotes$ = combineLatest([this.notes$, this.users$]).pipe(
     withLatestFrom(this.currentUser$),
     map(([[notes, users], currentUserId]) => {
       const filteredNotes = notes.filter((note) => {
@@ -74,50 +78,111 @@ export class SearchOptionsComponent implements AfterViewInit {
         return true;
       });
 
-      return filteredNotes;
+      return filteredNotes.map((note) => {
+        return {
+          id: note.id,
+          type: 'note',
+          text: note.content.text,
+        };
+      });
     }),
   );
 
-  public options$!: Observable<TuNode<Note>[]>;
+  polls$ = this.nodes.pipe(
+    map((nodes) => {
+      return nodes
+        .filter((node): node is PollBoardNode => node.type === 'poll')
+        .map((node) => {
+          return {
+            id: node.id,
+            type: 'poll',
+            text: node.content.title,
+          };
+        });
+    }),
+  );
+
+  panels$ = this.nodes.pipe(
+    map((nodes) => {
+      return nodes
+        .filter((node): node is PanelNode => node.type === 'panel')
+        .map((node) => {
+          return {
+            id: node.id,
+            type: 'panel',
+            text: this.cleanHtml(node.content.text),
+          };
+        });
+    }),
+  );
+
+  text$ = this.nodes.pipe(
+    map((nodes) => {
+      return nodes
+        .filter((node): node is TextNode => node.type === 'text')
+        .map((node) => {
+          return {
+            id: node.id,
+            type: 'text',
+            text: this.cleanHtml(node.content.text),
+          };
+        });
+    }),
+  );
+
+  searchableNodes$ = combineLatest([
+    this.visibleNotes$,
+    this.polls$,
+    this.panels$,
+    this.text$,
+  ]).pipe(
+    map(([notes, polls, panels, text]) => {
+      return [...notes, ...polls, ...panels, ...text];
+    }),
+  );
+
+  get searchFormControl() {
+    return this.form.get('search') as FormControl;
+  }
+
+  #options$ = combineLatest([
+    this.searchFormControl.valueChanges.pipe(startWith('')),
+    this.searchableNodes$,
+  ]).pipe(
+    map(([value, nodes]) => {
+      if (value) {
+        return nodes.filter((note) =>
+          this.normalizeText(note.text).includes(value),
+        );
+      }
+
+      return nodes;
+    }),
+  );
+  options = toSignal(this.#options$);
 
   constructor() {
-    const search = this.form.get('search');
-
-    if (search) {
-      this.options$ = combineLatest([
-        search.valueChanges.pipe(startWith('')),
-        this.visibleNotes$,
-      ]).pipe(
-        map(([value, notes]) => {
-          if (value) {
-            return notes.filter((note) =>
-              this.normalizeText(note.content.text).includes(value),
-            );
-          }
-
-          return notes;
-        }),
-      );
-    }
+    afterRender(() => {
+      this.searchInput().nativeElement.focus();
+    });
   }
 
-  public selected(event: MatAutocompleteSelectedEvent) {
+  cleanHtml(html: string) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    return doc.body.textContent || '';
+  }
+
+  selected(event: MatAutocompleteSelectedEvent) {
     this.form.get('search')?.setValue('');
 
-    this.store.dispatch(PageActions.goToNote({ note: event.option.value }));
+    this.store.dispatch(PageActions.goToNode({ nodeId: event.option.value }));
   }
 
-  public normalizeText(text: string) {
+  normalizeText(text: string) {
     return text
       .normalize('NFD')
       .replace(/[Ð-ð]/g, 'd')
       .replace(/[\u0300-\u036f]/g, '')
       .toLowerCase();
-  }
-
-  public ngAfterViewInit(): void {
-    requestAnimationFrame(() => {
-      this.searchInput.nativeElement.focus();
-    });
   }
 }

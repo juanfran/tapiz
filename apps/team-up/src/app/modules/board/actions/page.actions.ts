@@ -57,7 +57,7 @@ export const PageActions = createActionGroup({
     }>(),
     'Next vectors page': props<{ tags: string[] }>(),
     'Ready to search': emptyProps(),
-    'Go to note': props<{ note: Note }>(),
+    'Go to node': props<{ nodeId: string }>(),
     'Paste nodes': props<{ nodes: NodeAdd['data'][]; history: boolean }>(),
     'Follow user': props<{ id: User['id'] }>(),
     'Go to user': props<{ id: User['id'] }>(),

@@ -13,3 +13,5 @@ export interface Text {
 export function isText(node: TuNode): node is TuNode<Text> {
   return node.type === 'text';
 }
+
+export type TextNode = TuNode<Text, 'text'>;

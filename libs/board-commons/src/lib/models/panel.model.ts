@@ -21,3 +21,5 @@ export interface Panel {
 export function isPanel(node: TuNode): node is TuNode<Panel> {
   return node.type === 'panel';
 }
+
+export type PanelNode = TuNode<Panel, 'panel'>;
