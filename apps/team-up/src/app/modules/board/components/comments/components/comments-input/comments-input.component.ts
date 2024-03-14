@@ -3,8 +3,7 @@ import {
   Component,
   ChangeDetectionStrategy,
   input,
-  Output,
-  EventEmitter,
+  output,
 } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -55,8 +54,7 @@ export class CommentsInputComponent {
     nonNullable: true,
   });
 
-  @Output()
-  newComment = new EventEmitter<CommentNode>();
+  newComment = output<CommentNode>();
 
   submitEnter(event: Event) {
     if (!(event as KeyboardEvent).shiftKey) {

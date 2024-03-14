@@ -4,8 +4,8 @@ import {
   inject,
   computed,
   Injector,
-  ViewChild,
   ElementRef,
+  viewChild,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { CommentsStore } from './comments.store';
@@ -85,8 +85,8 @@ export class CommentsComponent {
   #store = inject(Store);
   #injector = inject(Injector);
 
-  @ViewChild('commentWrapper')
-  commentWrapper?: ElementRef<HTMLElement>;
+  commentWrapper =
+    viewChild.required<ElementRef<HTMLElement>>('commentWrapper');
 
   comments = computed(() => {
     const users = this.#nodesStore.users();
@@ -122,10 +122,8 @@ export class CommentsComponent {
     })
       .pipe(take(1), delay(20))
       .subscribe(() => {
-        if (this.commentWrapper) {
-          this.commentWrapper.nativeElement.scrollTop =
-            this.commentWrapper.nativeElement.scrollHeight;
-        }
+        this.commentWrapper().nativeElement.scrollTop =
+          this.commentWrapper().nativeElement.scrollHeight;
       });
 
     this.#store.dispatch(
