@@ -17,6 +17,7 @@ import { pageFeature } from '../reducers/page.reducer';
 import { filterNil } from '../../../commons/operators/filter-nil';
 import { ActivatedRoute } from '@angular/router';
 import { BoardFacade } from '../../../services/board-facade.service';
+import { Point, TuNode } from '@team-up/board-commons';
 
 @Injectable()
 export class PageEffects {
@@ -71,21 +72,37 @@ export class PageEffects {
     );
   });
 
-  public goToNote$ = createEffect(() => {
+  public goToNode$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(PageActions.goToNote),
+      ofType(PageActions.goToNode),
+      concatLatestFrom(() => [this.boardFacade.getNodes()]),
+      map(([{ nodeId }, nodes]) => {
+        console.log(nodeId, nodes);
+        return nodes.find((it) => it.id === nodeId) as TuNode<{
+          position: Point;
+          width?: number;
+        }>;
+      }),
+      filterNil(),
       concatLatestFrom(() => [this.store.select(pageFeature.selectZoom)]),
-      map(([{ note }, zoom]) => {
-        const noteWidth = 300;
+      map(([node, zoom]) => {
+        let width = node.content.width;
+
+        const nodeWidths = {
+          note: 300,
+          poll: 650,
+        } as Record<string, number>;
+
+        width ??= nodeWidths[node.type] || 0;
 
         const x =
-          -note.position.x * zoom +
+          -node.content.position.x * zoom +
           document.body.clientWidth / 2 -
-          (noteWidth / 2) * zoom;
+          (width / 2) * zoom;
         const y =
-          -note.position.y * zoom +
+          -node.content.position.y * zoom +
           document.body.clientHeight / 2 -
-          (noteWidth / 2) * zoom;
+          (width / 2) * zoom;
 
         return PageActions.setUserView({
           zoom,
@@ -100,7 +117,7 @@ export class PageEffects {
 
   public goToNoteResetPopup$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(PageActions.goToNote),
+      ofType(PageActions.goToNode),
       map(() => {
         return PageActions.setPopupOpen({
           popup: '',

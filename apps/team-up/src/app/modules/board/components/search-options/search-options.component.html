@@ -11,9 +11,9 @@
       #auto="matAutocomplete"
       [hideSingleSelectionIndicator]="true"
       (optionSelected)="selected($event)">
-      @for (option of options$ | async; track option) {
-        <mat-option [value]="option.content">
-          {{ option.content.text }}
+      @for (option of options(); track option) {
+        <mat-option [value]="option.id">
+          <span class="type">({{ option.type }})</span> {{ option.text }}
         </mat-option>
       }
     </mat-autocomplete>
