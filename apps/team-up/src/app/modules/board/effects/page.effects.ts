@@ -77,7 +77,6 @@ export class PageEffects {
       ofType(PageActions.goToNode),
       concatLatestFrom(() => [this.boardFacade.getNodes()]),
       map(([{ nodeId }, nodes]) => {
-        console.log(nodeId, nodes);
         return nodes.find((it) => it.id === nodeId) as TuNode<{
           position: Point;
           width?: number;

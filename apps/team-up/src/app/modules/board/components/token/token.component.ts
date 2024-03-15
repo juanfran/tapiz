@@ -113,8 +113,8 @@ export class TokenComponent implements OnInit, DynamicComponent, Draggable {
     return this.el.nativeElement;
   }
 
-  public get preventDrag() {
-    return this.edit() || !this.focus();
+  public preventDrag() {
+    return this.edit();
   }
 
   public get id() {

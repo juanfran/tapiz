@@ -15,7 +15,7 @@ import { encrypt } from '@team-up/utils/crypto';
 import { MatIconModule } from '@angular/material/icon';
 import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
 import { Store } from '@ngrx/store';
-import { BoardActions } from '../estimation/estimation.component';
+
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -26,6 +26,7 @@ import { v4 } from 'uuid';
 import { NodesStore } from '../services/nodes.store';
 import { CommonModule } from '@angular/common';
 import { PollResultsComponent } from './components/poll-results/poll-results.component';
+import { BoardActions } from '@team-up/board-commons/actions/board.actions';
 
 @Component({
   selector: 'team-up-poll-board',
@@ -111,10 +112,6 @@ export class PollBoardComponent implements AfterViewInit {
 
   get nativeElement() {
     return this.#el.nativeElement;
-  }
-
-  get preventDrag() {
-    return !this.focus();
   }
 
   get id() {
@@ -208,6 +205,12 @@ export class PollBoardComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
-    this.#multiDragService.add(this, this.#destroyRef);
+    this.#multiDragService.register({
+      id: this.id,
+      nodeType: this.nodeType,
+      handler: this.drag.nativeElement,
+      position: () => this.position,
+      destroyRef: this.#destroyRef,
+    });
   }
 }

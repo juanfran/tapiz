@@ -98,10 +98,6 @@ export class EstimationBoardComponent implements AfterViewInit, OnInit {
     return this.el.nativeElement;
   }
 
-  public get preventDrag() {
-    return !this.focus();
-  }
-
   public get id() {
     return this.node().id;
   }
@@ -125,6 +121,12 @@ export class EstimationBoardComponent implements AfterViewInit, OnInit {
   }
 
   public ngAfterViewInit() {
-    this.multiDragService.add(this, this.destroyRef);
+    this.multiDragService.register({
+      id: this.id,
+      nodeType: this.nodeType,
+      handler: this.handler,
+      position: () => this.position,
+      destroyRef: this.destroyRef,
+    });
   }
 }

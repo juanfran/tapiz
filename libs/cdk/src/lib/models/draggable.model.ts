@@ -1,7 +1,7 @@
 import { Point } from '@team-up/board-commons';
 
 export declare interface Draggable {
-  preventDrag: boolean;
+  preventDrag?: () => boolean;
   position: Point;
   nativeElement: HTMLElement;
   id: string;
