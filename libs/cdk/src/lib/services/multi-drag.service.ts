@@ -1,117 +1,95 @@
-import { ApplicationRef, DestroyRef, Injectable, inject } from '@angular/core';
-import { filterNil } from 'ngxtension/filter-nil';
+import { DestroyRef, Injectable } from '@angular/core';
 import {
   Observable,
   Subject,
-  Subscription,
   animationFrameScheduler,
-  distinctUntilChanged,
   filter,
-  finalize,
   fromEvent,
   map,
   merge,
   startWith,
-  switchMap,
   takeUntil,
-  tap,
   throttleTime,
   withLatestFrom,
 } from 'rxjs';
-import { Draggable } from '../models/draggable.model';
 import { concatLatestFrom } from '@ngrx/effects';
 import { Point } from '@team-up/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+export interface Draggable {
+  id: string;
+  nodeType: string;
+  handler: HTMLElement;
+  destroyRef: DestroyRef;
+  position: () => Point;
+  preventDrag?: () => boolean;
+}
+
+interface SetupConfig {
+  dragEnabled: Observable<boolean>;
+  draggableId: Observable<string[]>;
+  zoom: Observable<number>;
+  relativePosition: Observable<Point>;
+  move: (draggable: Draggable, position: Point) => void;
+  end: (
+    dragged: {
+      draggable: Draggable;
+      initialPosition: Point;
+      finalPosition: Point;
+    }[],
+  ) => void;
+}
+
+interface MoveEvent {
+  type: 'move';
+  position: Point;
+}
+
+interface EndEvent {
+  type: 'end';
+}
+
+type DragEvent = MoveEvent | EndEvent;
 
 @Injectable({
   providedIn: 'root',
 })
 export class MultiDragService {
-  #mouseMove$ = new Subject() as Subject<MouseEvent>;
-  #mouseDown$ = new Subject() as Subject<MouseEvent>;
-  #mouseUp$ = new Subject() as Subject<MouseEvent>;
-
-  public mouseMove$ = this.#mouseMove$.asObservable();
-  public mouseDown$ = this.#mouseDown$.asObservable();
-  public mouseUp$ = this.#mouseUp$.asObservable();
-
-  public updateSharedMouseMove(mouseMove: MouseEvent) {
-    this.#mouseMove$.next(mouseMove);
-  }
-
-  public updateSharedMouseDown(mouseDown: MouseEvent) {
-    this.#mouseDown$.next(mouseDown);
-  }
-
-  public updateSharedMouseUp(mouseUp: MouseEvent) {
-    this.#mouseUp$.next(mouseUp);
-  }
-
-  private appRef = inject(ApplicationRef);
-
-  private dragElements = new Map<
+  #dragElements = new Map<
     Draggable['id'],
     {
       init: Point;
       final: Point | null;
-      type: string;
+      draggable: Draggable;
     }
   >();
 
-  private subscriptions = new Map<Draggable['id'], Subscription>();
+  #snap = 50;
+  #setUpConfig?: SetupConfig;
 
-  private snap = 50;
-  private setUpConfig?: {
-    dragEnabled: Observable<boolean>;
-    zoom: Observable<number>;
-    relativePosition: Observable<Point>;
-    move: (draggable: Draggable, position: Point) => void;
-    end: (
-      dragged: {
-        id: string;
-        nodeType: string;
-        initialPosition: Point;
-        finalPosition: Point;
-      }[],
-    ) => void;
-  };
+  draggableElements: Draggable[] = [];
+  move$ = new Subject<DragEvent>();
 
-  public draggableElements: {
-    draggableCmp: Draggable;
-    destroyRef: DestroyRef;
-  }[] = [];
-
-  public setUp(setUpConfig: MultiDragService['setUpConfig']) {
-    this.setUpConfig = setUpConfig;
-  }
-
-  public add(draggable: Draggable, destroyRef: DestroyRef) {
-    this.draggableElements.push({ draggableCmp: draggable, destroyRef });
-
-    destroyRef.onDestroy(() => {
-      this.remove(draggable);
-    });
-
-    this.listen(draggable, destroyRef);
-  }
-
-  public remove(draggable: Draggable) {
+  remove(draggable: Draggable) {
     this.draggableElements = this.draggableElements.filter(
-      (d) => d.draggableCmp !== draggable,
+      (d) => d !== draggable,
     );
-
-    if (this.subscriptions.has(draggable.id)) {
-      this.subscriptions.get(draggable.id)?.unsubscribe();
-      this.subscriptions.delete(draggable.id);
-    }
   }
 
-  public listen(draggable: Draggable, destroyRef: DestroyRef) {
-    const setUpConfig = this.setUpConfig;
+  setUp(setUpConfig: SetupConfig) {
+    this.#setUpConfig = setUpConfig;
+  }
+
+  register(draggable: Draggable) {
+    const setUpConfig = this.#setUpConfig;
 
     if (!setUpConfig) {
       throw new Error('MultiDragService.setUp() must be called before use');
     }
+
+    let startPositionDiff: null | Point = null;
+
+    this.draggableElements.push(draggable);
 
     const keydown$ = fromEvent<KeyboardEvent>(document, 'keydown');
     const keyup$ = fromEvent<KeyboardEvent>(document, 'keyup');
@@ -120,167 +98,170 @@ export class MultiDragService {
       startWith(false),
     );
 
-    const handler = draggable.handler ?? draggable.nativeElement;
-
-    const mouseDown$ = merge(
-      fromEvent<MouseEvent>(handler, 'mousedown').pipe(
-        tap((event) => {
-          this.updateSharedMouseDown(event);
-        }),
-      ),
-      this.mouseDown$.pipe(filterNil()),
-    ).pipe(
-      distinctUntilChanged(),
-      filter((e) => {
-        if ((e.target as HTMLElement).classList.contains('no-drag')) {
-          return false;
-        }
-
-        return true;
-      }),
-      concatLatestFrom(() => setUpConfig.dragEnabled),
-      filter(([, dragEnabled]) => dragEnabled),
-      map(([event]) => {
-        return event;
-      }),
-    );
-
-    const mouseUp$ = merge(
-      fromEvent(window, 'mouseup').pipe(
-        tap((event) => {
-          this.updateSharedMouseUp(event as MouseEvent);
-        }),
-      ),
-      this.mouseUp$,
-    ).pipe(
-      map(() => true),
-      distinctUntilChanged(),
-    );
-
-    let startPositionDiff = { x: 0, y: 0 };
-
-    const mouseMove$ = merge(
-      fromEvent<MouseEvent>(document.body, 'mousemove').pipe(
-        throttleTime(0, animationFrameScheduler),
-        tap((event) => {
-          // prevent select text on drag note
-          event.preventDefault();
-          this.updateSharedMouseMove(event);
-        }),
-      ),
-      this.mouseMove$.pipe(filterNil()),
-    ).pipe(
-      distinctUntilChanged(),
-      map((mouseMove) => {
-        return {
-          x: mouseMove.clientX,
-          y: mouseMove.clientY,
-        };
-      }),
-      withLatestFrom(setUpConfig.zoom, setUpConfig.relativePosition),
-      map(([move, zoom, position]) => {
-        const posX = -position.x + move.x;
-        const posY = -position.y + move.y;
-
-        return {
-          x: posX / zoom,
-          y: posY / zoom,
-        };
-      }),
-    );
-
-    const move$ = mouseDown$.pipe(
-      withLatestFrom(setUpConfig.zoom, setUpConfig.relativePosition),
-      switchMap(([event, zoom, position]) => {
-        const initialPosition = draggable.position ?? { x: 0, y: 0 };
-
-        if (!this.dragElements.has(draggable.id)) {
-          this.dragElements.set(draggable.id, {
-            init: initialPosition,
-            final: null,
-            type: draggable.nodeType,
-          });
-        }
-
-        const posX = -position.x + event.clientX;
-        const posY = -position.y + event.clientY;
-
-        startPositionDiff = {
-          x: posX / zoom - initialPosition.x,
-          y: posY / zoom - initialPosition.y,
-        };
-
-        return mouseMove$.pipe(
-          takeUntil(mouseUp$),
-          finalize(() => {
-            this.endDrag();
-          }),
-        );
-      }),
-    );
-
-    const moveSubscription = move$
+    fromEvent<MouseEvent>(draggable.handler, 'mousedown')
       .pipe(
-        takeUntilDestroyed(destroyRef),
-        withLatestFrom(controlPressed$),
-        filter(() => {
-          return !draggable.preventDrag;
+        filter((e) => {
+          if ((e.target as HTMLElement).classList.contains('no-drag')) {
+            return false;
+          }
+
+          return true;
         }),
-        map(([move, ctrlPressed]) => {
+        concatLatestFrom(() => setUpConfig.dragEnabled),
+        filter(([, dragEnabled]) => dragEnabled),
+        map(([event]) => {
+          return event;
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.startDrag(draggable.destroyRef);
+        },
+        complete: () => {
+          this.remove(draggable);
+        },
+      });
+
+    this.move$
+      .pipe(
+        takeUntilDestroyed(draggable.destroyRef),
+        filter((move) => {
+          return move.type === 'end';
+        }),
+      )
+      .subscribe(() => {
+        startPositionDiff = null;
+      });
+
+    this.move$
+      .pipe(
+        takeUntilDestroyed(draggable.destroyRef),
+        filter((move): move is MoveEvent => {
+          return move.type === 'move';
+        }),
+        filter(() => {
+          if (draggable.preventDrag) {
+            return !draggable.preventDrag();
+          }
+
+          return true;
+        }),
+        withLatestFrom(setUpConfig.draggableId, controlPressed$),
+        filter(([, draggableId]) => {
+          return draggableId.includes(draggable.id);
+        }),
+        map(([event, , ctrlPressed]) => {
+          const initialPosition = draggable.position();
+
+          if (!this.#dragElements.has(draggable.id)) {
+            this.#dragElements.set(draggable.id, {
+              init: initialPosition,
+              final: null,
+              draggable,
+            });
+          }
+
+          if (!startPositionDiff) {
+            startPositionDiff = {
+              x: event.position.x - initialPosition.x,
+              y: event.position.y - initialPosition.y,
+            };
+          }
+
           let finalPosition = {
-            x: Math.round(move.x - startPositionDiff.x),
-            y: Math.round(move.y - startPositionDiff.y),
+            x: Math.round(event.position.x - startPositionDiff.x),
+            y: Math.round(event.position.y - startPositionDiff.y),
           };
 
           if (ctrlPressed) {
             finalPosition = {
-              x: Math.round(finalPosition.x / this.snap) * this.snap,
-              y: Math.round(finalPosition.y / this.snap) * this.snap,
+              x: Math.round(finalPosition.x / this.#snap) * this.#snap,
+              y: Math.round(finalPosition.y / this.#snap) * this.#snap,
             };
           }
 
-          return finalPosition;
+          return {
+            x: finalPosition.x,
+            y: finalPosition.y,
+          };
         }),
       )
       .subscribe((position) => {
-        const draggableElement = this.dragElements.get(draggable.id);
+        const draggableElement = this.#dragElements.get(draggable.id);
 
         if (draggableElement) {
-          this.dragElements.set(draggable.id, {
+          this.#dragElements.set(draggable.id, {
             ...draggableElement,
             final: position,
           });
         }
 
-        this.setUpConfig?.move(draggable, position);
-
-        this.appRef.tick();
+        this.#setUpConfig?.move(draggable, position);
       });
-
-    this.subscriptions.set(draggable.id, moveSubscription);
   }
 
-  private endDrag() {
+  startDrag(destroyRef: DestroyRef) {
+    const setUpConfig = this.#setUpConfig;
+
+    if (!setUpConfig) {
+      return;
+    }
+
+    fromEvent<MouseEvent>(document.body, 'mousemove')
+      .pipe(
+        throttleTime(0, animationFrameScheduler),
+        takeUntil(fromEvent<MouseEvent>(window, 'mouseup')),
+        takeUntilDestroyed(destroyRef),
+        map((mouseMove) => {
+          return {
+            x: mouseMove.x,
+            y: mouseMove.y,
+          };
+        }),
+        withLatestFrom(setUpConfig.zoom, setUpConfig.relativePosition),
+        map(([move, zoom, position]) => {
+          const posX = -position.x + move.x;
+          const posY = -position.y + move.y;
+
+          return {
+            x: posX / zoom,
+            y: posY / zoom,
+          };
+        }),
+      )
+      .subscribe({
+        next: (position) => {
+          this.move$.next({ type: 'move', position });
+        },
+        complete: () => {
+          if (!this.#dragElements.size) {
+            return;
+          }
+
+          this.move$.next({ type: 'end' });
+          this.#endDrag();
+        },
+      });
+  }
+
+  #endDrag() {
     const actions: {
-      id: string;
-      nodeType: string;
+      draggable: Draggable;
       initialPosition: Point;
       finalPosition: Point;
     }[] = [];
 
-    this.dragElements.forEach((dragElement, id) => {
+    this.#dragElements.forEach((dragElement) => {
       if (dragElement.final) {
         actions.push({
-          id,
-          nodeType: dragElement.type,
+          draggable: dragElement.draggable,
           initialPosition: dragElement.init,
           finalPosition: dragElement.final,
         });
       }
     });
 
-    this.setUpConfig?.end(actions);
-
-    this.dragElements.clear();
+    this.#setUpConfig?.end(actions);
+    this.#dragElements.clear();
   }
 }

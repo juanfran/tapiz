@@ -11,7 +11,6 @@ import {
   signal,
 } from '@angular/core';
 import { Point, Resizable, Rotatable, TuNode } from '@team-up/board-commons';
-import { Draggable } from '@team-up/cdk/models/draggable.model';
 import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
 import { ResizeHandlerComponent } from '@team-up/ui/resize';
 import { RotateHandlerComponent } from '@team-up/ui/rotate';
@@ -48,7 +47,7 @@ import { NodesStore } from '../services/nodes.store';
   standalone: true,
   imports: [ResizeHandlerComponent, RotateHandlerComponent],
 })
-export class NodeSpaceComponent implements AfterViewInit, Draggable {
+export class NodeSpaceComponent implements AfterViewInit {
   #destroyRef = inject(DestroyRef);
   #multiDragService = inject(MultiDragService);
 
@@ -116,6 +115,13 @@ export class NodeSpaceComponent implements AfterViewInit, Draggable {
   }
 
   ngAfterViewInit(): void {
-    this.#multiDragService.add(this, this.#destroyRef);
+    this.#multiDragService.register({
+      id: this.id,
+      nodeType: this.nodeType,
+      handler: this.drag.nativeElement,
+      preventDrag: () => this.preventDrag,
+      position: () => this.position,
+      destroyRef: this.#destroyRef,
+    });
   }
 }

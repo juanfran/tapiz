@@ -286,6 +286,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       dragEnabled: this.store.select(selectDragEnabled),
       zoom: this.store.select(selectZoom),
       relativePosition: this.store.select(selectPosition),
+      draggableId: this.store.select(pageFeature.selectFocusId),
       move: (draggable, position) => {
         this.store.dispatch(
           BoardActions.batchNodeActions({
@@ -308,13 +309,12 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       end: (dragElements) => {
         const actions = dragElements.map((action) => {
           return {
-            nodeType: action.nodeType,
-            id: action.id,
+            nodeType: action.draggable.nodeType,
+            id: action.draggable.id,
             initialPosition: action.initialPosition,
             finalPosition: action.finalPosition,
           };
         });
-
         if (actions.length) {
           this.store.dispatch(PageActions.endDragNode({ nodes: actions }));
         }

@@ -19,6 +19,7 @@
   </div>
   @if (vm.edit) {
     <textarea
+      class="no-drag"
       #textarea
       maxlength="140"
       (input)="setText($event)"

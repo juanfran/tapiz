@@ -451,10 +451,6 @@ export class NoteComponent implements AfterViewInit, OnInit, Draggable {
     return this.state.get('note').content.position;
   }
 
-  public get preventDrag() {
-    return this.state.get('edit') || !this.state.get('focus');
-  }
-
   public setText(event: Event) {
     if (event.target) {
       const value = (event.target as HTMLTextAreaElement).value;

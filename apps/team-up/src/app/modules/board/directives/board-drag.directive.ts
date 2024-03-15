@@ -12,8 +12,23 @@ export class BoardDragDirective implements AfterViewInit {
   private destroyRef = inject(DestroyRef);
 
   public ngAfterViewInit() {
-    if (this.host) {
-      this.multiDragService.add(this.host, this.destroyRef);
+    const host = this.host;
+
+    if (host) {
+      this.multiDragService.register({
+        id: host.id,
+        nodeType: host.nodeType,
+        handler: host.nativeElement,
+        preventDrag: () => {
+          if (host.preventDrag) {
+            return host.preventDrag();
+          }
+
+          return false;
+        },
+        position: () => host.position,
+        destroyRef: this.destroyRef,
+      });
     }
   }
 

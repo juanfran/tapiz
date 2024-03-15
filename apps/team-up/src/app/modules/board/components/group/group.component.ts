@@ -219,8 +219,8 @@ export class GroupComponent
     return this.state.get('group').content.position;
   }
 
-  public get preventDrag() {
-    return !this.state.get('draggable') || !this.state.get('focus');
+  public preventDrag() {
+    return !this.state.get('draggable');
   }
 
   public enter(event: Event) {
