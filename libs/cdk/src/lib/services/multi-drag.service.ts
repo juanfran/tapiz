@@ -128,6 +128,10 @@ export class MultiDragService {
         filter((move) => {
           return move.type === 'end';
         }),
+        withLatestFrom(setUpConfig.draggableId),
+        filter(([, draggableId]) => {
+          return draggableId.includes(draggable.id);
+        }),
       )
       .subscribe(() => {
         startPositionDiff = null;

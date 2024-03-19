@@ -16,14 +16,16 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { VotesModalComponent } from '../votes-modal/votes-modal.component';
 import { Group, Note, TuNode } from '@team-up/board-commons';
 import { selectVoting } from '../../selectors/page.selectors';
-import { CommentsStore } from '../comments/comments.store';
+import { CommentsStore } from '@team-up/nodes/comments/comments.store';
 
 @Component({
   selector: 'team-up-board-context-menu',
   template: '',
-  styles: `:host {
-    display: none;
-  }`,
+  styles: `
+    :host {
+      display: none;
+    }
+  `,
   standalone: true,
   imports: [MatDialogModule],
 })

@@ -47,7 +47,6 @@ import { NotesService } from '../services/notes.service';
 import { v4 } from 'uuid';
 import { GroupComponent } from '../components/group/group.component';
 import { BoardDragDirective } from '../directives/board-drag.directive';
-import { NoteComponent } from '../components/note/note.component';
 import { CursorsComponent } from '../components/cursors/cursors.component';
 import { ZoneComponent } from '../components/zone/zone.component';
 import { OverlayComponent } from '../components/overlay/overlay.component';
@@ -65,7 +64,6 @@ import {
   StateActions,
   TuNode,
   isGroup,
-  isNote,
 } from '@team-up/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -88,7 +86,7 @@ import { SubscriptionService } from '../../../services/subscription.service';
 import { DrawingStore } from '@team-up/board-components/drawing/drawing.store';
 import { DrawingOptionsComponent } from '@team-up/board-components/drawing-options';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { CommentsComponent } from '../components/comments/comments.component';
+import { CommentsComponent } from '@team-up/nodes/comments/comments.component';
 
 @UntilDestroy()
 @Component({
@@ -106,7 +104,6 @@ import { CommentsComponent } from '../components/comments/comments.component';
     OverlayComponent,
     ZoneComponent,
     CursorsComponent,
-    NoteComponent,
     BoardDragDirective,
     GroupComponent,
     DrawingOptionsComponent,
@@ -130,9 +127,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
 
   public readonly historyService = inject(HistoryService);
 
-  public readonly notes$ = this.nodes$.pipe(
-    map((nodes) => nodes.filter(isNote)),
-  );
   public readonly groups$ = this.nodes$.pipe(
     map((nodes) => nodes.filter(isGroup)),
   );

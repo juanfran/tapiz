@@ -10,7 +10,7 @@ import {
 import { wsOpen } from '../../../modules/ws/ws.actions';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
-import { NativeEmoji } from 'emoji-picker-element/shared';
+import type { NativeEmoji } from 'emoji-picker-element/shared';
 
 export interface PageState {
   name: string;
