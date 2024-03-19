@@ -1,54 +1,53 @@
 import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { filter, tap } from 'rxjs/operators';
+import { filter, map, tap } from 'rxjs/operators';
 import { PageActions } from '../actions/page.actions';
 import { StateActions } from '@team-up/board-commons';
 import { BoardFacade } from '../../../services/board-facade.service';
-import { WsService } from '../../ws/services/ws.service';
 import { isInputField } from '@team-up/cdk/utils/is-input-field';
+import { BoardActions } from '../actions/board.actions';
 
 @Injectable()
 export class HistoryEffects {
-  private boardFacade = inject(BoardFacade);
-  private wsService = inject(WsService);
+  #boardFacade = inject(BoardFacade);
+  #actions$ = inject(Actions);
 
-  public undo$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(PageActions.undo),
-        filter(() => {
-          return !isInputField();
-        }),
-        tap(() => {
-          this.boardFacade.undo();
-        }),
-      );
-    },
-    {
-      dispatch: false,
-    },
-  );
+  undo$ = createEffect(() => {
+    return this.#actions$.pipe(
+      ofType(PageActions.undo),
+      filter(() => {
+        return !isInputField();
+      }),
+      map(() => {
+        const actions = this.#boardFacade.undo();
 
-  public redo$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(PageActions.redo),
-        filter(() => {
-          return !isInputField();
-        }),
-        tap(() => {
-          this.boardFacade.redo();
-        }),
-      );
-    },
-    {
-      dispatch: false,
-    },
-  );
+        return BoardActions.batchNodeActions({
+          history: false,
+          actions,
+        });
+      }),
+    );
+  });
 
-  public endDrag$ = createEffect(
+  redo$ = createEffect(() => {
+    return this.#actions$.pipe(
+      ofType(PageActions.redo),
+      filter(() => {
+        return !isInputField();
+      }),
+      map(() => {
+        const actions = this.#boardFacade.redo();
+        return BoardActions.batchNodeActions({
+          history: false,
+          actions,
+        });
+      }),
+    );
+  });
+
+  endDrag$ = createEffect(
     () => {
-      return this.actions$.pipe(
+      return this.#actions$.pipe(
         ofType(PageActions.endDragNode),
         tap((actions) => {
           const nodesActions = actions.nodes.map((node) => {
@@ -64,7 +63,7 @@ export class HistoryEffects {
             };
           }) as StateActions[];
 
-          this.boardFacade.patchHistory((history) => {
+          this.#boardFacade.patchHistory((history) => {
             history.past.unshift(nodesActions);
             history.future = [];
 
@@ -78,12 +77,12 @@ export class HistoryEffects {
     },
   );
 
-  public snapShot$ = createEffect(
+  snapShot$ = createEffect(
     () => {
-      return this.actions$.pipe(
+      return this.#actions$.pipe(
         ofType(PageActions.nodeSnapshot),
         tap((action) => {
-          this.boardFacade.patchHistory((history) => {
+          this.#boardFacade.patchHistory((history) => {
             history.past.unshift([
               {
                 data: {
@@ -105,6 +104,4 @@ export class HistoryEffects {
       dispatch: false,
     },
   );
-
-  constructor(private actions$: Actions) {}
 }

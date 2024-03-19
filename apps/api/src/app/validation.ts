@@ -6,13 +6,12 @@ import { POLL_VALIDATORS } from '@team-up/board-commons/validators/poll.validato
 import { COMMENTS_VALIDATORS } from '@team-up/board-commons/validators/comments.validator.js';
 import { SETTINGS_VALIDATOR } from '@team-up/board-commons/validators/settings.validators.js';
 
-import { noteValidator } from '@team-up/board-commons/validators/note/node.validator.js';
+import { NOTE_VALIDATORS } from '@team-up/board-commons/validators/note.validator.js';
 
 import { type ZodAny } from 'zod';
 
 const validations = {
   custom: {
-    note: noteValidator,
     user: Validators.userValidator,
   },
   new: {
@@ -41,6 +40,7 @@ const validations = {
     ...ESTIMATION_VALIDATORS,
     ...POLL_VALIDATORS,
     ...COMMENTS_VALIDATORS,
+    ...NOTE_VALIDATORS,
   ],
 };
 
