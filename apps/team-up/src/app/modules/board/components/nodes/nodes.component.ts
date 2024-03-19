@@ -11,7 +11,12 @@ import {
   selectZoom,
   selectPrivateId,
   selectCanvasMode,
+  selectPopupOpen,
+  selectEmoji,
+  selectUserHighlight,
+  selectShowUserVotes,
 } from '../../selectors/page.selectors';
+import { PageActions } from '../../actions/page.actions';
 
 @Component({
   selector: 'team-up-nodes',
@@ -32,7 +37,7 @@ export class NodesComponent {
   public nodes$ = this.boardFacade.getNodes().pipe(
     map((it) => {
       return it.filter(
-        (it) => !['note', 'group', 'user', 'settings'].includes(it.type),
+        (it) => !['group', 'user', 'settings'].includes(it.type),
       );
     }),
   );
@@ -72,6 +77,50 @@ export class NodesComponent {
       .pipe(takeUntilDestroyed())
       .subscribe((canvasMode) => {
         this.nodesStore.canvasMode$.next(canvasMode);
+      });
+
+    this.boardFacade
+      .getNodes()
+      .pipe(takeUntilDestroyed())
+      .subscribe((nodes) => {
+        this.nodesStore.nodes$.next(nodes);
+      });
+
+    this.nodesStore.focusNode.subscribe((event) => {
+      this.store.dispatch(
+        PageActions.setFocusId({
+          focusId: event.id,
+          ctrlKey: event.ctrlKey,
+        }),
+      );
+    });
+
+    this.store
+      .select(selectPopupOpen)
+      .pipe(takeUntilDestroyed())
+      .subscribe((popupOpen) => {
+        this.nodesStore.activeToolbarOption$.next(popupOpen);
+      });
+
+    this.store
+      .select(selectEmoji)
+      .pipe(takeUntilDestroyed())
+      .subscribe((emoji) => {
+        this.nodesStore.emoji$.next(emoji);
+      });
+
+    this.store
+      .select(selectUserHighlight)
+      .pipe(takeUntilDestroyed())
+      .subscribe((user) => {
+        this.nodesStore.userHighlight$.next(user);
+      });
+
+    this.store
+      .select(selectShowUserVotes)
+      .pipe(takeUntilDestroyed())
+      .subscribe((user) => {
+        this.nodesStore.userVotes$.next(user);
       });
   }
 }

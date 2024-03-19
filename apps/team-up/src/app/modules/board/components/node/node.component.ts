@@ -28,6 +28,7 @@ import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { filterNil } from 'ngxtension/filter-nil';
 import { compose, rotateDEG, translate, toCSS } from 'transformation-matrix';
 import { isInputField } from '@team-up/cdk/utils/is-input-field';
+import { NodeStore } from '@team-up/nodes/node/node.store';
 
 interface State {
   position: {
@@ -55,9 +56,13 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [],
-  providers: [RxState, HotkeysService],
+  providers: [RxState, HotkeysService, NodeStore],
+  host: {
+    '[class.highlight]': 'hightlight()',
+  },
 })
 export class NodeComponent implements OnInit {
+  readonly #nodeStore = inject(NodeStore);
   private state = inject(RxState) as RxState<State>;
   private el = inject(ElementRef<HTMLElement>);
   private store = inject(Store);
@@ -85,6 +90,8 @@ export class NodeComponent implements OnInit {
       }),
     );
   }
+
+  public hightlight = this.#nodeStore.highlight;
 
   public get nativeElement() {
     return this.el.nativeElement;
@@ -206,8 +213,14 @@ export class NodeComponent implements OnInit {
 
         this.cmp.setInput('node', this.state.signal('node'));
         this.cmp.setInput('focus', this.state.signal('focus'));
-
         this.cmp.setInput('pasted', pasted);
+
+        this.#nodeStore.updateState({
+          pasted: false,
+          node: this.state.get('node'),
+          focus: this.state.get('focus'),
+        });
+
         const zIndex = (this.cmp.instance as { zIndex?: number })?.zIndex ?? 1;
 
         this.nativeElement.style.setProperty('--z-index-node', zIndex);

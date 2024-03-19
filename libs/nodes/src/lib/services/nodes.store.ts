@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { TuNode, User } from '@team-up/board-commons';
 import { rxState } from '@rx-angular/state';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { rxActions } from '@rx-angular/state/actions';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '@team-up/board-commons/actions/board.actions';
+import type { NativeEmoji } from 'emoji-picker-element/shared';
 
 interface NodesState {
   users: User[];
@@ -12,6 +13,11 @@ interface NodesState {
   zoom: number;
   privateId: string;
   canvasMode: string;
+  nodes: TuNode[];
+  activeToolbarOption: string;
+  emoji: NativeEmoji | null;
+  userHighlight: string | null;
+  userVotes: string | null;
 }
 
 const initialState: NodesState = {
@@ -20,6 +26,11 @@ const initialState: NodesState = {
   zoom: 1,
   privateId: '',
   canvasMode: 'editMode',
+  nodes: [],
+  activeToolbarOption: '',
+  emoji: null,
+  userHighlight: null,
+  userVotes: null,
 };
 
 @Injectable({
@@ -34,6 +45,17 @@ export class NodesStore {
   public zoom$ = new BehaviorSubject(1);
   public privateId$ = new BehaviorSubject('');
   public canvasMode$ = new BehaviorSubject('editMode');
+  public nodes$ = new BehaviorSubject<TuNode[]>([]);
+  public activeToolbarOption$ = new BehaviorSubject<string>('');
+  public emoji$ = new BehaviorSubject<NativeEmoji | null>(null);
+  public userHighlight$ = new BehaviorSubject<NodesState['userHighlight']>(
+    null,
+  );
+  public userVotes$ = new BehaviorSubject<NodesState['userVotes']>(null);
+
+  #focusNode$ = new Subject<{ id: string; ctrlKey: boolean }>();
+
+  focusNode = this.#focusNode$.asObservable();
 
   actions = rxActions<{
     deleteNodes: { nodes: { id: string; type: string }[]; history?: boolean };
@@ -48,6 +70,11 @@ export class NodesStore {
     connect('zoom', this.zoom$.asObservable());
     connect('privateId', this.privateId$.asObservable());
     connect('canvasMode', this.canvasMode$.asObservable());
+    connect('nodes', this.nodes$.asObservable());
+    connect('activeToolbarOption', this.activeToolbarOption$.asObservable());
+    connect('emoji', this.emoji$.asObservable());
+    connect('userHighlight', this.userHighlight$.asObservable());
+    connect('userVotes', this.userVotes$.asObservable());
 
     this.actions.copyNodes$.subscribe(({ nodes }) => {
       navigator.clipboard.writeText(JSON.stringify(nodes));
@@ -76,4 +103,13 @@ export class NodesStore {
   zoom = this.#state.signal('zoom');
   privateId = this.#state.signal('privateId');
   canvasMode = this.#state.signal('canvasMode');
+  nodes = this.#state.signal('nodes');
+  activeToolbarOption = this.#state.signal('activeToolbarOption');
+  emoji = this.#state.signal('emoji');
+  userHighlight = this.#state.signal('userHighlight');
+  userVotes = this.#state.signal('userVotes');
+
+  setFocusNode(event: { id: string; ctrlKey: boolean }) {
+    this.#focusNode$.next(event);
+  }
 }

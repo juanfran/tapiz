@@ -23,11 +23,6 @@
       <team-up-zone></team-up-zone>
       <team-up-cursors></team-up-cursors>
       @defer {
-        @for (note of notes$ | async; track trackById($index, note)) {
-          <team-up-note
-            teamUpBoardDrag
-            [note]="note"></team-up-note>
-        }
         @for (group of groups$ | async; track trackById($index, group)) {
           <team-up-group
             teamUpBoardDrag

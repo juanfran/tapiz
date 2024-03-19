@@ -6,6 +6,7 @@ import { VECTOR_CONFIG } from '@team-up/nodes/vector';
 import { PANEL_CONFIG } from '@team-up/nodes/panel';
 import { POLL_BOARD_CONFIG } from '@team-up/nodes/poll-board';
 import { PERSONAL_TOKEN_CONFIG } from './modules/board/components/token/register';
+import { NOTE_CONFIG } from '@team-up/nodes/note';
 
 registerNode('token', PERSONAL_TOKEN_CONFIG);
 registerNode('estimation', ESTIMATION_BOARD_CONFIG);
@@ -14,3 +15,4 @@ registerNode('image', IMAGE_CONFIG);
 registerNode('vector', VECTOR_CONFIG);
 registerNode('panel', PANEL_CONFIG);
 registerNode('poll', POLL_BOARD_CONFIG);
+registerNode('note', NOTE_CONFIG);

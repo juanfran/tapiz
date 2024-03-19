@@ -71,10 +71,6 @@ textarea {
       sans-serif;
   }
 
-  &.highlight {
-    z-index: var(--board-hightlight-node-layer);
-  }
-
   &.focus {
     border-color: var(--custom-main);
 
