@@ -134,10 +134,10 @@ export class BoardFacade {
   });
 
   public undo() {
-    return this.board.undo();
+    return this.board.undo(false);
   }
 
   public redo() {
-    return this.board.redo();
+    return this.board.redo(false);
   }
 }

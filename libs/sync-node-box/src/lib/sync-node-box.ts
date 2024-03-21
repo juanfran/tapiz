@@ -101,7 +101,7 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
     patchHistory: (fn: (history: SyncNodeBoxHistory) => SyncNodeBoxHistory) => {
       nodesHistory = fn(nodesHistory);
     },
-    undo: () => {
+    undo: (autoApply = true) => {
       if (options?.log) {
         log(nodesHistory, 'undo');
       }
@@ -113,7 +113,7 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
         nodesHistory,
       );
 
-      if (actionsApplied.length) {
+      if (autoApply && actionsApplied.length) {
         setState(newState);
 
         nodesHistory = newHistory;
@@ -123,7 +123,7 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
 
       return actionsApplied;
     },
-    redo: () => {
+    redo: (authApply = true) => {
       if (options?.log) {
         log(nodesHistory, 'redo');
       }
@@ -135,7 +135,7 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
         nodesHistory,
       );
 
-      if (actionsApplied.length) {
+      if (authApply && actionsApplied.length) {
         setState(newState);
 
         nodesHistory = newHistory;
