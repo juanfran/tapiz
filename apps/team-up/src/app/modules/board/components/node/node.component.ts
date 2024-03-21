@@ -17,17 +17,14 @@ import {
 } from '@angular/core';
 import { RxState } from '@rx-angular/state';
 import { Point, TuNode } from '@team-up/board-commons';
-import { distinctUntilChanged, filter, map, take } from 'rxjs';
+import { distinctUntilChanged, map, take } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { selectFocusId } from '../../selectors/page.selectors';
-import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import { pageFeature } from '../../reducers/page.reducer';
 import { DynamicComponent } from './dynamic-component';
-import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { filterNil } from 'ngxtension/filter-nil';
 import { compose, rotateDEG, translate, toCSS } from 'transformation-matrix';
-import { isInputField } from '@team-up/cdk/utils/is-input-field';
 import { NodeStore } from '@team-up/nodes/node/node.store';
 
 interface State {
@@ -56,18 +53,17 @@ interface State {
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [],
-  providers: [RxState, HotkeysService, NodeStore],
+  providers: [RxState, NodeStore],
   host: {
     '[class.highlight]': 'hightlight()',
   },
 })
 export class NodeComponent implements OnInit {
   readonly #nodeStore = inject(NodeStore);
-  private state = inject(RxState) as RxState<State>;
+  state = inject(RxState) as RxState<State>;
   private el = inject(ElementRef<HTMLElement>);
   private store = inject(Store);
   private cmp?: ComponentRef<DynamicComponent>;
-  private hotkeysService = inject(HotkeysService);
 
   @HostBinding('class') get layer() {
     return `layer-${this.state.get('node').content.layer}`;
@@ -110,17 +106,6 @@ export class NodeComponent implements OnInit {
         .select(selectFocusId)
         .pipe(map((it) => it.includes(this.state.get('node').id))),
     );
-
-    this.hotkeysService
-      .listen({ key: 'Delete' })
-      .pipe(
-        filter(() => {
-          return !isInputField();
-        }),
-      )
-      .subscribe(() => {
-        this.onDeletePress();
-      });
   }
 
   private positionState() {
@@ -176,31 +161,14 @@ export class NodeComponent implements OnInit {
     );
   }
 
-  private onDeletePress() {
+  preventDelete() {
     const instance = this.cmp?.instance;
 
-    if (instance) {
-      if (instance.preventDelete?.()) {
-        return;
-      }
+    if (instance?.preventDelete?.()) {
+      return true;
     }
 
-    if (this.state.get('focus')) {
-      this.store.dispatch(
-        BoardActions.batchNodeActions({
-          history: true,
-          actions: [
-            {
-              data: {
-                type: this.state.get('node').type,
-                id: this.state.get('node').id,
-              },
-              op: 'remove',
-            },
-          ],
-        }),
-      );
-    }
+    return false;
   }
 
   private loadComponent(component: Type<DynamicComponent>) {

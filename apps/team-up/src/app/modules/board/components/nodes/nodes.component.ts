@@ -1,4 +1,9 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  viewChildren,
+} from '@angular/core';
 import { RxFor } from '@rx-angular/template/for';
 import { NodeComponent } from '../node/node.component';
 import { map } from 'rxjs/operators';
@@ -17,6 +22,11 @@ import {
   selectShowUserVotes,
 } from '../../selectors/page.selectors';
 import { PageActions } from '../../actions/page.actions';
+import { filter } from 'rxjs';
+import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
+import { isInputField } from '@team-up/cdk/utils/is-input-field';
+import { BoardActions } from '../../actions/board.actions';
+import { NodeRemove } from '@team-up/board-commons';
 
 @Component({
   selector: 'team-up-nodes',
@@ -27,12 +37,14 @@ import { PageActions } from '../../actions/page.actions';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [RxFor, NodeComponent],
-  providers: [],
+  providers: [HotkeysService],
 })
 export class NodesComponent {
   private boardFacade = inject(BoardFacade);
   private nodesStore = inject(NodesStore);
   private store = inject(Store);
+  private nodes = viewChildren<NodeComponent>(NodeComponent);
+  private hotkeysService = inject(HotkeysService);
 
   public nodes$ = this.boardFacade.getNodes().pipe(
     map((it) => {
@@ -41,6 +53,17 @@ export class NodesComponent {
   );
 
   constructor() {
+    this.hotkeysService
+      .listen({ key: 'Delete' })
+      .pipe(
+        filter(() => {
+          return !isInputField();
+        }),
+      )
+      .subscribe(() => {
+        this.onDeletePress();
+      });
+
     // todo: find a better way to connect page state with nodes state, work for standalone nodes
     this.boardFacade
       .getUsers()
@@ -120,5 +143,28 @@ export class NodesComponent {
       .subscribe((user) => {
         this.nodesStore.userVotes$.next(user);
       });
+  }
+
+  private onDeletePress() {
+    const nodes = this.nodes().filter((it) => {
+      return it.state.get('focus') && !it.preventDelete?.();
+    });
+
+    const actions = nodes.map((it) => {
+      return {
+        data: {
+          type: it.state.get('node').type,
+          id: it.state.get('node').id,
+        },
+        op: 'remove',
+      } as NodeRemove;
+    });
+
+    this.store.dispatch(
+      BoardActions.batchNodeActions({
+        history: true,
+        actions: actions,
+      }),
+    );
   }
 }

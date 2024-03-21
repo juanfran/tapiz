@@ -98,10 +98,6 @@ export class GroupComponent {
   editText = signal('');
 
   constructor() {
-    effect(() => {
-      console.log(this.node());
-    });
-
     afterNextRender(() => {
       if (this.focus() && !this.pasted()) {
         this.initEdit();
