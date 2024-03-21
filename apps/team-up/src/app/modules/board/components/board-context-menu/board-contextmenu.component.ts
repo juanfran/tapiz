@@ -39,6 +39,9 @@ export class BoardContextMenuComponent implements OnInit {
   private dialog = inject(MatDialog);
   private voting = this.store.selectSignal(selectVoting);
   private commentsStore = inject(CommentsStore);
+  private showUserVotes = this.store.selectSignal(
+    pageFeature.selectShowUserVotes,
+  );
 
   public readonly boardMode = this.store.selectSignal(
     pageFeature.selectCanvasMode,
@@ -59,6 +62,10 @@ export class BoardContextMenuComponent implements OnInit {
         return true;
       },
       items: () => {
+        if (this.showUserVotes()) {
+          return [];
+        }
+
         const currentNodes = this.boardFacade.selectFocusNodes();
 
         if (currentNodes?.length) {
