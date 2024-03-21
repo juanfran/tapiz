@@ -31,11 +31,14 @@
 }
 
 :host {
+  display: block;
   border: 2px dashed #5fb0b7;
   border-radius: 36px;
   cursor: grab;
   padding: 1rem;
   position: absolute;
+  inline-size: 100%;
+  block-size: 100%;
 
   &.focus {
     border-color: #a672f8;
@@ -47,10 +50,6 @@
 
   &.voting {
     cursor: crosshair;
-  }
-
-  &.highlight {
-    z-index: var(--board-hightlight-node-layer);
   }
 }
 

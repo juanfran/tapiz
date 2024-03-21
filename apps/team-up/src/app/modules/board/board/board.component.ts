@@ -45,7 +45,6 @@ import { BoardZoomService } from '../services/board-zoom.service';
 import { ActivatedRoute } from '@angular/router';
 import { NotesService } from '../services/notes.service';
 import { v4 } from 'uuid';
-import { GroupComponent } from '../components/group/group.component';
 import { BoardDragDirective } from '../directives/board-drag.directive';
 import { CursorsComponent } from '../components/cursors/cursors.component';
 import { ZoneComponent } from '../components/zone/zone.component';
@@ -58,13 +57,7 @@ import { SearchOptionsComponent } from '../components/search-options/search-opti
 import { Actions, ofType } from '@ngrx/effects';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { TitleComponent } from '../../../shared/title/title.component';
-import {
-  Drawing,
-  Point,
-  StateActions,
-  TuNode,
-  isGroup,
-} from '@team-up/board-commons';
+import { Drawing, Point, StateActions, TuNode } from '@team-up/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NodesComponent } from '../components/nodes/nodes.component';
@@ -105,7 +98,6 @@ import { CommentsComponent } from '@team-up/nodes/comments/comments.component';
     ZoneComponent,
     CursorsComponent,
     BoardDragDirective,
-    GroupComponent,
     DrawingOptionsComponent,
     SearchOptionsComponent,
     TitleComponent,
@@ -126,10 +118,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly nodes$ = this.boardFacade.getNodes();
 
   public readonly historyService = inject(HistoryService);
-
-  public readonly groups$ = this.nodes$.pipe(
-    map((nodes) => nodes.filter(isGroup)),
-  );
   public readonly canvasMode$ = this.store.select(selectCanvasMode);
   public readonly newNote$ = new Subject<MouseEvent>();
   public readonly drawing = this.drawingStore.drawing;
