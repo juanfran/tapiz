@@ -16,16 +16,13 @@ import {
   afterNextRender,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { RxState } from '@rx-angular/state';
 import { Drawing, Note, Panel, TuNode, isPanel } from '@team-up/board-commons';
 import { lighter } from '@team-up/cdk/utils/colors';
-import { AsyncPipe } from '@angular/common';
 import {
   DrawingDirective,
   DrawingStore,
 } from '@team-up/board-components/drawing';
 import { HistoryService } from '../services/history.service';
-import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { MatIconModule } from '@angular/material/icon';
 import { NodesStore } from '../services/nodes.store';
 import { CommentsStore } from '../comments/comments.store';
@@ -39,9 +36,8 @@ import { NodeStore } from '../node/node.store';
   templateUrl: './note.component.html',
   styleUrls: ['./note.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState, HotkeysService],
   standalone: true,
-  imports: [AsyncPipe, DrawingDirective, MatIconModule],
+  imports: [DrawingDirective, MatIconModule],
 })
 export class NoteComponent {
   #commentsStore = inject(CommentsStore);

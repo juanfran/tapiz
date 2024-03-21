@@ -4,9 +4,7 @@ import {
   Input,
   Signal,
 } from '@angular/core';
-import { RxState } from '@rx-angular/state';
 import { TuNode, Vector } from '@team-up/board-commons';
-import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { NodeSpaceComponent } from '../node-space';
 
 @Component({
@@ -24,7 +22,6 @@ import { NodeSpaceComponent } from '../node-space';
   `,
   styleUrls: ['./vector.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState, HotkeysService],
   standalone: true,
   imports: [NodeSpaceComponent],
 })
