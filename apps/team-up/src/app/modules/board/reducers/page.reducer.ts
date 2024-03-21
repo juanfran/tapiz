@@ -166,7 +166,11 @@ const reducer = createReducer(
             boardCursor: 'default',
           };
         }
-      } else if (action.op === 'remove') {
+      }
+    }
+
+    actions.forEach((action) => {
+      if (action.op === 'remove') {
         const id = action.data.id;
 
         if (state.focusId.includes(id)) {
@@ -176,7 +180,8 @@ const reducer = createReducer(
           };
         }
       }
-    }
+    });
+
     return {
       ...state,
     };
