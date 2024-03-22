@@ -6,6 +6,7 @@ type NodeState = {
   focus: boolean;
   pasted: boolean;
   highlight: boolean;
+  layer: number;
 };
 
 const initialState: NodeState = {
@@ -13,6 +14,7 @@ const initialState: NodeState = {
   focus: false,
   pasted: false,
   highlight: false,
+  layer: 0,
 };
 
 export const NodeStore = signalStore(

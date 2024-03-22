@@ -38,6 +38,10 @@ import { NodeStore } from '../node/node.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [DrawingDirective, MatIconModule],
+  host: {
+    '[class.drawing]': 'drawing()',
+    '[class.active-layer]': 'activeLayer()',
+  },
 })
 export class NoteComponent {
   #commentsStore = inject(CommentsStore);
@@ -63,7 +67,7 @@ export class NoteComponent {
     return this.focus();
   }
 
-  drawing = hostBinding('class.drawing', this.#drawingStore.drawing);
+  drawing = this.#drawingStore.drawing;
   voting = hostBinding(
     'class.voting',
     computed(() => {
@@ -80,6 +84,10 @@ export class NoteComponent {
       return this.user()?.visible ?? true;
     }),
   );
+
+  activeLayer = computed(() => {
+    return this.#nodeStore.layer() === this.node().content.layer;
+  });
 
   votes = computed(() => {
     return this.node().content.votes.reduce((prev, it) => {

@@ -4,13 +4,13 @@ import {
   Input,
   ElementRef,
   OnInit,
-  HostBinding,
   HostListener,
   Signal,
   signal,
   inject,
   Injector,
   effect,
+  computed,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
@@ -28,6 +28,7 @@ import {
   DrawingDirective,
   DrawingStore,
 } from '@team-up/board-components/drawing';
+import { NodeStore } from '../node/node.store';
 
 @Component({
   selector: 'team-up-panel',
@@ -76,38 +77,41 @@ import {
   host: {
     '[class.focus]': 'focus()',
     '[class.toolbar]': 'edit()',
+    '[class.drawing]': 'drawing()',
+    '[class.active-layer]': 'activeLayer()',
   },
 })
 export class PanelComponent implements OnInit {
-  private injector = inject(Injector);
-  private historyService = inject(HistoryService);
-  private el = inject(ElementRef);
-  private store = inject(Store);
-  private drawingStore = inject(DrawingStore);
+  #injector = inject(Injector);
+  #historyService = inject(HistoryService);
+  #el = inject(ElementRef);
+  #store = inject(Store);
+  #drawingStore = inject(DrawingStore);
+  #nodeStore = inject(NodeStore);
 
   @Input({ required: true })
-  public node!: Signal<TuNode<Panel>>;
+  node!: Signal<TuNode<Panel>>;
 
   @Input()
-  public pasted!: Signal<boolean>;
+  pasted!: Signal<boolean>;
 
   @Input({ required: true })
-  public focus!: Signal<boolean>;
+  focus!: Signal<boolean>;
 
-  public edit = signal(false);
-  public editText = signal('');
-  public newContent = signal('');
+  edit = signal(false);
+  editText = signal('');
+  newContent = signal('');
 
-  @HostBinding('class') get layer() {
-    return `layer-${this.node().content.layer}`;
+  get drawing() {
+    return this.#drawingStore.drawing;
   }
 
-  @HostBinding('class.drawing') get drawing() {
-    return this.drawingStore.drawing();
-  }
+  activeLayer = computed(() => {
+    return this.#nodeStore.layer() === this.node().content.layer;
+  });
 
   @HostListener('dblclick', ['$event'])
-  public mousedown(event: MouseEvent) {
+  mousedown(event: MouseEvent) {
     if (!this.edit()) {
       event.preventDefault();
       event.stopPropagation();
@@ -118,18 +122,18 @@ export class PanelComponent implements OnInit {
 
   constructor() {
     effect(() => {
-      this.setCssVariables(this.node());
+      this.#setCssVariables(this.node());
     });
   }
 
-  public startEdit() {
-    this.historyService.initEdit(this.node());
+  startEdit() {
+    this.#historyService.initEdit(this.node());
     this.edit.set(true);
     this.newContent.set(this.node().content.text);
   }
 
-  public setDrawing(newLine: Drawing[]) {
-    this.drawingStore.actions.setDrawing({
+  setDrawing(newLine: Drawing[]) {
+    this.#drawingStore.actions.setDrawing({
       id: this.node().id,
       type: 'panel',
       drawing: [...this.node().content.drawing, ...newLine],
@@ -137,11 +141,11 @@ export class PanelComponent implements OnInit {
     });
   }
 
-  public newColor(e: Event) {
+  newColor(e: Event) {
     if (e.target) {
       const color = (e.target as HTMLInputElement).value;
 
-      this.store.dispatch(
+      this.#store.dispatch(
         BoardActions.batchNodeActions({
           history: true,
           actions: [
@@ -161,11 +165,11 @@ export class PanelComponent implements OnInit {
     }
   }
 
-  public newSize(e: Event) {
+  newSize(e: Event) {
     if (e.target) {
       const size = Number((e.target as HTMLInputElement).value);
 
-      this.store.dispatch(
+      this.#store.dispatch(
         BoardActions.batchNodeActions({
           history: true,
           actions: [
@@ -185,15 +189,15 @@ export class PanelComponent implements OnInit {
     }
   }
 
-  public ngOnInit() {
+  ngOnInit() {
     toObservable(this.node, {
-      injector: this.injector,
+      injector: this.#injector,
     }).subscribe((node) => {
       this.editText.set(node.content.text);
     });
 
     const focus$ = toObservable(this.focus, {
-      injector: this.injector,
+      injector: this.#injector,
     });
 
     focus$
@@ -203,7 +207,7 @@ export class PanelComponent implements OnInit {
       )
       .subscribe(() => {
         if (!this.focus() && this.edit()) {
-          this.store.dispatch(
+          this.#store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
               actions: [
@@ -230,18 +234,18 @@ export class PanelComponent implements OnInit {
     }
   }
 
-  public cancelEdit() {
+  cancelEdit() {
     if (this.edit()) {
-      this.historyService.finishEdit(this.node());
+      this.#historyService.finishEdit(this.node());
       this.edit.set(false);
     }
   }
 
-  public get nativeElement(): HTMLElement {
-    return this.el.nativeElement as HTMLElement;
+  get nativeElement(): HTMLElement {
+    return this.#el.nativeElement as HTMLElement;
   }
 
-  private setCssVariables(panel: TuNode<Panel>) {
+  #setCssVariables(panel: TuNode<Panel>) {
     if (panel.content.backgroundColor) {
       this.nativeElement.style.setProperty(
         '--backgroundColor',

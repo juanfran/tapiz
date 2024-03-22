@@ -159,6 +159,15 @@ export class NodeComponent implements OnInit {
         this.nativeElement.style.height = `${size.height}px`;
       },
     );
+
+    this.state.hold(
+      this.store.select(pageFeature.selectCanvasMode),
+      (layer) => {
+        this.#nodeStore.updateState({
+          layer: layer === 'editMode' ? 0 : 1,
+        });
+      },
+    );
   }
 
   preventDelete() {

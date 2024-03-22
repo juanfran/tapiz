@@ -80,10 +80,6 @@ export class TextComponent implements OnInit {
   public editText = signal('');
   public newContent = signal('');
 
-  @HostBinding('class') get layer() {
-    return `layer-${this.node().content.layer}`;
-  }
-
   @HostListener('dblclick', ['$event'])
   public mousedown(event: MouseEvent) {
     if (!this.edit()) {

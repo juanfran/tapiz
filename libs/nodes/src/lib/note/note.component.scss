@@ -83,7 +83,7 @@ textarea {
     }
   }
 
-  &.drawing canvas {
+  &.drawing.active-layer canvas {
     pointer-events: all;
   }
 

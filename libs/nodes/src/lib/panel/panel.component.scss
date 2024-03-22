@@ -17,7 +17,7 @@
     padding: var(--spacing-3);
   }
 
-  &.drawing canvas {
+  &.drawing.active-layer canvas {
     pointer-events: all;
   }
 }

@@ -190,20 +190,6 @@ export class BoardEffects {
     { dispatch: false },
   );
 
-  public resetPopupOnChangeMode$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(PageActions.changeCanvasMode),
-      map(() => PageActions.setPopupOpen({ popup: '' })),
-    );
-  });
-
-  public moveEnabledOnChangeMode$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(PageActions.changeCanvasMode),
-      map(() => PageActions.setMoveEnabled({ enabled: true })),
-    );
-  });
-
   public zoneToGroup$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.zoneToGroup),
