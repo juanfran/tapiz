@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   Input,
   OnInit,
-  HostBinding,
   HostListener,
   Signal,
   signal,
