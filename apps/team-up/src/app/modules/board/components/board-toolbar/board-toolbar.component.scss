@@ -205,6 +205,7 @@
   left: 46px;
 }
 
-team-up-token-selector {
-  margin-left: 1rem;
+team-up-token-selector,
+team-up-template-selector {
+  margin-left: var(--spacing-2);
 }

@@ -29,7 +29,8 @@ export class BoardZoomService {
 
   constructor(private store: Store) {
     const maxZoom = 2.5;
-    const minZoom = 0.2;
+    const minZoom = 0.1;
+    const stepZoom = 0.075;
 
     const wheel$ = fromEvent<WheelEvent>(window, 'wheel').pipe(
       share(),
@@ -69,13 +70,13 @@ export class BoardZoomService {
         if (zoomEvent.zoom > 0) {
           return {
             point: zoomEvent.point,
-            zoom: zoom - 0.1,
+            zoom: zoom - stepZoom,
           };
         }
 
         return {
           point: zoomEvent.point,
-          zoom: zoom + 0.1,
+          zoom: zoom + stepZoom,
         };
       }),
       map((zoomEvent) => {
