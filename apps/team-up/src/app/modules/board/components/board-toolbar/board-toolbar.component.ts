@@ -41,6 +41,7 @@ import { TokenSelectorComponent } from '../token-selector/token-selector.compone
 import { Token } from '@team-up/board-commons/models/token.model';
 import { PollBoard, Text } from '@team-up/board-commons';
 import { DrawingStore } from '@team-up/board-components/drawing/drawing.store';
+import { TemplateSelectorComponent } from '../template-selector/template-selector.component';
 
 interface State {
   popupOpen: string;
@@ -63,6 +64,7 @@ interface State {
     AsyncPipe,
     MatIconModule,
     TokenSelectorComponent,
+    TemplateSelectorComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
@@ -445,6 +447,19 @@ export class BoardToolbarComponent {
     }
 
     this.imageForm.reset();
+    this.popupOpen('');
+  }
+
+  public templateSelector() {
+    if (this.state.get('popupOpen') === 'templates') {
+      this.popupOpen('');
+      return;
+    }
+
+    this.popupOpen('templates');
+  }
+
+  public seletedTemplate() {
     this.popupOpen('');
   }
 }

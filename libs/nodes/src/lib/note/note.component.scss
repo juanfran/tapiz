@@ -48,10 +48,7 @@ textarea {
   display: block;
   height: 300px;
   padding: var(--spacing-2);
-  position: absolute;
   width: 300px;
-  z-index: var(--board-important-item-layer);
-  will-change: transform;
 
   canvas {
     pointer-events: none;

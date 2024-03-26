@@ -1,0 +1,24 @@
+:host {
+  display: block;
+  background: var(--primary-color-background);
+  padding: var(--spacing-2);
+  border-radius: 8px;
+}
+
+.templates {
+  display: grid;
+  grid-template-columns: repeat(2, 300px);
+  gap: var(--spacing-2);
+}
+
+.template {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  align-items: center;
+
+  p {
+    margin: 0;
+    margin-block-start: var(--spacing-2);
+  }
+}

@@ -178,6 +178,17 @@
 
     <div
       class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'templates'">
+      <button
+        class="toolbar-button"
+        (click)="templateSelector()">
+        <mat-icon class="material-icons-outlined">view_quilt</mat-icon>
+      </button>
+      <div class="toolbar-tooltip">Templates</div>
+    </div>
+
+    <div
+      class="toolbar-button-container"
       [class.active]="vm.popupOpen === 'search'">
       <button
         class="toolbar-button"
@@ -188,17 +199,25 @@
     </div>
   </div>
 
-  @if (vm.popupOpen === 'token') {
-    <div class="tokens">
-      <team-up-token-selector (selectToken)="tokenSelected($event)" />
-    </div>
-  }
+  @defer (prefetch on idle) {
+    @if (vm.popupOpen === 'token') {
+      <div class="tokens">
+        <team-up-token-selector (selectToken)="tokenSelected($event)" />
+      </div>
+    }
 
-  @if (vm.popupOpen === 'emoji') {
-    <div class="emojis">
-      <emoji-picker
-        (emoji-click)="emojiSelected($event)"
-        class="light"></emoji-picker>
-    </div>
+    @if (vm.popupOpen === 'emoji') {
+      <div class="emojis">
+        <emoji-picker
+          (emoji-click)="emojiSelected($event)"
+          class="light" />
+      </div>
+    }
+
+    @if (vm.popupOpen === 'templates') {
+      <div class="tokens">
+        <team-up-template-selector (selected)="seletedTemplate()" />
+      </div>
+    }
   }
 </ng-container>
