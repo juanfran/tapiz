@@ -14,7 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
     class="menu"
     [style.transform]="position()"
     (clickOutside)="contextMenuStore.actions.close()"
-    [class.open]="contextMenuStore.open()">
+    [class.open]="contextMenuStore.open() && contextMenuStore.items().length">
     @for (item of contextMenuStore.items(); track $index) {
       <button
         class="item"

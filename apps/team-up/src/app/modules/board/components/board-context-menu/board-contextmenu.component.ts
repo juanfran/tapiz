@@ -39,9 +39,7 @@ export class BoardContextMenuComponent implements OnInit {
   private dialog = inject(MatDialog);
   private voting = this.store.selectSignal(selectVoting);
   private commentsStore = inject(CommentsStore);
-  private showUserVotes = this.store.selectSignal(
-    pageFeature.selectShowUserVotes,
-  );
+  private showUserVotes = this.store.selectSignal(pageFeature.selectVoting);
 
   public readonly boardMode = this.store.selectSignal(
     pageFeature.selectCanvasMode,
