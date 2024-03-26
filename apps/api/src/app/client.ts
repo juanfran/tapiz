@@ -15,6 +15,7 @@ import { z } from 'zod';
 
 export class Client {
   public boardId?: string;
+  public teamId?: string;
   public isAdmin!: boolean;
   public sendTimeout?: ReturnType<typeof setTimeout>;
   public pendingMsgs: unknown[] = [];
@@ -89,6 +90,22 @@ export class Client {
     this.ws.close(1008, 'Unauthorized');
   }
 
+  public async refreshAccess() {
+    if (!this.boardId) {
+      this.noAccessClose();
+      return;
+    }
+
+    const haveAccess = await db.board.haveAccess(this.boardId, this.id);
+
+    if (!haveAccess) {
+      this.noAccessClose();
+      return;
+    }
+
+    this.refreshIsAdmin();
+  }
+
   public close() {
     if (!this.boardId) {
       return;
@@ -157,6 +174,9 @@ export class Client {
       this.noAccessClose();
       return;
     }
+
+    this.teamId =
+      (await db.board.getBoardBasic(message.boardId))?.teamId ?? undefined;
 
     this.boardId = message.boardId;
 

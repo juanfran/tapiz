@@ -2,7 +2,7 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { protectedProcedure, router, teamAdminProcedure } from '../trpc.js';
 import db from '../db/index.js';
-import { revokeBoardAccess } from '../global.js';
+import { checkTeamBoardsAccess, revokeBoardAccess } from '../global.js';
 import { triggerTeam } from '../subscriptor.js';
 
 export const teamRouter = router({
@@ -120,6 +120,7 @@ export const teamRouter = router({
         req.input.role,
       );
 
+      checkTeamBoardsAccess(req.input.teamId);
       triggerTeam(req.input.teamId, req.ctx.correlationId);
 
       return {
@@ -145,6 +146,8 @@ export const teamRouter = router({
 
       await db.team.deleteMember(req.input.teamId, req.input.memberId);
 
+      checkTeamBoardsAccess(req.input.teamId);
+
       return {
         success: true,
       };
@@ -157,6 +160,8 @@ export const teamRouter = router({
     )
     .mutation(async (req) => {
       await db.team.deleteMember(req.input.teamId, req.ctx.user.sub);
+
+      checkTeamBoardsAccess(req.input.teamId);
 
       return {
         success: true,

@@ -20,6 +20,21 @@ export async function getBoard(boardId: string) {
   return results.at(0);
 }
 
+export async function getBoardBasic(boardId: string) {
+  const results = await db
+    .select({
+      id: schema.boards.id,
+      name: schema.boards.name,
+      createdAt: schema.boards.createdAt,
+      teamId: schema.boards.teamId,
+      public: schema.boards.public,
+    })
+    .from(schema.boards)
+    .where(eq(schema.boards.id, boardId));
+
+  return results.at(0);
+}
+
 export async function updateLastAccessedAt(boardId: string, userId: string) {
   return db
     .update(schema.acountsToBoards)
@@ -33,7 +48,7 @@ export async function updateLastAccessedAt(boardId: string, userId: string) {
 }
 
 export async function haveAccess(boardId: string, userId: string) {
-  const board = await getBoard(boardId);
+  const board = await getBoardBasic(boardId);
 
   if (!board) {
     return false;
@@ -72,7 +87,9 @@ export async function getBoardAdmins(boardId: string) {
   const ids = new Set<string>();
 
   const boards = await db
-    .select()
+    .select({
+      accountId: schema.acountsToBoards.accountId,
+    })
     .from(schema.acountsToBoards)
     .where(
       and(
