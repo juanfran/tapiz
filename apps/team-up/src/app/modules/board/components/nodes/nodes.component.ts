@@ -3,112 +3,66 @@ import {
   ChangeDetectionStrategy,
   inject,
   viewChildren,
+  ViewChildren,
 } from '@angular/core';
-import { RxFor } from '@rx-angular/template/for';
 import { NodeComponent } from '../node/node.component';
 import { map } from 'rxjs/operators';
 import { NodesStore } from '@team-up/nodes/services/nodes.store';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { Store } from '@ngrx/store';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  selectUserId,
-  selectZoom,
-  selectPrivateId,
-  selectCanvasMode,
-  selectPopupOpen,
-  selectEmoji,
-  selectUserHighlight,
-  selectShowUserVotes,
-} from '../../selectors/page.selectors';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { PageActions } from '../../actions/page.actions';
 import { filter } from 'rxjs';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { isInputField } from '@team-up/cdk/utils/is-input-field';
-import { BoardActions } from '../../actions/board.actions';
-import { NodeRemove } from '@team-up/board-commons';
+import { User } from '@team-up/board-commons';
+import { pageFeature } from '../../reducers/page.reducer';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'team-up-nodes',
   styleUrls: ['./nodes.component.scss'],
-  template: ` <team-up-node
-    *rxFor="let node of nodes$; trackBy: 'id'"
-    [node]="node" />`,
+  template: `
+    @for (node of nodes$ | async; track node.id) {
+      <team-up-node [node]="node" />
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [RxFor, NodeComponent],
+  imports: [NodeComponent, AsyncPipe],
   providers: [HotkeysService],
 })
 export class NodesComponent {
-  private boardFacade = inject(BoardFacade);
-  private nodesStore = inject(NodesStore);
-  private store = inject(Store);
-  private nodes = viewChildren<NodeComponent>(NodeComponent);
-  private hotkeysService = inject(HotkeysService);
+  #boardFacade = inject(BoardFacade);
+  #nodesStore = inject(NodesStore);
+  #store = inject(Store);
+  #hotkeysService = inject(HotkeysService);
 
-  public nodes$ = this.boardFacade.getNodes().pipe(
+  nodesComponents = viewChildren<NodeComponent>(NodeComponent);
+
+  @ViewChildren(NodeComponent) nodesxx!: NodeComponent[];
+
+  public nodes$ = this.#boardFacade.getNodes().pipe(
     map((it) => {
       return it.filter((it) => !['user', 'settings'].includes(it.type));
     }),
   );
 
   constructor() {
-    this.hotkeysService
+    this.#hotkeysService
       .listen({ key: 'Delete' })
       .pipe(
+        takeUntilDestroyed(),
         filter(() => {
           return !isInputField();
         }),
       )
       .subscribe(() => {
-        this.onDeletePress();
+        this.#onDeletePress();
       });
 
-    // todo: find a better way to connect page state with nodes state, work for standalone nodes
-    this.boardFacade
-      .getUsers()
-      .pipe(takeUntilDestroyed())
-      .subscribe((users) => {
-        this.nodesStore.users$.next(users.map((it) => it.content));
-      });
-
-    this.store
-      .select(selectUserId)
-      .pipe(takeUntilDestroyed())
-      .subscribe((userId) => {
-        this.nodesStore.userId$.next(userId);
-      });
-
-    this.store
-      .select(selectPrivateId)
-      .pipe(takeUntilDestroyed())
-      .subscribe((privateId) => {
-        this.nodesStore.privateId$.next(privateId);
-      });
-
-    this.store
-      .select(selectZoom)
-      .pipe(takeUntilDestroyed())
-      .subscribe((zoom) => {
-        this.nodesStore.zoom$.next(zoom);
-      });
-
-    this.store
-      .select(selectCanvasMode)
-      .pipe(takeUntilDestroyed())
-      .subscribe((canvasMode) => {
-        this.nodesStore.canvasMode$.next(canvasMode);
-      });
-
-    this.boardFacade
-      .getNodes()
-      .pipe(takeUntilDestroyed())
-      .subscribe((nodes) => {
-        this.nodesStore.nodes$.next(nodes);
-      });
-
-    this.nodesStore.focusNode.subscribe((event) => {
-      this.store.dispatch(
+    this.#nodesStore.focusNode.pipe(takeUntilDestroyed()).subscribe((event) => {
+      this.#store.dispatch(
         PageActions.setFocusId({
           focusId: event.id,
           ctrlKey: event.ctrlKey,
@@ -116,55 +70,53 @@ export class NodesComponent {
       );
     });
 
-    this.store
-      .select(selectPopupOpen)
-      .pipe(takeUntilDestroyed())
-      .subscribe((popupOpen) => {
-        this.nodesStore.activeToolbarOption$.next(popupOpen);
-      });
-
-    this.store
-      .select(selectEmoji)
-      .pipe(takeUntilDestroyed())
-      .subscribe((emoji) => {
-        this.nodesStore.emoji$.next(emoji);
-      });
-
-    this.store
-      .select(selectUserHighlight)
-      .pipe(takeUntilDestroyed())
-      .subscribe((user) => {
-        this.nodesStore.userHighlight$.next(user);
-      });
-
-    this.store
-      .select(selectShowUserVotes)
-      .pipe(takeUntilDestroyed())
-      .subscribe((user) => {
-        this.nodesStore.userVotes$.next(user);
-      });
+    this.#nodesStore.users = toSignal(
+      this.#boardFacade
+        .getUsers()
+        .pipe(map((users) => users.map((it) => it.content))),
+      {
+        initialValue: [] as User[],
+      },
+    );
+    this.#nodesStore.nodes = toSignal(this.#boardFacade.getNodes(), {
+      initialValue: [],
+    });
+    this.#nodesStore.userId = this.#store.selectSignal(
+      pageFeature.selectUserId,
+    );
+    this.#nodesStore.privateId = this.#store.selectSignal(
+      pageFeature.selectPrivateId,
+    );
+    this.#nodesStore.zoom = this.#store.selectSignal(pageFeature.selectZoom);
+    this.#nodesStore.canvasMode = this.#store.selectSignal(
+      pageFeature.selectCanvasMode,
+    );
+    this.#nodesStore.emoji = this.#store.selectSignal(pageFeature.selectEmoji);
+    this.#nodesStore.userHighlight = this.#store.selectSignal(
+      pageFeature.selectUserHighlight,
+    );
+    this.#nodesStore.userVotes = this.#store.selectSignal(
+      pageFeature.selectShowUserVotes,
+    );
+    this.#nodesStore.activeToolbarOption = this.#store.selectSignal(
+      pageFeature.selectPopupOpen,
+    );
   }
 
-  private onDeletePress() {
-    const nodes = this.nodes().filter((it) => {
-      return it.state.get('focus') && !it.preventDelete?.();
-    });
-
-    const actions = nodes.map((it) => {
-      return {
-        data: {
+  #onDeletePress() {
+    const nodes = this.nodesComponents()
+      .filter((it) => {
+        return it.state.get('focus') && !it.preventDelete?.();
+      })
+      .map((it) => {
+        return {
           type: it.state.get('node').type,
           id: it.state.get('node').id,
-        },
-        op: 'remove',
-      } as NodeRemove;
-    });
+        };
+      });
 
-    this.store.dispatch(
-      BoardActions.batchNodeActions({
-        history: true,
-        actions: actions,
-      }),
-    );
+    this.#nodesStore.actions.deleteNodes({
+      nodes,
+    });
   }
 }
