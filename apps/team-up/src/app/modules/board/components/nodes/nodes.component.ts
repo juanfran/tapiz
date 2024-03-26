@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   inject,
   viewChildren,
-  ViewChildren,
 } from '@angular/core';
 import { NodeComponent } from '../node/node.component';
 import { map } from 'rxjs/operators';
@@ -39,8 +38,6 @@ export class NodesComponent {
   #hotkeysService = inject(HotkeysService);
 
   nodesComponents = viewChildren<NodeComponent>(NodeComponent);
-
-  @ViewChildren(NodeComponent) nodesxx!: NodeComponent[];
 
   public nodes$ = this.#boardFacade.getNodes().pipe(
     map((it) => {
