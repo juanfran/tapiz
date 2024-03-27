@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import {
+  debounceTime,
   filter,
   map,
   switchMap,
   take,
   tap,
-  throttleTime,
   withLatestFrom,
 } from 'rxjs';
 import { PageActions } from '../actions/page.actions';
@@ -132,7 +132,7 @@ export class PageEffects {
     () => {
       return this.actions$.pipe(
         ofType(PageActions.setUserView),
-        throttleTime(500),
+        debounceTime(500),
         withLatestFrom(this.store.select(selectBoardId)),
         tap(([action, boardId]) => {
           localStorage.setItem(
