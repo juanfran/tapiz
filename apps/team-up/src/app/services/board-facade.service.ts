@@ -31,7 +31,7 @@ export class BoardFacade {
   private store = inject(Store);
 
   constructor() {
-    console.log(this);
+    // console.log(this);
   }
 
   public start() {

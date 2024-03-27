@@ -35,7 +35,7 @@ export class CopyPasteService {
       return;
     }
 
-    const nodes: NodeAdd['data'][] = copyNode.map((it, index) => {
+    const nodes: NodeAdd['data'][] = copyNode.map((it, index): TuNode => {
       if ('position' in it.content) {
         if (options?.x && options?.y) {
           it.content.position = {
@@ -61,7 +61,10 @@ export class CopyPasteService {
 
       return {
         ...it,
-        layer: this.layer(),
+        content: {
+          ...it.content,
+          layer: this.layer(),
+        },
         id: v4(),
       };
     });
