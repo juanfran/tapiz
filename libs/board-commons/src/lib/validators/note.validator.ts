@@ -1,10 +1,14 @@
 import { z } from 'zod';
 
 import type { NodeValidator } from '../models/node.model.js';
-import { CommonBoardValidation } from './common-board-validation.js';
+import {
+  CommonBoardValidation,
+  SizeValidator,
+} from './common-board-validation.js';
 
 const note = z.object({
   ...CommonBoardValidation,
+  ...SizeValidator,
   text: z.string().max(140),
   votes: z.array(
     z.object({

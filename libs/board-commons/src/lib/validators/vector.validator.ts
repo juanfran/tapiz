@@ -1,10 +1,12 @@
 import { z } from 'zod';
-import { CommonBoardValidation } from './common-board-validation.js';
+import {
+  CommonBoardValidation,
+  SizeValidator,
+} from './common-board-validation.js';
 
 const vector = z.object({
   ...CommonBoardValidation,
-  width: z.number().nonnegative().safe(),
-  height: z.number().nonnegative().safe(),
+  ...SizeValidator,
   url: z.string().max(1000),
   rotation: z.number().safe(),
 });

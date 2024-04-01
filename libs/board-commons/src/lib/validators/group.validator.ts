@@ -1,8 +1,12 @@
 import { z } from 'zod';
-import { CommonBoardValidation } from './common-board-validation.js';
+import {
+  CommonBoardValidation,
+  SizeValidator,
+} from './common-board-validation.js';
 
 const group = z.object({
   ...CommonBoardValidation,
+  ...SizeValidator,
   title: z.string().max(1000),
   votes: z.array(
     z.object({
@@ -10,8 +14,6 @@ const group = z.object({
       vote: z.number().int().min(0),
     }),
   ),
-  width: z.number().nonnegative().safe(),
-  height: z.number().nonnegative().safe(),
 });
 
 export const patchGroup = group.partial();

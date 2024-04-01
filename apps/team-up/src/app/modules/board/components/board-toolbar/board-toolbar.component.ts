@@ -376,6 +376,17 @@ export class BoardToolbarComponent {
       )
       .subscribe({
         next: ([event, zoom, position]) => {
+          const tokenContent: Token = {
+            ...token,
+            layer: this.layer(),
+            position: {
+              x: (-position.x + event.pageX) / zoom - 50,
+              y: (-position.y + event.pageY) / zoom - 50,
+            },
+            width: 100,
+            height: 100,
+          };
+
           this.store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
@@ -384,14 +395,7 @@ export class BoardToolbarComponent {
                   data: {
                     type: 'token',
                     id: v4(),
-                    content: {
-                      ...token,
-                      layer: this.layer(),
-                      position: {
-                        x: (-position.x + event.pageX) / zoom - 50,
-                        y: (-position.y + event.pageY) / zoom - 50,
-                      },
-                    },
+                    content: tokenContent,
                   },
                   op: 'add',
                 },

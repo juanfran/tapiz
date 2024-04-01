@@ -1,9 +1,7 @@
 import { z } from 'zod';
 import { StateActions, TuNode } from '../models/node.model.js';
-import { CommonBoardValidation } from './common-board-validation.js';
 
 const user = z.object({
-  ...CommonBoardValidation,
   visible: z.boolean(),
   cursor: z.object({
     x: z.number().safe(),

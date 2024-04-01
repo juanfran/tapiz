@@ -105,6 +105,8 @@ export class TemplateSelectorComponent {
     //             text: 'x',
     //             color: null,
     //             backgroundColor: null,
+    //             width: 100,
+    //             height: 100,
     //             position: {
     //               x: 0,
     //               y: 0,

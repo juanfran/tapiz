@@ -22,6 +22,8 @@ export class NotesService {
       votes: [],
       emojis: [],
       drawing: [],
+      width: 300,
+      height: 300,
       ...data,
     };
   }

@@ -5,4 +5,7 @@ export interface Token {
   backgroundColor: string;
   text: string;
   position: Point;
+  width: number;
+  height: number;
+  layer: number;
 }
