@@ -14,6 +14,16 @@
     </div>
     <div
       class="toolbar-button-container"
+      [class.active]="vm.popupOpen === 'select'">
+      <button
+        (click)="select()"
+        class="toolbar-button">
+        <mat-icon class="material-icons-outlined">crop_free</mat-icon>
+      </button>
+      <div class="toolbar-tooltip">Select</div>
+    </div>
+    <div
+      class="toolbar-button-container"
       [class.active]="vm.popupOpen === 'group'">
       <button
         class="toolbar-button"

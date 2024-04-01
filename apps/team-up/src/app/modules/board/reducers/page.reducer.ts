@@ -186,6 +186,14 @@ const reducer = createReducer(
       ...state,
     };
   }),
+  on(PageActions.selectNodes, (state, { ids }): PageState => {
+    return {
+      ...state,
+      focusId: ids,
+      moveEnabled: true,
+      zone: null,
+    };
+  }),
   on(
     PageActions.setFocusId,
     (state, { focusId, ctrlKey = false }): PageState => {

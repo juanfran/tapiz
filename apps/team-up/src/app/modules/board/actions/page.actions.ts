@@ -67,5 +67,6 @@ export const PageActions = createActionGroup({
     'Lock board': props<{ lock: boolean }>(),
     'Refetch board': emptyProps(),
     Drawing: props<{ drawing: boolean }>(),
+    'Select nodes': props<{ ids: string[] }>(),
   },
 });

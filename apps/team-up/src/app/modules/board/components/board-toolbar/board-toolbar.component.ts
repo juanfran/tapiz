@@ -165,6 +165,23 @@ export class BoardToolbarComponent {
       });
   }
 
+  public select() {
+    if (this.state.get('popupOpen') === 'select') {
+      this.popupOpen('');
+      return;
+    }
+
+    this.popupOpen('select');
+
+    this.store.dispatch(
+      PageActions.setInitZone({
+        initZone: {
+          type: 'select',
+        },
+      }),
+    );
+  }
+
   public group() {
     if (this.state.get('popupOpen') === 'group') {
       this.popupOpen('');
@@ -235,6 +252,11 @@ export class BoardToolbarComponent {
   }
 
   public panel() {
+    if (this.state.get('popupOpen') === 'panel') {
+      this.popupOpen('');
+      return;
+    }
+
     this.popupOpen('panel');
     this.store.dispatch(
       PageActions.setInitZone({

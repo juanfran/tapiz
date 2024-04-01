@@ -1,5 +1,4 @@
 :host {
-  cursor: se-resize;
   position: absolute;
   z-index: var(--board-tools-layer);
 
@@ -12,5 +11,10 @@
     background-color: var(--white);
     border: 1px solid #67fff9;
     box-shadow: 0 0 10px 0 rgba(232, 233, 234, 1);
+  }
+
+  &.select {
+    background-color: transparent;
+    border: 6px dashed #a672f8;
   }
 }
