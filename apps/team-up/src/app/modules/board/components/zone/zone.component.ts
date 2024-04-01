@@ -4,10 +4,11 @@ import {
   ChangeDetectorRef,
   HostBinding,
   ElementRef,
+  inject,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { Zone, ZoneConfig } from '@team-up/board-commons';
+import { TuNode, Zone, ZoneConfig } from '@team-up/board-commons';
 import { Subscription } from 'rxjs';
 import {
   filter,
@@ -23,8 +24,10 @@ import {
   selectInitZone,
   selectZone,
   selectZoom,
+  selectLayer,
 } from '../../selectors/page.selectors';
 import { BoardMoveService } from '../../services/board-move.service';
+import { BoardFacade } from '../../../../services/board-facade.service';
 
 interface State {
   zone: Zone | null;
@@ -44,15 +47,15 @@ export class ZoneComponent {
   }
 
   @HostBinding('class.group') get group() {
-    return this.state.get('config')?.type === 'group';
+    return this.#state.get('config')?.type === 'group';
   }
 
   @HostBinding('class.panel') get panel() {
-    return this.state.get('config')?.type === 'panel';
+    return this.#state.get('config')?.type === 'panel';
   }
 
   @HostBinding('class.select') get select() {
-    return this.state.get('config')?.type === 'select';
+    return this.#state.get('config')?.type === 'select';
   }
 
   @HostBinding('style.transform') get transform() {
@@ -70,26 +73,29 @@ export class ZoneComponent {
   }
 
   get zone() {
-    return this.state.get('zone');
+    return this.#state.get('zone');
   }
 
   nextClickSubscription?: Subscription;
 
-  constructor(
-    private el: ElementRef,
-    private store: Store,
-    private state: RxState<State>,
-    private cdRef: ChangeDetectorRef,
-    private boardMoveService: BoardMoveService,
-  ) {
-    const initZone$ = this.store
+  #boardFacade = inject(BoardFacade);
+  #el = inject(ElementRef);
+  #store = inject(Store);
+  #state = inject(RxState<State>);
+  #cdRef = inject(ChangeDetectorRef);
+  #boardMoveService = inject(BoardMoveService);
+
+  #layer = this.#store.selectSignal(selectLayer);
+
+  constructor() {
+    const initZone$ = this.#store
       .select(selectInitZone)
       .pipe(filter((it) => !!it));
-    this.state.hold(initZone$, () => this.captureNextClick());
+    this.#state.hold(initZone$, () => this.captureNextClick());
 
     // unsubscribe from next click if the toolbar change
-    this.state.hold(
-      this.store.select(selectInitZone).pipe(filter((it) => !it)),
+    this.#state.hold(
+      this.#store.select(selectInitZone).pipe(filter((it) => !it)),
       () => {
         if (this.nextClickSubscription) {
           this.nextClickSubscription.unsubscribe();
@@ -97,24 +103,24 @@ export class ZoneComponent {
       },
     );
 
-    this.state.connect('zone', this.store.select(selectZone));
-    this.state.connect('config', this.store.select(selectInitZone));
-    this.state.hold(this.state.select(), () => this.cdRef.markForCheck());
+    this.#state.connect('zone', this.#store.select(selectZone));
+    this.#state.connect('config', this.#store.select(selectInitZone));
+    this.#state.hold(this.#state.select(), () => this.#cdRef.markForCheck());
   }
 
   captureNextClick() {
-    this.nextClickSubscription = this.boardMoveService
+    this.nextClickSubscription = this.#boardMoveService
       .nextMouseDown()
       .pipe(
         withLatestFrom(
-          this.store.select(selectZoom),
-          this.store.select(selectPosition),
+          this.#store.select(selectZoom),
+          this.#store.select(selectPosition),
         ),
         switchMap(([mouseDownEvent, zoom, position]) => {
-          this.store.dispatch(PageActions.setMoveEnabled({ enabled: false }));
+          this.#store.dispatch(PageActions.setMoveEnabled({ enabled: false }));
 
-          return this.boardMoveService.mouseMove$.pipe(
-            takeUntil(this.boardMoveService.mouseUp$),
+          return this.#boardMoveService.mouseMove$.pipe(
+            takeUntil(this.#boardMoveService.mouseUp$),
             map((mouseMoveEvent) => {
               return {
                 width: (mouseMoveEvent.x - mouseDownEvent.clientX) / zoom,
@@ -155,20 +161,20 @@ export class ZoneComponent {
       )
       .subscribe({
         next: (zone) => {
-          this.store.dispatch(
+          this.#store.dispatch(
             PageActions.setZone({
               zone,
             }),
           );
         },
         complete: () => {
-          this.store.dispatch(PageActions.setPopupOpen({ popup: '' }));
+          this.#store.dispatch(PageActions.setPopupOpen({ popup: '' }));
 
-          if (this.state.get('config')?.type === 'group') {
-            this.store.dispatch(PageActions.zoneToGroup());
-          } else if (this.state.get('config')?.type === 'panel') {
-            this.store.dispatch(PageActions.zoneToPanel());
-          } else if (this.state.get('config')?.type === 'select') {
+          if (this.#state.get('config')?.type === 'group') {
+            this.#store.dispatch(PageActions.zoneToGroup());
+          } else if (this.#state.get('config')?.type === 'panel') {
+            this.#store.dispatch(PageActions.zoneToPanel());
+          } else if (this.#state.get('config')?.type === 'select') {
             this.zoneToSelect();
           }
         },
@@ -179,6 +185,11 @@ export class ZoneComponent {
     if (!this.zone) {
       return;
     }
+
+    const boardNodes = this.#boardFacade.get() as TuNode<
+      { layer: number },
+      string
+    >[];
 
     const nodes = document.querySelectorAll<HTMLElement>('team-up-node');
     const zoneRect = this.nativeElement.getBoundingClientRect();
@@ -199,10 +210,21 @@ export class ZoneComponent {
         );
       })
       .map((el) => {
-        return el.dataset['id'] as string;
-      });
+        const node = boardNodes.find(
+          (node) =>
+            node.id === el.dataset['id'] &&
+            node.content.layer === this.#layer(),
+        );
 
-    this.store.dispatch(PageActions.selectNodes({ ids: selectedNodes }));
+        if (node) {
+          return node.id;
+        }
+
+        return null;
+      })
+      .filter((it): it is string => !!it);
+
+    this.#store.dispatch(PageActions.selectNodes({ ids: selectedNodes }));
   }
 
   #isInside(
@@ -216,6 +238,6 @@ export class ZoneComponent {
   }
 
   get nativeElement(): HTMLElement {
-    return this.el.nativeElement as HTMLElement;
+    return this.#el.nativeElement as HTMLElement;
   }
 }
