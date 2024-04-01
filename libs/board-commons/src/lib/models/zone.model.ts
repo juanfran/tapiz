@@ -7,5 +7,5 @@ export interface Zone {
 }
 
 export interface ZoneConfig {
-  type: 'group' | 'panel';
+  type: 'group' | 'panel' | 'select';
 }

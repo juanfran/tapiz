@@ -69,6 +69,10 @@ export class NodeComponent implements OnInit {
     return `layer-${this.state.get('node').content.layer}`;
   }
 
+  @HostBinding('attr.data-id') get id() {
+    return this.state.get('node').id;
+  }
+
   @Input({ required: true })
   public set node(node: TuNode) {
     this.state.set({ node: node as State['node'] });

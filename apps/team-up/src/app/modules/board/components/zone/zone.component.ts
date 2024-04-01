@@ -4,9 +4,7 @@ import {
   ChangeDetectorRef,
   HostBinding,
   ElementRef,
-  ApplicationRef,
 } from '@angular/core';
-import { UntilDestroy } from '@ngneat/until-destroy';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
 import { Zone, ZoneConfig } from '@team-up/board-commons';
@@ -32,7 +30,6 @@ interface State {
   zone: Zone | null;
   config: ZoneConfig | null;
 }
-@UntilDestroy()
 @Component({
   selector: 'team-up-zone',
   template: '',
@@ -54,6 +51,10 @@ export class ZoneComponent {
     return this.state.get('config')?.type === 'panel';
   }
 
+  @HostBinding('class.select') get select() {
+    return this.state.get('config')?.type === 'select';
+  }
+
   @HostBinding('style.transform') get transform() {
     return this.zone
       ? `translate(${this.zone.position.x}px, ${this.zone.position.y}px)`
@@ -68,14 +69,13 @@ export class ZoneComponent {
     return this.zone?.height;
   }
 
-  public get zone() {
+  get zone() {
     return this.state.get('zone');
   }
 
-  public nextClickSubscription?: Subscription;
+  nextClickSubscription?: Subscription;
 
   constructor(
-    private appRef: ApplicationRef,
     private el: ElementRef,
     private store: Store,
     private state: RxState<State>,
@@ -102,7 +102,7 @@ export class ZoneComponent {
     this.state.hold(this.state.select(), () => this.cdRef.markForCheck());
   }
 
-  public captureNextClick() {
+  captureNextClick() {
     this.nextClickSubscription = this.boardMoveService
       .nextMouseDown()
       .pipe(
@@ -122,12 +122,24 @@ export class ZoneComponent {
               };
             }),
             map((size) => {
+              const finalPosition = {
+                x: (-position.x + mouseDownEvent.clientX) / zoom,
+                y: (-position.y + mouseDownEvent.clientY) / zoom,
+              };
+
+              if (size.width < 0) {
+                size.width = -size.width;
+                finalPosition.x -= size.width;
+              }
+
+              if (size.height < 0) {
+                size.height = -size.height;
+                finalPosition.y -= size.height;
+              }
+
               return {
                 ...size,
-                position: {
-                  x: (-position.x + mouseDownEvent.clientX) / zoom,
-                  y: (-position.y + mouseDownEvent.clientY) / zoom,
-                },
+                position: finalPosition,
               };
             }),
             startWith({
@@ -148,7 +160,6 @@ export class ZoneComponent {
               zone,
             }),
           );
-          this.appRef.tick();
         },
         complete: () => {
           this.store.dispatch(PageActions.setPopupOpen({ popup: '' }));
@@ -157,12 +168,54 @@ export class ZoneComponent {
             this.store.dispatch(PageActions.zoneToGroup());
           } else if (this.state.get('config')?.type === 'panel') {
             this.store.dispatch(PageActions.zoneToPanel());
+          } else if (this.state.get('config')?.type === 'select') {
+            this.zoneToSelect();
           }
         },
       });
   }
 
-  public get nativeElement(): HTMLElement {
+  zoneToSelect() {
+    if (!this.zone) {
+      return;
+    }
+
+    const nodes = document.querySelectorAll<HTMLElement>('team-up-node');
+    const zoneRect = this.nativeElement.getBoundingClientRect();
+
+    const selectedNodes = Array.from(nodes)
+      .filter((node) => {
+        const position = node.getBoundingClientRect();
+
+        return (
+          this.#isInside(position.x, position.y, zoneRect) ||
+          this.#isInside(position.x + position.width, position.y, zoneRect) ||
+          this.#isInside(position.x, position.y + position.height, zoneRect) ||
+          this.#isInside(
+            position.x + position.width,
+            position.y + position.height,
+            zoneRect,
+          )
+        );
+      })
+      .map((el) => {
+        return el.dataset['id'] as string;
+      });
+
+    this.store.dispatch(PageActions.selectNodes({ ids: selectedNodes }));
+  }
+
+  #isInside(
+    x: number,
+    y: number,
+    rect: { left: number; right: number; top: number; bottom: number },
+  ) {
+    return (
+      x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
+    );
+  }
+
+  get nativeElement(): HTMLElement {
     return this.el.nativeElement as HTMLElement;
   }
 }
