@@ -39,9 +39,15 @@ import { RxLet } from '@rx-angular/template/let';
 import { MatIconModule } from '@angular/material/icon';
 import { TokenSelectorComponent } from '../token-selector/token-selector.component';
 import { Token } from '@team-up/board-commons/models/token.model';
-import { PollBoard, Text } from '@team-up/board-commons';
+import {
+  EstimationBoard,
+  Image,
+  PollBoard,
+  Text,
+} from '@team-up/board-commons';
 import { DrawingStore } from '@team-up/board-components/drawing/drawing.store';
 import { TemplateSelectorComponent } from '../template-selector/template-selector.component';
+import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 
 interface State {
   popupOpen: string;
@@ -84,6 +90,7 @@ export class BoardToolbarComponent {
     private notesService: NotesService,
     private dialog: MatDialog,
     private drawingStore: DrawingStore,
+    private nodesActions: NodesActions,
   ) {
     this.state.connect('popupOpen', this.store.select(selectPopupOpen));
   }
@@ -108,28 +115,19 @@ export class BoardToolbarComponent {
             y: (-position.y + event.pageY) / zoom,
           };
 
-          const text: Text = {
+          const action = this.nodesActions.add<Text>('text', {
             text: '<p></p>',
             position: textPosition,
             layer: this.layer(),
             width: 200,
             height: 50,
             rotation: 0,
-          };
+          });
 
           this.store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
-              actions: [
-                {
-                  data: {
-                    type: 'text',
-                    id: v4(),
-                    content: text,
-                  },
-                  op: 'add',
-                },
-              ],
+              actions: [action],
             }),
           );
         },
@@ -299,16 +297,7 @@ export class BoardToolbarComponent {
           this.store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
-              actions: [
-                {
-                  data: {
-                    type: 'poll',
-                    id: v4(),
-                    content: poll,
-                  },
-                  op: 'add',
-                },
-              ],
+              actions: [this.nodesActions.add('poll', poll)],
             }),
           );
         },
@@ -363,20 +352,13 @@ export class BoardToolbarComponent {
             BoardActions.batchNodeActions({
               history: true,
               actions: [
-                {
-                  data: {
-                    type: 'estimation',
-                    id: v4(),
-                    content: {
-                      layer: this.layer(),
-                      position: {
-                        x: (-position.x + event.pageX) / zoom,
-                        y: (-position.y + event.pageY) / zoom,
-                      },
-                    },
+                this.nodesActions.add<EstimationBoard>('estimation', {
+                  layer: this.layer(),
+                  position: {
+                    x: (-position.x + event.pageX) / zoom,
+                    y: (-position.y + event.pageY) / zoom,
                   },
-                  op: 'add',
-                },
+                }),
               ],
             }),
           );
@@ -412,16 +394,7 @@ export class BoardToolbarComponent {
           this.store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
-              actions: [
-                {
-                  data: {
-                    type: 'token',
-                    id: v4(),
-                    content: tokenContent,
-                  },
-                  op: 'add',
-                },
-              ],
+              actions: [this.nodesActions.add<Token>('token', tokenContent)],
             }),
           );
         },
@@ -448,24 +421,17 @@ export class BoardToolbarComponent {
             BoardActions.batchNodeActions({
               history: true,
               actions: [
-                {
-                  data: {
-                    type: 'image',
-                    id: v4(),
-                    content: {
-                      url,
-                      layer: this.layer(),
-                      position: {
-                        x: -position.x / zoom,
-                        y: -position.y / zoom,
-                      },
-                      rotation: 0,
-                      width: 0,
-                      height: 0,
-                    },
+                this.nodesActions.add<Image>('image', {
+                  url,
+                  layer: this.layer(),
+                  position: {
+                    x: -position.x / zoom,
+                    y: -position.y / zoom,
                   },
-                  op: 'add',
-                },
+                  rotation: 0,
+                  width: 0,
+                  height: 0,
+                }),
               ],
             }),
           );

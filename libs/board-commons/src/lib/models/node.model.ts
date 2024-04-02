@@ -5,16 +5,18 @@ export interface TuNode<C = object, T = string> {
   children?: TuNode[];
 }
 
-export interface NodeAdd {
+export interface NodeAdd<T = object> {
   op: 'add';
-  data: TuNode;
+  data: TuNode<T>;
   parent?: string;
+  position?: number;
 }
 
-export interface NodePatch {
+export interface NodePatch<T = object> {
   op: 'patch';
-  data: TuNode;
+  data: TuNode<T>;
   parent?: string;
+  position?: number;
 }
 
 export interface NodeRemove {

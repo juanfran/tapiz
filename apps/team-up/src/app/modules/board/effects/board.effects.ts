@@ -17,9 +17,10 @@ import { PageActions } from '../actions/page.actions';
 import { selectLayer, selectZone } from '../selectors/page.selectors';
 import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
-import { Panel, StateActions } from '@team-up/board-commons';
+import { Group, Panel, StateActions } from '@team-up/board-commons';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { pageFeature } from '../reducers/page.reducer';
+import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 
 @Injectable()
 export class BoardEffects {
@@ -210,21 +211,14 @@ export class BoardEffects {
             BoardActions.batchNodeActions({
               history: true,
               actions: [
-                {
-                  data: {
-                    type: 'group',
-                    id: v4(),
-                    content: {
-                      title: '',
-                      position: zone.position,
-                      width: width,
-                      height: height,
-                      votes: [],
-                      layer,
-                    },
-                  },
-                  op: 'add',
-                },
+                this.nodesActions.add<Group>('group', {
+                  title: '',
+                  position: zone.position,
+                  width: width,
+                  height: height,
+                  votes: [],
+                  layer,
+                }),
               ],
             }),
           );
@@ -264,16 +258,7 @@ export class BoardEffects {
           return of(
             BoardActions.batchNodeActions({
               history: true,
-              actions: [
-                {
-                  data: {
-                    type: 'panel',
-                    id: v4(),
-                    content: panel,
-                  },
-                  op: 'add',
-                },
-              ],
+              actions: [this.nodesActions.add('panel', panel)],
             }),
           );
         }
@@ -290,5 +275,6 @@ export class BoardEffects {
     private boardApiService: BoardApiService,
     private store: Store,
     private boardFacade: BoardFacade,
+    private nodesActions: NodesActions,
   ) {}
 }

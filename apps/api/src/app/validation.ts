@@ -94,6 +94,7 @@ export const validateAction = async (
           op: 'add',
           data: result.data,
           parent: msg.parent,
+          position: msg.position,
         };
       }
     } else if (msg.op === 'patch') {
@@ -118,6 +119,7 @@ export const validateAction = async (
           op: 'patch',
           data: result.data,
           parent: msg.parent,
+          position: msg.position,
         };
       }
     } else if (msg.op === 'remove') {
@@ -191,6 +193,8 @@ export const validateAction = async (
               type: msg.data.type,
               content: validatorResult.data,
             },
+            parent: msg.parent,
+            position: msg.position,
           };
         }
       }
@@ -213,6 +217,8 @@ export const validateAction = async (
             type: msg.data.type,
             content: validatorResult.data,
           },
+          parent: msg.parent,
+          position: msg.position,
         };
       }
     }

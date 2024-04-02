@@ -17,6 +17,7 @@ import { VotesModalComponent } from '../votes-modal/votes-modal.component';
 import { Group, Note, TuNode } from '@team-up/board-commons';
 import { selectVoting } from '../../selectors/page.selectors';
 import { CommentsStore } from '@team-up/nodes/comments/comments.store';
+import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 
 @Component({
   selector: 'team-up-board-context-menu',
@@ -39,6 +40,7 @@ export class BoardContextMenuComponent implements OnInit {
   private dialog = inject(MatDialog);
   private voting = this.store.selectSignal(selectVoting);
   private commentsStore = inject(CommentsStore);
+  private nodesActions = inject(NodesActions);
   private showUserVotes = this.store.selectSignal(pageFeature.selectVoting);
 
   public readonly boardMode = this.store.selectSignal(
@@ -91,6 +93,62 @@ export class BoardContextMenuComponent implements OnInit {
                 });
               },
             },
+            {
+              label: 'Move forward',
+              icon: 'vertical_align_top',
+              action: () => {
+                const actions = this.nodesActions.bulkPatch(
+                  currentNodes.map((it) => {
+                    return {
+                      node: {
+                        id: it.id,
+                        type: it.type,
+                        content: {},
+                      },
+                      options: {
+                        position: -1,
+                      },
+                    };
+                  }),
+                );
+
+                this.store.dispatch(
+                  BoardActions.batchNodeActions({
+                    history: true,
+                    actions,
+                  }),
+                );
+              },
+            },
+            {
+              label: 'Move backward',
+              icon: 'vertical_align_bottom',
+              action: () => {
+                const actions = this.nodesActions
+                  .bulkPatch(
+                    currentNodes.map((it) => {
+                      return {
+                        node: {
+                          id: it.id,
+                          type: it.type,
+                          content: {},
+                        },
+                        options: {
+                          position: 0,
+                        },
+                      };
+                    }),
+                  )
+                  .toReversed();
+
+                this.store.dispatch(
+                  BoardActions.batchNodeActions({
+                    history: true,
+                    actions,
+                  }),
+                );
+              },
+            },
           ];
 
           if (this.boardMode() === 'editMode') {
@@ -102,16 +160,13 @@ export class BoardContextMenuComponent implements OnInit {
                   BoardActions.batchNodeActions({
                     history: true,
                     actions: currentNodes.map((node) => {
-                      return {
-                        data: {
-                          type: node.type,
-                          id: node.id,
-                          content: {
-                            layer: 1,
-                          },
+                      return this.nodesActions.patch({
+                        type: node.type,
+                        id: node.id,
+                        content: {
+                          layer: 1,
                         },
-                        op: 'patch',
-                      };
+                      });
                     }),
                   }),
                 );
@@ -132,16 +187,13 @@ export class BoardContextMenuComponent implements OnInit {
                   BoardActions.batchNodeActions({
                     history: true,
                     actions: currentNodes.map((node) => {
-                      return {
-                        data: {
-                          type: node.type,
-                          id: node.id,
-                          content: {
-                            layer: 0,
-                          },
+                      return this.nodesActions.patch({
+                        type: node.type,
+                        id: node.id,
+                        content: {
+                          layer: 0,
                         },
-                        op: 'patch',
-                      };
+                      });
                     }),
                   }),
                 );

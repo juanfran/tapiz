@@ -95,54 +95,6 @@ export class TextComponent implements OnInit {
     this.newContent.set(this.node().content.text);
   }
 
-  public newColor(e: Event) {
-    if (e.target) {
-      const color = (e.target as HTMLInputElement).value;
-
-      this.store.dispatch(
-        BoardActions.batchNodeActions({
-          history: true,
-          actions: [
-            {
-              data: {
-                type: 'text',
-                id: this.node().id,
-                content: {
-                  color,
-                },
-              },
-              op: 'patch',
-            },
-          ],
-        }),
-      );
-    }
-  }
-
-  public newSize(e: Event) {
-    if (e.target) {
-      const size = Number((e.target as HTMLInputElement).value);
-
-      this.store.dispatch(
-        BoardActions.batchNodeActions({
-          history: true,
-          actions: [
-            {
-              data: {
-                type: 'text',
-                id: this.node().id,
-                content: {
-                  size,
-                },
-              },
-              op: 'patch',
-            },
-          ],
-        }),
-      );
-    }
-  }
-
   public ngOnInit() {
     toObservable(this.node, {
       injector: this.injector,

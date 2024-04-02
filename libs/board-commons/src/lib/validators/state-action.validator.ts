@@ -6,4 +6,6 @@ export const stateAction = z.object({
     content: z.any(),
     type: z.string().max(255),
   }),
+  parent: z.string().optional(),
+  position: z.number().optional(),
 });

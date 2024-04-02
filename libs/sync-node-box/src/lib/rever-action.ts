@@ -21,6 +21,8 @@ export function reverseAction(
   }
 
   if (node) {
+    const currentPosition = nodes.findIndex((it) => it.id === action.data.id);
+
     if (action.op === 'patch') {
       const nodeDiff = diff(action.data, node);
 
@@ -32,12 +34,14 @@ export function reverseAction(
           type: action.data.type,
           content: nodeDiff,
         },
+        position: currentPosition,
       };
     } else if (action.op === 'remove' && node) {
       return {
         op: 'add',
         parent: action.parent,
         data: node,
+        position: currentPosition,
       };
     }
   }

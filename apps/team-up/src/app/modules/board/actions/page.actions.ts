@@ -37,6 +37,7 @@ export const PageActions = createActionGroup({
         id: string;
         nodeType: string;
         initialPosition: Point;
+        initialIndex: number;
         finalPosition: Point;
       }[];
     }>(),
