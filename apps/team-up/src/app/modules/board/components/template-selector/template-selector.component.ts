@@ -7,11 +7,11 @@ import {
 import { NgOptimizedImage } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
-import { v4 } from 'uuid';
 import { selectLayer } from '../../selectors/page.selectors';
 import { NodeAdd, TuNode } from '@team-up/board-commons';
 import { pageFeature } from '../../reducers/page.reducer';
 import { TemplaNode } from './template-node.model';
+import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 
 interface Template {
   title: string;
@@ -44,6 +44,7 @@ interface Template {
 })
 export class TemplateSelectorComponent {
   #store = inject(Store);
+  #nodesActions = inject(NodesActions);
 
   selected = output();
 
@@ -183,16 +184,12 @@ export class TemplateSelectorComponent {
               y: heightTemplate + userY + node.content.position.y,
             },
           },
-          id: v4(),
         };
       },
     );
 
     const actions: NodeAdd[] = parsedTemplateNodes.map((node) => {
-      return {
-        data: node,
-        op: 'add',
-      };
+      return this.#nodesActions.add(node.type, node.content);
     });
 
     this.#store.dispatch(

@@ -6,6 +6,7 @@ import { BoardActions } from '../actions/board.actions';
 import { selectLayer } from '../selectors/page.selectors';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +16,7 @@ export class NotesService {
   #layer = this.#store.selectSignal(selectLayer);
   #boardFacade = inject(BoardFacade);
   #settings = toSignal(this.#boardFacade.getSettings());
+  #nodesActions = inject(NodesActions);
 
   getNew(data: Pick<Note, 'ownerId' | 'position' | 'layer'>): Note {
     return {
@@ -37,19 +39,12 @@ export class NotesService {
       position,
     });
 
+    const action = this.#nodesActions.add<Note>('note', note);
+
     this.#store.dispatch(
       BoardActions.batchNodeActions({
         history: true,
-        actions: [
-          {
-            data: {
-              type: 'note',
-              id: v4(),
-              content: note,
-            },
-            op: 'add',
-          },
-        ],
+        actions: [action],
       }),
     );
   }

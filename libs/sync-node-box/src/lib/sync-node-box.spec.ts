@@ -253,7 +253,7 @@ describe('syncNodeBox', () => {
 
     let content = box.get();
 
-    expect(content[1].children).toEqual([children[0], addNode, patchNode]);
+    expect(content[1].children).toEqual([children[0], patchNode, addNode]);
 
     box.undo();
 
@@ -265,6 +265,86 @@ describe('syncNodeBox', () => {
 
     content = box.get();
 
-    expect(content[1].children).toEqual([children[0], addNode, patchNode]);
+    expect(content[1].children).toEqual([children[0], patchNode, addNode]);
+  });
+
+  describe('change position', () => {
+    let box = syncNodeBox();
+    const node1: TuNode = { id: '1', type: 'note', content: {} };
+    const node2: TuNode = { id: '2', type: 'note', content: {} };
+    const node3: TuNode = { id: '3', type: 'group', content: {} };
+    const node4: TuNode = { id: '4', type: 'panel', content: {} };
+    const node5: TuNode = { id: '5', type: 'panel', content: {} };
+
+    beforeEach(() => {
+      box = syncNodeBox();
+      box.actions([{ op: 'add', data: node4 }], true);
+      box.actions([{ op: 'add', data: node5 }], true);
+      box.actions([{ op: 'add', data: node3 }], true);
+      box.actions([{ op: 'add', data: node2 }], true);
+      box.actions([{ op: 'add', data: node1 }], true);
+    });
+
+    it('add preserve order', () => {
+      expect(box.get()).toEqual([node4, node5, node3, node2, node1]);
+    });
+
+    it('add specific position and undo/redo', () => {
+      const node6: TuNode = { id: '6', type: 'note', content: {} };
+      box.actions([{ op: 'add', data: node6, position: 2 }], true);
+      expect(box.get()).toEqual([node4, node5, node6, node3, node2, node1]);
+
+      box.undo();
+
+      expect(box.get()).toEqual([node4, node5, node3, node2, node1]);
+
+      box.redo();
+
+      expect(box.get()).toEqual([node4, node5, node6, node3, node2, node1]);
+    });
+
+    it('remove preserve position and undo/redo', () => {
+      box.actions([{ op: 'remove', data: { id: '3', type: 'group' } }], true);
+      expect(box.get()).toEqual([node4, node5, node2, node1]);
+
+      box.undo();
+
+      expect(box.get()).toEqual([node4, node5, node3, node2, node1]);
+
+      box.redo();
+
+      expect(box.get()).toEqual([node4, node5, node2, node1]);
+    });
+
+    it('patch preserve position and undo/redo', () => {
+      box.actions([{ op: 'patch', data: node2, position: 0 }], true);
+      expect(box.get()).toEqual([node2, node4, node5, node3, node1]);
+
+      box.undo();
+
+      expect(box.get()).toEqual([node4, node5, node3, node2, node1]);
+
+      box.redo();
+
+      expect(box.get()).toEqual([node2, node4, node5, node3, node1]);
+    });
+
+    it('same position', () => {
+      box.actions([{ op: 'patch', data: node2, position: 3 }], true);
+      expect(box.get()).toEqual([node4, node5, node3, node2, node1]);
+    });
+
+    it('invalid position', () => {
+      const node6: TuNode = { id: '6', type: 'note', content: {} };
+
+      box.actions([{ op: 'add', data: node6, position: 100 }], true);
+      expect(box.get()).toEqual([node4, node5, node3, node2, node1, node6]);
+
+      box.actions([{ op: 'patch', data: node4, position: 100 }], true);
+      expect(box.get()).toEqual([node4, node5, node3, node2, node1, node6]);
+
+      box.actions([{ op: 'patch', data: node4, position: -1 }], true);
+      expect(box.get()).toEqual([node4, node5, node3, node2, node1, node6]);
+    });
   });
 });

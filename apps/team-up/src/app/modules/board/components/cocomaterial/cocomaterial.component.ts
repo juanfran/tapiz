@@ -28,6 +28,7 @@ import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
 import { BoardActions } from '../../actions/board.actions';
 import { MatDialogRef } from '@angular/material/dialog';
 import { v4 } from 'uuid';
+import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 
 interface State {
   tags: CocomaterialTag[];
@@ -68,6 +69,7 @@ export class CocomaterialComponent {
     private state: RxState<State>,
     private store: Store,
     public dialogRef: MatDialogRef<CocomaterialComponent>,
+    private nodesActions: NodesActions,
   ) {
     this.state.set({
       tags: [],
@@ -175,24 +177,17 @@ export class CocomaterialComponent {
             BoardActions.batchNodeActions({
               history: true,
               actions: [
-                {
-                  data: {
-                    type: vector.svg ? 'vector' : 'image',
-                    id: v4(),
-                    content: {
-                      url: vector.svg ?? vector.gif ?? '',
-                      width: 150,
-                      height: 150,
-                      position: {
-                        x: (-position.x + event.pageX) / zoom - 75,
-                        y: (-position.y + event.pageY) / zoom - 75,
-                      },
-                      rotation: 0,
-                      layer: this.layer(),
-                    },
+                this.nodesActions.add(vector.svg ? 'vector' : 'image', {
+                  url: vector.svg ?? vector.gif ?? '',
+                  width: 150,
+                  height: 150,
+                  position: {
+                    x: (-position.x + event.pageX) / zoom - 75,
+                    y: (-position.y + event.pageY) / zoom - 75,
                   },
-                  op: 'add',
-                },
+                  rotation: 0,
+                  layer: this.layer(),
+                }),
               ],
             }),
           );

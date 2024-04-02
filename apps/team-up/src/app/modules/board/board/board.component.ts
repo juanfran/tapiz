@@ -44,7 +44,6 @@ import { BoardMoveService } from '../services/board-move.service';
 import { BoardZoomService } from '../services/board-zoom.service';
 import { ActivatedRoute } from '@angular/router';
 import { NotesService } from '../services/notes.service';
-import { v4 } from 'uuid';
 import { BoardDragDirective } from '../directives/board-drag.directive';
 import { CursorsComponent } from '../components/cursors/cursors.component';
 import { ZoneComponent } from '../components/zone/zone.component';
@@ -57,7 +56,13 @@ import { SearchOptionsComponent } from '../components/search-options/search-opti
 import { Actions, ofType } from '@ngrx/effects';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { TitleComponent } from '../../../shared/title/title.component';
-import { Drawing, Point, StateActions, TuNode } from '@team-up/board-commons';
+import {
+  Drawing,
+  Image,
+  Point,
+  StateActions,
+  TuNode,
+} from '@team-up/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NodesComponent } from '../components/nodes/nodes.component';
@@ -80,6 +85,7 @@ import { DrawingStore } from '@team-up/board-components/drawing/drawing.store';
 import { DrawingOptionsComponent } from '@team-up/board-components/drawing-options';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommentsComponent } from '@team-up/nodes/comments/comments.component';
+import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 
 @UntilDestroy()
 @Component({
@@ -177,6 +183,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     private rotateService: RotateService,
     private subscriptionService: SubscriptionService,
     private drawingStore: DrawingStore,
+    private nodesActions: NodesActions,
   ) {
     rxEffect(
       this.contextMenuStore.open$.pipe(
@@ -220,12 +227,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         this.store.dispatch(
           BoardActions.batchNodeActions({
             history: false,
-            actions: [
-              {
-                data: node,
-                op: 'patch',
-              },
-            ],
+            actions: [this.nodesActions.patch(node)],
           }),
         );
       });
@@ -249,12 +251,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         this.store.dispatch(
           BoardActions.batchNodeActions({
             history: false,
-            actions: [
-              {
-                data: node,
-                op: 'patch',
-              },
-            ],
+            actions: [this.nodesActions.patch(node)],
           }),
         );
       });
@@ -269,22 +266,28 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       zoom: this.store.select(selectZoom),
       relativePosition: this.store.select(selectPosition),
       draggableId: this.store.select(pageFeature.selectFocusId),
-      move: (draggable, position) => {
+      nodes: () => {
+        return this.boardFacade.get();
+      },
+      move: (elements) => {
+        const nodes = elements.map(({ draggable, position }) => {
+          return {
+            node: {
+              type: draggable.nodeType,
+              id: draggable.id,
+              content: {
+                position,
+              },
+            },
+          };
+        });
+
+        const actions = this.nodesActions.bulkPatch(nodes);
+
         this.store.dispatch(
           BoardActions.batchNodeActions({
             history: false,
-            actions: [
-              {
-                data: {
-                  type: draggable.nodeType,
-                  id: draggable.id,
-                  content: {
-                    position,
-                  },
-                },
-                op: 'patch',
-              },
-            ],
+            actions,
           }),
         );
       },
@@ -294,6 +297,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
             nodeType: action.draggable.nodeType,
             id: action.draggable.id,
             initialPosition: action.initialPosition,
+            initialIndex: action.initialIndex,
             finalPosition: action.finalPosition,
           };
         });
@@ -515,24 +519,17 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
                 BoardActions.batchNodeActions({
                   history: true,
                   actions: [
-                    {
-                      data: {
-                        type: 'image',
-                        id: v4(),
-                        content: {
-                          url: reader.result as string,
-                          width: 0,
-                          height: 0,
-                          position: {
-                            x: (-position.x + event.clientX) / zoom,
-                            y: (-position.y + event.clientY) / zoom,
-                          },
-                          layer: this.layer(),
-                          rotation: 0,
-                        },
+                    this.nodesActions.add<Image>('image', {
+                      url: reader.result as string,
+                      width: 0,
+                      height: 0,
+                      position: {
+                        x: (-position.x + event.clientX) / zoom,
+                        y: (-position.y + event.clientY) / zoom,
                       },
-                      op: 'add',
-                    },
+                      layer: this.layer(),
+                      rotation: 0,
+                    }),
                   ],
                 }),
               );

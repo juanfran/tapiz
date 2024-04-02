@@ -22,6 +22,7 @@ import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '@team-up/cdk/models/draggable.model';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
+import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 @Component({
   selector: 'team-up-token',
   styleUrls: ['./token.component.scss'],
@@ -63,6 +64,7 @@ export class TokenComponent implements OnInit, DynamicComponent, Draggable {
   private historyService = inject(HistoryService);
   private boardDragDirective = inject(BoardDragDirective);
   private injector = inject(Injector);
+  private nodesActions = inject(NodesActions);
 
   @Input({ required: true })
   public node!: Signal<TuNode<Token>>;
@@ -148,16 +150,13 @@ export class TokenComponent implements OnInit, DynamicComponent, Draggable {
       BoardActions.batchNodeActions({
         history: false,
         actions: [
-          {
-            data: {
-              type: 'token',
-              id: this.node().id,
-              content: {
-                text,
-              },
+          this.nodesActions.patch({
+            type: 'token',
+            id: this.node().id,
+            content: {
+              text,
             },
-            op: 'patch',
-          },
+          }),
         ],
       }),
     );

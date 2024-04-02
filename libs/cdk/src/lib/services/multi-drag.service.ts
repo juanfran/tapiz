@@ -6,14 +6,13 @@ import {
   filter,
   fromEvent,
   map,
-  merge,
-  startWith,
+  take,
   takeUntil,
   throttleTime,
   withLatestFrom,
 } from 'rxjs';
 import { concatLatestFrom } from '@ngrx/effects';
-import { Point } from '@team-up/board-commons';
+import { Point, TuNode } from '@team-up/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export interface Draggable {
@@ -30,11 +29,18 @@ interface SetupConfig {
   draggableId: Observable<string[]>;
   zoom: Observable<number>;
   relativePosition: Observable<Point>;
-  move: (draggable: Draggable, position: Point) => void;
+  nodes: () => TuNode[];
+  move: (
+    elements: {
+      draggable: Draggable;
+      position: Point;
+    }[],
+  ) => void;
   end: (
     dragged: {
       draggable: Draggable;
       initialPosition: Point;
+      initialIndex: number;
       finalPosition: Point;
     }[],
   ) => void;
@@ -59,6 +65,7 @@ export class MultiDragService {
     Draggable['id'],
     {
       init: Point;
+      initialIndex: number;
       final: Point | null;
       draggable: Draggable;
     }
@@ -66,6 +73,7 @@ export class MultiDragService {
 
   #snap = 50;
   #setUpConfig?: SetupConfig;
+  #eventInitialPoisition: null | Point = null;
 
   draggableElements: Draggable[] = [];
   move$ = new Subject<DragEvent>();
@@ -87,16 +95,7 @@ export class MultiDragService {
       throw new Error('MultiDragService.setUp() must be called before use');
     }
 
-    let startPositionDiff: null | Point = null;
-
     this.draggableElements.push(draggable);
-
-    const keydown$ = fromEvent<KeyboardEvent>(document, 'keydown');
-    const keyup$ = fromEvent<KeyboardEvent>(document, 'keyup');
-    const controlPressed$ = merge(keydown$, keyup$).pipe(
-      map((event) => event.ctrlKey),
-      startWith(false),
-    );
 
     fromEvent<MouseEvent>(draggable.handler, 'mousedown')
       .pipe(
@@ -121,87 +120,6 @@ export class MultiDragService {
           this.remove(draggable);
         },
       });
-
-    this.move$
-      .pipe(
-        takeUntilDestroyed(draggable.destroyRef),
-        filter((move) => {
-          return move.type === 'end';
-        }),
-        withLatestFrom(setUpConfig.draggableId),
-        filter(([, draggableId]) => {
-          return draggableId.includes(draggable.id);
-        }),
-      )
-      .subscribe(() => {
-        startPositionDiff = null;
-      });
-
-    this.move$
-      .pipe(
-        takeUntilDestroyed(draggable.destroyRef),
-        filter((move): move is MoveEvent => {
-          return move.type === 'move';
-        }),
-        filter(() => {
-          if (draggable.preventDrag) {
-            return !draggable.preventDrag();
-          }
-
-          return true;
-        }),
-        withLatestFrom(setUpConfig.draggableId, controlPressed$),
-        filter(([, draggableId]) => {
-          return draggableId.includes(draggable.id);
-        }),
-        map(([event, , ctrlPressed]) => {
-          const initialPosition = draggable.position();
-
-          if (!this.#dragElements.has(draggable.id)) {
-            this.#dragElements.set(draggable.id, {
-              init: initialPosition,
-              final: null,
-              draggable,
-            });
-          }
-
-          if (!startPositionDiff) {
-            startPositionDiff = {
-              x: event.position.x - initialPosition.x,
-              y: event.position.y - initialPosition.y,
-            };
-          }
-
-          let finalPosition = {
-            x: Math.round(event.position.x - startPositionDiff.x),
-            y: Math.round(event.position.y - startPositionDiff.y),
-          };
-
-          if (ctrlPressed) {
-            finalPosition = {
-              x: Math.round(finalPosition.x / this.#snap) * this.#snap,
-              y: Math.round(finalPosition.y / this.#snap) * this.#snap,
-            };
-          }
-
-          return {
-            x: finalPosition.x,
-            y: finalPosition.y,
-          };
-        }),
-      )
-      .subscribe((position) => {
-        const draggableElement = this.#dragElements.get(draggable.id);
-
-        if (draggableElement) {
-          this.#dragElements.set(draggable.id, {
-            ...draggableElement,
-            final: position,
-          });
-        }
-
-        this.#setUpConfig?.move(draggable, position);
-      });
   }
 
   startDrag(destroyRef: DestroyRef) {
@@ -211,47 +129,141 @@ export class MultiDragService {
       return;
     }
 
+    this.#eventInitialPoisition = null;
+
     fromEvent<MouseEvent>(document.body, 'mousemove')
       .pipe(
         throttleTime(0, animationFrameScheduler),
         takeUntil(fromEvent<MouseEvent>(window, 'mouseup')),
         takeUntilDestroyed(destroyRef),
-        map((mouseMove) => {
-          return {
-            x: mouseMove.x,
-            y: mouseMove.y,
-          };
-        }),
         withLatestFrom(setUpConfig.zoom, setUpConfig.relativePosition),
-        map(([move, zoom, position]) => {
-          const posX = -position.x + move.x;
-          const posY = -position.y + move.y;
+        map(([mouseMove, zoom, position]) => {
+          const posX = -position.x + mouseMove.x;
+          const posY = -position.y + mouseMove.y;
 
           return {
-            x: posX / zoom,
-            y: posY / zoom,
+            position: {
+              x: posX / zoom,
+              y: posY / zoom,
+            },
+            ctrlKey: mouseMove.ctrlKey,
           };
         }),
       )
       .subscribe({
-        next: (position) => {
-          this.move$.next({ type: 'move', position });
+        next: (event) => {
+          if (!this.#eventInitialPoisition) {
+            this.#eventInitialPoisition = {
+              x: event.position.x,
+              y: event.position.y,
+            };
+          }
+
+          this.#move(event);
         },
         complete: () => {
           if (!this.#dragElements.size) {
             return;
           }
 
-          this.move$.next({ type: 'end' });
           this.#endDrag();
         },
       });
+  }
+
+  #move(event: { position: Point; ctrlKey: boolean }) {
+    const setUpConfig = this.#setUpConfig;
+
+    if (!setUpConfig) {
+      return;
+    }
+
+    let startPositionDiff: null | Point = null;
+
+    setUpConfig.draggableId.pipe(take(1)).subscribe((draggableId) => {
+      const eventInitialPosition = this.#eventInitialPoisition;
+
+      if (!eventInitialPosition) {
+        return;
+      }
+
+      const dragResult = this.draggableElements
+        .filter((draggable) => {
+          if (draggableId.includes(draggable.id)) {
+            if (draggable.preventDrag) {
+              return !draggable.preventDrag();
+            }
+
+            return true;
+          }
+
+          return false;
+        })
+        .map((draggable) => {
+          if (!this.#dragElements.has(draggable.id)) {
+            const initialPosition = draggable.position();
+            const initialIndex = setUpConfig
+              .nodes()
+              .findIndex((it) => it.id === draggable.id);
+
+            this.#dragElements.set(draggable.id, {
+              init: initialPosition,
+              initialIndex,
+              final: null,
+              draggable,
+            });
+          }
+
+          const initialPosition = this.#dragElements.get(draggable.id)
+            ?.init ?? { x: 0, y: 0 };
+
+          startPositionDiff = {
+            x: eventInitialPosition.x - initialPosition.x,
+            y: eventInitialPosition.y - initialPosition.y,
+          };
+
+          let finalPosition = {
+            x: Math.round(event.position.x - startPositionDiff.x),
+            y: Math.round(event.position.y - startPositionDiff.y),
+          };
+
+          if (event.ctrlKey) {
+            finalPosition = {
+              x: Math.round(finalPosition.x / this.#snap) * this.#snap,
+              y: Math.round(finalPosition.y / this.#snap) * this.#snap,
+            };
+          }
+
+          const draggableElement = this.#dragElements.get(draggable.id);
+
+          if (draggableElement) {
+            this.#dragElements.set(draggable.id, {
+              ...draggableElement,
+              final: {
+                x: finalPosition.x,
+                y: finalPosition.y,
+              },
+            });
+          }
+
+          return {
+            draggable,
+            position: {
+              x: finalPosition.x,
+              y: finalPosition.y,
+            },
+          };
+        });
+
+      this.#setUpConfig?.move(dragResult);
+    });
   }
 
   #endDrag() {
     const actions: {
       draggable: Draggable;
       initialPosition: Point;
+      initialIndex: number;
       finalPosition: Point;
     }[] = [];
 
@@ -260,6 +272,7 @@ export class MultiDragService {
         actions.push({
           draggable: dragElement.draggable,
           initialPosition: dragElement.init,
+          initialIndex: dragElement.initialIndex,
           finalPosition: dragElement.final,
         });
       }

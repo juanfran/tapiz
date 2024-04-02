@@ -6,11 +6,15 @@ import { StateActions } from '@team-up/board-commons';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { isInputField } from '@team-up/cdk/utils/is-input-field';
 import { BoardActions } from '../actions/board.actions';
+import { NodesActions } from '@team-up/nodes/services/nodes-actions';
+import { NodesStore } from '@team-up/nodes/services/nodes.store';
 
 @Injectable()
 export class HistoryEffects {
   #boardFacade = inject(BoardFacade);
   #actions$ = inject(Actions);
+  #nodesActions = inject(NodesActions);
+  #nodesStore = inject(NodesStore);
 
   undo$ = createEffect(() => {
     return this.#actions$.pipe(
@@ -59,6 +63,7 @@ export class HistoryEffects {
                   position: node.initialPosition,
                 },
               },
+              position: node.initialIndex,
               op: 'patch',
             };
           }) as StateActions[];

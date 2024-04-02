@@ -29,6 +29,7 @@ import {
   DrawingStore,
 } from '@team-up/board-components/drawing';
 import { NodeStore } from '../node/node.store';
+import { NodesActions } from '../services/nodes-actions';
 
 @Component({
   selector: 'team-up-panel',
@@ -88,6 +89,7 @@ export class PanelComponent implements OnInit {
   #store = inject(Store);
   #drawingStore = inject(DrawingStore);
   #nodeStore = inject(NodeStore);
+  #nodesActions = inject(NodesActions);
 
   @Input({ required: true })
   node!: Signal<TuNode<Panel>>;
@@ -141,54 +143,6 @@ export class PanelComponent implements OnInit {
     });
   }
 
-  newColor(e: Event) {
-    if (e.target) {
-      const color = (e.target as HTMLInputElement).value;
-
-      this.#store.dispatch(
-        BoardActions.batchNodeActions({
-          history: true,
-          actions: [
-            {
-              data: {
-                type: 'text',
-                id: this.node().id,
-                content: {
-                  color,
-                },
-              },
-              op: 'patch',
-            },
-          ],
-        }),
-      );
-    }
-  }
-
-  newSize(e: Event) {
-    if (e.target) {
-      const size = Number((e.target as HTMLInputElement).value);
-
-      this.#store.dispatch(
-        BoardActions.batchNodeActions({
-          history: true,
-          actions: [
-            {
-              data: {
-                type: 'text',
-                id: this.node().id,
-                content: {
-                  size,
-                },
-              },
-              op: 'patch',
-            },
-          ],
-        }),
-      );
-    }
-  }
-
   ngOnInit() {
     toObservable(this.node, {
       injector: this.#injector,
@@ -211,16 +165,13 @@ export class PanelComponent implements OnInit {
             BoardActions.batchNodeActions({
               history: true,
               actions: [
-                {
-                  data: {
-                    type: 'text',
-                    id: this.node().id,
-                    content: {
-                      text: this.newContent(),
-                    },
+                this.#nodesActions.patch<Panel>({
+                  type: 'panel',
+                  id: this.node().id,
+                  content: {
+                    text: this.newContent(),
                   },
-                  op: 'patch',
-                },
+                }),
               ],
             }),
           );
