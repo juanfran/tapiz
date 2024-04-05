@@ -116,10 +116,6 @@ export class EstimationBoardComponent implements AfterViewInit, OnInit {
 
   public zIndex = 6;
 
-  public preventDelete() {
-    return true;
-  }
-
   public ngAfterViewInit() {
     this.multiDragService.register({
       id: this.id,

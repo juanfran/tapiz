@@ -26,6 +26,7 @@ import { DynamicComponent } from './dynamic-component';
 import { filterNil } from 'ngxtension/filter-nil';
 import { compose, rotateDEG, translate, toCSS } from 'transformation-matrix';
 import { NodeStore } from '@team-up/nodes/node/node.store';
+import { isInputField } from '@team-up/cdk/utils/is-input-field';
 
 interface State {
   position: {
@@ -175,6 +176,10 @@ export class NodeComponent implements OnInit {
   }
 
   preventDelete() {
+    if (isInputField()) {
+      return true;
+    }
+
     const instance = this.cmp?.instance;
 
     if (instance?.preventDelete?.()) {

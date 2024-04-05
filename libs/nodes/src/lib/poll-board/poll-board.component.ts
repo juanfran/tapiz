@@ -132,10 +132,6 @@ export class PollBoardComponent implements AfterViewInit {
 
   zIndex = 6;
 
-  preventDelete() {
-    return true;
-  }
-
   updateNode(content: Partial<PollBoard>) {
     this.#store.dispatch(
       BoardActions.batchNodeActions({
