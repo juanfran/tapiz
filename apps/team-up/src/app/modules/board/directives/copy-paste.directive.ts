@@ -6,6 +6,7 @@ import { selectFocusId } from '../selectors/page.selectors';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { CopyPasteService } from '../../../services/copy-paste.service';
 import { isInputField } from '@team-up/cdk/utils/is-input-field';
+import { NotificationService } from '../../../shared/notification/notification.service';
 
 @Directive({
   selector: '[teamUpCopyPaste]',
@@ -27,6 +28,7 @@ export class CopyPasteDirective {
   private store = inject(Store);
   private boardFacade = inject(BoardFacade);
   private copyPasteService = inject(CopyPasteService);
+  private notificationService = inject(NotificationService);
 
   public copy() {
     this.boardFacade
@@ -39,7 +41,16 @@ export class CopyPasteDirective {
         const copyNodes = nodes.filter((node) => focusId.includes(node.id));
 
         if (copyNodes) {
-          navigator.clipboard.writeText(JSON.stringify(copyNodes));
+          const hasReadText = navigator.clipboard.readText as unknown;
+          if (hasReadText) {
+            navigator.clipboard.writeText(JSON.stringify(copyNodes));
+          } else {
+            this.notificationService.open({
+              message: 'Your browser does not support clipboard access.',
+              action: 'Close',
+              type: 'info',
+            });
+          }
         }
       });
   }

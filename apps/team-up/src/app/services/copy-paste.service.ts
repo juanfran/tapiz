@@ -28,6 +28,12 @@ export class CopyPasteService {
     incX?: number;
     incY?: number;
   }) {
+    const hasReadText = navigator.clipboard.readText as unknown;
+
+    if (!hasReadText) {
+      return;
+    }
+
     const text = await navigator.clipboard.readText();
     const copyNode = this.getNodes(text);
 

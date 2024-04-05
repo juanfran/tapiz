@@ -7,10 +7,10 @@ import { NotificationData } from './notification.model';
   providedIn: 'root',
 })
 export class NotificationService {
-  private snackBar = inject(MatSnackBar);
+  #snackBar = inject(MatSnackBar);
 
-  public open(data: NotificationData) {
-    this.snackBar.openFromComponent(NotificationComponent, {
+  open(data: NotificationData) {
+    this.#snackBar.openFromComponent(NotificationComponent, {
       data: {
         message: data.message,
         action: data.action,
