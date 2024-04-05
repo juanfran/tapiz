@@ -78,9 +78,9 @@ export class MultiDragService {
   draggableElements: Draggable[] = [];
   move$ = new Subject<DragEvent>();
 
-  remove(draggable: Draggable) {
+  remove(draggable: Draggable['id']) {
     this.draggableElements = this.draggableElements.filter(
-      (d) => d !== draggable,
+      (d) => d.id !== draggable,
     );
   }
 
@@ -94,6 +94,8 @@ export class MultiDragService {
     if (!setUpConfig) {
       throw new Error('MultiDragService.setUp() must be called before use');
     }
+
+    this.remove(draggable.id);
 
     this.draggableElements.push(draggable);
 
@@ -117,7 +119,7 @@ export class MultiDragService {
           this.startDrag(draggable.destroyRef);
         },
         complete: () => {
-          this.remove(draggable);
+          this.remove(draggable.id);
         },
       });
   }
