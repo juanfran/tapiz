@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { protectedProcedure, router, teamAdminProcedure } from '../trpc.js';
 import db from '../db/index.js';
 import { checkTeamBoardsAccess, revokeBoardAccess } from '../global.js';
-import { triggerTeam } from '../subscriptor.js';
+import { triggerTeam, triggerUser } from '../subscriptor.js';
 
 export const teamRouter = router({
   new: protectedProcedure
@@ -75,6 +75,8 @@ export const teamRouter = router({
         if (member) {
           throw new TRPCError({ code: 'CONFLICT' });
         }
+
+        triggerUser(invitedUser.id);
       }
 
       const invitation = await db.user.inviteByEmail(

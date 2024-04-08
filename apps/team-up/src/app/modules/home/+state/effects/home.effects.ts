@@ -423,7 +423,7 @@ export const renameTeam$ = createEffect(
 export const initHomeInvitations$ = createEffect(
   (actions$ = inject(Actions), usersApiService = inject(UserApiService)) => {
     return actions$.pipe(
-      ofType(HomeActions.initHome),
+      ofType(HomeActions.initHome, HomeActions.userEvent),
       switchMap(() => {
         return usersApiService.invites();
       }),

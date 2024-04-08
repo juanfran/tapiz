@@ -97,5 +97,6 @@ export const HomeActions = createActionGroup({
       id: BoardUser['id'];
       teamId: Team['id'] | null;
     }>(),
+    'User event': emptyProps(),
   },
 });

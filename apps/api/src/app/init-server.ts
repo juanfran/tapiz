@@ -12,7 +12,7 @@ import {
 import { Server } from './server.js';
 import { newSubscriptorConnection } from './subscriptor.js';
 import { setServer } from './global.js';
-import { getAuthUrl } from './auth.js';
+import { getAuthUrl, lucia, validateSession } from './auth.js';
 import { googleCallback } from './routers/auth-routes.js';
 
 const fastify = Fastify({
@@ -62,8 +62,23 @@ fastify.register(async function (fastify) {
     server.connection(connection.socket, req);
   });
 
-  fastify.get('/sub', { websocket: true }, (connection) => {
-    newSubscriptorConnection(connection.socket);
+  fastify.get('/sub', { websocket: true }, async (connection, req) => {
+    const cookies = (req as any).cookies;
+    const sessionId = cookies[lucia.sessionCookieName];
+
+    if (!sessionId) {
+      connection.socket.close();
+      return;
+    }
+
+    const { user } = await validateSession(sessionId);
+
+    if (!user) {
+      connection.socket.close();
+      return;
+    }
+
+    newSubscriptorConnection(connection.socket, user.id);
   });
 
   fastify.get('/api/auth', async (req, rep) => {

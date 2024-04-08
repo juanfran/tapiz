@@ -61,6 +61,10 @@ export class HomeComponent {
       this.store.select(homeFeature.selectUserInvitations),
     );
 
+    this.subscriptionService.userMessages().subscribe(() => {
+      this.store.dispatch(HomeActions.userEvent());
+    });
+
     this.state
       .select('teams')
       .pipe(

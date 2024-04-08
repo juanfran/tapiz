@@ -14,6 +14,7 @@ export class SubscriptionService {
   #boardsSubject = new Subject<string>();
   #teamIds = new BehaviorSubject<string[]>([]);
   #teamSubject = new Subject<string>();
+  #userSubject = new Subject<void>();
   correlationId = v4();
 
   public listen() {
@@ -77,6 +78,8 @@ export class SubscriptionService {
           this.#teamSubject.next(message['id']);
         } else if (message['type'] === 'board') {
           this.#boardsSubject.next(message['id']);
+        } else if (message['type'] === 'user') {
+          this.#userSubject.next();
         }
       } catch (e) {
         console.error(e);
@@ -94,6 +97,10 @@ export class SubscriptionService {
 
   teamMessages() {
     return this.#teamSubject.asObservable();
+  }
+
+  userMessages() {
+    return this.#userSubject.asObservable();
   }
 
   watchBoardIds(ids: string[]) {

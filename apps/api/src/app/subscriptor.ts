@@ -2,12 +2,12 @@ import type { WebSocket } from 'ws';
 import { z } from 'zod';
 
 const msgSchema = z.object({
-  type: z.union([z.literal('board'), z.literal('team')]),
+  type: z.union([z.literal('board'), z.literal('team'), z.literal('user')]),
   ids: z.string().array(),
   clientId: z.string(),
 });
 
-export function Subscriptor(connection: WebSocket) {
+export function Subscriptor(connection: WebSocket, connectionUserId: string) {
   let boardIds = new Set<string>();
   let teamIds = new Set<string>();
   let clientId = '';
@@ -23,7 +23,7 @@ export function Subscriptor(connection: WebSocket) {
 
       if (type === 'board') {
         boardIds = new Set(ids);
-      } else {
+      } else if (type === 'team') {
         teamIds = new Set(ids);
       }
     } catch {
@@ -38,7 +38,7 @@ export function Subscriptor(connection: WebSocket) {
       }
 
       if (boardIds.has(boardId)) {
-        connection.send(`{"type":"board","id":"${boardId}"}`);
+        connection.send(JSON.stringify({ type: 'board', id: boardId }));
       }
     },
     checkTeam(teamId: string, correlationId: string) {
@@ -47,7 +47,12 @@ export function Subscriptor(connection: WebSocket) {
       }
 
       if (teamIds.has(teamId)) {
-        connection.send(`{"type":"team","id":"${teamId}"}`);
+        connection.send(JSON.stringify({ type: 'team', id: teamId }));
+      }
+    },
+    checkUser(userId: string) {
+      if (userId === connectionUserId) {
+        connection.send(JSON.stringify({ type: 'user' }));
       }
     },
   };
@@ -55,8 +60,11 @@ export function Subscriptor(connection: WebSocket) {
 
 const subscriptors = new Set<ReturnType<typeof Subscriptor>>();
 
-export const newSubscriptorConnection = (connection: WebSocket) => {
-  const subscriptor = Subscriptor(connection);
+export const newSubscriptorConnection = (
+  connection: WebSocket,
+  userId: string,
+) => {
+  const subscriptor = Subscriptor(connection, userId);
   subscriptors.add(subscriptor);
 
   connection.on('close', () => {
@@ -73,5 +81,11 @@ export const triggerBoard = (boardId: string, correlationId: string) => {
 export const triggerTeam = (teamId: string, correlationId: string) => {
   for (const subscriptor of subscriptors) {
     subscriptor.checkTeam(teamId, correlationId);
+  }
+};
+
+export const triggerUser = (userId: string) => {
+  for (const subscriptor of subscriptors) {
+    subscriptor.checkUser(userId);
   }
 };
