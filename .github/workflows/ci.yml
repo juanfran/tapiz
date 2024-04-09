@@ -38,4 +38,4 @@ jobs:
 
       - name: Test
         id: npm-test
-        run: npm run unit:tests
+        run: npm run test
