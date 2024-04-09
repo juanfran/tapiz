@@ -1,10 +1,8 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  Input,
   OnInit,
   HostListener,
-  Signal,
   signal,
   inject,
   Injector,
@@ -21,9 +19,11 @@ import { ToolbarComponent } from '@team-up/ui/toolbar';
 import { EditorViewComponent } from '@team-up/ui/editor-view';
 import { filter, pairwise } from 'rxjs';
 import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-text',
+
   template: `
     <team-up-node-space
       [node]="node()"
@@ -56,6 +56,7 @@ import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
     EditorViewComponent,
     SafeHtmlPipe,
   ],
+
   host: {
     '[class.focus]': 'focus()',
     '[class.toolbar]': 'edit()',
@@ -66,14 +67,11 @@ export class TextComponent implements OnInit {
   private historyService = inject(HistoryService);
   private store = inject(Store);
 
-  @Input({ required: true })
-  public node!: Signal<TuNode<Text>>;
+  public node = input.required<TuNode<Text>>();
 
-  @Input()
-  public pasted!: Signal<boolean>;
+  public pasted = input.required<boolean>();
 
-  @Input({ required: true })
-  public focus!: Signal<boolean>;
+  public focus = input.required<boolean>();
 
   public edit = signal(false);
   public editText = signal('');

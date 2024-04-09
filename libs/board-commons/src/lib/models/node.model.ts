@@ -1,3 +1,5 @@
+import { Point } from './point.model.js';
+
 export interface TuNode<C = object, T = string> {
   id: string;
   type: T;
@@ -54,6 +56,14 @@ type RemoveResponse =
       data: NodeRemove['data'];
     }
   | NodeValidatorError;
+
+export type BoardTuNode = TuNode<{
+  position: Point;
+  layer: number;
+  rotation?: number;
+  width?: number;
+  height?: number;
+}>;
 
 export interface NodeValidator {
   add: (

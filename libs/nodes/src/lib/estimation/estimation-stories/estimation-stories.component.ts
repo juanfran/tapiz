@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Input,
-  OnInit,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 
 import {
   FormArray,
@@ -19,6 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { EstimationStory } from '@team-up/board-commons';
 import { v4 } from 'uuid';
 import { output } from '@angular/core';
+import { input } from '@angular/core';
 
 export { BoardActions } from '@team-up/board-commons/actions/board.actions';
 
@@ -32,6 +28,7 @@ export { BoardActions } from '@team-up/board-commons/actions/board.actions';
     MatFormFieldModule,
     MatIconModule,
   ],
+
   template: `
     <form
       (ngSubmit)="save()"
@@ -86,7 +83,7 @@ export { BoardActions } from '@team-up/board-commons/actions/board.actions';
           Save
         </button>
 
-        @if (showCancel) {
+        @if (showCancel()) {
           <button
             type="button"
             (click)="closeConfig.emit()"
@@ -102,11 +99,9 @@ export { BoardActions } from '@team-up/board-commons/actions/board.actions';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EstimationStoriesComponent implements OnInit {
-  @Input()
-  public estimationStories!: EstimationStory[];
+  public estimationStories = input.required<EstimationStory[]>();
 
-  @Input()
-  public showCancel = false;
+  public showCancel = input(false);
 
   public addStory = output<EstimationStory[]>();
 
@@ -117,10 +112,10 @@ export class EstimationStoriesComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    if (!this.estimationStories.length) {
+    if (!this.estimationStories().length) {
       this.add();
     } else {
-      this.estimationStories.forEach((story) => {
+      this.estimationStories().forEach((story) => {
         this.add(story);
       });
     }

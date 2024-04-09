@@ -1,21 +1,18 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Input,
-  inject,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogRef } from '@angular/material/dialog';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-modal-header',
   standalone: true,
   imports: [MatButtonModule, MatIconModule],
+
   template: `
-    <h1 class="title">
-      {{ title }}
+    <h1 class="title()">
+      {{ title() }}
 
       <button
         type="button"
@@ -30,8 +27,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 export class ModalHeaderComponent {
   public dialogRef = inject(MatDialogRef);
 
-  @Input({ required: true })
-  public title!: string;
+  public title = input.required<string>();
 
   public cancel() {
     this.dialogRef.close();

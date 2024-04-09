@@ -1,11 +1,4 @@
-import {
-  Directive,
-  ElementRef,
-  Input,
-  effect,
-  inject,
-  signal,
-} from '@angular/core';
+import { Directive, ElementRef, effect, inject } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import {
   animationFrameScheduler,
@@ -22,6 +15,7 @@ import { concatLatestFrom } from '@ngrx/effects';
 import { Drawing } from '@team-up/board-commons';
 import { DrawingStore } from './drawing.store';
 import { output } from '@angular/core';
+import { input } from '@angular/core';
 
 export interface MouseDrawingEvent {
   x: number;
@@ -38,14 +32,9 @@ export interface MouseDrawingEvent {
 })
 export class DrawingDirective {
   #drawingStore = inject(DrawingStore);
-  #drawing = signal([] as Drawing[]);
+  teamUpDrawing = input<Drawing[]>([]);
 
-  @Input() set teamUpDrawing(drawing: Drawing[]) {
-    this.#drawing.set(drawing);
-  }
-
-  @Input()
-  public canDraw = true;
+  public canDraw = input(true);
 
   drawing = output<Drawing[]>();
 
@@ -59,7 +48,7 @@ export class DrawingDirective {
       const paintCanvas = this.elementRef.nativeElement;
       this.context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
 
-      this.#drawing().forEach((line) => {
+      this.teamUpDrawing().forEach((line) => {
         this.drawLine(line);
       });
     });
@@ -98,7 +87,7 @@ export class DrawingDirective {
     mouseDown$
       .pipe(
         takeUntilDestroyed(),
-        filter(() => this.canDraw),
+        filter(() => this.canDraw()),
         switchMap(() => {
           return mouseMove$.pipe(
             scan(

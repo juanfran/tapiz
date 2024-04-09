@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Input,
   computed,
   inject,
   signal,
@@ -25,6 +24,7 @@ import { v4 } from 'uuid';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { EstimationWorkspaceComponent } from './estimation-workspace/estimation-workspace.component';
+import { input } from '@angular/core';
 
 export { BoardActions } from '@team-up/board-commons/actions/board.actions';
 
@@ -104,36 +104,30 @@ export { BoardActions } from '@team-up/board-commons/actions/board.actions';
 })
 export class EstimationComponent {
   private store = inject(Store);
-  public config = signal<EstimationConfigNode | undefined>(undefined);
-  public results = signal<EstimationResultNode[]>([]);
   public userResults = computed(() => {
     const results = this.results();
 
-    return results.find((result) => result.content.userId === this.userId);
+    return results.find((result) => result.content.userId === this.userId());
   });
   public screen = signal<'stories' | 'scales' | 'main'>('main');
 
-  @Input({ required: true })
-  public userId!: string;
+  public userId = input.required<string>();
 
-  @Input()
-  public parentId?: string;
+  public parentId = input<string>();
 
-  @Input({ required: true })
-  public set nodes(nodes: EstimationNodes[]) {
-    const config = nodes.find(
+  public nodes = input<EstimationNodes[]>([]);
+
+  config = computed(() => {
+    return this.nodes().find(
       (node): node is EstimationConfigNode => node.type === 'estimation.config',
     );
+  });
 
-    this.config.set(config);
-
-    this.results.set(
-      nodes.filter(
-        (node): node is EstimationResultNode =>
-          node.type === 'estimation.result',
-      ),
+  public results = computed(() => {
+    return this.nodes().filter(
+      (node): node is EstimationResultNode => node.type === 'estimation.result',
     );
-  }
+  });
 
   public editScale(scale: string) {
     const config = this.config();
@@ -145,7 +139,7 @@ export class EstimationComponent {
           actions: [
             {
               op: 'patch',
-              parent: this.parentId,
+              parent: this.parentId(),
               data: {
                 ...config,
                 content: {
@@ -180,7 +174,7 @@ export class EstimationComponent {
         actions: [
           {
             op: 'add',
-            parent: this.parentId,
+            parent: this.parentId(),
             data: estimationConfig,
           },
         ],
@@ -207,7 +201,7 @@ export class EstimationComponent {
       const actions: StateActions[] = [
         {
           op: 'patch',
-          parent: this.parentId,
+          parent: this.parentId(),
           data: {
             ...config,
             content: {
@@ -257,7 +251,7 @@ export class EstimationComponent {
           actions: [
             {
               op: 'patch',
-              parent: this.parentId,
+              parent: this.parentId(),
               data: {
                 ...config,
                 content: {
@@ -274,7 +268,7 @@ export class EstimationComponent {
 
   public deleteEstimation() {
     const config = this.config();
-    const id = this.parentId;
+    const id = this.parentId();
 
     if (config && id) {
       this.store.dispatch(
@@ -304,7 +298,7 @@ export class EstimationComponent {
           actions: [
             {
               op: 'patch',
-              parent: this.parentId,
+              parent: this.parentId(),
               data: {
                 ...config,
                 content: {
@@ -329,7 +323,7 @@ export class EstimationComponent {
         id: v4(),
         type: 'estimation.result',
         content: {
-          userId: this.userId,
+          userId: this.userId(),
           results: [],
         },
       };
@@ -357,7 +351,7 @@ export class EstimationComponent {
           actions: [
             {
               op,
-              parent: this.parentId,
+              parent: this.parentId(),
               data: resultsNode,
             },
           ],

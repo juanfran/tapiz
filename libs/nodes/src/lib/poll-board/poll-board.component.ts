@@ -4,8 +4,6 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  Input,
-  Signal,
   ViewChild,
   computed,
   inject,
@@ -27,6 +25,7 @@ import { NodesStore } from '../services/nodes.store';
 import { CommonModule } from '@angular/common';
 import { PollResultsComponent } from './components/poll-results/poll-results.component';
 import { BoardActions } from '@team-up/board-commons/actions/board.actions';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-poll-board',
@@ -43,6 +42,7 @@ import { BoardActions } from '@team-up/board-commons/actions/board.actions';
     PollResultsComponent,
     CommonModule,
   ],
+
   template: `
     <div
       class="drag-indicator"
@@ -82,14 +82,11 @@ import { BoardActions } from '@team-up/board-commons/actions/board.actions';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PollBoardComponent implements AfterViewInit {
-  @Input({ required: true })
-  node!: Signal<PollBoardNode>;
+  node = input.required<PollBoardNode>();
 
-  @Input()
-  pasted!: Signal<boolean>;
+  pasted = input.required<boolean>();
 
-  @Input()
-  focus!: Signal<boolean>;
+  focus = input.required<boolean>();
 
   @ViewChild('drag')
   drag!: ElementRef<HTMLButtonElement>;

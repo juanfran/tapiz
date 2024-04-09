@@ -1,10 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Input,
   computed,
   inject,
-  signal,
 } from '@angular/core';
 
 import { RxFor } from '@rx-angular/template/for';
@@ -22,6 +20,7 @@ import { RenameBoardComponent } from '../rename-board/rename-board.component';
 import { MatSelectModule } from '@angular/material/select';
 import { homeFeature } from '../../+state/home.feature';
 import { TransferBoardComponent } from '../transfer-board/transfer-board.component';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-board-list',
@@ -47,10 +46,9 @@ export class BoardListComponent {
   private dialog = inject(MatDialog);
 
   public sortBy = this.store.selectSignal(homeFeature.selectSortBy);
-  public listBoards = signal([] as BoardUser[]);
 
   public sortedBoards = computed(() => {
-    const list = [...this.listBoards()];
+    const list = [...this.boards()];
 
     list.sort((a, b) => {
       const sortyBy = this.sortBy();
@@ -75,10 +73,7 @@ export class BoardListComponent {
     return list;
   });
 
-  @Input()
-  public set boards(boards: BoardUser[]) {
-    this.listBoards.set(boards);
-  }
+  boards = input.required<BoardUser[]>();
 
   public sortByField(fieldName: string) {
     return (a: Record<string, string>, b: Record<string, string>) =>

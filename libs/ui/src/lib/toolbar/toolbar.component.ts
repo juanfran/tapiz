@@ -5,11 +5,10 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  Input,
   OnInit,
   ViewChild,
+  effect,
   inject,
-  signal,
 } from '@angular/core';
 
 import { MatIconModule } from '@angular/material/icon';
@@ -30,6 +29,7 @@ import { NodeToolbar } from './node-toolbar.model';
 import { TuNode } from '@team-up/board-commons';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '@team-up/board-commons/actions/board.actions';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-toolbar',
@@ -108,7 +108,7 @@ import { BoardActions } from '@team-up/board-commons/actions/board.actions';
       </div>
     }
 
-    @if (layoutOptions) {
+    @if (layoutOptions()) {
       <div class="type-icon">
         <button
           title="Layout"
@@ -127,12 +127,12 @@ import { BoardActions } from '@team-up/board-commons/actions/board.actions';
                 <div
                   class="color"
                   [style.background-color]="
-                    node.content.backgroundColor ?? '#FFF'
+                    node().content.backgroundColor ?? '#FFF'
                   ">
                   <div class="color-picker">
                     <input
                       type="color"
-                      [value]="node.content.backgroundColor"
+                      [value]="node().content.backgroundColor"
                       (change)="updateNode($event, 'backgroundColor')" />
                   </div>
                 </div>
@@ -146,12 +146,12 @@ import { BoardActions } from '@team-up/board-commons/actions/board.actions';
                 <div
                   class="color"
                   [style.background-color]="
-                    node.content.borderColor ?? '#e8e9ea'
+                    node().content.borderColor ?? '#e8e9ea'
                   ">
                   <div class="color-picker">
                     <input
                       type="color"
-                      [value]="node.content.borderColor"
+                      [value]="node().content.borderColor"
                       (change)="updateNode($event, 'borderColor')" />
                   </div>
                 </div>
@@ -164,7 +164,7 @@ import { BoardActions } from '@team-up/board-commons/actions/board.actions';
 
                 <input
                   type="number"
-                  [value]="node.content.borderRadius ?? 0"
+                  [value]="node().content.borderRadius ?? 0"
                   (change)="updateNode($event, 'borderRadius')" />
               </label>
             </div>
@@ -175,7 +175,7 @@ import { BoardActions } from '@team-up/board-commons/actions/board.actions';
 
                 <input
                   type="number"
-                  [value]="node.content.borderWidth ?? 1"
+                  [value]="node().content.borderWidth ?? 1"
                   (change)="updateNode($event, 'borderWidth')" />
               </label>
             </div>
@@ -185,17 +185,17 @@ import { BoardActions } from '@team-up/board-commons/actions/board.actions';
 
               <div class="buttons">
                 <button
-                  [class.active]="node.content.textAlign === 'start'"
+                  [class.active]="node().content.textAlign === 'start'"
                   (click)="updateNodeValue('start', 'textAlign')">
                   <mat-icon>vertical_align_top</mat-icon>
                 </button>
                 <button
-                  [class.active]="node.content.textAlign === 'center'"
+                  [class.active]="node().content.textAlign === 'center'"
                   (click)="updateNodeValue('center', 'textAlign')">
                   <mat-icon>vertical_align_center</mat-icon>
                 </button>
                 <button
-                  [class.active]="node.content.textAlign === 'end'"
+                  [class.active]="node().content.textAlign === 'end'"
                   (click)="updateNodeValue('end', 'textAlign')">
                   <mat-icon>vertical_align_bottom</mat-icon>
                 </button>
@@ -223,65 +223,50 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
 
   #cd = inject(ChangeDetectorRef);
   #el = inject(ElementRef);
-  #x = signal<number>(0);
-  #y = signal<number>(0);
+
   #destroyRef = inject(DestroyRef);
   #store = inject(Store);
 
-  @Input({ required: true }) editor!: Editor;
-  @Input({ required: true }) node!: TuNode<NodeToolbar>;
+  editor = input.required<Editor>();
+  node = input.required<TuNode<NodeToolbar>>();
 
-  @Input({ required: true }) set x(value: number) {
-    this.#x.set(value);
+  x = input(0);
+  y = input(0);
 
-    if (this.#el) {
-      this.#refreshPositon();
-    }
-  }
-  @Input({ required: true }) set y(value: number) {
-    this.#y.set(value);
+  layoutOptions = input(false);
 
-    if (this.#el) {
-      this.#refreshPositon();
-    }
-  }
-
-  @Input()
-  layoutOptions = false;
-
-  @Input()
-  closeMenus?: Observable<unknown>;
+  closeMenus = input<Observable<unknown>>();
 
   menuItems: MenuItem[] = [
     {
       type: 'icon',
       command: () => {
-        this.editor.chain().focus().toggleBold().run();
+        this.editor().chain().focus().toggleBold().run();
       },
       name: 'Bold',
       enabled: true,
       icon: 'format_bold',
-      active: () => this.editor.isActive('bold'),
+      active: () => this.editor().isActive('bold'),
     },
     {
       type: 'icon',
       command: () => {
-        this.editor.chain().focus().toggleItalic().run();
+        this.editor().chain().focus().toggleItalic().run();
       },
       enabled: true,
       name: 'Italic',
       icon: 'format_italic',
-      active: () => this.editor.isActive('italic'),
+      active: () => this.editor().isActive('italic'),
     },
     {
       type: 'icon',
       command: () => {
-        this.editor.chain().focus().toggleStrike().run();
+        this.editor().chain().focus().toggleStrike().run();
       },
       enabled: true,
       name: 'Strike',
       icon: 'strikethrough_s',
-      active: () => this.editor.isActive('strike'),
+      active: () => this.editor().isActive('strike'),
     },
     {
       type: 'divider',
@@ -290,12 +275,12 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
       type: 'select',
       command: (value: string) => {
         if (value === 'raleway') {
-          this.editor.commands.unsetFontFamily();
+          this.editor().commands.unsetFontFamily();
 
           return;
         }
 
-        this.editor.commands.setFontFamily(`var(--font-${value})`);
+        this.editor().commands.setFontFamily(`var(--font-${value})`);
       },
       enabled: true,
       name: 'Aa',
@@ -331,7 +316,7 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
           return false;
         }
 
-        return this.editor.isActive('textStyle', {
+        return this.editor().isActive('textStyle', {
           fontFamily: `var(--font-${fontFamily})`,
         });
       },
@@ -343,9 +328,11 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
       type: 'select',
       command: (value: string) => {
         if (value) {
-          this.editor.commands.toggleHeading({ level: Number(value) as Level });
+          this.editor().commands.toggleHeading({
+            level: Number(value) as Level,
+          });
         } else {
-          this.editor.commands.setParagraph();
+          this.editor().commands.setParagraph();
         }
       },
       enabled: true,
@@ -376,10 +363,10 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
       ],
       active: (level: string) => {
         if (!level) {
-          return this.editor.isActive('paragraph');
+          return this.editor().isActive('paragraph');
         }
 
-        return this.editor.isActive('heading', { level: Number(level) });
+        return this.editor().isActive('heading', { level: Number(level) });
       },
     },
     {
@@ -388,32 +375,32 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
     {
       type: 'icon',
       command: () => {
-        this.editor.chain().focus().setTextAlign('left').run();
+        this.editor().chain().focus().setTextAlign('left').run();
       },
       enabled: true,
       name: 'Align Left',
       icon: 'format_align_left',
-      active: () => this.editor.isActive({ textAlign: 'left' }),
+      active: () => this.editor().isActive({ textAlign: 'left' }),
     },
     {
       type: 'icon',
       command: () => {
-        this.editor.chain().focus().setTextAlign('center').run();
+        this.editor().chain().focus().setTextAlign('center').run();
       },
       enabled: true,
       name: 'Align Center',
       icon: 'format_align_center',
-      active: () => this.editor.isActive({ textAlign: 'center' }),
+      active: () => this.editor().isActive({ textAlign: 'center' }),
     },
     {
       type: 'icon',
       command: () => {
-        this.editor.chain().focus().setTextAlign('right').run();
+        this.editor().chain().focus().setTextAlign('right').run();
       },
       enabled: true,
       name: 'Align Right',
       icon: 'format_align_right',
-      active: () => this.editor.isActive({ textAlign: 'right' }),
+      active: () => this.editor().isActive({ textAlign: 'right' }),
     },
     {
       type: 'divider',
@@ -421,22 +408,22 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
     {
       type: 'icon',
       command: () => {
-        this.editor.chain().focus().toggleBulletList().run();
+        this.editor().chain().focus().toggleBulletList().run();
       },
       enabled: true,
       name: 'Bullet list',
       icon: 'format_list_bulleted',
-      active: () => this.editor.isActive('bulletList'),
+      active: () => this.editor().isActive('bulletList'),
     },
     {
       type: 'icon',
       command: () => {
-        this.editor.chain().focus().toggleOrderedList().run();
+        this.editor().chain().focus().toggleOrderedList().run();
       },
       enabled: true,
       name: 'Ordered list',
       icon: 'format_list_numbered',
-      active: () => this.editor.isActive('orderedList'),
+      active: () => this.editor().isActive('orderedList'),
     },
     {
       type: 'divider',
@@ -444,7 +431,7 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
     {
       type: 'icon',
       command: () => {
-        const previousUrl = this.editor.getAttributes('link')['href'] ?? '';
+        const previousUrl = this.editor().getAttributes('link')['href'] ?? '';
 
         const url = prompt('Link url', previousUrl);
 
@@ -454,13 +441,18 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
 
         // unset link
         if (url === '') {
-          this.editor.chain().focus().extendMarkRange('link').unsetLink().run();
+          this.editor()
+            .chain()
+            .focus()
+            .extendMarkRange('link')
+            .unsetLink()
+            .run();
 
           return;
         }
 
         // update link
-        this.editor
+        this.editor()
           .chain()
           .focus()
           .extendMarkRange('link')
@@ -470,18 +462,18 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
       enabled: true,
       name: 'Link',
       icon: 'link',
-      active: () => this.editor.isActive('link'),
+      active: () => this.editor().isActive('link'),
     },
     {
       type: 'color',
       command: (color: string) => {
-        this.editor.chain().focus().setColor(color).run();
+        this.editor().chain().focus().setColor(color).run();
       },
       enabled: true,
       name: 'Font color',
       color: () => {
         const color =
-          this.editor.getAttributes('textStyle')['color'] ?? '#000000';
+          this.editor().getAttributes('textStyle')['color'] ?? '#000000';
 
         return {
           main: color,
@@ -500,11 +492,11 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.editor.on('transaction', () => {
+    this.editor().on('transaction', () => {
       this.#cd.detectChanges();
     });
 
-    this.closeMenus
+    this.closeMenus()
       ?.pipe(
         takeUntilDestroyed(this.#destroyRef),
         filter(() => !!this.menu),
@@ -529,8 +521,8 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
           {
             op: 'patch',
             data: {
-              id: this.node.id,
-              type: this.node.type,
+              id: this.node().id,
+              type: this.node().type,
               content: {
                 [key]: isNumber ? Number(target.value) : target.value,
               },
@@ -549,8 +541,8 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
           {
             op: 'patch',
             data: {
-              id: this.node.id,
-              type: this.node.type,
+              id: this.node().id,
+              type: this.node().type,
               content: {
                 [key]: value,
               },
@@ -561,15 +553,21 @@ export class ToolbarComponent implements OnInit, AfterViewInit {
     );
   }
 
-  ngAfterViewInit(): void {
-    this.#refreshPositon();
+  constructor() {
+    effect(() => {
+      this.#refreshPositon(this.x(), this.y());
+    });
   }
 
-  #refreshPositon() {
-    const x = this.#x() - this.#el.nativeElement.offsetWidth / 2;
+  ngAfterViewInit(): void {
+    this.#refreshPositon(this.x(), this.y());
+  }
+
+  #refreshPositon(positionX: number, positionY: number) {
+    const x = positionX - this.#el.nativeElement.offsetWidth / 2;
 
     this.#el.nativeElement.style.transform = `translate(${x}px, ${
-      this.#y() - 40
+      positionY - 40
     }px)`;
   }
 }

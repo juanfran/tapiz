@@ -5,9 +5,7 @@ import {
   DestroyRef,
   ElementRef,
   Injector,
-  Input,
   OnInit,
-  Signal,
   ViewChild,
   computed,
   inject,
@@ -25,11 +23,13 @@ import * as R from 'remeda';
 import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
 import { NodesStore } from '../services/nodes.store';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-estimation-board',
   standalone: true,
   imports: [EstimationComponent, MatIconModule],
+
   template: `
     <div
       class="drag-indicator"
@@ -50,14 +50,11 @@ import { toObservable } from '@angular/core/rxjs-interop';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EstimationBoardComponent implements AfterViewInit, OnInit {
-  @Input({ required: true })
-  public node!: Signal<TuNode<EstimationBoard, 'estimation'>>;
+  public node = input.required<TuNode<EstimationBoard, 'estimation'>>();
 
-  @Input()
-  public pasted!: Signal<boolean>;
+  public pasted = input.required<boolean>();
 
-  @Input()
-  public focus!: Signal<boolean>;
+  public focus = input.required<boolean>();
 
   @ViewChild('drag')
   public drag!: ElementRef<HTMLButtonElement>;

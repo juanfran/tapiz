@@ -1,15 +1,17 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect } from '@angular/core';
 
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { EstimationConfig } from '@team-up/board-commons';
 import { output } from '@angular/core';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-init-estimation',
   standalone: true,
   imports: [MatSelectModule, FormsModule, MatButtonModule],
+
   template: `
     <form
       (ngSubmit)="onSubmit()"
@@ -17,8 +19,8 @@ import { output } from '@angular/core';
       <mat-form-field>
         <mat-label>Scale</mat-label>
         <mat-select
-          [(ngModel)]="scale"
-          name="scale">
+          [(ngModel)]="scaleField"
+          name="scale()">
           <mat-option value="t-shirt">T-Shirt</mat-option>
           <mat-option value="fibonacci">Fibonacci</mat-option>
         </mat-select>
@@ -39,12 +41,19 @@ import { output } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InitEstimationComponent {
-  @Input()
-  public scale: EstimationConfig['scale'] = 't-shirt';
+  public scale = input<EstimationConfig['scale']>('t-shirt');
 
   public completeSetup = output<EstimationConfig['scale']>();
 
+  scaleField: EstimationConfig['scale'] = 't-shirt';
+
+  constructor() {
+    effect(() => {
+      this.scaleField = this.scale();
+    });
+  }
+
   public onSubmit() {
-    this.completeSetup.emit(this.scale);
+    this.completeSetup.emit(this.scaleField);
   }
 }

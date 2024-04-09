@@ -6,7 +6,6 @@ import {
   inject,
   OnInit,
   ElementRef,
-  Input,
   ViewChild,
   ViewContainerRef,
   Type,
@@ -14,38 +13,23 @@ import {
   ComponentRef,
   HostBinding,
   signal,
+  Injector,
+  effect,
+  computed,
 } from '@angular/core';
 import { RxState } from '@rx-angular/state';
-import { Point, TuNode } from '@team-up/board-commons';
-import { distinctUntilChanged, map, take } from 'rxjs';
+import { BoardTuNode } from '@team-up/board-commons';
+import { take } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { selectFocusId } from '../../selectors/page.selectors';
 import { PageActions } from '../../actions/page.actions';
 import { pageFeature } from '../../reducers/page.reducer';
 import { DynamicComponent } from './dynamic-component';
-import { filterNil } from 'ngxtension/filter-nil';
 import { compose, rotateDEG, translate, toCSS } from 'transformation-matrix';
 import { NodeStore } from '@team-up/nodes/node/node.store';
 import { isInputField } from '@team-up/cdk/utils/is-input-field';
-
-interface State {
-  position: {
-    point: Point;
-    rotation: number;
-  };
-  size: {
-    width: number;
-    height: number;
-  };
-  node: TuNode<{
-    position: Point;
-    layer: number;
-    rotation?: number;
-    width?: number;
-    height?: number;
-  }>;
-  focus: boolean;
-}
+import { input } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'team-up-node',
@@ -61,23 +45,50 @@ interface State {
 })
 export class NodeComponent implements OnInit {
   readonly #nodeStore = inject(NodeStore);
-  state = inject(RxState) as RxState<State>;
   private el = inject(ElementRef<HTMLElement>);
   private store = inject(Store);
   private cmp?: ComponentRef<DynamicComponent>;
+  private injector = inject(Injector);
 
   @HostBinding('class') get layer() {
-    return `layer-${this.state.get('node').content.layer}`;
+    return `layer-${this.node().content.layer}`;
   }
 
   @HostBinding('attr.data-id') get id() {
-    return this.state.get('node').id;
+    return this.node().id;
   }
 
-  @Input({ required: true })
-  public set node(node: TuNode) {
-    this.state.set({ node: node as State['node'] });
-  }
+  node = input.required<BoardTuNode>();
+
+  position = computed(() => {
+    const content = this.node().content;
+
+    return {
+      point: content.position,
+      rotation: content?.rotation ?? 0,
+    };
+  });
+
+  size = computed(() => {
+    const content = this.node().content;
+
+    if ('width' in content && 'height' in content) {
+      return {
+        size: {
+          width: content.width as number,
+          height: content.height as number,
+        },
+      };
+    }
+
+    return {};
+  });
+
+  focusId = this.store.selectSignal(selectFocusId);
+
+  focus = computed(() => {
+    return this.focusId().includes(this.node().id);
+  });
 
   @ViewChild('nodeHost', { read: ViewContainerRef })
   public nodeHost!: ViewContainerRef;
@@ -86,7 +97,7 @@ export class NodeComponent implements OnInit {
   public mousedown(event: MouseEvent) {
     this.store.dispatch(
       PageActions.setFocusId({
-        focusId: this.state.get('node').id,
+        focusId: this.node().id,
         ctrlKey: event.ctrlKey,
       }),
     );
@@ -98,81 +109,37 @@ export class NodeComponent implements OnInit {
     return this.el.nativeElement;
   }
 
-  public ngOnInit() {
-    loadNode(this.state.get('node').type).then((node) => {
-      this.loadComponent(node.component as Type<DynamicComponent>);
+  constructor() {
+    effect(() => {
+      const { point, rotation } = this.position();
+      this.nativeElement.style.transform = toCSS(
+        compose(translate(point.x, point.y), rotateDEG(rotation)),
+      );
     });
 
-    this.positionState();
+    effect(() => {
+      const { size } = this.size();
 
-    this.state.connect(
-      'focus',
-      this.store
-        .select(selectFocusId)
-        .pipe(map((it) => it.includes(this.state.get('node').id))),
-    );
-  }
-
-  private positionState() {
-    this.state.hold(this.state.select('node'), (node) => {
-      const content = node.content;
-
-      this.state.set({
-        position: {
-          point: content.position,
-          rotation: content?.rotation ?? 0,
-        },
-      });
-
-      if ('width' in node.content && 'height' in node.content) {
-        this.state.set({
-          size: {
-            width: node.content.width as number,
-            height: node.content.height as number,
-          },
-        });
+      if (size) {
+        this.nativeElement.style.width = `${size.width}px`;
+        this.nativeElement.style.height = `${size.height}px`;
       }
     });
 
-    this.state.hold(
-      this.state.select('position').pipe(
-        distinctUntilChanged((prev, cur) => {
-          return (
-            prev.point.x === cur.point.x &&
-            prev.point.y === cur.point.y &&
-            prev.rotation === cur.rotation
-          );
-        }),
-        filterNil(),
-      ),
-      ({ point, rotation }) => {
-        this.nativeElement.style.transform = toCSS(
-          compose(translate(point.x, point.y), rotateDEG(rotation)),
-        );
-      },
-    );
-
-    this.state.hold(
-      this.state.select('size').pipe(
-        distinctUntilChanged(
-          (prev, cur) => prev.width === cur.width && prev.height === cur.height,
-        ),
-        filterNil(),
-      ),
-      (size) => {
-        this.nativeElement.style.width = `${size.width}px`;
-        this.nativeElement.style.height = `${size.height}px`;
-      },
-    );
-
-    this.state.hold(
-      this.store.select(pageFeature.selectCanvasMode),
-      (layer) => {
+    this.store
+      .select(pageFeature.selectCanvasMode)
+      .pipe(takeUntilDestroyed())
+      .subscribe((layer) => {
         this.#nodeStore.updateState({
           layer: layer === 'editMode' ? 0 : 1,
         });
-      },
-    );
+      });
+  }
+
+  public ngOnInit() {
+    loadNode(this.node().type).then((node) => {
+      this.loadComponent(node.component as Type<DynamicComponent>);
+    });
   }
 
   preventDelete() {
@@ -194,22 +161,44 @@ export class NodeComponent implements OnInit {
       .select(pageFeature.selectAdditionalContext)
       .pipe(take(1))
       .subscribe((context) => {
-        const pasted = signal(context[this.state.get('node').id] === 'pasted');
+        const pasted = signal(context[this.node().id] === 'pasted');
         this.cmp = this.nodeHost.createComponent(component);
 
-        this.cmp.setInput('node', this.state.signal('node'));
-        this.cmp.setInput('focus', this.state.signal('focus'));
-        this.cmp.setInput('pasted', pasted);
+        this.cmp.setInput('node', this.node());
+        this.cmp.setInput('focus', this.focus());
+        this.cmp.setInput('pasted', pasted());
 
         this.#nodeStore.updateState({
           pasted: false,
-          node: this.state.get('node'),
-          focus: this.state.get('focus'),
+          node: this.node(),
+          focus: this.focus(),
         });
 
         const zIndex = (this.cmp.instance as { zIndex?: number })?.zIndex ?? 1;
 
         this.nativeElement.style.setProperty('--z-index-node', zIndex);
       });
+
+    effect(
+      () => {
+        if (!this.cmp) {
+          return;
+        }
+
+        this.cmp.setInput('node', this.node());
+      },
+      { injector: this.injector },
+    );
+
+    effect(
+      () => {
+        if (!this.cmp) {
+          return;
+        }
+
+        this.cmp.setInput('focus', this.focus());
+      },
+      { injector: this.injector },
+    );
   }
 }

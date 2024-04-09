@@ -1,10 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Input,
-  inject,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
 import { BoardUser, UserTeam } from '@team-up/board-commons';
@@ -30,9 +25,10 @@ import { ConfirmComponent } from '../../../../shared/confirm-action/confirm-acti
 import { TitleComponent } from '../../../../shared/title/title.component';
 import { filterNil } from 'ngxtension/filter-nil';
 import { SubscriptionService } from '../../../../services/subscription.service';
+import { input } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 interface State {
-  teamId: string;
   team: UserTeam;
   boards: BoardUser[];
 }
@@ -111,9 +107,7 @@ export class TeamComponent {
 
   public model$ = this.state.select();
 
-  @Input() set id(id: string) {
-    this.state.set({ teamId: id });
-  }
+  id = input.required<string>();
 
   constructor() {
     this.state.hold(this.state.select('team'), (team) => {
@@ -123,7 +117,7 @@ export class TeamComponent {
     this.state.connect(
       'team',
       combineLatest({
-        teamId: this.state.select('teamId'),
+        teamId: toObservable(this.id),
         teams: this.store.select(homeFeature.selectTeams),
       }).pipe(
         map(({ teamId, teams }) => teams.find((team) => team.id === teamId)),
@@ -143,13 +137,11 @@ export class TeamComponent {
       ),
       this.subscriptionService
         .teamMessages()
-        .pipe(filter((it) => it === this.state.get('teamId'))),
+        .pipe(filter((it) => it === this.id())),
     )
       .pipe(debounceTime(100))
       .subscribe(() => {
-        this.store.dispatch(
-          HomeActions.fetchTeamBoards({ teamId: this.state.get('teamId') }),
-        );
+        this.store.dispatch(HomeActions.fetchTeamBoards({ teamId: this.id() }));
       });
   }
 
@@ -175,9 +167,7 @@ export class TeamComponent {
       .afterClosed()
       .pipe(filter((it) => it))
       .subscribe(() => {
-        this.store.dispatch(
-          HomeActions.deleteTeam({ id: this.state.get('teamId') }),
-        );
+        this.store.dispatch(HomeActions.deleteTeam({ id: this.id() }));
       });
   }
 
@@ -196,7 +186,7 @@ export class TeamComponent {
       .subscribe((name) => {
         this.store.dispatch(
           HomeActions.renameTeam({
-            id: this.state.get('teamId'),
+            id: this.id(),
             name,
           }),
         );
@@ -209,7 +199,7 @@ export class TeamComponent {
       autoFocus: 'dialog',
       data: {
         title: 'Team members',
-        teamId: this.state.get('teamId'),
+        teamId: this.id(),
       },
     });
   }
@@ -234,9 +224,7 @@ export class TeamComponent {
       .afterClosed()
       .pipe(filter((it) => it))
       .subscribe(() => {
-        this.store.dispatch(
-          HomeActions.leaveTeam({ id: this.state.get('teamId') }),
-        );
+        this.store.dispatch(HomeActions.leaveTeam({ id: this.id() }));
       });
   }
 }

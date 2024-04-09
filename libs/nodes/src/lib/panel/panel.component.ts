@@ -1,11 +1,9 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  Input,
   ElementRef,
   OnInit,
   HostListener,
-  Signal,
   signal,
   inject,
   Injector,
@@ -30,9 +28,11 @@ import {
 } from '@team-up/board-components/drawing';
 import { NodeStore } from '../node/node.store';
 import { NodesActions } from '../services/nodes-actions';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-panel',
+
   template: `
     <team-up-node-space
       [node]="node()"
@@ -75,6 +75,7 @@ import { NodesActions } from '../services/nodes-actions';
     SafeHtmlPipe,
     DrawingDirective,
   ],
+
   host: {
     '[class.focus]': 'focus()',
     '[class.toolbar]': 'edit()',
@@ -91,14 +92,11 @@ export class PanelComponent implements OnInit {
   #nodeStore = inject(NodeStore);
   #nodesActions = inject(NodesActions);
 
-  @Input({ required: true })
-  node!: Signal<TuNode<Panel>>;
+  node = input.required<TuNode<Panel>>();
 
-  @Input()
-  pasted!: Signal<boolean>;
+  pasted = input.required<boolean>();
 
-  @Input({ required: true })
-  focus!: Signal<boolean>;
+  focus = input.required<boolean>();
 
   edit = signal(false);
   editText = signal('');

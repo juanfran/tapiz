@@ -1,5 +1,6 @@
-import { Directive, ElementRef, Input, inject } from '@angular/core';
+import { Directive, ElementRef, computed, effect, inject } from '@angular/core';
 import { contrast } from '@team-up/cdk/utils/colors';
+import { input } from '@angular/core';
 
 const colors = [
   '#FF7F7F',
@@ -38,30 +39,35 @@ export const BoardColors = colors.map((backgroundColor) => {
   exportAs: 'teamUpBoardIdToColor',
 })
 export class BoardIdToColorDirective {
-  private elementRef = inject(ElementRef<HTMLElement>);
+  #elementRef = inject(ElementRef<HTMLElement>);
 
-  @Input({ required: true }) set teamUpBoardIdToColor(boardId: string) {
-    this.idToColor(boardId);
-  }
+  teamUpBoardIdToColor = input.required<string>();
 
-  private colors = BoardColors;
+  #index = computed(() => {
+    const id = this.teamUpBoardIdToColor();
 
-  public color = '';
-  public backgroundColor = '';
-
-  public idToColor(id: string) {
     let hash = 0;
     for (let i = 0; i < id.length; i++) {
       hash = hash * 31 + id.charCodeAt(i);
       hash = hash % Number.MAX_SAFE_INTEGER;
     }
 
-    const index = Math.abs(hash) % this.colors.length;
+    return Math.abs(hash) % this.#colors.length;
+  });
 
-    this.backgroundColor = this.colors[index].backgroundColor;
-    this.color = this.colors[index].color;
+  #colors = BoardColors;
+  color = computed(() => {
+    return this.#colors[this.#index()].color;
+  });
+  backgroundColor = computed(() => {
+    return this.#colors[this.#index()].backgroundColor;
+  });
 
-    this.elementRef.nativeElement.style.backgroundColor = this.backgroundColor;
-    this.elementRef.nativeElement.style.color = this.color;
+  constructor() {
+    effect(() => {
+      this.#elementRef.nativeElement.style.backgroundColor =
+        this.backgroundColor();
+      this.#elementRef.nativeElement.style.color = this.color();
+    });
   }
 }

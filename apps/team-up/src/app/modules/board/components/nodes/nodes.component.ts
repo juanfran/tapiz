@@ -14,7 +14,7 @@ import { PageActions } from '../../actions/page.actions';
 import { filter } from 'rxjs';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { isInputField } from '@team-up/cdk/utils/is-input-field';
-import { User } from '@team-up/board-commons';
+import { BoardTuNode, User } from '@team-up/board-commons';
 import { pageFeature } from '../../reducers/page.reducer';
 import { AsyncPipe } from '@angular/common';
 
@@ -41,7 +41,9 @@ export class NodesComponent {
 
   public nodes$ = this.#boardFacade.getNodes().pipe(
     map((it) => {
-      return it.filter((it) => !['user', 'settings'].includes(it.type));
+      return it.filter(
+        (it) => !['user', 'settings'].includes(it.type),
+      ) as BoardTuNode[];
     }),
   );
 
@@ -103,12 +105,12 @@ export class NodesComponent {
   #onDeletePress() {
     const nodes = this.nodesComponents()
       .filter((it) => {
-        return it.state.get('focus') && !it.preventDelete?.();
+        return it.focus() && !it.preventDelete?.();
       })
       .map((it) => {
         return {
-          type: it.state.get('node').type,
-          id: it.state.get('node').id,
+          type: it.node().type,
+          id: it.node().id,
         };
       });
 
