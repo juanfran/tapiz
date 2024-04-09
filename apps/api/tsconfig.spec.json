@@ -2,12 +2,19 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "module": "commonjs",
-    "types": ["jest", "node"],
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "strict": true
+    "types": [
+      "vitest/globals",
+      "vitest/importMeta",
+      "vite/client",
+      "node",
+      "vitest"
+    ],
   },
-  "files": ["src/test-setup.ts"],
-  "include": ["jest.config.ts", "**/*.test.ts", "**/*.spec.ts", "**/*.d.ts"]
+  "include": [
+    "src/test-setup.ts",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.d.ts"
+  ]
 }

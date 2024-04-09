@@ -47,18 +47,18 @@
         }
       }
     },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/apps/api"],
-      "options": {
-        "jestConfig": "apps/api/jest.config.ts"
-      }
-    },
-    "run-script": {
+    "regenerate": {
       "executor": "nx:run-commands",
       "outputs": [],
       "options": {
         "command": "node apps/api/src/app/regenerate.js"
+      }
+    },
+    "migrate": {
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "npx tsx apps/api/src/app/db/migrate.ts"
       }
     }
   },

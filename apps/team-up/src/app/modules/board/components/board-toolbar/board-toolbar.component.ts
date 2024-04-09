@@ -24,7 +24,6 @@ import {
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { v4 } from 'uuid';
 import { Subscription, zip } from 'rxjs';
 import 'emoji-picker-element';
 import { EmojiClickEvent, NativeEmoji } from 'emoji-picker-element/shared';

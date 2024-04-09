@@ -83,13 +83,6 @@
       "options": {
         "buildTarget": "team-up:build"
       }
-    },
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/apps/team-up"],
-      "options": {
-        "jestConfig": "apps/team-up/jest.config.ts"
-      }
     }
   },
   "tags": ["scope:web"]

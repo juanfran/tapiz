@@ -11,7 +11,6 @@ import {
   catchError,
   filter,
 } from 'rxjs/operators';
-import { v4 } from 'uuid';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
 import { selectLayer, selectZone } from '../selectors/page.selectors';
