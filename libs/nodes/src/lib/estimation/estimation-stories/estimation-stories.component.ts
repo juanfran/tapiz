@@ -1,10 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   Input,
   OnInit,
-  Output,
 } from '@angular/core';
 
 import {
@@ -20,6 +18,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { EstimationStory } from '@team-up/board-commons';
 import { v4 } from 'uuid';
+import { output } from '@angular/core';
 
 export { BoardActions } from '@team-up/board-commons/actions/board.actions';
 
@@ -109,11 +108,9 @@ export class EstimationStoriesComponent implements OnInit {
   @Input()
   public showCancel = false;
 
-  @Output()
-  public addStory = new EventEmitter<EstimationStory[]>();
+  public addStory = output<EstimationStory[]>();
 
-  @Output()
-  public closeConfig = new EventEmitter<void>();
+  public closeConfig = output<void>();
 
   public get stories() {
     return (this.form.get('stories') as FormArray).controls as FormGroup[];

@@ -1,13 +1,6 @@
-import {
-  Directive,
-  ElementRef,
-  EventEmitter,
-  NgZone,
-  OnInit,
-  Output,
-  inject,
-} from '@angular/core';
+import { Directive, ElementRef, NgZone, OnInit, inject } from '@angular/core';
 import { fromEvent } from 'rxjs';
+import { output } from '@angular/core';
 
 @Directive({
   selector: '[teamUpClickOutside]',
@@ -17,7 +10,7 @@ export class ClickOutsideDirective implements OnInit {
   private elementRef = inject(ElementRef);
   private ngZone = inject(NgZone);
 
-  @Output() public teamUpClickOutside = new EventEmitter<{
+  public teamUpClickOutside = output<{
     event: MouseEvent;
     el: ElementRef;
   }>();

@@ -1,9 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   Input,
-  Output,
   signal,
   computed,
   inject,
@@ -18,6 +16,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { NodesStore } from '../../services/nodes.store';
+import { output } from '@angular/core';
 
 @Component({
   selector: 'team-up-estimation-workspace',
@@ -132,17 +131,14 @@ export class EstimationWorkspaceComponent {
     );
   });
 
-  @Output()
-  public setStep = new EventEmitter<number>();
+  public setStep = output<number>();
 
-  @Output()
-  public storyVisibility = new EventEmitter<{
+  public storyVisibility = output<{
     storyId: string;
     visibility: boolean;
   }>();
 
-  @Output()
-  public vote = new EventEmitter<{
+  public vote = output<{
     storyId: string;
     vote: string;
   }>();

@@ -4,10 +4,8 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   Input,
   OnChanges,
-  Output,
   SimpleChanges,
   ViewChild,
 } from '@angular/core';
@@ -25,6 +23,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Invitation, Member } from '@team-up/board-commons';
+import { output } from '@angular/core';
 
 @Component({
   selector: 'team-up-members',
@@ -190,28 +189,20 @@ export class MembersComponent implements OnChanges {
   @Input()
   public invitations: Invitation[] = [];
 
-  @Output()
-  public closeDialog = new EventEmitter<void>();
+  public closeDialog = output<void>();
 
-  @Output()
-  public invited = new EventEmitter<
-    Required<Pick<Invitation, 'email' | 'role'>>[]
-  >();
+  public invited = output<Required<Pick<Invitation, 'email' | 'role'>>[]>();
 
-  @Output()
-  public deletedInvitation = new EventEmitter<string>();
+  public deletedInvitation = output<string>();
 
-  @Output()
-  public deletedMember = new EventEmitter<string>();
+  public deletedMember = output<string>();
 
-  @Output()
-  public roleInvitationChanged = new EventEmitter<{
+  public roleInvitationChanged = output<{
     id: string;
     role: Invitation['role'];
   }>();
 
-  @Output()
-  public roleMemberChanged = new EventEmitter<{
+  public roleMemberChanged = output<{
     id: string;
     role: Member['role'];
   }>();

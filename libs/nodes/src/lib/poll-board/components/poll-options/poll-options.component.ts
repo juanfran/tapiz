@@ -1,8 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Output,
   computed,
   effect,
   inject,
@@ -22,6 +20,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
 import { decrypt } from '@team-up/utils/crypto';
 import { NodesStore } from '../../../services/nodes.store';
+import { output } from '@angular/core';
 
 @Component({
   selector: 'team-up-poll-options',
@@ -103,14 +102,11 @@ export class PollOptionsComponent {
     nonNullable: true,
   });
 
-  @Output()
-  vote = new EventEmitter<string>();
+  vote = output<string>();
 
-  @Output()
-  resetVote = new EventEmitter<string>();
+  resetVote = output<string>();
 
-  @Output()
-  endPoll = new EventEmitter<void>();
+  endPoll = output<void>();
 
   constructor() {
     effect(async () => {

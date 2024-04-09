@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Output,
-  input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { PollBoard, PollBoardNode, PollOption } from '@team-up/board-commons';
 import { MatIconModule } from '@angular/material/icon';
 import { v4 } from 'uuid';
@@ -18,6 +12,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { output } from '@angular/core';
 
 @Component({
   selector: 'team-up-poll-config',
@@ -124,7 +119,7 @@ import { MatInputModule } from '@angular/material/input';
 export class PollConfigComponent {
   node = input.required<PollBoardNode>();
 
-  @Output() nodeChange = new EventEmitter<Partial<PollBoard>>();
+  nodeChange = output<Partial<PollBoard>>();
 
   anonymousField = new FormControl(false);
   titleField = new FormControl('', {
