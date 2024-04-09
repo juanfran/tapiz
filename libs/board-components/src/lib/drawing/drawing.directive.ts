@@ -1,9 +1,7 @@
 import {
   Directive,
   ElementRef,
-  EventEmitter,
   Input,
-  Output,
   effect,
   inject,
   signal,
@@ -23,6 +21,7 @@ import {
 import { concatLatestFrom } from '@ngrx/effects';
 import { Drawing } from '@team-up/board-commons';
 import { DrawingStore } from './drawing.store';
+import { output } from '@angular/core';
 
 export interface MouseDrawingEvent {
   x: number;
@@ -48,7 +47,7 @@ export class DrawingDirective {
   @Input()
   public canDraw = true;
 
-  @Output() drawing = new EventEmitter<Drawing[]>();
+  drawing = output<Drawing[]>();
 
   private context: CanvasRenderingContext2D;
   private elementRef = inject(ElementRef);

@@ -1,15 +1,10 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Input,
-  Output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { EstimationConfig } from '@team-up/board-commons';
+import { output } from '@angular/core';
 
 @Component({
   selector: 'team-up-init-estimation',
@@ -47,8 +42,7 @@ export class InitEstimationComponent {
   @Input()
   public scale: EstimationConfig['scale'] = 't-shirt';
 
-  @Output()
-  public completeSetup = new EventEmitter<EstimationConfig['scale']>();
+  public completeSetup = output<EstimationConfig['scale']>();
 
   public onSubmit() {
     this.completeSetup.emit(this.scale);

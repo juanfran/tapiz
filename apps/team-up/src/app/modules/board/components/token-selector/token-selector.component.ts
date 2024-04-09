@@ -1,11 +1,4 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  inject,
-  Output,
-  EventEmitter,
-} from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import {
@@ -14,6 +7,7 @@ import {
 } from '../../../../shared/board-id-to-color.directive';
 import { RxFor } from '@rx-angular/template/for';
 import { BoardFacade } from '../../../../services/board-facade.service';
+import { output } from '@angular/core';
 
 @Component({
   selector: 'team-up-token-selector',
@@ -59,14 +53,12 @@ import { BoardFacade } from '../../../../services/board-facade.service';
   imports: [BoardIdToColorDirective, RxFor],
 })
 export class TokenSelectorComponent {
-  @Output()
-  public selectToken = new EventEmitter<{
+  public selectToken = output<{
     text: string;
     color: string;
     backgroundColor: string;
   }>();
 
-  private store = inject(Store);
   private boardFacade = inject(BoardFacade);
 
   public users = toSignal(

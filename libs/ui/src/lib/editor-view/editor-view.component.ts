@@ -3,11 +3,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  EventEmitter,
   HostBinding,
   Input,
   OnDestroy,
-  Output,
   Signal,
   ViewChild,
   WritableSignal,
@@ -36,6 +34,7 @@ import { Bold } from '@tiptap/extension-bold';
 import { Document } from '@tiptap/extension-document';
 import { Text } from '@tiptap/extension-text';
 import { ListItem } from '@tiptap/extension-list-item';
+import { output } from '@angular/core';
 
 @Component({
   selector: 'team-up-editor-view',
@@ -98,8 +97,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
     this.#layoutToolbarOptions.set(value);
   }
 
-  @Output()
-  contentChange = new EventEmitter<string>();
+  contentChange = output<string>();
 
   @HostBinding('class.show')
   @Input()
@@ -200,7 +198,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
         ],
         content: node.innerHTML,
         onUpdate: ({ editor }) => {
-          this.contentChange.next(editor.getHTML());
+          this.contentChange.emit(editor.getHTML());
         },
       }),
     );
