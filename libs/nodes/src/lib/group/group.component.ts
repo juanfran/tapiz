@@ -1,11 +1,9 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  Input,
   HostListener,
   ElementRef,
   HostBinding,
-  Signal,
   computed,
   inject,
   viewChild,
@@ -23,9 +21,11 @@ import { NodesStore } from '../services/nodes.store';
 import { BoardActions } from '@team-up/board-commons/actions/board.actions';
 import { NodeStore } from '../node/node.store';
 import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-group',
+
   template: `
     <div
       class="title"
@@ -66,14 +66,11 @@ export class GroupComponent {
   #multiDragService = inject(MultiDragService);
   #destroyRef = inject(DestroyRef);
 
-  @Input({ required: true })
-  node!: Signal<TuNode<Group>>;
+  node = input.required<TuNode<Group>>();
 
-  @Input()
-  pasted!: Signal<boolean>;
+  pasted = input.required<boolean>();
 
-  @Input({ required: true })
-  focus!: Signal<boolean>;
+  focus = input.required<boolean>();
 
   @HostBinding('class.focus') get focusClass() {
     return this.focus();

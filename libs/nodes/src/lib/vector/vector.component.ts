@@ -1,14 +1,11 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  Input,
-  Signal,
-} from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { TuNode, Vector } from '@team-up/board-commons';
 import { NodeSpaceComponent } from '../node-space';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-vector',
+
   template: `
     <team-up-node-space
       [node]="node()"
@@ -26,12 +23,9 @@ import { NodeSpaceComponent } from '../node-space';
   imports: [NodeSpaceComponent],
 })
 export class VectorComponent {
-  @Input({ required: true })
-  public node!: Signal<TuNode<Vector>>;
+  public node = input.required<TuNode<Vector>>();
 
-  @Input()
-  public pasted!: Signal<boolean>;
+  public pasted = input.required<boolean>();
 
-  @Input({ required: true })
-  public focus!: Signal<boolean>;
+  public focus = input.required<boolean>();
 }

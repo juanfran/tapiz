@@ -1,10 +1,8 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  Input,
   ElementRef,
   ViewChild,
-  Signal,
   inject,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -14,9 +12,11 @@ import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { NodeSpaceComponent } from '../node-space';
 
 import { BoardActions } from '@team-up/board-commons/actions/board.actions';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-image',
+
   template: `
     <team-up-node-space
       [node]="node()"
@@ -34,6 +34,7 @@ import { BoardActions } from '@team-up/board-commons/actions/board.actions';
   providers: [RxState, HotkeysService],
   standalone: true,
   imports: [NodeSpaceComponent],
+
   host: {
     '[class.focus]': 'focus()',
   },
@@ -43,14 +44,11 @@ export class ImageComponent {
 
   @ViewChild('image') public imageRef!: ElementRef;
 
-  @Input({ required: true })
-  public node!: Signal<TuNode<Image>>;
+  public node = input.required<TuNode<Image>>();
 
-  @Input()
-  public pasted!: Signal<boolean>;
+  public pasted = input.required<boolean>();
 
-  @Input({ required: true })
-  public focus!: Signal<boolean>;
+  public focus = input.required<boolean>();
 
   public loadImage() {
     const image = this.node();

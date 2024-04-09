@@ -2,7 +2,6 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  Input,
   ViewChild,
   inject,
 } from '@angular/core';
@@ -12,27 +11,29 @@ import { Resizable, ResizePosition, TuNode } from '@team-up/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filterNil } from 'ngxtension/filter-nil';
 import { ResizeService } from './resize.service';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-resize-handler',
   standalone: true,
   imports: [],
+
   template: `
     <div
       #topLeft
-      [style.transform]="'scale(' + scale + ')'"
+      [style.transform]="'scale(' + scale() + ')'"
       class="no-drag resize-point top-left"></div>
     <div
       #topRight
-      [style.transform]="'scale(' + scale + ')'"
+      [style.transform]="'scale(' + scale() + ')'"
       class="no-drag resize-point top-right"></div>
     <div
       #bottomLeft
-      [style.transform]="'scale(' + scale + ')'"
+      [style.transform]="'scale(' + scale() + ')'"
       class="no-drag resize-point bottom-left"></div>
     <div
       #bottomRight
-      [style.transform]="'scale(' + scale + ')'"
+      [style.transform]="'scale(' + scale() + ')'"
       class="no-drag resize-point bottom-right"></div>
   `,
   styles: [
@@ -84,34 +85,32 @@ export class ResizeHandlerComponent implements Resizable {
   private destroyRef = inject(DestroyRef);
   private resizeService = inject(ResizeService);
 
-  @Input({ required: true })
-  public node!: TuNode<Resizable>;
+  public node = input.required<TuNode<Resizable>>();
 
-  @Input()
-  public scale = 1;
+  public scale = input(1);
 
   public get nodeType() {
-    return this.node.type;
+    return this.node().type;
   }
 
   public get width() {
-    return this.node.content.width;
+    return this.node().content.width;
   }
 
   public get height() {
-    return this.node.content.height;
+    return this.node().content.height;
   }
 
   public get position() {
-    return this.node.content.position;
+    return this.node().content.position;
   }
 
   public get rotation() {
-    return this.node.content.rotation;
+    return this.node().content.rotation;
   }
 
   public get id() {
-    return this.node.id;
+    return this.node().id;
   }
 
   @ViewChild('topLeft') public set topLeft(el: ElementRef<HTMLElement>) {

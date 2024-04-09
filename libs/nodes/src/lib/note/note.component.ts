@@ -2,12 +2,10 @@ import { Point } from '@angular/cdk/drag-drop';
 import {
   Component,
   ChangeDetectionStrategy,
-  Input,
   HostListener,
   ElementRef,
   HostBinding,
   inject,
-  Signal,
   computed,
   signal,
   effect,
@@ -30,6 +28,7 @@ import { BoardActions } from '@team-up/board-commons/actions/board.actions';
 import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
 import { hostBinding } from 'ngxtension/host-binding';
 import { NodeStore } from '../node/node.store';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-note',
@@ -54,14 +53,11 @@ export class NoteComponent {
   #nodesStore = inject(NodesStore);
   #nodeStore = inject(NodeStore);
 
-  @Input({ required: true })
-  node!: Signal<TuNode<Note>>;
+  node = input.required<TuNode<Note>>();
 
-  @Input()
-  pasted!: Signal<boolean>;
+  pasted = input.required<boolean>();
 
-  @Input({ required: true })
-  focus!: Signal<boolean>;
+  focus = input.required<boolean>();
 
   @HostBinding('class.focus') get focusClass() {
     return this.focus();

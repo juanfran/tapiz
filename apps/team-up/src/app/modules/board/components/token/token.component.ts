@@ -3,14 +3,12 @@ import { focustContentEditable } from '../../../../shared/focus-content-editable
 import {
   Component,
   ChangeDetectionStrategy,
-  Input,
   OnInit,
   inject,
   ElementRef,
   HostListener,
   ViewChild,
   signal,
-  Signal,
   Injector,
 } from '@angular/core';
 import { Token, TuNode } from '@team-up/board-commons';
@@ -23,6 +21,8 @@ import { Draggable } from '@team-up/cdk/models/draggable.model';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { NodesActions } from '@team-up/nodes/services/nodes-actions';
+import { input } from '@angular/core';
+
 @Component({
   selector: 'team-up-token',
   styleUrls: ['./token.component.scss'],
@@ -46,6 +46,7 @@ import { NodesActions } from '@team-up/nodes/services/nodes-actions';
   standalone: true,
   imports: [BoardDragDirective],
   hostDirectives: [BoardDragDirective],
+
   host: {
     '[class.focus]': 'focus()',
   },
@@ -66,14 +67,9 @@ export class TokenComponent implements OnInit, DynamicComponent, Draggable {
   private injector = inject(Injector);
   private nodesActions = inject(NodesActions);
 
-  @Input({ required: true })
-  public node!: Signal<TuNode<Token>>;
-
-  @Input()
-  public pasted!: Signal<boolean>;
-
-  @Input()
-  public focus!: Signal<boolean>;
+  public node = input.required<TuNode<Token>>();
+  public pasted = input.required<boolean>();
+  public focus = input.required<boolean>();
 
   @HostListener('dblclick', ['$event'])
   public mousedown(event: MouseEvent) {

@@ -2,7 +2,6 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  Input,
   ViewChild,
   inject,
 } from '@angular/core';
@@ -13,6 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filterNil } from 'ngxtension/filter-nil';
 import { RotateService } from './rotate.service';
 import { MatIconModule } from '@angular/material/icon';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-rotate-handler',
@@ -39,27 +39,26 @@ export class RotateHandlerComponent {
   private rotateService = inject(RotateService);
   private el = inject(ElementRef);
 
-  @Input({ required: true })
-  public node!: TuNode<Rotatable>;
+  public node = input.required<TuNode<Rotatable>>();
 
   public get nodeType() {
-    return this.node.type;
+    return this.node().type;
   }
 
   public get width() {
-    return this.node.content.width;
+    return this.node().content.width;
   }
 
   public get height() {
-    return this.node.content.height;
+    return this.node().content.height;
   }
 
   public get position() {
-    return this.node.content.position;
+    return this.node().content.position;
   }
 
   public get rotation() {
-    return this.node.content.rotation;
+    return this.node().content.rotation;
   }
 
   public get nativeElement() {
@@ -67,7 +66,7 @@ export class RotateHandlerComponent {
   }
 
   public get id() {
-    return this.node.id;
+    return this.node().id;
   }
 
   @ViewChild('handler') public set handler(el: ElementRef<HTMLElement>) {

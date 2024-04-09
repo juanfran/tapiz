@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  Input,
   OnChanges,
   SimpleChanges,
   ViewChild,
@@ -24,11 +23,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Invitation, Member } from '@team-up/board-commons';
 import { output } from '@angular/core';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-members',
+
   template: `
-    <team-up-modal-header [title]="title"></team-up-modal-header>
+    <team-up-modal-header [title]="title()"></team-up-modal-header>
     <form
       class="invite-by-email"
       [formGroup]="form"
@@ -62,13 +63,13 @@ import { output } from '@angular/core';
         </button>
       </div>
     </form>
-    @if (invitations.length || members.length) {
-      <mat-dialog-content class="members">
+    @if (invitations().length || members().length) {
+      <mat-dialog-content class="members()">
         <h2>Members</h2>
-        @if (invitations.length) {
-          <div class="members-list invitations">
+        @if (invitations().length) {
+          <div class="members-list invitations()">
             @for (
-              invitation of invitations;
+              invitation of invitations();
               track trackByInvitationId($index, invitation)
             ) {
               <div class="member">
@@ -89,7 +90,7 @@ import { output } from '@angular/core';
           </div>
         }
         <div class="members-list">
-          @for (member of members; track trackByMemberId($index, member)) {
+          @for (member of members(); track trackByMemberId($index, member)) {
             <div class="member">
               <ng-container
                 *ngTemplateOutlet="
@@ -136,7 +137,7 @@ import { output } from '@angular/core';
               </mat-select>
             </mat-form-field>
             <button
-              title="Delete member"
+              title()="Delete member"
               tuIconButton
               (click)="onDeleteMember(member.id, !member.email)">
               <mat-icon>close</mat-icon>
@@ -180,14 +181,11 @@ export class MembersComponent implements OnChanges {
     }),
   });
 
-  @Input({ required: true })
-  public title!: string;
+  public title = input.required<string>();
 
-  @Input()
-  public members: Member[] = [];
+  public members = input<Member[]>([]);
 
-  @Input()
-  public invitations: Invitation[] = [];
+  public invitations = input<Invitation[]>([]);
 
   public closeDialog = output<void>();
 
@@ -251,7 +249,7 @@ export class MembersComponent implements OnChanges {
   public ngOnChanges(changes: SimpleChanges) {
     // check if there is only one admin
     if (changes['members']) {
-      const admins = this.members.filter((member) => member.role === 'admin');
+      const admins = this.members().filter((member) => member.role === 'admin');
 
       this.lastAdmin = admins.length === 1;
     }

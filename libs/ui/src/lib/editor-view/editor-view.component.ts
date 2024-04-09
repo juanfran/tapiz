@@ -3,10 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  HostBinding,
-  Input,
   OnDestroy,
-  Signal,
   ViewChild,
   WritableSignal,
   effect,
@@ -35,6 +32,8 @@ import { Document } from '@tiptap/extension-document';
 import { Text } from '@tiptap/extension-text';
 import { ListItem } from '@tiptap/extension-list-item';
 import { output } from '@angular/core';
+import { input } from '@angular/core';
+import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
 
 @Component({
   selector: 'team-up-editor-view',
@@ -42,11 +41,6 @@ import { output } from '@angular/core';
     <div
       class="editor"
       #editor></div>
-    <div
-      class="text"
-      #text>
-      {{ content }}
-    </div>
     <div style="isolation: isolete">
       <div
         class="link-menu"
@@ -64,59 +58,35 @@ import { output } from '@angular/core';
   styleUrl: './editor-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [ToolbarComponent],
+  imports: [ToolbarComponent, SafeHtmlPipe],
   exportAs: 'editorView',
+  host: {
+    '[class.show]': 'focus()',
+  },
 })
 export class EditorViewComponent implements OnDestroy, AfterViewInit {
   #editorViewSharedStateService = inject(EditorViewSharedStateService);
 
-  #content = signal('');
-  #toolbar = signal(false);
-  #layoutToolbarOptions = signal(false);
-  #node = signal<TuNode | null>(null);
-
-  @Input({ required: true }) set node(node: TuNode) {
-    this.#node.set(node);
-  }
-
-  @Input() set toolbar(value: boolean) {
-    this.#toolbar.set(value);
-
-    if (value) {
-      this.#showToolbar();
-    } else {
-      this.#hideToolbar();
-    }
-  }
-
-  @Input() set content(value: string) {
-    this.#content.set(value);
-  }
-
-  @Input() set layoutToolbarOptions(value: boolean) {
-    this.#layoutToolbarOptions.set(value);
-  }
+  content = input('');
+  node = input.required<TuNode>();
+  toolbar = input.required<boolean>();
+  layoutToolbarOptions = input<boolean>(false);
 
   contentChange = output<string>();
 
-  @HostBinding('class.show')
-  @Input()
-  set focus(value: boolean) {
-    this.#focus.set(value);
-  }
+  focus = input<boolean>(false);
 
   @ViewChild('text') text!: ElementRef<HTMLElement>;
   @ViewChild('editor') editor!: ElementRef<HTMLElement>;
   @ViewChild('linkMenu') linkMenu!: ElementRef<HTMLElement>;
 
-  #focus = signal(false);
   #editor: WritableSignal<Editor | null> = signal(null);
 
   linkUrl = signal('');
 
   constructor() {
     effect(() => {
-      if (this.#focus()) {
+      if (this.focus()) {
         this.#editor()?.view.focus();
       }
     });
@@ -125,13 +95,21 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
       const instance = this.#editor();
 
       if (instance) {
-        instance.commands.setContent(this.#content());
+        instance.commands.setContent(this.content());
+      }
+    });
+
+    effect(() => {
+      if (this.toolbar()) {
+        this.#showToolbar();
+      } else {
+        this.#hideToolbar();
       }
     });
   }
 
   ngAfterViewInit() {
-    this.initEditor(this.#content());
+    this.initEditor(this.content());
   }
 
   initEditor(content: string) {
@@ -176,7 +154,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
             shouldShow: ({ editor, nodeDom }) => {
               if (
                 (nodeDom?.tagName !== 'A' && !nodeDom?.closest('a')) ||
-                !this.#toolbar()
+                !this.toolbar()
               ) {
                 return false;
               }
@@ -203,11 +181,11 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
       }),
     );
 
-    if (this.#focus()) {
+    if (this.focus()) {
       this.#editor()?.view.focus();
     }
 
-    if (this.#toolbar()) {
+    if (this.toolbar()) {
       this.#showToolbar();
     }
   }
@@ -215,7 +193,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.#editor()?.destroy();
 
-    const nodeId = this.#node()?.id;
+    const nodeId = this.node()?.id;
 
     if (nodeId) {
       this.#editorViewSharedStateService.removeNode(nodeId);
@@ -223,7 +201,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
   }
 
   #showToolbar() {
-    const node = this.#node();
+    const node = this.node();
     const instance = this.#editor();
 
     if (!node || !instance) {
@@ -231,14 +209,14 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
     }
 
     this.#editorViewSharedStateService.addNode(
-      this.#node.asReadonly() as Signal<TuNode>,
+      this.node,
       instance,
-      this.#layoutToolbarOptions(),
+      this.layoutToolbarOptions(),
     );
   }
 
   #hideToolbar() {
-    const nodeId = this.#node()?.id;
+    const nodeId = this.node()?.id;
 
     if (nodeId) {
       this.#editor()?.commands.blur();

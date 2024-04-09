@@ -25,8 +25,8 @@ import { output } from '@angular/core';
           (click)="
             selectUserToken(
               user.name,
-              teamUpBoardIdToColor.color,
-              teamUpBoardIdToColor.backgroundColor
+              teamUpBoardIdToColor.color(),
+              teamUpBoardIdToColor.backgroundColor()
             )
           ">
           {{ user.name }}

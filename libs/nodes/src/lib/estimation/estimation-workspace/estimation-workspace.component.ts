@@ -1,8 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Input,
-  signal,
   computed,
   inject,
 } from '@angular/core';
@@ -17,6 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { NodesStore } from '../../services/nodes.store';
 import { output } from '@angular/core';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-estimation-workspace',
@@ -108,20 +107,26 @@ export class EstimationWorkspaceComponent {
     ['t-shirt']: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
   };
 
-  @Input()
-  public set estimation(estimation: EstimationConfig) {
-    this.stories.set(estimation.stories);
-    this.step.set(estimation.step);
-    this.scale.set(this.scaleSetup[estimation.scale]);
-  }
+  estimation = input.required<EstimationConfig>();
 
-  @Input()
-  public set results(results: EstimationResultNode[]) {
-    this.storiesResults.set(results);
-  }
+  stories = computed(() => {
+    return this.estimation().stories;
+  });
+
+  step = computed(() => {
+    return this.estimation().step;
+  });
+
+  scale = computed(() => {
+    return (
+      this.scaleSetup[this.estimation().scale] ?? this.scaleSetup.fibonacci
+    );
+  });
+
+  results = input.required<EstimationResultNode[]>();
 
   public userResults = computed(() => {
-    const estimationResult = this.storiesResults();
+    const estimationResult = this.results();
 
     if (!estimationResult) {
       return;
@@ -146,12 +151,9 @@ export class EstimationWorkspaceComponent {
   public currentStory = computed(() => {
     return this.stories()[this.step()];
   });
-  public stories = signal<EstimationStory[]>([]);
-  public step = signal<number>(0);
-  public scale = signal<string[]>(this.scaleSetup.fibonacci);
-  public storiesResults = signal<EstimationResultNode[]>([]);
+
   public userStoriesResults = computed(() => {
-    const estimationResult = this.storiesResults();
+    const estimationResult = this.results();
 
     return estimationResult.find(
       (result) => result.content.userId === this.nodesStore.userId(),
@@ -171,7 +173,7 @@ export class EstimationWorkspaceComponent {
   });
 
   public getUserVote(user: User, storyId: string) {
-    const results = this.storiesResults();
+    const results = this.results();
 
     const usersResults = results?.find((result) => {
       if (result.content.userId === user.id) {

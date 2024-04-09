@@ -2,9 +2,10 @@ import {
   Component,
   ChangeDetectionStrategy,
   inject,
-  Input,
+  effect,
 } from '@angular/core';
 import { Title } from '@angular/platform-browser';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-title',
@@ -17,11 +18,13 @@ import { Title } from '@angular/platform-browser';
 export class TitleComponent {
   private titleService = inject(Title);
 
-  @Input()
-  public prefix = 'TeamUp -';
+  prefix = input('TeamUp -');
 
-  @Input({ required: true })
-  public set title(title: string) {
-    this.titleService.setTitle(`${this.prefix} ${title}`);
+  title = input.required<string>();
+
+  constructor() {
+    effect(() => {
+      this.titleService.setTitle(`${this.prefix()} ${this.title()}`);
+    });
   }
 }

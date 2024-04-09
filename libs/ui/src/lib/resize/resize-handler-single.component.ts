@@ -2,7 +2,6 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  Input,
   afterNextRender,
   inject,
 } from '@angular/core';
@@ -12,6 +11,7 @@ import { Resizable, ResizePosition, TuNode } from '@team-up/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filterNil } from 'ngxtension/filter-nil';
 import { ResizeService } from './resize.service';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-resize-single',
@@ -19,15 +19,15 @@ import { ResizeService } from './resize.service';
   imports: [],
   template: '<ng-content></ng-content>',
   styles: `
-      :host {
-        bottom: 0;
-        cursor: se-resize;
-        height: 50px;
-        position: absolute;
-        right: 0;
-        width: 50px;
-      }
-    `,
+    :host {
+      bottom: 0;
+      cursor: se-resize;
+      height: 50px;
+      position: absolute;
+      right: 0;
+      width: 50px;
+    }
+  `,
 })
 export class ResizeHandlerSingleComponent implements Resizable {
   private moveService = inject(MoveService);
@@ -35,31 +35,30 @@ export class ResizeHandlerSingleComponent implements Resizable {
   private resizeService = inject(ResizeService);
   private el: ElementRef<HTMLElement> = inject(ElementRef);
 
-  @Input({ required: true })
-  public node!: TuNode<Resizable>;
+  public node = input.required<TuNode<Resizable>>();
 
   public get nodeType() {
-    return this.node.type;
+    return this.node().type;
   }
 
   public get width() {
-    return this.node.content.width;
+    return this.node().content.width;
   }
 
   public get height() {
-    return this.node.content.height;
+    return this.node().content.height;
   }
 
   public get position() {
-    return this.node.content.position;
+    return this.node().content.position;
   }
 
   public get rotation() {
-    return this.node.content.rotation;
+    return this.node().content.rotation;
   }
 
   public get id() {
-    return this.node.id;
+    return this.node().id;
   }
 
   constructor() {

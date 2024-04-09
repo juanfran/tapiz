@@ -4,41 +4,43 @@ import {
   Component,
   DestroyRef,
   ElementRef,
-  Input,
   ViewChild,
   computed,
   inject,
-  signal,
 } from '@angular/core';
 import { Point, Resizable, Rotatable, TuNode } from '@team-up/board-commons';
 import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
 import { ResizeHandlerComponent } from '@team-up/ui/resize';
 import { RotateHandlerComponent } from '@team-up/ui/rotate';
 import { NodesStore } from '../services/nodes.store';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'team-up-node-space',
+
   template: `
     <div
       #drag
       class="content"
-      [class.drag-outline]="active()">
+      [class.drag-outline]="enabled()">
       <ng-content />
     </div>
 
-    @if (active()) {
-      @if (isResizable(node)) {
-        <team-up-resize-handler
-          [node]="node"
-          [scale]="scale()" />
-      }
-
-      @if (isRotable(node)) {
-        <div class="rotate-wrapper">
-          <team-up-rotate-handler
+    @if (node(); as node) {
+      @if (enabled()) {
+        @if (isResizable(node)) {
+          <team-up-resize-handler
             [node]="node"
-            [style.transform]="'scale(' + scale() + ')'" />
-        </div>
+            [scale]="scale()" />
+        }
+
+        @if (isRotable(node)) {
+          <div class="rotate-wrapper">
+            <team-up-rotate-handler
+              [node]="node"
+              [style.transform]="'scale(' + scale() + ')'" />
+          </div>
+        }
       }
     }
   `,
@@ -62,44 +64,37 @@ export class NodeSpaceComponent implements AfterViewInit {
     return 1;
   });
 
-  active = signal(true);
+  enabled = input(true);
 
-  @Input({ required: true })
-  node!: TuNode<{
-    position: Point;
-  }>;
+  node = input.required<
+    TuNode<{
+      position: Point;
+    }>
+  >();
 
-  @Input()
-  draggable = true;
+  draggable = input(true);
 
-  @Input()
-  resize = false;
+  resize = input(false);
 
-  @Input()
-  rotate = false;
-
-  @Input()
-  set enabled(dragReady: boolean) {
-    this.active.set(dragReady);
-  }
+  rotate = input(false);
 
   @ViewChild('drag')
   drag!: ElementRef<HTMLElement>;
 
   get preventDrag() {
-    return !this.active();
+    return !this.enabled();
   }
 
   get position() {
-    return this.node.content.position;
+    return this.node().content.position;
   }
 
   get id() {
-    return this.node.id;
+    return this.node().id;
   }
 
   get nodeType() {
-    return this.node.type;
+    return this.node().type;
   }
 
   get nativeElement() {
@@ -107,11 +102,11 @@ export class NodeSpaceComponent implements AfterViewInit {
   }
 
   isResizable(node: TuNode<unknown>): node is TuNode<Resizable> {
-    return this.resize;
+    return this.resize();
   }
 
   isRotable(node: TuNode<unknown>): node is TuNode<Rotatable> {
-    return this.rotate;
+    return this.rotate();
   }
 
   ngAfterViewInit(): void {
