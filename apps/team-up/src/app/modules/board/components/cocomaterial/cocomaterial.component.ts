@@ -27,7 +27,6 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
 import { BoardActions } from '../../actions/board.actions';
 import { MatDialogRef } from '@angular/material/dialog';
-import { v4 } from 'uuid';
 import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 
 interface State {

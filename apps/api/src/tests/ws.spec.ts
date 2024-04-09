@@ -6,6 +6,7 @@ import {
   getAuth,
   getUserCaller,
   initTestServer,
+  initWs,
 } from './test-helpers';
 import { getBoardUser } from '../app/db/board-db';
 
@@ -27,16 +28,7 @@ describe('ws', () => {
     await startDB();
     await createMultipleUsers();
     await initTestServer(port);
-  });
-
-  beforeAll((done) => {
-    ws = new WebSocket(`ws://localhost:${port}/events`, {
-      headers: {
-        Cookie: 'auth=1',
-      },
-    });
-    ws.on('open', done);
-    ws.on('error', console.error);
+    ws = await initWs(port);
   });
 
   it('invialid msg', async () => {

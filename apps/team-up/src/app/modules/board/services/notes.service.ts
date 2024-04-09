@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Note, Point, User } from '@team-up/board-commons';
-import { v4 } from 'uuid';
 import { BoardActions } from '../actions/board.actions';
 import { selectLayer } from '../selectors/page.selectors';
 import { BoardFacade } from '../../../services/board-facade.service';

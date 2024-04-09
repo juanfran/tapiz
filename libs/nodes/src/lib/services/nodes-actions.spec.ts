@@ -1,13 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { NodesActions } from './nodes-actions';
 import { NodesStore } from './nodes.store';
-import { v4 as uuidv4 } from 'uuid';
 import { signal } from '@angular/core';
 import { TuNode } from '@team-up/board-commons';
+import { vi } from 'vitest';
 
 // Mock the external UUID function
-jest.mock('uuid', () => ({
-  v4: jest.fn(),
+vi.mock('uuid', () => ({
+  v4: () => {
+    return 'test-uuid';
+  },
 }));
 
 describe('NodesActions', () => {
@@ -30,11 +32,10 @@ describe('NodesActions', () => {
     });
 
     service = TestBed.inject(NodesActions);
-    (uuidv4 as jest.Mock).mockReturnValue('test-uuid');
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('add', () => {

@@ -4,13 +4,6 @@
   "sourceRoot": "libs/board-commons/src",
   "projectType": "library",
   "targets": {
-    "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/board-commons"],
-      "options": {
-        "jestConfig": "libs/board-commons/jest.config.ts"
-      }
-    }
   },
   "tags": ["type:util"]
 }
