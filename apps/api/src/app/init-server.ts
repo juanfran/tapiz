@@ -63,6 +63,7 @@ fastify.register(async function (fastify) {
   });
 
   fastify.get('/sub', { websocket: true }, async (connection, req) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cookies = (req as any).cookies;
     const sessionId = cookies[lucia.sessionCookieName];
 

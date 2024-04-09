@@ -28,7 +28,6 @@ describe('ws', () => {
 
   beforeAll(async () => {
     await startDB();
-    console.log('fin start db');
     await createMultipleUsers();
     wsServer = await initTestServer(port);
     ws = await initWs(port);
