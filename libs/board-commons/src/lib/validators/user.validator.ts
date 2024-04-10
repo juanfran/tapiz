@@ -7,6 +7,12 @@ const user = z.object({
     x: z.number().safe(),
     y: z.number().safe(),
   }),
+  position: z
+    .object({
+      x: z.number().safe(),
+      y: z.number().safe(),
+    })
+    .optional(),
   zoom: z.number().safe(),
 });
 
