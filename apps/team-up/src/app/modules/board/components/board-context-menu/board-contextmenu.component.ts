@@ -15,7 +15,7 @@ import { BoardFacade } from '../../../../services/board-facade.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { VotesModalComponent } from '../votes-modal/votes-modal.component';
 import { Group, Note, TuNode } from '@team-up/board-commons';
-import { selectVoting } from '../../selectors/page.selectors';
+import { selectEmoji, selectVoting } from '../../selectors/page.selectors';
 import { CommentsStore } from '@team-up/nodes/comments/comments.store';
 import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 
@@ -39,6 +39,7 @@ export class BoardContextMenuComponent implements OnInit {
   private boardComponent = inject(BoardComponent);
   private dialog = inject(MatDialog);
   private voting = this.store.selectSignal(selectVoting);
+  private emoji = this.store.selectSignal(selectEmoji);
   private commentsStore = inject(CommentsStore);
   private nodesActions = inject(NodesActions);
   private showUserVotes = this.store.selectSignal(pageFeature.selectVoting);
@@ -56,6 +57,12 @@ export class BoardContextMenuComponent implements OnInit {
 
           return !currentNodes.some((node) => {
             return node.type === 'note' || node.type === 'group';
+          });
+        } else if (this.emoji()) {
+          const currentNodes = this.boardFacade.selectFocusNodes();
+
+          return !currentNodes.some((node) => {
+            return node.type === 'note';
           });
         }
 
