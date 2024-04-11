@@ -4,4 +4,5 @@ export interface NodeToolbar {
   borderWidth?: number;
   borderRadius?: number;
   textAlign?: 'start' | 'center' | 'end';
+  color?: string;
 }
