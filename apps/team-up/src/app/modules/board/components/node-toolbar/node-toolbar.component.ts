@@ -39,8 +39,6 @@ interface Toolbar {
     @for (toolbar of toolbars(); track toolbar.id) {
       <team-up-toolbar
         [editor]="toolbar.view"
-        [x]="toolbar.x"
-        [y]="toolbar.y"
         [node]="toolbar.node()"
         [closeMenus]="closeMenus"
         [layoutOptions]="toolbar.layoutOptions" />

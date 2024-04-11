@@ -54,6 +54,7 @@
     "@rx-angular/cdk": "^17.0.0",
     "@rx-angular/state": "^17.0.0",
     "@rx-angular/template": "^17.0.0",
+    "@simonwep/pickr": "^1.9.0",
     "@tiptap/core": "2.1.16",
     "@tiptap/extension-bold": "2.1.16",
     "@tiptap/extension-bullet-list": "2.1.16",

@@ -1,0 +1,69 @@
+.menu-item,
+.standalone-item {
+  background-color: transparent;
+  cursor: pointer;
+  border: none;
+  color: var(--gray-12);
+  user-select: none;
+  min-width: 64px;
+  line-height: 36px;
+  padding: 0 var(--size-3);
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex: 1;
+}
+
+.standalone-item {
+  background-color: var(--primary-color-button-bg);
+  border-radius: var(--radius-2);
+}
+
+.menu-item{
+  &:hover,
+  &.active {
+    background-color: var(--purple-bbg);
+  }
+}
+
+.field {
+  align-items: center;
+  color: var(--gray-12);
+  display: flex;
+  gap: var(--size-2);
+}
+
+@mixin button {
+  color: var(--gray-12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: 36px;
+  border-radius: var(--radius-2);
+  aspect-ratio: 1/1;
+
+  &.active,
+  &:hover {
+    background-color: var(--primary-color-button-bg);
+  }
+}
+
+.buttons {
+  display: flex;
+  gap: var(--size-2);
+
+  button {
+    @include button;
+  }
+}
+
+.button {
+  @include button;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2);
+  font-weight: var(--font-weight-3);
+}

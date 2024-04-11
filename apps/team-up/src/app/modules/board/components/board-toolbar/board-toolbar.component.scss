@@ -103,10 +103,10 @@
 
 .toolbar {
   background: var(--primary-color-background);
-  border-radius: 8px;
+  border-radius: var(--radius-2);
   display: flex;
   flex-direction: column;
-  padding: 0.5rem 0;
+  padding: var(--size-2) 0;
   transition: background 0.5s ease;
 }
 

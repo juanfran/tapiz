@@ -209,18 +209,22 @@ export class PanelComponent implements OnInit {
       );
     }
 
-    if (panel.content.borderWidth) {
+    if (panel.content.borderWidth !== undefined) {
       this.nativeElement.style.setProperty(
         '--borderWidth',
         panel.content.borderWidth + 'px',
       );
+    } else {
+      this.nativeElement.style.setProperty('--borderWidth', '1px');
     }
 
-    if (panel.content.borderRadius) {
+    if (panel.content.borderRadius !== undefined) {
       this.nativeElement.style.setProperty(
         '--borderRadius',
         panel.content.borderRadius + 'px',
       );
+    } else {
+      this.nativeElement.style.setProperty('--borderRadius', '0px');
     }
 
     if (panel.content.textAlign) {
