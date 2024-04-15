@@ -118,6 +118,7 @@ export class DrawingDirective {
     this.context.lineWidth = event.size ?? this.#drawingStore.size();
     this.context.strokeStyle = event.color ?? this.#drawingStore.color();
 
+    this.context.lineCap = 'round';
     this.context.beginPath();
     this.context.moveTo(event.x, event.y);
     this.context.lineTo(event.nX, event.nY);
