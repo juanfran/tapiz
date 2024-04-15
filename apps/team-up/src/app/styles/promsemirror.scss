@@ -2,6 +2,7 @@
 .rich-text {
   outline: none;
   font-feature-settings: "liga" 0;
+  font-variant-ligatures: none;
 
   p {
     margin-block-end: var(--size-1);
