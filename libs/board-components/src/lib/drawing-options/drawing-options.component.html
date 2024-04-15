@@ -1,10 +1,9 @@
 <form
   class="form"
   [formGroup]="form">
-  <input
-    formControlName="color"
-    type="color"
-    class="color-picker" />
+  <team-up-color-picker
+    [color]="form.get('color')?.value ?? '#000000'"
+    (change)="updateColor($event)" />
   <input
     formControlName="size"
     type="range"

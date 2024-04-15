@@ -2,13 +2,14 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { DrawingStore } from '../drawing/drawing.store';
+import { ColorPickerComponent } from '@team-up/ui/color-picker';
 @Component({
   selector: 'team-up-drawing-options',
   templateUrl: './drawing-options.component.html',
   styleUrls: ['./drawing-options.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [ReactiveFormsModule, MatIconModule],
+  imports: [ReactiveFormsModule, MatIconModule, ColorPickerComponent],
 })
 export class DrawingOptionsComponent {
   #drawingStore = inject(DrawingStore);
@@ -34,15 +35,19 @@ export class DrawingOptionsComponent {
     });
   }
 
-  public clean() {
+  clean() {
     this.#drawingStore.actions.cleanDrawing();
   }
 
-  public undo() {
+  undo() {
     this.#drawingStore.actions.undoDrawing();
   }
 
-  public redo() {
+  redo() {
     this.#drawingStore.actions.redoDrawing();
+  }
+
+  updateColor(color: string | undefined) {
+    this.form.patchValue({ color: color ?? '#000000' });
   }
 }
