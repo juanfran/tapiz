@@ -7,9 +7,6 @@
   position: absolute;
   inline-size: 100%;
   block-size: 100%;
-  background-color: var(--backgroundColor);
-  border: var(--borderWidth) solid var(--borderColor);
-  border-radius: var(--borderRadius);
 
   team-up-editor-view,
   .rich-text {
@@ -20,6 +17,14 @@
   &.drawing.active-layer canvas {
     pointer-events: all;
   }
+}
+
+.inner {
+  background-color: var(--backgroundColor);
+  border: var(--borderWidth) solid var(--borderColor);
+  border-radius: var(--borderRadius);
+  inline-size: 100%;
+  block-size: 100%;
 }
 
 .readonly {

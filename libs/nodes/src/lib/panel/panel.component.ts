@@ -39,29 +39,31 @@ import { input } from '@angular/core';
       [resize]="true"
       [rotate]="true"
       [enabled]="!edit() && focus()">
-      <div class="editor-wrapper">
-        @if (!edit()) {
-          <div
-            class="rich-text"
-            [innerHTML]="node().content.text | safeHtml"></div>
-        } @else {
-          <team-up-editor-view
-            #editorView="editorView"
-            [class.readonly]="!edit()"
-            [node]="node()"
-            [toolbar]="edit()"
-            [layoutToolbarOptions]="true"
-            [content]="node().content.text"
-            [focus]="edit()"
-            (contentChange)="newContent.set($event)" />
-        }
-      </div>
+      <div class="inner">
+        <div class="editor-wrapper">
+          @if (!edit()) {
+            <div
+              class="rich-text"
+              [innerHTML]="node().content.text | safeHtml"></div>
+          } @else {
+            <team-up-editor-view
+              #editorView="editorView"
+              [class.readonly]="!edit()"
+              [node]="node()"
+              [toolbar]="edit()"
+              [layoutToolbarOptions]="true"
+              [content]="node().content.text"
+              [focus]="edit()"
+              (contentChange)="newContent.set($event)" />
+          }
+        </div>
 
-      <canvas
-        [teamUpDrawing]="node().content.drawing"
-        (drawing)="setDrawing($event)"
-        [attr.width]="node().content.width"
-        [attr.height]="node().content.height"></canvas>
+        <canvas
+          [teamUpDrawing]="node().content.drawing"
+          (drawing)="setDrawing($event)"
+          [attr.width]="node().content.width"
+          [attr.height]="node().content.height"></canvas>
+      </div>
     </team-up-node-space>
   `,
   styleUrls: ['./panel.component.scss'],
