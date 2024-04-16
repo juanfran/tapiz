@@ -85,12 +85,7 @@ export class BoardEffects {
       return this.actions$.pipe(
         ofType(PageActions.pasteNodes),
         tap((action) => {
-          const batchActions: StateActions[] = action.nodes.map((node) => {
-            return {
-              op: 'add',
-              data: node,
-            };
-          });
+          const batchActions = this.nodesActions.bulkAdd(action.nodes);
 
           this.boardFacade.applyActions(batchActions, true);
           this.wsService.send(batchActions);

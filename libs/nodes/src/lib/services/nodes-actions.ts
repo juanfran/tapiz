@@ -28,7 +28,7 @@ export class NodesActions {
       nodeAdd.parent = options.parent;
     }
 
-    const positionCandidate = this.#getPositionCandidate(
+    const positionCandidate = this.getPositionCandidate(
       type,
       options?.position,
     );
@@ -37,6 +37,15 @@ export class NodesActions {
 
     return nodeAdd;
   }
+
+  bulkAdd(nodes: { type: string; content: object; options?: Options }[]) {
+    const actions = nodes.map(({ type, content, options }) =>
+      this.add(type, content, options),
+    );
+
+    return actions;
+  }
+
   patch<T>(node: TuNode<Partial<T>>, options?: Options): NodePatch<T> {
     const nodePatch = {
       data: node,
@@ -47,7 +56,7 @@ export class NodesActions {
       nodePatch.parent = options.parent;
     }
 
-    const positionCandidate = this.#getPositionCandidatePatch(
+    const positionCandidate = this.getPositionCandidatePatch(
       node.type,
       node.id,
       options?.position,
@@ -73,7 +82,7 @@ export class NodesActions {
     return actions;
   }
 
-  #getPositionCandidatePatch(type: string, id: string, position?: number) {
+  getPositionCandidatePatch(type: string, id: string, position?: number) {
     if (position !== undefined) {
       if (position === -1) {
         return this.#nodesStore.nodes().length - 1;
@@ -118,7 +127,7 @@ export class NodesActions {
     return this.#nodesStore.nodes().length - 1;
   }
 
-  #getPositionCandidate(type: string, position?: number) {
+  getPositionCandidate(type: string, position?: number) {
     if (position !== undefined) {
       if (position === -1) {
         return this.#nodesStore.nodes().length - 1;
