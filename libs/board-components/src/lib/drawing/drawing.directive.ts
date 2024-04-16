@@ -16,6 +16,7 @@ import { Drawing } from '@team-up/board-commons';
 import { DrawingStore } from './drawing.store';
 import { output } from '@angular/core';
 import { input } from '@angular/core';
+import { injectResize } from 'ngxtension/resize';
 
 export interface MouseDrawingEvent {
   x: number;
@@ -32,6 +33,7 @@ export interface MouseDrawingEvent {
 })
 export class DrawingDirective {
   #drawingStore = inject(DrawingStore);
+  #resize$ = injectResize();
   teamUpDrawing = input<Drawing[]>([]);
 
   public canDraw = input(true);
@@ -44,6 +46,15 @@ export class DrawingDirective {
   private dragEnabled = toObservable(this.#drawingStore.drawing);
 
   constructor() {
+    this.#resize$.pipe(takeUntilDestroyed()).subscribe(() => {
+      const paintCanvas = this.elementRef.nativeElement;
+      this.context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+
+      this.teamUpDrawing().forEach((line) => {
+        this.drawLine(line);
+      });
+    });
+
     effect(() => {
       const paintCanvas = this.elementRef.nativeElement;
       this.context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
