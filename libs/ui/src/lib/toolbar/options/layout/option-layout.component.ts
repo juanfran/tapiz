@@ -56,7 +56,7 @@ import { MatSliderModule } from '@angular/material/slider';
 
         <mat-slider
           min="1"
-          max="500"
+          max="100"
           step="1">
           <input
             matSliderThumb
@@ -142,7 +142,7 @@ export class OptionLayoutComponent {
               id: this.node().id,
               type: this.node().type,
               content: {
-                [key]: value,
+                [key]: value ?? null,
               },
             },
           },

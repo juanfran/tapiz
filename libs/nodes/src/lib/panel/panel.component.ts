@@ -202,6 +202,8 @@ export class PanelComponent implements OnInit {
         '--backgroundColor',
         panel.content.backgroundColor,
       );
+    } else {
+      this.nativeElement.style.removeProperty('--backgroundColor');
     }
 
     if (panel.content.borderColor) {
@@ -209,6 +211,8 @@ export class PanelComponent implements OnInit {
         '--borderColor',
         panel.content.borderColor,
       );
+    } else {
+      this.nativeElement.style.removeProperty('--borderColor');
     }
 
     if (panel.content.borderWidth !== undefined) {
@@ -217,7 +221,7 @@ export class PanelComponent implements OnInit {
         panel.content.borderWidth + 'px',
       );
     } else {
-      this.nativeElement.style.setProperty('--borderWidth', '1px');
+      this.nativeElement.style.removeProperty('--borderWidth');
     }
 
     if (panel.content.borderRadius !== undefined) {
@@ -226,7 +230,7 @@ export class PanelComponent implements OnInit {
         panel.content.borderRadius + 'px',
       );
     } else {
-      this.nativeElement.style.setProperty('--borderRadius', '0px');
+      this.nativeElement.style.removeProperty('--borderRadius');
     }
 
     if (panel.content.textAlign) {
@@ -234,6 +238,8 @@ export class PanelComponent implements OnInit {
         '--textAlign',
         panel.content.textAlign,
       );
+    } else {
+      this.nativeElement.style.removeProperty('--textAlign');
     }
   }
 }
