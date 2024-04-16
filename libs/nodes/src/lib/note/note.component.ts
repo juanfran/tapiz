@@ -29,6 +29,13 @@ import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
 import { hostBinding } from 'ngxtension/host-binding';
 import { NodeStore } from '../node/node.store';
 import { input } from '@angular/core';
+import {
+  applyToPoint,
+  compose,
+  inverse,
+  rotateDEG,
+  translate,
+} from 'transformation-matrix';
 
 @Component({
   selector: 'team-up-note',
@@ -395,13 +402,33 @@ export class NoteComponent {
   }
 
   findPanel(position: Point, panels: TuNode<Panel>[]) {
+    const width = 300;
+    const height = 300;
+
     const insidePanel = panels.find((panel) => {
-      return (
-        position.x >= panel.content.position.x &&
-        position.x < panel.content.position.x + panel.content.width &&
-        position.y >= panel.content.position.y &&
-        position.y < panel.content.position.y + panel.content.height
+      const transform = compose(
+        translate(panel.content.position.x, panel.content.position.y),
+        rotateDEG(panel.content.rotation),
       );
+
+      const inverseTransform = inverse(transform);
+
+      const corners = [
+        { x: position.x, y: position.y },
+        { x: position.x + width, y: position.y },
+        { x: position.x, y: position.y + height },
+        { x: position.x + width, y: position.y + height },
+      ];
+
+      return corners.every((corner) => {
+        const transformedCorner = applyToPoint(inverseTransform, corner);
+        return (
+          transformedCorner.x >= 0 &&
+          transformedCorner.x <= panel.content.width &&
+          transformedCorner.y >= 0 &&
+          transformedCorner.y <= panel.content.height
+        );
+      });
     });
 
     const color = insidePanel?.content.color ?? '#fdab61';

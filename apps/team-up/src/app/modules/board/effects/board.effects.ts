@@ -16,7 +16,7 @@ import { PageActions } from '../actions/page.actions';
 import { selectLayer, selectZone } from '../selectors/page.selectors';
 import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
-import { Group, Panel, StateActions } from '@team-up/board-commons';
+import { Group, Panel } from '@team-up/board-commons';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { pageFeature } from '../reducers/page.reducer';
 import { NodesActions } from '@team-up/nodes/services/nodes-actions';
