@@ -129,7 +129,10 @@ export class TextComponent implements OnInit {
             }),
           );
 
-          this.cancelEdit();
+          // delay to prevent flickering with the old content
+          requestAnimationFrame(() => {
+            this.cancelEdit();
+          });
         }
       });
 
