@@ -18,6 +18,7 @@ export interface Note {
   drawing: Drawing[];
   width: number;
   height: number;
+  color?: string | null;
 }
 
 export function isNote(node: TuNode): node is TuNode<Note> {

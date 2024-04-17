@@ -142,6 +142,13 @@ export class NoteComponent {
   ownerId = computed(() => {
     return this.user()?.id;
   });
+  color = computed(() => {
+    const panels = this.#nodesStore.nodes().filter(isPanel);
+
+    const position = this.node().content.position;
+    const defaultColor = this.node().content.color ?? '#fdab61';
+    return this.findColor(position, panels, defaultColor);
+  });
 
   constructor() {
     const highlight = computed(() => {
@@ -176,13 +183,6 @@ export class NoteComponent {
     });
 
     effect(() => {
-      const panels = this.#nodesStore.nodes().filter(isPanel);
-
-      const position = this.node().content.position;
-      this.findPanel(position, panels);
-    });
-
-    effect(() => {
       if (this.edit()) {
         this.#historyService.initEdit(this.node());
       } else {
@@ -201,6 +201,14 @@ export class NoteComponent {
 
     effect(() => {
       this.textarea()?.nativeElement.focus();
+    });
+
+    effect(() => {
+      const color = this.color();
+
+      if (color) {
+        this.setColor(color);
+      }
     });
 
     afterNextRender(() => {
@@ -401,7 +409,7 @@ export class NoteComponent {
     return this.userId() === this.node().content.ownerId;
   }
 
-  findPanel(position: Point, panels: TuNode<Panel>[]) {
+  findColor(position: Point, panels: TuNode<Panel>[], defaultColor: string) {
     const width = 300;
     const height = 300;
 
@@ -431,8 +439,14 @@ export class NoteComponent {
       });
     });
 
-    const color = insidePanel?.content.color ?? '#fdab61';
+    if (insidePanel?.content.color) {
+      return insidePanel?.content.color;
+    }
 
+    return defaultColor;
+  }
+
+  setColor(color: string) {
     this.nativeElement.style.setProperty('--custom-fg', '#000');
     this.nativeElement.style.setProperty('--custom-bg', lighter(color, 70));
     this.nativeElement.style.setProperty('--custom-main', color);
