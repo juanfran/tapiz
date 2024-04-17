@@ -2,9 +2,9 @@ import {
   Component,
   ChangeDetectionStrategy,
   CUSTOM_ELEMENTS_SCHEMA,
+  inject,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { RxState } from '@rx-angular/state';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import {
@@ -34,7 +34,6 @@ import { AutoFocusDirective } from '../../directives/autofocus.directive';
 import { MatInputModule } from '@angular/material/input';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { AsyncPipe } from '@angular/common';
-import { RxLet } from '@rx-angular/template/let';
 import { MatIconModule } from '@angular/material/icon';
 import { TokenSelectorComponent } from '../token-selector/token-selector.component';
 import { Token } from '@team-up/board-commons/models/token.model';
@@ -48,19 +47,13 @@ import { DrawingStore } from '@team-up/board-components/drawing/drawing.store';
 import { TemplateSelectorComponent } from '../template-selector/template-selector.component';
 import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 
-interface State {
-  popupOpen: string;
-}
-
 @Component({
   selector: 'team-up-board-toolbar',
   templateUrl: './board-toolbar.component.html',
   styleUrls: ['./board-toolbar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState],
   standalone: true,
   imports: [
-    RxLet,
     SvgIconComponent,
     ReactiveFormsModule,
     MatInputModule,
@@ -74,37 +67,32 @@ interface State {
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class BoardToolbarComponent {
-  public readonly model$ = this.state.select();
-  public canvasMode$ = this.store.select(selectCanvasMode);
-  public imageForm = new FormGroup({
+  #store = inject(Store);
+  #boardMoveService = inject(BoardMoveService);
+  #notesService = inject(NotesService);
+  #dialog = inject(MatDialog);
+  #drawingStore = inject(DrawingStore);
+  #nodesActions = inject(NodesActions);
+
+  canvasMode$ = this.#store.select(selectCanvasMode);
+  imageForm = new FormGroup({
     url: new FormControl('', [Validators.required]),
   });
-  public toolbarSubscription?: Subscription;
-  public readonly layer = this.store.selectSignal(selectLayer);
+  toolbarSubscription?: Subscription;
+  layer = this.#store.selectSignal(selectLayer);
+  popup = this.#store.selectSignal(selectPopupOpen);
 
-  constructor(
-    public state: RxState<State>,
-    private store: Store,
-    private boardMoveService: BoardMoveService,
-    private notesService: NotesService,
-    private dialog: MatDialog,
-    private drawingStore: DrawingStore,
-    private nodesActions: NodesActions,
-  ) {
-    this.state.connect('popupOpen', this.store.select(selectPopupOpen));
-  }
-
-  public text() {
+  text() {
     this.popupOpen('text');
 
-    this.store.dispatch(PageActions.textToolbarClick());
+    this.#store.dispatch(PageActions.textToolbarClick());
 
-    this.toolbarSubscription = this.boardMoveService
+    this.toolbarSubscription = this.#boardMoveService
       .nextMouseDown()
       .pipe(
         withLatestFrom(
-          this.store.select(selectZoom),
-          this.store.select(selectPosition),
+          this.#store.select(selectZoom),
+          this.#store.select(selectPosition),
         ),
       )
       .subscribe({
@@ -114,7 +102,7 @@ export class BoardToolbarComponent {
             y: (-position.y + event.pageY) / zoom,
           };
 
-          const action = this.nodesActions.add<Text>('text', {
+          const action = this.#nodesActions.add<Text>('text', {
             text: '<p></p>',
             position: textPosition,
             layer: this.layer(),
@@ -123,7 +111,7 @@ export class BoardToolbarComponent {
             rotation: 0,
           });
 
-          this.store.dispatch(
+          this.#store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
               actions: [action],
@@ -134,26 +122,26 @@ export class BoardToolbarComponent {
       });
   }
 
-  public note() {
-    if (this.state.get('popupOpen') === 'note') {
+  note() {
+    if (this.popup() === 'note') {
       this.popupOpen('');
       return;
     }
 
     this.popupOpen('note');
 
-    this.toolbarSubscription = this.boardMoveService
+    this.toolbarSubscription = this.#boardMoveService
       .nextMouseDown()
       .pipe(
         withLatestFrom(
-          this.store.select(selectZoom),
-          this.store.select(selectPosition),
-          this.store.select(selectUserId),
+          this.#store.select(selectZoom),
+          this.#store.select(selectPosition),
+          this.#store.select(selectUserId),
         ),
       )
       .subscribe({
         next: ([event, zoom, position, userId]) => {
-          this.notesService.createNote(userId, {
+          this.#notesService.createNote(userId, {
             x: (-position.x + event.clientX) / zoom,
             y: (-position.y + event.clientY) / zoom,
           });
@@ -162,15 +150,15 @@ export class BoardToolbarComponent {
       });
   }
 
-  public select() {
-    if (this.state.get('popupOpen') === 'select') {
+  select() {
+    if (this.popup() === 'select') {
       this.popupOpen('');
       return;
     }
 
     this.popupOpen('select');
 
-    this.store.dispatch(
+    this.#store.dispatch(
       PageActions.setInitZone({
         initZone: {
           type: 'select',
@@ -179,10 +167,10 @@ export class BoardToolbarComponent {
     );
   }
 
-  public group() {
-    if (this.state.get('popupOpen') === 'group') {
+  group() {
+    if (this.popup() === 'group') {
       this.popupOpen('');
-      this.store.dispatch(
+      this.#store.dispatch(
         PageActions.setInitZone({
           initZone: null,
         }),
@@ -191,7 +179,7 @@ export class BoardToolbarComponent {
     }
 
     this.popupOpen('group');
-    this.store.dispatch(
+    this.#store.dispatch(
       PageActions.setInitZone({
         initZone: {
           type: 'group',
@@ -200,39 +188,39 @@ export class BoardToolbarComponent {
     );
   }
 
-  public vote() {
-    if (this.state.get('popupOpen') !== 'vote') {
+  vote() {
+    if (this.popup() !== 'vote') {
       this.popupOpen('vote');
-      this.store.dispatch(PageActions.readyToVote());
+      this.#store.dispatch(PageActions.readyToVote());
     } else {
       this.popupOpen('');
     }
   }
 
-  public draw() {
-    if (this.state.get('popupOpen') !== 'draw') {
+  draw() {
+    if (this.popup() !== 'draw') {
       this.popupOpen('draw');
-      this.drawingStore.actions.readyToDraw();
+      this.#drawingStore.actions.readyToDraw();
     } else {
       this.popupOpen('');
-      this.drawingStore.actions.finishDrawing();
+      this.#drawingStore.actions.finishDrawing();
     }
   }
 
-  public search() {
-    if (this.state.get('popupOpen') !== 'search') {
+  search() {
+    if (this.popup() !== 'search') {
       this.popupOpen('search');
-      this.store.dispatch(PageActions.readyToSearch());
+      this.#store.dispatch(PageActions.readyToSearch());
     } else {
       this.popupOpen('');
     }
   }
 
-  public cocomaterial() {
-    if (this.state.get('popupOpen') !== 'cocomaterial') {
+  cocomaterial() {
+    if (this.popup() !== 'cocomaterial') {
       this.popupOpen('cocomaterial');
 
-      const dialogRef = this.dialog.open(CocomaterialComponent, {
+      const dialogRef = this.#dialog.open(CocomaterialComponent, {
         height: '900px',
         width: '800px',
         enterAnimationDuration: 0,
@@ -248,14 +236,14 @@ export class BoardToolbarComponent {
     }
   }
 
-  public panel() {
-    if (this.state.get('popupOpen') === 'panel') {
+  panel() {
+    if (this.popup() === 'panel') {
       this.popupOpen('');
       return;
     }
 
     this.popupOpen('panel');
-    this.store.dispatch(
+    this.#store.dispatch(
       PageActions.setInitZone({
         initZone: {
           type: 'panel',
@@ -264,20 +252,20 @@ export class BoardToolbarComponent {
     );
   }
 
-  public poll() {
-    if (this.state.get('popupOpen') === 'poll') {
+  poll() {
+    if (this.popup() === 'poll') {
       this.popupOpen('');
       return;
     }
 
     this.popupOpen('poll');
 
-    this.toolbarSubscription = this.boardMoveService
+    this.toolbarSubscription = this.#boardMoveService
       .nextMouseDown()
       .pipe(
         withLatestFrom(
-          this.store.select(selectZoom),
-          this.store.select(selectPosition),
+          this.#store.select(selectZoom),
+          this.#store.select(selectPosition),
         ),
       )
       .subscribe({
@@ -293,10 +281,10 @@ export class BoardToolbarComponent {
             options: [],
           };
 
-          this.store.dispatch(
+          this.#store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
-              actions: [this.nodesActions.add('poll', poll)],
+              actions: [this.#nodesActions.add('poll', poll)],
             }),
           );
         },
@@ -304,24 +292,24 @@ export class BoardToolbarComponent {
       });
   }
 
-  public emoji() {
-    if (this.state.get('popupOpen') !== 'emoji') {
+  emoji() {
+    if (this.popup() !== 'emoji') {
       this.popupOpen('emoji');
     } else {
       this.popupOpen('');
     }
   }
 
-  public emojiSelected(emojiEvent: EmojiClickEvent) {
-    this.store.dispatch(
+  emojiSelected(emojiEvent: EmojiClickEvent) {
+    this.#store.dispatch(
       PageActions.selectEmoji({
         emoji: emojiEvent.detail.emoji as NativeEmoji,
       }),
     );
   }
 
-  public token() {
-    if (this.state.get('popupOpen') === 'token') {
+  token() {
+    if (this.popup() === 'token') {
       this.popupOpen('');
       return;
     }
@@ -329,29 +317,29 @@ export class BoardToolbarComponent {
     this.popupOpen('token');
   }
 
-  public estimation() {
-    if (this.state.get('popupOpen') === 'estimation') {
+  estimation() {
+    if (this.popup() === 'estimation') {
       this.popupOpen('');
       return;
     }
 
     this.popupOpen('estimation');
 
-    this.toolbarSubscription = this.boardMoveService
+    this.toolbarSubscription = this.#boardMoveService
       .nextMouseDown()
       .pipe(
         withLatestFrom(
-          this.store.select(selectZoom),
-          this.store.select(selectPosition),
+          this.#store.select(selectZoom),
+          this.#store.select(selectPosition),
         ),
       )
       .subscribe({
         next: ([event, zoom, position]) => {
-          this.store.dispatch(
+          this.#store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
               actions: [
-                this.nodesActions.add<EstimationBoard>('estimation', {
+                this.#nodesActions.add<EstimationBoard>('estimation', {
                   layer: this.layer(),
                   position: {
                     x: (-position.x + event.pageX) / zoom,
@@ -366,15 +354,13 @@ export class BoardToolbarComponent {
       });
   }
 
-  public tokenSelected(
-    token: Pick<Token, 'backgroundColor' | 'color' | 'text'>,
-  ) {
-    this.toolbarSubscription = this.boardMoveService
+  tokenSelected(token: Pick<Token, 'backgroundColor' | 'color' | 'text'>) {
+    this.toolbarSubscription = this.#boardMoveService
       .nextMouseDown()
       .pipe(
         withLatestFrom(
-          this.store.select(selectZoom),
-          this.store.select(selectPosition),
+          this.#store.select(selectZoom),
+          this.#store.select(selectPosition),
         ),
       )
       .subscribe({
@@ -390,10 +376,10 @@ export class BoardToolbarComponent {
             height: 100,
           };
 
-          this.store.dispatch(
+          this.#store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
-              actions: [this.nodesActions.add<Token>('token', tokenContent)],
+              actions: [this.#nodesActions.add<Token>('token', tokenContent)],
             }),
           );
         },
@@ -401,8 +387,8 @@ export class BoardToolbarComponent {
       });
   }
 
-  public popupOpen(popupName: string) {
-    this.store.dispatch(PageActions.setPopupOpen({ popup: popupName }));
+  popupOpen(popupName: string) {
+    this.#store.dispatch(PageActions.setPopupOpen({ popup: popupName }));
 
     if (this.toolbarSubscription) {
       this.toolbarSubscription.unsubscribe();
@@ -410,17 +396,17 @@ export class BoardToolbarComponent {
     }
   }
 
-  public newImage() {
+  newImage() {
     const url = this.imageForm.get('url')?.value;
     if (this.imageForm.valid && url) {
-      zip(this.store.select(selectZoom), this.store.select(selectPosition))
+      zip(this.#store.select(selectZoom), this.#store.select(selectPosition))
         .pipe(take(1))
         .subscribe(([zoom, position]) => {
-          this.store.dispatch(
+          this.#store.dispatch(
             BoardActions.batchNodeActions({
               history: true,
               actions: [
-                this.nodesActions.add<Image>('image', {
+                this.#nodesActions.add<Image>('image', {
                   url,
                   layer: this.layer(),
                   position: {
@@ -441,8 +427,8 @@ export class BoardToolbarComponent {
     this.popupOpen('');
   }
 
-  public templateSelector() {
-    if (this.state.get('popupOpen') === 'templates') {
+  templateSelector() {
+    if (this.popup() === 'templates') {
       this.popupOpen('');
       return;
     }
@@ -450,7 +436,7 @@ export class BoardToolbarComponent {
     this.popupOpen('templates');
   }
 
-  public seletedTemplate() {
+  seletedTemplate() {
     this.popupOpen('');
   }
 }

@@ -1,71 +1,69 @@
-<ng-container *rxLet="model$; let vm">
+<button
+  class="home"
+  [routerLink]="['/']">
+  <team-up-svg-icon
+    icon="home"
+    class="icon-svg"></team-up-svg-icon>
+</button>
+<div class="mode">
+  @if (edit()) {
+    <span
+      #textarea
+      teamUpAutofocus
+      class="textarea"
+      role="textbox"
+      (teamUpClickOutside)="clickOutside($event)"
+      (keydown.enter)="enter($event)"
+      contenteditable
+      >{{ name() }}</span
+    >
+  }
+  @if (!edit() && isAdmin()) {
+    <button
+      class="edit-name"
+      (click)="editName()">
+      <team-up-svg-icon
+        icon="edit"
+        class="icon-svg"></team-up-svg-icon>
+      <span class="board-name">{{ name() }}</span>
+    </button>
+  }
+  @if (!isAdmin()) {
+    <span class="board-name">{{ name() }}</span>
+  }
+</div>
+<div class="header-end">
+  @if (isAdmin()) {
+    <button
+      title="Settings"
+      class="button-action"
+      (click)="settings()">
+      <mat-icon>settings</mat-icon>
+    </button>
+  }
   <button
-    class="home"
-    [routerLink]="['/']">
+    title="Share"
+    class="button-action"
+    (click)="share()">
+    <mat-icon>share</mat-icon>
+  </button>
+  <button (click)="export()">
     <team-up-svg-icon
-      icon="home"
+      icon="export"
       class="icon-svg"></team-up-svg-icon>
   </button>
-  <div class="mode">
-    @if (vm.edit) {
-      <span
-        #textarea
-        teamUpAutofocus
-        class="textarea"
-        role="textbox"
-        (teamUpClickOutside)="clickOutside($event)"
-        (keydown.enter)="enter($event)"
-        contenteditable
-        >{{ vm.name }}</span
-      >
-    }
-    @if (!vm.edit && vm.isAdmin) {
-      <button
-        class="edit-name"
-        (click)="editName()">
-        <team-up-svg-icon
-          icon="edit"
-          class="icon-svg"></team-up-svg-icon>
-        <span class="board-name">{{ vm.name }}</span>
-      </button>
-    }
-    @if (!vm.isAdmin) {
-      <span class="board-name">{{ vm.name }}</span>
-    }
-  </div>
-  <div class="header-end">
-    @if (vm.isAdmin) {
-      <button
-        title="Settings"
-        class="button-action"
-        (click)="settings()">
-        <mat-icon>settings</mat-icon>
-      </button>
-    }
+  <div class="change-mode-button-holder">
     <button
-      title="Share"
-      class="button-action"
-      (click)="share()">
-      <mat-icon>share</mat-icon>
+      [class.active]="canvasMode() === 'editMode'"
+      class="change-mode-button"
+      (click)="changeCanvasMode('editMode')">
+      Edit Mode
     </button>
-    <button (click)="export()">
-      <team-up-svg-icon
-        icon="export"
-        class="icon-svg"></team-up-svg-icon>
+    <button
+      [class.active]="canvasMode() === 'composeMode'"
+      class="change-mode-button"
+      (click)="changeCanvasMode('composeMode')">
+      Compose Mode
     </button>
-    <div class="change-mode-button-holder">
-      <button
-        [class.active]="state.get('canvasMode') === 'editMode'"
-        class="change-mode-button"
-        (click)="changeCanvasMode('editMode')">
-        Edit Mode
-      </button>
-      <button
-        [class.active]="state.get('canvasMode') === 'composeMode'"
-        class="change-mode-button"
-        (click)="changeCanvasMode('composeMode')">
-        Compose Mode
-      </button>
-    </div>
   </div>
-</ng-container>
+</div>
