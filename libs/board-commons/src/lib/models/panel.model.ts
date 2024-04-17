@@ -9,11 +9,11 @@ export interface Panel {
   width: number;
   height: number;
   rotation: number;
-  color?: string;
-  backgroundColor?: string;
-  borderColor?: string;
-  borderWidth?: number;
-  borderRadius?: number;
+  color?: string | null;
+  backgroundColor?: string | null;
+  borderColor?: string | null;
+  borderWidth?: number | null;
+  borderRadius?: number | null;
   textAlign?: 'start' | 'center' | 'end';
   drawing: Drawing[];
 }

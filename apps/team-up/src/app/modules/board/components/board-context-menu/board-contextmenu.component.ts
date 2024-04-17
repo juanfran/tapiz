@@ -14,10 +14,12 @@ import { CopyPasteService } from '../../../../services/copy-paste.service';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { VotesModalComponent } from '../votes-modal/votes-modal.component';
-import { Group, Note, TuNode } from '@team-up/board-commons';
+import { Group, NodePatch, Note, TuNode } from '@team-up/board-commons';
 import { selectEmoji, selectVoting } from '../../selectors/page.selectors';
 import { CommentsStore } from '@team-up/nodes/comments/comments.store';
 import { NodesActions } from '@team-up/nodes/services/nodes-actions';
+import Pickr from '@simonwep/pickr';
+import { colorPickerConfig } from '@team-up/ui/color-picker/color-picker.config';
 
 @Component({
   selector: 'team-up-board-context-menu',
@@ -215,16 +217,65 @@ export class BoardContextMenuComponent implements OnInit {
           }
 
           if (currentNodes.length === 1) {
-            const canHaveComments = currentNodes[0].type === 'note';
+            const isNote = currentNodes[0].type === 'note';
 
-            if (canHaveComments) {
-              actions.push({
-                label: 'Comments',
-                icon: 'comments',
-                action: () => {
-                  this.commentsStore.setParentNode(currentNodes[0]['id']);
+            if (isNote) {
+              const note = currentNodes[0] as TuNode<Note>;
+
+              actions.push(
+                {
+                  label: 'Comments',
+                  icon: 'comments',
+                  action: () => {
+                    this.commentsStore.setParentNode(currentNodes[0]['id']);
+                  },
                 },
-              });
+                {
+                  label: 'Color',
+                  icon: 'palette',
+                  action: () => {
+                    const noteEl = document.querySelector<HTMLElement>(
+                      `[data-id="${note.id}"]`,
+                    );
+
+                    if (!noteEl) {
+                      return;
+                    }
+
+                    const pickr = Pickr.create({
+                      ...colorPickerConfig,
+                      el: noteEl,
+                      useAsButton: true,
+                      default: note.content.color ?? '#fdab61',
+                    });
+
+                    pickr.show();
+
+                    pickr.on('save', (color: Pickr.HSVaColor | null) => {
+                      const patchNote: NodePatch<Note> = {
+                        data: {
+                          type: 'note',
+                          id: note.id,
+                          content: {
+                            color: color?.toHEXA().toString() ?? null,
+                          },
+                        },
+                        op: 'patch',
+                      };
+
+                      this.store.dispatch(
+                        BoardActions.batchNodeActions({
+                          history: true,
+                          actions: [patchNote],
+                        }),
+                      );
+
+                      pickr.hide();
+                      pickr.destroy();
+                    });
+                  },
+                },
+              );
             }
           }
 

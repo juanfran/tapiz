@@ -36,6 +36,7 @@ const note = z.object({
     }),
   ),
   ownerId: z.string().max(255),
+  color: z.string().length(7).regex(/^#/).nullable().optional(),
 });
 
 export const patchNote = note.partial();

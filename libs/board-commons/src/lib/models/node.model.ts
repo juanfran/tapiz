@@ -16,7 +16,7 @@ export interface NodeAdd<T = object> {
 
 export interface NodePatch<T = object> {
   op: 'patch';
-  data: TuNode<T>;
+  data: TuNode<Partial<T>>;
   parent?: string;
   position?: number;
 }
