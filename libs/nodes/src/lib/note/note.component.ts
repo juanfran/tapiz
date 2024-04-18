@@ -39,6 +39,7 @@ import {
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
+import { NodeSpaceComponent } from '../node-space';
 
 @Component({
   selector: 'team-up-note',
@@ -46,7 +47,7 @@ import { switchMap } from 'rxjs';
   styleUrls: ['./note.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [DrawingDirective, MatIconModule],
+  imports: [DrawingDirective, MatIconModule, NodeSpaceComponent],
   host: {
     '[class.drawing]': 'drawing()',
     '[class.active-layer]': 'activeLayer()',
@@ -112,24 +113,12 @@ export class NoteComponent {
 
   textarea = viewChild<ElementRef>('textarea');
   textSize = computed(() => {
-    const realSize = 250;
-
-    const sizeSearch = (fontSize: number): number => {
-      const height = this.#noteHeight(
-        this.node().content.text,
-        realSize,
-        `${fontSize}px "Open Sans", -apple-system, system-ui, sans-serif`,
-        1.1,
-      );
-
-      if (height > realSize - 10) {
-        return sizeSearch(fontSize - 1);
-      }
-
-      return fontSize;
-    };
-
-    return sizeSearch(56);
+    return this.#noteHeight(
+      this.node().content.width,
+      this.node().content.height,
+      this.node().content.text,
+      '"Open Sans", -apple-system, system-ui, sans-serif',
+    );
   });
 
   userId = this.#nodesStore.userId;
@@ -429,8 +418,8 @@ export class NoteComponent {
   }
 
   findColor(position: Point, panels: TuNode<Panel>[], defaultColor: string) {
-    const width = 300;
-    const height = 300;
+    const width = this.node().content.width;
+    const height = this.node().content.height;
 
     const insidePanel = panels.find((panel) => {
       const transform = compose(
@@ -528,25 +517,56 @@ export class NoteComponent {
     this.#commentsStore.setParentNode(this.node().id);
   }
 
-  #noteHeight(texto: string, width: number, font: string, lineHeight: number) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+  #noteHeight(
+    width: number,
+    height: number,
+    text: string,
+    font: string,
+  ): number {
+    const container = document.querySelector('#size-calculator');
+    const minFontSize = 1;
+    const maxFontSize = 56;
+    let fontSize = maxFontSize;
+    const increment = 1;
 
-    if (!ctx) return 0;
+    if (!container) {
+      return maxFontSize;
+    }
 
-    ctx.font = font;
+    const div = document.createElement('div');
+    const textDiv = document.createElement('div');
+    const padding = 10;
+    const nameHeight = 28;
 
-    const textLines = texto.split('\n');
+    div.style.overflow = 'scroll-y';
+    div.style.width = `${width}px`;
+    div.style.height = `${height - nameHeight}px`;
+    div.style.padding = `${padding}px`;
+    div.style.position = 'absolute';
+    div.style.top = '-1000px';
+    div.id = 'textDivCalculator';
+    textDiv.style.fontFamily = font;
+    textDiv.style.overflowWrap = 'break-word';
+    textDiv.style.whiteSpace = 'pre-wrap';
+    textDiv.style.lineHeight = '1.1';
 
-    const nlines = textLines.reduce((prev, line) => {
-      const error = 1.05;
-      const measure = ctx.measureText(line).width * error;
+    textDiv.innerText = text;
+    div.appendChild(textDiv);
 
-      return prev + (Math.ceil(measure / width) || 1);
-    }, 0);
+    container.appendChild(div);
 
-    const realLineHeight = parseInt(font) * lineHeight;
+    while (fontSize >= minFontSize) {
+      textDiv.style.fontSize = `${fontSize}px`;
 
-    return nlines * realLineHeight;
+      if (textDiv.clientHeight + padding / 2 < div.clientHeight) {
+        break;
+      }
+
+      fontSize -= increment;
+    }
+
+    container.removeChild(div);
+
+    return fontSize - increment;
   }
 }

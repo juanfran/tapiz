@@ -1,52 +1,58 @@
-<div class="top-info">
-  @if (comments()) {
-    <button
-      type="button"
-      class="comments"
-      (click)="openComments()">
-      {{ comments() }}
+<team-up-node-space
+  [node]="node()"
+  [resize]="true"
+  [rotate]="false"
+  [enabled]="!edit() && focus()">
+  <div class="inner">
+    <div class="top-info">
+      @if (comments()) {
+        <button
+          type="button"
+          class="comments"
+          (click)="openComments()">
+          {{ comments() }}
 
-      <mat-icon>comments</mat-icon>
-    </button>
-  }
+          <mat-icon>comments</mat-icon>
+        </button>
+      }
 
-  @if (votes() > 0) {
-    <div class="vote">
-      {{ votes() }}
+      @if (votes() > 0) {
+        <div class="vote">
+          {{ votes() }}
+        </div>
+      }
     </div>
-  }
-</div>
-@if (edit()) {
-  <textarea
-    class="no-drag"
-    #textarea
-    maxlength="140"
-    (input)="setText($event)"
-    (focus)="selectTextarea($event)"
-    >{{ editText() }}</textarea
-  >
-}
-@if (!edit()) {
-  <div class="text">{{ node().content.text }}</div>
-}
-<div
-  class="name"
-  [title]="username()">
-  {{ username() }}
-</div>
-<div class="characters">{{ node().content.text.length }}/140</div>
-@for (emoji of node().content.emojis; track emoji) {
-  <div
-    class="emoji"
-    [style.left.px]="emoji.position.x"
-    [style.top.px]="emoji.position.y">
-    {{ emoji.unicode }}
+    @if (edit()) {
+      <textarea
+        class="no-drag"
+        #textarea
+        (input)="setText($event)"
+        (focus)="selectTextarea($event)"
+        >{{ editText() }}</textarea
+      >
+    }
+    @if (!edit()) {
+      <div class="text">{{ node().content.text }}</div>
+    }
+    <div
+      class="name"
+      [title]="username()">
+      {{ username() }}
+    </div>
+    @for (emoji of node().content.emojis; track emoji) {
+      <div
+        class="emoji"
+        [style.left.px]="emoji.position.x"
+        [style.top.px]="emoji.position.y">
+        {{ emoji.unicode }}
+      </div>
+    }
+    @if (visible()) {
+      <canvas
+        [teamUpDrawing]="node().content.drawing"
+        (drawing)="setDrawing($event)"
+        [width]="node().content.width"
+        [height]="node().content.height"></canvas>
+    }
   </div>
-}
-@if (visible()) {
-  <canvas
-    [teamUpDrawing]="node().content.drawing"
-    (drawing)="setDrawing($event)"
-    width="300"
-    height="300"></canvas>
-}
+</team-up-node-space>

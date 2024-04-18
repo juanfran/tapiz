@@ -90,7 +90,6 @@ export class PageEffects {
         let height = node.content.height;
 
         const nodeWidths = {
-          note: 300,
           poll: 650,
         } as Record<string, number>;
 

@@ -19,16 +19,6 @@
   white-space: nowrap;
 }
 
-.characters {
-  bottom: 0.5rem;
-  color: var(--orange);
-  font-size: 1.125rem;
-  font-weight: 700;
-  opacity: 0;
-  position: absolute;
-  right: 0.5rem;
-}
-
 textarea {
   background: transparent;
   border: 0;
@@ -42,13 +32,9 @@ textarea {
   --emoji-width: 27px;
   --emoji-height: 33px;
 
-  background-color: var(--custom-bg);
-  border: solid 2px transparent;
-  box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.15);
   display: block;
-  height: 300px;
-  padding: var(--spacing-2);
-  width: 300px;
+  inline-size: 100%;
+  block-size: 100%;
 
   canvas {
     pointer-events: none;
@@ -87,6 +73,15 @@ textarea {
   &.voting {
     cursor: crosshair;
   }
+}
+
+.inner {
+  background-color: var(--custom-bg);
+  border: solid 2px transparent;
+  box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.15);
+  padding: var(--spacing-2);
+  inline-size: 100%;
+  block-size: 100%;
 }
 
 .text {

@@ -77,3 +77,10 @@ team-up-header {
 .container.loading {
   display: none;
 }
+
+
+#size-calculator {
+  position: absolute;
+  top: -1000px;
+  z-index: -1;
+}
