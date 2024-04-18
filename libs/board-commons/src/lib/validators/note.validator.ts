@@ -9,7 +9,7 @@ import {
 const note = z.object({
   ...CommonBoardValidation,
   ...SizeValidator,
-  text: z.string().max(140),
+  text: z.string(),
   votes: z.array(
     z.object({
       userId: z.string().max(255),
@@ -36,6 +36,8 @@ const note = z.object({
     }),
   ),
   ownerId: z.string().max(255),
+  width: z.number().positive(),
+  height: z.number().positive(),
   color: z.string().length(7).regex(/^#/).nullable().optional(),
 });
 
