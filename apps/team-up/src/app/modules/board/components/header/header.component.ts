@@ -4,6 +4,7 @@ import {
   ElementRef,
   signal,
   inject,
+  viewChild,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
@@ -13,7 +14,7 @@ import {
   selectIsAdmin,
 } from '../../selectors/page.selectors';
 import { ExportService } from '../../services/export.service';
-import { ClickOutsideDirective } from '@team-up/ui/click-outside/click-outside.directive';
+import { ClickOutside } from 'ngxtension/click-outside';
 import { AutoFocusDirective } from '../../directives/autofocus.directive';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { RouterLink } from '@angular/router';
@@ -36,7 +37,7 @@ import { switchMap } from 'rxjs';
     RouterLink,
     SvgIconComponent,
     AutoFocusDirective,
-    ClickOutsideDirective,
+    ClickOutside,
     MatIconModule,
     MatDialogModule,
   ],
@@ -47,6 +48,8 @@ export class HeaderComponent {
   #store = inject(Store);
   #dialog = inject(MatDialog);
   #hotkeysService = inject(HotkeysService);
+
+  textarea = viewChild<ElementRef<HTMLInputElement>>('textarea');
 
   edit = signal(false);
   canvasMode = this.#store.selectSignal(selectCanvasMode);
@@ -103,10 +106,16 @@ export class HeaderComponent {
     }
   }
 
-  clickOutside({ el }: { el: ElementRef }) {
+  clickOutside() {
     this.edit.set(false);
 
-    const name = (el.nativeElement as HTMLTextAreaElement).innerText;
+    const el = this.textarea()?.nativeElement;
+
+    if (!el) {
+      return;
+    }
+
+    const name = el.innerText;
 
     if (name !== this.name()) {
       this.#store.dispatch(BoardActions.setBoardName({ name }));
