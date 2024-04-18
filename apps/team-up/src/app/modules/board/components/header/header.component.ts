@@ -22,6 +22,9 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ShareBoardComponent } from '../share-board/share-board.component';
 import { pageFeature } from '../../reducers/page.reducer';
 import { BoardSettingsComponent } from '../board-settings/board-settings.component';
+import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { switchMap } from 'rxjs';
 
 @Component({
   selector: 'team-up-header',
@@ -37,16 +40,34 @@ import { BoardSettingsComponent } from '../board-settings/board-settings.compone
     MatIconModule,
     MatDialogModule,
   ],
+  providers: [HotkeysService],
 })
 export class HeaderComponent {
   #exportService = inject(ExportService);
   #store = inject(Store);
   #dialog = inject(MatDialog);
+  #hotkeysService = inject(HotkeysService);
 
   edit = signal(false);
   canvasMode = this.#store.selectSignal(selectCanvasMode);
   name = this.#store.selectSignal(pageFeature.selectName);
   isAdmin = this.#store.selectSignal(selectIsAdmin);
+
+  constructor() {
+    toObservable(this.edit)
+      .pipe(
+        takeUntilDestroyed(),
+        switchMap((edit) => {
+          if (edit) {
+            return this.#hotkeysService.listen({ key: 'Escape' });
+          }
+          return [];
+        }),
+      )
+      .subscribe(() => {
+        this.edit.set(false);
+      });
+  }
 
   changeCanvasMode(mode: string) {
     this.#store.dispatch(

@@ -36,6 +36,9 @@ import {
   rotateDEG,
   translate,
 } from 'transformation-matrix';
+import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
+import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { switchMap } from 'rxjs';
 
 @Component({
   selector: 'team-up-note',
@@ -48,6 +51,7 @@ import {
     '[class.drawing]': 'drawing()',
     '[class.active-layer]': 'activeLayer()',
   },
+  providers: [HotkeysService],
 })
 export class NoteComponent {
   #commentsStore = inject(CommentsStore);
@@ -59,6 +63,7 @@ export class NoteComponent {
   #drawingStore = inject(DrawingStore);
   #nodesStore = inject(NodesStore);
   #nodeStore = inject(NodeStore);
+  #hotkeysService = inject(HotkeysService);
 
   node = input.required<TuNode<Note>>();
 
@@ -165,6 +170,20 @@ export class NoteComponent {
 
       return !!votes;
     });
+
+    toObservable(this.focus)
+      .pipe(
+        takeUntilDestroyed(),
+        switchMap((focus) => {
+          if (focus) {
+            return this.#hotkeysService.listen({ key: 'Escape' });
+          }
+          return [];
+        }),
+      )
+      .subscribe(() => {
+        this.edit.set(false);
+      });
 
     effect(
       () => {

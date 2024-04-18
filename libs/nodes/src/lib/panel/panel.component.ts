@@ -14,13 +14,13 @@ import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
 import { Drawing, Panel, TuNode } from '@team-up/board-commons';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { BoardActions } from '@team-up/board-commons/actions/board.actions';
 import { HistoryService } from '../services/history.service';
 import { NodeSpaceComponent } from '../node-space';
 import { ToolbarComponent } from '@team-up/ui/toolbar';
 import { EditorViewComponent } from '@team-up/ui/editor-view';
-import { filter, pairwise } from 'rxjs';
+import { filter, pairwise, switchMap } from 'rxjs';
 import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
 import {
   DrawingDirective,
@@ -77,7 +77,6 @@ import { input } from '@angular/core';
     SafeHtmlPipe,
     DrawingDirective,
   ],
-
   host: {
     '[class.focus]': 'focus()',
     '[class.toolbar]': 'edit()',
@@ -93,6 +92,7 @@ export class PanelComponent implements OnInit {
   #drawingStore = inject(DrawingStore);
   #nodeStore = inject(NodeStore);
   #nodesActions = inject(NodesActions);
+  #hotkeysService = inject(HotkeysService);
 
   node = input.required<TuNode<Panel>>();
 
@@ -126,6 +126,20 @@ export class PanelComponent implements OnInit {
     effect(() => {
       this.#setCssVariables(this.node());
     });
+
+    toObservable(this.focus)
+      .pipe(
+        takeUntilDestroyed(),
+        switchMap((focus) => {
+          if (focus) {
+            return this.#hotkeysService.listen({ key: 'Escape' });
+          }
+          return [];
+        }),
+      )
+      .subscribe(() => {
+        this.finishEdit();
+      });
   }
 
   startEdit() {
@@ -161,31 +175,35 @@ export class PanelComponent implements OnInit {
       )
       .subscribe(() => {
         if (!this.focus() && this.edit()) {
-          this.#store.dispatch(
-            BoardActions.batchNodeActions({
-              history: true,
-              actions: [
-                this.#nodesActions.patch<Panel>({
-                  type: 'panel',
-                  id: this.node().id,
-                  content: {
-                    text: this.newContent(),
-                  },
-                }),
-              ],
-            }),
-          );
-
-          // delay to prevent flickering with the old content
-          requestAnimationFrame(() => {
-            this.cancelEdit();
-          });
+          this.finishEdit();
         }
       });
 
     if (this.focus() && !this.pasted()) {
       this.startEdit();
     }
+  }
+
+  finishEdit() {
+    this.#store.dispatch(
+      BoardActions.batchNodeActions({
+        history: true,
+        actions: [
+          this.#nodesActions.patch<Panel>({
+            type: 'panel',
+            id: this.node().id,
+            content: {
+              text: this.newContent(),
+            },
+          }),
+        ],
+      }),
+    );
+
+    // delay to prevent flickering with the old content
+    requestAnimationFrame(() => {
+      this.cancelEdit();
+    });
   }
 
   cancelEdit() {

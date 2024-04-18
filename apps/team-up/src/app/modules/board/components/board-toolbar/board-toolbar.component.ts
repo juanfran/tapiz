@@ -15,7 +15,7 @@ import {
   selectUserId,
   selectZoom,
 } from '../../selectors/page.selectors';
-import { take, withLatestFrom } from 'rxjs/operators';
+import { switchMap, take, withLatestFrom } from 'rxjs/operators';
 import { BoardMoveService } from '../../services/board-move.service';
 import { NotesService } from '../../services/notes.service';
 import {
@@ -46,6 +46,8 @@ import {
 import { DrawingStore } from '@team-up/board-components/drawing/drawing.store';
 import { TemplateSelectorComponent } from '../template-selector/template-selector.component';
 import { NodesActions } from '@team-up/nodes/services/nodes-actions';
+import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
+import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'team-up-board-toolbar',
@@ -65,6 +67,7 @@ import { NodesActions } from '@team-up/nodes/services/nodes-actions';
     TemplateSelectorComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  providers: [HotkeysService],
 })
 export class BoardToolbarComponent {
   #store = inject(Store);
@@ -73,6 +76,7 @@ export class BoardToolbarComponent {
   #dialog = inject(MatDialog);
   #drawingStore = inject(DrawingStore);
   #nodesActions = inject(NodesActions);
+  #hotkeysService = inject(HotkeysService);
 
   canvasMode$ = this.#store.select(selectCanvasMode);
   imageForm = new FormGroup({
@@ -81,6 +85,22 @@ export class BoardToolbarComponent {
   toolbarSubscription?: Subscription;
   layer = this.#store.selectSignal(selectLayer);
   popup = this.#store.selectSignal(selectPopupOpen);
+
+  constructor() {
+    toObservable(this.popup)
+      .pipe(
+        takeUntilDestroyed(),
+        switchMap((popup) => {
+          if (popup) {
+            return this.#hotkeysService.listen({ key: 'Escape' });
+          }
+          return [];
+        }),
+      )
+      .subscribe(() => {
+        this.popupOpen('');
+      });
+  }
 
   text() {
     this.popupOpen('text');
