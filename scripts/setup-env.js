@@ -1,7 +1,4 @@
-import * as dotenv from 'dotenv';
 import { writeFileSync } from 'fs';
-
-dotenv.config();
 
 const front = ['API', 'WS'];
 const frontConfig = {};

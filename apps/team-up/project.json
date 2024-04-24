@@ -17,12 +17,7 @@
         "inlineStyleLanguage": "scss",
         "assets": [
           "apps/team-up/src/favicon.ico",
-          "apps/team-up/src/assets",
-          {
-            "glob": "**/*",
-            "input": "./node_modules/tinymce/",
-            "output": "./assets/"
-          }
+          "apps/team-up/src/assets"
         ],
         "styles": ["apps/team-up/src/app/styles/styles.scss"],
         "stylePreprocessorOptions": {
