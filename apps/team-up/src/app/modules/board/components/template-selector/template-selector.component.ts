@@ -91,36 +91,6 @@ export class TemplateSelectorComponent {
     },
   ];
 
-  constructor() {
-    // reference 0, 0
-    // this.#store.dispatch(
-    //   BoardActions.batchNodeActions({
-    //     history: true,
-    //     actions: [
-    //       {
-    //         data: {
-    //           type: 'token',
-    //           id: v4(),
-    //           content: {
-    //             layer: this.layer(),
-    //             text: 'x',
-    //             color: null,
-    //             backgroundColor: null,
-    //             width: 100,
-    //             height: 100,
-    //             position: {
-    //               x: 0,
-    //               y: 0,
-    //             },
-    //           },
-    //         },
-    //         op: 'add',
-    //       },
-    //     ],
-    //   }),
-    // );
-  }
-
   getSize(nodes: TuNode<TemplaNode>[]) {
     const sortedX = nodes.toSorted((prev, curr) => {
       return prev.content.position.x - curr.content.position.x;

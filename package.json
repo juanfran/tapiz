@@ -4,7 +4,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "config": "node scripts/setup-env.js",
+    "config": "node --env-file=.env scripts/setup-env.js",
     "ng": "nx",
     "start": "npm run config && nx serve team-up --port 4300",
     "start:api": "nx serve api",
@@ -83,7 +83,7 @@
     "lucia": "^3.0.1",
     "messageformat": "^2.3.0",
     "ngx-infinite-scroll": "^17.0.0",
-    "ngxtension": "^2.2.1",
+    "ngxtension": "^3.0.1",
     "open-props": "^1.6.12",
     "oslo": "^1.1.2",
     "postgres": "^3.3.5",

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { fromEvent, animationFrameScheduler, Observable, Subject } from 'rxjs';
 import {
   map,
@@ -19,14 +19,13 @@ import { selectPosition } from '../selectors/page.selectors';
   providedIn: 'root',
 })
 export class BoardMoveService {
+  private store = inject(Store);
   public move$!: Observable<Point>;
   public mouseMove$!: Observable<Point>;
   public mouseDown$!: Observable<MouseEvent>;
   public mouseUp$!: Observable<MouseEvent>;
   public boardMove$!: Observable<Point>;
   public currentMouseDownWatch$?: Subject<void>;
-
-  constructor(private store: Store) {}
 
   public listen(workLayer: HTMLElement) {
     this.mouseDown$ = fromEvent<MouseEvent>(workLayer, 'mousedown').pipe(

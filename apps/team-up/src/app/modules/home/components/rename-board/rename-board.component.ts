@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Inject,
-  inject,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
@@ -58,6 +53,10 @@ import { ModalHeaderComponent } from '../../../../shared/modal-header/modal-head
   ],
 })
 export class RenameBoardComponent {
+  public data = inject<{
+    name: string;
+  }>(MAT_DIALOG_DATA);
+
   private dialogRef = inject(MatDialogRef);
 
   public form = new FormGroup({
@@ -67,14 +66,9 @@ export class RenameBoardComponent {
     }),
   });
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      name: string;
-    },
-  ) {
+  constructor() {
     this.form.patchValue({
-      name: data.name,
+      name: this.data.name,
     });
   }
 

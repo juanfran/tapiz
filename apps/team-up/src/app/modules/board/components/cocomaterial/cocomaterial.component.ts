@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
@@ -57,6 +57,12 @@ interface State {
   providers: [RxState],
 })
 export class CocomaterialComponent {
+  private state = inject<RxState<State>>(RxState<State>);
+  private store = inject(Store);
+  public dialogRef = inject<MatDialogRef<CocomaterialComponent>>(
+    MatDialogRef<CocomaterialComponent>,
+  );
+  private nodesActions = inject(NodesActions);
   @ViewChild('tagInput') tagInput!: ElementRef<HTMLInputElement>;
 
   public readonly viewModel$ = this.state.select();
@@ -64,12 +70,7 @@ export class CocomaterialComponent {
 
   public separatorKeysCodes: number[] = [ENTER, COMMA];
 
-  constructor(
-    private state: RxState<State>,
-    private store: Store,
-    public dialogRef: MatDialogRef<CocomaterialComponent>,
-    private nodesActions: NodesActions,
-  ) {
+  constructor() {
     this.state.set({
       tags: [],
       filteredTags: [],

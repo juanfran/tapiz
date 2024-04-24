@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
@@ -13,7 +13,7 @@ import { ConfigService } from '../../../../services/config.service';
   imports: [MatButtonModule, MatIconModule, SvgIconComponent],
 })
 export class LoginComponent {
-  constructor(private configService: ConfigService) {}
+  private configService = inject(ConfigService);
 
   loginGoogle() {
     window.location.href = `${this.configService.config.API}/auth`;

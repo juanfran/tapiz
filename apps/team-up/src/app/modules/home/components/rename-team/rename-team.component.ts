@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Inject,
-  inject,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
@@ -56,6 +51,9 @@ import { MatButtonModule } from '@angular/material/button';
   ],
 })
 export class RenameTeamComponent {
+  public data = inject<{
+    name: string;
+  }>(MAT_DIALOG_DATA);
   private dialogRef = inject(MatDialogRef);
 
   public form = new FormGroup({
@@ -65,14 +63,9 @@ export class RenameTeamComponent {
     }),
   });
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      name: string;
-    },
-  ) {
+  constructor() {
     this.form.patchValue({
-      name: data.name,
+      name: this.data.name,
     });
   }
 

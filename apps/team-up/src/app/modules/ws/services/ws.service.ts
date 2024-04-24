@@ -10,15 +10,14 @@ import { ConfigService } from '../../../services/config.service';
   providedIn: 'root',
 })
 export class WsService {
+  private store = inject(Store);
+  private configService = inject(ConfigService);
   private ws!: WebSocket;
   private pool: unknown[] = [];
   private notificationService = inject(NotificationService);
   private router = inject(Router);
 
-  constructor(
-    private store: Store,
-    private configService: ConfigService,
-  ) {
+  constructor() {
     this.poolLoop();
   }
 

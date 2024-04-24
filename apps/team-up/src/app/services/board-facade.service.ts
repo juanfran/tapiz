@@ -30,10 +30,6 @@ export class BoardFacade {
   private board = syncNodeBox({ log: false });
   private store = inject(Store);
 
-  constructor() {
-    // console.log(this);
-  }
-
   public start() {
     this.board.update(() => {
       return [];

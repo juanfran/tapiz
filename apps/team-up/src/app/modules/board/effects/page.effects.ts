@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import {
@@ -21,6 +21,11 @@ import { Point, TuNode } from '@team-up/board-commons';
 
 @Injectable()
 export class PageEffects {
+  private actions$ = inject(Actions);
+  private store = inject(Store);
+  private boardApiService = inject(BoardApiService);
+  private route = inject(ActivatedRoute);
+  private boardFacade = inject(BoardFacade);
   public initBoardCocomaterialTags$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.initBoard),
@@ -229,12 +234,4 @@ export class PageEffects {
       filterNil(),
     );
   });
-
-  constructor(
-    private actions$: Actions,
-    private store: Store,
-    private boardApiService: BoardApiService,
-    private route: ActivatedRoute,
-    private boardFacade: BoardFacade,
-  ) {}
 }

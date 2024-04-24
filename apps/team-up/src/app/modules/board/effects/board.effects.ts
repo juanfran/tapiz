@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { WsService } from '../../../modules/ws/services/ws.service';
@@ -23,6 +23,13 @@ import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 
 @Injectable()
 export class BoardEffects {
+  private router = inject(Router);
+  private actions$ = inject(Actions);
+  private wsService = inject(WsService);
+  private boardApiService = inject(BoardApiService);
+  private store = inject(Store);
+  private boardFacade = inject(BoardFacade);
+  private nodesActions = inject(NodesActions);
   public initBoard$ = createEffect(
     () => {
       return this.actions$.pipe(
@@ -261,14 +268,4 @@ export class BoardEffects {
       }),
     );
   });
-
-  constructor(
-    private router: Router,
-    private actions$: Actions,
-    private wsService: WsService,
-    private boardApiService: BoardApiService,
-    private store: Store,
-    private boardFacade: BoardFacade,
-    private nodesActions: NodesActions,
-  ) {}
 }

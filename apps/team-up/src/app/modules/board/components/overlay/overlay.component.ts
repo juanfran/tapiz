@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   HostBinding,
   ElementRef,
+  inject,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
@@ -21,15 +22,15 @@ interface State {
   standalone: true,
 })
 export class OverlayComponent {
+  private el = inject(ElementRef);
+  private state = inject<RxState<State>>(RxState<State>);
+  private store = inject(Store);
+
   @HostBinding('style.display') get display() {
     return this.state.get('highlight') ? 'block' : 'none';
   }
 
-  constructor(
-    private el: ElementRef,
-    private state: RxState<State>,
-    private store: Store,
-  ) {
+  constructor() {
     this.state.connect('highlight', this.store.select(isUserHighlighActive()));
   }
 }

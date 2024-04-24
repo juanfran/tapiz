@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   selectUserHighlight,
@@ -52,11 +52,11 @@ interface ComponentViewModel {
   ],
 })
 export class UsersComponent {
-  constructor(
-    private store: Store,
-    private state: RxState<State>,
-    private boardFacade: BoardFacade,
-  ) {
+  private store = inject(Store);
+  private state = inject<RxState<State>>(RxState<State>);
+  private boardFacade = inject(BoardFacade);
+
+  constructor() {
     this.state.connect(
       'users',
       this.boardFacade

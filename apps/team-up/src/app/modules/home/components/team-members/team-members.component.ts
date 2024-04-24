@@ -1,10 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Inject,
-  inject,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Invitation, Member, TeamMember } from '@team-up/board-commons';
 import { MembersComponent } from '../members/members.component';
@@ -43,20 +38,18 @@ interface TeamMembersComponentState {
   imports: [CommonModule, MembersComponent],
 })
 export class TeamMembersComponent {
+  public data = inject<{
+    teamId: string;
+    title: string;
+  }>(MAT_DIALOG_DATA);
   public dialogRef = inject(MatDialogRef);
   public store = inject(Store);
   public state = inject(RxState) as RxState<TeamMembersComponentState>;
   public model$ = this.state.select();
 
-  constructor(
-    @Inject(MAT_DIALOG_DATA)
-    public data: {
-      teamId: string;
-      title: string;
-    },
-  ) {
+  constructor() {
     this.store.dispatch(
-      HomeActions.initTeamMembersModal({ teamId: data.teamId }),
+      HomeActions.initTeamMembersModal({ teamId: this.data.teamId }),
     );
 
     this.state.connect(

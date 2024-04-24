@@ -120,6 +120,23 @@ import { NodesActions } from '@team-up/nodes/services/nodes-actions';
   hostDirectives: [CopyPasteDirective],
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
+  public el = inject(ElementRef);
+  private wsService = inject(WsService);
+  private store = inject(Store);
+  private boardZoomService = inject(BoardZoomService);
+  private boardMoveService = inject(BoardMoveService);
+  private route = inject(ActivatedRoute);
+  private notesService = inject(NotesService);
+  private actions = inject(Actions);
+  private boardFacade = inject(BoardFacade);
+  private multiDragService = inject(MultiDragService);
+  private contextMenuStore = inject(ContextMenuStore);
+  private moveService = inject(MoveService);
+  private resizeService = inject(ResizeService);
+  private rotateService = inject(RotateService);
+  private subscriptionService = inject(SubscriptionService);
+  private drawingStore = inject(DrawingStore);
+  private nodesActions = inject(NodesActions);
   public readonly boardId$ = this.store.select(selectBoardId);
   public readonly nodes$ = this.boardFacade.getNodes();
 
@@ -166,25 +183,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     this.store.dispatch(PageActions.redo());
   }
 
-  constructor(
-    public el: ElementRef,
-    private wsService: WsService,
-    private store: Store,
-    private boardZoomService: BoardZoomService,
-    private boardMoveService: BoardMoveService,
-    private route: ActivatedRoute,
-    private notesService: NotesService,
-    private actions: Actions,
-    private boardFacade: BoardFacade,
-    private multiDragService: MultiDragService,
-    private contextMenuStore: ContextMenuStore,
-    private moveService: MoveService,
-    private resizeService: ResizeService,
-    private rotateService: RotateService,
-    private subscriptionService: SubscriptionService,
-    private drawingStore: DrawingStore,
-    private nodesActions: NodesActions,
-  ) {
+  constructor() {
     rxEffect(
       this.contextMenuStore.open$.pipe(
         pairwise(),

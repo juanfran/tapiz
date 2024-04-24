@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { fromEvent, Observable } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -21,13 +21,14 @@ import { concatLatestFrom } from '@ngrx/effects';
   providedIn: 'root',
 })
 export class BoardZoomService {
+  private store = inject(Store);
   public zoomMove$!: Observable<[Point, number]>;
   public zoom$!: Observable<{
     zoom: number;
     point: Point;
   }>;
 
-  constructor(private store: Store) {
+  constructor() {
     const maxZoom = 2.5;
     const minZoom = 0.1;
     const stepZoom = 0.075;
