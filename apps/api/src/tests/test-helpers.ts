@@ -81,7 +81,7 @@ export const initTestServer = (port: number): Promise<Server> => {
 
     fastify.register(async function (fastify) {
       fastify.get('/events', { websocket: true }, (connection, req) => {
-        server.connection(connection.socket, req);
+        server.connection(connection, req);
       });
     });
 
