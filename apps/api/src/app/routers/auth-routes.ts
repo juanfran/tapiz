@@ -35,12 +35,16 @@ export async function googleCallback(fastify: FastifyInstance) {
         const user = await getUserByGoogleId(googleUser.sub);
 
         if (user) {
-          const session = await lucia.createSession(user.id, {});
-          const sessionCookie = lucia.createSessionCookie(session.id);
+          try {
+            const session = await lucia.createSession(user.id, {});
+            const sessionCookie = lucia.createSessionCookie(session.id);
 
-          rep.setCookie(sessionCookie.name, sessionCookie.value, {
-            ...sessionCookie.attributes,
-          });
+            rep.setCookie(sessionCookie.name, sessionCookie.value, {
+              ...sessionCookie.attributes,
+            });
+          } catch (e) {
+            console.error(e);
+          }
 
           return rep.redirect(
             config.FRONTEND_URL +

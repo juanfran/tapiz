@@ -59,7 +59,7 @@ fastify.register(async function (fastify) {
       setServer(server);
     }
 
-    server.connection(connection.socket, req);
+    server.connection(connection, req);
   });
 
   fastify.get('/sub', { websocket: true }, async (connection, req) => {
@@ -68,18 +68,18 @@ fastify.register(async function (fastify) {
     const sessionId = cookies[lucia.sessionCookieName];
 
     if (!sessionId) {
-      connection.socket.close();
+      connection.close();
       return;
     }
 
     const { user } = await validateSession(sessionId);
 
     if (!user) {
-      connection.socket.close();
+      connection.close();
       return;
     }
 
-    newSubscriptorConnection(connection.socket, user.id);
+    newSubscriptorConnection(connection, user.id);
   });
 
   fastify.get('/api/auth', async (req, rep) => {
