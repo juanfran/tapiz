@@ -29,9 +29,9 @@ export class APIConfigService {
           });
 
           if (response.status === 401) {
-            this.#store.dispatch(AppActions.logout());
+            this.#store.dispatch(AppActions.unauthorized());
 
-            return Promise.reject('Unauthorized');
+            return response;
           }
 
           return response;

@@ -326,9 +326,9 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         .subscribe(() => {
           this.store.dispatch(PageActions.refetchBoard());
         });
-    }
 
-    this.dragConfig();
+      this.dragConfig();
+    }
   }
 
   public dragConfig() {

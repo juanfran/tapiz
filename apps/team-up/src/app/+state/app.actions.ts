@@ -5,5 +5,6 @@ export const AppActions = createActionGroup({
   events: {
     'Set user id': props<{ userId: string }>(),
     logout: emptyProps(),
+    unauthorized: emptyProps(),
   },
 });
