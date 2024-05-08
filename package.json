@@ -62,6 +62,7 @@
     "@tiptap/extension-document": "2.3.1",
     "@tiptap/extension-font-family": "2.3.1",
     "@tiptap/extension-heading": "2.3.1",
+    "@tiptap/extension-history": "^2.3.2",
     "@tiptap/extension-italic": "2.3.1",
     "@tiptap/extension-link": "2.3.1",
     "@tiptap/extension-list-item": "2.3.1",

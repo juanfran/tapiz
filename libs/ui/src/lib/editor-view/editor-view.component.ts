@@ -17,6 +17,7 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import { TextAlign } from '@tiptap/extension-text-align';
 import { Link } from '@tiptap/extension-link';
 import { FontFamily } from '@tiptap/extension-font-family';
+import { History } from '@tiptap/extension-history';
 import { ToolbarComponent } from '../toolbar';
 import { EditorViewSharedStateService } from './editor-view-shared-state.service';
 import { BubbleMenu } from './bubble-menu';
@@ -149,6 +150,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
           FontFamily.configure({
             types: ['textStyle'],
           }),
+          History.configure(),
           BubbleMenu.configure({
             element: this.linkMenu.nativeElement,
             shouldShow: ({ editor, nodeDom }) => {
