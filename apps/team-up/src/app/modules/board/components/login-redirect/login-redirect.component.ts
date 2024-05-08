@@ -18,7 +18,7 @@ export class LoginRedirectComponent implements OnInit {
   ngOnInit(): void {
     const url = sessionStorage.getItem('url') ?? '/';
     sessionStorage.removeItem('url');
-    this.router.navigate([url]);
+    this.router.navigateByUrl(url);
 
     this.store.dispatch(AppActions.setUserId({ userId: this.id() }));
     localStorage.setItem('userId', this.id());
