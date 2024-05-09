@@ -70,7 +70,8 @@ textarea {
     pointer-events: all;
   }
 
-  &.voting {
+  &.voting,
+  &.emoji-mode {
     cursor: crosshair;
   }
 }

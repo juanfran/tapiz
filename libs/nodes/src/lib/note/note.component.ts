@@ -83,6 +83,13 @@ export class NoteComponent {
       return this.#nodesStore.activeToolbarOption() === 'vote';
     }),
   );
+  emojiMode = hostBinding(
+    'class.emoji-mode',
+    computed(() => {
+      return this.#nodesStore.activeToolbarOption() === 'emoji';
+    }),
+  );
+
   visible = hostBinding(
     'class.visible',
     computed(() => {
@@ -242,11 +249,9 @@ export class NoteComponent {
       event.stopPropagation();
     }
 
-    const activeToolbarOption = this.#nodesStore.activeToolbarOption();
-
     if (this.voting()) {
       this.#voteEvent(event);
-    } else if (activeToolbarOption === 'emoji') {
+    } else if (this.emojiMode()) {
       this.#emojiEvent(event);
     } else {
       this.#nodesStore.setFocusNode({

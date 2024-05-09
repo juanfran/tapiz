@@ -300,7 +300,6 @@ const reducer = createReducer(
   on(PageActions.selectEmoji, (state, { emoji }): PageState => {
     return {
       ...state,
-      boardCursor: 'crosshair',
       emoji: emoji,
     };
   }),
