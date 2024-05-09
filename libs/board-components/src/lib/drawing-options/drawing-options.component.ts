@@ -14,8 +14,10 @@ import { ColorPickerComponent } from '@team-up/ui/color-picker';
 export class DrawingOptionsComponent {
   #drawingStore = inject(DrawingStore);
 
+  defaultColor = 'rgba(0, 0, 0, 1)';
+
   form = new FormGroup({
-    color: new FormControl('#000000', { nonNullable: true }),
+    color: new FormControl(this.defaultColor, { nonNullable: true }),
     size: new FormControl(5, { nonNullable: true }),
   });
 
@@ -48,6 +50,6 @@ export class DrawingOptionsComponent {
   }
 
   updateColor(color: string | undefined) {
-    this.form.patchValue({ color: color ?? '#000000' });
+    this.form.patchValue({ color: color ?? this.defaultColor });
   }
 }

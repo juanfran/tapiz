@@ -1,8 +1,7 @@
+import { Point } from './point.model.js';
+
 export interface Drawing {
-  color: string;
+  points: Point[];
   size: number;
-  x: number;
-  y: number;
-  nX: number;
-  nY: number;
+  color: string;
 }
