@@ -15,7 +15,6 @@ import { BoardFacade } from '../../../../services/board-facade.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { VotesModalComponent } from '../votes-modal/votes-modal.component';
 import { Group, NodePatch, Note, TuNode } from '@team-up/board-commons';
-import { selectEmoji, selectVoting } from '../../selectors/page.selectors';
 import { CommentsStore } from '@team-up/nodes/comments/comments.store';
 import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 import Pickr from '@simonwep/pickr';
@@ -40,8 +39,6 @@ export class BoardContextMenuComponent implements OnInit {
   private store = inject(Store);
   private boardComponent = inject(BoardComponent);
   private dialog = inject(MatDialog);
-  private voting = this.store.selectSignal(selectVoting);
-  private emoji = this.store.selectSignal(selectEmoji);
   private commentsStore = inject(CommentsStore);
   private nodesActions = inject(NodesActions);
   private showUserVotes = this.store.selectSignal(pageFeature.selectVoting);
@@ -54,18 +51,10 @@ export class BoardContextMenuComponent implements OnInit {
     this.contextMenuStore.config({
       element: this.boardComponent.el.nativeElement,
       isValid: () => {
-        if (this.voting()) {
-          const currentNodes = this.boardFacade.selectFocusNodes();
+        const activeToolbarOption = this.nodesStore.activeToolbarOption();
 
-          return !currentNodes.some((node) => {
-            return node.type === 'note' || node.type === 'group';
-          });
-        } else if (this.emoji()) {
-          const currentNodes = this.boardFacade.selectFocusNodes();
-
-          return !currentNodes.some((node) => {
-            return node.type === 'note';
-          });
+        if (activeToolbarOption === 'emoji' || activeToolbarOption === 'vote') {
+          return false;
         }
 
         return true;

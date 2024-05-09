@@ -242,55 +242,12 @@ export class NoteComponent {
       event.stopPropagation();
     }
 
+    const activeToolbarOption = this.#nodesStore.activeToolbarOption();
+
     if (this.voting()) {
-      let votes = this.node().content.votes;
-
-      let currentUserVote = votes.find((vote) => vote.userId === this.userId());
-
-      if (currentUserVote) {
-        votes = votes.map((vote) => {
-          if (vote.userId === this.userId()) {
-            return {
-              ...vote,
-              vote: event.button === 2 ? vote.vote - 1 : vote.vote + 1,
-            };
-          }
-
-          return vote;
-        });
-      } else {
-        votes = [
-          ...votes,
-          {
-            userId: this.userId(),
-            vote: event.button === 2 ? -1 : 1,
-          },
-        ];
-      }
-
-      currentUserVote = votes.find((vote) => vote.userId === this.userId());
-
-      votes = votes.filter((vote) => vote.vote !== 0);
-
-      if (currentUserVote && currentUserVote.vote >= 0) {
-        this.#store.dispatch(
-          BoardActions.batchNodeActions({
-            history: true,
-            actions: [
-              {
-                data: {
-                  type: 'note',
-                  id: this.node().id,
-                  content: {
-                    votes,
-                  },
-                },
-                op: 'patch',
-              },
-            ],
-          }),
-        );
-      }
+      this.#voteEvent(event);
+    } else if (activeToolbarOption === 'emoji') {
+      this.#emojiEvent(event);
     } else {
       this.#nodesStore.setFocusNode({
         id: this.node().id,
@@ -311,93 +268,6 @@ export class NoteComponent {
     if (!this.voting()) {
       this.initEdit();
     }
-  }
-
-  @HostListener('click', ['$event'])
-  emoji(event: MouseEvent) {
-    const emoji = this.#nodesStore.emoji();
-
-    if (!emoji) {
-      return;
-    }
-
-    const zoom = this.#nodesStore.zoom();
-    const { width, height } = this.emojisSize();
-    const targetPosition = this.nativeElement.getBoundingClientRect();
-    this.#store.dispatch(
-      BoardActions.batchNodeActions({
-        history: true,
-        actions: [
-          {
-            data: {
-              type: 'note',
-              id: this.node().id,
-              content: {
-                emojis: [
-                  ...this.node().content.emojis,
-                  {
-                    unicode: emoji.unicode,
-                    position: {
-                      x:
-                        (event.clientX - targetPosition.left) / zoom -
-                        width / 2,
-                      y:
-                        (event.clientY - targetPosition.top) / zoom -
-                        height / 2,
-                    },
-                  },
-                ],
-              },
-            },
-            op: 'patch',
-          },
-        ],
-      }),
-    );
-  }
-
-  @HostListener('contextmenu', ['$event'])
-  removeEmoji(event: MouseEvent) {
-    const option = this.#nodesStore.activeToolbarOption();
-
-    if (option !== 'emoji') {
-      return;
-    }
-
-    const zoom = this.#nodesStore.zoom();
-
-    const targetPosition = this.nativeElement.getBoundingClientRect();
-    const { width, height } = this.emojisSize();
-
-    const clientX = (event.clientX - targetPosition.left) / zoom;
-    const clientY = (event.clientY - targetPosition.top) / zoom;
-
-    const emojis = this.node().content.emojis.filter((emoji) => {
-      return !(
-        clientX >= emoji.position.x &&
-        clientX <= emoji.position.x + width &&
-        clientY >= emoji.position.y &&
-        clientY <= emoji.position.y + height
-      );
-    });
-
-    this.#store.dispatch(
-      BoardActions.batchNodeActions({
-        history: true,
-        actions: [
-          {
-            data: {
-              type: 'note',
-              id: this.node().id,
-              content: {
-                emojis: [...emojis],
-              },
-            },
-            op: 'patch',
-          },
-        ],
-      }),
-    );
   }
 
   emojisSize() {
@@ -568,5 +438,133 @@ export class NoteComponent {
     container.removeChild(div);
 
     return fontSize - increment;
+  }
+
+  #voteEvent(event: MouseEvent) {
+    let votes = this.node().content.votes;
+
+    let currentUserVote = votes.find((vote) => vote.userId === this.userId());
+
+    if (currentUserVote) {
+      votes = votes.map((vote) => {
+        if (vote.userId === this.userId()) {
+          return {
+            ...vote,
+            vote: event.button === 2 ? vote.vote - 1 : vote.vote + 1,
+          };
+        }
+
+        return vote;
+      });
+    } else {
+      votes = [
+        ...votes,
+        {
+          userId: this.userId(),
+          vote: event.button === 2 ? -1 : 1,
+        },
+      ];
+    }
+
+    currentUserVote = votes.find((vote) => vote.userId === this.userId());
+
+    votes = votes.filter((vote) => vote.vote !== 0);
+
+    if (currentUserVote && currentUserVote.vote >= 0) {
+      this.#store.dispatch(
+        BoardActions.batchNodeActions({
+          history: true,
+          actions: [
+            {
+              data: {
+                type: 'note',
+                id: this.node().id,
+                content: {
+                  votes,
+                },
+              },
+              op: 'patch',
+            },
+          ],
+        }),
+      );
+    }
+  }
+
+  #emojiEvent(event: MouseEvent) {
+    const zoom = this.#nodesStore.zoom();
+    const { width, height } = this.emojisSize();
+    const targetPosition = this.nativeElement.getBoundingClientRect();
+
+    if (event.button === 0) {
+      const emoji = this.#nodesStore.emoji();
+
+      if (!emoji) {
+        return;
+      }
+
+      this.#store.dispatch(
+        BoardActions.batchNodeActions({
+          history: true,
+          actions: [
+            {
+              data: {
+                type: 'note',
+                id: this.node().id,
+                content: {
+                  emojis: [
+                    ...this.node().content.emojis,
+                    {
+                      unicode: emoji.unicode,
+                      position: {
+                        x:
+                          (event.clientX - targetPosition.left) / zoom -
+                          width / 2,
+                        y:
+                          (event.clientY - targetPosition.top) / zoom -
+                          height / 2,
+                      },
+                    },
+                  ],
+                },
+              },
+              op: 'patch',
+            },
+          ],
+        }),
+      );
+    } else {
+      const emojis = this.node().content.emojis.filter((emoji) => {
+        const x = (event.clientX - targetPosition.left) / zoom;
+        const y = (event.clientY - targetPosition.top) / zoom;
+
+        console.log(event.clientX, emoji.position.x, width, height);
+
+        return !(
+          x >= emoji.position.x &&
+          x <= emoji.position.x + width &&
+          y >= emoji.position.y &&
+          y <= emoji.position.y + height
+        );
+      });
+
+      this.#store.dispatch(
+        BoardActions.batchNodeActions({
+          history: true,
+          actions: [
+            {
+              data: {
+                type: 'note',
+                id: this.node().id,
+                content: {
+                  emojis: [...emojis],
+                },
+              },
+              op: 'patch',
+            },
+          ],
+        }),
+      );
+    }
   }
 }
