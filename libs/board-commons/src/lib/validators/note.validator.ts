@@ -27,12 +27,14 @@ const note = z.object({
   ),
   drawing: z.array(
     z.object({
-      color: z.string().min(4).max(7),
+      color: z.string(),
       size: z.number().positive().safe(),
-      x: z.number().safe(),
-      y: z.number().safe(),
-      nX: z.number().safe(),
-      nY: z.number().safe(),
+      points: z.array(
+        z.object({
+          x: z.number().safe(),
+          y: z.number().safe(),
+        }),
+      ),
     }),
   ),
   ownerId: z.string().max(255),

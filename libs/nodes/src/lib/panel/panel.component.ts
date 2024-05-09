@@ -148,11 +148,11 @@ export class PanelComponent implements OnInit {
     this.newContent.set(this.node().content.text);
   }
 
-  setDrawing(newLine: Drawing[]) {
+  setDrawing(newLine: Drawing) {
     this.#drawingStore.actions.setDrawing({
       id: this.node().id,
       type: 'panel',
-      drawing: [...this.node().content.drawing, ...newLine],
+      drawing: [...this.node().content.drawing, newLine],
       history: true,
     });
   }

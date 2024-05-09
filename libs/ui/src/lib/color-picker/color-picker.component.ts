@@ -24,6 +24,7 @@ export class ColorPickerComponent implements OnDestroy {
 
   color = input<string>();
   change = output<string | undefined>();
+  mode = input<'HEX' | 'RGBA' | 'HSL' | 'HSVA'>('HEX');
 
   constructor() {
     afterNextRender(() => {
@@ -34,7 +35,16 @@ export class ColorPickerComponent implements OnDestroy {
       });
 
       this.#pickr.on('save', (color: Pickr.HSVaColor | null) => {
-        this.change.emit(color?.toHEXA().toString() ?? undefined);
+        if (this.mode() === 'HEX') {
+          this.change.emit(color?.toHEXA().toString() ?? undefined);
+        } else if (this.mode() === 'RGBA') {
+          this.change.emit(color?.toRGBA().toString() ?? undefined);
+        } else if (this.mode() === 'HSL') {
+          this.change.emit(color?.toHSLA().toString() ?? undefined);
+        } else if (this.mode() === 'HSVA') {
+          this.change.emit(color?.toHSVA().toString() ?? undefined);
+        }
+
         this.#pickr?.hide();
       });
     });

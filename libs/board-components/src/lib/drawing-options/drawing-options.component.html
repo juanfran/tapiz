@@ -2,7 +2,8 @@
   class="form"
   [formGroup]="form">
   <team-up-color-picker
-    [color]="form.get('color')?.value ?? '#000000'"
+    [color]="form.get('color')?.value ?? defaultColor"
+    mode="RGBA"
     (change)="updateColor($event)" />
   <input
     formControlName="size"

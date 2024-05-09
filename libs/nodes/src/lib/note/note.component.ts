@@ -379,11 +379,11 @@ export class NoteComponent {
     return this.node().id;
   }
 
-  setDrawing(newLine: Drawing[]) {
+  setDrawing(newLine: Drawing) {
     this.#drawingStore.actions.setDrawing({
       id: this.node().id,
       type: 'note',
-      drawing: [...this.node().content.drawing, ...newLine],
+      drawing: [...this.node().content.drawing, newLine],
       history: true,
     });
   }

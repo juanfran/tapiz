@@ -11,12 +11,13 @@ import {
   takeUntil,
   throttleTime,
 } from 'rxjs';
-import { concatLatestFrom } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
 import { Drawing } from '@team-up/board-commons';
 import { DrawingStore } from './drawing.store';
 import { output } from '@angular/core';
 import { input } from '@angular/core';
 import { injectResize } from 'ngxtension/resize';
+import { getStroke } from 'perfect-freehand';
 
 export interface MouseDrawingEvent {
   x: number;
@@ -36,62 +37,58 @@ export class DrawingDirective {
   #resize$ = injectResize();
   teamUpDrawing = input<Drawing[]>([]);
 
-  public canDraw = input(true);
+  canDraw = input(true);
 
-  drawing = output<Drawing[]>();
+  drawing = output<Drawing>();
 
-  private context: CanvasRenderingContext2D;
-  private elementRef = inject(ElementRef);
-  private drawingEvents: Drawing[] = [];
-  private dragEnabled = toObservable(this.#drawingStore.drawing);
+  #context: CanvasRenderingContext2D;
+  #elementRef = inject(ElementRef);
+  #strokeEvents: Drawing | null = null;
+  #dragEnabled = toObservable(this.#drawingStore.drawing);
 
   constructor() {
     this.#resize$.pipe(takeUntilDestroyed()).subscribe(() => {
-      const paintCanvas = this.elementRef.nativeElement;
-      this.context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+      const paintCanvas = this.#elementRef.nativeElement;
+      this.#context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
 
       this.teamUpDrawing().forEach((line) => {
-        this.drawLine(line);
+        this.drawStroke(line);
       });
     });
 
     effect(() => {
-      const paintCanvas = this.elementRef.nativeElement;
-      this.context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+      const paintCanvas = this.#elementRef.nativeElement;
+      this.#context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
 
       this.teamUpDrawing().forEach((line) => {
-        this.drawLine(line);
+        this.drawStroke(line);
       });
     });
 
-    const paintCanvas = this.elementRef.nativeElement;
-    this.context = paintCanvas.getContext('2d');
-    this.context.lineCap = 'round';
-
-    this.context.lineWidth = this.#drawingStore.size();
-    this.context.strokeStyle = this.#drawingStore.color();
+    const paintCanvas = this.#elementRef.nativeElement;
+    this.#context = paintCanvas.getContext('2d');
 
     const mouseUp$ = fromEvent(window, 'mouseup').pipe(map(() => false));
 
     const mouseMove$ = fromEvent<MouseEvent>(
-      this.elementRef.nativeElement,
+      this.#elementRef.nativeElement,
       'mousemove',
     ).pipe(
       takeUntil(mouseUp$),
       throttleTime(0, animationFrameScheduler),
-      concatLatestFrom(() => this.dragEnabled),
+      concatLatestFrom(() => this.#dragEnabled),
       filter(([, dragEnabled]) => dragEnabled),
       map(([event]) => event),
       finalize(() => {
-        if (this.drawingEvents.length) {
-          this.drawing.emit(this.drawingEvents);
-          this.drawingEvents = [];
+        if (this.#strokeEvents) {
+          this.drawing.emit(this.#strokeEvents);
+          this.#strokeEvents = null;
         }
       }),
     );
 
     const mouseDown$ = fromEvent<MouseEvent>(
-      this.elementRef.nativeElement,
+      this.#elementRef.nativeElement,
       'mousedown',
     );
 
@@ -103,36 +100,77 @@ export class DrawingDirective {
           return mouseMove$.pipe(
             scan(
               (acc, event) => {
-                return {
-                  x: acc.nX ?? event.offsetX,
-                  y: acc.nY ?? event.offsetY,
-                  nX: event.offsetX,
-                  nY: event.offsetY,
-                  size: this.#drawingStore.size(),
-                  color: this.#drawingStore.color(),
-                } as MouseDrawingEvent;
+                acc.points.push({ x: event.offsetX, y: event.offsetY });
+
+                return acc;
               },
-              { nX: null, nY: null, x: 0, y: 0 } as MouseDrawingEvent,
+              {
+                size: this.#drawingStore.size(),
+                color: this.#drawingStore.color(),
+                points: [],
+              } as Drawing,
             ),
           );
         }),
       )
-      .subscribe((event: MouseDrawingEvent) => {
-        if (event.nX !== null && event.nY !== null) {
-          this.drawingEvents.push(event as Drawing);
-          this.drawLine(event as Drawing);
-        }
+      .subscribe((event) => {
+        this.#strokeEvents = event;
+
+        const paintCanvas = this.#elementRef.nativeElement;
+        this.#context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+
+        [...this.teamUpDrawing(), event].forEach((line) => {
+          this.drawStroke(line);
+        });
       });
   }
 
-  public drawLine(event: Drawing) {
-    this.context.lineWidth = event.size ?? this.#drawingStore.size();
-    this.context.strokeStyle = event.color ?? this.#drawingStore.color();
+  #average = (a: number, b: number) => (a + b) / 2;
 
-    this.context.lineCap = 'round';
-    this.context.beginPath();
-    this.context.moveTo(event.x, event.y);
-    this.context.lineTo(event.nX, event.nY);
-    this.context.stroke();
+  #getPathFromStroke(points: number[][], closed = true) {
+    const len = points.length;
+
+    if (len < 4) {
+      return '';
+    }
+
+    let a = points[0];
+    let b = points[1];
+    const c = points[2];
+
+    let result = `M${a[0].toFixed(2)},${a[1].toFixed(2)} Q${b[0].toFixed(
+      2,
+    )},${b[1].toFixed(2)} ${this.#average(b[0], c[0]).toFixed(2)},${this.#average(
+      b[1],
+      c[1],
+    ).toFixed(2)} T`;
+
+    for (let i = 2, max = len - 1; i < max; i++) {
+      a = points[i];
+      b = points[i + 1];
+      result += `${this.#average(a[0], b[0]).toFixed(2)},${this.#average(
+        a[1],
+        b[1],
+      ).toFixed(2)} `;
+    }
+
+    if (closed) {
+      result += 'Z';
+    }
+
+    return result;
+  }
+
+  drawStroke(drawings: Drawing) {
+    const stroke = getStroke(drawings.points, {
+      size: drawings.size,
+      thinning: 0,
+    });
+
+    const pathData = this.#getPathFromStroke(stroke);
+    const myPath = new Path2D(pathData);
+
+    this.#context.fillStyle = drawings.color;
+    this.#context.fill(myPath);
   }
 }
