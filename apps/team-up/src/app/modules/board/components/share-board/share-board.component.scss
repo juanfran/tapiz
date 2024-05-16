@@ -32,3 +32,13 @@
 .board-visibility {
   margin-block-start: var(--spacing-4);
 }
+
+.demo {
+  margin-block-start: var(--spacing-4);
+  font-size: var(--font-size-2);
+
+  a {
+    color: var(--brand);
+    font-weight: var(--font-weight-bold);
+  }
+}

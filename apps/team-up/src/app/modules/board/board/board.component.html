@@ -6,7 +6,9 @@
   class="container">
   @defer {
     <team-up-header></team-up-header>
-    <team-up-users></team-up-users>
+    @if (!isDemo) {
+      <team-up-users></team-up-users>
+    }
     <team-up-board-toolbar />
     @if (drawing()) {
       <team-up-drawing-options></team-up-drawing-options>
@@ -21,15 +23,19 @@
     @if (boardId$ | async) {
       <team-up-overlay></team-up-overlay>
       <team-up-zone></team-up-zone>
-      <team-up-cursors></team-up-cursors>
+      @if (!isDemo) {
+        <team-up-cursors></team-up-cursors>
+      }
       @defer {
         <team-up-nodes />
       }
     }
   </div>
   @defer {
-    <team-up-follow-user></team-up-follow-user>
-    <team-up-stop-highlight></team-up-stop-highlight>
+    @if (!isDemo) {
+      <team-up-follow-user></team-up-follow-user>
+      <team-up-stop-highlight></team-up-stop-highlight>
+    }
     <team-up-context-menu />
     <team-up-board-context-menu />
     <team-up-node-toolbar />

@@ -5,64 +5,69 @@ import {
   BoardColors,
   BoardIdToColorDirective,
 } from '../../../../shared/board-id-to-color.directive';
-import { RxFor } from '@rx-angular/template/for';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { output } from '@angular/core';
+import { ConfigService } from '../../../../services/config.service';
 
 @Component({
   selector: 'team-up-token-selector',
   styleUrls: ['./token-selector.component.scss'],
   template: `
-    <div class="tokens">
-      <h3 class="title">Team</h3>
-      <div class="token-list">
-        <button
-          type="button"
-          *rxFor="let user of users(); trackBy: 'id'"
-          [teamUpBoardIdToColor]="user.id"
-          #teamUpBoardIdToColor="teamUpBoardIdToColor"
-          class="token"
-          (click)="
-            selectUserToken(
-              user.name,
-              teamUpBoardIdToColor.color(),
-              teamUpBoardIdToColor.backgroundColor()
-            )
-          ">
-          {{ user.name }}
-        </button>
+    @if (!isDemo) {
+      <div class="tokens">
+        <h3 class="title">Team</h3>
+        <div class="token-list">
+          @for (user of users(); track user.id) {
+            <button
+              type="button"
+              [teamUpBoardIdToColor]="user.id"
+              #teamUpBoardIdToColor="teamUpBoardIdToColor"
+              class="token"
+              (click)="
+                selectUserToken(
+                  user.name,
+                  teamUpBoardIdToColor.color(),
+                  teamUpBoardIdToColor.backgroundColor()
+                )
+              ">
+              {{ user.name }}
+            </button>
+          }
+        </div>
       </div>
-    </div>
+    }
     <div class="tokens">
       <h3 class="title">Tokens</h3>
       <div class="token-list">
-        <button
-          *rxFor="let bColor of colors"
-          type="button"
-          class="token"
-          [style.background-color]="bColor.backgroundColor"
-          [style.color]="bColor.color"
-          (click)="
-            selectUserToken('', bColor.color, bColor.backgroundColor)
-          "></button>
+        @for (bColor of colors; track bColor.color) {
+          <button
+            type="button"
+            class="token"
+            [style.background-color]="bColor.backgroundColor"
+            [style.color]="bColor.color"
+            (click)="
+              selectUserToken('', bColor.color, bColor.backgroundColor)
+            "></button>
+        }
       </div>
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [BoardIdToColorDirective, RxFor],
+  imports: [BoardIdToColorDirective],
 })
 export class TokenSelectorComponent {
-  public selectToken = output<{
+  selectToken = output<{
     text: string;
     color: string;
     backgroundColor: string;
   }>();
 
-  private boardFacade = inject(BoardFacade);
+  #boardFacade = inject(BoardFacade);
+  #configService = inject(ConfigService);
 
-  public users = toSignal(
-    this.boardFacade.getUsers().pipe(
+  users = toSignal(
+    this.#boardFacade.getUsers().pipe(
       map((users) => {
         return users
           .map((user) => {
@@ -81,9 +86,13 @@ export class TokenSelectorComponent {
     ),
   );
 
-  public colors = BoardColors;
+  colors = BoardColors;
 
-  public selectUserToken(text: string, color: string, backgroundColor: string) {
+  get isDemo() {
+    return !!this.#configService.config.DEMO;
+  }
+
+  selectUserToken(text: string, color: string, backgroundColor: string) {
     this.selectToken.emit({ text, color, backgroundColor });
   }
 }

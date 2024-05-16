@@ -18,6 +18,10 @@ export class SubscriptionService {
   correlationId = v4();
 
   public listen() {
+    if (this.#configService.config.DEMO) {
+      return;
+    }
+
     this.#ws = new WebSocket(`${this.#configService.config.WS}/sub`);
 
     this.#ws.addEventListener('open', () => {
