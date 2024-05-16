@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
 import { Store } from '@ngrx/store';
 import { WsService } from '../../../modules/ws/services/ws.service';
 import { EMPTY, of } from 'rxjs';
@@ -16,10 +17,17 @@ import { PageActions } from '../actions/page.actions';
 import { selectLayer, selectZone } from '../selectors/page.selectors';
 import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
-import { Group, Panel } from '@team-up/board-commons';
+import {
+  Group,
+  NodeAdd,
+  Panel,
+  StateActions,
+  TuNode,
+} from '@team-up/board-commons';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { pageFeature } from '../reducers/page.reducer';
 import { NodesActions } from '@team-up/nodes/services/nodes-actions';
+import { ConfigService } from '../../../services/config.service';
 
 @Injectable()
 export class BoardEffects {
@@ -30,6 +38,7 @@ export class BoardEffects {
   private store = inject(Store);
   private boardFacade = inject(BoardFacade);
   private nodesActions = inject(NodesActions);
+  private configService = inject(ConfigService);
   public initBoard$ = createEffect(
     () => {
       return this.actions$.pipe(
@@ -48,9 +57,17 @@ export class BoardEffects {
     () => {
       return this.actions$.pipe(
         ofType(BoardActions.batchNodeActions),
-        tap((batch) => {
+        concatLatestFrom(() => this.store.select(pageFeature.selectBoardId)),
+        tap(([batch, boardId]) => {
           this.boardFacade.applyActions(batch.actions, batch.history);
           this.wsService.send(batch.actions);
+
+          if (this.configService.config.DEMO) {
+            localStorage.setItem(
+              boardId,
+              JSON.stringify(this.boardFacade.get()),
+            );
+          }
         }),
       );
     },
@@ -126,6 +143,7 @@ export class BoardEffects {
   public joinBoard$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.joinBoard),
+      filter(() => !this.configService.config.DEMO),
       switchMap((action) => {
         return this.boardApiService.getBoard(action.boardId).pipe(
           map((board) => {
@@ -155,6 +173,45 @@ export class BoardEffects {
             return EMPTY;
           }),
         );
+      }),
+    );
+  });
+
+  public joinBoardDemo$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.joinBoard),
+      filter(() => !!this.configService.config.DEMO),
+      concatLatestFrom(() => this.store.select(pageFeature.selectBoardId)),
+      map(([, boardId]) => {
+        let board: TuNode<object, string>[] = [];
+
+        const storeItem = localStorage.getItem(boardId) || '[]';
+
+        try {
+          board = JSON.parse(storeItem);
+        } catch (e) {
+          console.error(e);
+        }
+
+        const initStateActions: StateActions[] = [
+          ...board.map((it) => {
+            const add: NodeAdd = {
+              data: it,
+              op: 'add',
+            };
+
+            return add;
+          }),
+        ];
+
+        this.boardFacade.applyActions(initStateActions);
+
+        return PageActions.fetchBoardSuccess({
+          name: 'Demo',
+          isAdmin: true,
+          isPublic: false,
+          privateId: '',
+        });
       }),
     );
   });

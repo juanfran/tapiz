@@ -26,6 +26,7 @@ import { BoardSettingsComponent } from '../board-settings/board-settings.compone
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
+import { ConfigService } from '../../../../services/config.service';
 
 @Component({
   selector: 'team-up-header',
@@ -48,6 +49,7 @@ export class HeaderComponent {
   #store = inject(Store);
   #dialog = inject(MatDialog);
   #hotkeysService = inject(HotkeysService);
+  #configService = inject(ConfigService);
 
   textarea = viewChild<ElementRef<HTMLInputElement>>('textarea');
 
@@ -55,6 +57,10 @@ export class HeaderComponent {
   canvasMode = this.#store.selectSignal(selectCanvasMode);
   name = this.#store.selectSignal(pageFeature.selectName);
   isAdmin = this.#store.selectSignal(selectIsAdmin);
+
+  get isDemo() {
+    return !!this.#configService.config.DEMO;
+  }
 
   constructor() {
     toObservable(this.edit)

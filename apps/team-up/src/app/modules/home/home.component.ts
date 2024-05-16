@@ -15,7 +15,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
 import { UserInvitationsComponent } from './components/user-invitations/user-invitations.component';
 import { AuthService } from '../../services/auth.service';
-import { trackByProp } from '../../shared/track-by-prop';
 import { ConfirmComponent } from '../../shared/confirm-action/confirm-actions.component';
 import { SubscriptionService } from '../../services/subscription.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -50,7 +49,6 @@ export class HomeComponent {
   private subscriptionService = inject(SubscriptionService);
 
   public model$ = this.state.select();
-  public trackById = trackByProp('id');
 
   constructor() {
     this.store.dispatch(HomeActions.initHome());

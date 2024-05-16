@@ -5,35 +5,37 @@
     icon="home"
     class="icon-svg"></team-up-svg-icon>
 </button>
-<div class="mode">
-  @if (edit()) {
-    <span
-      #textarea
-      teamUpAutofocus
-      class="textarea"
-      role="textbox"
-      (clickOutside)="clickOutside()"
-      (keydown.enter)="enter($event)"
-      contenteditable
-      >{{ name() }}</span
-    >
-  }
-  @if (!edit() && isAdmin()) {
-    <button
-      class="edit-name"
-      (click)="editName()">
-      <team-up-svg-icon
-        icon="edit"
-        class="icon-svg"></team-up-svg-icon>
+@if (!isDemo) {
+  <div class="mode">
+    @if (edit()) {
+      <span
+        #textarea
+        teamUpAutofocus
+        class="textarea"
+        role="textbox"
+        (clickOutside)="clickOutside()"
+        (keydown.enter)="enter($event)"
+        contenteditable
+        >{{ name() }}</span
+      >
+    }
+    @if (!edit() && isAdmin()) {
+      <button
+        class="edit-name"
+        (click)="editName()">
+        <team-up-svg-icon
+          icon="edit"
+          class="icon-svg"></team-up-svg-icon>
+        <span class="board-name">{{ name() }}</span>
+      </button>
+    }
+    @if (!isAdmin()) {
       <span class="board-name">{{ name() }}</span>
-    </button>
-  }
-  @if (!isAdmin()) {
-    <span class="board-name">{{ name() }}</span>
-  }
-</div>
+    }
+  </div>
+}
 <div class="header-end">
-  @if (isAdmin()) {
+  @if (isAdmin() && !isDemo) {
     <button
       title="Settings"
       class="button-action"

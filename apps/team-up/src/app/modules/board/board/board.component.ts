@@ -11,7 +11,14 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { rxEffect } from 'ngxtension/rx-effect';
-import { animationFrameScheduler, fromEvent, merge, Subject, zip } from 'rxjs';
+import {
+  animationFrameScheduler,
+  combineLatest,
+  fromEvent,
+  merge,
+  Subject,
+  zip,
+} from 'rxjs';
 import {
   map,
   withLatestFrom,
@@ -53,7 +60,6 @@ import { BoardToolbarComponent } from '../components/board-toolbar/board-toolbar
 import { UsersComponent } from '../components/users/users.component';
 import { HeaderComponent } from '../components/header/header.component';
 import { SearchOptionsComponent } from '../components/search-options/search-options.component';
-import { Actions, ofType } from '@ngrx/effects';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { TitleComponent } from '../../../shared/title/title.component';
 import {
@@ -86,6 +92,7 @@ import { DrawingOptionsComponent } from '@team-up/board-components/drawing-optio
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommentsComponent } from '@team-up/nodes/comments/comments.component';
 import { NodesActions } from '@team-up/nodes/services/nodes-actions';
+import { ConfigService } from '../../../services/config.service';
 
 @UntilDestroy()
 @Component({
@@ -127,7 +134,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   private boardMoveService = inject(BoardMoveService);
   private route = inject(ActivatedRoute);
   private notesService = inject(NotesService);
-  private actions = inject(Actions);
   private boardFacade = inject(BoardFacade);
   private multiDragService = inject(MultiDragService);
   private contextMenuStore = inject(ContextMenuStore);
@@ -137,6 +143,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   private subscriptionService = inject(SubscriptionService);
   private drawingStore = inject(DrawingStore);
   private nodesActions = inject(NodesActions);
+  private configService = inject(ConfigService);
   public readonly boardId$ = this.store.select(selectBoardId);
   public readonly nodes$ = this.boardFacade.getNodes();
 
@@ -488,9 +495,12 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       this.wsService.send([action]);
     };
 
-    this.actions
-      .pipe(ofType(PageActions.setUserView), untilDestroyed(this))
-      .subscribe(({ zoom, position }) => {
+    combineLatest([
+      this.store.select(selectZoom),
+      this.store.select(selectPosition),
+    ])
+      .pipe(untilDestroyed(this))
+      .subscribe(([zoom, position]) => {
         this.workLayerNativeElement.style.transform = `translate(${position.x}px, ${position.y}px) scale(${zoom})`;
       });
   }
@@ -544,7 +554,21 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     return this.workLayer.nativeElement as HTMLElement;
   }
 
+  get isDemo() {
+    return !!this.configService.config.DEMO;
+  }
+
   public connect(): Promise<void> {
+    if (this.isDemo) {
+      const boardId = this.route.snapshot.paramMap.get('id');
+
+      if (boardId) {
+        this.store.dispatch(PageActions.joinBoard({ boardId }));
+        return Promise.resolve();
+      }
+      return Promise.reject();
+    }
+
     this.wsService.listen();
 
     return new Promise((resolve, reject) => {
@@ -565,11 +589,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
           }
         });
     });
-  }
-
-  // issue: https://github.com/angular/angular/issues/42609
-  public trackById(index: number, obj: unknown) {
-    return (obj as { id: string }).id;
   }
 
   public ngAfterViewInit() {

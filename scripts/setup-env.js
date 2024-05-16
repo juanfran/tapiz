@@ -1,9 +1,19 @@
+import e from 'cors';
 import { writeFileSync } from 'fs';
 
-const front = ['API', 'WS'];
+const front = ['API', 'WS', 'DEMO'];
 const frontConfig = {};
 
+
 front.forEach((key) => {
+  if (process.env[key] === 'true') {
+    frontConfig[key] = true;
+    return;
+  } else if (process.env[key] === 'false') {
+    frontConfig[key] = false;
+    return;
+  }
+
   frontConfig[key] = process.env[key];
 });
 

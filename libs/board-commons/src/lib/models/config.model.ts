@@ -4,4 +4,5 @@ export interface Config {
   FRONTEND_URL: string;
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
+  DEMO?: boolean;
 }
