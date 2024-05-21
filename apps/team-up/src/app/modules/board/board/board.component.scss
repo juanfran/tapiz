@@ -6,6 +6,12 @@
   position: relative;
   width: 100vw;
   cursor: var(--default-cursor, auto);
+
+  &.node-selection-disabled {
+    team-up-nodes {
+      pointer-events: none;
+    }
+  }
 }
 
 .work-layer {

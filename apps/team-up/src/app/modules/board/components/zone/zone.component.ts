@@ -1,243 +1,50 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  HostBinding,
-  ElementRef,
   inject,
+  computed,
 } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { RxState } from '@rx-angular/state';
-import { TuNode, Zone, ZoneConfig } from '@team-up/board-commons';
-import { Subscription } from 'rxjs';
-import {
-  filter,
-  map,
-  startWith,
-  switchMap,
-  takeUntil,
-  withLatestFrom,
-} from 'rxjs/operators';
-import { PageActions } from '../../actions/page.actions';
-import {
-  selectPosition,
-  selectInitZone,
-  selectZone,
-  selectZoom,
-  selectLayer,
-} from '../../selectors/page.selectors';
-import { BoardMoveService } from '../../services/board-move.service';
-import { BoardFacade } from '../../../../services/board-facade.service';
 
-interface State {
-  zone: Zone | null;
-  config: ZoneConfig | null;
-}
+import { ZoneService } from './zone.service';
+
 @Component({
   selector: 'team-up-zone',
   template: '',
   styleUrls: ['./zone.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState],
   standalone: true,
+  host: {
+    '[style.display]': 'areaSelector()',
+    '[style.transform]': 'transform()',
+    '[style.width.px]': 'width()',
+    '[style.height.px]': 'height()',
+    '[class.group]': 'areaSelector()?.style === "group"',
+    '[class.panel]': 'areaSelector()?.style === "panel"',
+    '[class.select]': 'areaSelector()?.style === "select"',
+  },
 })
 export class ZoneComponent {
-  @HostBinding('style.display') get display() {
-    return this.zone ? 'block' : 'none';
+  #zoneService = inject(ZoneService);
+
+  get areaSelector() {
+    return this.#zoneService.areaSelector;
   }
 
-  @HostBinding('class.group') get group() {
-    return this.#state.get('config')?.type === 'group';
-  }
+  transform = computed(() => {
+    const area = this.areaSelector();
 
-  @HostBinding('class.panel') get panel() {
-    return this.#state.get('config')?.type === 'panel';
-  }
+    return area ? `translate(${area.position.x}px, ${area.position.y}px)` : '';
+  });
 
-  @HostBinding('class.select') get select() {
-    return this.#state.get('config')?.type === 'select';
-  }
+  width = computed(() => {
+    const area = this.areaSelector();
 
-  @HostBinding('style.transform') get transform() {
-    return this.zone
-      ? `translate(${this.zone.position.x}px, ${this.zone.position.y}px)`
-      : '';
-  }
+    return area ? area.size.width : 0;
+  });
 
-  @HostBinding('style.width.px') get width() {
-    return this.zone?.width;
-  }
+  height = computed(() => {
+    const area = this.areaSelector();
 
-  @HostBinding('style.height.px') get height() {
-    return this.zone?.height;
-  }
-
-  get zone() {
-    return this.#state.get('zone');
-  }
-
-  nextClickSubscription?: Subscription;
-
-  #boardFacade = inject(BoardFacade);
-  #el = inject(ElementRef);
-  #store = inject(Store);
-  #state = inject(RxState<State>);
-  #cdRef = inject(ChangeDetectorRef);
-  #boardMoveService = inject(BoardMoveService);
-
-  #layer = this.#store.selectSignal(selectLayer);
-
-  constructor() {
-    const initZone$ = this.#store
-      .select(selectInitZone)
-      .pipe(filter((it) => !!it));
-    this.#state.hold(initZone$, () => this.captureNextClick());
-
-    // unsubscribe from next click if the toolbar change
-    this.#state.hold(
-      this.#store.select(selectInitZone).pipe(filter((it) => !it)),
-      () => {
-        if (this.nextClickSubscription) {
-          this.nextClickSubscription.unsubscribe();
-        }
-      },
-    );
-
-    this.#state.connect('zone', this.#store.select(selectZone));
-    this.#state.connect('config', this.#store.select(selectInitZone));
-    this.#state.hold(this.#state.select(), () => this.#cdRef.markForCheck());
-  }
-
-  captureNextClick() {
-    this.nextClickSubscription = this.#boardMoveService
-      .nextMouseDown()
-      .pipe(
-        withLatestFrom(
-          this.#store.select(selectZoom),
-          this.#store.select(selectPosition),
-        ),
-        switchMap(([mouseDownEvent, zoom, position]) => {
-          this.#store.dispatch(PageActions.setMoveEnabled({ enabled: false }));
-
-          return this.#boardMoveService.mouseMove$.pipe(
-            takeUntil(this.#boardMoveService.mouseUp$),
-            map((mouseMoveEvent) => {
-              return {
-                width: (mouseMoveEvent.x - mouseDownEvent.clientX) / zoom,
-                height: (mouseMoveEvent.y - mouseDownEvent.clientY) / zoom,
-              };
-            }),
-            map((size) => {
-              const finalPosition = {
-                x: (-position.x + mouseDownEvent.clientX) / zoom,
-                y: (-position.y + mouseDownEvent.clientY) / zoom,
-              };
-
-              if (size.width < 0) {
-                size.width = -size.width;
-                finalPosition.x -= size.width;
-              }
-
-              if (size.height < 0) {
-                size.height = -size.height;
-                finalPosition.y -= size.height;
-              }
-
-              return {
-                ...size,
-                position: finalPosition,
-              };
-            }),
-            startWith({
-              width: 0,
-              height: 0,
-              position: {
-                x: (-position.x + mouseDownEvent.clientX) / zoom,
-                y: (-position.y + mouseDownEvent.clientY) / zoom,
-              },
-            }),
-          );
-        }),
-      )
-      .subscribe({
-        next: (zone) => {
-          this.#store.dispatch(
-            PageActions.setZone({
-              zone,
-            }),
-          );
-        },
-        complete: () => {
-          this.#store.dispatch(PageActions.setPopupOpen({ popup: '' }));
-
-          if (this.#state.get('config')?.type === 'group') {
-            this.#store.dispatch(PageActions.zoneToGroup());
-          } else if (this.#state.get('config')?.type === 'panel') {
-            this.#store.dispatch(PageActions.zoneToPanel());
-          } else if (this.#state.get('config')?.type === 'select') {
-            this.zoneToSelect();
-          }
-        },
-      });
-  }
-
-  zoneToSelect() {
-    if (!this.zone) {
-      return;
-    }
-
-    const boardNodes = this.#boardFacade.get() as TuNode<
-      { layer: number },
-      string
-    >[];
-
-    const nodes = document.querySelectorAll<HTMLElement>('team-up-node');
-    const zoneRect = this.nativeElement.getBoundingClientRect();
-
-    const selectedNodes = Array.from(nodes)
-      .filter((node) => {
-        const position = node.getBoundingClientRect();
-
-        return (
-          this.#isInside(position.x, position.y, zoneRect) ||
-          this.#isInside(position.x + position.width, position.y, zoneRect) ||
-          this.#isInside(position.x, position.y + position.height, zoneRect) ||
-          this.#isInside(
-            position.x + position.width,
-            position.y + position.height,
-            zoneRect,
-          )
-        );
-      })
-      .map((el) => {
-        const node = boardNodes.find(
-          (node) =>
-            node.id === el.dataset['id'] &&
-            node.content.layer === this.#layer(),
-        );
-
-        if (node) {
-          return node.id;
-        }
-
-        return null;
-      })
-      .filter((it): it is string => !!it);
-
-    this.#store.dispatch(PageActions.selectNodes({ ids: selectedNodes }));
-  }
-
-  #isInside(
-    x: number,
-    y: number,
-    rect: { left: number; right: number; top: number; bottom: number },
-  ) {
-    return (
-      x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
-    );
-  }
-
-  get nativeElement(): HTMLElement {
-    return this.#el.nativeElement as HTMLElement;
-  }
+    return area ? area.size.height : 0;
+  });
 }

@@ -34,7 +34,6 @@ import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
 
 import {
-  selectBoardCursor,
   selectCanvasMode,
   selectMoveEnabled,
   selectOpen,
@@ -125,6 +124,9 @@ import { ConfigService } from '../../../services/config.service';
     CommentsComponent,
   ],
   hostDirectives: [CopyPasteDirective],
+  host: {
+    '[class.node-selection-disabled]': '!nodeSelectionEnabled()',
+  },
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
   public el = inject(ElementRef);
@@ -157,6 +159,9 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly loaded = this.store.selectSignal(pageFeature.selectLoaded);
   public readonly userId = this.store.selectSignal(selectUserId);
   public readonly layer = this.store.selectSignal(selectLayer);
+  public readonly nodeSelectionEnabled = this.store.selectSignal(
+    pageFeature.selectNodeSelection,
+  );
 
   @ViewChild('workLayer', { read: ElementRef }) public workLayer!: ElementRef;
 
@@ -382,7 +387,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       });
 
     this.store
-      .select(selectBoardCursor)
+      .select(pageFeature.selectBoardCursor)
       .pipe(untilDestroyed(this))
       .subscribe((cursor) => {
         this.el.nativeElement.style.setProperty('--default-cursor', cursor);

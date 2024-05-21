@@ -14,16 +14,9 @@ import {
 } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
-import { selectLayer, selectZone } from '../selectors/page.selectors';
 import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
-import {
-  Group,
-  NodeAdd,
-  Panel,
-  StateActions,
-  TuNode,
-} from '@team-up/board-commons';
+import { NodeAdd, StateActions, TuNode } from '@team-up/board-commons';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { pageFeature } from '../reducers/page.reducer';
 import { NodesActions } from '@team-up/nodes/services/nodes-actions';
@@ -248,81 +241,4 @@ export class BoardEffects {
     },
     { dispatch: false },
   );
-
-  public zoneToGroup$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(PageActions.zoneToGroup),
-      concatLatestFrom(() => [
-        this.store.select(selectZone),
-        this.store.select(selectLayer),
-      ]),
-      mergeMap(([, zone, layer]) => {
-        if (zone) {
-          let { width, height } = zone;
-
-          if (width < 2) {
-            width = 300;
-            height = 300;
-          }
-
-          return of(
-            BoardActions.batchNodeActions({
-              history: true,
-              actions: [
-                this.nodesActions.add<Group>('group', {
-                  title: '',
-                  position: zone.position,
-                  width: width,
-                  height: height,
-                  votes: [],
-                  layer,
-                }),
-              ],
-            }),
-          );
-        }
-
-        return EMPTY;
-      }),
-    );
-  });
-
-  public zoneToPanel$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(PageActions.zoneToPanel),
-      concatLatestFrom(() => [
-        this.store.select(selectZone),
-        this.store.select(selectLayer),
-      ]),
-      mergeMap(([, zone, layer]) => {
-        if (zone) {
-          let { width, height } = zone;
-
-          if (width < 2) {
-            width = 300;
-            height = 300;
-          }
-
-          const panel: Panel = {
-            text: '<h2 style="text-align: center"></h2>',
-            position: zone.position,
-            width: width,
-            height: height,
-            layer,
-            rotation: 0,
-            drawing: [],
-          };
-
-          return of(
-            BoardActions.batchNodeActions({
-              history: true,
-              actions: [this.nodesActions.add('panel', panel)],
-            }),
-          );
-        }
-
-        return EMPTY;
-      }),
-    );
-  });
 }
