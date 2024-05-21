@@ -9,7 +9,7 @@ import {
   share,
   filter,
   withLatestFrom,
-  first,
+  take,
 } from 'rxjs/operators';
 import { Point } from '@team-up/board-commons';
 import { Store } from '@ngrx/store';
@@ -98,7 +98,7 @@ export class BoardMoveService {
     this.currentMouseDownWatch$ = new Subject();
 
     return this.mouseDown$.pipe(
-      first(),
+      take(1),
       takeUntil(this.currentMouseDownWatch$),
     );
   }

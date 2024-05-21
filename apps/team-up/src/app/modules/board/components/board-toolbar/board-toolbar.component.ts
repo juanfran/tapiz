@@ -12,11 +12,9 @@ import {
   selectLayer,
   selectPopupOpen,
   selectPosition,
-  selectUserId,
   selectZoom,
 } from '../../selectors/page.selectors';
-import { switchMap, take, withLatestFrom } from 'rxjs/operators';
-import { BoardMoveService } from '../../services/board-move.service';
+import { switchMap, take } from 'rxjs/operators';
 import { NotesService } from '../../services/notes.service';
 import {
   FormControl,
@@ -39,7 +37,9 @@ import { TokenSelectorComponent } from '../token-selector/token-selector.compone
 import { Token } from '@team-up/board-commons/models/token.model';
 import {
   EstimationBoard,
+  Group,
   Image,
+  Panel,
   PollBoard,
   Text,
 } from '@team-up/board-commons';
@@ -48,6 +48,7 @@ import { TemplateSelectorComponent } from '../template-selector/template-selecto
 import { NodesActions } from '@team-up/nodes/services/nodes-actions';
 import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ZoneService } from '../zone/zone.service';
 
 @Component({
   selector: 'team-up-board-toolbar',
@@ -71,12 +72,12 @@ import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 })
 export class BoardToolbarComponent {
   #store = inject(Store);
-  #boardMoveService = inject(BoardMoveService);
   #notesService = inject(NotesService);
   #dialog = inject(MatDialog);
   #drawingStore = inject(DrawingStore);
   #nodesActions = inject(NodesActions);
   #hotkeysService = inject(HotkeysService);
+  #zoneService = inject(ZoneService);
 
   canvasMode$ = this.#store.select(selectCanvasMode);
   imageForm = new FormGroup({
@@ -105,40 +106,25 @@ export class BoardToolbarComponent {
   text() {
     this.popupOpen('text');
 
-    this.#store.dispatch(PageActions.textToolbarClick());
+    this.toolbarSubscription = this.#zoneService
+      .select('text')
+      .subscribe(({ position }) => {
+        this.popupOpen('');
+        const action = this.#nodesActions.add<Text>('text', {
+          text: '<p></p>',
+          position,
+          layer: this.layer(),
+          width: 200,
+          height: 50,
+          rotation: 0,
+        });
 
-    this.toolbarSubscription = this.#boardMoveService
-      .nextMouseDown()
-      .pipe(
-        withLatestFrom(
-          this.#store.select(selectZoom),
-          this.#store.select(selectPosition),
-        ),
-      )
-      .subscribe({
-        next: ([event, zoom, position]) => {
-          const textPosition = {
-            x: (-position.x + event.pageX) / zoom,
-            y: (-position.y + event.pageY) / zoom,
-          };
-
-          const action = this.#nodesActions.add<Text>('text', {
-            text: '<p></p>',
-            position: textPosition,
-            layer: this.layer(),
-            width: 200,
-            height: 50,
-            rotation: 0,
-          });
-
-          this.#store.dispatch(
-            BoardActions.batchNodeActions({
-              history: true,
-              actions: [action],
-            }),
-          );
-        },
-        complete: () => this.popupOpen(''),
+        this.#store.dispatch(
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [action],
+          }),
+        );
       });
   }
 
@@ -150,23 +136,11 @@ export class BoardToolbarComponent {
 
     this.popupOpen('note');
 
-    this.toolbarSubscription = this.#boardMoveService
-      .nextMouseDown()
-      .pipe(
-        withLatestFrom(
-          this.#store.select(selectZoom),
-          this.#store.select(selectPosition),
-          this.#store.select(selectUserId),
-        ),
-      )
-      .subscribe({
-        next: ([event, zoom, position, userId]) => {
-          this.#notesService.createNote(userId, {
-            x: (-position.x + event.clientX) / zoom,
-            y: (-position.y + event.clientY) / zoom,
-          });
-        },
-        complete: () => this.popupOpen(''),
+    this.toolbarSubscription = this.#zoneService
+      .select()
+      .subscribe(({ userId, position }) => {
+        this.#notesService.createNote(userId, position);
+        this.popupOpen('');
       });
   }
 
@@ -178,34 +152,63 @@ export class BoardToolbarComponent {
 
     this.popupOpen('select');
 
-    this.#store.dispatch(
-      PageActions.setInitZone({
-        initZone: {
-          type: 'select',
-        },
-      }),
-    );
+    this.toolbarSubscription = this.#zoneService
+      .selectArea('select')
+      .subscribe((result) => {
+        this.popupOpen('');
+
+        if (!result) {
+          return;
+        }
+
+        const selectedNodes = this.#zoneService.nodesInZone(result);
+        this.#store.dispatch(PageActions.selectNodes({ ids: selectedNodes }));
+      });
   }
 
   group() {
     if (this.popup() === 'group') {
       this.popupOpen('');
-      this.#store.dispatch(
-        PageActions.setInitZone({
-          initZone: null,
-        }),
-      );
+
       return;
     }
 
     this.popupOpen('group');
-    this.#store.dispatch(
-      PageActions.setInitZone({
-        initZone: {
-          type: 'group',
-        },
-      }),
-    );
+    this.toolbarSubscription = this.#zoneService
+      .selectArea('group')
+      .subscribe((zone) => {
+        this.popupOpen('');
+
+        if (!zone) {
+          return;
+        }
+
+        let { width, height } = zone.size;
+
+        if (width < 2) {
+          width = 300;
+        }
+
+        if (height < 2) {
+          height = 300;
+        }
+
+        this.#store.dispatch(
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [
+              this.#nodesActions.add<Group>('group', {
+                title: '',
+                position: zone.position,
+                width: width,
+                height: height,
+                votes: [],
+                layer: zone.layer,
+              }),
+            ],
+          }),
+        );
+      });
   }
 
   vote() {
@@ -263,13 +266,43 @@ export class BoardToolbarComponent {
     }
 
     this.popupOpen('panel');
-    this.#store.dispatch(
-      PageActions.setInitZone({
-        initZone: {
-          type: 'panel',
-        },
-      }),
-    );
+
+    this.toolbarSubscription = this.#zoneService
+      .selectArea('panel')
+      .subscribe((zone) => {
+        this.popupOpen('');
+
+        if (!zone) {
+          return;
+        }
+
+        let { width, height } = zone.size;
+
+        if (width < 2) {
+          width = 300;
+        }
+
+        if (height < 2) {
+          height = 300;
+        }
+
+        const panel: Panel = {
+          text: '<h2 style="text-align: center"></h2>',
+          position: zone.position,
+          width: width,
+          height: height,
+          layer: zone.layer,
+          rotation: 0,
+          drawing: [],
+        };
+
+        this.#store.dispatch(
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [this.#nodesActions.add('panel', panel)],
+          }),
+        );
+      });
   }
 
   poll() {
@@ -280,35 +313,25 @@ export class BoardToolbarComponent {
 
     this.popupOpen('poll');
 
-    this.toolbarSubscription = this.#boardMoveService
-      .nextMouseDown()
-      .pipe(
-        withLatestFrom(
-          this.#store.select(selectZoom),
-          this.#store.select(selectPosition),
-        ),
-      )
-      .subscribe({
-        next: ([event, zoom, position]) => {
-          const poll: PollBoard = {
-            title: '',
-            layer: this.layer(),
-            position: {
-              x: (-position.x + event.pageX) / zoom,
-              y: (-position.y + event.pageY) / zoom,
-            },
-            finished: false,
-            options: [],
-          };
+    this.toolbarSubscription = this.#zoneService
+      .select()
+      .subscribe(({ position }) => {
+        this.popupOpen('');
 
-          this.#store.dispatch(
-            BoardActions.batchNodeActions({
-              history: true,
-              actions: [this.#nodesActions.add('poll', poll)],
-            }),
-          );
-        },
-        complete: () => this.popupOpen(''),
+        const poll: PollBoard = {
+          title: '',
+          layer: this.layer(),
+          position,
+          finished: false,
+          options: [],
+        };
+
+        this.#store.dispatch(
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [this.#nodesActions.add('poll', poll)],
+          }),
+        );
       });
   }
 
@@ -345,65 +368,45 @@ export class BoardToolbarComponent {
 
     this.popupOpen('estimation');
 
-    this.toolbarSubscription = this.#boardMoveService
-      .nextMouseDown()
-      .pipe(
-        withLatestFrom(
-          this.#store.select(selectZoom),
-          this.#store.select(selectPosition),
-        ),
-      )
-      .subscribe({
-        next: ([event, zoom, position]) => {
-          this.#store.dispatch(
-            BoardActions.batchNodeActions({
-              history: true,
-              actions: [
-                this.#nodesActions.add<EstimationBoard>('estimation', {
-                  layer: this.layer(),
-                  position: {
-                    x: (-position.x + event.pageX) / zoom,
-                    y: (-position.y + event.pageY) / zoom,
-                  },
-                }),
-              ],
-            }),
-          );
-        },
-        complete: () => this.popupOpen(''),
+    this.toolbarSubscription = this.#zoneService
+      .select()
+      .subscribe(({ position }) => {
+        this.popupOpen('');
+
+        this.#store.dispatch(
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [
+              this.#nodesActions.add<EstimationBoard>('estimation', {
+                layer: this.layer(),
+                position,
+              }),
+            ],
+          }),
+        );
       });
   }
 
   tokenSelected(token: Pick<Token, 'backgroundColor' | 'color' | 'text'>) {
-    this.toolbarSubscription = this.#boardMoveService
-      .nextMouseDown()
-      .pipe(
-        withLatestFrom(
-          this.#store.select(selectZoom),
-          this.#store.select(selectPosition),
-        ),
-      )
-      .subscribe({
-        next: ([event, zoom, position]) => {
-          const tokenContent: Token = {
-            ...token,
-            layer: this.layer(),
-            position: {
-              x: (-position.x + event.pageX) / zoom - 50,
-              y: (-position.y + event.pageY) / zoom - 50,
-            },
-            width: 100,
-            height: 100,
-          };
+    this.toolbarSubscription = this.#zoneService
+      .select()
+      .subscribe(({ position }) => {
+        this.popupOpen('');
 
-          this.#store.dispatch(
-            BoardActions.batchNodeActions({
-              history: true,
-              actions: [this.#nodesActions.add<Token>('token', tokenContent)],
-            }),
-          );
-        },
-        complete: () => this.popupOpen(''),
+        const tokenContent: Token = {
+          ...token,
+          layer: this.layer(),
+          position,
+          width: 100,
+          height: 100,
+        };
+
+        this.#store.dispatch(
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [this.#nodesActions.add<Token>('token', tokenContent)],
+          }),
+        );
       });
   }
 

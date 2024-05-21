@@ -1,8 +1,6 @@
 import { createFeature, createReducer, on } from '@ngrx/store';
 import {
   Point,
-  ZoneConfig,
-  Zone,
   User,
   CocomaterialTag,
   CocomaterialApiListVectors,
@@ -17,13 +15,12 @@ export interface PageState {
   loaded: boolean;
   focusId: string[];
   open: boolean;
-  initZone: ZoneConfig | null;
   userId: string;
   boardId: string;
   zoom: number;
   position: Point;
   moveEnabled: boolean;
-  zone: Zone | null;
+  nodeSelection: boolean;
   userHighlight: User['id'] | null;
   showUserVotes: User['id'] | null;
   canvasMode: string;
@@ -51,7 +48,6 @@ const initialPageState: PageState = {
   loaded: false,
   focusId: [],
   open: false,
-  initZone: null,
   boardId: '',
   zoom: 1,
   position: {
@@ -59,7 +55,7 @@ const initialPageState: PageState = {
     y: 0,
   },
   moveEnabled: false,
-  zone: null,
+  nodeSelection: true,
   userHighlight: null,
   showUserVotes: null,
   canvasMode: 'editMode',
@@ -136,12 +132,6 @@ const reducer = createReducer(
       position,
     };
   }),
-  on(PageActions.setInitZone, (state, { initZone }): PageState => {
-    return {
-      ...state,
-      initZone,
-    };
-  }),
   on(PageActions.setMoveEnabled, (state, { enabled }): PageState => {
     return {
       ...state,
@@ -156,14 +146,7 @@ const reducer = createReducer(
         if (action.data.type === 'group' || action.data.type === 'panel') {
           state = {
             ...state,
-            initZone: null,
             moveEnabled: true,
-            zone: null,
-          };
-        } else if (action.data.type === 'text') {
-          state = {
-            ...state,
-            boardCursor: 'default',
           };
         }
       }
@@ -191,7 +174,6 @@ const reducer = createReducer(
       ...state,
       focusId: ids,
       moveEnabled: true,
-      zone: null,
     };
   }),
   on(
@@ -216,12 +198,6 @@ const reducer = createReducer(
       return state;
     },
   ),
-  on(PageActions.setZone, (state, { zone }): PageState => {
-    return {
-      ...state,
-      zone,
-    };
-  }),
   on(PageActions.changeCanvasMode, (state, { canvasMode }): PageState => {
     return {
       ...state,
@@ -279,17 +255,7 @@ const reducer = createReducer(
     state.dragEnabled = true;
     state.searching = false;
 
-    if (popup.length) {
-      state.initZone = null;
-    }
-
     return state;
-  }),
-  on(PageActions.textToolbarClick, (state): PageState => {
-    return {
-      ...state,
-      boardCursor: 'text',
-    };
   }),
   on(PageActions.readyToVote, (state): PageState => {
     return {
@@ -403,6 +369,18 @@ const reducer = createReducer(
     return {
       ...state,
       dragEnabled: !drawing,
+    };
+  }),
+  on(PageActions.setBoardCursor, (state, { cursor }): PageState => {
+    return {
+      ...state,
+      boardCursor: cursor,
+    };
+  }),
+  on(PageActions.setNodeSelection, (state, { enabled }): PageState => {
+    return {
+      ...state,
+      nodeSelection: enabled,
     };
   }),
 );

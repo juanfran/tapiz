@@ -18,6 +18,7 @@ import { filterNil } from '../../../commons/operators/filter-nil';
 import { ActivatedRoute } from '@angular/router';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { Point, TuNode } from '@team-up/board-commons';
+import { getNodeSize } from '../../../shared/node-size';
 
 @Injectable()
 export class PageEffects {
@@ -91,15 +92,7 @@ export class PageEffects {
       filterNil(),
       concatLatestFrom(() => [this.store.select(pageFeature.selectZoom)]),
       map(([node, zoom]) => {
-        let width = node.content.width;
-        let height = node.content.height;
-
-        const nodeWidths = {
-          poll: 650,
-        } as Record<string, number>;
-
-        width ??= nodeWidths[node.type] || 0;
-        height ??= width;
+        const { width, height } = getNodeSize(node);
 
         const x =
           -node.content.position.x * zoom +

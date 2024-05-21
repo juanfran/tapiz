@@ -1,8 +1,6 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import {
   Point,
-  Zone,
-  ZoneConfig,
   User,
   BoardUser,
   CocomaterialTag,
@@ -26,12 +24,8 @@ export const PageActions = createActionGroup({
     'Join board': props<{ boardId: string }>(),
     'Set user view': props<{ zoom: number; position: Point }>(),
     'Set move enabled': props<{ enabled: boolean }>(),
-    'Set init zone': props<{ initZone: ZoneConfig | null }>(),
     'Set focus id': props<{ focusId: string; ctrlKey?: boolean }>(),
     'Change canvas mode': props<{ canvasMode: string }>(),
-    'Set zone': props<{ zone: Zone | null }>(),
-    'Zone to group': emptyProps(),
-    'Zone to panel': emptyProps(),
     'End drag node': props<{
       nodes: {
         id: string;
@@ -45,7 +39,6 @@ export const PageActions = createActionGroup({
     Redo: emptyProps(),
     'Toggle user highlight': props<{ id: User['id'] }>(),
     'Set popup open': props<{ popup: string }>(),
-    'Text toolbar click': emptyProps(),
     'Ready to vote': emptyProps(),
     'Board not found': props<{ id: BoardUser['id'] }>(),
     'Select emoji': props<{ emoji: NativeEmoji }>(),
@@ -69,5 +62,7 @@ export const PageActions = createActionGroup({
     'Refetch board': emptyProps(),
     Drawing: props<{ drawing: boolean }>(),
     'Select nodes': props<{ ids: string[] }>(),
+    'Set board cursor': props<{ cursor: string }>(),
+    'Set node selection': props<{ enabled: boolean }>(),
   },
 });
