@@ -3,8 +3,7 @@ const Config = {
   DB_DATABASE: process.env['POSTGRES_DB'] ?? 'db',
   DB_HOST: process.env['POSTGRES_HOST'] ?? 'localhost',
   DB_PASSWORD: process.env['POSTGRES_PASSWORD'],
-  DB_PORT_HOST: Number(process.env['DB_PORT_HOST']),
-  DB_PORT: Number(process.env['DB_PORT']),
+  DB_PORT_HOST: Number(process.env['POSTGRES_PORT_HOST']),
   DB_USER: process.env['POSTGRES_USER'],
   GOOGLE_CLIENT_ID: process.env['GOOGLE_CLIENT_ID'],
   GOOGLE_CLIENT_SECRET: process.env['GOOGLE_CLIENT_SECRET'],
@@ -17,7 +16,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 export async function regenerateDatabase() {
   console.log('regenerating database');
 
-  const connectionMigration = `postgres://${Config.DB_USER}:${Config.DB_PASSWORD}@${Config.DB_HOST}:${Config.DB_PORT}/postgres`;
+  const connectionMigration = `postgres://${Config.DB_USER}:${Config.DB_PASSWORD}@${Config.DB_HOST}:${Config.DB_PORT_HOST}/postgres`;
 
   const sql = postgres(connectionMigration, { max: 1 });
 
@@ -25,7 +24,7 @@ export async function regenerateDatabase() {
   await sql`CREATE DATABASE ${sql(Config.DB_DATABASE)}`;
   await sql.end();
 
-  const connection = `postgres://${Config.DB_USER}:${Config.DB_PASSWORD}@${Config.DB_HOST}:${Config.DB_PORT}/${Config.DB_DATABASE}`;
+  const connection = `postgres://${Config.DB_USER}:${Config.DB_PASSWORD}@${Config.DB_HOST}:${Config.DB_PORT_HOST}/${Config.DB_DATABASE}`;
 
   const migrationClient = postgres(connection, { max: 1 });
 

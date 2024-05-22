@@ -16,6 +16,6 @@ export class LoginComponent {
   private configService = inject(ConfigService);
 
   loginGoogle() {
-    window.location.href = `${this.configService.config.API}/auth`;
+    window.location.href = `${this.configService.config.API_URL}/auth`;
   }
 }

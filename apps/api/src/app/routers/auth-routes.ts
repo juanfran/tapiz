@@ -1,7 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { getUserInfo, lucia, validateAuthorizationCode } from '../auth.js';
 import { getUserByGoogleId } from '../db/user-db.js';
-import config from '../config.js';
 import { generateId } from 'lucia';
 import db from '../db/index.js';
 
@@ -33,7 +32,6 @@ export async function googleCallback(fastify: FastifyInstance) {
 
         const googleUser = await getUserInfo(tokens.accessToken);
         const user = await getUserByGoogleId(googleUser.sub);
-
         if (user) {
           try {
             const session = await lucia.createSession(user.id, {});
@@ -47,7 +45,7 @@ export async function googleCallback(fastify: FastifyInstance) {
           }
 
           return rep.redirect(
-            config.FRONTEND_URL +
+            process.env['FRONTEND_URL'] +
               `/login-redirect?status=success&id=${user.id}`,
           );
         } else {
@@ -68,7 +66,8 @@ export async function googleCallback(fastify: FastifyInstance) {
           });
 
           return rep.redirect(
-            config.FRONTEND_URL + `/login-redirect?status=success&id=${userId}`,
+            process.env['FRONTEND_URL'] +
+              `/login-redirect?status=success&id=${userId}`,
           );
         }
       }

@@ -16,7 +16,7 @@ export class APIConfigService {
   #config = createTRPCProxyClient<AppRouter>({
     links: [
       httpBatchLink({
-        url: this.#configService.config.API + '/trpc',
+        url: this.#configService.config.API_URL + '/trpc',
         fetch: async (url, options) => {
           // update api-rest-interceptor.service.ts
           const response = await fetch(url, {

@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:22
 
 RUN mkdir -p /home/team-up
 
@@ -10,7 +10,5 @@ RUN npm ci
 RUN npx nx run api:build:production
 RUN npm prune --production
 RUN rm -rf apps libs resources
-
-EXPOSE 8000
 
 CMD ["node", "dist/apps/api/main.js"]

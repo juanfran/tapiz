@@ -1,9 +1,8 @@
 #!/bin/sh
 
-API="${API}"
-WS="${WS}"
-FIREBASE_CONFIG="${FIREBASE_CONFIG}"
+API_URL="${API_URL}"
+WS_URL="${WS_URL}"
 
-echo "{\"API\":\"$API\",\"WS\":\"$WS\"}" > /usr/share/nginx/html/assets/config.json
+echo "{\"API_URL\":\"$API_URL\",\"WS_URL\":\"$WS_URL\"}" > /usr/share/nginx/html/assets/config.json
 
 nginx -g 'daemon off;'

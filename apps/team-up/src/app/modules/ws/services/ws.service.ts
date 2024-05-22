@@ -25,7 +25,7 @@ export class WsService {
       return;
     }
 
-    this.#ws = new WebSocket(`${this.#configService.config.WS}/events`);
+    this.#ws = new WebSocket(`${this.#configService.config.WS_URL}/events`);
 
     this.#ws.addEventListener('open', () => {
       this.#store.dispatch(wsOpen());

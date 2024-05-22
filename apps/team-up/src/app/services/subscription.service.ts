@@ -22,7 +22,7 @@ export class SubscriptionService {
       return;
     }
 
-    this.#ws = new WebSocket(`${this.#configService.config.WS}/sub`);
+    this.#ws = new WebSocket(`${this.#configService.config.WS_URL}/sub`);
 
     this.#ws.addEventListener('open', () => {
       this.#boardIds
