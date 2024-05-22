@@ -1,5 +1,4 @@
 import type { Config } from 'drizzle-kit';
-import AppConfig from './apps/api/src/app/config';
 
 export default {
   schema: './apps/api/src/app/schema.ts',
@@ -7,10 +6,10 @@ export default {
   breakpoints: true,
   driver: 'pg',
   dbCredentials: {
-    host: AppConfig.DB_HOST,
-    port: AppConfig.DB_PORT,
-    user: AppConfig.DB_USER,
-    password: AppConfig.DB_PASSWORD,
-    database: AppConfig.DB_DATABASE,
+    host: process.env['POSTGRES_HOST']!,
+    port: Number(process.env['POSTGRES_PORT_HOST']!),
+    user: process.env['POSTGRES_USER'],
+    password: process.env['POSTGRES_PASSWORD'],
+    database: process.env['POSTGRES_DB']!,
   },
 } satisfies Config;

@@ -4,7 +4,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "config": "node --env-file=.env scripts/setup-env.js",
+    "config": "node scripts/setup-env.js",
     "ng": "nx",
     "start": "npm run config && nx serve team-up --port 4300",
     "start:api": "nx serve api",
@@ -78,6 +78,8 @@
     "arctic": "^1.8.0",
     "cors": "^2.8.5",
     "date-fns": "^3.6.0",
+    "dotenv": "^16.4.5",
+    "dotenv-expand": "^11.0.6",
     "drizzle-orm": "0.28.6",
     "emoji-picker-element": "^1.21.3",
     "fastify": "^4.27.0",

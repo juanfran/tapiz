@@ -91,12 +91,18 @@ fastify.register(async function (fastify) {
   fastify.register(googleCallback);
 });
 
-const port = 8000;
+const host = process.env['API_HOST'];
 
 export function startApiServer() {
-  fastify.listen({ port }, (err) => {
-    if (err) throw err;
+  fastify.listen(
+    {
+      port: Number(process.env['API_PORT']),
+      host: host === 'localhost' ? '0.0.0.0' : host,
+    },
+    (err) => {
+      if (err) throw err;
 
-    console.log(`http://localhost:${port}`);
-  });
+      console.log(`http://localhost:${process.env['API_PORT']}`);
+    },
+  );
 }

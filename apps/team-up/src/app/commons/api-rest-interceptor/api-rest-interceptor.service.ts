@@ -15,8 +15,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // update api-config.service.ts
   if (
     configService.config &&
-    (req.url.includes(configService.config.API) ||
-      req.url.includes(configService.config.WS))
+    (req.url.includes(configService.config.API_URL) ||
+      req.url.includes(configService.config.WS_URL))
   ) {
     const request = req.clone({
       headers: new HttpHeaders({

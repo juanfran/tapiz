@@ -1,14 +1,12 @@
 import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-
-import Config from '../config.js';
 import { setPsqlClient } from '../auth.js';
 
 export let db: PostgresJsDatabase;
 export let psqlClient: postgres.Sql;
 
-async function waitDb() {
-  const connection = `postgres://${Config.DB_USER}:${Config.DB_PASSWORD}@${Config.DB_HOST}:${Config.DB_PORT}/${Config.DB_DATABASE}`;
+function waitDb() {
+  const connection = `postgres://${process.env['POSTGRES_USER']}:${process.env['POSTGRES_PASSWORD']}@${process.env['POSTGRES_HOST']}:${process.env['POSTGRES_PORT_HOST']}/${process.env['POSTGRES_DB']}`;
 
   psqlClient = postgres(connection);
 
@@ -22,7 +20,7 @@ async function waitDb() {
 export async function startDB() {
   const run = async () => {
     try {
-      await waitDb();
+      waitDb();
     } catch (e) {
       console.log('Error connecting to DB, retrying in 2 seconds');
       setTimeout(run, 2000);

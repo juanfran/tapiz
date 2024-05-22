@@ -4,22 +4,27 @@
 
 ## Installation & Configuration
 
-Follow these steps to set up TeamUp on your system with Docker:
+Follow these steps to set up TeamUp on your system using Docker:
 
-1. Create a copy of the example environment file `.env.example` and name it as `.env`:
+1. **Copy the Example Environment File**  
+   Create a copy of the example environment file `.env.example` and name it `.env`:
 
-```console
-cp .env.example .env
-```
+   ```bash
+   cp .env.example .env
+   ```
 
-2. Configure your database and front-end access as per your setup.
+2. **Configure Environment Variables**  
+   Update the `.env` file with your specific configuration details, including database settings and front-end access.
 
-3. [Get your Google authentication credentials] (https://developers.google.com/identity/protocols/oauth2), add the redirct url `http://localhost:9000/api/auth/callback` and fill in the `.env` file with the client ID and the client secret.
+3. **Google Authentication Credentials**  
+   Obtain your Google authentication credentials by following [this guide](https://developers.google.com/identity/protocols/oauth2). Add the redirect URL `http://localhost:8000/api/auth/callback` and fill in the `.env` file with the client ID and client secret.
 
-With the setup complete, you can now run the Docker command to spin up your application:
+4. **Build and Run the Docker Containers**  
+   With the setup complete, you can now run the Docker command to spin up your application:
 
-```console
-docker compose up -d
-```
+   ```bash
+   docker-compose up -d
+   ```
 
-TeamUp will now be accessible at [http://localhost:9000](http://localhost:9000).
+5. **Access the Application**  
+   TeamUp will now be accessible at [http://localhost:4300](http://localhost:4300).

@@ -1,9 +1,12 @@
-import e from 'cors';
+import { config } from 'dotenv'
+import { expand } from 'dotenv-expand';
+
+expand(config())
+
 import { writeFileSync } from 'fs';
 
-const front = ['API', 'WS', 'DEMO'];
+const front = ['API_URL', 'WS_URL', 'DEMO'];
 const frontConfig = {};
-
 
 front.forEach((key) => {
   if (process.env[key] === 'true') {

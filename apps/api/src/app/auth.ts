@@ -1,11 +1,10 @@
 import { FastifyReply } from 'fastify';
-import Config from './config.js';
 import { Google, generateCodeVerifier, generateState } from 'arctic';
 import { Lucia } from 'lucia';
 import { PostgresJsAdapter } from '@lucia-auth/adapter-postgresql';
 import postgres from 'postgres';
 
-if (!Config.GOOGLE_CLIENT_ID || !Config.GOOGLE_CLIENT_SECRET) {
+if (!process.env['GOOGLE_CLIENT_ID'] || !process.env['GOOGLE_CLIENT_SECRET']) {
   throw new Error('Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET');
 }
 
@@ -28,9 +27,9 @@ export const setPsqlClient = (psqlClient: postgres.Sql) => {
 };
 
 const google = new Google(
-  Config.GOOGLE_CLIENT_ID,
-  Config.GOOGLE_CLIENT_SECRET,
-  `${Config.API_URL}/auth/callback`,
+  process.env['GOOGLE_CLIENT_ID'],
+  process.env['GOOGLE_CLIENT_SECRET'],
+  `${process.env['API_URL']}/auth/callback`,
 );
 
 export const getAuthUrl = async (reply: FastifyReply) => {
