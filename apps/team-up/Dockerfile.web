@@ -14,10 +14,10 @@ RUN rm -rf apps libs resources
 FROM nginx:1.25.0-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /home/team-up/dist/apps/team-up /usr/share/nginx/html
-COPY --from=builder /home/team-up/run.sh /docker-entrypoint.d/40-run.sh
+COPY --from=builder /home/team-up/generate-config.sh /docker-entrypoint.d/40-generate-config.sh
 
 RUN touch /var/run/nginx.pid
 RUN chown -R nginx:nginx /var/run/nginx.pid /usr/share/nginx/html /var/cache/nginx /var/log/nginx /etc/nginx/conf.d
-RUN chmod +x /docker-entrypoint.d/40-run.sh
+RUN chmod +x /docker-entrypoint.d/40-generate-config.sh
 
 USER nginx
