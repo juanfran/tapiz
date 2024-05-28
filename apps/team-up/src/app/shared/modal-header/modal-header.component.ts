@@ -13,13 +13,12 @@ import { input } from '@angular/core';
   template: `
     <h1 class="title()">
       {{ title() }}
-
-      <button
-        type="button"
-        (click)="cancel()">
-        <mat-icon>close</mat-icon>
-      </button>
     </h1>
+    <button
+      type="button"
+      (click)="cancel()">
+      <mat-icon>close</mat-icon>
+    </button>
   `,
   styleUrls: ['./modal-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
