@@ -11,6 +11,7 @@ import {
   tap,
   catchError,
   filter,
+  auditTime,
 } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
@@ -50,17 +51,26 @@ export class BoardEffects {
     () => {
       return this.actions$.pipe(
         ofType(BoardActions.batchNodeActions),
-        concatLatestFrom(() => this.store.select(pageFeature.selectBoardId)),
-        tap(([batch, boardId]) => {
+        tap((batch) => {
           this.boardFacade.applyActions(batch.actions, batch.history);
           this.wsService.send(batch.actions);
+        }),
+      );
+    },
+    {
+      dispatch: false,
+    },
+  );
 
-          if (this.configService.config.DEMO) {
-            localStorage.setItem(
-              boardId,
-              JSON.stringify(this.boardFacade.get()),
-            );
-          }
+  public batchNodeActionsDemo$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(BoardActions.batchNodeActions),
+        auditTime(500),
+        concatLatestFrom(() => this.store.select(pageFeature.selectBoardId)),
+        filter(() => !!this.configService.config.DEMO),
+        tap(([, boardId]) => {
+          localStorage.setItem(boardId, JSON.stringify(this.boardFacade.get()));
         }),
       );
     },
