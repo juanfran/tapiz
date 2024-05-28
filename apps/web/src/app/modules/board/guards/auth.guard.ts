@@ -10,6 +10,7 @@ import { filter, map, switchMap } from 'rxjs/operators';
 
 import { AuthService } from '../../../services/auth.service';
 import { appFeature } from '../../../+state/app.reducer';
+import { ConfigService } from '../../../services/config.service';
 
 export const AuthGuard: CanActivateFn = (
   next: ActivatedRouteSnapshot,
@@ -18,6 +19,11 @@ export const AuthGuard: CanActivateFn = (
   const store = inject(Store);
   const router = inject(Router);
   const authService = inject(AuthService);
+  const configService = inject(ConfigService);
+
+  if (configService.config.DEMO) {
+    return true;
+  }
 
   return authService.authReady.pipe(
     filter((ready) => ready),
