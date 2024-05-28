@@ -12,29 +12,29 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { Drawing, Panel, TuNode } from '@team-up/board-commons';
-import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
+import { Drawing, Panel, TuNode } from '@tapiz/board-commons';
+import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { BoardActions } from '@team-up/board-commons/actions/board.actions';
+import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { HistoryService } from '../services/history.service';
 import { NodeSpaceComponent } from '../node-space';
-import { ToolbarComponent } from '@team-up/ui/toolbar';
-import { EditorViewComponent } from '@team-up/ui/editor-view';
+import { ToolbarComponent } from '@tapiz/ui/toolbar';
+import { EditorViewComponent } from '@tapiz/ui/editor-view';
 import { filter, pairwise, switchMap } from 'rxjs';
-import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
+import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import {
   DrawingDirective,
   DrawingStore,
-} from '@team-up/board-components/drawing';
+} from '@tapiz/board-components/drawing';
 import { NodeStore } from '../node/node.store';
 import { NodesActions } from '../services/nodes-actions';
 import { input } from '@angular/core';
 
 @Component({
-  selector: 'team-up-panel',
+  selector: 'tapiz-panel',
 
   template: `
-    <team-up-node-space
+    <tapiz-node-space
       [node]="node()"
       [resize]="true"
       [rotate]="true"
@@ -46,7 +46,7 @@ import { input } from '@angular/core';
               class="rich-text"
               [innerHTML]="node().content.text | safeHtml"></div>
           } @else {
-            <team-up-editor-view
+            <tapiz-editor-view
               #editorView="editorView"
               [class.readonly]="!edit()"
               [node]="node()"
@@ -59,12 +59,12 @@ import { input } from '@angular/core';
         </div>
 
         <canvas
-          [teamUpDrawing]="node().content.drawing"
+          [tapizDrawing]="node().content.drawing"
           (drawing)="setDrawing($event)"
           [attr.width]="node().content.width"
           [attr.height]="node().content.height"></canvas>
       </div>
-    </team-up-node-space>
+    </tapiz-node-space>
   `,
   styleUrls: ['./panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

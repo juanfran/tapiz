@@ -1,0 +1,92 @@
+@if (model$ | async; as vm) {
+  <div class="header">
+    <a
+      class="logo"
+      routerLink="/">
+      <img src="/assets/svg/logo.webp" />
+      <span class="name">Tapiz</span>
+    </a>
+    <div class="inline-end-header">
+      @if (vm.invitations.length) {
+        <button
+          [matBadge]="vm.invitations.length"
+          matBadgeColor="warn"
+          (click)="openInvitationDialog()"
+          type="button">
+          <mat-icon>mail</mat-icon>
+        </button>
+      }
+      <div class="user-menu">
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="menu">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button
+            mat-menu-item
+            (click)="deleteAccount()">
+            <mat-icon>person_remove</mat-icon>
+            <span>Delete account</span>
+          </button>
+          <button
+            mat-menu-item
+            (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Logout</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+  <div class="wrapper">
+    <nav class="navigation-menu">
+      <ul>
+        <li>
+          <a
+            class="menu-option"
+            routerLink="/"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            >Boards</a
+          >
+        </li>
+        <li>
+          <a
+            class="menu-option"
+            routerLink="/starred"
+            routerLinkActive="active"
+            >Starred</a
+          >
+        </li>
+      </ul>
+      <div class="teams">
+        <h4>
+          Teams
+          <button
+            tuIconButton
+            size="small"
+            (click)="openCreateTeamDialog()"
+            aria-label="Create team">
+            <mat-icon>add</mat-icon>
+          </button>
+        </h4>
+        <ul>
+          @for (team of vm.teams; track team) {
+            <li>
+              <a
+                class="menu-option"
+                [routerLink]="['/team', team.id]"
+                routerLinkActive="active"
+                >{{ team.name }}</a
+              >
+            </li>
+          }
+        </ul>
+      </div>
+    </nav>
+    <div class="main">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+}

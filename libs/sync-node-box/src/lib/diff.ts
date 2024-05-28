@@ -1,4 +1,4 @@
-import { TuNode } from '@team-up/board-commons';
+import { TuNode } from '@tapiz/board-commons';
 
 export function diff(node1: TuNode, node2: TuNode) {
   const diffResult: Record<string, unknown> = {};

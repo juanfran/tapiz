@@ -1,4 +1,4 @@
-import { Point } from '@team-up/board-commons';
+import { Point } from '@tapiz/board-commons';
 
 export declare interface Draggable {
   preventDrag?: () => boolean;

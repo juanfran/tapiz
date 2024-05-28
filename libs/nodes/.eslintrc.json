@@ -21,7 +21,7 @@
           "error",
           {
             "type": "element",
-            "prefix": "team-up",
+            "prefix": "tapiz",
             "style": "kebab-case"
           }
         ],

@@ -11,7 +11,7 @@ import { Level } from '@tiptap/extension-heading';
 import { ToolbarEditorService } from '../../toolbar-editor.service';
 
 @Component({
-  selector: 'team-up-toolbar-option-size',
+  selector: 'tapiz-toolbar-option-size',
   template: `
     <div class="buttons">
       <button

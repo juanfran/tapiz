@@ -1,0 +1,205 @@
+:host {
+  --toolbar-button-height: 2.25rem;
+  --toolbar-button-width: 2.875rem;
+
+  cursor: default;
+  height: auto;
+  position: relative;
+  display: flex;
+}
+
+.toolbar-tooltip {
+  align-items: center;
+  background: #1f1f1f;
+  border-radius: 8px;
+  color: var(--white);
+  display: flex;
+  font-family:
+    "Work Sans",
+    -apple-system,
+    system-ui,
+    sans-serif;
+  justify-content: center;
+  left: 100%;
+  min-height: 2rem;
+  min-width: 4.125rem;
+  opacity: 0;
+  padding: 0.25rem;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  transition: all 0.5s ease;
+  z-index: var(--board-tools-layer);
+
+  &::before {
+    background: #1f1f1f;
+    content: "";
+    height: 10px;
+    position: absolute;
+    right: calc(100% - 5px);
+    top: calc(50% - 5px);
+    transform: rotate(45deg);
+    width: 10px;
+  }
+
+  label {
+    font-family:
+      "Raleway",
+      -apple-system,
+      system-ui,
+      sans-serif;
+    font-size: 1.3rem;
+    margin-bottom: 0.25rem;
+  }
+}
+
+.toolbar-button-container {
+  margin-bottom: 0.15rem;
+  position: relative;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &.mt {
+    margin-top: 2rem;
+  }
+
+  .toolbar-button:hover {
+    background: var(--primary-color-button-bg);
+
+    + .toolbar-tooltip {
+      left: calc(100% + 0.5rem);
+      opacity: 1;
+      padding: 0 10px;
+      white-space: nowrap;
+      width: auto;
+    }
+  }
+
+  &.active {
+    background: var(--primary-color-button-bg);
+
+    .toolbar-tooltip {
+      display: none;
+    }
+  }
+}
+
+.toolbar-button {
+  align-items: center;
+  background: none;
+  display: flex;
+  height: var(--toolbar-button-height);
+  justify-content: center;
+  padding: 0;
+  width: var(--toolbar-button-width);
+
+  svg {
+    height: 24px;
+    width: 24px;
+  }
+}
+
+.toolbar {
+  background: var(--primary-color-background);
+  border-radius: var(--radius-2);
+  display: flex;
+  flex-direction: column;
+  padding: var(--size-2) 0;
+  transition: background 0.5s ease;
+}
+
+.toolbar-container {
+  height: 0;
+  position: relative;
+  width: 100%;
+}
+
+.toolbar-popup {
+  background: var(--primary-color-background);
+  border-radius: 0 8px 8px 0;
+  left: 100%;
+  position: absolute;
+  top: calc(var(--toolbar-button-height) * -1);
+
+  &.brushes {
+    min-width: 128px;
+    padding: 1rem;
+  }
+
+  .popup-title {
+    bottom: 100%;
+    color: var(--primary-color);
+    font-family:
+      "Raleway",
+      -apple-system,
+      system-ui,
+      sans-serif;
+    font-size: 0.625rem;
+    position: absolute;
+    right: 0.25rem;
+  }
+
+  label {
+    font-family:
+      "Raleway",
+      -apple-system,
+      system-ui,
+      sans-serif;
+    font-size: 0.625rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .toolbar-popup-button {
+    display: flex;
+    margin-bottom: 0.5rem;
+    margin-right: 0.5rem;
+    padding: 0;
+
+    .icon-svg {
+      width: 24px;
+    }
+  }
+
+  .font {
+    display: flex;
+  }
+}
+
+.brush-size {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
+.image-url-field {
+  height: 30px;
+  width: 500px;
+}
+
+.image-popup {
+  padding: 1rem;
+
+  .submit {
+    margin-right: 0.5rem;
+  }
+}
+
+.actions {
+  margin-top: 0.5rem;
+}
+
+.emojis {
+  background: var(--primary-color-background);
+  border-radius: 8px;
+  margin-left: 1rem;
+  padding: 0.5rem;
+  position: absolute;
+  left: 46px;
+}
+
+tapiz-token-selector,
+tapiz-template-selector {
+  margin-left: var(--spacing-2);
+}

@@ -8,15 +8,15 @@ import {
   computed,
   inject,
 } from '@angular/core';
-import { Point, Resizable, Rotatable, TuNode } from '@team-up/board-commons';
-import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
-import { ResizeHandlerComponent } from '@team-up/ui/resize';
-import { RotateHandlerComponent } from '@team-up/ui/rotate';
+import { Point, Resizable, Rotatable, TuNode } from '@tapiz/board-commons';
+import { MultiDragService } from '@tapiz/cdk/services/multi-drag.service';
+import { ResizeHandlerComponent } from '@tapiz/ui/resize';
+import { RotateHandlerComponent } from '@tapiz/ui/rotate';
 import { NodesStore } from '../services/nodes.store';
 import { input } from '@angular/core';
 
 @Component({
-  selector: 'team-up-node-space',
+  selector: 'tapiz-node-space',
 
   template: `
     <div
@@ -29,14 +29,14 @@ import { input } from '@angular/core';
     @if (node(); as node) {
       @if (enabled()) {
         @if (isResizable(node)) {
-          <team-up-resize-handler
+          <tapiz-resize-handler
             [node]="node"
             [scale]="scale()" />
         }
 
         @if (isRotable(node)) {
           <div class="rotate-wrapper">
-            <team-up-rotate-handler
+            <tapiz-rotate-handler
               [node]="node"
               [style.transform]="'scale(' + scale() + ')'" />
           </div>

@@ -13,7 +13,7 @@ import Pickr from '@simonwep/pickr';
 import { colorPickerConfig } from './color-picker.config';
 
 @Component({
-  selector: 'team-up-color-picker',
+  selector: 'tapiz-color-picker',
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,

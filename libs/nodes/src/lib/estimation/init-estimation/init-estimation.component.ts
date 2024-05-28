@@ -3,12 +3,12 @@ import { ChangeDetectionStrategy, Component, effect } from '@angular/core';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { EstimationConfig } from '@team-up/board-commons';
+import { EstimationConfig } from '@tapiz/board-commons';
 import { output } from '@angular/core';
 import { input } from '@angular/core';
 
 @Component({
-  selector: 'team-up-init-estimation',
+  selector: 'tapiz-init-estimation',
   standalone: true,
   imports: [MatSelectModule, FormsModule, MatButtonModule],
 

@@ -13,7 +13,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - '${DB_PORT_HOST}:5432'
+      - '${POSTGRES_PORT_HOST}:5432'
 
   api:
     restart: always
@@ -33,7 +33,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: ./apps/team-up/Dockerfile.web
+      dockerfile: ./apps/web/Dockerfile.web
     depends_on:
       - api
     ports:

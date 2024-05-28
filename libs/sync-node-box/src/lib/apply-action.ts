@@ -1,5 +1,5 @@
-import type { TuNode, StateActions } from '@team-up/board-commons';
-import { arrayMove } from '@team-up/utils/array.js';
+import type { TuNode, StateActions } from '@tapiz/board-commons';
+import { arrayMove } from '@tapiz/utils/array.js';
 
 const ignoreNodes = ['settings', 'user'];
 

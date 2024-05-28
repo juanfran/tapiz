@@ -19,7 +19,7 @@ import { ToolbarEditorService } from '../../toolbar-editor.service';
 import { ColorPickerComponent } from '../../../color-picker';
 
 @Component({
-  selector: 'team-up-toolbar-option-font',
+  selector: 'tapiz-toolbar-option-font',
   template: `
     <button
       [cdkMenuTriggerFor]="menu"
@@ -46,7 +46,7 @@ import { ColorPickerComponent } from '../../../color-picker';
     <label
       [title]="'Font Color'"
       for="color-picker">
-      <team-up-color-picker
+      <tapiz-color-picker
         [color]="color() || '#000000'"
         (change)="changeColor($event)" />
     </label>

@@ -6,8 +6,8 @@ import {
   inject,
 } from '@angular/core';
 
-import { MoveService } from '@team-up/cdk/services/move.service';
-import { Rotatable, TuNode } from '@team-up/board-commons';
+import { MoveService } from '@tapiz/cdk/services/move.service';
+import { Rotatable, TuNode } from '@tapiz/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filterNil } from 'ngxtension/filter-nil';
 import { RotateService } from './rotate.service';
@@ -15,7 +15,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { input } from '@angular/core';
 
 @Component({
-  selector: 'team-up-rotate-handler',
+  selector: 'tapiz-rotate-handler',
   standalone: true,
   imports: [MatIconModule],
   template: `

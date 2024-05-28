@@ -7,7 +7,7 @@ import {
   PollBoardNode,
 } from '../models/poll.model.js';
 import { pick } from 'remeda';
-import { decrypt } from '@team-up/utils/crypto.js';
+import { decrypt } from '@tapiz/utils/crypto.js';
 
 const pollBoard = z.object({
   ...CommonBoardValidation,

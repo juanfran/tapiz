@@ -6,7 +6,7 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { CommentNode, TuNode } from '@team-up/board-commons';
+import { CommentNode, TuNode } from '@tapiz/board-commons';
 import { NodesStore } from '../services/nodes.store';
 
 type CommentsState = {

@@ -1,4 +1,4 @@
-import type { StateActions, TuNode } from '@team-up/board-commons';
+import type { StateActions, TuNode } from '@tapiz/board-commons';
 import { syncNodeBox } from './sync-node-box.js';
 
 describe('syncNodeBox', () => {

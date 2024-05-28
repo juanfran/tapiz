@@ -1,0 +1,92 @@
+:host {
+  background-color: var(--color-light-1);
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  width: 100vw;
+  cursor: var(--default-cursor, auto);
+
+  &.node-selection-disabled {
+    tapiz-nodes {
+      pointer-events: none;
+    }
+  }
+}
+
+.work-layer {
+  height: 0;
+  position: relative;
+  transform: scale(1) translate(0, 0);
+  transform-origin: 0 0;
+  width: 0;
+}
+
+canvas {
+  --canvas-size: 9000px;
+
+  border: 1px dotted #c61236;
+  height: var(--canvas-size);
+  left: calc(-1 * (var(--canvas-size) / 2));
+  pointer-events: none;
+  position: absolute;
+  top: calc(-1 * (var(--canvas-size) / 2));
+  width: var(--canvas-size);
+}
+
+tapiz-board-toolbar {
+  left: 1rem;
+  position: fixed;
+  top: 70px;
+  z-index: var(--board-tools-layer);
+}
+
+tapiz-drawing-options {
+  left: calc(50% - 150px);
+  position: fixed;
+  top: 50px;
+  z-index: var(--board-tools-layer);
+}
+
+tapiz-search-options {
+  left: calc(50% - 150px);
+  position: fixed;
+  top: 50px;
+  z-index: var(--board-tools-layer);
+}
+
+tapiz-users,
+tapiz-header {
+  z-index: var(--board-tools-layer);
+}
+
+.edit-mode {
+  ::ng-deep .layer-1 {
+    pointer-events: none;
+
+    .hide-non-active-layer {
+      display: none;
+    }
+  }
+}
+
+.compose-mode {
+  ::ng-deep .layer-0 {
+    pointer-events: none;
+
+    .hide-non-active-layer {
+      display: none;
+    }
+  }
+}
+
+.container.loading {
+  display: none;
+}
+
+
+#size-calculator {
+  position: absolute;
+  top: -1000px;
+  z-index: -1;
+}

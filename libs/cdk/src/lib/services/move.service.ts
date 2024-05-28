@@ -14,7 +14,7 @@ import type {
   ResizePosition,
   Point,
   RotatableHost,
-} from '@team-up/board-commons';
+} from '@tapiz/board-commons';
 import {
   compose,
   decomposeTSR,

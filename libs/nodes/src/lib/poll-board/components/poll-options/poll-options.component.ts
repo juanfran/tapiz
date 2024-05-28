@@ -7,7 +7,7 @@ import {
   input,
   signal,
 } from '@angular/core';
-import { PollAnswerNode, PollBoardNode } from '@team-up/board-commons';
+import { PollAnswerNode, PollBoardNode } from '@tapiz/board-commons';
 import { MatIconModule } from '@angular/material/icon';
 import {
   FormControl,
@@ -18,12 +18,12 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
-import { decrypt } from '@team-up/utils/crypto';
+import { decrypt } from '@tapiz/utils/crypto';
 import { NodesStore } from '../../../services/nodes.store';
 import { output } from '@angular/core';
 
 @Component({
-  selector: 'team-up-poll-options',
+  selector: 'tapiz-poll-options',
   standalone: true,
   imports: [
     MatButtonModule,

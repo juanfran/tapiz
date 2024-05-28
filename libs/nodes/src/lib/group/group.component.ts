@@ -13,18 +13,18 @@ import {
   DestroyRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Group, TuNode } from '@team-up/board-commons';
-import { ResizeHandlerSingleComponent } from '@team-up/ui/resize';
+import { Group, TuNode } from '@tapiz/board-commons';
+import { ResizeHandlerSingleComponent } from '@tapiz/ui/resize';
 import { NodeSpaceComponent } from '../node-space';
 import { hostBinding } from 'ngxtension/host-binding';
 import { NodesStore } from '../services/nodes.store';
-import { BoardActions } from '@team-up/board-commons/actions/board.actions';
+import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { NodeStore } from '../node/node.store';
-import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
+import { MultiDragService } from '@tapiz/cdk/services/multi-drag.service';
 import { input } from '@angular/core';
 
 @Component({
-  selector: 'team-up-group',
+  selector: 'tapiz-group',
 
   template: `
     <div
@@ -51,7 +51,7 @@ import { input } from '@angular/core';
         }
       }
     </div>
-    <team-up-resize-single [node]="node()" />
+    <tapiz-resize-single [node]="node()" />
   `,
   styleUrls: ['./group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

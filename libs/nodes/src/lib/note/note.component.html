@@ -1,4 +1,4 @@
-<team-up-node-space
+<tapiz-node-space
   [node]="node()"
   [resize]="true"
   [rotate]="false"
@@ -49,10 +49,10 @@
     }
     @if (visible()) {
       <canvas
-        [teamUpDrawing]="node().content.drawing"
+        [tapizDrawing]="node().content.drawing"
         (drawing)="setDrawing($event)"
         [width]="node().content.width"
         [height]="node().content.height"></canvas>
     }
   </div>
-</team-up-node-space>
+</tapiz-node-space>

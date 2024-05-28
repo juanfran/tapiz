@@ -78,7 +78,7 @@ export class ContextMenuStore {
 
       const el = event.target as HTMLElement;
 
-      if (el.tagName.toUpperCase() !== 'team-up-board'.toUpperCase()) {
+      if (el.tagName.toUpperCase() !== 'tapiz-board'.toUpperCase()) {
         const isProsemirror = el.closest('.ProseMirror');
 
         if (isProsemirror) {

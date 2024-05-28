@@ -5,21 +5,21 @@ import {
   input,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { TuNode } from '@team-up/board-commons';
+import { TuNode } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
-import { BoardActions } from '@team-up/board-commons/actions/board.actions';
+import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { NodeToolbar } from '../../node-toolbar.model';
 import { ColorPickerComponent } from '../../../color-picker';
 import { MatSliderModule } from '@angular/material/slider';
 
 @Component({
-  selector: 'team-up-toolbar-option-layout',
+  selector: 'tapiz-toolbar-option-layout',
   template: `
     <div class="field">
       <label class="color-picker-layout">
         Background color
 
-        <team-up-color-picker
+        <tapiz-color-picker
           [color]="node().content.backgroundColor"
           (change)="updateNodeValue($event, 'backgroundColor')" />
       </label>
@@ -29,7 +29,7 @@ import { MatSliderModule } from '@angular/material/slider';
       <label class="color-picker-layout">
         Border color
 
-        <team-up-color-picker
+        <tapiz-color-picker
           [color]="node().content.borderColor"
           (change)="updateNodeValue($event, 'borderColor')" />
       </label>
@@ -91,7 +91,7 @@ import { MatSliderModule } from '@angular/material/slider';
       <label class="color-picker-layout">
         Note color
 
-        <team-up-color-picker
+        <tapiz-color-picker
           [color]="node().content.color"
           (change)="updateNodeValue($event, 'color')" />
       </label>

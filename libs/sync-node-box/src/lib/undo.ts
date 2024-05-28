@@ -1,4 +1,4 @@
-import { StateActions, TuNode } from '@team-up/board-commons';
+import { StateActions, TuNode } from '@tapiz/board-commons';
 import { SyncNodeBoxHistory } from './models.js';
 import { applyAction } from './apply-action.js';
 import { reverseAction } from './rever-action.js';

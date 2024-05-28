@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { PollBoard, PollBoardNode, PollOption } from '@team-up/board-commons';
+import { PollBoard, PollBoardNode, PollOption } from '@tapiz/board-commons';
 import { MatIconModule } from '@angular/material/icon';
 import { v4 } from 'uuid';
 import {
@@ -15,7 +15,7 @@ import { MatInputModule } from '@angular/material/input';
 import { output } from '@angular/core';
 
 @Component({
-  selector: 'team-up-poll-config',
+  selector: 'tapiz-poll-config',
   standalone: true,
   imports: [
     MatButtonModule,

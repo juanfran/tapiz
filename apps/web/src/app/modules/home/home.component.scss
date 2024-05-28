@@ -1,0 +1,87 @@
+:host {
+  --header-height: 55px;
+  height: 100vh;
+}
+
+.wrapper {
+  height: calc(100vh - var(--header-height));
+  display: flex;
+  inline-size: 100%;
+}
+
+.main {
+  overflow-y: auto;
+  height: calc(100vh - var(--header-height));
+  inline-size: 100%;
+}
+
+.header {
+  width: 100%;
+  height: var(--header-height);
+  padding-inline: var(--spacing-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navigation-menu {
+  height: calc(100vh - var(--header-height));
+  width: 240px;
+  padding-block-start: var(--spacing-4);
+  padding-inline: var(--spacing-4);
+  ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  .menu-option {
+    display: block;
+    inline-size: 100%;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: var(--font-size-14);
+    padding: var(--spacing-2) var(--spacing-4);
+    text-align: left;
+    &:hover,
+    &.active {
+      background-color: var(--accent--ui);
+    }
+  }
+}
+
+.inline-end-header {
+  display: flex;
+  gap: var(--spacing-4);
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  text-decoration: none;
+  align-items: center;
+  font-size: var(--font-size-24);
+  font-weight: 700;
+
+  .name {
+    color: var(--brand);
+  }
+
+  img {
+    inline-size: 45px;
+    margin-inline-end: var(--spacing-2);
+  }
+}
+
+.teams {
+  padding-block-start: var(--spacing-4);
+  border-block-start: 1px solid var(--accent--ui);
+
+  h4 {
+    align-items: center;
+    margin: 0;
+    margin-block-end: var(--spacing-2);
+    gap: var(--spacing-1);
+    display: flex;
+  }
+}

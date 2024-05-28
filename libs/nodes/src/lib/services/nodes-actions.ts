@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { NodeAdd, NodePatch, TuNode } from '@team-up/board-commons';
+import { NodeAdd, NodePatch, TuNode } from '@tapiz/board-commons';
 import { NodesStore } from './nodes.store';
 import { v4 } from 'uuid';
 

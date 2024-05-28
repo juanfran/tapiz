@@ -1,0 +1,52 @@
+<tapiz-title [title]="boardTitle()"></tapiz-title>
+<div
+  [class.edit-mode]="(canvasMode$ | async) === 'editMode'"
+  [class.compose-mode]="(canvasMode$ | async) === 'composeMode'"
+  [class.loading]="!loaded()"
+  class="container">
+  @defer {
+    <tapiz-header></tapiz-header>
+    @if (!isDemo) {
+      <tapiz-users></tapiz-users>
+    }
+    <tapiz-board-toolbar />
+    @if (drawing()) {
+      <tapiz-drawing-options></tapiz-drawing-options>
+    }
+    @if (search()) {
+      <tapiz-search-options></tapiz-search-options>
+    }
+  }
+  <div
+    class="work-layer"
+    #workLayer>
+    @if (boardId$ | async) {
+      <tapiz-overlay></tapiz-overlay>
+      <tapiz-zone></tapiz-zone>
+      @if (!isDemo) {
+        <tapiz-cursors></tapiz-cursors>
+      }
+      @defer {
+        <tapiz-nodes />
+      }
+    }
+  </div>
+  @defer {
+    @if (!isDemo) {
+      <tapiz-follow-user></tapiz-follow-user>
+      <tapiz-stop-highlight></tapiz-stop-highlight>
+    }
+    <tapiz-context-menu />
+    <tapiz-board-context-menu />
+    <tapiz-node-toolbar />
+    <tapiz-comments />
+  }
+</div>
+
+@if (!loaded()) {
+  <div class="loading-bar">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+}
+
+<div id="size-calculator"></div>

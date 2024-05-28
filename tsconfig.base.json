@@ -22,15 +22,15 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@team-up/api/*": ["apps/api/src/*"],
-      "@team-up/board-commons": ["libs/board-commons/src/index.ts"],
-      "@team-up/board-commons/*": ["libs/board-commons/src/lib/*"],
-      "@team-up/board-components/*": ["libs/board-components/src/lib/*"],
-      "@team-up/cdk/*": ["libs/cdk/src/lib/*"],
-      "@team-up/nodes/*": ["libs/nodes/src/lib/*"],
-      "@team-up/sync-node-box": ["libs/sync-node-box/src/index.ts"],
-      "@team-up/ui/*": ["libs/ui/src/lib/*"],
-      "@team-up/utils/*": ["libs/utils/src/lib/*"]
+      "@tapiz/api/*": ["apps/api/src/*"],
+      "@tapiz/board-commons": ["libs/board-commons/src/index.ts"],
+      "@tapiz/board-commons/*": ["libs/board-commons/src/lib/*"],
+      "@tapiz/board-components/*": ["libs/board-components/src/lib/*"],
+      "@tapiz/cdk/*": ["libs/cdk/src/lib/*"],
+      "@tapiz/nodes/*": ["libs/nodes/src/lib/*"],
+      "@tapiz/sync-node-box": ["libs/sync-node-box/src/index.ts"],
+      "@tapiz/ui/*": ["libs/ui/src/lib/*"],
+      "@tapiz/utils/*": ["libs/utils/src/lib/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

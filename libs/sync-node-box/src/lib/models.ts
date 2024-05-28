@@ -1,4 +1,4 @@
-import { StateActions } from '@team-up/board-commons';
+import { StateActions } from '@tapiz/board-commons';
 
 export interface SyncNodeBoxOptions {
   history?: number;

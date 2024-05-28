@@ -13,7 +13,7 @@ import type {
   EstimationResultNode,
   EstimationStory,
   StateActions,
-} from '@team-up/board-commons';
+} from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
 import { MatSelectModule } from '@angular/material/select';
 import { BoardActions } from './estimation.component';
@@ -26,10 +26,10 @@ import { MatMenuModule } from '@angular/material/menu';
 import { EstimationWorkspaceComponent } from './estimation-workspace/estimation-workspace.component';
 import { input } from '@angular/core';
 
-export { BoardActions } from '@team-up/board-commons/actions/board.actions';
+export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 
 @Component({
-  selector: 'team-up-estimation',
+  selector: 'tapiz-estimation',
   standalone: true,
   imports: [
     MatSelectModule,
@@ -70,33 +70,33 @@ export { BoardActions } from '@team-up/board-commons/actions/board.actions';
           </mat-menu>
         </div>
         @if (estimationConfig.content.stories.length) {
-          <team-up-estimation-workspace
+          <tapiz-estimation-workspace
             [estimation]="estimationConfig.content"
             [results]="results()"
             (setStep)="setEstimationStep($event)"
             (vote)="vote($event)"
             (storyVisibility)="
               setStoryVisibility($event)
-            "></team-up-estimation-workspace>
+            "></tapiz-estimation-workspace>
         }
       }
       @if (screen() === 'stories') {
-        <team-up-estimation-stories
+        <tapiz-estimation-stories
           [estimationStories]="estimationConfig.content.stories"
           [showCancel]="!!estimationConfig.content.stories.length"
           (addStory)="onAddStory($event)"
-          (closeConfig)="screen.set('main')"></team-up-estimation-stories>
+          (closeConfig)="screen.set('main')"></tapiz-estimation-stories>
       }
       @if (screen() === 'scales') {
-        <team-up-init-estimation
+        <tapiz-init-estimation
           [scale]="estimationConfig.content.scale"
-          (completeSetup)="editScale($event)"></team-up-init-estimation>
+          (completeSetup)="editScale($event)"></tapiz-init-estimation>
       }
     }
 
     @if (!config()) {
-      <team-up-init-estimation
-        (completeSetup)="onCompleteSetup($event)"></team-up-init-estimation>
+      <tapiz-init-estimation
+        (completeSetup)="onCompleteSetup($event)"></tapiz-init-estimation>
     }
   `,
   styleUrls: ['./estimation.component.scss'],

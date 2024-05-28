@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { db } from './init-db.js';
 import * as schema from '../schema.js';
-import { TeamInvitation, TeamMember, UserTeam } from '@team-up/board-commons';
+import { TeamInvitation, TeamMember, UserTeam } from '@tapiz/board-commons';
 import { SetNonNullable } from 'type-fest';
 import { getUsersBoardsByTeam } from './board-db.js';
 
