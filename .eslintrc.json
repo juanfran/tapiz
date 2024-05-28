@@ -14,16 +14,29 @@
             "depConstraints": [
               {
                 "sourceTag": "scope:web",
-                "onlyDependOnLibsWithTags": ["scope:web", "type:util", "type:ui", "type:feature"]
+                "onlyDependOnLibsWithTags": [
+                  "scope:web",
+                  "type:util",
+                  "type:ui",
+                  "type:feature"
+                ]
               },
               {
                 "sourceTag": "scope:server",
-                "onlyDependOnLibsWithTags": ["scope:server", "type:util", "type:feature"],
+                "onlyDependOnLibsWithTags": [
+                  "scope:server",
+                  "type:util",
+                  "type:feature"
+                ],
                 "bannedExternalImports": ["@angular/*"]
               },
               {
                 "sourceTag": "type:feature",
-                "onlyDependOnLibsWithTags": ["type:feature", "type:ui", "type:util"]
+                "onlyDependOnLibsWithTags": [
+                  "type:feature",
+                  "type:ui",
+                  "type:util"
+                ]
               },
               {
                 "sourceTag": "type:ui",
@@ -59,13 +72,18 @@
           {
             "avoidEscape": true
           }
-        ]
+        ],
+        "@typescript-eslint/no-extra-semi": "error",
+        "no-extra-semi": "off"
       }
     },
     {
       "files": ["*.js", "*.jsx"],
       "extends": ["plugin:@nx/javascript"],
-      "rules": {}
+      "rules": {
+        "@typescript-eslint/no-extra-semi": "error",
+        "no-extra-semi": "off"
+      }
     }
   ]
 }
