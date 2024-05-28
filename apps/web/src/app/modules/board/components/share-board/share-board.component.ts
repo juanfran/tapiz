@@ -51,7 +51,7 @@ import { ConfigService } from '../../../../services/config.service';
           our
           <a
             target="_blank"
-            href="https://github.com/juanfran/tapiz/blob/main/INSTALL.md"
+            href="https://github.com/juanfran/tapiz/blob/main/docs/INSTALL.md"
             >GitHub repository</a
           >.
         </p>
