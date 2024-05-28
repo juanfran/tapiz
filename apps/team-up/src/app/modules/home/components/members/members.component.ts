@@ -137,7 +137,7 @@ import { input } from '@angular/core';
               </mat-select>
             </mat-form-field>
             <button
-              title()="Delete member"
+              title="Delete member"
               tuIconButton
               (click)="onDeleteMember(member.id, !member.email)">
               <mat-icon>close</mat-icon>
