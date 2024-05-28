@@ -1,4 +1,4 @@
-import type { StateActions, TuNode } from '@team-up/board-commons';
+import type { StateActions, TuNode } from '@tapiz/board-commons';
 
 import { BehaviorSubject, distinctUntilChanged, shareReplay } from 'rxjs';
 import { applyAction } from './apply-action.js';

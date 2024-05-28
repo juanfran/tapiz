@@ -21,7 +21,7 @@ front.forEach((key) => {
 });
 
 writeFileSync(
-  './apps/team-up/src/assets/config.json',
+  './apps/web/src/assets/config.json',
   JSON.stringify({
     ...frontConfig,
   }),

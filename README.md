@@ -1,14 +1,14 @@
-# TeamUp
+# Tapiz
 
-TeamUp is a web based collaborative board to help teams in their online meetings & projects.
+Tapiz is a web based collaborative board to help teams in their online meetings & projects.
 
-![Demo](https://github.com/juanfran/team-up/blob/main/resources/demo-teamup-new.gif)
+![Demo](https://github.com/juanfran/tapiz/blob/main/resources/demo-tapiz-new.gif)
 
 ## Install with Docker
 
-You can get started with Teamup locally or self-host it with docker.
+You can get started with Tapiz locally or self-host it with docker.
 
-[Follow the step-by-step guide](./INSTALL.md) on getting started with Docker.
+[Follow the step-by-step guide](./docs/INSTALL.md) on getting started with Docker.
 
 ## Current status
 

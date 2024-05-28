@@ -1,0 +1,10 @@
+:host {
+  display: contents;
+}
+
+tapiz-toolbar {
+  position: absolute;
+  z-index: var(--board-tools-layer);
+  inset-inline-start: 70px;
+  inset-block-start: 70px;
+}

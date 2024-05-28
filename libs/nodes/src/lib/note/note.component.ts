@@ -14,18 +14,18 @@ import {
   afterNextRender,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Drawing, Note, Panel, TuNode, isPanel } from '@team-up/board-commons';
-import { lighter } from '@team-up/cdk/utils/colors';
+import { Drawing, Note, Panel, TuNode, isPanel } from '@tapiz/board-commons';
+import { lighter } from '@tapiz/cdk/utils/colors';
 import {
   DrawingDirective,
   DrawingStore,
-} from '@team-up/board-components/drawing';
+} from '@tapiz/board-components/drawing';
 import { HistoryService } from '../services/history.service';
 import { MatIconModule } from '@angular/material/icon';
 import { NodesStore } from '../services/nodes.store';
 import { CommentsStore } from '../comments/comments.store';
-import { BoardActions } from '@team-up/board-commons/actions/board.actions';
-import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
+import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
+import { MultiDragService } from '@tapiz/cdk/services/multi-drag.service';
 import { hostBinding } from 'ngxtension/host-binding';
 import { NodeStore } from '../node/node.store';
 import { input } from '@angular/core';
@@ -36,13 +36,13 @@ import {
   rotateDEG,
   translate,
 } from 'transformation-matrix';
-import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
+import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
 import { NodeSpaceComponent } from '../node-space';
 
 @Component({
-  selector: 'team-up-note',
+  selector: 'tapiz-note',
   templateUrl: './note.component.html',
   styleUrls: ['./note.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

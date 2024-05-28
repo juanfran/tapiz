@@ -6,7 +6,7 @@ import type {
   PrivateBoardUser,
   TuNode,
   UserNode,
-} from '@team-up/board-commons';
+} from '@tapiz/board-commons';
 import { SetNonNullable } from 'type-fest';
 import * as team from './team-db.js';
 import { getUserTeam } from './team-db.js';

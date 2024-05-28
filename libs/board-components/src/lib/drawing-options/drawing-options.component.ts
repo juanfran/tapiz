@@ -2,9 +2,9 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { DrawingStore } from '../drawing/drawing.store';
-import { ColorPickerComponent } from '@team-up/ui/color-picker';
+import { ColorPickerComponent } from '@tapiz/ui/color-picker';
 @Component({
-  selector: 'team-up-drawing-options',
+  selector: 'tapiz-drawing-options',
   templateUrl: './drawing-options.component.html',
   styleUrls: ['./drawing-options.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

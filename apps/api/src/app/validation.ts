@@ -1,12 +1,12 @@
-import { StateActions, TuNode, Validators } from '@team-up/board-commons';
+import { StateActions, TuNode, Validators } from '@tapiz/board-commons';
 
-import { PERSONAL_TOKEN_VALIDATOR } from '@team-up/board-commons/validators/token.validator.js';
-import { ESTIMATION_VALIDATORS } from '@team-up/board-commons/validators/estimation.validator.js';
-import { POLL_VALIDATORS } from '@team-up/board-commons/validators/poll.validator.js';
-import { COMMENTS_VALIDATORS } from '@team-up/board-commons/validators/comments.validator.js';
-import { SETTINGS_VALIDATOR } from '@team-up/board-commons/validators/settings.validators.js';
+import { PERSONAL_TOKEN_VALIDATOR } from '@tapiz/board-commons/validators/token.validator.js';
+import { ESTIMATION_VALIDATORS } from '@tapiz/board-commons/validators/estimation.validator.js';
+import { POLL_VALIDATORS } from '@tapiz/board-commons/validators/poll.validator.js';
+import { COMMENTS_VALIDATORS } from '@tapiz/board-commons/validators/comments.validator.js';
+import { SETTINGS_VALIDATOR } from '@tapiz/board-commons/validators/settings.validators.js';
 
-import { NOTE_VALIDATORS } from '@team-up/board-commons/validators/note.validator.js';
+import { NOTE_VALIDATORS } from '@tapiz/board-commons/validators/note.validator.js';
 
 import { type ZodAny } from 'zod';
 

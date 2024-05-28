@@ -1,9 +1,9 @@
 import { Injectable, Signal, inject } from '@angular/core';
-import { TuNode, User } from '@team-up/board-commons';
+import { TuNode, User } from '@tapiz/board-commons';
 import { Subject } from 'rxjs';
 import { rxActions } from '@rx-angular/state/actions';
 import { Store } from '@ngrx/store';
-import { BoardActions } from '@team-up/board-commons/actions/board.actions';
+import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import type { NativeEmoji } from 'emoji-picker-element/shared';
 
 @Injectable({

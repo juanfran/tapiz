@@ -21,7 +21,7 @@ import { History } from '@tiptap/extension-history';
 import { ToolbarComponent } from '../toolbar';
 import { EditorViewSharedStateService } from './editor-view-shared-state.service';
 import { BubbleMenu } from './bubble-menu';
-import { TuNode } from '@team-up/board-commons';
+import { TuNode } from '@tapiz/board-commons';
 import { Heading } from '@tiptap/extension-heading';
 import { Paragraph } from '@tiptap/extension-paragraph';
 import { BulletList } from '@tiptap/extension-bullet-list';
@@ -34,10 +34,10 @@ import { Text } from '@tiptap/extension-text';
 import { ListItem } from '@tiptap/extension-list-item';
 import { output } from '@angular/core';
 import { input } from '@angular/core';
-import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
+import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 
 @Component({
-  selector: 'team-up-editor-view',
+  selector: 'tapiz-editor-view',
   template: `
     <div
       class="editor"

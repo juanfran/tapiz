@@ -10,7 +10,7 @@ import type { Editor } from '@tiptap/core';
 import { Observable } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NodeToolbar } from './node-toolbar.model';
-import { TuNode } from '@team-up/board-commons';
+import { TuNode } from '@tapiz/board-commons';
 import { input } from '@angular/core';
 import { OptionFormatComponent } from './options/format/option-format.component';
 import { OptionFontComponent } from './options/font/option-font.component';
@@ -21,16 +21,16 @@ import { ToolbarEditorService } from './toolbar-editor.service';
 import { OptionLayoutComponent } from './options/layout/option-layout.component';
 
 @Component({
-  selector: 'team-up-toolbar',
+  selector: 'tapiz-toolbar',
   template: `
-    <team-up-toolbar-option-format [editor]="editor()" />
-    <team-up-toolbar-option-font [editor]="editor()" />
-    <team-up-toolbar-option-size [editor]="editor()" />
-    <team-up-toolbar-option-align [editor]="editor()" />
-    <team-up-toolbar-option-list [editor]="editor()" />
+    <tapiz-toolbar-option-format [editor]="editor()" />
+    <tapiz-toolbar-option-font [editor]="editor()" />
+    <tapiz-toolbar-option-size [editor]="editor()" />
+    <tapiz-toolbar-option-align [editor]="editor()" />
+    <tapiz-toolbar-option-list [editor]="editor()" />
 
     @if (layoutOptions()) {
-      <team-up-toolbar-option-layout [node]="node()" />
+      <tapiz-toolbar-option-layout [node]="node()" />
     }
   `,
   styleUrl: './toolbar.component.scss',

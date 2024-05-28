@@ -11,15 +11,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { EstimationStory } from '@team-up/board-commons';
+import { EstimationStory } from '@tapiz/board-commons';
 import { v4 } from 'uuid';
 import { output } from '@angular/core';
 import { input } from '@angular/core';
 
-export { BoardActions } from '@team-up/board-commons/actions/board.actions';
+export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 
 @Component({
-  selector: 'team-up-estimation-stories',
+  selector: 'tapiz-estimation-stories',
   standalone: true,
   imports: [
     ReactiveFormsModule,

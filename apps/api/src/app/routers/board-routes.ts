@@ -1,6 +1,6 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { BoardUser } from '@team-up/board-commons';
+import { BoardUser } from '@tapiz/board-commons';
 import {
   boardAdminProcedure,
   boardMemberProcedure,

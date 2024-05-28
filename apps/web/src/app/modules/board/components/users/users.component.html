@@ -1,0 +1,110 @@
+@if (viewModel$ | async; as vm) {
+  <div class="right-col-toolbar users">
+    <button class="title-container">
+      <h2 class="title">People</h2>
+    </button>
+    <div class="user-container">
+      @if (vm.showUsers) {
+        @for (user of vm.users; track user.id) {
+          <button
+            [cdkMenuTriggerFor]="menu"
+            [cdkMenuTriggerData]="{ user: user }"
+            [class.offline]="!user.connected"
+            [class.active]="user.id === vm.userHighlight"
+            class="user">
+            <tapiz-svg-icon
+              icon="user"
+              class="icon-svg"></tapiz-svg-icon>
+            <p class="username">
+              <span
+                class="name"
+                [title]="user.name"
+                >{{ user.name }}</span
+              >
+            </p>
+          </button>
+        }
+      } @else {
+        <div class="no-users">
+          <p>Anonymous mode</p>
+        </div>
+      }
+    </div>
+    @if (vm.currentUser) {
+      <button
+        class="user me"
+        [cdkMenuTriggerFor]="menu"
+        [cdkMenuTriggerData]="{ user: vm.currentUser }">
+        <tapiz-svg-icon
+          icon="user"
+          class="icon-svg"></tapiz-svg-icon>
+        <p class="username">
+          <span
+            class="name"
+            [title]="vm.currentUser.name"
+            >{{ vm.currentUser.name }}</span
+          >
+          <span class="myself">(me)</span>
+        </p>
+      </button>
+    }
+  </div>
+  <div class="right-col-toolbar">
+    <div class="title-container">
+      <h2 class="title">Show my post its</h2>
+    </div>
+    <button
+      class="toolbar-slider"
+      [ngClass]="{ showVisible: vm.visible }"
+      (click)="toggleVisibility()">
+      <div class="slider-wrapper">
+        <div class="slider-dot"></div>
+      </div>
+      @if (vm.visible) {
+        <span>Enabled</span>
+      } @else {
+        <span>Disabled</span>
+      }
+    </button>
+  </div>
+
+  <ng-template
+    #menu
+    let-user="user">
+    <div
+      class="menu"
+      cdkMenu>
+      @if (vm.currentUser?.id !== user.id) {
+        <button
+          cdkMenuItem
+          class="menu-item"
+          (cdkMenuItemTriggered)="follow(user.id)">
+          @if (vm.follow) {
+            Unfollow
+          } @else {
+            Follow
+          }
+        </button>
+
+        <button
+          cdkMenuItem
+          class="menu-item"
+          (cdkMenuItemTriggered)="goToUser(user.id)">
+          Go to user
+        </button>
+      }
+      <button
+        cdkMenuItem
+        class="menu-item"
+        (cdkMenuItemTriggered)="toggleUserHighlight(user.id)">
+        Hightlight
+      </button>
+      <button
+        cdkMenuItem
+        class="menu-item"
+        (cdkMenuItemTriggered)="showVotes(user.id)">
+        Show votes
+      </button>
+    </div>
+  </ng-template>
+}

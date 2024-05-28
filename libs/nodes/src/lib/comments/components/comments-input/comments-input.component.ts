@@ -10,10 +10,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { v4 } from 'uuid';
-import { CommentNode } from '@team-up/board-commons';
+import { CommentNode } from '@tapiz/board-commons';
 
 @Component({
-  selector: 'team-up-comments-input',
+  selector: 'tapiz-comments-input',
   standalone: true,
   imports: [
     MatIconModule,

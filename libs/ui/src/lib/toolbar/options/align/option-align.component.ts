@@ -11,7 +11,7 @@ import { Editor } from '@tiptap/core';
 import { ToolbarEditorService } from '../../toolbar-editor.service';
 
 @Component({
-  selector: 'team-up-toolbar-option-align',
+  selector: 'tapiz-toolbar-option-align',
   template: `
     <div class="buttons">
       <button

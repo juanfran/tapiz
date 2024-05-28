@@ -1,4 +1,4 @@
-import type { TuNode, StateActions } from '@team-up/board-commons';
+import type { TuNode, StateActions } from '@tapiz/board-commons';
 
 import { diff } from './diff.js';
 

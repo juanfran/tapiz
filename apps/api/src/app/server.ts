@@ -1,9 +1,9 @@
-import type { StateActions, TuNode, UserNode } from '@team-up/board-commons';
+import type { StateActions, TuNode, UserNode } from '@tapiz/board-commons';
 import type { WebSocket } from 'ws';
 import { Client } from './client.js';
 import db from './db/index.js';
 
-import { syncNodeBox } from '@team-up/sync-node-box';
+import { syncNodeBox } from '@tapiz/sync-node-box';
 import { Subscription, throttleTime } from 'rxjs';
 import { FastifyRequest } from 'fastify';
 import { lucia, validateSession } from './auth.js';

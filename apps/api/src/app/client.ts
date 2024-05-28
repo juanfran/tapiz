@@ -3,7 +3,7 @@ import {
   NodeAdd,
   StateActions,
   UserNode,
-} from '@team-up/board-commons';
+} from '@tapiz/board-commons';
 import { Server } from './server.js';
 import type { WebSocket } from 'ws';
 import db from './db/index.js';

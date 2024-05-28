@@ -8,6 +8,7 @@ export default defineConfig({
   cacheDir: '../../node_modules/.vite/libs/sync-node-box',
   plugins: [tsconfigPaths()],
   test: {
+    watch: false,
     globals: true,
     cache: {
       dir: '../../node_modules/.vitest',

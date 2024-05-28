@@ -1,7 +1,7 @@
 import { eq, and, or } from 'drizzle-orm';
 import { db } from './init-db.js';
 import * as schema from '../schema.js';
-import { Invitation, Role, UserInvitation } from '@team-up/board-commons';
+import { Invitation, Role, UserInvitation } from '@tapiz/board-commons';
 
 export async function getUser(id: string) {
   const users = await db

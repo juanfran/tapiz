@@ -6,15 +6,15 @@ import {
   inject,
 } from '@angular/core';
 
-import { MoveService } from '@team-up/cdk/services/move.service';
-import { Resizable, ResizePosition, TuNode } from '@team-up/board-commons';
+import { MoveService } from '@tapiz/cdk/services/move.service';
+import { Resizable, ResizePosition, TuNode } from '@tapiz/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filterNil } from 'ngxtension/filter-nil';
 import { ResizeService } from './resize.service';
 import { input } from '@angular/core';
 
 @Component({
-  selector: 'team-up-resize-handler',
+  selector: 'tapiz-resize-handler',
   standalone: true,
   imports: [],
 

@@ -9,23 +9,23 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { Text, TuNode } from '@team-up/board-commons';
-import { HotkeysService } from '@team-up/cdk/services/hostkeys.service';
+import { Text, TuNode } from '@tapiz/board-commons';
+import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { BoardActions } from '@team-up/board-commons/actions/board.actions';
+import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { HistoryService } from '../services/history.service';
 import { NodeSpaceComponent } from '../node-space';
-import { ToolbarComponent } from '@team-up/ui/toolbar';
-import { EditorViewComponent } from '@team-up/ui/editor-view';
+import { ToolbarComponent } from '@tapiz/ui/toolbar';
+import { EditorViewComponent } from '@tapiz/ui/editor-view';
 import { filter, pairwise } from 'rxjs';
-import { SafeHtmlPipe } from '@team-up/cdk/pipes/safe-html';
+import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { input } from '@angular/core';
 
 @Component({
-  selector: 'team-up-text',
+  selector: 'tapiz-text',
 
   template: `
-    <team-up-node-space
+    <tapiz-node-space
       [node]="node()"
       [resize]="true"
       [rotate]="true"
@@ -35,7 +35,7 @@ import { input } from '@angular/core';
           class="rich-text"
           [innerHTML]="node().content.text | safeHtml"></div>
       } @else {
-        <team-up-editor-view
+        <tapiz-editor-view
           [class.readonly]="!edit()"
           #editorView="editorView"
           [node]="node()"
@@ -44,7 +44,7 @@ import { input } from '@angular/core';
           [focus]="edit()"
           (contentChange)="newContent.set($event)" />
       }
-    </team-up-node-space>
+    </tapiz-node-space>
   `,
   styleUrls: ['./text.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

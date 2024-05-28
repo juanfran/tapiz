@@ -11,4 +11,4 @@ dist
 
 database-seed.sql
 
-apps/team-up/src/assets/config.json
+apps/web/src/assets/config.json

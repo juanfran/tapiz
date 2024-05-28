@@ -1,7 +1,7 @@
 <form
   class="form"
   [formGroup]="form">
-  <team-up-color-picker
+  <tapiz-color-picker
     [color]="form.get('color')?.value ?? defaultColor"
     mode="RGBA"
     (change)="updateColor($event)" />

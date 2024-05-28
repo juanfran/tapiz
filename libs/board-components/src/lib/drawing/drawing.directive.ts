@@ -12,7 +12,7 @@ import {
   throttleTime,
 } from 'rxjs';
 import { concatLatestFrom } from '@ngrx/operators';
-import { Drawing } from '@team-up/board-commons';
+import { Drawing } from '@tapiz/board-commons';
 import { DrawingStore } from './drawing.store';
 import { output } from '@angular/core';
 import { input } from '@angular/core';
@@ -29,13 +29,13 @@ export interface MouseDrawingEvent {
 }
 
 @Directive({
-  selector: '[teamUpDrawing]',
+  selector: '[tapizDrawing]',
   standalone: true,
 })
 export class DrawingDirective {
   #drawingStore = inject(DrawingStore);
   #resize$ = injectResize();
-  teamUpDrawing = input<Drawing[]>([]);
+  tapizDrawing = input<Drawing[]>([]);
 
   canDraw = input(true);
 
@@ -51,7 +51,7 @@ export class DrawingDirective {
       const paintCanvas = this.#elementRef.nativeElement;
       this.#context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
 
-      this.teamUpDrawing().forEach((line) => {
+      this.tapizDrawing().forEach((line) => {
         this.drawStroke(line);
       });
     });
@@ -60,7 +60,7 @@ export class DrawingDirective {
       const paintCanvas = this.#elementRef.nativeElement;
       this.#context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
 
-      this.teamUpDrawing().forEach((line) => {
+      this.tapizDrawing().forEach((line) => {
         this.drawStroke(line);
       });
     });
@@ -119,7 +119,7 @@ export class DrawingDirective {
         const paintCanvas = this.#elementRef.nativeElement;
         this.#context.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
 
-        [...this.teamUpDrawing(), event].forEach((line) => {
+        [...this.tapizDrawing(), event].forEach((line) => {
           this.drawStroke(line);
         });
       });

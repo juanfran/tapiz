@@ -10,7 +10,7 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { TuNode } from '@team-up/board-commons';
+import { TuNode } from '@tapiz/board-commons';
 
 export const roleEnum = pgEnum('role', ['admin', 'member']);
 export const roleEnumWithGuest = pgEnum('role', ['admin', 'member', 'guest']);

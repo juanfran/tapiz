@@ -9,7 +9,7 @@ import { ClickOutside } from 'ngxtension/click-outside';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'team-up-context-menu',
+  selector: 'tapiz-context-menu',
   template: `<div
     class="menu"
     [style.transform]="position()"

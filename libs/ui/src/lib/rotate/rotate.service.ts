@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Rotatable, TuNode } from '@team-up/board-commons';
+import { Rotatable, TuNode } from '@tapiz/board-commons';
 import { Subject } from 'rxjs';
 
 @Injectable({

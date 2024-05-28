@@ -1,5 +1,5 @@
 import { Injectable, Signal } from '@angular/core';
-import { TuNode } from '@team-up/board-commons';
+import { TuNode } from '@tapiz/board-commons';
 import type { Editor } from '@tiptap/core';
 import { BehaviorSubject } from 'rxjs';
 import { NodeToolbar } from '../toolbar/node-toolbar.model';

@@ -8,10 +8,10 @@ import {
   computed,
   inject,
 } from '@angular/core';
-import { PollBoard, PollBoardNode } from '@team-up/board-commons';
-import { encrypt } from '@team-up/utils/crypto';
+import { PollBoard, PollBoardNode } from '@tapiz/board-commons';
+import { encrypt } from '@tapiz/utils/crypto';
 import { MatIconModule } from '@angular/material/icon';
-import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
+import { MultiDragService } from '@tapiz/cdk/services/multi-drag.service';
 import { Store } from '@ngrx/store';
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -24,11 +24,11 @@ import { v4 } from 'uuid';
 import { NodesStore } from '../services/nodes.store';
 import { CommonModule } from '@angular/common';
 import { PollResultsComponent } from './components/poll-results/poll-results.component';
-import { BoardActions } from '@team-up/board-commons/actions/board.actions';
+import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { input } from '@angular/core';
 
 @Component({
-  selector: 'team-up-poll-board',
+  selector: 'tapiz-poll-board',
   standalone: true,
   imports: [
     MatButtonModule,
@@ -59,11 +59,11 @@ import { input } from '@angular/core';
           <h1>{{ nodeContent.title }}</h1>
 
           @if (nodeContent.finished) {
-            <team-up-poll-results
+            <tapiz-poll-results
               [node]="node()"
               [users]="users()" />
           } @else {
-            <team-up-poll-options
+            <tapiz-poll-options
               [node]="node()"
               [userId]="userId()"
               (vote)="setUserVote($event)"
@@ -71,7 +71,7 @@ import { input } from '@angular/core';
               (endPoll)="endPoll()" />
           }
         } @else {
-          <team-up-poll-config
+          <tapiz-poll-config
             [node]="node()"
             (nodeChange)="updateNode($event)" />
         }

@@ -4,7 +4,7 @@ import {
   computed,
   input,
 } from '@angular/core';
-import { PollAnswerNode, PollBoardNode, User } from '@team-up/board-commons';
+import { PollAnswerNode, PollBoardNode, User } from '@tapiz/board-commons';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -16,7 +16,7 @@ interface PollResult {
 }
 
 @Component({
-  selector: 'team-up-poll-results',
+  selector: 'tapiz-poll-results',
   standalone: true,
   imports: [MatButtonModule, MatIconModule],
   template: `

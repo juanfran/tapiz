@@ -1,14 +1,14 @@
 {
-  "name": "team-up",
+  "name": "tapiz",
   "version": "0.0.0",
   "license": "MIT",
   "type": "module",
   "scripts": {
     "config": "node scripts/setup-env.js",
     "ng": "nx",
-    "start": "npm run config && nx serve team-up --port 4300",
+    "start": "npm run config && nx serve web --port 4300",
     "start:api": "nx serve api",
-    "build": "npm run config && nx build team-up",
+    "build": "npm run config && nx build web",
     "migrate": "nx run api:migrate",
     "test": "nx run-many --target=test --exclude='api' --parallel",
     "e2e:tests": "nx run test api",

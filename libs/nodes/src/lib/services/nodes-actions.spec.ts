@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { NodesActions } from './nodes-actions';
 import { NodesStore } from './nodes.store';
 import { signal } from '@angular/core';
-import { TuNode } from '@team-up/board-commons';
+import { TuNode } from '@tapiz/board-commons';
 import { vi } from 'vitest';
 
 // Mock the external UUID function

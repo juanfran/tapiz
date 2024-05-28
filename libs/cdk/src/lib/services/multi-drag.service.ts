@@ -12,7 +12,7 @@ import {
   withLatestFrom,
 } from 'rxjs';
 import { concatLatestFrom } from '@ngrx/effects';
-import { Point, TuNode } from '@team-up/board-commons';
+import { Point, TuNode } from '@tapiz/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export interface Draggable {

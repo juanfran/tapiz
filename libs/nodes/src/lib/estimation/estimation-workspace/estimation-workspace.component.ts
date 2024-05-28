@@ -10,7 +10,7 @@ import {
   EstimationResultNode,
   EstimationStory,
   User,
-} from '@team-up/board-commons';
+} from '@tapiz/board-commons';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { NodesStore } from '../../services/nodes.store';
@@ -18,7 +18,7 @@ import { output } from '@angular/core';
 import { input } from '@angular/core';
 
 @Component({
-  selector: 'team-up-estimation-workspace',
+  selector: 'tapiz-estimation-workspace',
   standalone: true,
   imports: [MatButtonModule, MatIconModule],
   template: `

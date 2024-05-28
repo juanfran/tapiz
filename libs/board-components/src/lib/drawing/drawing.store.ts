@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { Drawing, TuNode } from '@team-up/board-commons';
+import { Drawing, TuNode } from '@tapiz/board-commons';
 import { rxState } from '@rx-angular/state';
 import { BehaviorSubject, filter, map } from 'rxjs';
 import { rxActions } from '@rx-angular/state/actions';
 import { Store } from '@ngrx/store';
-import { BoardActions } from '@team-up/board-commons/actions/board.actions';
+import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { Action } from '@ngrx/store';
 import { concatLatestFrom } from '@ngrx/effects';
 

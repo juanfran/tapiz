@@ -40,7 +40,7 @@ Thumbs.db
 
 .angular
 
-apps/team-up/src/assets/config.json
+apps/web/src/assets/config.json
 .env
 
 apps/api/src/app/sessions/*

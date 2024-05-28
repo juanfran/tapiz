@@ -1,0 +1,19 @@
+:host {
+  padding: 1rem;
+  display: block;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-block-start: var(--spacing-4);
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+tapiz-modal-header {
+  margin-block-end: var(--spacing-4);
+}

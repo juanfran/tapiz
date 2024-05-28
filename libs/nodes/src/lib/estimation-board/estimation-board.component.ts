@@ -12,21 +12,17 @@ import {
   signal,
 } from '@angular/core';
 
-import {
-  EstimationBoard,
-  TuNode,
-  EstimationNodes,
-} from '@team-up/board-commons';
+import { EstimationBoard, TuNode, EstimationNodes } from '@tapiz/board-commons';
 import { MatIconModule } from '@angular/material/icon';
 import { EstimationComponent } from '../estimation/estimation.component';
 import * as R from 'remeda';
-import { MultiDragService } from '@team-up/cdk/services/multi-drag.service';
+import { MultiDragService } from '@tapiz/cdk/services/multi-drag.service';
 import { NodesStore } from '../services/nodes.store';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { input } from '@angular/core';
 
 @Component({
-  selector: 'team-up-estimation-board',
+  selector: 'tapiz-estimation-board',
   standalone: true,
   imports: [EstimationComponent, MatIconModule],
 
@@ -39,11 +35,11 @@ import { input } from '@angular/core';
       </button>
     </div>
     @if (parentId()) {
-      <team-up-estimation
+      <tapiz-estimation
         [class.focus]="focus()"
         [nodes]="estimation()"
         [userId]="nodesStore.userId()"
-        [parentId]="parentId()"></team-up-estimation>
+        [parentId]="parentId()"></tapiz-estimation>
     }
   `,
   styleUrls: ['./estimation-board.component.scss'],

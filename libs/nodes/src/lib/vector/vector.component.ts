@@ -1,13 +1,13 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { TuNode, Vector } from '@team-up/board-commons';
+import { TuNode, Vector } from '@tapiz/board-commons';
 import { NodeSpaceComponent } from '../node-space';
 import { input } from '@angular/core';
 
 @Component({
-  selector: 'team-up-vector',
+  selector: 'tapiz-vector',
 
   template: `
-    <team-up-node-space
+    <tapiz-node-space
       [node]="node()"
       [enabled]="focus()"
       [rotate]="true"
@@ -15,7 +15,7 @@ import { input } from '@angular/core';
       <img
         #image
         [attr.src]="node().content.url" />
-    </team-up-node-space>
+    </tapiz-node-space>
   `,
   styleUrls: ['./vector.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
