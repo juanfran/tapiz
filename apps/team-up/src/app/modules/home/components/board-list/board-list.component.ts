@@ -5,7 +5,6 @@ import {
   inject,
 } from '@angular/core';
 
-import { RxFor } from '@rx-angular/template/for';
 import { BoardUser, SortBoard } from '@team-up/board-commons';
 import { Router, RouterModule } from '@angular/router';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
@@ -34,7 +33,6 @@ import { input } from '@angular/core';
     RouterModule,
     MatDialogModule,
     MatSelectModule,
-    RxFor,
   ],
   templateUrl: './board-list.component.html',
   styleUrls: ['./board-list.component.scss'],
