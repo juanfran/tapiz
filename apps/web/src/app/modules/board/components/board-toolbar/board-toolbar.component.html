@@ -3,6 +3,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'note'">
     <button
+      aria-label="Note"
       (click)="note()"
       class="toolbar-button">
       <tapiz-svg-icon
@@ -15,6 +16,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'select'">
     <button
+      aria-label="Select"
       (click)="select()"
       class="toolbar-button">
       <mat-icon class="material-icons-outlined">crop_free</mat-icon>
@@ -25,6 +27,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'group'">
     <button
+      aria-label="Group"
       class="toolbar-button"
       (click)="group()">
       <tapiz-svg-icon
@@ -37,6 +40,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'vote'">
     <button
+      aria-label="Vote"
       class="toolbar-button"
       (click)="vote()">
       <tapiz-svg-icon
@@ -49,6 +53,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'emoji'">
     <button
+      aria-label="Emoji"
       class="toolbar-button"
       (click)="emoji()">
       <tapiz-svg-icon
@@ -61,6 +66,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'draw'">
     <button
+      aria-label="Draw"
       class="toolbar-button"
       (click)="draw()">
       <tapiz-svg-icon
@@ -73,6 +79,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'cocomaterial'">
     <button
+      aria-label="Cocomaterial"
       class="toolbar-button"
       (click)="cocomaterial()">
       <tapiz-svg-icon
@@ -85,6 +92,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'image'">
     <button
+      aria-label="Image"
       class="toolbar-button"
       (click)="popupOpen('image')">
       <tapiz-svg-icon
@@ -131,6 +139,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'token'">
     <button
+      aria-label="Token"
       (click)="token()"
       class="toolbar-button">
       <mat-icon class="material-icons-outlined">circle</mat-icon>
@@ -141,6 +150,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'estimation'">
     <button
+      aria-label="Estimation"
       class="toolbar-button"
       (click)="estimation()">
       <mat-icon class="material-icons-outlined">style</mat-icon>
@@ -152,6 +162,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'text'">
     <button
+      aria-label="Text"
       class="toolbar-button"
       (click)="text()">
       <tapiz-svg-icon
@@ -165,6 +176,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'panel'">
     <button
+      aria-label="Panel"
       class="toolbar-button"
       (click)="panel()">
       <tapiz-svg-icon
@@ -178,6 +190,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'poll'">
     <button
+      aria-label="Poll"
       class="toolbar-button"
       (click)="poll()">
       <mat-icon class="material-icons-outlined">poll</mat-icon>
@@ -189,6 +202,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'templates'">
     <button
+      aria-label="Templates"
       class="toolbar-button"
       (click)="templateSelector()">
       <mat-icon class="material-icons-outlined">view_quilt</mat-icon>
@@ -200,6 +214,7 @@
     class="toolbar-button-container"
     [class.active]="popup() === 'search'">
     <button
+      aria-label="Search"
       class="toolbar-button"
       (click)="search()">
       <mat-icon>search</mat-icon>

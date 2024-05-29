@@ -50,6 +50,8 @@ import { NodeSpaceComponent } from '../node-space';
   imports: [DrawingDirective, MatIconModule, NodeSpaceComponent],
   host: {
     '[class.drawing]': 'drawing()',
+    '[class.voting]': 'voting()',
+    '[class.emoji-mode]': 'emojiMode()',
     '[class.active-layer]': 'activeLayer()',
   },
   providers: [HotkeysService],

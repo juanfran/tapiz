@@ -26,7 +26,7 @@
       @if (!isDemo) {
         <tapiz-cursors></tapiz-cursors>
       }
-      @defer {
+      @defer (on immediate) {
         <tapiz-nodes />
       }
     }

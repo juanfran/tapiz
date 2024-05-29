@@ -1,5 +1,6 @@
 <button
   class="home"
+  aria-label="Home"
   [routerLink]="['/']">
   <tapiz-svg-icon
     icon="home"
@@ -21,6 +22,8 @@
     }
     @if (!edit() && isAdmin()) {
       <button
+        title="Edit name"
+        aria-label="Edit name"
         class="edit-name"
         (click)="editName()">
         <tapiz-svg-icon
@@ -38,6 +41,7 @@
   @if (isAdmin() && !isDemo) {
     <button
       title="Settings"
+      aria-label="Settings"
       class="button-action"
       (click)="settings()">
       <mat-icon>settings</mat-icon>
@@ -45,23 +49,31 @@
   }
   <button
     title="Share"
+    aria-label="Share"
     class="button-action"
     (click)="share()">
     <mat-icon>share</mat-icon>
   </button>
-  <button (click)="export()">
+  <button
+    title="Download"
+    aria-label="Download"
+    (click)="export()">
     <tapiz-svg-icon
       icon="export"
       class="icon-svg"></tapiz-svg-icon>
   </button>
   <div class="change-mode-button-holder">
     <button
+      title="Edit mode"
+      aria-label="Edit mode"
       [class.active]="canvasMode() === 'editMode'"
       class="change-mode-button"
       (click)="changeCanvasMode('editMode')">
       Edit Mode
     </button>
     <button
+      title="Compose mode"
+      aria-label="Compose mode"
       [class.active]="canvasMode() === 'composeMode'"
       class="change-mode-button"
       (click)="changeCanvasMode('composeMode')">

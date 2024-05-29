@@ -48,7 +48,7 @@
     }
   }
 
-  &.voting {
+  &.voting, &.voting .title {
     cursor: crosshair;
   }
 }
