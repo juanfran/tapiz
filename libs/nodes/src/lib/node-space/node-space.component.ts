@@ -48,6 +48,9 @@ import { input } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [ResizeHandlerComponent, RotateHandlerComponent],
+  host: {
+    '[style.--cursor]': 'cursor()',
+  },
 })
 export class NodeSpaceComponent implements AfterViewInit {
   #destroyRef = inject(DestroyRef);
@@ -73,10 +76,9 @@ export class NodeSpaceComponent implements AfterViewInit {
   >();
 
   draggable = input(true);
-
   resize = input(false);
-
   rotate = input(false);
+  cursor = input('grab');
 
   @ViewChild('drag')
   drag!: ElementRef<HTMLElement>;

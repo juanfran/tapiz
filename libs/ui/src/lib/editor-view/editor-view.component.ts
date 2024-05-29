@@ -35,6 +35,7 @@ import { ListItem } from '@tiptap/extension-list-item';
 import { output } from '@angular/core';
 import { input } from '@angular/core';
 import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'tapiz-editor-view',
@@ -67,14 +68,11 @@ import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 })
 export class EditorViewComponent implements OnDestroy, AfterViewInit {
   #editorViewSharedStateService = inject(EditorViewSharedStateService);
-
   content = input('');
   node = input.required<TuNode>();
-  toolbar = input.required<boolean>();
   layoutToolbarOptions = input<boolean>(false);
-
+  toolbar = input<boolean>(false);
   contentChange = output<string>();
-
   focus = input<boolean>(false);
 
   @ViewChild('text') text!: ElementRef<HTMLElement>;
@@ -100,13 +98,15 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
       }
     });
 
-    effect(() => {
-      if (this.toolbar()) {
-        this.#showToolbar();
-      } else {
-        this.#hideToolbar();
-      }
-    });
+    toObservable(this.toolbar)
+      .pipe(takeUntilDestroyed())
+      .subscribe((value) => {
+        if (value) {
+          this.#showToolbar();
+        } else {
+          this.#hideToolbar();
+        }
+      });
   }
 
   ngAfterViewInit() {
@@ -180,12 +180,13 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
         onUpdate: ({ editor }) => {
           this.contentChange.emit(editor.getHTML());
         },
+        onCreate: ({ editor }) => {
+          if (this.focus()) {
+            editor.view.focus();
+          }
+        },
       }),
     );
-
-    if (this.focus()) {
-      this.#editor()?.view.focus();
-    }
 
     if (this.toolbar()) {
       this.#showToolbar();

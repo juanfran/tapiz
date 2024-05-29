@@ -11,7 +11,7 @@
 }
 
 .drag-outline {
-  cursor: grab;
+  cursor: var(--cursor);
   outline: 3px dotted var(--primary-color);
 }
 

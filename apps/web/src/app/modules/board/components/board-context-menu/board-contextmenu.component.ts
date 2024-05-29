@@ -19,6 +19,7 @@ import { CommentsStore } from '@tapiz/nodes/comments/comments.store';
 import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
 import Pickr from '@simonwep/pickr';
 import { colorPickerConfig } from '@tapiz/ui/color-picker/color-picker.config';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'tapiz-board-context-menu',
@@ -42,6 +43,7 @@ export class BoardContextMenuComponent implements OnInit {
   private commentsStore = inject(CommentsStore);
   private nodesActions = inject(NodesActions);
   private showUserVotes = this.store.selectSignal(pageFeature.selectVoting);
+  private selectFocusNodes = toSignal(this.boardFacade.selectFocusNodes$);
 
   public readonly boardMode = this.store.selectSignal(
     pageFeature.selectCanvasMode,
@@ -64,7 +66,7 @@ export class BoardContextMenuComponent implements OnInit {
           return [];
         }
 
-        const currentNodes = this.boardFacade.selectFocusNodes();
+        const currentNodes = this.selectFocusNodes();
 
         if (currentNodes?.length) {
           const actions: ContextMenuItem[] = [

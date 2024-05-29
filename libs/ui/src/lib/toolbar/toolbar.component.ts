@@ -2,13 +2,10 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef,
   afterNextRender,
   inject,
 } from '@angular/core';
 import type { Editor } from '@tiptap/core';
-import { Observable } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NodeToolbar } from './node-toolbar.model';
 import { TuNode } from '@tapiz/board-commons';
 import { input } from '@angular/core';
@@ -49,7 +46,6 @@ import { OptionLayoutComponent } from './options/layout/option-layout.component'
 export class ToolbarComponent {
   #cd = inject(ChangeDetectorRef);
 
-  #destroyRef = inject(DestroyRef);
   #toolbarEditorService = inject(ToolbarEditorService);
 
   editor = input.required<Editor>();
@@ -60,22 +56,11 @@ export class ToolbarComponent {
 
   layoutOptions = input(false);
 
-  closeMenus = input<Observable<unknown>>();
-
   constructor() {
     afterNextRender(() => {
       this.editor().on('transaction', () => {
         this.#cd.detectChanges();
       });
-
-      this.closeMenus()
-        ?.pipe(takeUntilDestroyed(this.#destroyRef))
-        .subscribe(() => {
-          if (document.activeElement) {
-            (document.activeElement as HTMLElement).blur();
-          }
-          document.body.focus();
-        });
 
       this.#toolbarEditorService.listenToEditor(this.editor);
     });

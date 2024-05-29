@@ -8,7 +8,6 @@ import {
   Injector,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { RxState } from '@rx-angular/state';
 import { Text, TuNode } from '@tapiz/board-commons';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -48,7 +47,7 @@ import { input } from '@angular/core';
   `,
   styleUrls: ['./text.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState, HotkeysService],
+  providers: [HotkeysService],
   standalone: true,
   imports: [
     NodeSpaceComponent,

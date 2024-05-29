@@ -40,7 +40,6 @@ interface Toolbar {
       <tapiz-toolbar
         [editor]="toolbar.view"
         [node]="toolbar.node()"
-        [closeMenus]="closeMenus"
         [layoutOptions]="toolbar.layoutOptions" />
     }
   `,
@@ -61,8 +60,6 @@ export class NodeToolbarComponent {
       height: number;
     }>[]
   >;
-
-  closeMenus = this.#store.select(pageFeature.selectZoom);
 
   toolbars = toSignal(
     combineLatest([

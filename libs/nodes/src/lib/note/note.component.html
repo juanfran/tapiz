@@ -2,7 +2,8 @@
   [node]="node()"
   [resize]="true"
   [rotate]="false"
-  [enabled]="!edit() && focus()">
+  [enabled]="!edit() && focus()"
+  [cursor]="cursor()">
   <div class="inner">
     <div class="top-info">
       @if (comments()) {

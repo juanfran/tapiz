@@ -109,13 +109,15 @@ export class OptionFontComponent {
       });
   }
 
-  isActiveFont(fontFamily: string) {
-    if (fontFamily === 'raleway') {
+  isActiveFont(fontOption: string) {
+    if (fontOption === 'raleway') {
       return false;
     }
 
+    const fontFamily = this.#getFontFamily(fontOption);
+
     return this.editor().isActive('textStyle', {
-      fontFamily: `var(--font-${fontFamily})`,
+      fontFamily,
     });
   }
 
@@ -126,7 +128,9 @@ export class OptionFontComponent {
       return;
     }
 
-    this.editor().chain().focus().setFontFamily(`var(--font-${value})`).run();
+    const font = this.#getFontFamily(value);
+
+    this.editor().chain().focus().setFontFamily(font).run();
   }
 
   changeColor(color: string | undefined) {
@@ -135,5 +139,9 @@ export class OptionFontComponent {
       .focus()
       .setColor(color ?? '#000')
       .run();
+  }
+
+  #getFontFamily(value: string) {
+    return getComputedStyle(document.body).getPropertyValue(`--font-${value}`);
   }
 }

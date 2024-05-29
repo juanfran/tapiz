@@ -69,11 +69,6 @@ textarea {
   &.drawing.active-layer canvas {
     pointer-events: all;
   }
-
-  &.voting,
-  &.emoji-mode {
-    cursor: crosshair;
-  }
 }
 
 .inner {

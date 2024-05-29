@@ -19,7 +19,6 @@ import {
 import { pageFeature } from '../modules/board/reducers/page.reducer';
 import { concatLatestFrom } from '@ngrx/effects';
 import * as R from 'remeda';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 const isBoardSettings = (it: TuNode): it is TuNode<BoardSettings> => {
   return it.type === 'settings';
@@ -124,10 +123,6 @@ export class BoardFacade {
     }),
     share(),
   );
-
-  public readonly selectFocusNodes = toSignal(this.selectFocusNodes$, {
-    initialValue: [],
-  });
 
   public undo() {
     return this.board.undo(false);

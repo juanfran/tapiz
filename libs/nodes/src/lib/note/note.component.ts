@@ -77,18 +77,19 @@ export class NoteComponent {
   }
 
   drawing = this.#drawingStore.drawing;
-  voting = hostBinding(
-    'class.voting',
-    computed(() => {
-      return this.#nodesStore.activeToolbarOption() === 'vote';
-    }),
-  );
-  emojiMode = hostBinding(
-    'class.emoji-mode',
-    computed(() => {
-      return this.#nodesStore.activeToolbarOption() === 'emoji';
-    }),
-  );
+  voting = computed(() => {
+    return this.#nodesStore.activeToolbarOption() === 'vote';
+  });
+  emojiMode = computed(() => {
+    return this.#nodesStore.activeToolbarOption() === 'emoji';
+  });
+  cursor = computed(() => {
+    if (this.drawing() || this.voting() || this.emojiMode()) {
+      return 'crosshair';
+    }
+
+    return 'grab';
+  });
 
   visible = hostBinding(
     'class.visible',
