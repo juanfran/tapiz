@@ -55,6 +55,6 @@ export class ColorPickerComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.#pickr?.destroy();
+    this.#pickr?.destroyAndRemove();
   }
 }
