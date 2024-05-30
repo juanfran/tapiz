@@ -1,15 +1,38 @@
 # Tapiz
 
-Tapiz is a web based collaborative board to help teams in their online meetings & projects.
+Tapiz is a web-based collaborative board designed to assist teams with their online meetings and projects.
 
 ![Demo](https://github.com/juanfran/tapiz/blob/main/resources/demo-tapiz-new.gif)
 
-## Install with Docker
+## Features
 
-You can get started with Tapiz locally or self-host it with docker.
+- Real-time collaboration with team members
+- Notes
+- Drawing
+- Polls
+- Templates
+- Estimations
+- And much more
 
-[Follow the step-by-step guide](./docs/INSTALL.md) on getting started with Docker.
+## Technologies Used
 
-## Current status
+Tapiz is built using the following technologies and libraries:
 
-This is an alpha release and not yet ready for production use. Please open an issue with feedback about the current features and any issues you encounter. Let us know if you have any suggestions for new features.
+- [Angular](https://angular.dev/)
+- [NgRx](https://ngrx.io/)
+- [Fastify](https://www.fastify.io/)
+- [Drizzle ORM](https://orm.drizzle.team/)
+- [PostgreSQL](https://www.postgresql.org/)
+- [TRPC](https://trpc.io/)
+- [Lucia](https://lucia-auth.com/)
+- [Nx](https://nx.dev/)
+
+## Installation with Docker
+
+You can get started with Tapiz locally or self-host it using Docker.
+
+[Follow the step-by-step guide](./docs/INSTALL.md) to get started with Docker.
+
+## Current Status
+
+This is an alpha release and is not yet ready for production use. Please open an issue to provide feedback on the current features and report any problems you encounter. We welcome suggestions for new features as well.
