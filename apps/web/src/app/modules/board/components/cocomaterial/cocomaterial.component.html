@@ -47,9 +47,10 @@
     @for (vector of vm.vectors; track vector) {
       <button
         (click)="selectVector(vector, $event)"
-        class="vector">
-        <img [attr.src]="vector.svg ?? vector.gif" />
-      </button>
+        class="vector"
+        [style.background-image]="
+          'url(' + (vector.svg ?? vector.gif) + ')'
+        "></button>
     }
   </div>
 }

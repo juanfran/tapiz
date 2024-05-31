@@ -20,8 +20,8 @@ mat-form-field {
   .vector {
     align-items: center;
     display: flex;
-    background-position: 50%;
     background-size: contain;
+    background-position: center;
     background-repeat: no-repeat;
     height: 150px;
     width: 100%;
@@ -33,9 +33,4 @@ mat-form-field {
       width: 100%;
     }
   }
-}
-
-img {
-  margin: 0;
-  pointer-events: none;
 }

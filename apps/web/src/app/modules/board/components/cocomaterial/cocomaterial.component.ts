@@ -23,7 +23,7 @@ import { map, startWith, take, withLatestFrom } from 'rxjs';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { PageActions } from '../../actions/page.actions';
 import { SvgBackgroundDirective } from '../../directives/svg-background.directive';
-import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { BoardActions } from '../../actions/board.actions';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -50,7 +50,7 @@ interface State {
     MatPaginatorModule,
     SafeHtmlPipe,
     SvgBackgroundDirective,
-    InfiniteScrollModule,
+    InfiniteScrollDirective,
   ],
   templateUrl: './cocomaterial.component.html',
   styleUrls: ['./cocomaterial.component.scss'],
