@@ -39,7 +39,7 @@ import { ConfigService } from '../../../../services/config.service';
     <div class="tokens">
       <h3 class="title">Tokens</h3>
       <div class="token-list">
-        @for (bColor of colors; track bColor.color) {
+        @for (bColor of colors; track bColor.backgroundColor) {
           <button
             type="button"
             class="token"
