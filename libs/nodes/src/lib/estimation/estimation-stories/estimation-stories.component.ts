@@ -28,7 +28,6 @@ export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
     MatFormFieldModule,
     MatIconModule,
   ],
-
   template: `
     <form
       (ngSubmit)="save()"
@@ -75,7 +74,6 @@ export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 
       <div class="actions">
         <button
-          [disabled]="!form.valid"
           class="submit"
           type="submit"
           mat-raised-button
@@ -99,19 +97,19 @@ export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EstimationStoriesComponent implements OnInit {
-  public estimationStories = input.required<EstimationStory[]>();
+  estimationStories = input.required<EstimationStory[]>();
 
-  public showCancel = input(false);
+  showCancel = input(false);
 
-  public addStory = output<EstimationStory[]>();
+  addStory = output<EstimationStory[]>();
 
-  public closeConfig = output<void>();
+  closeConfig = output<void>();
 
-  public get stories() {
+  get stories() {
     return (this.form.get('stories') as FormArray).controls as FormGroup[];
   }
 
-  public ngOnInit(): void {
+  ngOnInit(): void {
     if (!this.estimationStories().length) {
       this.add();
     } else {
@@ -121,17 +119,17 @@ export class EstimationStoriesComponent implements OnInit {
     }
   }
 
-  public form = new FormGroup({
+  form = new FormGroup({
     stories: new FormArray([]),
   });
 
-  public deleteStory(index: number) {
+  deleteStory(index: number) {
     const stories = this.form.get('stories') as FormArray;
 
     stories.removeAt(index);
   }
 
-  public add(
+  add(
     data: EstimationStory = {
       id: v4(),
       title: '',
@@ -154,7 +152,12 @@ export class EstimationStoriesComponent implements OnInit {
     );
   }
 
-  public save() {
+  save() {
+    if (!this.form.valid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
     const stories = this.form.value.stories as EstimationStory[];
 
     this.addStory.emit(stories);
