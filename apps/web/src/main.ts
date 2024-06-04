@@ -29,49 +29,45 @@ export function prefersReducedMotion(): boolean {
   return mediaQueryList.matches;
 }
 
-fetch(environment.config).then(async (response) => {
-  const config = await response.json();
+if (environment.production) {
+  enableProdMode();
+}
 
-  if (environment.production) {
-    enableProdMode();
-  }
-
-  bootstrapApplication(AppComponent, {
-    providers: [
-      { provide: APP_CONFIG, useValue: config },
-      importProvidersFrom(MatSnackBarModule),
-      provideAnimationsAsync(),
-      provideStore(
-        {
-          app: appFeature.reducer,
-        },
-        {
-          metaReducers: !environment.production ? [] : [],
-          runtimeChecks: {
-            strictStateImmutability: true,
-            strictActionImmutability: true,
-            strictStateSerializability: true,
-            strictActionSerializability: true,
-            strictActionTypeUniqueness: true,
-          },
-        },
-      ),
-      provideEffects(appEffects),
-      provideStoreDevtools({
-        logOnly: !isDevMode(),
-      }),
-      provideRouterStore(),
-
-      provideHttpClient(withInterceptors([authInterceptor])),
-      provideRouter(APP_ROUTES, withComponentInputBinding()),
-      provideZoneChangeDetection({
-        eventCoalescing: true,
-        runCoalescing: true,
-      }),
+bootstrapApplication(AppComponent, {
+  providers: [
+    { provide: APP_CONFIG, useValue: environment },
+    importProvidersFrom(MatSnackBarModule),
+    provideAnimationsAsync(),
+    provideStore(
       {
-        provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
-        useValue: { appearance: 'outline', subscriptSizing: 'dynamic' },
+        app: appFeature.reducer,
       },
-    ],
-  }).catch((err) => console.error(err));
-});
+      {
+        metaReducers: !environment.production ? [] : [],
+        runtimeChecks: {
+          strictStateImmutability: true,
+          strictActionImmutability: true,
+          strictStateSerializability: true,
+          strictActionSerializability: true,
+          strictActionTypeUniqueness: true,
+        },
+      },
+    ),
+    provideEffects(appEffects),
+    provideStoreDevtools({
+      logOnly: !isDevMode(),
+    }),
+    provideRouterStore(),
+
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideRouter(APP_ROUTES, withComponentInputBinding()),
+    provideZoneChangeDetection({
+      eventCoalescing: true,
+      runCoalescing: true,
+    }),
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: { appearance: 'outline', subscriptSizing: 'dynamic' },
+    },
+  ],
+}).catch((err) => console.error(err));

@@ -20,9 +20,22 @@ front.forEach((key) => {
   frontConfig[key] = process.env[key];
 });
 
+const prodConfig = JSON.stringify({
+  ...frontConfig,
+  production: true,
+});
+
+const devConfig = JSON.stringify({
+  ...frontConfig,
+  production: false,
+});
+
 writeFileSync(
-  './apps/web/src/assets/config.json',
-  JSON.stringify({
-    ...frontConfig,
-  }),
+  './apps/web/src/environments/environment.prod.ts',
+  `export const environment = ${prodConfig};`
+);
+
+writeFileSync(
+  './apps/web/src/environments/environment.ts',
+  `export const environment = ${devConfig};`
 );
