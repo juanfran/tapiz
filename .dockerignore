@@ -1,6 +1,9 @@
 .git
 .vscode
 .angular
+.nx
+.husky
+.github
 
 .env
 
@@ -8,7 +11,3 @@ npm-debug.log
 node_modules
 
 dist
-
-database-seed.sql
-
-apps/web/src/assets/config.json

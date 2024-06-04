@@ -34,6 +34,9 @@ services:
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile.web
+      args:
+        - API_URL=${API_URL}
+        - WS_URL=${WS_URL}
     depends_on:
       - api
     ports:
