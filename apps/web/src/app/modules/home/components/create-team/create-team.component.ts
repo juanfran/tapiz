@@ -30,19 +30,19 @@ import { MatInputModule } from '@angular/material/input';
 
       <div class="actions">
         <button
-          class="submit"
-          type="submit"
-          mat-raised-button
-          color="primary">
-          Save
-        </button>
-        <button
           (click)="cancel()"
           class="cancel"
           type="button"
           mat-raised-button
           color="warn">
           Cancel
+        </button>
+        <button
+          class="submit"
+          type="submit"
+          mat-raised-button
+          color="primary">
+          Save
         </button>
       </div>
     </form>

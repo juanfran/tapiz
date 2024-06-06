@@ -73,14 +73,6 @@ export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
       </button>
 
       <div class="actions">
-        <button
-          class="submit"
-          type="submit"
-          mat-raised-button
-          color="primary">
-          Save
-        </button>
-
         @if (showCancel()) {
           <button
             type="button"
@@ -90,6 +82,13 @@ export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
             Cancel
           </button>
         }
+        <button
+          class="submit"
+          type="submit"
+          mat-raised-button
+          color="primary">
+          Save
+        </button>
       </div>
     </form>
   `,
