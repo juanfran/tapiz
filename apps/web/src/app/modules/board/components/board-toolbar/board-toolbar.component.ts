@@ -99,6 +99,10 @@ export class BoardToolbarComponent {
         }),
       )
       .subscribe(() => {
+        if (this.popup() === 'draw') {
+          this.#drawingStore.actions.finishDrawing();
+        }
+
         this.popupOpen('');
       });
   }
