@@ -41,6 +41,7 @@ import { input } from '@angular/core';
           [toolbar]="edit()"
           [content]="node().content.text"
           [focus]="edit()"
+          [fontSize]="true"
           (contentChange)="newContent.set($event)" />
       }
     </tapiz-node-space>

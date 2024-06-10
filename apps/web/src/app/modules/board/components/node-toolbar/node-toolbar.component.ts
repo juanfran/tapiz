@@ -27,7 +27,10 @@ import type { Editor } from '@tiptap/core';
 interface Toolbar {
   id: string;
   view: Editor;
-  layoutOptions: boolean;
+  options: {
+    layoutOptions: boolean;
+    fontSize: boolean;
+  };
   node: Signal<TuNode<NodeToolbar, string>>;
   x: number;
   y: number;
@@ -40,7 +43,8 @@ interface Toolbar {
       <tapiz-toolbar
         [editor]="toolbar.view"
         [node]="toolbar.node()"
-        [layoutOptions]="toolbar.layoutOptions" />
+        [layoutOptions]="toolbar.options.layoutOptions"
+        [fontSize]="toolbar.options.fontSize" />
     }
   `,
   styleUrl: './node-toolbar.component.scss',
@@ -73,8 +77,8 @@ export class NodeToolbarComponent {
           nodes,
           zoom,
           toolbarNodes: Array.from(toolbarNodes).map(
-            ([id, { view, layoutOptions, node }]) => {
-              return { id, view, layoutOptions, node };
+            ([id, { view, options, node }]) => {
+              return { id, view, options, node };
             },
           ),
           position,
@@ -107,7 +111,7 @@ export class NodeToolbarComponent {
               id: node.id,
               view: toolbar.view,
               node: toolbar.node,
-              layoutOptions: toolbar.layoutOptions,
+              options: toolbar.options,
               x,
               y,
             } as Toolbar;

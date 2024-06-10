@@ -13,7 +13,10 @@ export class EditorViewSharedStateService {
       string,
       {
         view: Editor;
-        layoutOptions: boolean;
+        options: {
+          layoutOptions: boolean;
+          fontSize: boolean;
+        };
         node: Signal<TuNode<NodeToolbar>>;
       }
     >
@@ -22,12 +25,15 @@ export class EditorViewSharedStateService {
   addNode(
     node: Signal<TuNode<NodeToolbar>>,
     view: Editor,
-    layoutOptions = false,
+    options: {
+      layoutOptions: boolean;
+      fontSize: boolean;
+    },
   ) {
     this.#nodes.next(
       this.#nodes.getValue().set(node().id, {
         view,
-        layoutOptions,
+        options,
         node,
       }),
     );

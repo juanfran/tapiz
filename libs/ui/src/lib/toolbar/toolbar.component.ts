@@ -22,7 +22,9 @@ import { OptionLayoutComponent } from './options/layout/option-layout.component'
   template: `
     <tapiz-toolbar-option-format [editor]="editor()" />
     <tapiz-toolbar-option-font [editor]="editor()" />
-    <tapiz-toolbar-option-size [editor]="editor()" />
+    @if (fontSize()) {
+      <tapiz-toolbar-option-size [editor]="editor()" />
+    }
     <tapiz-toolbar-option-align [editor]="editor()" />
     <tapiz-toolbar-option-list [editor]="editor()" />
 
@@ -55,6 +57,7 @@ export class ToolbarComponent {
   y = input(0);
 
   layoutOptions = input(false);
+  fontSize = input(false);
 
   constructor() {
     afterNextRender(() => {

@@ -9,7 +9,6 @@ import {
   computed,
   signal,
   effect,
-  DestroyRef,
   viewChild,
   afterNextRender,
 } from '@angular/core';
@@ -25,7 +24,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { NodesStore } from '../services/nodes.store';
 import { CommentsStore } from '../comments/comments.store';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
-import { MultiDragService } from '@tapiz/cdk/services/multi-drag.service';
 import { hostBinding } from 'ngxtension/host-binding';
 import { NodeStore } from '../node/node.store';
 import { input } from '@angular/core';
@@ -40,6 +38,8 @@ import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
 import { NodeSpaceComponent } from '../node-space';
+import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
+import { EditorViewComponent } from '@tapiz/ui/editor-view';
 
 @Component({
   selector: 'tapiz-note',
@@ -47,7 +47,13 @@ import { NodeSpaceComponent } from '../node-space';
   styleUrls: ['./note.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [DrawingDirective, MatIconModule, NodeSpaceComponent],
+  imports: [
+    DrawingDirective,
+    MatIconModule,
+    NodeSpaceComponent,
+    SafeHtmlPipe,
+    EditorViewComponent,
+  ],
   host: {
     '[class.drawing]': 'drawing()',
     '[class.voting]': 'voting()',
@@ -58,8 +64,6 @@ import { NodeSpaceComponent } from '../node-space';
 })
 export class NoteComponent {
   #commentsStore = inject(CommentsStore);
-  #destroyRef = inject(DestroyRef);
-  #multiDragService = inject(MultiDragService);
   #el = inject(ElementRef);
   #store = inject(Store);
   #historyService = inject(HistoryService);
@@ -77,6 +81,8 @@ export class NoteComponent {
   @HostBinding('class.focus') get focusClass() {
     return this.focus();
   }
+
+  editorView = viewChild<EditorViewComponent>('editorView');
 
   drawing = this.#drawingStore.drawing;
   voting = computed(() => {
@@ -121,13 +127,11 @@ export class NoteComponent {
     return user?.name ?? '';
   });
 
-  textarea = viewChild<ElementRef>('textarea');
   textSize = computed(() => {
     return this.#noteHeight(
       this.node().content.width,
       this.node().content.height,
       this.node().content.text,
-      '"Open Sans", -apple-system, system-ui, sans-serif',
     );
   });
 
@@ -195,9 +199,11 @@ export class NoteComponent {
 
     effect(() => {
       this.#el.nativeElement.style.setProperty(
-        '--text-size',
+        '--text-editor-font-size',
         `${this.textSize()}px`,
       );
+
+      this.editorView()?.setTextSize(this.textSize());
     });
 
     effect(() => {
@@ -218,10 +224,6 @@ export class NoteComponent {
     );
 
     effect(() => {
-      this.textarea()?.nativeElement.focus();
-    });
-
-    effect(() => {
       const color = this.color();
 
       if (color) {
@@ -233,14 +235,6 @@ export class NoteComponent {
       if (this.focus() && !this.pasted()) {
         this.initEdit();
       }
-
-      this.#multiDragService.register({
-        id: this.node().id,
-        nodeType: 'note',
-        handler: this.nativeElement,
-        position: () => this.node().content.position,
-        destroyRef: this.#destroyRef,
-      });
     });
   }
 
@@ -344,28 +338,24 @@ export class NoteComponent {
     this.editText.set(this.node().content.text);
   }
 
-  setText(event: Event) {
-    if (event.target) {
-      const value = (event.target as HTMLTextAreaElement).value;
-
-      this.#store.dispatch(
-        BoardActions.batchNodeActions({
-          history: false,
-          actions: [
-            {
-              data: {
-                type: 'note',
-                id: this.node().id,
-                content: {
-                  text: value,
-                },
+  setText(value: string) {
+    this.#store.dispatch(
+      BoardActions.batchNodeActions({
+        history: false,
+        actions: [
+          {
+            data: {
+              type: 'note',
+              id: this.node().id,
+              content: {
+                text: value,
               },
-              op: 'patch',
             },
-          ],
-        }),
-      );
-    }
+            op: 'patch',
+          },
+        ],
+      }),
+    );
   }
 
   selectTextarea($event: FocusEvent) {
@@ -395,12 +385,7 @@ export class NoteComponent {
     this.#commentsStore.setParentNode(this.node().id);
   }
 
-  #noteHeight(
-    width: number,
-    height: number,
-    text: string,
-    font: string,
-  ): number {
+  #noteHeight(width: number, height: number, text: string): number {
     const container = document.querySelector('#size-calculator');
     const minFontSize = 1;
     const maxFontSize = 56;
@@ -423,18 +408,16 @@ export class NoteComponent {
     div.style.position = 'absolute';
     div.style.top = '-1000px';
     div.id = 'textDivCalculator';
-    textDiv.style.fontFamily = font;
-    textDiv.style.overflowWrap = 'break-word';
-    textDiv.style.whiteSpace = 'pre-wrap';
-    textDiv.style.lineHeight = '1.1';
+    textDiv.classList.add('rich-text', 'note-rich-text');
 
-    textDiv.innerText = text;
+    textDiv.innerHTML = text;
+
     div.appendChild(textDiv);
 
     container.appendChild(div);
 
     while (fontSize >= minFontSize) {
-      textDiv.style.fontSize = `${fontSize}px`;
+      div.style.setProperty('--text-editor-font-size', `${fontSize}px`);
 
       if (textDiv.clientHeight + padding / 2 < div.clientHeight) {
         break;
@@ -443,7 +426,9 @@ export class NoteComponent {
       fontSize -= increment;
     }
 
-    container.removeChild(div);
+    if (fontSize < minFontSize) {
+      return minFontSize;
+    }
 
     return fontSize - increment;
   }
@@ -545,8 +530,6 @@ export class NoteComponent {
       const emojis = this.node().content.emojis.filter((emoji) => {
         const x = (event.clientX - targetPosition.left) / zoom;
         const y = (event.clientY - targetPosition.top) / zoom;
-
-        console.log(event.clientX, emoji.position.x, width, height);
 
         return !(
           x >= emoji.position.x &&
