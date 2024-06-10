@@ -1,9 +1,3 @@
-.text {
-  overflow-wrap: break-word;
-  user-select: none;
-  white-space: pre-wrap;
-}
-
 .name {
   bottom: 0.5rem;
   color: var(--orange);
@@ -46,7 +40,7 @@ textarea {
     }
   }
 
-  &:not(.visible) .text {
+  &:not(.visible) .rich-text {
     font-family:
       "Redacted Script",
       -apple-system,
@@ -84,18 +78,16 @@ textarea {
   block-size: 100%;
 }
 
-.text {
+.rich-text {
   color: var(--custom-fg);
 }
 
-.text,
-textarea {
+.rich-text {
   font-family:
     "Open Sans",
     -apple-system,
     system-ui,
     sans-serif;
-  font-size: var(--text-size);
   overflow: hidden;
   line-height: 1.1;
 }

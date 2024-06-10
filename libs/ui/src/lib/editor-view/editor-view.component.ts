@@ -71,9 +71,11 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
   content = input('');
   node = input.required<TuNode>();
   layoutToolbarOptions = input<boolean>(false);
+  fontSize = input<boolean>(false);
   toolbar = input<boolean>(false);
   contentChange = output<string>();
   focus = input<boolean>(false);
+  customClass = input('');
 
   @ViewChild('text') text!: ElementRef<HTMLElement>;
   @ViewChild('editor') editor!: ElementRef<HTMLElement>;
@@ -126,6 +128,11 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
     this.#editor.set(
       new Editor({
         element: this.editor.nativeElement,
+        editorProps: {
+          attributes: {
+            class: this.customClass(),
+          },
+        },
         extensions: [
           ListItem,
           Text,
@@ -193,6 +200,13 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
     }
   }
 
+  setTextSize(size: number) {
+    this.#editor()?.view.dom.style.setProperty(
+      '--text-editor-font-size',
+      `${size}px`,
+    );
+  }
+
   ngOnDestroy(): void {
     this.#editor()?.destroy();
 
@@ -211,11 +225,10 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
       return;
     }
 
-    this.#editorViewSharedStateService.addNode(
-      this.node,
-      instance,
-      this.layoutToolbarOptions(),
-    );
+    this.#editorViewSharedStateService.addNode(this.node, instance, {
+      layoutOptions: this.layoutToolbarOptions(),
+      fontSize: this.fontSize(),
+    });
   }
 
   #hideToolbar() {

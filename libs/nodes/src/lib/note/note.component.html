@@ -24,16 +24,19 @@
       }
     </div>
     @if (edit()) {
-      <textarea
-        class="no-drag"
-        #textarea
-        (input)="setText($event)"
-        (focus)="selectTextarea($event)"
-        >{{ editText() }}</textarea
-      >
-    }
-    @if (!edit()) {
-      <div class="text">{{ node().content.text }}</div>
+      <tapiz-editor-view
+        [class.readonly]="!edit()"
+        #editorView="editorView"
+        [node]="node()"
+        [toolbar]="edit()"
+        [content]="initialText()"
+        [focus]="edit()"
+        customClass="note-rich-text"
+        (contentChange)="setText($event)" />
+    } @else {
+      <div
+        class="rich-text"
+        [innerHTML]="node().content.text | safeHtml"></div>
     }
     <div
       class="name"

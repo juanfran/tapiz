@@ -76,7 +76,7 @@ export class SearchOptionsComponent {
         return {
           id: note.id,
           type: 'note',
-          text: note.content.text,
+          text: this.cleanHtml(note.content.text),
         };
       });
     }),

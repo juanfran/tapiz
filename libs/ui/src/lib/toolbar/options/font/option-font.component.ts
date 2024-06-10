@@ -42,7 +42,6 @@ import { ColorPickerComponent } from '../../../color-picker';
         }
       </div>
     </ng-template>
-
     <label
       [title]="'Font Color'"
       for="color-picker">

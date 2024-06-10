@@ -54,6 +54,7 @@ import { input } from '@angular/core';
               [layoutToolbarOptions]="true"
               [content]="node().content.text"
               [focus]="edit()"
+              [fontSize]="true"
               (contentChange)="newContent.set($event)" />
           }
         </div>
