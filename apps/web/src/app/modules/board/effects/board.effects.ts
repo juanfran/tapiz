@@ -107,22 +107,21 @@ export class BoardEffects {
     },
   );
 
-  public pasteNodes$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(PageActions.pasteNodes),
-        tap((action) => {
-          const batchActions = this.nodesActions.bulkAdd(action.nodes);
+  public pasteNodes$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.pasteNodes),
+      map((action) => {
+        const batchActions = this.nodesActions.bulkAdd(action.nodes);
 
-          this.boardFacade.applyActions(batchActions, true);
-          this.wsService.send(batchActions);
-        }),
-      );
-    },
-    {
-      dispatch: false,
-    },
-  );
+        this.boardFacade.applyActions(batchActions, true);
+        this.wsService.send(batchActions);
+
+        return PageActions.pasteNodesSuccess({
+          nodes: batchActions,
+        });
+      }),
+    );
+  });
 
   public refetchBoard$ = createEffect(() => {
     return this.actions$.pipe(

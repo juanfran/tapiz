@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { NodeAdd, Point, TuNode } from '@tapiz/board-commons';
-import { v4 } from 'uuid';
 import { PageActions } from '../modules/board/actions/page.actions';
 import { selectLayer } from '../modules/board/selectors/page.selectors';
 
@@ -59,7 +58,7 @@ export class CopyPasteService {
           it.children = it.children.map((child) => {
             return {
               ...child,
-              id: v4(),
+              id: '',
             };
           });
         }
@@ -71,7 +70,7 @@ export class CopyPasteService {
           ...it.content,
           layer: this.layer(),
         },
-        id: v4(),
+        id: '',
       };
     });
 

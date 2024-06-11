@@ -52,6 +52,7 @@ export const PageActions = createActionGroup({
     'Ready to search': emptyProps(),
     'Go to node': props<{ nodeId: string }>(),
     'Paste nodes': props<{ nodes: NodeAdd['data'][]; history: boolean }>(),
+    'Paste nodes success': props<{ nodes: NodeAdd[] }>(),
     'Follow user': props<{ id: User['id'] }>(),
     'Go to user': props<{ id: User['id'] }>(),
     'Set board privacy': props<{ isPublic: boolean }>(),

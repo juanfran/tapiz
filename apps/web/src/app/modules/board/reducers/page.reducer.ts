@@ -308,7 +308,7 @@ const reducer = createReducer(
       searching: true,
     };
   }),
-  on(PageActions.pasteNodes, (state, { nodes }): PageState => {
+  on(PageActions.pasteNodesSuccess, (state, { nodes }): PageState => {
     state = {
       ...state,
     };
@@ -318,10 +318,10 @@ const reducer = createReducer(
     };
 
     nodes.forEach((it) => {
-      state.additionalContext[it.id] = 'pasted';
+      state.additionalContext[it.data.id] = 'pasted';
     });
 
-    state.focusId = nodes.map((it) => it.id);
+    state.focusId = nodes.map((it) => it.data.id);
 
     return state;
   }),
