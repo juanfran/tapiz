@@ -111,22 +111,37 @@ export class BoardToolbarComponent {
     this.popupOpen('text');
 
     this.toolbarSubscription = this.#zoneService
-      .select('text')
-      .subscribe(({ position }) => {
+      .selectArea('panel')
+      .subscribe((zone) => {
         this.popupOpen('');
-        const action = this.#nodesActions.add<Text>('text', {
+
+        if (!zone) {
+          return;
+        }
+
+        let { width, height } = zone.size;
+
+        if (width < 2) {
+          width = 300;
+        }
+
+        if (height < 2) {
+          height = 300;
+        }
+
+        const text: Text = {
           text: '<p></p>',
-          position,
-          layer: this.layer(),
-          width: 200,
-          height: 50,
+          position: zone.position,
+          width: width,
+          height: height,
+          layer: zone.layer,
           rotation: 0,
-        });
+        };
 
         this.#store.dispatch(
           BoardActions.batchNodeActions({
             history: true,
-            actions: [action],
+            actions: [this.#nodesActions.add('text', text)],
           }),
         );
       });

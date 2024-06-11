@@ -7,9 +7,9 @@ import {
   map,
   switchMap,
   takeUntil,
-  Subscription,
   finalize,
   Observable,
+  startWith,
 } from 'rxjs';
 import { PageActions } from '../../actions/page.actions';
 import { selectLayer } from '../../selectors/page.selectors';
@@ -31,7 +31,6 @@ interface SelectAction {
 export class ZoneService {
   #boardMoveService = inject(BoardMoveService);
   #store = inject(Store);
-  #subscriptions: Subscription | null = null;
   #areaSelector = signal<SelectAction | null>(null);
   #boardFacade = inject(BoardFacade);
 
@@ -128,6 +127,17 @@ export class ZoneService {
                   relativeRect:
                     zoneDom?.getBoundingClientRect() ?? new DOMRect(),
                 };
+              }),
+              startWith({
+                userId,
+                style,
+                position: {
+                  x: (-position.x + mouseDownEvent.clientX) / zoom,
+                  y: (-position.y + mouseDownEvent.clientY) / zoom,
+                },
+                size: { width: 0, height: 0 },
+                relativeRect: new DOMRect(),
+                layer,
               }),
             );
           }),
