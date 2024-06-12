@@ -14,6 +14,7 @@ import { newSubscriptorConnection } from './subscriptor.js';
 import { setServer } from './global.js';
 import { getAuthUrl, lucia, validateSession } from './auth.js';
 import { googleCallback } from './routers/auth-routes.js';
+import { fileUpload } from './file-upload.js';
 
 const fastify = Fastify({
   logger: false,
@@ -24,6 +25,8 @@ await fastify.register(import('@fastify/rate-limit'), {
   max: 150,
   timeWindow: '1 minute',
 });
+
+fastify.register(fileUpload);
 
 fastify.register(fastifyCookie, {
   hook: 'onRequest',

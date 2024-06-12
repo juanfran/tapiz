@@ -17,7 +17,6 @@ import {
   fromEvent,
   merge,
   Subject,
-  zip,
 } from 'rxjs';
 import {
   map,
@@ -61,13 +60,7 @@ import { HeaderComponent } from '../components/header/header.component';
 import { SearchOptionsComponent } from '../components/search-options/search-options.component';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { TitleComponent } from '../../../shared/title/title.component';
-import {
-  Drawing,
-  Image,
-  Point,
-  StateActions,
-  TuNode,
-} from '@tapiz/board-commons';
+import { Drawing, Point, StateActions, TuNode } from '@tapiz/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NodesComponent } from '../components/nodes/nodes.component';
@@ -92,6 +85,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { CommentsComponent } from '@tapiz/nodes/comments/comments.component';
 import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
 import { ConfigService } from '../../../services/config.service';
+import { FileUploadService } from '../../../services/file-upload.service';
 
 @UntilDestroy()
 @Component({
@@ -146,6 +140,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   private drawingStore = inject(DrawingStore);
   private nodesActions = inject(NodesActions);
   private configService = inject(ConfigService);
+  private fileUploadService = inject(FileUploadService);
   public readonly boardId$ = this.store.select(selectBoardId);
   public readonly nodes$ = this.boardFacade.getNodes();
 
@@ -519,39 +514,10 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     const droppedFiles = event.dataTransfer?.files;
 
     if (droppedFiles) {
-      zip(this.store.select(selectZoom), this.store.select(selectPosition))
-        .pipe(take(1))
-        .subscribe(([zoom, position]) => {
-          const files = Array.from(droppedFiles);
-
-          const images = files.filter((file) => file.type.startsWith('image'));
-
-          images.forEach((image) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              this.store.dispatch(
-                BoardActions.batchNodeActions({
-                  history: true,
-                  actions: [
-                    this.nodesActions.add<Image>('image', {
-                      url: reader.result as string,
-                      width: 0,
-                      height: 0,
-                      position: {
-                        x: (-position.x + event.clientX) / zoom,
-                        y: (-position.y + event.clientY) / zoom,
-                      },
-                      layer: this.layer(),
-                      rotation: 0,
-                    }),
-                  ],
-                }),
-              );
-            };
-
-            reader.readAsDataURL(image);
-          });
-        });
+      this.fileUploadService.addFilesToBoard(Array.from(droppedFiles), {
+        x: event.clientX,
+        y: event.clientY,
+      });
     }
   }
 

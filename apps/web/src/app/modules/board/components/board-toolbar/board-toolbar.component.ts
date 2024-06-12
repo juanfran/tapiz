@@ -16,7 +16,7 @@ import {
 } from '../../selectors/page.selectors';
 import { switchMap, take } from 'rxjs/operators';
 import { NotesService } from '../../services/notes.service';
-import { Observable, Subscription, zip } from 'rxjs';
+import { Subscription, zip } from 'rxjs';
 import 'emoji-picker-element';
 import { EmojiClickEvent, NativeEmoji } from 'emoji-picker-element/shared';
 import { MatDialog } from '@angular/material/dialog';
@@ -43,6 +43,9 @@ import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ZoneService } from '../zone/zone.service';
 import { AddImageComponent } from '../add-image/add-image.component';
+import { FileUploadService } from '../../../../services/file-upload.service';
+import { getImageDimensions } from '@tapiz/cdk/utils/image-dimensions';
+import { ConfigService } from '../../../../services/config.service';
 
 @Component({
   selector: 'tapiz-board-toolbar',
@@ -71,6 +74,8 @@ export class BoardToolbarComponent {
   #nodesActions = inject(NodesActions);
   #hotkeysService = inject(HotkeysService);
   #zoneService = inject(ZoneService);
+  #fileUploadService = inject(FileUploadService);
+  #configService = inject(ConfigService);
 
   canvasMode$ = this.#store.select(selectCanvasMode);
   toolbarSubscription?: Subscription;
@@ -438,25 +443,16 @@ export class BoardToolbarComponent {
     }
   }
 
-  newImage(url: string) {
-    const loadImageObserver = new Observable<{ width: number; height: number }>(
-      (observer) => {
-        const img = new Image();
-        img.onload = () => {
-          observer.next({
-            width: img.width,
-            height: img.height,
-          });
-          observer.complete();
-        };
-        img.src = url;
-      },
-    );
+  newImageFile(file: File) {
+    this.#fileUploadService.addFilesToBoard([file]);
+    this.popupOpen('');
+  }
 
+  newImageUrl(url: string) {
     zip(
       this.#store.select(selectZoom),
       this.#store.select(selectPosition),
-      loadImageObserver,
+      getImageDimensions(url),
     )
       .pipe(take(1))
       .subscribe(([zoom, position, imageSize]) => {
@@ -481,8 +477,8 @@ export class BoardToolbarComponent {
                     imageSize.height / 2,
                 },
                 rotation: 0,
-                width: 0,
-                height: 0,
+                width: imageSize.width,
+                height: imageSize.height,
               }),
             ],
           }),

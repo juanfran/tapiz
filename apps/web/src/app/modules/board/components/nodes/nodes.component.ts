@@ -17,6 +17,7 @@ import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 import { BoardTuNode, User } from '@tapiz/board-commons';
 import { pageFeature } from '../../reducers/page.reducer';
 import { AsyncPipe } from '@angular/common';
+import { ConfigService } from '../../../../services/config.service';
 
 @Component({
   selector: 'tapiz-nodes',
@@ -36,6 +37,7 @@ export class NodesComponent {
   #nodesStore = inject(NodesStore);
   #store = inject(Store);
   #hotkeysService = inject(HotkeysService);
+  #configService = inject(ConfigService);
 
   nodesComponents = viewChildren<NodeComponent>(NodeComponent);
 
@@ -100,6 +102,8 @@ export class NodesComponent {
     this.#nodesStore.activeToolbarOption = this.#store.selectSignal(
       pageFeature.selectPopupOpen,
     );
+
+    this.#nodesStore.apiUrl = this.#configService.config.API_URL;
   }
 
   #onDeletePress() {

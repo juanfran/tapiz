@@ -103,7 +103,9 @@
     @if (popup() === 'image') {
       <div class="toolbar-container">
         <div class="toolbar-popup image-popup">
-          <tapiz-add-image (newImage)="newImage($event)" />
+          <tapiz-add-image
+            (newImageUrl)="newImageUrl($event)"
+            (newImageFile)="newImageFile($event)" />
         </div>
       </div>
     }

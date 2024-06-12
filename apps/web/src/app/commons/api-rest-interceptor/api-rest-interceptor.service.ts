@@ -18,13 +18,22 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     (req.url.includes(configService.config.API_URL) ||
       req.url.includes(configService.config.WS_URL))
   ) {
-    const request = req.clone({
+    let request = req.clone({
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
         'correlation-id': subscriptionService.correlationId,
       }),
       withCredentials: true,
     });
+
+    if (req.url.includes('upload-file-board')) {
+      request = req.clone({
+        headers: new HttpHeaders({
+          'correlation-id': subscriptionService.correlationId,
+        }),
+        withCredentials: true,
+      });
+    }
 
     return next(request).pipe(
       catchError((err: HttpErrorResponse) => {

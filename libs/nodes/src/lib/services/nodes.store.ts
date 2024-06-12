@@ -54,6 +54,7 @@ export class NodesStore {
   emoji!: Signal<NativeEmoji | null>;
   userHighlight!: Signal<string | null>;
   userVotes!: Signal<string | null>;
+  apiUrl!: string;
 
   setFocusNode(event: { id: string; ctrlKey: boolean }) {
     this.#focusNode$.next(event);

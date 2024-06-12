@@ -4,10 +4,14 @@
   inline-size: 500px;
 }
 
-// .image-url-field {
-//   height: 30px;
-//   width: 500px;
-// }
+.upload-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: 100px;
+  border-block-end: 1px solid var(--gray-3);
+  margin-block-end: var(--spacing-4);
+}
 
 .add-image-row {
   display: flex;
