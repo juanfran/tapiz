@@ -528,3 +528,9 @@ export async function transferBoard(boardId: string, teamId: string | null) {
     .set({ teamId })
     .where(eq(schema.boards.id, boardId));
 }
+
+export async function addFileToBoard(boardId: string, name: string) {
+  return (
+    await db.insert(schema.boardFiles).values({ boardId, name }).returning()
+  ).at(0);
+}

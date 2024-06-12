@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  output,
+} from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -9,6 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { AutoFocusDirective } from '../../directives/autofocus.directive';
+import { ConfigService } from '../../../../services/config.service';
 
 @Component({
   selector: 'tapiz-add-image',
@@ -21,6 +27,25 @@ import { AutoFocusDirective } from '../../directives/autofocus.directive';
     AutoFocusDirective,
   ],
   template: `
+    @if (!isDemo) {
+      <div class="upload-image">
+        <button
+          color="primary"
+          type="button"
+          mat-raised-button
+          (click)="fileInput.click()">
+          Upload image
+        </button>
+
+        <input
+          #fileInput
+          hidden
+          type="file"
+          accept="image/*"
+          (change)="uploadImage($event)" />
+      </div>
+    }
+
     <form
       class="image-by-url-form"
       [formGroup]="imageForm"
@@ -48,6 +73,12 @@ import { AutoFocusDirective } from '../../directives/autofocus.directive';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddImageComponent {
+  #configService = inject(ConfigService);
+
+  get isDemo() {
+    return !!this.#configService.config.DEMO;
+  }
+
   imageForm = new FormGroup({
     url: new FormControl('', {
       validators: [Validators.required, Validators.pattern(/^https?:\/\/.+/)],
@@ -55,14 +86,24 @@ export class AddImageComponent {
     }),
   });
 
-  newImage = output<string>();
+  newImageUrl = output<string>();
+  newImageFile = output<File>();
 
   newImageByUrl() {
     const url = this.imageForm.value.url;
 
     if (this.imageForm.valid && url) {
-      this.newImage.emit(url);
+      this.newImageUrl.emit(url);
       this.imageForm.reset();
+    }
+  }
+
+  uploadImage(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+
+    if (file) {
+      this.newImageFile.emit(file);
     }
   }
 }

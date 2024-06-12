@@ -179,3 +179,12 @@ export const invitationRelations = relations(invitations, ({ one }) => ({
     references: [accounts.id],
   }),
 }));
+
+export const boardFiles = pgTable('board_files', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  boardId: uuid('board_id')
+    .notNull()
+    .references(() => boards.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 256 }).notNull(),
+  createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
+});

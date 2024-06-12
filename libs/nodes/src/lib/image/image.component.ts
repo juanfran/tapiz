@@ -4,6 +4,7 @@ import {
   ElementRef,
   inject,
   viewChild,
+  computed,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
@@ -12,6 +13,7 @@ import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { NodeSpaceComponent } from '../node-space';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { input } from '@angular/core';
+import { NodesStore } from '../services/nodes.store';
 
 @Component({
   selector: 'tapiz-image',
@@ -24,7 +26,7 @@ import { input } from '@angular/core';
       [resize]="true">
       <img
         #image
-        [attr.src]="node().content.url"
+        [attr.src]="url()"
         (load)="loadImage()" />
     </tapiz-node-space>
   `,
@@ -40,6 +42,7 @@ import { input } from '@angular/core';
 })
 export class ImageComponent {
   #store = inject(Store);
+  #nodesStore = inject(NodesStore);
 
   imageRef = viewChild.required<ElementRef>('image');
 
@@ -47,9 +50,18 @@ export class ImageComponent {
   pasted = input.required<boolean>();
   focus = input.required<boolean>();
 
+  url = computed(() => {
+    const url = this.node().content.url;
+
+    if (url.startsWith('data:')) {
+      return url;
+    }
+
+    return this.#nodesStore.apiUrl + '/uploads/' + url;
+  });
+
   loadImage() {
     const image = this.node();
-
     const id = image.id;
     const width = image.content.width;
     const height = image.content.height;
