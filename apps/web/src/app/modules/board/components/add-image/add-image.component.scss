@@ -1,0 +1,19 @@
+:host {
+  display: block;
+  padding: var(--spacing-4);
+  inline-size: 500px;
+}
+
+// .image-url-field {
+//   height: 30px;
+//   width: 500px;
+// }
+
+.add-image-row {
+  display: flex;
+  gap: var(--spacing-4);
+
+  input {
+    inline-size: 100%;
+  }
+}

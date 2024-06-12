@@ -16,19 +16,12 @@ import {
 } from '../../selectors/page.selectors';
 import { switchMap, take } from 'rxjs/operators';
 import { NotesService } from '../../services/notes.service';
-import {
-  FormControl,
-  FormGroup,
-  Validators,
-  ReactiveFormsModule,
-} from '@angular/forms';
-import { Subscription, zip } from 'rxjs';
+import { Observable, Subscription, zip } from 'rxjs';
 import 'emoji-picker-element';
 import { EmojiClickEvent, NativeEmoji } from 'emoji-picker-element/shared';
 import { MatDialog } from '@angular/material/dialog';
 import { CocomaterialComponent } from '../cocomaterial/cocomaterial.component';
 import { MatButtonModule } from '@angular/material/button';
-import { AutoFocusDirective } from '../../directives/autofocus.directive';
 import { MatInputModule } from '@angular/material/input';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { AsyncPipe } from '@angular/common';
@@ -49,6 +42,7 @@ import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ZoneService } from '../zone/zone.service';
+import { AddImageComponent } from '../add-image/add-image.component';
 
 @Component({
   selector: 'tapiz-board-toolbar',
@@ -58,14 +52,13 @@ import { ZoneService } from '../zone/zone.service';
   standalone: true,
   imports: [
     SvgIconComponent,
-    ReactiveFormsModule,
     MatInputModule,
-    AutoFocusDirective,
     MatButtonModule,
     AsyncPipe,
     MatIconModule,
     TokenSelectorComponent,
     TemplateSelectorComponent,
+    AddImageComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [HotkeysService],
@@ -80,9 +73,6 @@ export class BoardToolbarComponent {
   #zoneService = inject(ZoneService);
 
   canvasMode$ = this.#store.select(selectCanvasMode);
-  imageForm = new FormGroup({
-    url: new FormControl('', [Validators.required]),
-  });
   toolbarSubscription?: Subscription;
   layer = this.#store.selectSignal(selectLayer);
   popup = this.#store.selectSignal(selectPopupOpen);
@@ -158,6 +148,7 @@ export class BoardToolbarComponent {
     this.toolbarSubscription = this.#zoneService
       .select()
       .subscribe(({ userId, position }) => {
+        console.log('note position', position);
         this.#notesService.createNote(userId, position);
         this.popupOpen('');
       });
@@ -370,6 +361,15 @@ export class BoardToolbarComponent {
     );
   }
 
+  togglePopup(popup: string) {
+    if (this.popup() === popup) {
+      this.popupOpen('');
+      return;
+    }
+
+    this.popupOpen(popup);
+  }
+
   token() {
     if (this.popup() === 'token') {
       this.popupOpen('');
@@ -438,34 +438,57 @@ export class BoardToolbarComponent {
     }
   }
 
-  newImage() {
-    const url = this.imageForm.get('url')?.value;
-    if (this.imageForm.valid && url) {
-      zip(this.#store.select(selectZoom), this.#store.select(selectPosition))
-        .pipe(take(1))
-        .subscribe(([zoom, position]) => {
-          this.#store.dispatch(
-            BoardActions.batchNodeActions({
-              history: true,
-              actions: [
-                this.#nodesActions.add<Image>('image', {
-                  url,
-                  layer: this.layer(),
-                  position: {
-                    x: -position.x / zoom,
-                    y: -position.y / zoom,
-                  },
-                  rotation: 0,
-                  width: 0,
-                  height: 0,
-                }),
-              ],
-            }),
-          );
-        });
-    }
+  newImage(url: string) {
+    const loadImageObserver = new Observable<{ width: number; height: number }>(
+      (observer) => {
+        const img = new Image();
+        img.onload = () => {
+          observer.next({
+            width: img.width,
+            height: img.height,
+          });
+          observer.complete();
+        };
+        img.src = url;
+      },
+    );
 
-    this.imageForm.reset();
+    zip(
+      this.#store.select(selectZoom),
+      this.#store.select(selectPosition),
+      loadImageObserver,
+    )
+      .pipe(take(1))
+      .subscribe(([zoom, position, imageSize]) => {
+        const clientHeight = document.body.clientHeight;
+        const clientWidth = document.body.clientWidth;
+
+        this.#store.dispatch(
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [
+              this.#nodesActions.add<Image>('image', {
+                url,
+                layer: this.layer(),
+                position: {
+                  x:
+                    -position.x / zoom +
+                    clientWidth / 2 / zoom -
+                    imageSize.width / 2,
+                  y:
+                    -position.y / zoom +
+                    clientHeight / 2 / zoom -
+                    imageSize.height / 2,
+                },
+                rotation: 0,
+                width: 0,
+                height: 0,
+              }),
+            ],
+          }),
+        );
+      });
+
     this.popupOpen('');
   }
 

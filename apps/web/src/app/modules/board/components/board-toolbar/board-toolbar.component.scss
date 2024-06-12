@@ -128,19 +128,6 @@
     padding: 1rem;
   }
 
-  .popup-title {
-    bottom: 100%;
-    color: var(--primary-color);
-    font-family:
-      "Raleway",
-      -apple-system,
-      system-ui,
-      sans-serif;
-    font-size: 0.625rem;
-    position: absolute;
-    right: 0.25rem;
-  }
-
   label {
     font-family:
       "Raleway",
@@ -173,22 +160,6 @@
   justify-content: center;
 }
 
-.image-url-field {
-  height: 30px;
-  width: 500px;
-}
-
-.image-popup {
-  padding: 1rem;
-
-  .submit {
-    margin-right: 0.5rem;
-  }
-}
-
-.actions {
-  margin-top: 0.5rem;
-}
 
 .emojis {
   background: var(--primary-color-background);

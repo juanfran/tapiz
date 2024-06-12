@@ -94,7 +94,7 @@
     <button
       aria-label="Image"
       class="toolbar-button"
-      (click)="popupOpen('image')">
+      (click)="togglePopup('image')">
       <tapiz-svg-icon
         icon="picture"
         class="icon-svg"></tapiz-svg-icon>
@@ -103,34 +103,7 @@
     @if (popup() === 'image') {
       <div class="toolbar-container">
         <div class="toolbar-popup image-popup">
-          <form
-            [formGroup]="imageForm"
-            (submit)="newImage()">
-            <span class="popup-title">Image url</span>
-            <input
-              tapizAutofocus
-              formControlName="url"
-              autocomplete="off"
-              matInput
-              class="image-url-field" />
-            <div class="actions">
-              <button
-                (click)="popupOpen('')"
-                class="cancel"
-                type="text"
-                mat-raised-button
-                color="warn">
-                Cancel
-              </button>
-              <button
-                class="submit"
-                type="submit"
-                mat-raised-button
-                color="primary">
-                Submit
-              </button>
-            </div>
-          </form>
+          <tapiz-add-image (newImage)="newImage($event)" />
         </div>
       </div>
     }
