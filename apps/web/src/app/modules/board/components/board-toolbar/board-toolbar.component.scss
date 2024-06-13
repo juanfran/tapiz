@@ -30,6 +30,7 @@
   top: 0;
   transition: all 0.5s ease;
   z-index: var(--board-tools-layer);
+  white-space: nowrap;
 
   &::before {
     background: #1f1f1f;
@@ -72,8 +73,6 @@
       left: calc(100% + 0.5rem);
       opacity: 1;
       padding: 0 10px;
-      white-space: nowrap;
-      width: auto;
     }
   }
 
