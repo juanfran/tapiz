@@ -60,55 +60,49 @@ export const boardRouter = router({
         name: req.input.name,
       };
     }),
-  delete: boardAdminProcedure
-    .input(z.object({ boardId: z.string().uuid() }))
-    .mutation(async (req) => {
-      const owners = await db.board.getAllBoardAdmins(req.input.boardId);
+  delete: boardAdminProcedure.mutation(async (req) => {
+    const owners = await db.board.getAllBoardAdmins(req.input.boardId);
 
-      if (owners.includes(req.ctx.user.sub)) {
-        await db.board.deleteBoard(req.input.boardId);
+    if (owners.includes(req.ctx.user.sub)) {
+      await db.board.deleteBoard(req.input.boardId);
 
-        revokeBoardAccess(req.input.boardId);
-        triggerBoard(req.input.boardId, req.ctx.correlationId);
-
-        return {
-          success: true,
-        };
-      } else {
-        throw new TRPCError({ code: 'UNAUTHORIZED' });
-      }
-    }),
-  leave: boardMemberProcedure
-    .input(z.object({ boardId: z.string().uuid() }))
-    .mutation(async (req) => {
-      if (!req.ctx.userBoard) {
-        throw new TRPCError({ code: 'UNAUTHORIZED' });
-      }
-
-      await db.board.leaveBoard(req.ctx.user.sub, req.input.boardId);
+      revokeBoardAccess(req.input.boardId);
+      triggerBoard(req.input.boardId, req.ctx.correlationId);
 
       return {
         success: true,
       };
-    }),
-  duplicate: boardMemberProcedure
-    .input(z.object({ boardId: z.string().uuid() }))
-    .mutation(async (req) => {
-      const newBoard = await db.board.createBoard(
-        req.ctx.board.name,
-        req.ctx.user.sub,
-        req.ctx.board.board,
-        req.ctx.board.teamId,
-      );
+    } else {
+      throw new TRPCError({ code: 'UNAUTHORIZED' });
+    }
+  }),
+  leave: boardMemberProcedure.mutation(async (req) => {
+    if (!req.ctx.userBoard) {
+      throw new TRPCError({ code: 'UNAUTHORIZED' });
+    }
 
-      return {
-        id: newBoard.id,
-        name: req.ctx.board.name,
-        role: req.ctx.userBoard?.role ?? 'guest',
-        isAdmin: true,
-        createdAt: newBoard.createdAt,
-      } as BoardUser;
-    }),
+    await db.board.leaveBoard(req.ctx.user.sub, req.input.boardId);
+
+    return {
+      success: true,
+    };
+  }),
+  duplicate: boardMemberProcedure.mutation(async (req) => {
+    const newBoard = await db.board.createBoard(
+      req.ctx.board.name,
+      req.ctx.user.sub,
+      req.ctx.board.board,
+      req.ctx.board.teamId,
+    );
+
+    return {
+      id: newBoard.id,
+      name: req.ctx.board.name,
+      role: req.ctx.userBoard?.role ?? 'guest',
+      isAdmin: true,
+      createdAt: newBoard.createdAt,
+    } as BoardUser;
+  }),
   changePrivacy: boardAdminProcedure
     .input(
       z.object({
@@ -127,13 +121,11 @@ export const boardRouter = router({
         success: true,
       };
     }),
-  board: boardMemberProcedure
-    .input(z.object({ boardId: z.string().uuid() }))
-    .query(async (req) => {
-      db.board.updateLastAccessedAt(req.input.boardId, req.ctx.user.sub);
+  board: boardMemberProcedure.query(async (req) => {
+    db.board.updateLastAccessedAt(req.input.boardId, req.ctx.user.sub);
 
-      return req.ctx.userBoard;
-    }),
+    return req.ctx.userBoard;
+  }),
   teamBoards: teamMemberProcedure
     .input(z.object({ teamId: z.string().uuid() }))
     .query(async (req) => {

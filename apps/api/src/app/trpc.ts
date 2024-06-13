@@ -1,6 +1,7 @@
 import { TRPCError, initTRPC } from '@trpc/server';
 import type { AuthContext } from './auth.context.js';
 import db from './db/index.js';
+import { z } from 'zod';
 
 const t = initTRPC.create();
 
@@ -151,6 +152,8 @@ export const teamProcedure = protectedProcedure.use(teamCheck);
 export const teamAdminProcedure = teamProcedure.use(teamAdminCheck);
 export const teamMemberProcedure = teamProcedure.use(teamMemberCheck);
 
-export const boardProcedure = protectedProcedure.use(boardCheck);
+export const boardProcedure = protectedProcedure
+  .input(z.object({ boardId: z.string().uuid() }))
+  .use(boardCheck);
 export const boardAdminProcedure = boardProcedure.use(boardAdminCheck);
 export const boardMemberProcedure = boardProcedure.use(boardMemberCheck);

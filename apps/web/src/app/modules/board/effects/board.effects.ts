@@ -164,7 +164,7 @@ export class BoardEffects {
             });
           }),
           catchError((e) => {
-            if (e.data.httpStatus === 404) {
+            if (e.data.httpStatus !== 200) {
               return of(
                 PageActions.boardNotFound({
                   id: action.boardId,
