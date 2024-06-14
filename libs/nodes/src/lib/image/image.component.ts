@@ -57,6 +57,10 @@ export class ImageComponent {
       return url;
     }
 
+    if (this.#nodesStore.apiUrl.endsWith('/')) {
+      return this.#nodesStore.apiUrl + 'uploads/' + url;
+    }
+
     return this.#nodesStore.apiUrl + '/uploads/' + url;
   });
 
