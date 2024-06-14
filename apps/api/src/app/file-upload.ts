@@ -6,6 +6,7 @@ import { v4 } from 'uuid';
 import { createContext } from './auth.context.js';
 import { FastifyRequest } from 'fastify/types/request.js';
 import fastifyStatics from '@fastify/static';
+import { unlink } from 'node:fs';
 
 interface CheckAccessSuccess {
   success: true;
@@ -18,6 +19,8 @@ interface CheckAccessError {
 }
 
 type CheckAccessResult = CheckAccessSuccess | CheckAccessError;
+
+const uploadFolder = path.join(import.meta.dirname, '../../../uploads');
 
 async function checkAccess(
   req: FastifyRequest<{
@@ -54,7 +57,7 @@ async function checkAccess(
 export async function fileUpload(fastify: FastifyInstance) {
   fastify.register(multer.contentParser);
   fastify.register(fastifyStatics, {
-    root: path.join(import.meta.dirname, '../../../uploads'),
+    root: uploadFolder,
     prefix: '/uploads/',
   });
 
@@ -103,7 +106,7 @@ export async function fileUpload(fastify: FastifyInstance) {
         return { error: 'Error uploading file' };
       }
 
-      await db.board.addFileToBoard(req.body.boardId, data.fieldname);
+      await db.board.addFileToBoard(req.body.boardId, data.filename);
 
       return {
         url: data.filename,
@@ -122,4 +125,16 @@ export async function fileUpload(fastify: FastifyInstance) {
       return res.sendFile(req.params.filename);
     },
   });
+}
+
+export async function deleteBoardFiles(boardId: string) {
+  const files = await db.board.getBoardFiles(boardId);
+
+  console.log(files);
+
+  for (const file of files) {
+    unlink(path.join(uploadFolder + '/' + file.name), (err) => {
+      console.log(err);
+    });
+  }
 }

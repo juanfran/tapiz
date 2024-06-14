@@ -10,6 +10,7 @@ import type {
 import { SetNonNullable } from 'type-fest';
 import * as team from './team-db.js';
 import { getUserTeam } from './team-db.js';
+import { deleteBoardFiles } from '../file-upload.js';
 
 export async function getBoard(boardId: string) {
   const results = await db
@@ -406,7 +407,18 @@ export async function createBoard(
   return result[0];
 }
 
+export async function getBoardFiles(boardId: string) {
+  return db
+    .select({
+      name: schema.boardFiles.name,
+    })
+    .from(schema.boardFiles)
+    .where(eq(schema.boardFiles.boardId, boardId));
+}
+
 export async function deleteBoard(boardId: string) {
+  deleteBoardFiles(boardId);
+
   return db.delete(schema.boards).where(eq(schema.boards.id, boardId));
 }
 
