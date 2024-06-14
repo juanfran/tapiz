@@ -6,21 +6,21 @@
   class="container">
   @if (loadingBar()) {
     <div class="loading-bar">
-      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      <mat-progress-bar mode="indeterminate" />
     </div>
   }
 
   @defer {
-    <tapiz-header></tapiz-header>
+    <tapiz-header />
     @if (!isDemo) {
-      <tapiz-users></tapiz-users>
+      <tapiz-users />
     }
     <tapiz-board-toolbar />
     @if (drawing()) {
-      <tapiz-drawing-options></tapiz-drawing-options>
+      <tapiz-drawing-options />
     }
     @if (search()) {
-      <tapiz-search-options></tapiz-search-options>
+      <tapiz-search-options />
     }
   }
   <div
@@ -39,9 +39,12 @@
   </div>
   @defer {
     @if (!isDemo) {
-      <tapiz-follow-user></tapiz-follow-user>
-      <tapiz-stop-highlight></tapiz-stop-highlight>
+      <tapiz-follow-user />
+      <tapiz-stop-highlight />
+    } @else {
+      <tapiz-demo-intro />
     }
+
     <tapiz-context-menu />
     <tapiz-board-context-menu />
     <tapiz-node-toolbar />
@@ -51,7 +54,7 @@
 
 @if (!loaded()) {
   <div class="loading-bar">
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <mat-progress-bar mode="indeterminate" />
   </div>
 }
 

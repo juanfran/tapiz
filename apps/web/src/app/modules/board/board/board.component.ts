@@ -86,6 +86,7 @@ import { CommentsComponent } from '@tapiz/nodes/comments/comments.component';
 import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
 import { ConfigService } from '../../../services/config.service';
 import { FileUploadService } from '../../../services/file-upload.service';
+import { DemoIntroComponent } from '../components/demo-intro/demo-intro.component';
 
 @UntilDestroy()
 @Component({
@@ -116,6 +117,7 @@ import { FileUploadService } from '../../../services/file-upload.service';
     BoardContextMenuComponent,
     NodeToolbarComponent,
     CommentsComponent,
+    DemoIntroComponent,
   ],
   hostDirectives: [CopyPasteDirective],
   host: {

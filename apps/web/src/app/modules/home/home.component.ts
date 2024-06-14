@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RxState } from '@rx-angular/state';
 import { UserTeam, UserInvitation } from '@tapiz/board-commons';
 import { MatMenuModule } from '@angular/material/menu';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { HomeActions } from './+state/home.actions';
 import { RouterModule } from '@angular/router';
@@ -39,6 +39,7 @@ interface State {
     MatDialogModule,
     MatButtonModule,
     MatBadgeModule,
+    NgOptimizedImage,
   ],
 })
 export class HomeComponent {
