@@ -22,7 +22,7 @@ import {
   rotateDEG,
   translate,
 } from 'transformation-matrix';
-import { concatLatestFrom } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
 import { filterNil } from 'ngxtension/filter-nil';
 
 @Injectable({

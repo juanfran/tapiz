@@ -17,7 +17,7 @@ import {
   share,
 } from 'rxjs';
 import { pageFeature } from '../modules/board/reducers/page.reducer';
-import { concatLatestFrom } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
 import * as R from 'remeda';
 
 const isBoardSettings = (it: TuNode): it is TuNode<BoardSettings> => {

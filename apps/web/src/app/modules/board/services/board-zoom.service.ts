@@ -15,7 +15,7 @@ import {
   selectPosition,
   selectZoom,
 } from '../selectors/page.selectors';
-import { concatLatestFrom } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
 
 @Injectable({
   providedIn: 'root',

@@ -1,7 +1,8 @@
 import { BoardApiService } from '../../../../services/board-api.service';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
 import { exhaustMap, filter, map, mergeMap, switchMap, tap } from 'rxjs';
 import { HomeActions } from '../home.actions';
 import { AuthService } from '../../../../services/auth.service';

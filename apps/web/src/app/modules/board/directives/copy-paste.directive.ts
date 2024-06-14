@@ -1,7 +1,7 @@
 import { Directive, HostListener, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { take } from 'rxjs';
-import { concatLatestFrom } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
 import { selectFocusId } from '../selectors/page.selectors';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { CopyPasteService } from '../../../services/copy-paste.service';

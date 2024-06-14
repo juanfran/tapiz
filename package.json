@@ -46,13 +46,13 @@
     "@floating-ui/dom": "^1.6.5",
     "@lucia-auth/adapter-postgresql": "^3.1.2",
     "@ngneat/until-destroy": "^10.0.0",
-    "@ngrx/effects": "17.2.0",
-    "@ngrx/router-store": "17.2.0",
-    "@ngrx/signals": "^17.2.0",
-    "@ngrx/store": "17.2.0",
-    "@ngrx/store-devtools": "17.2.0",
+    "@ngrx/effects": "18.0.0",
+    "@ngrx/router-store": "18.0.0",
+    "@ngrx/signals": "^18.0.0-rc.1",
+    "@ngrx/store": "18.0.0",
+    "@ngrx/store-devtools": "18.0.0",
     "@nx/angular": "19.1.0",
-    "@rx-angular/state": "^17.2.0",
+    "@rx-angular/state": "^18.0.0",
     "@simonwep/pickr": "^1.9.0",
     "@tiptap/core": "2.3.1",
     "@tiptap/extension-bold": "2.3.1",
@@ -157,27 +157,5 @@
   "optionalDependencies": {
     "bufferutil": "^4.0.8",
     "utf-8-validate": "^6.0.3"
-  },
-  "overrides": {
-    "@ngrx/signals": {
-      "@angular/core": "^18.0.0"
-    },
-    "@ngrx/store-devtools": {
-      "@angular/core": "^18.0.0"
-    },
-    "@ngrx/effects": {
-      "@angular/core": "^18.0.0"
-    },
-    "@ngrx/router-store": {
-      "@angular/common": "^18.0.0",
-      "@angular/core": "^18.0.0",
-      "@angular/router": "^18.0.0"
-    },
-    "@ngrx/store": {
-      "@angular/core": "^18.0.0"
-    },
-    "@rx-angular/state": {
-      "@angular/core": "^18.0.0"
-    }
   }
 }

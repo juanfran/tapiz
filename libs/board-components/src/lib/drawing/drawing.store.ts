@@ -6,7 +6,7 @@ import { rxActions } from '@rx-angular/state/actions';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { Action } from '@ngrx/store';
-import { concatLatestFrom } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
 
 interface DrawingState {
   undoable: { action: Action; inverseAction: Action }[];

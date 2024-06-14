@@ -11,7 +11,7 @@ import {
   throttleTime,
   withLatestFrom,
 } from 'rxjs';
-import { concatLatestFrom } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
 import { Point, TuNode } from '@tapiz/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
