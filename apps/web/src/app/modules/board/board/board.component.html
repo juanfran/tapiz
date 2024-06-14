@@ -4,6 +4,12 @@
   [class.compose-mode]="(canvasMode$ | async) === 'composeMode'"
   [class.loading]="!loaded()"
   class="container">
+  @if (loadingBar()) {
+    <div class="loading-bar">
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </div>
+  }
+
   @defer {
     <tapiz-header></tapiz-header>
     @if (!isDemo) {

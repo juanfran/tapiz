@@ -9,6 +9,7 @@ import { BoardActions } from '../modules/board/actions/board.actions';
 import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
 import { Image } from '@tapiz/board-commons';
 import { selectLayer } from '../modules/board/selectors/page.selectors';
+import { PageActions } from '../modules/board/actions/page.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -50,6 +51,8 @@ export class FileUploadService {
       y: number;
     },
   ): void {
+    this.#store.dispatch(PageActions.setLoadingBar({ loadingBar: true }));
+
     zip(
       this.#store.select(pageFeature.selectZoom),
       this.#store.select(pageFeature.selectPosition),
@@ -85,6 +88,10 @@ export class FileUploadService {
                   y: document.body.clientHeight / 2,
                 };
               }
+
+              this.#store.dispatch(
+                PageActions.setLoadingBar({ loadingBar: false }),
+              );
 
               this.#store.dispatch(
                 BoardActions.batchNodeActions({

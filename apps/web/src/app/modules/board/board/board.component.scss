@@ -80,9 +80,19 @@ tapiz-header {
   }
 }
 
-.container.loading {
-  display: none;
+.container {
+  &.loading {
+    display: none;
+  }
+
+  .loading-bar {
+    inline-size: 100%;
+    position: fixed;
+    inset-block-start: 42px;
+  }
 }
+
+
 
 
 #size-calculator {

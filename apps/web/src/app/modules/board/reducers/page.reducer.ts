@@ -41,6 +41,7 @@ export interface PageState {
   additionalContext: Record<string, unknown>;
   follow: string;
   isPublic: boolean;
+  loadingBar: boolean;
 }
 
 const initialPageState: PageState = {
@@ -77,6 +78,7 @@ const initialPageState: PageState = {
   additionalContext: {},
   follow: '',
   isPublic: false,
+  loadingBar: false,
 };
 
 const reducer = createReducer(
@@ -381,6 +383,12 @@ const reducer = createReducer(
     return {
       ...state,
       nodeSelection: enabled,
+    };
+  }),
+  on(PageActions.setLoadingBar, (state, { loadingBar }): PageState => {
+    return {
+      ...state,
+      loadingBar,
     };
   }),
 );

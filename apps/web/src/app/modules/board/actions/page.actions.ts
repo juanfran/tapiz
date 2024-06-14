@@ -65,5 +65,6 @@ export const PageActions = createActionGroup({
     'Select nodes': props<{ ids: string[] }>(),
     'Set board cursor': props<{ cursor: string }>(),
     'Set node selection': props<{ enabled: boolean }>(),
+    'Set loading bar': props<{ loadingBar: boolean }>(),
   },
 });

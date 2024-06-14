@@ -157,6 +157,9 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly nodeSelectionEnabled = this.store.selectSignal(
     pageFeature.selectNodeSelection,
   );
+  public readonly loadingBar = this.store.selectSignal(
+    pageFeature.selectLoadingBar,
+  );
 
   @ViewChild('workLayer', { read: ElementRef }) public workLayer!: ElementRef;
 
