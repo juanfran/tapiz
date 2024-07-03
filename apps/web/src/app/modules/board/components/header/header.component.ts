@@ -57,6 +57,7 @@ export class HeaderComponent {
   canvasMode = this.#store.selectSignal(selectCanvasMode);
   name = this.#store.selectSignal(pageFeature.selectName);
   isAdmin = this.#store.selectSignal(selectIsAdmin);
+  boardId = this.#store.selectSignal(pageFeature.selectBoardId);
 
   get isDemo() {
     return !!this.#configService.config.DEMO;
@@ -89,7 +90,11 @@ export class HeaderComponent {
   export() {
     this.#exportService.getExportFile().then(
       (url) => {
-        window.location.href = url;
+        const fileLink = document.createElement('a');
+
+        fileLink.href = url;
+        fileLink.download = `${this.boardId()}.json`;
+        fileLink.click();
       },
       () => {
         console.error('export error');

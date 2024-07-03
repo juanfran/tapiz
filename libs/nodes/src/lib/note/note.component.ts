@@ -15,6 +15,7 @@ import {
 import { Store } from '@ngrx/store';
 import { Drawing, Note, Panel, TuNode, isPanel } from '@tapiz/board-commons';
 import { lighter } from '@tapiz/cdk/utils/colors';
+import { insideNode } from '@tapiz/cdk/utils/inside-node';
 import {
   DrawingDirective,
   DrawingStore,
@@ -27,13 +28,6 @@ import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { hostBinding } from 'ngxtension/host-binding';
 import { NodeStore } from '../node/node.store';
 import { input } from '@angular/core';
-import {
-  applyToPoint,
-  compose,
-  inverse,
-  rotateDEG,
-  translate,
-} from 'transformation-matrix';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
@@ -293,31 +287,14 @@ export class NoteComponent {
     const width = this.node().content.width;
     const height = this.node().content.height;
 
-    const insidePanel = panels.find((panel) => {
-      const transform = compose(
-        translate(panel.content.position.x, panel.content.position.y),
-        rotateDEG(panel.content.rotation),
-      );
-
-      const inverseTransform = inverse(transform);
-
-      const corners = [
-        { x: position.x, y: position.y },
-        { x: position.x + width, y: position.y },
-        { x: position.x, y: position.y + height },
-        { x: position.x + width, y: position.y + height },
-      ];
-
-      return corners.every((corner) => {
-        const transformedCorner = applyToPoint(inverseTransform, corner);
-        return (
-          transformedCorner.x >= 0 &&
-          transformedCorner.x <= panel.content.width &&
-          transformedCorner.y >= 0 &&
-          transformedCorner.y <= panel.content.height
-        );
-      });
-    });
+    const insidePanel = insideNode<Panel>(
+      {
+        position,
+        width,
+        height,
+      },
+      panels,
+    );
 
     if (insidePanel?.content.color) {
       return insidePanel?.content.color;
