@@ -458,6 +458,25 @@ export const acceptInvitation$ = createEffect(
   },
 );
 
+export const acceptInvitationSuccess$ = createEffect(
+  (actions$ = inject(Actions), router = inject(Router)) => {
+    return actions$.pipe(
+      ofType(HomeActions.acceptInvitationSuccess),
+      tap((team) => {
+        if (!team.invitation.team) {
+          return;
+        }
+
+        void router.navigate(['/team', team.invitation.team.id]);
+      }),
+    );
+  },
+  {
+    functional: true,
+    dispatch: false,
+  },
+);
+
 export const rejectInvitation$ = createEffect(
   (actions$ = inject(Actions), userApiService = inject(UserApiService)) => {
     return actions$.pipe(
