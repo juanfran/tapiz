@@ -1,12 +1,19 @@
 import { drizzle, PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
 import { setPsqlClient } from '../auth.js';
 
 export let db: PostgresJsDatabase;
 export let psqlClient: postgres.Sql;
 
-function waitDb() {
+function getConnection() {
   const connection = `postgres://${process.env['POSTGRES_USER']}:${process.env['POSTGRES_PASSWORD']}@${process.env['POSTGRES_HOST']}:${process.env['POSTGRES_PORT_HOST']}/${process.env['POSTGRES_DB']}`;
+
+  return connection;
+}
+
+function initDbClient() {
+  const connection = getConnection();
 
   psqlClient = postgres(connection);
 
@@ -17,10 +24,20 @@ function waitDb() {
   return db;
 }
 
+async function dbMigrate() {
+  const connection = getConnection();
+  const migrationClient = postgres(connection, { max: 1 });
+
+  await migrate(drizzle(migrationClient), { migrationsFolder: 'drizzle' });
+
+  return;
+}
+
 export async function startDB() {
   const run = async () => {
     try {
-      waitDb();
+      dbMigrate();
+      initDbClient();
     } catch (e) {
       console.log('Error connecting to DB, retrying in 2 seconds');
       setTimeout(run, 2000);
