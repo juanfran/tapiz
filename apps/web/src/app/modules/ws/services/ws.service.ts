@@ -5,7 +5,6 @@ import { optimize } from '@tapiz/board-commons';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../shared/notification/notification.service';
 import { ConfigService } from '../../../services/config.service';
-
 @Injectable({
   providedIn: 'root',
 })
@@ -16,6 +15,8 @@ export class WsService {
   #pool: unknown[] = [];
   #notificationService = inject(NotificationService);
   #router = inject(Router);
+  #keepAliveTimeoutId?: ReturnType<typeof setTimeout>;
+
   constructor() {
     this.#poolLoop();
   }
@@ -63,16 +64,20 @@ export class WsService {
 
         this.#router.navigate(['/']);
       }
+
+      clearTimeout(this.#keepAliveTimeoutId);
     });
+
+    this.#keepAlive();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   send(obj: unknown[]) {
     this.#pool.push(...obj);
   }
 
   close() {
     this.#ws?.close(1000);
+    clearTimeout(this.#keepAliveTimeoutId);
   }
 
   #poolLoop() {
@@ -87,5 +92,14 @@ export class WsService {
     setTimeout(() => {
       this.#poolLoop();
     }, 1000 / 15);
+  }
+
+  #keepAlive() {
+    if (this.#ws && this.#ws.readyState === WebSocket.OPEN) {
+      this.#ws.send('ping');
+    }
+    this.#keepAliveTimeoutId = setTimeout(() => {
+      this.#keepAlive();
+    }, 10000);
   }
 }

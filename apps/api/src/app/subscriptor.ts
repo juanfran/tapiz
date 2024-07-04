@@ -12,9 +12,16 @@ export function Subscriptor(connection: WebSocket, connectionUserId: string) {
   let teamIds = new Set<string>();
   let clientId = '';
 
-  connection.on('message', (data: string) => {
+  connection.on('message', (rawData) => {
+    const data = rawData.toString();
+
+    if (data === 'ping') {
+      connection.send('pong');
+      return;
+    }
+
     try {
-      const message = JSON.parse(data);
+      const message = JSON.parse(data.toString());
       const messageResult = msgSchema.parse(message);
 
       const { type, ids } = messageResult;

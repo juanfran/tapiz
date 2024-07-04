@@ -32,7 +32,14 @@ export class Client {
     this.ws.on('close', this.close.bind(this));
   }
 
-  public incomingMessage(messageString: string) {
+  public incomingMessage(rawData: Buffer) {
+    const messageString = rawData.toString();
+
+    if (messageString === 'ping') {
+      this.ws.send('pong');
+      return;
+    }
+
     let messages = this.parseMessage(messageString);
 
     if (!Array.isArray(messages)) {

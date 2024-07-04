@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { ConfigService } from './config.service';
 import { BehaviorSubject, Subject, filter, map } from 'rxjs';
 import { v4 } from 'uuid';
-import { equals } from 'remeda';
+import { isDeepEqual } from 'remeda';
 
 @Injectable({
   providedIn: 'root',
@@ -15,6 +15,7 @@ export class SubscriptionService {
   #teamIds = new BehaviorSubject<string[]>([]);
   #teamSubject = new Subject<string>();
   #userSubject = new Subject<void>();
+  #keepAliveTimeoutId?: ReturnType<typeof setTimeout>;
   correlationId = v4();
 
   public listen() {
@@ -89,10 +90,13 @@ export class SubscriptionService {
         console.error(e);
       }
     });
+
+    this.#keepAlive();
   }
 
   close() {
     this.#ws?.close();
+    clearTimeout(this.#keepAliveTimeoutId);
   }
 
   boardMessages() {
@@ -108,7 +112,7 @@ export class SubscriptionService {
   }
 
   watchBoardIds(ids: string[]) {
-    if (!equals(ids, this.#boardIds.getValue())) {
+    if (!isDeepEqual(ids, this.#boardIds.getValue())) {
       this.#boardIds.next(ids);
     }
 
@@ -118,10 +122,19 @@ export class SubscriptionService {
   watchTeamIds(ids: string[]) {
     const currentIds = this.#teamIds.getValue();
 
-    if (!equals(ids, currentIds)) {
+    if (!isDeepEqual(ids, currentIds)) {
       this.#teamIds.next(ids);
     }
 
     return this.teamMessages();
+  }
+
+  #keepAlive() {
+    if (this.#ws && this.#ws.readyState === WebSocket.OPEN) {
+      this.#ws.send('ping');
+    }
+    this.#keepAliveTimeoutId = setTimeout(() => {
+      this.#keepAlive();
+    }, 10000);
   }
 }
