@@ -48,4 +48,4 @@ apps/api/src/app/sessions/*
 .nx/cache
 
 uploads/*
-!uplaods/.gitkeep
+!uploads/.gitkeep
