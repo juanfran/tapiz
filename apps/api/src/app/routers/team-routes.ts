@@ -149,6 +149,7 @@ export const teamRouter = router({
       await db.team.deleteMember(req.input.teamId, req.input.memberId);
 
       checkTeamBoardsAccess(req.input.teamId);
+      triggerTeam(req.input.teamId, req.ctx.correlationId);
 
       return {
         success: true,

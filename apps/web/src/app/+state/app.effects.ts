@@ -43,11 +43,16 @@ export const unauthorized$ = createEffect(
       ofType(AppActions.unauthorized),
       concatLatestFrom(() => store.select(appFeature.selectUserId)),
       mergeMap((userId) => {
-        if (userId && router.url.includes('/board')) {
-          router.navigate(['/404']);
+        if (userId) {
+          if (router.url.includes('/board')) {
+            router.navigate(['/404']);
+          } else {
+            router.navigate(['/']);
+          }
 
           return EMPTY;
         }
+
         return of(AppActions.logout());
       }),
     );
