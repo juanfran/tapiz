@@ -76,6 +76,10 @@ export class SubscriptionService {
     });
 
     this.#ws.addEventListener('message', (event) => {
+      if (event.data === 'pong') {
+        return;
+      }
+
       try {
         const message = JSON.parse(event.data);
 
@@ -135,6 +139,6 @@ export class SubscriptionService {
     }
     this.#keepAliveTimeoutId = setTimeout(() => {
       this.#keepAlive();
-    }, 10000);
+    }, 30000);
   }
 }

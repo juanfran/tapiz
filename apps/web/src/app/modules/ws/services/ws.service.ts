@@ -33,6 +33,10 @@ export class WsService {
     });
 
     this.#ws.addEventListener('message', (event) => {
+      if (event.data === 'pong') {
+        return;
+      }
+
       const data = JSON.parse(event.data) as {
         [key in PropertyKey]: unknown;
       }[];
@@ -100,6 +104,6 @@ export class WsService {
     }
     this.#keepAliveTimeoutId = setTimeout(() => {
       this.#keepAlive();
-    }, 10000);
+    }, 30000);
   }
 }
