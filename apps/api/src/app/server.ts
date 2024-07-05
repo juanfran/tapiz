@@ -1,11 +1,10 @@
 import type { StateActions, TuNode, UserNode } from '@tapiz/board-commons';
-import type { WebSocket } from 'ws';
+import type { Socket, Server as WsServer } from 'socket.io';
 import { Client } from './client.js';
 import db from './db/index.js';
 
 import { syncNodeBox } from '@tapiz/sync-node-box';
 import { Subscription, throttleTime } from 'rxjs';
-import { FastifyRequest } from 'fastify';
 import { lucia, validateSession } from './auth.js';
 
 export class Server {
@@ -13,15 +12,10 @@ export class Server {
   private state: Record<string, ReturnType<typeof syncNodeBox>> = {};
   private stateSubscriptions: Record<string, Subscription> = {};
 
-  public clientClose(client: Client) {
-    this.clients = this.clients.filter((it) => it !== client);
-  }
+  constructor(public io: WsServer) {}
 
-  public async connection(wss: WebSocket, req: FastifyRequest) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cookies = (req as any).cookies;
+  public async connection(socket: Socket, cookies: Record<string, string>) {
     const sessionId = cookies[lucia.sessionCookieName];
-
     if (sessionId) {
       const { session, user } = await validateSession(sessionId);
 
@@ -30,33 +24,29 @@ export class Server {
 
         if (dbUser) {
           const client = new Client(
-            wss,
+            socket,
             this,
             dbUser.name,
             dbUser.id,
             dbUser.email,
           );
+
           this.clients.push(client);
+
+          socket.on('disconnect', () => {
+            this.clientClose(client);
+          });
+
           return;
         }
       }
     }
 
-    wss.close();
+    socket.disconnect();
   }
 
-  public connectedBoardClients(boardId: string) {
-    return this.clients.filter((it) => it.boardId === boardId);
-  }
-
-  public sendAll(boardId: string, message: unknown, exclude: Client[] = []) {
-    const boardClients = this.connectedBoardClients(boardId);
-
-    boardClients.forEach((client) => {
-      if (!exclude.includes(client)) {
-        client.send(message);
-      }
-    });
+  public clientClose(client: Client) {
+    this.clients = this.clients.filter((it) => it !== client);
   }
 
   public async createBoard(boardId: string) {

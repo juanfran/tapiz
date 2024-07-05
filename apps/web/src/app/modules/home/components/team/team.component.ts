@@ -11,6 +11,7 @@ import {
   map,
   merge,
   switchMap,
+  withLatestFrom,
 } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -26,7 +27,7 @@ import { TitleComponent } from '../../../../shared/title/title.component';
 import { filterNil } from 'ngxtension/filter-nil';
 import { SubscriptionService } from '../../../../services/subscription.service';
 import { input } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 
 interface State {
   team: UserTeam;
@@ -129,7 +130,10 @@ export class TeamComponent {
 
     merge(
       this.state.select('boards').pipe(
-        switchMap((boards) => {
+        withLatestFrom(this.store.select(homeFeature.selectLoadingBoards)),
+        filter(([, loading]) => !loading),
+        switchMap(([boards]) => {
+          console.log(boards);
           return this.subscriptionService.watchBoardIds(
             boards.map((it) => it.id),
           );
@@ -139,7 +143,7 @@ export class TeamComponent {
         .teamMessages()
         .pipe(filter((it) => it === this.id())),
     )
-      .pipe(debounceTime(100))
+      .pipe(debounceTime(100), takeUntilDestroyed())
       .subscribe(() => {
         this.store.dispatch(HomeActions.fetchTeamBoards({ teamId: this.id() }));
       });

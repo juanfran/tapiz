@@ -5,12 +5,12 @@ import { Router } from '@angular/router';
 import { ConfigService } from '../../services/config.service';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { throwError } from 'rxjs';
-import { SubscriptionService } from '../../services/subscription.service';
+import { WsService } from '../../modules/ws/services/ws.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const configService = inject(ConfigService);
   const router = inject(Router);
-  const subscriptionService = inject(SubscriptionService);
+  const wsService = inject(WsService);
 
   // update api-config.service.ts
   if (
@@ -21,7 +21,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     let request = req.clone({
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
-        'correlation-id': subscriptionService.correlationId,
+        'correlation-id': wsService.correlationId,
       }),
       withCredentials: true,
     });
@@ -29,7 +29,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     if (req.url.includes('upload-file-board')) {
       request = req.clone({
         headers: new HttpHeaders({
-          'correlation-id': subscriptionService.correlationId,
+          'correlation-id': wsService.correlationId,
         }),
         withCredentials: true,
       });

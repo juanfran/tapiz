@@ -22,7 +22,6 @@ import {
   map,
   withLatestFrom,
   filter,
-  first,
   take,
   throttleTime,
   pairwise,
@@ -35,7 +34,6 @@ import { PageActions } from '../actions/page.actions';
 import {
   selectCanvasMode,
   selectMoveEnabled,
-  selectOpen,
   selectPosition,
   selectBoardId,
   selectUserId,
@@ -534,52 +532,20 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     return !!this.configService.config.DEMO;
   }
 
-  public connect(): Promise<void> {
-    if (this.isDemo) {
-      const boardId = this.route.snapshot.paramMap.get('id');
+  public connect() {
+    const boardId = this.route.snapshot.paramMap.get('id');
 
-      if (boardId) {
-        this.store.dispatch(PageActions.joinBoard({ boardId }));
-        return Promise.resolve();
-      }
-      return Promise.reject();
+    if (boardId) {
+      this.store.dispatch(PageActions.joinBoard({ boardId }));
+      this.initBoard();
     }
-
-    this.wsService.listen();
-
-    return new Promise((resolve, reject) => {
-      this.store
-        .select(selectOpen)
-        .pipe(
-          filter((open) => open),
-          first(),
-        )
-        .subscribe(() => {
-          const boardId = this.route.snapshot.paramMap.get('id');
-
-          if (boardId) {
-            this.store.dispatch(PageActions.joinBoard({ boardId }));
-            resolve();
-          } else {
-            reject();
-          }
-        });
-    });
   }
 
   public ngAfterViewInit() {
-    this.connect().then(
-      () => {
-        this.initBoard();
-      },
-      () => {
-        console.error('connection failed');
-      },
-    );
+    this.connect();
   }
 
   public ngOnDestroy() {
     this.store.dispatch(PageActions.closeBoard());
-    this.wsService.close();
   }
 }

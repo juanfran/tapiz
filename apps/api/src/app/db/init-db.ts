@@ -28,7 +28,14 @@ async function dbMigrate() {
   const connection = getConnection();
   const migrationClient = postgres(connection, { max: 1 });
 
-  await migrate(drizzle(migrationClient), { migrationsFolder: 'drizzle' });
+  let migrationsFolder = 'drizzle';
+
+  // npm run test:e2e
+  if (process.cwd().includes('apps/api')) {
+    migrationsFolder = '../../drizzle';
+  }
+
+  await migrate(drizzle(migrationClient), { migrationsFolder });
 
   return;
 }

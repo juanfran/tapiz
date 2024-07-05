@@ -1,3 +1,5 @@
+import { type Server } from 'socket.io';
+
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
@@ -13,6 +15,12 @@ declare global {
       GOOGLE_CLIENT_ID: string;
       GOOGLE_CLIENT_SECRET: string;
     }
+  }
+}
+
+declare module 'fastify' {
+  interface FastifyInstance {
+    io: Server;
   }
 }
 

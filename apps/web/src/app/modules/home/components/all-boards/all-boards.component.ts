@@ -11,7 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { CreateBoardComponent } from '../create-board/create-board.component';
 import { debounceTime, filter, switchMap } from 'rxjs';
 import { SubscriptionService } from '../../../../services/subscription.service';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'tapiz-all-boards',
@@ -63,6 +63,7 @@ export class AllBoardsComponent {
             boards.map((it) => it.id),
           );
         }),
+        takeUntilDestroyed(),
       )
       .subscribe(() => {
         this.store.dispatch(HomeActions.fetchAllBoards());

@@ -5,7 +5,7 @@ import {
   UserNode,
 } from '@tapiz/board-commons';
 import { Server } from './server.js';
-import type { WebSocket } from 'ws';
+import { type Socket } from 'socket.io';
 import db from './db/index.js';
 import { validation } from './validation.js';
 import { z } from 'zod';
@@ -13,35 +13,64 @@ import { z } from 'zod';
 
 // init();
 
+const subSchema = z.object({
+  type: z.union([z.literal('board'), z.literal('team')]),
+  ids: z.string().array(),
+});
+
 export class Client {
-  public boardId?: string;
-  public teamId?: string;
-  public isAdmin!: boolean;
-  public sendTimeout?: ReturnType<typeof setTimeout>;
-  public pendingMsgs: unknown[] = [];
+  boardId?: string;
+  teamId?: string;
+  isAdmin!: boolean;
+  sendTimeout?: ReturnType<typeof setTimeout>;
+  pendingMsgs: unknown[] = [];
+  correlationId = '';
   private privateId = '';
 
   constructor(
-    public ws: WebSocket,
+    public socket: Socket,
     private server: Server,
     public username: string,
     public id: string,
     public email: string,
   ) {
-    this.ws.on('message', this.incomingMessage.bind(this));
-    this.ws.on('close', this.close.bind(this));
+    this.socket.on('board', this.boardIncomingMessage.bind(this));
+    this.socket.on('sub', this.subscriptorMessage.bind(this));
+    this.socket.on('correlationId', (correlationId: string) => {
+      this.correlationId = correlationId;
+    });
+    this.socket.on('disconnect', this.close.bind(this));
   }
 
-  public incomingMessage(rawData: Buffer) {
-    const messageString = rawData.toString();
+  categorySubscription(prefix: string, ids: string[]) {
+    const toUnsubscribe = Array.from(this.socket.rooms).filter((it) => {
+      return it.startsWith(prefix) && !ids.includes(`${prefix}${it}`);
+    });
 
-    if (messageString === 'ping') {
-      this.ws.send('pong');
-      return;
+    toUnsubscribe.forEach((it) => {
+      this.socket.leave(it);
+    });
+
+    this.socket.join(ids.map((it) => `${prefix}${it}`));
+  }
+
+  subscriptorMessage(message: { type: 'board' | 'team'; ids: string[] }) {
+    try {
+      const messageResult = subSchema.parse(message);
+
+      const { type, ids } = messageResult;
+
+      if (type === 'board') {
+        this.categorySubscription('sub:board:', ids);
+      } else if (type === 'team') {
+        this.categorySubscription('sub:team:', ids);
+      }
+    } catch {
+      this.socket.disconnect();
     }
+  }
 
-    let messages = this.parseMessage(messageString);
-
+  boardIncomingMessage(messages: string | unknown[]) {
     if (!Array.isArray(messages)) {
       messages = [messages];
     }
@@ -52,7 +81,7 @@ export class Client {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public processMsg(messages: any) {
+  processMsg(messages: any) {
     //saveMsg(message);
 
     if (messages.length) {
@@ -64,7 +93,7 @@ export class Client {
     }
   }
 
-  public async parseStateActionMessage(messages: StateActions[]) {
+  async parseStateActionMessage(messages: StateActions[]) {
     if (!this.boardId) {
       return;
     }
@@ -93,27 +122,32 @@ export class Client {
     }
   }
 
-  public noAccessClose() {
-    this.ws.close(1008, 'Unauthorized');
+  unauthorizedClose(disconnect = true) {
+    this.socket.emit('error', 'unauthorized');
+
+    if (disconnect) {
+      console.log('unauthorized close');
+      this.socket.disconnect();
+    }
   }
 
-  public async refreshAccess() {
+  async refreshAccess() {
     if (!this.boardId) {
-      this.noAccessClose();
+      this.unauthorizedClose(false);
       return;
     }
 
     const haveAccess = await db.board.haveAccess(this.boardId, this.id);
 
     if (!haveAccess) {
-      this.noAccessClose();
+      this.unauthorizedClose(false);
       return;
     }
 
     this.refreshIsAdmin();
   }
 
-  public close() {
+  close() {
     if (!this.boardId) {
       return;
     }
@@ -149,12 +183,12 @@ export class Client {
       op: 'patch',
     };
 
-    this.server.sendAll(this.boardId, this.getSetStateAction([action]), []);
-    this.server.clientClose(this);
-    const boardId = this.boardId;
+    this.sendAll(this.boardId, this.getSetStateAction([action]));
+    const roomSize =
+      this.server.io.of('/').adapter.rooms.get(this.boardId)?.size || 0;
 
-    if (!this.server.connectedBoardClients(boardId).length) {
-      this.server.emptyBoard(boardId);
+    if (!roomSize) {
+      this.server.emptyBoard(this.boardId);
     }
   }
 
@@ -164,21 +198,21 @@ export class Client {
     }
 
     this.updateStateWithActions(actions);
-    this.server.sendAll(this.boardId, this.getSetStateAction(actions), [this]);
+    this.sendAll(this.boardId, this.getSetStateAction(actions));
   }
 
   private async join(message: { boardId: string }) {
     const result = z.string().uuid().safeParse(message.boardId);
 
     if (!result.success) {
-      this.noAccessClose();
+      this.unauthorizedClose();
       return;
     }
 
     const haveAccess = await db.board.haveAccess(message.boardId, this.id);
 
     if (!haveAccess) {
-      this.noAccessClose();
+      this.unauthorizedClose();
       return;
     }
 
@@ -237,9 +271,9 @@ export class Client {
         op: isAlreadyInBoard ? 'patch' : 'add',
       };
 
-      this.server.sendAll(this.boardId, this.getSetStateAction([userAction]), [
-        this,
-      ]);
+      this.sendAll(this.boardId, this.getSetStateAction([userAction]));
+
+      this.socket.join(this.boardId);
 
       this.send(this.getSetStateAction(initStateActions));
     } catch (e) {
@@ -247,7 +281,7 @@ export class Client {
     }
   }
 
-  public async refreshIsAdmin() {
+  async refreshIsAdmin() {
     if (!this.boardId) {
       return;
     }
@@ -257,14 +291,14 @@ export class Client {
     this.isAdmin = admins.includes(this.id);
   }
 
-  public getSetStateAction(action: StateActions[]) {
+  getSetStateAction(action: StateActions[]) {
     return {
       type: BoardCommonActions.setState,
       data: action,
     };
   }
 
-  public send(msg: unknown) {
+  send(msg: unknown) {
     this.pendingMsgs.push(msg);
 
     if (this.sendTimeout) {
@@ -272,20 +306,14 @@ export class Client {
     }
 
     this.sendTimeout = setTimeout(() => {
-      this.ws.send(JSON.stringify(this.pendingMsgs));
+      this.socket.emit('board', this.pendingMsgs);
       this.pendingMsgs = [];
       this.sendTimeout = undefined;
     }, 50);
   }
 
-  private parseMessage(messageString: string) {
-    try {
-      return JSON.parse(messageString);
-    } catch (e) {
-      console.error(e);
-
-      return [];
-    }
+  sendAll(boardId: string, message: unknown) {
+    this.socket.to(boardId).emit('board', [message]);
   }
 
   private updateStateWithActions(actions: StateActions[]) {

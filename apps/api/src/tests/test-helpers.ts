@@ -3,7 +3,7 @@ import { randEmail, randFirstName, randUuid } from '@ngneat/falso';
 import { appRouter } from '../app/routers/index.js';
 import Fastify from 'fastify';
 import fastifyCookie from '@fastify/cookie';
-import ws from '@fastify/websocket';
+import fastifyIO from 'fastify-socket.io';
 import { initTRPC } from '@trpc/server';
 import { Server } from '../app/server.js';
 import db from '../app/db/index.js';
@@ -75,15 +75,10 @@ export const initTestServer = (port: number): Promise<Server> => {
       parseOptions: {},
     });
 
-    fastify.register(ws);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fastify.register(fastifyIO as any);
 
-    const server = new Server();
-
-    fastify.register(async function (fastify) {
-      fastify.get('/events', { websocket: true }, (connection, req) => {
-        server.connection(connection, req);
-      });
-    });
+    const server = new Server(fastify.io);
 
     fastify.listen({ port }, (err) => {
       if (err) throw err;
