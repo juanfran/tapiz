@@ -30,6 +30,6 @@ export function revokeBoardAccess(boardId: string) {
   server?.clients
     .filter((client) => client.boardId === boardId)
     .forEach(async (client) => {
-      client.noAccessClose();
+      client.unauthorizedClose(false);
     });
 }

@@ -3,16 +3,16 @@ import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 // eslint-disable-next-line @nx/enforce-module-boundaries
 import type { AppRouter } from '@tapiz/api/app/trpc-type';
 import { ConfigService } from './config.service';
-import { SubscriptionService } from './subscription.service';
 import { Store } from '@ngrx/store';
 import { AppActions } from '../+state/app.actions';
+import { WsService } from '../modules/ws/services/ws.service';
 @Injectable({
   providedIn: 'root',
 })
 export class APIConfigService {
   #configService = inject(ConfigService);
   #store = inject(Store);
-  #subscriptionService = inject(SubscriptionService);
+  #wsService = inject(WsService);
   #config = createTRPCProxyClient<AppRouter>({
     links: [
       httpBatchLink({
@@ -24,7 +24,7 @@ export class APIConfigService {
             credentials: 'include',
             headers: {
               'Content-Type': 'application/json',
-              'correlation-id': this.#subscriptionService.correlationId,
+              'correlation-id': this.#wsService.correlationId,
             },
           });
 

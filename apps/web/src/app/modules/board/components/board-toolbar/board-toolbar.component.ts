@@ -153,7 +153,6 @@ export class BoardToolbarComponent {
     this.toolbarSubscription = this.#zoneService
       .select()
       .subscribe(({ userId, position }) => {
-        console.log('note position', position);
         this.#notesService.createNote(userId, position);
         this.popupOpen('');
       });

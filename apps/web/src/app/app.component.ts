@@ -2,10 +2,10 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import './app-node';
-import { SubscriptionService } from './services/subscription.service';
 import { Store } from '@ngrx/store';
 
 import { appFeature } from './+state/app.reducer';
+import { WsService } from './modules/ws/services/ws.service';
 
 @Component({
   selector: 'tapiz-root',
@@ -17,15 +17,15 @@ import { appFeature } from './+state/app.reducer';
 })
 export class AppComponent {
   #authService = inject(AuthService);
-  #subscriptionService = inject(SubscriptionService);
+  #wsService = inject(WsService);
   #store = inject(Store);
 
   constructor() {
     this.#store.select(appFeature.selectUserId).subscribe((userId) => {
       if (userId) {
-        this.#subscriptionService.listen();
+        this.#wsService.listen();
       } else {
-        this.#subscriptionService.close();
+        this.#wsService.close();
       }
     });
 

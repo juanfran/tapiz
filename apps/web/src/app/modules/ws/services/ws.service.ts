@@ -5,20 +5,31 @@ import { optimize } from '@tapiz/board-commons';
 import { Router } from '@angular/router';
 import { NotificationService } from '../../../shared/notification/notification.service';
 import { ConfigService } from '../../../services/config.service';
+
+import { io } from 'socket.io-client';
+import { v4 } from 'uuid';
+
 @Injectable({
   providedIn: 'root',
 })
 export class WsService {
   #store = inject(Store);
   #configService = inject(ConfigService);
-  #ws?: WebSocket;
   #pool: unknown[] = [];
   #notificationService = inject(NotificationService);
   #router = inject(Router);
-  #keepAliveTimeoutId?: ReturnType<typeof setTimeout>;
+  #socket = io(this.#configService.config.WS_URL, {
+    autoConnect: false,
+    withCredentials: true,
+  });
+  correlationId = v4();
 
   constructor() {
     this.#poolLoop();
+  }
+
+  getSocket() {
+    return this.#socket;
   }
 
   listen() {
@@ -26,31 +37,46 @@ export class WsService {
       return;
     }
 
-    this.#ws = new WebSocket(`${this.#configService.config.WS_URL}/events`);
+    this.#socket.connect();
 
-    this.#ws.addEventListener('open', () => {
+    this.#socket.on('connect', () => {
       this.#store.dispatch(wsOpen());
+      this.#socket.emit('correlationId', this.correlationId);
     });
 
-    this.#ws.addEventListener('message', (event) => {
-      if (event.data === 'pong') {
+    this.#socket.on('disconnect', (reason) => {
+      if (reason.includes('client')) {
         return;
       }
 
-      const data = JSON.parse(event.data) as {
-        [key in PropertyKey]: unknown;
-      }[];
-
-      data.forEach((message) => {
-        if (message['type']) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          this.#store.dispatch(message as any);
-        }
+      this.#notificationService.open({
+        message: 'Connection lost',
+        action: 'Close',
+        type: 'error',
+        durantion: 3000,
       });
+
+      this.#router.navigate(['/']);
     });
 
-    this.#ws.addEventListener('close', (e) => {
-      if (e.code === 1008) {
+    this.#socket.on(
+      'board',
+      (
+        response: {
+          [key in PropertyKey]: unknown;
+        }[],
+      ) => {
+        response.forEach((message) => {
+          if (message['type']) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            this.#store.dispatch(message as any);
+          }
+        });
+      },
+    );
+
+    this.#socket.on('error', (type: string) => {
+      if (type === 'unauthorized') {
         this.#notificationService.open({
           message: 'Unauthorized',
           action: 'Close',
@@ -58,21 +84,8 @@ export class WsService {
         });
 
         this.#router.navigate(['/']);
-      } else if (e.code !== 1000 && e.code !== 1001) {
-        this.#notificationService.open({
-          message: 'Connection lost',
-          action: 'Close',
-          type: 'error',
-          durantion: 3000,
-        });
-
-        this.#router.navigate(['/']);
       }
-
-      clearTimeout(this.#keepAliveTimeoutId);
     });
-
-    this.#keepAlive();
   }
 
   send(obj: unknown[]) {
@@ -80,15 +93,14 @@ export class WsService {
   }
 
   close() {
-    this.#ws?.close(1000);
-    clearTimeout(this.#keepAliveTimeoutId);
+    this.#socket.close();
   }
 
   #poolLoop() {
     if (this.#pool.length) {
       const optimizedPool = optimize(this.#pool);
-      if (this.#ws?.readyState === 1) {
-        this.#ws.send(JSON.stringify(optimizedPool));
+      if (this.#socket.connected) {
+        this.#socket.emit('board', optimizedPool);
       }
       this.#pool = [];
     }
@@ -96,14 +108,5 @@ export class WsService {
     setTimeout(() => {
       this.#poolLoop();
     }, 1000 / 15);
-  }
-
-  #keepAlive() {
-    if (this.#ws && this.#ws.readyState === WebSocket.OPEN) {
-      this.#ws.send('ping');
-    }
-    this.#keepAliveTimeoutId = setTimeout(() => {
-      this.#keepAlive();
-    }, 30000);
   }
 }

@@ -3,16 +3,16 @@ import { createContext } from './auth.context.js';
 import { AppRouter, appRouter } from './routers/index.js';
 import fastifyCookie from '@fastify/cookie';
 import cors from '@fastify/cors';
-import ws from '@fastify/websocket';
+import fastifyIO from 'fastify-socket.io';
+import { parse } from 'cookie';
 
 import {
   fastifyTRPCPlugin,
   FastifyTRPCPluginOptions,
 } from '@trpc/server/adapters/fastify';
 import { Server } from './server.js';
-import { newSubscriptorConnection } from './subscriptor.js';
 import { setServer } from './global.js';
-import { getAuthUrl, lucia, validateSession } from './auth.js';
+import { getAuthUrl } from './auth.js';
 import { googleCallback } from './routers/auth-routes.js';
 import { fileUpload } from './file-upload.js';
 
@@ -50,39 +50,36 @@ fastify.register(cors, {
   origin: true,
 });
 
-fastify.register(ws);
+// https://github.com/ducktors/fastify-socket.io/issues/36
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+fastify.register(fastifyIO as any, {
+  connectionStateRecovery: {
+    // the backup duration of the sessions and the packets
+    maxDisconnectionDuration: 2 * 60 * 1000,
+    // whether to skip middlewares upon successful recovery
+    skipMiddlewares: true,
+  },
+  cors: {
+    credentials: true,
+    origin: process.env['FRONTEND_URL'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  },
+});
 
 fastify.register(async function (fastify) {
   let server: Server | null = null;
 
-  fastify.get('/events', { websocket: true }, (connection, req) => {
-    if (!server) {
-      server = new Server();
+  fastify.ready((err) => {
+    if (err) throw err;
 
-      setServer(server);
-    }
+    fastify.io.on('connection', (socket) => {
+      if (!server) {
+        server = new Server(fastify.io);
+        setServer(server);
+      }
 
-    server.connection(connection, req);
-  });
-
-  fastify.get('/sub', { websocket: true }, async (connection, req) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cookies = (req as any).cookies;
-    const sessionId = cookies[lucia.sessionCookieName];
-
-    if (!sessionId) {
-      connection.close();
-      return;
-    }
-
-    const { user } = await validateSession(sessionId);
-
-    if (!user) {
-      connection.close();
-      return;
-    }
-
-    newSubscriptorConnection(connection, user.id);
+      server.connection(socket, parse(socket.request.headers.cookie ?? ''));
+    });
   });
 
   fastify.get('/api/auth', async (req, rep) => {
