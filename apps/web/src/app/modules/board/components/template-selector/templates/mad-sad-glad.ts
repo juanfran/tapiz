@@ -12,7 +12,9 @@ export function getTemplate(): TuNode<TemplaNode>[] {
           y: 50,
         },
         layer: 1,
-        text: '<h3>😠 Mad</h3><p><span style="color: rgb(173, 181, 189)">Frustrations and obstacles faced</span></p>',
+        text: `
+        <h3><span style="font-family: DankMono, OperatorMono, Inconsolata, FiraMono, ui-monospace, SFMono, Monaco, DroidSansMono, SourceCodePro, monospace">😠</span> Mad</h3>
+        <p><span style="color: rgb(173, 181, 189)">Frustrations and obstacles faced</span></p>`,
         width: 1250,
         height: 2600,
         rotation: 0,
@@ -28,7 +30,9 @@ export function getTemplate(): TuNode<TemplaNode>[] {
           y: 50,
         },
         layer: 1,
-        text: '<h3>😢 Sad</h3><p><span style="color: #adb5bd">Disappointments and letdowns</span></p>',
+        text: `
+        <h3><span style="font-family: DankMono, OperatorMono, Inconsolata, FiraMono, ui-monospace, SFMono, Monaco, DroidSansMono, SourceCodePro, monospace">😢</span> Sad</h3>
+        <p><span style="color: #adb5bd">Disappointments and letdowns</span></p>`,
         width: 1250,
         height: 2600,
         rotation: 0,
@@ -44,7 +48,9 @@ export function getTemplate(): TuNode<TemplaNode>[] {
           y: 50,
         },
         layer: 1,
-        text: '<h3>🎉 Glad</h3><p><span style="color: #adb5bd">Successes and happy moments</span></p>',
+        text: `
+         <h3><span style="font-family: DankMono, OperatorMono, Inconsolata, FiraMono, ui-monospace, SFMono, Monaco, DroidSansMono, SourceCodePro, monospace">🎉</span> Glad</h3>
+        <p><span style="color: #adb5bd">Successes and happy moments</span></p>`,
         width: 1250,
         height: 2600,
         rotation: 0,
