@@ -41,6 +41,12 @@ export class Client {
     });
     this.socket.on('disconnect', this.close.bind(this));
     this.socket.on('leaveBoard', () => {
+      if (!this.boardId) {
+        return;
+      }
+
+      this.socket.leave(this.boardId);
+
       this.boardId = undefined;
       this.teamId = undefined;
     });
