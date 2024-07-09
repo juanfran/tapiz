@@ -45,8 +45,6 @@ import { ZoneService } from '../zone/zone.service';
 import { AddImageComponent } from '../add-image/add-image.component';
 import { FileUploadService } from '../../../../services/file-upload.service';
 import { getImageDimensions } from '@tapiz/cdk/utils/image-dimensions';
-import { ConfigService } from '../../../../services/config.service';
-
 @Component({
   selector: 'tapiz-board-toolbar',
   templateUrl: './board-toolbar.component.html',
@@ -75,7 +73,6 @@ export class BoardToolbarComponent {
   #hotkeysService = inject(HotkeysService);
   #zoneService = inject(ZoneService);
   #fileUploadService = inject(FileUploadService);
-  #configService = inject(ConfigService);
 
   canvasMode$ = this.#store.select(selectCanvasMode);
   toolbarSubscription?: Subscription;
@@ -94,10 +91,6 @@ export class BoardToolbarComponent {
         }),
       )
       .subscribe(() => {
-        if (this.popup() === 'draw') {
-          this.#drawingStore.actions.finishDrawing();
-        }
-
         this.popupOpen('');
       });
   }
@@ -439,6 +432,10 @@ export class BoardToolbarComponent {
     if (this.toolbarSubscription) {
       this.toolbarSubscription.unsubscribe();
       this.toolbarSubscription = undefined;
+    }
+
+    if (this.#drawingStore.drawing()) {
+      this.#drawingStore.actions.finishDrawing();
     }
   }
 
