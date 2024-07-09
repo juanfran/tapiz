@@ -40,6 +40,10 @@ export class Client {
       this.correlationId = correlationId;
     });
     this.socket.on('disconnect', this.close.bind(this));
+    this.socket.on('leaveBoard', () => {
+      this.boardId = undefined;
+      this.teamId = undefined;
+    });
   }
 
   categorySubscription(prefix: string, ids: string[]) {
@@ -126,7 +130,6 @@ export class Client {
     this.socket.emit('error', 'unauthorized');
 
     if (disconnect) {
-      console.log('unauthorized close');
       this.socket.disconnect();
     }
   }

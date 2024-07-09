@@ -250,4 +250,16 @@ export class BoardEffects {
     },
     { dispatch: false },
   );
+
+  public closeBoard$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(PageActions.closeBoard),
+        tap(() => {
+          this.wsService.leaveBoard();
+        }),
+      );
+    },
+    { dispatch: false },
+  );
 }

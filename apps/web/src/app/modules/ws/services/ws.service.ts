@@ -96,6 +96,10 @@ export class WsService {
     this.#socket.close();
   }
 
+  leaveBoard() {
+    this.#socket.emit('leaveBoard');
+  }
+
   #poolLoop() {
     if (this.#pool.length) {
       const optimizedPool = optimize(this.#pool);
