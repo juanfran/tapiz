@@ -11,7 +11,7 @@ import { BoardFacade } from '../../../../services/board-facade.service';
 import { Store } from '@ngrx/store';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { PageActions } from '../../actions/page.actions';
-import { filter } from 'rxjs';
+import { filter, merge } from 'rxjs';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 import { BoardTuNode, User } from '@tapiz/board-commons';
@@ -50,8 +50,10 @@ export class NodesComponent {
   );
 
   constructor() {
-    this.#hotkeysService
-      .listen({ key: 'Delete' })
+    merge(
+      this.#hotkeysService.listen({ key: 'Backspace' }),
+      this.#hotkeysService.listen({ key: 'Delete' }),
+    )
       .pipe(
         takeUntilDestroyed(),
         filter(() => {

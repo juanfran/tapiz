@@ -10,21 +10,21 @@ interface HotkeysOptions {
 
 @Injectable()
 export class HotkeysService {
-  private destroyRef = inject(DestroyRef);
-  private defaultOptions = {
+  #destroyRef = inject(DestroyRef);
+  #defaultOptions = {
     trigger: 'keydown',
     element: document.body,
   };
 
-  public listen(options: HotkeysOptions) {
+  listen(options: HotkeysOptions) {
     const { trigger, element, key } = {
-      ...this.defaultOptions,
+      ...this.#defaultOptions,
       ...options,
     };
 
     return fromEvent<KeyboardEvent>(element, trigger).pipe(
       filter((event: KeyboardEvent) => event.key === key),
-      takeUntilDestroyed(this.destroyRef),
+      takeUntilDestroyed(this.#destroyRef),
     );
   }
 }
