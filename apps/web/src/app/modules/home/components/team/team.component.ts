@@ -133,7 +133,6 @@ export class TeamComponent {
         withLatestFrom(this.store.select(homeFeature.selectLoadingBoards)),
         filter(([, loading]) => !loading),
         switchMap(([boards]) => {
-          console.log(boards);
           return this.subscriptionService.watchBoardIds(
             boards.map((it) => it.id),
           );
