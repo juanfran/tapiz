@@ -294,7 +294,7 @@ export class BoardToolbarComponent {
         }
 
         const panel: Panel = {
-          text: '<h2 style="text-align: center"></h2>',
+          text: '<h2 style="text-align: center">Panel title</h2>',
           position: zone.position,
           width: width,
           height: height,
