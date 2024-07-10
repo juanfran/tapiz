@@ -86,6 +86,7 @@ import { ConfigService } from '../../../services/config.service';
 import { FileUploadService } from '../../../services/file-upload.service';
 import { DemoIntroComponent } from '../components/demo-intro/demo-intro.component';
 import { filterNil } from 'ngxtension/filter-nil';
+import { ZoomControlComponent } from '../components/zoom-control/zoom-control.component';
 
 @UntilDestroy()
 @Component({
@@ -117,6 +118,7 @@ import { filterNil } from 'ngxtension/filter-nil';
     NodeToolbarComponent,
     CommentsComponent,
     DemoIntroComponent,
+    ZoomControlComponent,
   ],
   hostDirectives: [CopyPasteDirective],
   host: {
@@ -142,6 +144,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   private nodesActions = inject(NodesActions);
   private configService = inject(ConfigService);
   private fileUploadService = inject(FileUploadService);
+  #userPosition = this.store.selectSignal(pageFeature.selectPosition);
   public readonly boardId$ = this.store.select(selectBoardId);
   public readonly nodes$ = this.boardFacade.getNodes();
 

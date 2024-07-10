@@ -1,0 +1,23 @@
+:host {
+  background: var(--primary-color-background);
+  border-radius: var(--radius-2);
+  align-items: center;
+  gap: var(--spacing-2);
+  display: flex;
+  padding: var(--size-2);
+  position: absolute;
+  inset-block-end: var(--spacing-2);
+  inset-inline-end: var(--spacing-2);
+  inline-size: 210px;
+}
+
+button {
+  padding: var(--size-1) var(--size-7);
+  font-size: var(--font-size-1);
+  font-weight: var(--font-weight-9);
+}
+
+.percentage {
+  inline-size: 100%;
+  text-align: center;
+}

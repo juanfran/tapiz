@@ -6,15 +6,11 @@ import { StateActions } from '@tapiz/board-commons';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 import { BoardActions } from '../actions/board.actions';
-import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
-import { NodesStore } from '@tapiz/nodes/services/nodes.store';
 
 @Injectable()
 export class HistoryEffects {
   #boardFacade = inject(BoardFacade);
   #actions$ = inject(Actions);
-  #nodesActions = inject(NodesActions);
-  #nodesStore = inject(NodesStore);
 
   undo$ = createEffect(() => {
     return this.#actions$.pipe(
