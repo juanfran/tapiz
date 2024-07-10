@@ -251,7 +251,13 @@ const reducer = createReducer(
   on(HomeActions.duplicateBoardSuccess, (state, { board }) => {
     return {
       ...state,
-      boards: [board, ...state.boards],
+      boards: [
+        {
+          ...board,
+          name: board.name + ' (copy)',
+        },
+        ...state.boards,
+      ],
     };
   }),
   on(HomeActions.renameBoard, (state, { id, name }) => {

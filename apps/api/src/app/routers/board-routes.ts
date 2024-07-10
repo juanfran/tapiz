@@ -89,7 +89,7 @@ export const boardRouter = router({
   }),
   duplicate: boardMemberProcedure.mutation(async (req) => {
     const newBoard = await db.board.createBoard(
-      req.ctx.board.name,
+      req.ctx.board.name + ' (copy)',
       req.ctx.user.sub,
       req.ctx.board.board,
       req.ctx.board.teamId,
