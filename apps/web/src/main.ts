@@ -1,7 +1,7 @@
 import {
   enableProdMode,
   importProvidersFrom,
-  provideZoneChangeDetection,
+  provideExperimentalZonelessChangeDetection,
   isDevMode,
 } from '@angular/core';
 
@@ -61,10 +61,7 @@ bootstrapApplication(AppComponent, {
 
     provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(APP_ROUTES, withComponentInputBinding()),
-    provideZoneChangeDetection({
-      eventCoalescing: true,
-      runCoalescing: true,
-    }),
+    provideExperimentalZonelessChangeDetection(),
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: { appearance: 'outline', subscriptSizing: 'dynamic' },
