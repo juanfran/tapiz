@@ -7,7 +7,7 @@ import fastifyIO from 'fastify-socket.io';
 import { initTRPC } from '@trpc/server';
 import { Server } from '../app/server.js';
 import db from '../app/db/index.js';
-import WebSocket from 'ws';
+import { io } from 'socket.io-client';
 
 const t = initTRPC.context().create();
 
@@ -89,15 +89,15 @@ export const initTestServer = (port: number): Promise<Server> => {
   });
 };
 
-export const initWs = (port: number): Promise<WebSocket> => {
+export const initWs = (port: number): Promise<ReturnType<typeof io>> => {
   return new Promise((resolve) => {
-    const ws = new WebSocket(`ws://localhost:${port}/events`, {
-      headers: {
+    const ws = io(`ws://localhost:${port}/events`, {
+      extraHeaders: {
         Cookie: 'auth=1',
       },
     });
 
-    ws.on('open', () => {
+    ws.on('connect', () => {
       resolve(ws);
     });
 
