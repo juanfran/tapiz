@@ -9,9 +9,6 @@ import { type Socket } from 'socket.io';
 import db from './db/index.js';
 import { validation } from './validation.js';
 import { z } from 'zod';
-// import { saveMsg, init } from './save-session';
-
-// init();
 
 const subSchema = z.object({
   type: z.union([z.literal('board'), z.literal('team')]),

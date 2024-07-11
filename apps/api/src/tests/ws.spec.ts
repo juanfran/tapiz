@@ -1,5 +1,3 @@
-import WebSocket from 'ws';
-
 import { startDB } from '../app/db/init-db';
 import {
   createMultipleUsers,
@@ -11,16 +9,16 @@ import {
 import { getBoardUser } from '../app/db/board-db';
 
 describe('ws', () => {
-  let ws: WebSocket;
+  let socket: Awaited<ReturnType<typeof initWs>>;
   const port = 8011;
 
   const send = (obj: unknown) => {
     return new Promise((resolve) => {
-      ws.send(JSON.stringify(obj), (err) => {
-        setTimeout(() => {
-          resolve(err);
-        }, 100); // wait for ws & db
-      });
+      socket.emit('board', obj);
+
+      setTimeout(() => {
+        resolve(null);
+      }, 100); // wait for ws & db
     });
   };
 
@@ -28,13 +26,13 @@ describe('ws', () => {
     await startDB();
     await createMultipleUsers();
     await initTestServer(port);
-    ws = await initWs(port);
+    socket = await initWs(port);
   });
 
   it('invialid msg', async () => {
-    await ws.send('something');
+    await socket.send('something');
 
-    expect(ws.OPEN).toEqual(WebSocket.OPEN);
+    expect(socket.connected).toEqual(true);
   });
 
   it('join', async () => {
@@ -49,6 +47,6 @@ describe('ws', () => {
     const board = await getBoardUser(board1.id, getAuth(1).sub);
 
     expect(board).toBeTruthy();
-    expect(ws.OPEN).toEqual(WebSocket.OPEN);
+    expect(socket.connected).toEqual(true);
   });
 });
