@@ -22,6 +22,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { authInterceptor } from './app/commons/api-rest-interceptor/api-rest-interceptor.service';
 import { provideEffects } from '@ngrx/effects';
 import * as appEffects from './app/+state/app.effects';
+import { debugMetaReducers } from './app/debug/meta-reducer';
 
 export function prefersReducedMotion(): boolean {
   const mediaQueryList = window.matchMedia('(prefers-reduced-motion)');
@@ -43,7 +44,7 @@ bootstrapApplication(AppComponent, {
         app: appFeature.reducer,
       },
       {
-        metaReducers: !environment.production ? [] : [],
+        metaReducers: debugMetaReducers,
         runtimeChecks: {
           strictStateImmutability: true,
           strictActionImmutability: true,

@@ -19,6 +19,7 @@ import {
 import { pageFeature } from '../modules/board/reducers/page.reducer';
 import { concatLatestFrom } from '@ngrx/operators';
 import * as R from 'remeda';
+import { addLog, addRawLog } from '../debug/debug';
 
 const isBoardSettings = (it: TuNode): it is TuNode<BoardSettings> => {
   return it.type === 'settings';
@@ -33,6 +34,7 @@ export class BoardFacade {
     this.board.update(() => {
       return [];
     });
+    addRawLog('start');
   }
 
   public get() {
@@ -40,7 +42,9 @@ export class BoardFacade {
   }
 
   public applyActions(actions: StateActions[], history = false) {
-    this.board.actions(actions, history);
+    const state = this.board.actions(actions, history);
+
+    addLog('facade', actions, state);
   }
 
   public getNodes() {
@@ -49,6 +53,7 @@ export class BoardFacade {
 
   public patchHistory(fn: Parameters<typeof this.board.patchHistory>[0]) {
     this.board.patchHistory(fn);
+    addRawLog('patchHistory');
   }
 
   public getUsers(): Observable<UserNode[]> {
@@ -125,10 +130,18 @@ export class BoardFacade {
   );
 
   public undo() {
-    return this.board.undo(false);
+    const actions = this.board.undo(false);
+
+    addLog('facade', actions, {});
+
+    return actions;
   }
 
   public redo() {
-    return this.board.redo(false);
+    const actions = this.board.redo(false);
+
+    addLog('facade', actions, {});
+
+    return actions;
   }
 }
