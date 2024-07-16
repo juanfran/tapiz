@@ -46,6 +46,7 @@ apps/web/src/environments/*.ts
 apps/api/src/app/sessions/*
 
 .nx/cache
+.nx/workspace-data
 
 uploads/*
 !uploads/.gitkeep

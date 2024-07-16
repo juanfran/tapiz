@@ -6,7 +6,7 @@ import { v4 } from 'uuid';
 import { createContext } from './auth.context.js';
 import { FastifyRequest } from 'fastify/types/request.js';
 import fastifyStatics from '@fastify/static';
-import { unlink } from 'node:fs';
+import { unlink } from 'fs';
 
 interface CheckAccessSuccess {
   success: true;
