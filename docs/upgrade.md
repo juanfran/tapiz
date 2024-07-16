@@ -1,9 +1,9 @@
 ## Update Angular
 
 ```bash
-npx nx migrate latest
-npm i
-npx nx migrate --run-migrations
+pnpm nx migrate latest
+pnpm i
+pnpm nx migrate --run-migrations
 rm migrations.json
 ```
 
@@ -21,10 +21,10 @@ node-fetch - it will break scripts/
 
 ## Check that everything works
 
-[] npm run start
-[] npm run lint
-[] npm run test
-[] npm run build:prod
+[] pnpm start
+[] pnpm lint
+[] pnpm test
+[] pnpm build:prod
 
 ## Revert failed update
 
