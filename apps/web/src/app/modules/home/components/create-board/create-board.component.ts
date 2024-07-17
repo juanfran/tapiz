@@ -41,14 +41,16 @@ import { MatSelectModule } from '@angular/material/select';
           matInput
           type="text" />
       </mat-form-field>
-      <mat-form-field>
-        <mat-label>Team</mat-label>
-        <mat-select formControlName="team">
-          @for (team of teams(); track team) {
-            <mat-option [value]="team.id">{{ team.name }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
+      @if (teams().length) {
+        <mat-form-field>
+          <mat-label>Choose a team...</mat-label>
+          <mat-select formControlName="team">
+            @for (team of teams(); track team) {
+              <mat-option [value]="team.id">{{ team.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
       <div class="actions">
         <button
           [disabled]="!form.valid"
