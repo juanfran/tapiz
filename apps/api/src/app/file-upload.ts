@@ -23,11 +23,8 @@ type CheckAccessResult = CheckAccessSuccess | CheckAccessError;
 const uploadFolder = path.join(import.meta.dirname, '../../../uploads');
 
 async function checkAccess(
-  req: FastifyRequest<{
-    Body: {
-      boardId: string;
-    };
-  }>,
+  boardId: string,
+  req: FastifyRequest,
   res: FastifyReply,
 ): Promise<CheckAccessResult> {
   const context = await createContext({ req, res });
@@ -36,16 +33,13 @@ async function checkAccess(
     return { success: false, code: 401, error: 'Unauthorized' };
   }
 
-  const board = await db.board.getBoard(req.body.boardId);
+  const board = await db.board.getBoard(boardId);
 
   if (!board) {
     return { success: false, code: 404, error: 'Board not found' };
   }
 
-  const haveAccess = await db.board.haveAccess(
-    req.body.boardId,
-    context.user.sub,
-  );
+  const haveAccess = await db.board.haveAccess(boardId, context.user.sub);
 
   if (!haveAccess) {
     return { success: false, code: 401, error: 'Unauthorized' };
@@ -90,7 +84,7 @@ export async function fileUpload(fastify: FastifyInstance) {
     url: '/api/upload-file-board',
     preHandler: upload.single('file'),
     handler: async (req, res) => {
-      const access = await checkAccess(req, res);
+      const access = await checkAccess(req.body.boardId, req, res);
 
       if (!access.success) {
         res.code(access.code);
@@ -122,6 +116,20 @@ export async function fileUpload(fastify: FastifyInstance) {
     method: 'GET',
     url: '/api/uploads/:filename',
     handler: async (req, res) => {
+      const file = await db.board.getFile(req.params.filename);
+
+      if (!file) {
+        res.code(404);
+        return { error: 'File not found' };
+      }
+
+      const access = await checkAccess(file.boardId, req, res);
+
+      if (!access.success) {
+        res.code(404);
+        return { error: 'File not found' };
+      }
+
       return res.sendFile(req.params.filename);
     },
   });

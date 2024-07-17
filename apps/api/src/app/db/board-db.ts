@@ -416,6 +416,18 @@ export async function getBoardFiles(boardId: string) {
     .where(eq(schema.boardFiles.boardId, boardId));
 }
 
+export async function getFile(fileName: string) {
+  const results = await db
+    .select({
+      name: schema.boardFiles.name,
+      boardId: schema.boardFiles.boardId,
+    })
+    .from(schema.boardFiles)
+    .where(eq(schema.boardFiles.name, fileName));
+
+  return results.at(0);
+}
+
 export async function deleteBoard(boardId: string) {
   deleteBoardFiles(boardId);
 
