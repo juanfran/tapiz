@@ -1,10 +1,9 @@
 :host {
-  display: grid;
-  grid-auto-columns: 1fr;
-  grid-auto-rows: 30px 1fr;
-  grid-template-columns: 4fr 6fr;
-  grid-template-rows: 1fr;
   height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding-block-start: 20vh;
+  align-items: flex-start;
 
   @media (max-width: 800px) {
     display: flex;
@@ -16,43 +15,36 @@
   display: flex;
   flex-direction: column;
   justify-self: flex-start;
-  padding: 4rem 2rem;
+  padding: var(--size-5);
+  background: #dcdaf6;
+  justify-self: flex-end;
+  max-width: 700px;
+  min-width: 500px;
+  box-shadow: var(--shadow-2);
 
-  &.left {
-    background: #dcdaf6;
-    height: 100%;
-    justify-self: flex-end;
-    max-width: 800px;
-    min-width: 500px;
-
-    @media (max-width: 800px) {
-      max-width: 100%;
-    }
-  }
-
-  &.right {
-    justify-content: space-between;
-
-    @media (max-width: 800px) {
-      display: none;
-    }
+  @media (max-width: 800px) {
+    max-width: 100%;
   }
 }
 
 .logo {
-  background: #736bdb;
-  border-radius: 8px;
-  color: var(--white);
-  display: inline-flex;
-  font-size: 2.25rem;
-  margin-bottom: 3rem;
-  padding: 0.25rem 1rem;
+  display: flex;
+  text-decoration: none;
+  align-items: center;
+  font-size: var(--font-size-7);
+  font-weight: var(--font-weight-7);
+  margin-block-end: var(--spacing-4);
+  gap: var(--spacing-2);
+
+  .name {
+    color: var(--brand);
+  }
 }
 
 .claim {
   color: #736bdb;
-  font-size: 2.25rem;
-  margin-bottom: 4rem;
+  font-size: var(--font-size-4);
+  margin-block-end: var(--spacing-8);
 }
 
 .button-inner {
@@ -65,13 +57,7 @@
 }
 
 .login-buttons {
-  width: 100%;
-
-  button {
-    width: 100%;
-
-    &:not(:last-child) {
-      margin-bottom: 0.75rem;
-    }
-  }
+  display: flex;
+  justify-content: center;
+  inline-size: 100%;
 }
