@@ -1,7 +1,7 @@
 <tapiz-title [title]="boardTitle()"></tapiz-title>
 <div
-  [class.edit-mode]="(canvasMode$ | async) === 'editMode'"
-  [class.compose-mode]="(canvasMode$ | async) === 'composeMode'"
+  [class.participate-mode]="boardMode() === 0"
+  [class.edit-mode]="boardMode() === 1"
   [class.loading]="!loaded()"
   class="container">
   @if (loadingBar()) {

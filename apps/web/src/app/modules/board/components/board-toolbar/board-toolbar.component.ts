@@ -8,8 +8,6 @@ import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
 import {
-  selectCanvasMode,
-  selectLayer,
   selectPopupOpen,
   selectPosition,
   selectZoom,
@@ -45,6 +43,7 @@ import { ZoneService } from '../zone/zone.service';
 import { AddImageComponent } from '../add-image/add-image.component';
 import { FileUploadService } from '../../../../services/file-upload.service';
 import { getImageDimensions } from '@tapiz/cdk/utils/image-dimensions';
+import { pageFeature } from '../../reducers/page.reducer';
 @Component({
   selector: 'tapiz-board-toolbar',
   templateUrl: './board-toolbar.component.html',
@@ -74,9 +73,8 @@ export class BoardToolbarComponent {
   #zoneService = inject(ZoneService);
   #fileUploadService = inject(FileUploadService);
 
-  canvasMode$ = this.#store.select(selectCanvasMode);
   toolbarSubscription?: Subscription;
-  layer = this.#store.selectSignal(selectLayer);
+  boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
   popup = this.#store.selectSignal(selectPopupOpen);
 
   constructor() {
@@ -286,15 +284,15 @@ export class BoardToolbarComponent {
         let { width, height } = zone.size;
 
         if (width < 2) {
-          width = 300;
+          width = 600;
         }
 
         if (height < 2) {
-          height = 300;
+          height = 2300;
         }
 
         const panel: Panel = {
-          text: '<h2 style="text-align: center">Panel title</h2>',
+          text: '<h3 style="text-align: center">Panel title</h3>',
           position: zone.position,
           width: width,
           height: height,
@@ -327,7 +325,7 @@ export class BoardToolbarComponent {
 
         const poll: PollBoard = {
           title: '',
-          layer: this.layer(),
+          layer: this.boardMode(),
           position,
           finished: false,
           options: [],
@@ -394,7 +392,7 @@ export class BoardToolbarComponent {
             history: true,
             actions: [
               this.#nodesActions.add<EstimationBoard>('estimation', {
-                layer: this.layer(),
+                layer: this.boardMode(),
                 position,
               }),
             ],
@@ -411,7 +409,7 @@ export class BoardToolbarComponent {
 
         const tokenContent: Token = {
           ...token,
-          layer: this.layer(),
+          layer: this.boardMode(),
           position,
           width: 100,
           height: 100,
@@ -461,7 +459,7 @@ export class BoardToolbarComponent {
             actions: [
               this.#nodesActions.add<Image>('image', {
                 url,
-                layer: this.layer(),
+                layer: this.boardMode(),
                 position: {
                   x:
                     -position.x / zoom +

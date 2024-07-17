@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { NodeAdd, Point, TuNode } from '@tapiz/board-commons';
 import { PageActions } from '../modules/board/actions/page.actions';
-import { selectLayer } from '../modules/board/selectors/page.selectors';
+import { pageFeature } from '../modules/board/reducers/page.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -10,7 +10,7 @@ import { selectLayer } from '../modules/board/selectors/page.selectors';
 export class CopyPasteService {
   private store = inject(Store);
 
-  public readonly layer = this.store.selectSignal(selectLayer);
+  public readonly layer = this.store.selectSignal(pageFeature.selectBoardMode);
 
   public getNodes(text: string): TuNode[] {
     try {

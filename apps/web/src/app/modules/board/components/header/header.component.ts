@@ -9,10 +9,7 @@ import {
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
-import {
-  selectCanvasMode,
-  selectIsAdmin,
-} from '../../selectors/page.selectors';
+import { selectIsAdmin } from '../../selectors/page.selectors';
 import { ExportService } from '../../services/export.service';
 import { ClickOutside } from 'ngxtension/click-outside';
 import { AutoFocusDirective } from '../../directives/autofocus.directive';
@@ -54,7 +51,7 @@ export class HeaderComponent {
   textarea = viewChild<ElementRef<HTMLInputElement>>('textarea');
 
   edit = signal(false);
-  canvasMode = this.#store.selectSignal(selectCanvasMode);
+  boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
   name = this.#store.selectSignal(pageFeature.selectName);
   isAdmin = this.#store.selectSignal(selectIsAdmin);
   boardId = this.#store.selectSignal(pageFeature.selectBoardId);
@@ -79,10 +76,10 @@ export class HeaderComponent {
       });
   }
 
-  changeCanvasMode(mode: string) {
+  changeBoardMode(boardMode: number) {
     this.#store.dispatch(
-      PageActions.changeCanvasMode({
-        canvasMode: mode,
+      PageActions.changeBoardMode({
+        boardMode,
       }),
     );
   }

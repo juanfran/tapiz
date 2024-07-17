@@ -98,9 +98,9 @@ export class PollBoardComponent implements AfterViewInit {
   #nodesStore = inject(NodesStore);
   userId = this.#nodesStore.userId;
   users = this.#nodesStore.users;
-  canvasMode = this.#nodesStore.canvasMode;
+
   showDrag = computed(() => {
-    if (this.canvasMode() === 'editMode') {
+    if (this.#nodesStore.boardMode() === 0) {
       return this.node().content.layer === 0;
     } else {
       return this.node().content.layer === 1;

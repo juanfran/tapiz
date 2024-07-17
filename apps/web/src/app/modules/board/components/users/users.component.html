@@ -49,24 +49,26 @@
       </button>
     }
   </div>
-  <div class="right-col-toolbar">
-    <div class="title-container">
-      <h2 class="title">Show my post its</h2>
-    </div>
-    <button
-      class="toolbar-slider"
-      [ngClass]="{ showVisible: vm.visible }"
-      (click)="toggleVisibility()">
-      <div class="slider-wrapper">
-        <div class="slider-dot"></div>
+  @if (boardMode() === 0) {
+    <div class="right-col-toolbar">
+      <div class="title-container">
+        <h2 class="title">Show my post its</h2>
       </div>
-      @if (vm.visible) {
-        <span>Enabled</span>
-      } @else {
-        <span>Disabled</span>
-      }
-    </button>
-  </div>
+      <button
+        class="toolbar-slider"
+        [ngClass]="{ showVisible: vm.visible }"
+        (click)="toggleVisibility()">
+        <div class="slider-wrapper">
+          <div class="slider-dot"></div>
+        </div>
+        @if (vm.visible) {
+          <span>Enabled</span>
+        } @else {
+          <span>Disabled</span>
+        }
+      </button>
+    </div>
+  }
 
   <ng-template
     #menu

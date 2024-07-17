@@ -48,7 +48,7 @@ export class NodesStore {
   userId!: Signal<string>;
   zoom!: Signal<number>;
   privateId!: Signal<string>;
-  canvasMode!: Signal<string>;
+  boardMode!: Signal<number>;
   nodes!: Signal<TuNode[]>;
   activeToolbarOption!: Signal<string>;
   emoji!: Signal<NativeEmoji | null>;

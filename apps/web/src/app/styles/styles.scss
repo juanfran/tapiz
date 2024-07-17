@@ -15,13 +15,13 @@
 @import "promsemirror.scss";
 @import "layers.scss";
 
-.edit-mode {
+.participate-mode {
   --primary-color: var(--purple);
   --primary-color-background: #f1f0fc;
   --primary-color-button-bg: var(--purple-bbg);
 }
 
-.compose-mode {
+.edit-mode {
   --primary-color: var(--baby-blue);
   --primary-color-background: #42cfdc26;
   --primary-color-button-bg: var(--baby-blue-bbg);

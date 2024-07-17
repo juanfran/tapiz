@@ -25,7 +25,7 @@ export const PageActions = createActionGroup({
     'Set user view': props<{ zoom: number; position: Point }>(),
     'Set move enabled': props<{ enabled: boolean }>(),
     'Set focus id': props<{ focusId: string; ctrlKey?: boolean }>(),
-    'Change canvas mode': props<{ canvasMode: string }>(),
+    'Change board mode': props<{ boardMode: number }>(),
     'End drag node': props<{
       nodes: {
         id: string;

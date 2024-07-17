@@ -12,7 +12,6 @@ import {
   startWith,
 } from 'rxjs';
 import { PageActions } from '../../actions/page.actions';
-import { selectLayer } from '../../selectors/page.selectors';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { TuNode } from '@tapiz/board-commons';
 
@@ -57,7 +56,7 @@ export class ZoneService {
         this.#store.select(pageFeature.selectZoom),
         this.#store.select(pageFeature.selectPosition),
         this.#store.select(pageFeature.selectUserId),
-        this.#store.select(selectLayer),
+        this.#store.select(pageFeature.selectBoardMode),
       ),
       map(([event, zoom, position, userId, layer]) => {
         return {
@@ -89,7 +88,7 @@ export class ZoneService {
             this.#store.select(pageFeature.selectZoom),
             this.#store.select(pageFeature.selectPosition),
             this.#store.select(pageFeature.selectUserId),
-            this.#store.select(selectLayer),
+            this.#store.select(pageFeature.selectBoardMode),
           ),
           switchMap(([mouseDownEvent, zoom, position, userId, layer]) => {
             const zoneDom = document.querySelector<HTMLElement>('tapiz-zone');

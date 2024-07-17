@@ -127,11 +127,11 @@ export class NodeComponent implements OnInit {
     });
 
     this.store
-      .select(pageFeature.selectCanvasMode)
+      .select(pageFeature.selectBoardMode)
       .pipe(takeUntilDestroyed())
       .subscribe((layer) => {
         this.#nodeStore.updateState({
-          layer: layer === 'editMode' ? 0 : 1,
+          layer,
         });
       });
   }

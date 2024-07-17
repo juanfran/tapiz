@@ -32,7 +32,6 @@ import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
 
 import {
-  selectCanvasMode,
   selectMoveEnabled,
   selectPosition,
   selectBoardId,
@@ -40,12 +39,11 @@ import {
   selectZoom,
   selectSearching,
   selectDragEnabled,
-  selectLayer,
 } from '../selectors/page.selectors';
 
 import { BoardMoveService } from '../services/board-move.service';
 import { BoardZoomService } from '../services/board-zoom.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NotesService } from '../services/notes.service';
 import { BoardDragDirective } from '../directives/board-drag.directive';
 import { CursorsComponent } from '../components/cursors/cursors.component';
@@ -144,12 +142,11 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   private nodesActions = inject(NodesActions);
   private configService = inject(ConfigService);
   private fileUploadService = inject(FileUploadService);
-  #userPosition = this.store.selectSignal(pageFeature.selectPosition);
+  private router = inject(Router);
   public readonly boardId$ = this.store.select(selectBoardId);
   public readonly nodes$ = this.boardFacade.getNodes();
 
   public readonly historyService = inject(HistoryService);
-  public readonly canvasMode$ = this.store.select(selectCanvasMode);
   public readonly newNote$ = new Subject<MouseEvent>();
   public readonly drawing = this.drawingStore.drawing;
   public readonly search = this.store.selectSignal(selectSearching);
@@ -157,7 +154,9 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly folloUser = this.store.selectSignal(pageFeature.selectFollow);
   public readonly loaded = this.store.selectSignal(pageFeature.selectLoaded);
   public readonly userId = this.store.selectSignal(selectUserId);
-  public readonly layer = this.store.selectSignal(selectLayer);
+  public readonly boardMode = this.store.selectSignal(
+    pageFeature.selectBoardMode,
+  );
   public readonly nodeSelectionEnabled = this.store.selectSignal(
     pageFeature.selectNodeSelection,
   );
@@ -198,6 +197,13 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   }
 
   constructor() {
+    console.log(sessionStorage.getItem('new-board'));
+
+    if (sessionStorage.getItem('new-board')) {
+      sessionStorage.removeItem('new-board');
+      this.store.dispatch(PageActions.changeBoardMode({ boardMode: 1 }));
+    }
+
     rxEffect(
       this.contextMenuStore.open$.pipe(
         pairwise(),

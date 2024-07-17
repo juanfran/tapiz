@@ -56,6 +56,8 @@ export class UsersComponent {
   private state = inject<RxState<State>>(RxState<State>);
   private boardFacade = inject(BoardFacade);
 
+  boardMode = this.store.selectSignal(pageFeature.selectBoardMode);
+
   constructor() {
     this.state.connect(
       'users',

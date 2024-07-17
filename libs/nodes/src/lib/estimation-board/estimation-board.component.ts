@@ -66,9 +66,8 @@ export class EstimationBoardComponent implements AfterViewInit, OnInit {
     return this.node().id;
   });
 
-  canvasMode = this.nodesStore.canvasMode;
   showDrag = computed(() => {
-    if (this.canvasMode() === 'editMode') {
+    if (this.nodesStore.boardMode() === 0) {
       return this.node().content.layer === 0;
     } else {
       return this.node().content.layer === 1;
