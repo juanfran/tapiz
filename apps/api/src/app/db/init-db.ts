@@ -30,7 +30,7 @@ async function dbMigrate() {
 
   let migrationsFolder = 'drizzle';
 
-  // npm run test:e2e
+  // pnpm run test:e2e
   if (process.cwd().includes('apps/api')) {
     migrationsFolder = '../../drizzle';
   }
