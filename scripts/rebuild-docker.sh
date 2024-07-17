@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm -rf dist/
+
 WEB_IMAGE="tapiz-web"
 API_IMAGE="tapiz-api"
 
