@@ -7,7 +7,6 @@ import {
 import { NgOptimizedImage } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
-import { selectLayer } from '../../selectors/page.selectors';
 import { NodeAdd, TuNode } from '@tapiz/board-commons';
 import { pageFeature } from '../../reducers/page.reducer';
 import { TemplaNode } from './template-node.model';
@@ -48,7 +47,7 @@ export class TemplateSelectorComponent {
 
   selected = output();
 
-  layer = this.#store.selectSignal(selectLayer);
+  boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
   userPostion = this.#store.selectSignal(pageFeature.selectPosition);
   userZoom = this.#store.selectSignal(pageFeature.selectZoom);
 

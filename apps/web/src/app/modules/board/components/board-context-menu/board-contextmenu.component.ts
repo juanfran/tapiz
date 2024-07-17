@@ -46,7 +46,7 @@ export class BoardContextMenuComponent implements OnInit {
   private selectFocusNodes = toSignal(this.boardFacade.selectFocusNodes$);
 
   public readonly boardMode = this.store.selectSignal(
-    pageFeature.selectCanvasMode,
+    pageFeature.selectBoardMode,
   );
 
   ngOnInit() {
@@ -151,9 +151,9 @@ export class BoardContextMenuComponent implements OnInit {
             },
           ];
 
-          if (this.boardMode() === 'editMode') {
+          if (this.boardMode() === 0) {
             actions.unshift({
-              label: 'Move to compose',
+              label: 'Move to edit mode',
               icon: 'flip_to_back',
               action: () => {
                 this.store.dispatch(
@@ -180,7 +180,7 @@ export class BoardContextMenuComponent implements OnInit {
             });
           } else {
             actions.unshift({
-              label: 'Move to edit',
+              label: 'Move to participant mode',
               icon: 'flip_to_front',
               action: () => {
                 this.store.dispatch(

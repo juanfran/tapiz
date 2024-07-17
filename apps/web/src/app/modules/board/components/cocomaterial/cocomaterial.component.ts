@@ -15,7 +15,6 @@ import { CocomaterialTag, CocomaterialApiVector } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
 import {
   selectCocomaterial,
-  selectLayer,
   selectPosition,
   selectZoom,
 } from '../../selectors/page.selectors';
@@ -28,6 +27,7 @@ import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { BoardActions } from '../../actions/board.actions';
 import { MatDialogRef } from '@angular/material/dialog';
 import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
+import { pageFeature } from '../../reducers/page.reducer';
 
 interface State {
   tags: CocomaterialTag[];
@@ -66,7 +66,9 @@ export class CocomaterialComponent {
   @ViewChild('tagInput') tagInput!: ElementRef<HTMLInputElement>;
 
   public readonly viewModel$ = this.state.select();
-  public readonly layer = this.store.selectSignal(selectLayer);
+  public readonly boardMode = this.store.selectSignal(
+    pageFeature.selectBoardMode,
+  );
 
   public separatorKeysCodes: number[] = [ENTER, COMMA];
 
@@ -186,7 +188,7 @@ export class CocomaterialComponent {
                     y: (-position.y + event.pageY) / zoom - 75,
                   },
                   rotation: 0,
-                  layer: this.layer(),
+                  layer: this.boardMode(),
                 }),
               ],
             }),

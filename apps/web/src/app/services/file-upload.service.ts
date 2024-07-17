@@ -8,7 +8,6 @@ import { getImageDimensions } from '@tapiz/cdk/utils/image-dimensions';
 import { BoardActions } from '../modules/board/actions/board.actions';
 import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
 import { Image } from '@tapiz/board-commons';
-import { selectLayer } from '../modules/board/selectors/page.selectors';
 import { PageActions } from '../modules/board/actions/page.actions';
 
 @Injectable({
@@ -57,7 +56,7 @@ export class FileUploadService {
       this.#store.select(pageFeature.selectZoom),
       this.#store.select(pageFeature.selectPosition),
       this.#store.select(pageFeature.selectBoardId),
-      this.#store.select(selectLayer),
+      this.#store.select(pageFeature.selectBoardMode),
     )
       .pipe(take(1))
       .subscribe(([zoom, position, boardId, layer]) => {

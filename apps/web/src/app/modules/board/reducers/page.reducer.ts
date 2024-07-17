@@ -23,7 +23,7 @@ export interface PageState {
   nodeSelection: boolean;
   userHighlight: User['id'] | null;
   showUserVotes: User['id'] | null;
-  canvasMode: string;
+  boardMode: number;
   popupOpen: string;
   isAdmin: boolean;
   privateId: string;
@@ -59,7 +59,7 @@ const initialPageState: PageState = {
   nodeSelection: true,
   userHighlight: null,
   showUserVotes: null,
-  canvasMode: 'editMode',
+  boardMode: 0,
   popupOpen: '',
   isAdmin: false,
   privateId: '',
@@ -92,6 +92,8 @@ const reducer = createReducer(
   on(PageActions.initBoard, (state, { userId }): PageState => {
     return {
       ...initialPageState,
+      // could be 1 because the session variable `new-board`
+      boardMode: state.boardMode,
       userId,
     };
   }),
@@ -200,10 +202,10 @@ const reducer = createReducer(
       return state;
     },
   ),
-  on(PageActions.changeCanvasMode, (state, { canvasMode }): PageState => {
+  on(PageActions.changeBoardMode, (state, { boardMode }): PageState => {
     return {
       ...state,
-      canvasMode,
+      boardMode,
       focusId: [],
     };
   }),

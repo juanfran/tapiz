@@ -36,6 +36,7 @@ import { MatSelectModule } from '@angular/material/select';
       <mat-form-field [hideRequiredMarker]="true">
         <mat-label>Board name</mat-label>
         <input
+          [maxLength]="255"
           formControlName="name"
           placeholder="Board name"
           matInput
@@ -58,7 +59,7 @@ import { MatSelectModule } from '@angular/material/select';
           type="submit"
           mat-raised-button
           color="primary">
-          Create
+          Create board
         </button>
       </div>
     </form>

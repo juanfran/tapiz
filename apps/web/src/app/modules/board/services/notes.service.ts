@@ -2,17 +2,17 @@ import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Note, Point, User } from '@tapiz/board-commons';
 import { BoardActions } from '../actions/board.actions';
-import { selectLayer } from '../selectors/page.selectors';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
+import { pageFeature } from '../reducers/page.reducer';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NotesService {
   #store = inject(Store);
-  #layer = this.#store.selectSignal(selectLayer);
+  #boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
   #boardFacade = inject(BoardFacade);
   #settings = toSignal(this.#boardFacade.getSettings());
   #nodesActions = inject(NodesActions);
@@ -34,7 +34,7 @@ export class NotesService {
 
     const note = this.getNew({
       ownerId: anonymousMode ? '' : userId,
-      layer: this.#layer(),
+      layer: this.#boardMode(),
       position,
     });
 

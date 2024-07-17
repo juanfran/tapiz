@@ -91,8 +91,8 @@ export class NodesComponent {
       pageFeature.selectPrivateId,
     );
     this.#nodesStore.zoom = this.#store.selectSignal(pageFeature.selectZoom);
-    this.#nodesStore.canvasMode = this.#store.selectSignal(
-      pageFeature.selectCanvasMode,
+    this.#nodesStore.boardMode = this.#store.selectSignal(
+      pageFeature.selectBoardMode,
     );
     this.#nodesStore.emoji = this.#store.selectSignal(pageFeature.selectEmoji);
     this.#nodesStore.userHighlight = this.#store.selectSignal(

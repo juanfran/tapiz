@@ -60,7 +60,7 @@ tapiz-header {
   z-index: var(--board-tools-layer);
 }
 
-.edit-mode {
+.participate-mode {
   ::ng-deep .layer-1 {
     pointer-events: none;
 
@@ -70,7 +70,7 @@ tapiz-header {
   }
 }
 
-.compose-mode {
+.edit-mode {
   ::ng-deep .layer-0 {
     pointer-events: none;
 
