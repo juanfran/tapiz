@@ -14,6 +14,7 @@
         "format": ["esm"],
         "bundle": true,
         "main": "apps/api/src/main.ts",
+        "generatePackageJson": true,
         "tsConfig": "apps/api/tsconfig.app.json",
         "assets": ["apps/api/src/assets"],
         "esbuildOptions": {
