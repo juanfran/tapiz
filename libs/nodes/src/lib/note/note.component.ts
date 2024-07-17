@@ -34,6 +34,7 @@ import { switchMap } from 'rxjs';
 import { NodeSpaceComponent } from '../node-space';
 import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { EditorViewComponent } from '@tapiz/ui/editor-view';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   selector: 'tapiz-note',
@@ -182,14 +183,11 @@ export class NoteComponent {
         this.edit.set(false);
       });
 
-    effect(
-      () => {
-        this.#nodeStore.updateState({
-          highlight: highlight(),
-        });
-      },
-      { allowSignalWrites: true },
-    );
+    explicitEffect([highlight], ([highlight]) => {
+      this.#nodeStore.updateState({
+        highlight,
+      });
+    });
 
     effect(() => {
       this.#el.nativeElement.style.setProperty(
@@ -208,14 +206,11 @@ export class NoteComponent {
       }
     });
 
-    effect(
-      () => {
-        if (!this.focus()) {
-          this.edit.set(false);
-        }
-      },
-      { allowSignalWrites: true },
-    );
+    explicitEffect([this.focus], ([focus]) => {
+      if (!focus) {
+        this.edit.set(false);
+      }
+    });
 
     effect(() => {
       const color = this.color();

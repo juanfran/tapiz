@@ -17,6 +17,7 @@ import { Group, TuNode } from '@tapiz/board-commons';
 import { ResizeHandlerSingleComponent } from '@tapiz/ui/resize';
 import { NodeSpaceComponent } from '../node-space';
 import { hostBinding } from 'ngxtension/host-binding';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 import { NodesStore } from '../services/nodes.store';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { NodeStore } from '../node/node.store';
@@ -117,23 +118,17 @@ export class GroupComponent {
       return !!votes;
     });
 
-    effect(
-      () => {
-        this.#nodeStore.updateState({
-          highlight: highlight(),
-        });
-      },
-      { allowSignalWrites: true },
-    );
+    explicitEffect([highlight], ([highlight]) => {
+      this.#nodeStore.updateState({
+        highlight,
+      });
+    });
 
-    effect(
-      () => {
-        if (!this.focus()) {
-          this.edit.set(false);
-        }
-      },
-      { allowSignalWrites: true },
-    );
+    explicitEffect([this.focus], ([focus]) => {
+      if (!focus) {
+        this.edit.set(false);
+      }
+    });
 
     effect(() => {
       this.textarea()?.nativeElement.focus();
