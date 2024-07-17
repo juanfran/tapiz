@@ -46,6 +46,8 @@ export const unauthorized$ = createEffect(
         if (userId) {
           if (router.url.includes('/board')) {
             router.navigate(['/404']);
+          } else if (router.url === '/') {
+            router.navigate(['/login']);
           } else {
             router.navigate(['/']);
           }
