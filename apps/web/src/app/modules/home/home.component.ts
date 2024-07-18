@@ -1,6 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { RxState } from '@rx-angular/state';
-import { UserTeam, UserInvitation } from '@tapiz/board-commons';
 import { MatMenuModule } from '@angular/material/menu';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { Store } from '@ngrx/store';
@@ -17,19 +15,15 @@ import { UserInvitationsComponent } from './components/user-invitations/user-inv
 import { AuthService } from '../../services/auth.service';
 import { ConfirmComponent } from '../../shared/confirm-action/confirm-actions.component';
 import { SubscriptionService } from '../../services/subscription.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-
-interface State {
-  teams: UserTeam[];
-  invitations: UserInvitation[];
-}
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { appFeature } from '../../+state/app.reducer';
 
 @Component({
   selector: 'tapiz-home',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState],
+  providers: [],
   standalone: true,
   imports: [
     CommonModule,
@@ -43,44 +37,41 @@ interface State {
   ],
 })
 export class HomeComponent {
-  private authService = inject(AuthService);
-  private store = inject(Store);
-  private state = inject(RxState) as RxState<State>;
-  private dialog = inject(MatDialog);
-  private subscriptionService = inject(SubscriptionService);
+  #authService = inject(AuthService);
+  #store = inject(Store);
+  #dialog = inject(MatDialog);
+  #subscriptionService = inject(SubscriptionService);
 
-  public model$ = this.state.select();
+  teams = this.#store.selectSignal(homeFeature.selectTeams);
+  invitations = this.#store.selectSignal(homeFeature.selectUserInvitations);
+  user = this.#store.selectSignal(appFeature.selectUser);
 
   constructor() {
-    this.store.dispatch(HomeActions.initHome());
+    this.#store.dispatch(HomeActions.initHome());
 
-    this.state.connect('teams', this.store.select(homeFeature.selectTeams));
-    this.state.connect(
-      'invitations',
-      this.store.select(homeFeature.selectUserInvitations),
-    );
+    this.#subscriptionService
+      .userMessages()
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.#store.dispatch(HomeActions.userEvent());
+      });
 
-    this.subscriptionService.userMessages().subscribe(() => {
-      this.store.dispatch(HomeActions.userEvent());
-    });
-
-    this.state
-      .select('teams')
+    toObservable(this.teams)
       .pipe(
         takeUntilDestroyed(),
         switchMap((teams) => {
-          return this.subscriptionService.watchTeamIds(
+          return this.#subscriptionService.watchTeamIds(
             teams.map((it) => it.id),
           );
         }),
       )
       .subscribe(() => {
-        this.store.dispatch(HomeActions.fetchTeams());
+        this.#store.dispatch(HomeActions.fetchTeams());
       });
   }
 
-  public openCreateTeamDialog() {
-    const dialogRef = this.dialog.open(CreateTeamComponent, {
+  openCreateTeamDialog() {
+    const dialogRef = this.#dialog.open(CreateTeamComponent, {
       width: '400px',
     });
 
@@ -89,16 +80,16 @@ export class HomeComponent {
         return;
       }
 
-      this.store.dispatch(HomeActions.createTeam({ name: result.name }));
+      this.#store.dispatch(HomeActions.createTeam({ name: result.name }));
     });
   }
 
-  public logout() {
-    this.authService.logout();
+  logout() {
+    this.#authService.logout();
   }
 
-  public deleteAccount() {
-    const dialogRef = this.dialog.open(ConfirmComponent, {
+  deleteAccount() {
+    const dialogRef = this.#dialog.open(ConfirmComponent, {
       data: {
         title: 'Delete account?',
         description:
@@ -119,15 +110,15 @@ export class HomeComponent {
       .afterClosed()
       .pipe(filter((it) => it))
       .subscribe(() => {
-        this.store.dispatch(HomeActions.removeAccount());
+        this.#store.dispatch(HomeActions.removeAccount());
       });
   }
 
-  public openInvitationDialog() {
-    this.dialog.open(UserInvitationsComponent, {
+  openInvitationDialog() {
+    this.#dialog.open(UserInvitationsComponent, {
       width: '600px',
       data: {
-        invitations: this.state.get('invitations'),
+        invitations: this.invitations(),
       },
     });
   }

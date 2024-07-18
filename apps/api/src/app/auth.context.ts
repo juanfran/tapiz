@@ -54,6 +54,7 @@ export async function createContext({ req, res }: CreateFastifyContextOptions) {
         sub: dbUser.id,
         name: dbUser.name,
         email: dbUser.email,
+        picture: dbUser.picture,
       };
     }
 

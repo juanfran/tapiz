@@ -1,21 +1,21 @@
-import { createFeature, createReducer, on } from '@ngrx/store';
-import { User } from '@tapiz/board-commons';
+import { createFeature, createReducer, createSelector, on } from '@ngrx/store';
 import { AppActions } from './app.actions';
+import { AuthUserModel } from '@tapiz/board-commons';
 
 export interface AppState {
-  userId: User['id'];
+  user: AuthUserModel | null;
 }
 
 const initialAppState: AppState = {
-  userId: '',
+  user: null,
 };
 
 const reducer = createReducer(
   initialAppState,
-  on(AppActions.setUserId, (state, { userId }): AppState => {
+  on(AppActions.setUser, (state, { user }): AppState => {
     return {
       ...state,
-      userId,
+      user,
     };
   }),
 );
@@ -23,4 +23,7 @@ const reducer = createReducer(
 export const appFeature = createFeature({
   name: 'app',
   reducer,
+  extraSelectors: ({ selectUser }) => ({
+    selectUserId: createSelector(selectUser, (user) => user?.id ?? ''),
+  }),
 });

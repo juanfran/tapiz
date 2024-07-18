@@ -15,6 +15,13 @@
       "when": 1718289258866,
       "tag": "0001_last_peter_parker",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1721295736271,
+      "tag": "0002_nosy_stardust",
+      "breakpoints": true
     }
   ]
 }

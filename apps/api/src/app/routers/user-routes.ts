@@ -68,8 +68,9 @@ export const userRouter = router({
   }),
   user: protectedProcedure.query(async (req) => {
     return {
-      name: req.ctx.user['name'],
-      sub: req.ctx.user.sub,
+      name: req.ctx.user.name,
+      id: req.ctx.user.sub,
+      picture: req.ctx.user.picture ?? '',
     };
   }),
   invites: protectedProcedure.query(async (req) => {

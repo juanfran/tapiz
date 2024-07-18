@@ -13,13 +13,13 @@ export class AuthService {
   private authReady$ = new BehaviorSubject<boolean>(false);
 
   public configureLogin() {
-    const userId = localStorage.getItem('userId');
+    const user = localStorage.getItem('user');
 
-    if (userId) {
-      this.store.dispatch(AppActions.setUserId({ userId }));
+    if (user) {
+      this.store.dispatch(AppActions.setUser({ user: JSON.parse(user) }));
 
       this.store
-        .select(appFeature.selectUserId)
+        .select(appFeature.selectUser)
         .pipe(filterNil(), take(1))
         .subscribe(() => {
           this.authReady$.next(true);

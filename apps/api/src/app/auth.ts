@@ -9,6 +9,17 @@ if (!process.env['GOOGLE_CLIENT_ID'] || !process.env['GOOGLE_CLIENT_SECRET']) {
 }
 
 export let lucia: Lucia;
+interface GoogleUserInfo {
+  sub: string;
+  name: string;
+  given_name: string;
+  family_name: string;
+  picture: string;
+  locale: string;
+  email?: string;
+  email_verified?: boolean;
+  hd?: string;
+}
 
 export const setPsqlClient = (psqlClient: postgres.Sql) => {
   const adapter = new PostgresJsAdapter(psqlClient, {
@@ -59,7 +70,9 @@ export const getAuthUrl = async (reply: FastifyReply) => {
   return url;
 };
 
-export async function getUserInfo(token: string) {
+export async function getUserInfo(
+  token: string,
+): Promise<GoogleUserInfo | undefined> {
   try {
     const response = await fetch(
       'https://openidconnect.googleapis.com/v1/userinfo',
@@ -80,6 +93,8 @@ export async function getUserInfo(token: string) {
   } catch (err) {
     console.error(err);
   }
+
+  return;
 }
 
 export async function validateAuthorizationCode(
