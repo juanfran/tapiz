@@ -132,6 +132,7 @@ export async function getBoardUser(
         name: schema.boards.name,
         createdAt: schema.boards.createdAt,
         teamId: schema.boards.teamId,
+        teamName: schema.teams.name,
         role: schema.acountsToBoards.role,
         public: schema.boards.public,
       },
@@ -167,6 +168,7 @@ export async function getBoardUser(
         eq(schema.teamMembers.accountId, userId),
       ),
     )
+    .leftJoin(schema.teams, and(eq(schema.teams.id, schema.boards.teamId)))
     .where(eq(schema.boards.id, boardId));
 
   const result = results.at(0);

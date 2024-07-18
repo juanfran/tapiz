@@ -24,6 +24,8 @@ import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
 import { ConfigService } from '../../../../services/config.service';
+import { NgOptimizedImage } from '@angular/common';
+import { appFeature } from '../../../../+state/app.reducer';
 
 @Component({
   selector: 'tapiz-header',
@@ -38,6 +40,7 @@ import { ConfigService } from '../../../../services/config.service';
     ClickOutside,
     MatIconModule,
     MatDialogModule,
+    NgOptimizedImage,
   ],
   providers: [HotkeysService],
 })
@@ -55,6 +58,8 @@ export class HeaderComponent {
   name = this.#store.selectSignal(pageFeature.selectName);
   isAdmin = this.#store.selectSignal(selectIsAdmin);
   boardId = this.#store.selectSignal(pageFeature.selectBoardId);
+  teamName = this.#store.selectSignal(pageFeature.selectTeamName);
+  user = this.#store.selectSignal(appFeature.selectUser);
 
   get isDemo() {
     return !!this.#configService.config.DEMO;

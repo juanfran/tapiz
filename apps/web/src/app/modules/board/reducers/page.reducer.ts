@@ -42,6 +42,7 @@ export interface PageState {
   follow: string;
   isPublic: boolean;
   loadingBar: boolean;
+  teamName: string | null;
 }
 
 const initialPageState: PageState = {
@@ -79,6 +80,7 @@ const initialPageState: PageState = {
   follow: '',
   isPublic: false,
   loadingBar: false,
+  teamName: null,
 };
 
 const reducer = createReducer(
@@ -111,7 +113,7 @@ const reducer = createReducer(
   }),
   on(
     PageActions.fetchBoardSuccess,
-    (state, { isAdmin, isPublic, name, privateId }): PageState => {
+    (state, { isAdmin, isPublic, name, privateId, teamName }): PageState => {
       return {
         ...state,
         name,
@@ -120,6 +122,7 @@ const reducer = createReducer(
         privateId,
         loaded: true,
         moveEnabled: true,
+        teamName,
       };
     },
   ),
