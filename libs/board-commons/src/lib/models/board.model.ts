@@ -18,4 +18,5 @@ export interface BoardUser extends Omit<Board, 'board'> {
 
 export interface PrivateBoardUser extends BoardUser {
   privateId: string;
+  teamName: string | null;
 }

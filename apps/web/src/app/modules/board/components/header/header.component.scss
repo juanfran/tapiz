@@ -6,73 +6,90 @@
   justify-content: space-between;
   left: 0;
   min-height: var(--header-height);
-  padding: 0.5rem 25px;
+  padding: 0.4rem  var(--size-3);
   position: fixed;
   top: 0;
   transition: background 0.5s ease;
   width: 100%;
+}
 
-  .icon-svg {
-    fill: var(--white);
-    height: 24px;
-    width: 24px;
+.logo {
+  margin-inline-end: var(--spacing-6);
+
+  img {
+    display: block;
   }
 }
 
-button,
-.board-name {
-  color: var(--white);
-  font-size: 1rem;
-}
-
-.mode {
+.breadcrumb {
   display: flex;
+  gap: var(--spacing-2);
+  inline-size: 100%;
 
-  .icon-svg {
-    margin-right: 0.5rem;
+  span {
+    max-width: 500px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--font-size-1);
   }
+
+  button,
+  span {
+    color: var(--white);
+    font-size: 1rem;
+  }
+}
+
+.board-name {
+  font-weight: var(--font-weight-7);
 }
 
 .edit-name {
   display: flex;
   align-items: center;
-}
-
-.board-name {
-  max-width: 500px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  padding: 0;
 }
 
 .change-mode-button-holder {
   display: flex;
+  margin-inline-start: var(--spacing-5);
 }
 
 .change-mode-button {
   align-items: center;
-  border-bottom: solid 2px var(--white);
-  border-top: solid 2px var(--primary-color);
   display: flex;
   font-family:
     "Open Sans",
     -apple-system,
     system-ui,
     sans-serif;
-  font-size: 0.75rem;
   justify-content: center;
-  min-height: 26px;
-  padding: 0 1rem;
+  block-size: 36px;
+  padding: 0 var(--spacing-3);
+  color: #5c5983;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-1);
+  font-weight: var(--font-weight-6);
+  font-size: var(--font-size-1);
 
-  &.active {
-    border-top: solid 2px var(--white);
-    font-weight: 700;
+  mat-icon {
+    inline-size: 12px;
+    block-size: 12px;
+    font-size: 12px;
+  }
+
+  &:hover {
+    color: #121232;
+    background: rgba(255, 255, 255, 1);
   }
 }
 
 .header-end {
   display: flex;
-  gap: var(--spacing-4);
+  gap: var(--spacing-1);
+  margin-inline-start: auto;
+  flex-shrink: 0;
 
   .icon-svg {
     margin-right: 0.5rem;
@@ -87,10 +104,18 @@ button,
   outline: none;
   overflow: hidden;
   resize: none;
-  width: 100%;
 }
 
 .button-action {
   display: flex;
   align-items: center;
+  color: white;
+}
+
+.avatar {
+  border-radius: var(--radius-round);
+  margin-inline-end: var(--spacing-5);
+  img {
+    display: block;
+  }
 }

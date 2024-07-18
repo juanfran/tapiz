@@ -1,13 +1,20 @@
-<button
-  class="home"
+<a
   aria-label="Home"
-  [routerLink]="['/']">
-  <tapiz-svg-icon
-    icon="home"
-    class="icon-svg"></tapiz-svg-icon>
-</button>
+  class="logo"
+  routerLink="/">
+  <img
+    priority="true"
+    ngSrc="/assets/logo.webp"
+    width="45"
+    height="47"
+    alt="Tapiz logo" />
+</a>
 @if (!isDemo) {
-  <div class="mode">
+  <div class="breadcrumb">
+    @if (teamName()) {
+      <span class="team-name">{{ teamName() }}</span>
+      <span>></span>
+    }
     @if (edit()) {
       <span
         #textarea
@@ -25,10 +32,7 @@
         title="Edit name"
         aria-label="Edit name"
         class="edit-name"
-        (click)="editName()">
-        <tapiz-svg-icon
-          icon="edit"
-          class="icon-svg"></tapiz-svg-icon>
+        (dblclick)="editName()">
         <span class="board-name">{{ name() }}</span>
       </button>
     }
@@ -38,6 +42,15 @@
   </div>
 }
 <div class="header-end">
+  @if (!isDemo && user()?.picture; as picture) {
+    <img
+      class="avatar"
+      [ngSrc]="picture"
+      width="36"
+      height="36"
+      alt="User avatar" />
+  }
+
   @if (isAdmin() && !isDemo) {
     <button
       title="Settings"
@@ -57,27 +70,29 @@
   <button
     title="Download"
     aria-label="Download"
+    class="button-action"
     (click)="export()">
-    <tapiz-svg-icon
-      icon="export"
-      class="icon-svg"></tapiz-svg-icon>
+    <mat-icon>file_download</mat-icon>
   </button>
   <div class="change-mode-button-holder">
-    <button
-      title="Participate"
-      aria-label="Participate"
-      [class.active]="boardMode() === 0"
-      class="change-mode-button"
-      (click)="changeBoardMode(0)">
-      Participate
-    </button>
-    <button
-      title="Edit board"
-      aria-label="Edit board"
-      [class.active]="boardMode() === 1"
-      class="change-mode-button"
-      (click)="changeBoardMode(1)">
-      Edit board
-    </button>
+    @if (boardMode() === 0) {
+      <button
+        title="Edit board"
+        aria-label="Edit board"
+        class="change-mode-button"
+        (click)="changeBoardMode(1)">
+        <mat-icon>mode_edit</mat-icon>
+        Edit board
+      </button>
+    } @else {
+      <button
+        title="Edit board"
+        aria-label="Edit board"
+        class="change-mode-button"
+        (click)="changeBoardMode(0)">
+        Close panel edition
+        <mat-icon>close</mat-icon>
+      </button>
+    }
   </div>
 </div>
