@@ -29,6 +29,7 @@ interface State {
     BoardListComponent,
     BoardListHeaderComponent,
   ],
+  providers: [RxState],
   template: `
     @if (model$ | async; as vm) {
       <tapiz-title title="Starred"></tapiz-title>

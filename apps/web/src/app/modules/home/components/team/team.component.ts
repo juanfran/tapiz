@@ -99,6 +99,7 @@ interface State {
     BoardListComponent,
     BoardListHeaderComponent,
   ],
+  providers: [RxState],
 })
 export class TeamComponent {
   private state = inject(RxState) as RxState<State>;

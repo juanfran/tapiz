@@ -6,28 +6,32 @@ import { APIConfigService } from './api-config.service';
   providedIn: 'root',
 })
 export class UserApiService {
-  private apiConfigService = inject(APIConfigService);
+  #apiConfigService = inject(APIConfigService);
   get trpc() {
-    return this.apiConfigService.trpc();
+    return this.#apiConfigService.trpc();
   }
 
-  public cancelInvitation(invitationId: string) {
+  cancelInvitation(invitationId: string) {
     return from(this.trpc.user.cancelInvite.mutate({ inviteId: invitationId }));
   }
 
-  public acceptInvitation(invitationId: string) {
+  acceptInvitation(invitationId: string) {
     return from(this.trpc.user.acceptInvite.mutate({ inviteId: invitationId }));
   }
 
-  public invites() {
+  invites() {
     return from(this.trpc.user.invites.query());
   }
 
-  public removeAccount() {
+  removeAccount() {
     return from(this.trpc.user.removeAccount.mutate());
   }
 
-  public logout() {
+  user() {
+    return from(this.trpc.user.user.query());
+  }
+
+  logout() {
     return from(this.trpc.user.logout.query());
   }
 }

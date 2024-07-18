@@ -24,7 +24,7 @@ export const logout$ = createEffect(
         localStorage.removeItem('userId');
         router.navigate(['/login']);
 
-        return AppActions.setUserId({ userId: '' });
+        return AppActions.setUser({ user: null });
       }),
     );
   },

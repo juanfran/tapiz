@@ -58,7 +58,7 @@
       "executor": "nx:run-commands",
       "outputs": [],
       "options": {
-        "command": "npx tsx apps/api/src/app/db/migrate.ts"
+        "command": "pnpm exec tsx apps/api/src/app/db/migrate.ts"
       }
     }
   },

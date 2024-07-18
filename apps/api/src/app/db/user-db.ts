@@ -47,11 +47,12 @@ export async function createUser(
   userId: string,
   name: string,
   email: string,
+  picture: string,
   googleId: string,
 ) {
   const insertedUser = await db
     .insert(schema.accounts)
-    .values({ id: userId, name, email, googleId })
+    .values({ id: userId, name, email, picture, googleId })
     .onConflictDoUpdate({
       target: schema.accounts.id,
       set: {
@@ -60,6 +61,18 @@ export async function createUser(
     });
 
   return insertedUser;
+}
+
+export async function updateUser(
+  userId: string,
+  name: string,
+  email: string,
+  picture: string,
+) {
+  return db
+    .update(schema.accounts)
+    .set({ name, picture, email })
+    .where(eq(schema.accounts.id, userId));
 }
 
 export async function invite(
