@@ -43,7 +43,7 @@ import {
 
 import { BoardMoveService } from '../services/board-move.service';
 import { BoardZoomService } from '../services/board-zoom.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { NotesService } from '../services/notes.service';
 import { BoardDragDirective } from '../directives/board-drag.directive';
 import { CursorsComponent } from '../components/cursors/cursors.component';
@@ -85,6 +85,7 @@ import { FileUploadService } from '../../../services/file-upload.service';
 import { DemoIntroComponent } from '../components/demo-intro/demo-intro.component';
 import { filterNil } from 'ngxtension/filter-nil';
 import { ZoomControlComponent } from '../components/zoom-control/zoom-control.component';
+import { BoardNodesAlignComponent } from '../components/board-nodes-align/board-nodes-align.component';
 
 @UntilDestroy()
 @Component({
@@ -117,6 +118,7 @@ import { ZoomControlComponent } from '../components/zoom-control/zoom-control.co
     CommentsComponent,
     DemoIntroComponent,
     ZoomControlComponent,
+    BoardNodesAlignComponent,
   ],
   hostDirectives: [CopyPasteDirective],
   host: {
@@ -142,7 +144,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   private nodesActions = inject(NodesActions);
   private configService = inject(ConfigService);
   private fileUploadService = inject(FileUploadService);
-  private router = inject(Router);
   public readonly boardId$ = this.store.select(selectBoardId);
   public readonly nodes$ = this.boardFacade.getNodes();
 
@@ -197,8 +198,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   }
 
   constructor() {
-    console.log(sessionStorage.getItem('new-board'));
-
     if (sessionStorage.getItem('new-board')) {
       sessionStorage.removeItem('new-board');
       this.store.dispatch(PageActions.changeBoardMode({ boardMode: 1 }));

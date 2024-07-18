@@ -124,7 +124,7 @@ export class BoardFacade {
       return nodes.filter((note) => focusId.includes(note.id));
     }),
     distinctUntilChanged((prev, curre) => {
-      return R.equals(prev, curre);
+      return R.isDeepEqual(prev, curre);
     }),
     share(),
   );
