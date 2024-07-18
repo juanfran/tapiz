@@ -65,20 +65,21 @@
       </button>
       <div class="toolbar-tooltip">React to Notes</div>
     </div>
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'draw'">
-      <button
-        aria-label="Draw Notes & Panels"
-        class="toolbar-button"
-        (click)="draw()">
-        <tapiz-svg-icon
-          icon="edit"
-          class="icon-svg"></tapiz-svg-icon>
-      </button>
-      <div class="toolbar-tooltip">Draw Notes & Panels</div>
-    </div>
   }
+  <div
+    class="toolbar-button-container"
+    [class.active]="popup() === 'draw'">
+    <button
+      aria-label="Draw Notes & Panels"
+      class="toolbar-button"
+      (click)="draw()">
+      <tapiz-svg-icon
+        icon="edit"
+        class="icon-svg"></tapiz-svg-icon>
+    </button>
+    <div class="toolbar-tooltip">Draw Notes & Panels</div>
+  </div>
+
   <div
     class="toolbar-button-container"
     [class.active]="popup() === 'panel'">

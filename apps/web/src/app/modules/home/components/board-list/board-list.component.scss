@@ -30,6 +30,7 @@
 .board-extra {
   display: flex;
   justify-content: flex-end;
+  padding-block-start: var(--spacing-1);
 }
 
 .board-title {

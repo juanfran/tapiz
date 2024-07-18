@@ -18,7 +18,7 @@
   padding: var(--size-8);
   background: #dcdaf6;
   justify-self: flex-end;
-  max-width: 700px;
+  max-width: 715px;
   min-width: 500px;
   box-shadow: var(--shadow-2);
 
@@ -45,6 +45,7 @@
   color: #736bdb;
   font-size: var(--font-size-4);
   margin-block-end: var(--spacing-8);
+  text-wrap: pretty;
 }
 
 .button-inner {

@@ -284,15 +284,15 @@ export class BoardToolbarComponent {
         let { width, height } = zone.size;
 
         if (width < 2) {
-          width = 600;
+          width = 1145;
         }
 
         if (height < 2) {
-          height = 2300;
+          height = 800;
         }
 
         const panel: Panel = {
-          text: '<h3 style="text-align: center">Panel title</h3>',
+          text: '<p style="text-align: center">Panel title</p>',
           position: zone.position,
           width: width,
           height: height,
