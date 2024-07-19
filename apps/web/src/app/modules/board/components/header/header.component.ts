@@ -61,6 +61,7 @@ export class HeaderComponent {
   isAdmin = this.#store.selectSignal(selectIsAdmin);
   boardId = this.#store.selectSignal(pageFeature.selectBoardId);
   teamName = this.#store.selectSignal(pageFeature.selectTeamName);
+  teamId = this.#store.selectSignal(pageFeature.selectTeamId);
   user = this.#store.selectSignal(appFeature.selectUser);
 
   get isDemo() {

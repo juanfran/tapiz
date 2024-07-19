@@ -27,7 +27,11 @@
   gap: var(--spacing-2);
   inline-size: 100%;
 
-  span {
+  a {
+    text-decoration: none;
+  }
+
+  span, a {
     max-width: 500px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -36,7 +40,8 @@
   }
 
   button,
-  span {
+  span,
+  a {
     color: var(--white);
     font-size: 1rem;
   }

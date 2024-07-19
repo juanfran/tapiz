@@ -21,6 +21,7 @@ export const PageActions = createActionGroup({
       isPublic: boolean;
       privateId: string;
       teamName: string | null;
+      teamId: string | null;
     }>(),
     'Join board': props<{ boardId: string }>(),
     'Set user view': props<{ zoom: number; position: Point }>(),

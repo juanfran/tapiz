@@ -136,6 +136,7 @@ export class BoardEffects {
               isPublic: board.public,
               privateId: board.privateId,
               teamName: board.teamName,
+              teamId: board.teamId,
             });
           }),
         );
@@ -163,6 +164,7 @@ export class BoardEffects {
               isPublic: board.public,
               privateId: board.privateId,
               teamName: board.teamName,
+              teamId: board.teamId,
             });
           }),
           catchError((e) => {
@@ -216,6 +218,7 @@ export class BoardEffects {
           isPublic: false,
           privateId: '',
           teamName: null,
+          teamId: null,
         });
       }),
     );

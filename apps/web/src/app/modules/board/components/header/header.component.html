@@ -12,7 +12,11 @@
 @if (!isDemo) {
   <div class="breadcrumb">
     @if (teamName()) {
-      <span class="team-name">{{ teamName() }}</span>
+      <a
+        [routerLink]="['/team', teamId()]"
+        class="team-name"
+        >{{ teamName() }}</a
+      >
       <span>></span>
     }
     @if (edit()) {
