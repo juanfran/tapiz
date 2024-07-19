@@ -80,6 +80,8 @@
     <div class="toolbar-tooltip">Draw Notes & Panels</div>
   </div>
 
+  <hr />
+
   <div
     class="toolbar-button-container"
     [class.active]="popup() === 'panel'">
@@ -152,7 +154,10 @@
     </button>
     <div class="toolbar-tooltip">Token</div>
   </div>
+
   @if (boardMode() === 0) {
+    <hr />
+
     <div
       class="toolbar-button-container"
       [class.active]="popup() === 'estimation'">
@@ -177,6 +182,7 @@
     </div>
   }
 
+  <hr />
   <div
     class="toolbar-button-container"
     [class.active]="popup() === 'search'">

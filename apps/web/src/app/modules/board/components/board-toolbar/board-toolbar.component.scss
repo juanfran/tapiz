@@ -173,3 +173,11 @@ tapiz-token-selector,
 tapiz-template-selector {
   margin-left: var(--spacing-2);
 }
+
+hr {
+  height: 2px;
+  border: 0;
+  border-top: 1px solid #ABAAB5;
+  font-size: 0;
+  inline-size: 28px;
+}
