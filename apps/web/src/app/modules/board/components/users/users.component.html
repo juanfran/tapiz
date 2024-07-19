@@ -52,21 +52,14 @@
     </div>
 
     <div class="right-col-toolbar">
-      <div class="title-container">
-        <h2 class="title">Show my post its</h2>
-      </div>
       <button
         class="toolbar-slider"
-        [ngClass]="{ showVisible: vm.visible }"
+        [class.no-visible]="!vm.visible"
         (click)="toggleVisibility()">
         <div class="slider-wrapper">
           <div class="slider-dot"></div>
         </div>
-        @if (vm.visible) {
-          <span>Enabled</span>
-        } @else {
-          <span>Disabled</span>
-        }
+        make my notes illegible
       </button>
     </div>
   }
