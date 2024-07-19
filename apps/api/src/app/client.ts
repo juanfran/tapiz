@@ -36,16 +36,11 @@ export class Client {
     this.socket.on('correlationId', (correlationId: string) => {
       this.correlationId = correlationId;
     });
-    this.socket.on('disconnect', this.close.bind(this));
+    this.socket.on('disconnect', () => {
+      this.close();
+    });
     this.socket.on('leaveBoard', () => {
-      if (!this.boardId) {
-        return;
-      }
-
-      this.socket.leave(this.boardId);
-
-      this.boardId = undefined;
-      this.teamId = undefined;
+      this.close();
     });
   }
 
@@ -196,6 +191,10 @@ export class Client {
     if (!roomSize) {
       this.server.emptyBoard(this.boardId);
     }
+
+    this.socket.leave(this.boardId);
+    this.boardId = undefined;
+    this.teamId = undefined;
   }
 
   private updateSendAllStateActions(actions: StateActions[]) {
