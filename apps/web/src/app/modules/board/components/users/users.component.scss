@@ -154,7 +154,7 @@
   display: flex;
   padding: 0;
   font-size: 12px;
-  white-space: nowrap;
+  text-wrap: pretty;
   color: var(--primary-color);
 
   &.no-visible {
