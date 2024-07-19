@@ -46,38 +46,40 @@
   </div>
 }
 <div class="header-end">
-  @if (!isDemo && user()?.picture; as picture) {
-    <img
-      class="avatar"
-      [ngSrc]="picture"
-      width="32"
-      height="32"
-      alt="User avatar" />
-  }
+  @if (boardMode() === 0) {
+    @if (!isDemo && user()?.picture; as picture) {
+      <img
+        class="avatar"
+        [ngSrc]="picture"
+        width="32"
+        height="32"
+        alt="User avatar" />
+    }
 
-  @if (isAdmin() && !isDemo) {
+    @if (isAdmin() && !isDemo) {
+      <button
+        title="Settings"
+        aria-label="Settings"
+        class="button-action"
+        (click)="settings()">
+        <mat-icon>settings</mat-icon>
+      </button>
+    }
     <button
-      title="Settings"
-      aria-label="Settings"
+      title="Share"
+      aria-label="Share"
       class="button-action"
-      (click)="settings()">
-      <mat-icon>settings</mat-icon>
+      (click)="share()">
+      <mat-icon>share</mat-icon>
+    </button>
+    <button
+      title="Download"
+      aria-label="Download"
+      class="button-action"
+      (click)="export()">
+      <mat-icon>file_download</mat-icon>
     </button>
   }
-  <button
-    title="Share"
-    aria-label="Share"
-    class="button-action"
-    (click)="share()">
-    <mat-icon>share</mat-icon>
-  </button>
-  <button
-    title="Download"
-    aria-label="Download"
-    class="button-action"
-    (click)="export()">
-    <mat-icon>file_download</mat-icon>
-  </button>
   <div class="change-mode-button-holder">
     @if (boardMode() === 0) {
       <button
