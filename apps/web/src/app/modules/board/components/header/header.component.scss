@@ -80,9 +80,10 @@
   font-size: var(--font-size-1);
 
   mat-icon {
-    inline-size: 12px;
-    block-size: 12px;
-    font-size: 12px;
+    --icon-size: 16px;
+    inline-size: var(--icon-size);
+    block-size: var(--icon-size);
+    font-size: var(--icon-size);
     margin-block-start: 1px;
   }
 
