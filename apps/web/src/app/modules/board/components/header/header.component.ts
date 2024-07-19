@@ -26,6 +26,7 @@ import { switchMap } from 'rxjs';
 import { ConfigService } from '../../../../services/config.service';
 import { NgOptimizedImage } from '@angular/common';
 import { appFeature } from '../../../../+state/app.reducer';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'tapiz-header',
@@ -40,6 +41,7 @@ import { appFeature } from '../../../../+state/app.reducer';
     ClickOutside,
     MatIconModule,
     MatDialogModule,
+    MatButtonModule,
     NgOptimizedImage,
   ],
   providers: [HotkeysService],

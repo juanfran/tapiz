@@ -5,8 +5,8 @@
   display: flex;
   justify-content: space-between;
   left: 0;
-  min-height: var(--header-height);
-  padding: 0.4rem  var(--size-3);
+  block-size: 48px;
+  padding-inline: 0.4rem;
   position: fixed;
   top: 0;
   transition: background 0.5s ease;
@@ -14,6 +14,7 @@
 }
 
 .logo {
+  flex-shrink: 0;
   margin-inline-end: var(--spacing-6);
 
   img {
@@ -77,6 +78,7 @@
     inline-size: 12px;
     block-size: 12px;
     font-size: 12px;
+    margin-block-start: 1px;
   }
 
   &:hover {
@@ -85,11 +87,21 @@
   }
 }
 
+.change-edit mat-icon {
+  margin-inline-end: 2px;
+}
+
+.change-close mat-icon {
+  margin-inline-start: 4px;
+}
+
 .header-end {
   display: flex;
+  align-items: center;
   gap: var(--spacing-1);
   margin-inline-start: auto;
   flex-shrink: 0;
+  position: relative;
 
   .icon-svg {
     margin-right: 0.5rem;
@@ -110,6 +122,12 @@
   display: flex;
   align-items: center;
   color: white;
+  border-radius: var(--radius-round);
+  padding: var(--spacing-2);
+  &:hover {
+    transition: background 0.2s ease;
+    background: rgba(0, 0, 0, 0.15);
+  }
 }
 
 .avatar {
