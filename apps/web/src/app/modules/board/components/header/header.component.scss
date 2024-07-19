@@ -6,7 +6,7 @@
   justify-content: space-between;
   left: 0;
   block-size: 48px;
-  padding-inline: 0.4rem;
+  padding-inline: var(--spacing-4);
   position: fixed;
   top: 0;
   transition: background 0.5s ease;
