@@ -39,7 +39,11 @@ export class BoardZoomService {
       filter(([event, popup]) => {
         const target = event.target as HTMLElement | undefined;
 
-        if (popup === 'cocomaterial' || popup === 'search') {
+        if (
+          popup === 'cocomaterial' ||
+          popup === 'search' ||
+          popup === 'live-reaction'
+        ) {
           return false;
         }
 

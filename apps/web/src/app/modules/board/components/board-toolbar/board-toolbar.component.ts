@@ -44,6 +44,7 @@ import { AddImageComponent } from '../add-image/add-image.component';
 import { FileUploadService } from '../../../../services/file-upload.service';
 import { getImageDimensions } from '@tapiz/cdk/utils/image-dimensions';
 import { pageFeature } from '../../reducers/page.reducer';
+import { LiveReactionComponent } from '../live-reaction/live-reaction.component';
 @Component({
   selector: 'tapiz-board-toolbar',
   templateUrl: './board-toolbar.component.html',
@@ -59,6 +60,7 @@ import { pageFeature } from '../../reducers/page.reducer';
     TokenSelectorComponent,
     TemplateSelectorComponent,
     AddImageComponent,
+    LiveReactionComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [HotkeysService],

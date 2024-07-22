@@ -17,11 +17,17 @@ import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
 import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
-import { NodeAdd, StateActions, TuNode } from '@tapiz/board-commons';
+import {
+  BoardCommonActions,
+  NodeAdd,
+  StateActions,
+  TuNode,
+} from '@tapiz/board-commons';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { pageFeature } from '../reducers/page.reducer';
 import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
 import { ConfigService } from '../../../services/config.service';
+import { LiveReactionStore } from '../components/live-reaction/live-reaction.store';
 
 @Injectable()
 export class BoardEffects {
@@ -33,6 +39,7 @@ export class BoardEffects {
   private boardFacade = inject(BoardFacade);
   private nodesActions = inject(NodesActions);
   private configService = inject(ConfigService);
+  private liveReactionStore = inject(LiveReactionStore);
   public initBoard$ = createEffect(
     () => {
       return this.actions$.pipe(
@@ -263,6 +270,18 @@ export class BoardEffects {
         ofType(PageActions.closeBoard),
         tap(() => {
           this.wsService.leaveBoard();
+        }),
+      );
+    },
+    { dispatch: false },
+  );
+
+  public broadCastEmojis$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(BoardCommonActions.broadcast),
+        tap((message) => {
+          this.liveReactionStore.add(message.data.emoji, message.data.position);
         }),
       );
     },
