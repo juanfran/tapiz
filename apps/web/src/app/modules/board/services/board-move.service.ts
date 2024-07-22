@@ -14,6 +14,7 @@ import {
 import { Point } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
 import { selectPosition } from '../selectors/page.selectors';
+import { pageFeature } from '../reducers/page.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -100,6 +101,25 @@ export class BoardMoveService {
     return this.mouseDown$.pipe(
       take(1),
       takeUntil(this.currentMouseDownWatch$),
+    );
+  }
+
+  public relativeMouseDown() {
+    return this.mouseDown$.pipe(
+      withLatestFrom(
+        this.store.select(pageFeature.selectZoom),
+        this.store.select(pageFeature.selectPosition),
+        this.store.select(pageFeature.selectBoardMode),
+      ),
+      map(([event, zoom, position, layer]) => {
+        return {
+          layer,
+          position: {
+            x: (-position.x + event.clientX) / zoom,
+            y: (-position.y + event.clientY) / zoom,
+          },
+        };
+      }),
     );
   }
 }

@@ -1,0 +1,19 @@
+:host {
+  display: block;
+  padding: var(--spacing-4);
+  inline-size: 495px;
+}
+
+.list {
+  max-block-size: 600px;
+  overflow-y: auto;
+
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 100px;
+  grid-gap: 10px;
+}
+
+.selected {
+  border: 2px solid var(--brand);
+}

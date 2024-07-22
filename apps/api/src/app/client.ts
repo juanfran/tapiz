@@ -9,6 +9,7 @@ import { type Socket } from 'socket.io';
 import db from './db/index.js';
 import { validation } from './validation.js';
 import { z } from 'zod';
+import * as R from 'remeda';
 
 const subSchema = z.object({
   type: z.union([z.literal('board'), z.literal('team')]),
@@ -84,13 +85,26 @@ export class Client {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   processMsg(messages: any) {
-    //saveMsg(message);
-
     if (messages.length) {
       if ('action' in messages[0] && messages[0].action === 'join') {
         this.join(messages[0]);
       } else {
-        this.parseStateActionMessage(messages);
+        const [broadcast, stateActions] = R.partition(
+          messages,
+          (it: Record<string, unknown>) => {
+            return it['type'] === BoardCommonActions.broadcast;
+          },
+        );
+
+        if (!this.boardId) {
+          return;
+        }
+
+        if (broadcast.length) {
+          this.socket.to(this.boardId).emit('board', broadcast);
+        }
+
+        this.parseStateActionMessage(stateActions as unknown as StateActions[]);
       }
     }
   }

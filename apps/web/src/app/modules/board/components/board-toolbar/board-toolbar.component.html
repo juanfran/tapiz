@@ -80,6 +80,29 @@
     <div class="toolbar-tooltip">Draw Notes & Panels</div>
   </div>
 
+  @if (boardMode() === 0) {
+    <div
+      class="toolbar-button-container"
+      [class.active]="popup() === 'live-reaction'">
+      <button
+        aria-label="Live Reactions"
+        class="toolbar-button"
+        (click)="togglePopup('live-reaction')">
+        <mat-icon class="material-icons-outlined"
+          >sentiment_very_satisfied</mat-icon
+        >
+      </button>
+      <div class="toolbar-tooltip">Live Reactions</div>
+      @if (popup() === 'live-reaction') {
+        <div class="toolbar-container">
+          <div class="toolbar-popup">
+            <tapiz-live-reaction />
+          </div>
+        </div>
+      }
+    </div>
+  }
+
   <hr />
 
   <div

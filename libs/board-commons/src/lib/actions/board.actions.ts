@@ -3,6 +3,10 @@ import { BoardCommonActions } from '../board-common-actions';
 import { BachStateActions, StateActions } from '../models/node.model';
 
 export const BoardActions = {
+  broadcast: createAction(
+    BoardCommonActions.broadcast,
+    props<{ data: unknown }>(),
+  ),
   setBoardName: createAction(
     BoardCommonActions.setBoardName,
     props<{ name: string }>(),
