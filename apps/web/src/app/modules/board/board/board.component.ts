@@ -87,6 +87,7 @@ import { filterNil } from 'ngxtension/filter-nil';
 import { ZoomControlComponent } from '../components/zoom-control/zoom-control.component';
 import { BoardNodesAlignComponent } from '../components/board-nodes-align/board-nodes-align.component';
 import { LiveReactionWallComponent } from '../components/live-reaction/live-reaction-wall.component';
+import { BoardEditorPortalComponent } from '../components/board-editor-portal/board-editor-portal.component';
 
 @UntilDestroy()
 @Component({
@@ -121,6 +122,7 @@ import { LiveReactionWallComponent } from '../components/live-reaction/live-reac
     ZoomControlComponent,
     BoardNodesAlignComponent,
     LiveReactionWallComponent,
+    BoardEditorPortalComponent,
   ],
   hostDirectives: [CopyPasteDirective],
   host: {

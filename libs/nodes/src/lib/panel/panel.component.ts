@@ -29,10 +29,10 @@ import {
 import { NodeStore } from '../node/node.store';
 import { NodesActions } from '../services/nodes-actions';
 import { input } from '@angular/core';
+import { EditorPortalComponent } from '../editor-portal/editor-portal.component';
 
 @Component({
   selector: 'tapiz-panel',
-
   template: `
     <tapiz-node-space
       [node]="node()"
@@ -46,16 +46,18 @@ import { input } from '@angular/core';
               class="rich-text"
               [innerHTML]="node().content.text | safeHtml"></div>
           } @else {
-            <tapiz-editor-view
-              #editorView="editorView"
-              [class.readonly]="!edit()"
-              [node]="node()"
-              [toolbar]="edit()"
-              [layoutToolbarOptions]="true"
-              [content]="node().content.text"
-              [focus]="edit()"
-              [fontSize]="true"
-              (contentChange)="newContent.set($event)" />
+            <tapiz-editor-portal [node]="node()">
+              <tapiz-editor-view
+                #editorView="editorView"
+                [class.readonly]="!edit()"
+                [node]="node()"
+                [toolbar]="edit()"
+                [layoutToolbarOptions]="true"
+                [content]="node().content.text"
+                [focus]="edit()"
+                [fontSize]="true"
+                (contentChange)="newContent.set($event)" />
+            </tapiz-editor-portal>
           }
         </div>
 
@@ -77,6 +79,7 @@ import { input } from '@angular/core';
     EditorViewComponent,
     SafeHtmlPipe,
     DrawingDirective,
+    EditorPortalComponent,
   ],
   host: {
     '[class.focus]': 'focus()',
