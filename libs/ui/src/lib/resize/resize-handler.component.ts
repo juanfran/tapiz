@@ -35,6 +35,8 @@ import { input } from '@angular/core';
       #bottomRight
       [style.transform]="'scale(' + scale() + ')'"
       class="no-drag resize-point bottom-right"></div>
+
+    <p class="size">{{ width }} x {{ height }}</p>
   `,
   styles: [
     `
@@ -76,6 +78,12 @@ import { input } from '@angular/core';
         bottom: var(--position);
         right: var(--position);
         cursor: nwse-resize;
+      }
+
+      .size {
+        color: var(--brand);
+        text-align: center;
+        padding-block-start: var(--spacing-1);
       }
     `,
   ],
@@ -155,8 +163,8 @@ export class ResizeHandlerComponent implements Resizable {
               x: size.x,
               y: size.y,
             },
-            width: size.width,
-            height: size.height,
+            width: Math.round(size.width),
+            height: Math.round(size.height),
           },
         });
       });
