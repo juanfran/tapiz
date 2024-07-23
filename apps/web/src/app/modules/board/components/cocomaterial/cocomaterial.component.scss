@@ -1,8 +1,7 @@
 :host {
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-  height: 100%;
+  display: block;
+  padding: var(--spacing-4);
+  inline-size: 495px;
 }
 
 mat-form-field {
@@ -10,12 +9,13 @@ mat-form-field {
 }
 
 .vectors {
+  margin-block-start: var(--spacing-4);
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: 160px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto;
   grid-gap: 10px;
-  height: 100%;
   overflow: auto;
+  max-block-size: 493px;
 
   .vector {
     align-items: center;
@@ -23,8 +23,13 @@ mat-form-field {
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
-    height: 150px;
+    height: 50px;
     width: 100%;
+    border: 2px solid transparent;
+
+    &.selected {
+      border-color: var(--brand);
+    }
   }
 
   &::ng-deep {

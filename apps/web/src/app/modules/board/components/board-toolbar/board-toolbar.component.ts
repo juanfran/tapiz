@@ -17,7 +17,6 @@ import { NotesService } from '../../services/notes.service';
 import { Subscription, zip } from 'rxjs';
 import 'emoji-picker-element';
 import { EmojiClickEvent, NativeEmoji } from 'emoji-picker-element/shared';
-import { MatDialog } from '@angular/material/dialog';
 import { CocomaterialComponent } from '../cocomaterial/cocomaterial.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -61,6 +60,7 @@ import { LiveReactionComponent } from '../live-reaction/live-reaction.component'
     TemplateSelectorComponent,
     AddImageComponent,
     LiveReactionComponent,
+    CocomaterialComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [HotkeysService],
@@ -68,7 +68,6 @@ import { LiveReactionComponent } from '../live-reaction/live-reaction.component'
 export class BoardToolbarComponent {
   #store = inject(Store);
   #notesService = inject(NotesService);
-  #dialog = inject(MatDialog);
   #drawingStore = inject(DrawingStore);
   #nodesActions = inject(NodesActions);
   #hotkeysService = inject(HotkeysService);
@@ -241,26 +240,6 @@ export class BoardToolbarComponent {
     if (this.popup() !== 'search') {
       this.popupOpen('search');
       this.#store.dispatch(PageActions.readyToSearch());
-    } else {
-      this.popupOpen('');
-    }
-  }
-
-  cocomaterial() {
-    if (this.popup() !== 'cocomaterial') {
-      this.popupOpen('cocomaterial');
-
-      const dialogRef = this.#dialog.open(CocomaterialComponent, {
-        height: '900px',
-        width: '800px',
-        enterAnimationDuration: 0,
-        exitAnimationDuration: 0,
-        autoFocus: false,
-      });
-
-      dialogRef.afterClosed().subscribe(() => {
-        this.popupOpen('');
-      });
     } else {
       this.popupOpen('');
     }

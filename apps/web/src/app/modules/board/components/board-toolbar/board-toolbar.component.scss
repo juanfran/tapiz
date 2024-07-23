@@ -4,8 +4,13 @@
 
   cursor: default;
   height: auto;
-  position: relative;
   display: flex;
+  align-items: flex-start;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
 }
 
 .toolbar-tooltip {
@@ -110,68 +115,7 @@
 }
 
 .toolbar-container {
-  height: 0;
-  position: relative;
-  width: 100%;
-}
-
-.toolbar-popup {
-  background: var(--primary-color-background);
-  border-radius: 0 8px 8px 0;
-  left: 100%;
-  position: absolute;
-  top: calc(var(--toolbar-button-height) * -1);
-
-  &.brushes {
-    min-width: 128px;
-    padding: 1rem;
-  }
-
-  label {
-    font-family:
-      "Raleway",
-      -apple-system,
-      system-ui,
-      sans-serif;
-    font-size: 0.625rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .toolbar-popup-button {
-    display: flex;
-    margin-bottom: 0.5rem;
-    margin-right: 0.5rem;
-    padding: 0;
-
-    .icon-svg {
-      width: 24px;
-    }
-  }
-
-  .font {
-    display: flex;
-  }
-}
-
-.brush-size {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-}
-
-
-.emojis {
-  background: var(--primary-color-background);
-  border-radius: 8px;
-  margin-left: 1rem;
-  padding: 0.5rem;
-  position: absolute;
-  left: 46px;
-}
-
-tapiz-token-selector,
-tapiz-template-selector {
-  margin-left: var(--spacing-2);
+  padding-inline-start: var(--spacing-2);
 }
 
 hr {
@@ -180,4 +124,11 @@ hr {
   border-top: 1px solid #ABAAB5;
   font-size: 0;
   inline-size: 28px;
+}
+
+
+.toolbar-popup {
+  background: var(--primary-color-background);
+  border-radius: var(--radius-2);
+  padding: var(--spacing-4);
 }

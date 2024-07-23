@@ -91,13 +91,6 @@
         <mat-icon class="material-icons-outlined">favorite_border</mat-icon>
       </button>
       <div class="toolbar-tooltip">Live Reactions</div>
-      @if (popup() === 'live-reaction') {
-        <div class="toolbar-container">
-          <div class="toolbar-popup">
-            <tapiz-live-reaction />
-          </div>
-        </div>
-      }
     </div>
   }
 
@@ -141,15 +134,6 @@
         class="icon-svg"></tapiz-svg-icon>
     </button>
     <div class="toolbar-tooltip">Image</div>
-    @if (popup() === 'image') {
-      <div class="toolbar-container">
-        <div class="toolbar-popup image-popup">
-          <tapiz-add-image
-            (newImageUrl)="newImageUrl($event)"
-            (newImageFile)="newImageFile($event)" />
-        </div>
-      </div>
-    }
   </div>
   <div
     class="toolbar-button-container"
@@ -157,7 +141,7 @@
     <button
       aria-label="Cocomaterial"
       class="toolbar-button"
-      (click)="cocomaterial()">
+      (click)="togglePopup('cocomaterial')">
       <tapiz-svg-icon
         icon="cocomaterial"
         class="icon-svg"></tapiz-svg-icon>
@@ -230,23 +214,38 @@
 </div>
 
 @defer (prefetch on idle) {
-  @if (popup() === 'token') {
-    <div class="tokens">
-      <tapiz-token-selector (selectToken)="tokenSelected($event)" />
-    </div>
-  }
+  <div class="toolbar-container">
+    @if (popup() === 'token') {
+      <tapiz-token-selector
+        (selectToken)="tokenSelected($event)"
+        class="toolbar-popup" />
+    }
 
-  @if (popup() === 'emoji') {
-    <div class="emojis">
+    @if (popup() === 'emoji') {
       <emoji-picker
         (emoji-click)="emojiSelected($event)"
-        class="light" />
-    </div>
-  }
+        class="light toolbar-popup" />
+    }
 
-  @if (popup() === 'templates') {
-    <div class="tokens">
-      <tapiz-template-selector (selected)="seletedTemplate()" />
-    </div>
-  }
+    @if (popup() === 'templates') {
+      <tapiz-template-selector
+        (selected)="seletedTemplate()"
+        class="toolbar-popup" />
+    }
+
+    @if (popup() === 'cocomaterial') {
+      <tapiz-cocomaterial class="toolbar-popup" />
+    }
+
+    @if (popup() === 'live-reaction') {
+      <tapiz-live-reaction class="toolbar-popup" />
+    }
+
+    @if (popup() === 'image') {
+      <tapiz-add-image
+        class="toolbar-popup"
+        (newImageUrl)="newImageUrl($event)"
+        (newImageFile)="newImageFile($event)" />
+    }
+  </div>
 }
