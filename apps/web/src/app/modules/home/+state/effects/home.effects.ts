@@ -113,7 +113,6 @@ export const createBoard$ = createEffect(
         return boardApiService.createBoard(action.name, action.teamId);
       }),
       tap((result) => {
-        console.log('set');
         sessionStorage.setItem('new-board', result.id);
 
         void router.navigate(['/board', result.id]);

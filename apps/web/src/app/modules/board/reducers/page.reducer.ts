@@ -267,6 +267,7 @@ const reducer = createReducer(
     state.voting = false;
     state.dragEnabled = true;
     state.searching = false;
+    state.nodeSelection = true;
 
     return state;
   }),

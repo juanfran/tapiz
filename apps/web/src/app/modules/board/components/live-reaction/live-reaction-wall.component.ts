@@ -26,8 +26,7 @@ import {
           opacity: 1,
         }),
       ),
-      transition('* => void', [animate('0.2s')]),
-      transition('void => *', [animate('0.5s')]),
+      transition('* => *', [animate('0.1s')]),
     ]),
   ],
   template: `

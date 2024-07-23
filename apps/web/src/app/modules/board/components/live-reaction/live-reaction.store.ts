@@ -44,7 +44,7 @@ export const LiveReactionStore = signalStore(
             emojis: state.emojis.filter((emoji) => emoji.id !== id),
           };
         });
-      }, 2000);
+      }, 4000);
     }
 
     return {

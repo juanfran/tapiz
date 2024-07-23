@@ -10,12 +10,7 @@ import {
 } from 'rxjs/operators';
 import { Point } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
-import {
-  selectPopupOpen,
-  selectPosition,
-  selectZoom,
-} from '../selectors/page.selectors';
-import { concatLatestFrom } from '@ngrx/operators';
+import { selectPosition, selectZoom } from '../selectors/page.selectors';
 
 @Injectable({
   providedIn: 'root',
@@ -35,29 +30,24 @@ export class BoardZoomService {
 
     const wheel$ = fromEvent<WheelEvent>(window, 'wheel').pipe(
       share(),
-      concatLatestFrom(() => this.store.select(selectPopupOpen)),
-      filter(([event, popup]) => {
+      filter((event) => {
         const target = event.target as HTMLElement | undefined;
 
-        if (
-          popup === 'cocomaterial' ||
-          popup === 'search' ||
-          popup === 'live-reaction'
-        ) {
-          return false;
-        }
-
         if (target) {
-          if (target.closest('[board-noscroll]')) {
+          if (
+            target.tagName.toUpperCase() !== 'TAPIZ-BOARD' &&
+            !target.closest('tapiz-nodes')
+          ) {
             return false;
           }
 
-          return target.tagName !== 'EMOJI-PICKER';
+          if (target.closest('[board-noscroll]')) {
+            return false;
+          }
         }
 
         return true;
       }),
-      map(([event]) => event),
     );
 
     this.zoom$ = wheel$.pipe(

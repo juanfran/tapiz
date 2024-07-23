@@ -65,11 +65,13 @@ export class LiveReactionComponent {
   constructor() {
     explicitEffect([this.selected], ([selected]) => {
       if (selected) {
+        this.#store.dispatch(PageActions.setNodeSelection({ enabled: false }));
         this.#store.dispatch(
           PageActions.setBoardCursor({ cursor: 'crosshair' }),
         );
       } else {
         this.#store.dispatch(PageActions.setBoardCursor({ cursor: 'default' }));
+        this.#store.dispatch(PageActions.setNodeSelection({ enabled: true }));
       }
     });
 
