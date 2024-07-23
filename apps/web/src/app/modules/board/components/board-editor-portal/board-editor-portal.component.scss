@@ -1,0 +1,8 @@
+:host {
+  display: contents;
+}
+
+.portal {
+  position: absolute;
+  z-index: var(--board-hightlight-node-layer);
+}

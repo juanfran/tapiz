@@ -35,6 +35,7 @@ import { NodeSpaceComponent } from '../node-space';
 import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { EditorViewComponent } from '@tapiz/ui/editor-view';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import { EditorPortalComponent } from '../editor-portal/editor-portal.component';
 
 @Component({
   selector: 'tapiz-note',
@@ -48,6 +49,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
     NodeSpaceComponent,
     SafeHtmlPipe,
     EditorViewComponent,
+    EditorPortalComponent,
   ],
   host: {
     '[class.drawing]': 'drawing()',

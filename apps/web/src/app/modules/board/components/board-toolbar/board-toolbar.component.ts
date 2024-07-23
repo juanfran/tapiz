@@ -119,8 +119,8 @@ export class BoardToolbarComponent {
         const text: Text = {
           text: '<p></p>',
           position: zone.position,
-          width: width,
-          height: height,
+          width: Math.round(width),
+          height: Math.round(height),
           layer: zone.layer,
           rotation: 0,
         };
@@ -275,8 +275,8 @@ export class BoardToolbarComponent {
         const panel: Panel = {
           text: '<p style="text-align: center">Panel title</p>',
           position: zone.position,
-          width: width,
-          height: height,
+          width: Math.round(width),
+          height: Math.round(height),
           layer: zone.layer,
           rotation: 0,
           drawing: [],

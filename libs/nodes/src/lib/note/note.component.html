@@ -24,15 +24,17 @@
       }
     </div>
     @if (edit()) {
-      <tapiz-editor-view
-        [class.readonly]="!edit()"
-        #editorView="editorView"
-        [node]="node()"
-        [toolbar]="edit()"
-        [content]="initialText()"
-        [focus]="edit()"
-        customClass="note-rich-text"
-        (contentChange)="setText($event)" />
+      <tapiz-editor-portal [node]="node()">
+        <tapiz-editor-view
+          [class.readonly]="!edit()"
+          #editorView="editorView"
+          [node]="node()"
+          [toolbar]="edit()"
+          [content]="initialText()"
+          [focus]="edit()"
+          customClass="note-rich-text"
+          (contentChange)="setText($event)" />
+      </tapiz-editor-portal>
     } @else {
       <div
         class="rich-text"

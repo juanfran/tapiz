@@ -19,6 +19,7 @@ import { EditorViewComponent } from '@tapiz/ui/editor-view';
 import { filter, pairwise } from 'rxjs';
 import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { input } from '@angular/core';
+import { EditorPortalComponent } from '../editor-portal/editor-portal.component';
 
 @Component({
   selector: 'tapiz-text',
@@ -34,15 +35,17 @@ import { input } from '@angular/core';
           class="rich-text"
           [innerHTML]="node().content.text | safeHtml"></div>
       } @else {
-        <tapiz-editor-view
-          [class.readonly]="!edit()"
-          #editorView="editorView"
-          [node]="node()"
-          [toolbar]="edit()"
-          [content]="node().content.text"
-          [focus]="edit()"
-          [fontSize]="true"
-          (contentChange)="newContent.set($event)" />
+        <tapiz-editor-portal [node]="node()">
+          <tapiz-editor-view
+            [class.readonly]="!edit()"
+            #editorView="editorView"
+            [node]="node()"
+            [toolbar]="edit()"
+            [content]="node().content.text"
+            [focus]="edit()"
+            [fontSize]="true"
+            (contentChange)="newContent.set($event)" />
+        </tapiz-editor-portal>
       }
     </tapiz-node-space>
   `,
@@ -55,6 +58,7 @@ import { input } from '@angular/core';
     ToolbarComponent,
     EditorViewComponent,
     SafeHtmlPipe,
+    EditorPortalComponent,
   ],
 
   host: {
