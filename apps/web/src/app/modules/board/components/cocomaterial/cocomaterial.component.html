@@ -1,56 +1,55 @@
-@if (viewModel$ | async; as vm) {
-  <form [formGroup]="form">
-    <mat-form-field
-      class="example-chip-list"
-      appearance="fill">
-      <mat-label>Search</mat-label>
-      <mat-chip-grid
-        #chipGrid
-        aria-label="Tag selection">
-        @for (tag of vm.tags; track tag) {
-          <mat-chip-row (removed)="remove(tag)">
-            {{ tag.name }}
-            <button
-              matChipRemove
-              [attr.aria-label]="'remove ' + tag.name">
-              <mat-icon>cancel</mat-icon>
-            </button>
-          </mat-chip-row>
-        }
-      </mat-chip-grid>
-      <input
-        placeholder="New Tag..."
-        #tagInput
-        formControlName="search"
-        [matChipInputFor]="chipGrid"
-        [matAutocomplete]="auto"
-        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-        (matChipInputTokenEnd)="add($event)" />
-      <mat-autocomplete
-        #auto="matAutocomplete"
-        (optionSelected)="selected($event)">
-        @for (tag of vm.filteredTags; track tag) {
-          <mat-option [value]="tag.slug">
-            {{ tag.name }}
-          </mat-option>
-        }
-      </mat-autocomplete>
-    </mat-form-field>
-  </form>
-  <div
-    infiniteScroll
-    [infiniteScrollDistance]="2"
-    [infiniteScrollThrottle]="50"
-    [scrollWindow]="false"
-    (scrolled)="onScroll()"
-    class="vectors">
-    @for (vector of vm.vectors; track vector) {
-      <button
-        (click)="selectVector(vector, $event)"
-        class="vector"
-        [style.background-image]="
-          'url(' + (vector.svg ?? vector.gif) + ')'
-        "></button>
-    }
-  </div>
-}
+<form [formGroup]="form">
+  <mat-form-field
+    class="example-chip-list"
+    appearance="fill">
+    <mat-label>Search</mat-label>
+    <mat-chip-grid
+      #chipGrid
+      aria-label="Tag selection">
+      @for (tag of tags(); track tag) {
+        <mat-chip-row (removed)="remove(tag)">
+          {{ tag.name }}
+          <button
+            matChipRemove
+            [attr.aria-label]="'remove ' + tag.name">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip-row>
+      }
+    </mat-chip-grid>
+    <input
+      placeholder="New Tag..."
+      #tagInput
+      formControlName="search"
+      [matChipInputFor]="chipGrid"
+      [matAutocomplete]="auto"
+      [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+      (matChipInputTokenEnd)="add($event)" />
+    <mat-autocomplete
+      #auto="matAutocomplete"
+      (optionSelected)="optionSelected($event)">
+      @for (tag of filteredTags(); track tag) {
+        <mat-option [value]="tag.slug">
+          {{ tag.name }}
+        </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+</form>
+<div
+  infiniteScroll
+  [infiniteScrollDistance]="2"
+  [infiniteScrollThrottle]="50"
+  [scrollWindow]="false"
+  (scrolled)="onScroll()"
+  class="vectors">
+  @for (vector of vectors(); track vector) {
+    <button
+      (click)="toggleSelect(vector)"
+      class="vector"
+      [class.selected]="vector === selected()"
+      [style.background-image]="
+        'url(' + (vector.svg ?? vector.gif) + ')'
+      "></button>
+  }
+</div>
