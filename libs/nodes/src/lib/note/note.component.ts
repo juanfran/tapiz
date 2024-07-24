@@ -200,8 +200,8 @@ export class NoteComponent {
       this.editorView()?.setTextSize(this.textSize());
     });
 
-    effect(() => {
-      if (this.edit()) {
+    explicitEffect([this.edit], ([edit]) => {
+      if (edit) {
         this.#historyService.initEdit(this.node());
       } else {
         this.#historyService.finishEdit(this.node());

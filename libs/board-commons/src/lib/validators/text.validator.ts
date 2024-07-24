@@ -7,7 +7,7 @@ import {
 const text = z.object({
   ...CommonBoardValidation,
   ...SizeValidator,
-  text: z.string().max(1000),
+  text: z.string(),
   rotation: z.number().safe(),
 });
 

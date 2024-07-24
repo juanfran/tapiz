@@ -20,7 +20,7 @@ import { HistoryService } from '../services/history.service';
 import { NodeSpaceComponent } from '../node-space';
 import { ToolbarComponent } from '@tapiz/ui/toolbar';
 import { EditorViewComponent } from '@tapiz/ui/editor-view';
-import { filter, pairwise, switchMap } from 'rxjs';
+import { switchMap } from 'rxjs';
 import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import {
   DrawingDirective,
@@ -30,6 +30,7 @@ import { NodeStore } from '../node/node.store';
 import { NodesActions } from '../services/nodes-actions';
 import { input } from '@angular/core';
 import { EditorPortalComponent } from '../editor-portal/editor-portal.component';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   selector: 'tapiz-panel',
@@ -53,10 +54,10 @@ import { EditorPortalComponent } from '../editor-portal/editor-portal.component'
                 [node]="node()"
                 [toolbar]="edit()"
                 [layoutToolbarOptions]="true"
-                [content]="node().content.text"
+                [content]="initialText()"
                 [focus]="edit()"
                 [fontSize]="true"
-                (contentChange)="newContent.set($event)" />
+                (contentChange)="setText($event)" />
             </tapiz-editor-portal>
           }
         </div>
@@ -106,7 +107,7 @@ export class PanelComponent implements OnInit {
 
   edit = signal(false);
   editText = signal('');
-  newContent = signal('');
+  initialText = signal('');
 
   get drawing() {
     return this.#drawingStore.drawing;
@@ -122,13 +123,27 @@ export class PanelComponent implements OnInit {
       event.preventDefault();
       event.stopPropagation();
 
-      this.startEdit();
+      this.initEdit();
     }
   }
 
   constructor() {
     effect(() => {
       this.#setCssVariables(this.node());
+    });
+
+    explicitEffect([this.focus], ([focus]) => {
+      if (!focus) {
+        this.cancelEdit();
+      }
+    });
+
+    explicitEffect([this.edit], ([edit]) => {
+      if (edit) {
+        this.#historyService.initEdit(this.node());
+      } else {
+        this.#historyService.finishEdit(this.node());
+      }
     });
 
     toObservable(this.focus)
@@ -142,14 +157,14 @@ export class PanelComponent implements OnInit {
         }),
       )
       .subscribe(() => {
-        this.finishEdit();
+        this.edit.set(false);
       });
   }
 
-  startEdit() {
-    this.#historyService.initEdit(this.node());
+  initEdit() {
+    this.initialText.set(this.node().content.text);
     this.edit.set(true);
-    this.newContent.set(this.node().content.text);
+    this.editText.set(this.node().content.text);
   }
 
   setDrawing(newLine: Drawing) {
@@ -168,46 +183,26 @@ export class PanelComponent implements OnInit {
       this.editText.set(node.content.text);
     });
 
-    const focus$ = toObservable(this.focus, {
-      injector: this.#injector,
-    });
-
-    focus$
-      .pipe(
-        pairwise(),
-        filter(([prev, next]) => prev && !next),
-      )
-      .subscribe(() => {
-        if (!this.focus() && this.edit()) {
-          this.finishEdit();
-        }
-      });
-
     if (this.focus() && !this.pasted()) {
-      this.startEdit();
+      this.initEdit();
     }
   }
 
-  finishEdit() {
+  setText(value: string) {
     this.#store.dispatch(
       BoardActions.batchNodeActions({
-        history: true,
+        history: false,
         actions: [
           this.#nodesActions.patch<Panel>({
             type: 'panel',
             id: this.node().id,
             content: {
-              text: this.newContent(),
+              text: value,
             },
           }),
         ],
       }),
     );
-
-    // delay to prevent flickering with the old content
-    requestAnimationFrame(() => {
-      this.cancelEdit();
-    });
   }
 
   cancelEdit() {

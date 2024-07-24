@@ -7,7 +7,7 @@ import {
 const panel = z.object({
   ...CommonBoardValidation,
   ...SizeValidator,
-  text: z.string().max(1000),
+  text: z.string(),
   backgroundColor: z.string().length(7).regex(/^#/).nullable(),
   borderColor: z.string().length(7).regex(/^#/).nullable(),
   borderWidth: z.number().nonnegative().safe().nullable(),

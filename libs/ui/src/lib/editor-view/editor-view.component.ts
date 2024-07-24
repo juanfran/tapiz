@@ -36,6 +36,7 @@ import { output } from '@angular/core';
 import { input } from '@angular/core';
 import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { Subject, sampleTime } from 'rxjs';
 
 @Component({
   selector: 'tapiz-editor-view',
@@ -83,6 +84,8 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
 
   #editor: WritableSignal<Editor | null> = signal(null);
 
+  #contentChange$ = new Subject<string>();
+
   linkUrl = signal('');
 
   constructor() {
@@ -108,6 +111,12 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
         } else {
           this.#hideToolbar();
         }
+      });
+
+    this.#contentChange$
+      .pipe(takeUntilDestroyed(), sampleTime(300))
+      .subscribe((html) => {
+        this.contentChange.emit(html);
       });
   }
 
@@ -185,7 +194,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
         ],
         content: node.innerHTML,
         onUpdate: ({ editor }) => {
-          this.contentChange.emit(editor.getHTML());
+          this.#contentChange$.next(editor.getHTML());
         },
         onCreate: ({ editor }) => {
           if (this.focus()) {

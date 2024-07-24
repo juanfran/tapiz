@@ -7,7 +7,7 @@ import {
 const image = z.object({
   ...CommonBoardValidation,
   ...SizeValidator,
-  url: z.string().max(1000),
+  url: z.string().max(2000),
   rotation: z.number().safe(),
 });
 

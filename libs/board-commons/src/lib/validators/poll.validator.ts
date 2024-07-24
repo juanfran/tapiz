@@ -17,7 +17,7 @@ const pollBoard = z.object({
   options: z.array(
     z.object({
       id: z.string().uuid(),
-      text: z.string().max(1000),
+      text: z.string().max(2000),
     }),
   ),
 });

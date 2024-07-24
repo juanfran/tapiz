@@ -10,16 +10,17 @@ import {
 import { Store } from '@ngrx/store';
 import { Text, TuNode } from '@tapiz/board-commons';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { HistoryService } from '../services/history.service';
 import { NodeSpaceComponent } from '../node-space';
 import { ToolbarComponent } from '@tapiz/ui/toolbar';
 import { EditorViewComponent } from '@tapiz/ui/editor-view';
-import { filter, pairwise } from 'rxjs';
 import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { input } from '@angular/core';
 import { EditorPortalComponent } from '../editor-portal/editor-portal.component';
+import { explicitEffect } from 'ngxtension/explicit-effect';
+import { switchMap } from 'rxjs';
 
 @Component({
   selector: 'tapiz-text',
@@ -41,10 +42,10 @@ import { EditorPortalComponent } from '../editor-portal/editor-portal.component'
             #editorView="editorView"
             [node]="node()"
             [toolbar]="edit()"
-            [content]="node().content.text"
+            [content]="initialText()"
             [focus]="edit()"
             [fontSize]="true"
-            (contentChange)="newContent.set($event)" />
+            (contentChange)="setText($event)" />
         </tapiz-editor-portal>
       }
     </tapiz-node-space>
@@ -67,88 +68,101 @@ import { EditorPortalComponent } from '../editor-portal/editor-portal.component'
   },
 })
 export class TextComponent implements OnInit {
-  private injector = inject(Injector);
-  private historyService = inject(HistoryService);
-  private store = inject(Store);
+  #injector = inject(Injector);
+  #historyService = inject(HistoryService);
+  #store = inject(Store);
+  #hotkeysService = inject(HotkeysService);
 
-  public node = input.required<TuNode<Text>>();
+  node = input.required<TuNode<Text>>();
+  pasted = input.required<boolean>();
+  focus = input.required<boolean>();
 
-  public pasted = input.required<boolean>();
-
-  public focus = input.required<boolean>();
-
-  public edit = signal(false);
-  public editText = signal('');
-  public newContent = signal('');
+  edit = signal(false);
+  editText = signal('');
+  initialText = signal('');
 
   @HostListener('dblclick', ['$event'])
-  public mousedown(event: MouseEvent) {
+  mousedown(event: MouseEvent) {
     if (!this.edit()) {
       event.preventDefault();
       event.stopPropagation();
 
-      this.startEdit();
+      this.initEdit();
     }
   }
 
-  public startEdit() {
-    this.historyService.initEdit(this.node());
-    this.edit.set(true);
-    this.newContent.set(this.node().content.text);
+  constructor() {
+    explicitEffect([this.focus], ([focus]) => {
+      if (!focus) {
+        this.cancelEdit();
+      }
+    });
+
+    explicitEffect([this.edit], ([edit]) => {
+      if (edit) {
+        this.#historyService.initEdit(this.node());
+      } else {
+        this.#historyService.finishEdit(this.node());
+      }
+    });
+
+    toObservable(this.focus)
+      .pipe(
+        takeUntilDestroyed(),
+        switchMap((focus) => {
+          if (focus) {
+            return this.#hotkeysService.listen({ key: 'Escape' });
+          }
+          return [];
+        }),
+      )
+      .subscribe(() => {
+        this.edit.set(false);
+      });
   }
 
-  public ngOnInit() {
+  initEdit() {
+    this.initialText.set(this.node().content.text);
+    this.edit.set(true);
+    this.editText.set(this.node().content.text);
+  }
+
+  ngOnInit() {
     toObservable(this.node, {
-      injector: this.injector,
+      injector: this.#injector,
     }).subscribe((node) => {
       this.editText.set(node.content.text);
     });
 
-    const focus$ = toObservable(this.focus, {
-      injector: this.injector,
-    });
-
-    focus$
-      .pipe(
-        pairwise(),
-        filter(([prev, next]) => prev && !next),
-      )
-      .subscribe(() => {
-        if (!this.focus() && this.edit()) {
-          this.store.dispatch(
-            BoardActions.batchNodeActions({
-              history: true,
-              actions: [
-                {
-                  data: {
-                    type: 'text',
-                    id: this.node().id,
-                    content: {
-                      text: this.newContent(),
-                    },
-                  },
-                  op: 'patch',
-                },
-              ],
-            }),
-          );
-
-          // delay to prevent flickering with the old content
-          requestAnimationFrame(() => {
-            this.cancelEdit();
-          });
-        }
-      });
-
     if (this.focus() && !this.pasted()) {
-      this.startEdit();
+      this.initEdit();
     }
   }
 
-  public cancelEdit() {
+  cancelEdit() {
     if (this.edit()) {
-      this.historyService.finishEdit(this.node());
+      this.#historyService.finishEdit(this.node());
       this.edit.set(false);
     }
+  }
+
+  setText(value: string) {
+    this.#store.dispatch(
+      BoardActions.batchNodeActions({
+        history: false,
+        actions: [
+          {
+            data: {
+              type: 'text',
+              id: this.node().id,
+              content: {
+                text: value,
+              },
+            },
+            op: 'patch',
+          },
+        ],
+      }),
+    );
   }
 }

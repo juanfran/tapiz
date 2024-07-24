@@ -54,7 +54,7 @@ const story = z.array(
   z.object({
     id: z.string().uuid(),
     title: z.string().max(1000),
-    description: z.string().max(1000),
+    description: z.string().max(5000),
     show: z.boolean(),
   }),
 );

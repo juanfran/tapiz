@@ -63,7 +63,7 @@ export class Server {
 
       const boardNodes = board.board ?? [];
 
-      this.state[boardId] = syncNodeBox({ history: 0 });
+      this.state[boardId] = syncNodeBox({ history: 0, log: false });
 
       this.updateBoard(
         boardId,
