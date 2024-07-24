@@ -2,7 +2,12 @@
   @if (boardMode() === 0) {
     <div class="right-col-toolbar users">
       <button class="title-container">
-        <h2 class="title">People</h2>
+        <h2 class="title">
+          People
+          @if (vm.showUsers && vm.users.length > 0) {
+            <span class="count">({{ vm.users.length + 1 }})</span>
+          }
+        </h2>
       </button>
       <div class="user-container">
         @if (vm.showUsers) {
