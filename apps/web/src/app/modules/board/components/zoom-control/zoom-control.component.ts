@@ -14,12 +14,14 @@ import { BoardFacade } from '../../../../services/board-facade.service';
   standalone: true,
   imports: [],
   template: `<button
+      title="Zoom out"
       (click)="decrease()"
       type="button">
       -
     </button>
     <span class="percentage">{{ zoomPercentage() }}</span>
     <button
+      title="Zoom in"
       (click)="increase()"
       type="button">
       +
