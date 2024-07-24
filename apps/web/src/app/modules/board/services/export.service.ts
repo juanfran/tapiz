@@ -45,6 +45,9 @@ export class ExportService {
             }),
             panel: insideNode<Panel>(note.content, panels)?.content?.text,
             group: insideNode<Group>(note.content, groups)?.content?.title,
+            comments: note.children?.filter(
+              (child) => child.type === 'comment',
+            ),
           };
 
           return node;
