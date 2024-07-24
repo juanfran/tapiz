@@ -26,6 +26,7 @@ import {
   take,
   throttleTime,
   pairwise,
+  switchMap,
 } from 'rxjs/operators';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { BoardActions } from '../actions/board.actions';
@@ -447,23 +448,23 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       }),
     );
 
-    merge(
-      this.boardMoveService.mouseDown$.pipe(map(() => true)),
-      this.boardMoveService.mouseUp$.pipe(map(() => false)),
-    )
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((press) => {
-        if (press) {
+    this.boardMoveService.move$
+      .pipe(
+        switchMap(() => {
           this.store.dispatch(
             PageActions.setBoardCursor({ cursor: 'grabbing' }),
           );
-        } else {
-          const cursor = this.boardShourtcutsDirective.panInProgresss()
-            ? 'grab'
-            : 'default';
 
-          this.store.dispatch(PageActions.setBoardCursor({ cursor }));
-        }
+          return this.boardMoveService.mouseUp$.pipe(take(1));
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        const cursor = this.boardShourtcutsDirective.panInProgresss()
+          ? 'grab'
+          : 'default';
+
+        this.store.dispatch(PageActions.setBoardCursor({ cursor }));
       });
 
     userView$
