@@ -88,6 +88,7 @@ import { ZoomControlComponent } from '../components/zoom-control/zoom-control.co
 import { BoardNodesAlignComponent } from '../components/board-nodes-align/board-nodes-align.component';
 import { LiveReactionWallComponent } from '../components/live-reaction/live-reaction-wall.component';
 import { BoardEditorPortalComponent } from '../components/board-editor-portal/board-editor-portal.component';
+import { BoardShourtcutsDirective } from '../directives/board-shortcuts.directive';
 
 @UntilDestroy()
 @Component({
@@ -124,7 +125,7 @@ import { BoardEditorPortalComponent } from '../components/board-editor-portal/bo
     LiveReactionWallComponent,
     BoardEditorPortalComponent,
   ],
-  hostDirectives: [CopyPasteDirective],
+  hostDirectives: [CopyPasteDirective, BoardShourtcutsDirective],
   host: {
     '[class.node-selection-disabled]': '!nodeSelectionEnabled()',
   },
@@ -183,22 +184,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     }
 
     this.newNote$.next(event);
-  }
-
-  @HostListener('document:keydown.control.z') public undoAction() {
-    this.undo();
-  }
-
-  @HostListener('document:keydown.control.y') public redoAction() {
-    this.redo();
-  }
-
-  public undo() {
-    this.store.dispatch(PageActions.undo());
-  }
-
-  public redo() {
-    this.store.dispatch(PageActions.redo());
   }
 
   constructor() {
