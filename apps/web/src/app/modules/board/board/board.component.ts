@@ -28,7 +28,6 @@ import {
   pairwise,
 } from 'rxjs/operators';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { UntilDestroy, untilDestroyed } from '@ngneat/until-destroy';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
 
@@ -91,7 +90,6 @@ import { LiveReactionWallComponent } from '../components/live-reaction/live-reac
 import { BoardEditorPortalComponent } from '../components/board-editor-portal/board-editor-portal.component';
 import { BoardShourtcutsDirective } from '../directives/board-shortcuts.directive';
 
-@UntilDestroy()
 @Component({
   selector: 'tapiz-board',
   templateUrl: './board.component.html',
@@ -214,11 +212,11 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       },
     );
 
-    this.historyService.event$.pipe(untilDestroyed(this)).subscribe((event) => {
+    this.historyService.event$.pipe(takeUntilDestroyed()).subscribe((event) => {
       this.store.dispatch(PageActions.nodeSnapshot(event));
     });
 
-    this.rotateService.onStart$.pipe(untilDestroyed(this)).subscribe((node) => {
+    this.rotateService.onStart$.pipe(takeUntilDestroyed()).subscribe((node) => {
       this.boardFacade.patchHistory((history) => {
         const nodeAction: StateActions = {
           data: node,
@@ -232,7 +230,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     });
 
     this.rotateService.onRotate$
-      .pipe(untilDestroyed(this))
+      .pipe(takeUntilDestroyed())
       .subscribe((node) => {
         this.store.dispatch(
           BoardActions.batchNodeActions({
@@ -242,7 +240,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         );
       });
 
-    this.resizeService.onStart$.pipe(untilDestroyed(this)).subscribe((node) => {
+    this.resizeService.onStart$.pipe(takeUntilDestroyed()).subscribe((node) => {
       this.boardFacade.patchHistory((history) => {
         const nodeAction: StateActions = {
           data: node,
@@ -256,7 +254,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     });
 
     this.resizeService.onResize$
-      .pipe(untilDestroyed(this))
+      .pipe(takeUntilDestroyed())
       .subscribe((node) => {
         this.store.dispatch(
           BoardActions.batchNodeActions({
@@ -333,7 +331,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     if (boardId) {
       this.subscriptionService
         .watchBoardIds([boardId])
-        .pipe(untilDestroyed(this))
+        .pipe(takeUntilDestroyed())
         .subscribe(() => {
           this.store.dispatch(PageActions.refetchBoard());
         });
@@ -345,7 +343,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public dragConfig() {
     // todo:  better way to sync
     this.boardFacade.selectFocusNodes$
-      .pipe(untilDestroyed(this))
+      .pipe(takeUntilDestroyed())
       .subscribe((nodes) => {
         this.drawingStore.selectNode$.next(nodes);
       });
@@ -353,7 +351,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     this.boardFacade
       .getNodes()
       .pipe(
-        untilDestroyed(this),
+        takeUntilDestroyed(),
         map((nodes) => {
           return nodes.filter(
             (node) => node.type === 'note' || node.type === 'panel',
@@ -365,7 +363,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       });
 
     toObservable(this.drawingStore.drawing)
-      .pipe(untilDestroyed(this))
+      .pipe(takeUntilDestroyed())
       .subscribe((drawing) => {
         this.store.dispatch(
           PageActions.drawing({
@@ -379,7 +377,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     fromEvent<MouseEvent>(this.el.nativeElement, 'wheel', { passive: false })
       .pipe(
         filter((event: MouseEvent) => event.ctrlKey),
-        untilDestroyed(this),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((event: MouseEvent) => {
         event.preventDefault();
@@ -387,7 +385,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
 
     this.store
       .select(pageFeature.selectBoardCursor)
-      .pipe(untilDestroyed(this))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((cursor) => {
         this.el.nativeElement.style.setProperty('--default-cursor', cursor);
 
@@ -400,12 +398,12 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
 
     this.newNote$
       .pipe(
-        untilDestroyed(this),
         withLatestFrom(
           this.store.select(selectZoom),
           this.store.select(selectPosition),
           this.store.select(selectUserId),
         ),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(([event, zoom, position, userId]) => {
         this.notesService.createNote(userId, {
@@ -417,19 +415,19 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     this.boardMoveService.listen(this.el.nativeElement);
 
     this.boardMoveService.mouseDown$
-      .pipe(untilDestroyed(this))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.store.dispatch(PageActions.setFocusId({ focusId: '' }));
       });
 
     this.boardMoveService.mouseMove$
       .pipe(
-        untilDestroyed(this),
         withLatestFrom(
           this.store.select(selectZoom),
           this.store.select(selectPosition),
         ),
         throttleTime(0, animationFrameScheduler),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(([mousePosition, zoom, position]) => {
         updateUserPosition(position, mousePosition, zoom);
@@ -470,12 +468,12 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
 
     userView$
       .pipe(
-        untilDestroyed(this),
         withLatestFrom(
           this.boardMoveService.mouseMove$,
           this.store.select(selectMoveEnabled),
         ),
         filter(([, , moveEnabled]) => moveEnabled),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(([{ move, zoom }, mousePosition]) => {
         this.store.dispatch(
@@ -522,7 +520,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       this.store.select(selectZoom),
       this.store.select(selectPosition),
     ])
-      .pipe(untilDestroyed(this))
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([zoom, position]) => {
         this.workLayerNativeElement.style.transform = `translate(${position.x}px, ${position.y}px) scale(${zoom})`;
       });

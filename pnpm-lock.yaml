@@ -68,9 +68,6 @@ importers:
       '@lucia-auth/adapter-postgresql':
         specifier: ^3.1.2
         version: 3.1.2(lucia@3.2.0)(postgres@3.4.4)
-      '@ngneat/until-destroy':
-        specifier: ^10.0.0
-        version: 10.0.0(@angular/core@18.1.0(rxjs@7.8.1)(zone.js@0.14.5))(rxjs@7.8.1)
       '@ngrx/effects':
         specifier: 18.0.1
         version: 18.0.1(@angular/core@18.1.0(rxjs@7.8.1)(zone.js@0.14.5))(@ngrx/store@18.0.1(@angular/core@18.1.0(rxjs@7.8.1)(zone.js@0.14.5))(rxjs@7.8.1))(rxjs@7.8.1)
@@ -2323,12 +2320,6 @@ packages:
 
   '@ngneat/falso@7.2.0':
     resolution: {integrity: sha512-283EXBFd05kCbGuGSXgmvhCsQYEYzvD/eJaE7lxd05qRB0tgREvZX7TRlJ1KSp8nHxoK6Ws029G1Y30mt4IVAA==}
-
-  '@ngneat/until-destroy@10.0.0':
-    resolution: {integrity: sha512-xXFAabQ4YVJ82LYxdgUlaKZyR3dSbxqG3woSyaclzxfCgWMEDweCcM/GGYbNiHJa0WwklI98RXHvca+UyCxpeg==}
-    peerDependencies:
-      '@angular/core': '>=13'
-      rxjs: ^6.4.0 || ^7.0.0
 
   '@ngrx/effects@18.0.1':
     resolution: {integrity: sha512-ESxJYx31uABixtnWcuDY+HLKyqXKABpPG3LPDMyZrj7lIdjCaTk471QMhRZOme8QQKzlJt0drGfzFo3FM+QYuA==}
@@ -12082,12 +12073,6 @@ snapshots:
     dependencies:
       seedrandom: 3.0.5
       uuid: 8.3.2
-
-  '@ngneat/until-destroy@10.0.0(@angular/core@18.1.0(rxjs@7.8.1)(zone.js@0.14.5))(rxjs@7.8.1)':
-    dependencies:
-      '@angular/core': 18.1.0(rxjs@7.8.1)(zone.js@0.14.5)
-      rxjs: 7.8.1
-      tslib: 2.6.3
 
   '@ngrx/effects@18.0.1(@angular/core@18.1.0(rxjs@7.8.1)(zone.js@0.14.5))(@ngrx/store@18.0.1(@angular/core@18.1.0(rxjs@7.8.1)(zone.js@0.14.5))(rxjs@7.8.1))(rxjs@7.8.1)':
     dependencies:
