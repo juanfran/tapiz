@@ -1,126 +1,70 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  computed,
+} from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   selectUserHighlight,
   selectUserId,
 } from '../../selectors/page.selectors';
-import { RxState } from '@rx-angular/state';
 import { PageActions } from '../../actions/page.actions';
 import { BoardActions } from '../../actions/board.actions';
 import { User } from '@tapiz/board-commons';
-import { Observable, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SvgIconComponent } from '../svg-icon/svg-icon.component';
-import { NgClass, AsyncPipe } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
 import { pageFeature } from '../../reducers/page.reducer';
 import { BoardFacade } from '../../../../services/board-facade.service';
-
-interface State {
-  visible: boolean;
-  users: User[];
-  userId: User['id'];
-  userHighlight: User['id'] | null;
-  currentUser?: User;
-  follow: string;
-  showUsers: boolean;
-}
-
-interface ComponentViewModel {
-  visible: boolean;
-  users: User[];
-  currentUser?: User;
-  userHighlight: User['id'] | null;
-  follow: string;
-  showUsers: boolean;
-}
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'tapiz-users',
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState],
   standalone: true,
-  imports: [
-    SvgIconComponent,
-    NgClass,
-    AsyncPipe,
-    CdkMenuTrigger,
-    CdkMenu,
-    CdkMenuItem,
-  ],
+  imports: [SvgIconComponent, NgClass, CdkMenuTrigger, CdkMenu, CdkMenuItem],
 })
 export class UsersComponent {
-  private store = inject(Store);
-  private state = inject<RxState<State>>(RxState<State>);
-  private boardFacade = inject(BoardFacade);
+  #store = inject(Store);
+  #boardFacade = inject(BoardFacade);
+  #users = toSignal(
+    this.#boardFacade
+      .getUsers()
+      .pipe(map((users) => users.map((user) => user.content))),
+    { initialValue: [] },
+  );
+  #settings = toSignal(this.#boardFacade.getSettings(), { initialValue: null });
 
-  boardMode = this.store.selectSignal(pageFeature.selectBoardMode);
+  boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
+  showUsers = computed(() => {
+    return !this.#settings()?.content.anonymousMode;
+  });
+  users = computed(() =>
+    this.#users().filter((user) => user.id !== this.userId()),
+  );
+  userId = this.#store.selectSignal(selectUserId);
+  userHighlight = this.#store.selectSignal(selectUserHighlight);
+  isFollowing = this.#store.selectSignal(pageFeature.selectFollow);
+  currentUser = computed(() => {
+    return this.#users()?.find((user) => user.id === this.userId());
+  });
+  visible = computed(() => this.currentUser()?.visible);
 
-  constructor() {
-    this.state.connect(
-      'users',
-      this.boardFacade
-        .getUsers()
-        .pipe(map((users) => users.map((user) => user.content))),
-    );
-    this.state.connect(
-      'showUsers',
-      this.boardFacade.getSettings().pipe(
-        map((settings) => {
-          if (!settings) {
-            return true;
-          }
-
-          return !settings.content.anonymousMode;
-        }),
-      ),
-    );
-    this.state.connect('userId', this.store.select(selectUserId));
-    this.state.connect('userHighlight', this.store.select(selectUserHighlight));
-    this.state.connect('follow', this.store.select(pageFeature.selectFollow));
-    this.state.connect(
-      'currentUser',
-      combineLatest([
-        this.state.select('users'),
-        this.state.select('userId'),
-      ]).pipe(
-        map(([users, userId]) => {
-          return users.find((user) => user.id === userId);
-        }),
-      ),
-    );
-  }
-
-  public readonly viewModel$: Observable<ComponentViewModel> = this.state
-    .select()
-    .pipe(
-      map(
-        ({ users, userId, currentUser, userHighlight, follow, showUsers }) => {
-          return {
-            visible: currentUser?.visible ?? false,
-            users: users.filter((user) => user.id !== userId),
-            currentUser,
-            userHighlight,
-            follow,
-            showUsers,
-          };
-        },
-      ),
-    );
-
-  public toggleVisibility() {
-    this.store.dispatch(
+  toggleVisibility() {
+    this.#store.dispatch(
       BoardActions.batchNodeActions({
         history: false,
         actions: [
           {
             data: {
               type: 'user',
-              id: this.state.get('userId'),
+              id: this.userId(),
               content: {
-                visible: !this.state.get('currentUser')?.visible,
+                visible: !this.currentUser()?.visible,
               },
             },
             op: 'patch',
@@ -130,19 +74,19 @@ export class UsersComponent {
     );
   }
 
-  public toggleUserHighlight(userId: User['id']) {
-    this.store.dispatch(PageActions.toggleUserHighlight({ id: userId }));
+  toggleUserHighlight(userId: User['id']) {
+    this.#store.dispatch(PageActions.toggleUserHighlight({ id: userId }));
   }
 
-  public follow(userId: User['id']) {
-    this.store.dispatch(PageActions.followUser({ id: userId }));
+  follow(userId: User['id']) {
+    this.#store.dispatch(PageActions.followUser({ id: userId }));
   }
 
-  public goToUser(userId: User['id']) {
-    this.store.dispatch(PageActions.goToUser({ id: userId }));
+  goToUser(userId: User['id']) {
+    this.#store.dispatch(PageActions.goToUser({ id: userId }));
   }
 
-  public showVotes(userId: User['id']) {
-    this.store.dispatch(PageActions.toggleShowVotes({ userId }));
+  showVotes(userId: User['id']) {
+    this.#store.dispatch(PageActions.toggleShowVotes({ userId }));
   }
 }
