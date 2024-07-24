@@ -18,7 +18,6 @@ import {
   MatAutocompleteSelectedEvent,
 } from '@angular/material/autocomplete';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { RxState } from '@rx-angular/state';
 import {
   CocomaterialTag,
   CocomaterialApiVector,
@@ -57,7 +56,6 @@ import { BoardMoveService } from '../../services/board-move.service';
   ],
   templateUrl: './cocomaterial.component.html',
   styleUrls: ['./cocomaterial.component.scss'],
-  providers: [RxState],
 })
 export class CocomaterialComponent {
   #store = inject(Store);

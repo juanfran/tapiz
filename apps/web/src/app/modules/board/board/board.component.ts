@@ -8,6 +8,7 @@ import {
   OnDestroy,
   HostBinding,
   inject,
+  DestroyRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { rxEffect } from 'ngxtension/rx-effect';
@@ -77,7 +78,7 @@ import { appFeature } from '../../../+state/app.reducer';
 import { SubscriptionService } from '../../../services/subscription.service';
 import { DrawingStore } from '@tapiz/board-components/drawing/drawing.store';
 import { DrawingOptionsComponent } from '@tapiz/board-components/drawing-options';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { CommentsComponent } from '@tapiz/nodes/comments/comments.component';
 import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
 import { ConfigService } from '../../../services/config.service';
@@ -149,6 +150,8 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   private nodesActions = inject(NodesActions);
   private configService = inject(ConfigService);
   private fileUploadService = inject(FileUploadService);
+  private destroyRef = inject(DestroyRef);
+  private boardShourtcutsDirective = inject(BoardShourtcutsDirective);
   public readonly boardId$ = this.store.select(selectBoardId);
   public readonly nodes$ = this.boardFacade.getNodes();
 
@@ -445,6 +448,25 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         };
       }),
     );
+
+    merge(
+      this.boardMoveService.mouseDown$.pipe(map(() => true)),
+      this.boardMoveService.mouseUp$.pipe(map(() => false)),
+    )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((press) => {
+        if (press) {
+          this.store.dispatch(
+            PageActions.setBoardCursor({ cursor: 'grabbing' }),
+          );
+        } else {
+          const cursor = this.boardShourtcutsDirective.panInProgresss()
+            ? 'grab'
+            : 'default';
+
+          this.store.dispatch(PageActions.setBoardCursor({ cursor }));
+        }
+      });
 
     userView$
       .pipe(
