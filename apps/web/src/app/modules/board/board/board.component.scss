@@ -92,11 +92,23 @@ tapiz-header {
   }
 }
 
-
-
-
 #size-calculator {
   position: absolute;
   top: -1000px;
   z-index: -1;
+}
+
+.column-buttons {
+  pointer-events: none;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  bottom: var(--spacing-1);
+  width: 100%;
+  gap: var(--spacing-2);
+
+  > * {
+    pointer-events: auto;
+  }
 }

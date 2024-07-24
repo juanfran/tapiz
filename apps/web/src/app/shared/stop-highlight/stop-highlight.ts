@@ -10,27 +10,24 @@ import { isUserHighlighActive } from '../../modules/board/selectors/page.selecto
   standalone: true,
   imports: [MatButtonModule],
   template: `
-    <div class="wrapper">
-      @if (highlight()) {
-        <button
-          (click)="stop()"
-          mat-raised-button
-          color="primary">
-          Stop highlight user
-        </button>
-      }
-      <div></div>
-    </div>
+    @if (highlight()) {
+      <button
+        (click)="stop()"
+        mat-raised-button
+        color="primary">
+        Stop highlight user
+      </button>
+    }
   `,
   styleUrls: ['./stop-highlight.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class StopHighlightComponent {
-  private store = inject(Store);
+  #store = inject(Store);
 
-  public highlight = this.store.selectSignal(isUserHighlighActive());
+  highlight = this.#store.selectSignal(isUserHighlighActive());
 
-  public stop() {
-    this.store.dispatch(PageActions.stopHighlight());
+  stop() {
+    this.#store.dispatch(PageActions.stopHighlight());
   }
 }

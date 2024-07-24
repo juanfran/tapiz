@@ -41,8 +41,10 @@
   </div>
   @defer {
     @if (!isDemo) {
-      <tapiz-follow-user />
-      <tapiz-stop-highlight />
+      <div class="column-buttons">
+        <tapiz-follow-user />
+        <tapiz-stop-highlight />
+      </div>
     } @else {
       <tapiz-demo-intro />
     }
