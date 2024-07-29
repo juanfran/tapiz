@@ -1,4 +1,18 @@
 <div class="toolbar">
+  <div
+    class="toolbar-button-container"
+    [class.active]="!popup()">
+    <button
+      aria-label="Select"
+      class="toolbar-button"
+      (click)="popupOpen('')">
+      <tapiz-svg-icon
+        icon="mousepointer"
+        class="icon-svg"></tapiz-svg-icon>
+    </button>
+    <div class="toolbar-tooltip">Select</div>
+  </div>
+
   @if (boardMode() === 1) {
     <div
       class="toolbar-button-container"
