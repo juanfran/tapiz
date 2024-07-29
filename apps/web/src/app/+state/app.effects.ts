@@ -7,11 +7,13 @@ import { EMPTY, exhaustMap, map, mergeMap, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { appFeature } from './app.reducer';
+import { AuthService } from '../services/auth.service';
 
 export const logout$ = createEffect(
   (
     actions$ = inject(Actions),
     userApiService = inject(UserApiService),
+    authService = inject(AuthService),
     router = inject(Router),
   ) => {
     return actions$.pipe(
@@ -21,7 +23,9 @@ export const logout$ = createEffect(
       }),
       map(() => {
         document.cookie = '';
-        localStorage.removeItem('userId');
+        localStorage.removeItem('user');
+        authService.removeLocalStoreUser();
+
         router.navigate(['/login']);
 
         return AppActions.setUser({ user: null });

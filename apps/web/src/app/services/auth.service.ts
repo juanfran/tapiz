@@ -4,6 +4,7 @@ import { BehaviorSubject, take } from 'rxjs';
 import { AppActions } from '../+state/app.actions';
 import { filterNil } from 'ngxtension/filter-nil';
 import { appFeature } from '../+state/app.reducer';
+import { AuthUserModel } from '@tapiz/board-commons';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +13,7 @@ export class AuthService {
   private store = inject(Store);
   private authReady$ = new BehaviorSubject<boolean>(false);
 
-  public configureLogin() {
+  configureLogin() {
     const user = localStorage.getItem('user');
 
     if (user) {
@@ -29,11 +30,19 @@ export class AuthService {
     }
   }
 
-  public get authReady() {
+  get authReady() {
     return this.authReady$.asObservable();
   }
 
-  public logout() {
+  logout() {
     this.store.dispatch(AppActions.logout());
+  }
+
+  setLocalStoreUser(user: AuthUserModel) {
+    localStorage.setItem('user', JSON.stringify(user));
+  }
+
+  removeLocalStoreUser() {
+    localStorage.removeItem('user');
   }
 }
