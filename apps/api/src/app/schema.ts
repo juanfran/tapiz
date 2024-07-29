@@ -19,8 +19,8 @@ export const accounts = pgTable('accounts', {
   id: varchar('id', { length: 256 }).primaryKey(),
   name: varchar('name', { length: 256 }).notNull(),
   email: varchar('email', { length: 320 }).notNull().unique(),
-  picture: varchar('picture', { length: 256 }),
-  googleId: varchar('google_id', { length: 256 }).unique(),
+  picture: varchar('picture'),
+  googleId: varchar('google_id').unique(),
 });
 
 export const accountsToSession = pgTable('account_session', {
