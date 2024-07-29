@@ -13,12 +13,12 @@ import { PageActions } from '../../actions/page.actions';
 import { BoardActions } from '../../actions/board.actions';
 import { User } from '@tapiz/board-commons';
 import { map } from 'rxjs/operators';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { NgClass } from '@angular/common';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
 import { pageFeature } from '../../reducers/page.reducer';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'tapiz-users',
@@ -26,7 +26,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   styleUrls: ['./users.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [SvgIconComponent, NgClass, CdkMenuTrigger, CdkMenu, CdkMenuItem],
+  imports: [NgClass, CdkMenuTrigger, CdkMenu, CdkMenuItem, MatIconModule],
 })
 export class UsersComponent {
   #store = inject(Store);

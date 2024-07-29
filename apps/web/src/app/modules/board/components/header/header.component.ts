@@ -13,7 +13,6 @@ import { selectIsAdmin } from '../../selectors/page.selectors';
 import { ExportService } from '../../services/export.service';
 import { ClickOutside } from 'ngxtension/click-outside';
 import { AutoFocusDirective } from '../../directives/autofocus.directive';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -36,7 +35,6 @@ import { MatButtonModule } from '@angular/material/button';
   standalone: true,
   imports: [
     RouterLink,
-    SvgIconComponent,
     AutoFocusDirective,
     ClickOutside,
     MatIconModule,

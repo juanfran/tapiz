@@ -20,7 +20,6 @@ import { EmojiClickEvent, NativeEmoji } from 'emoji-picker-element/shared';
 import { CocomaterialComponent } from '../cocomaterial/cocomaterial.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { AsyncPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { TokenSelectorComponent } from '../token-selector/token-selector.component';
@@ -51,7 +50,6 @@ import { LiveReactionComponent } from '../live-reaction/live-reaction.component'
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    SvgIconComponent,
     MatInputModule,
     MatButtonModule,
     AsyncPipe,

@@ -17,9 +17,10 @@
             [class.offline]="!user.connected"
             [class.active]="user.id === userHighlight()"
             class="user">
-            <tapiz-svg-icon
-              icon="user"
-              class="icon-svg"></tapiz-svg-icon>
+            <mat-icon
+              class="icon-svg"
+              svgIcon="user"></mat-icon>
+
             <p class="username">
               <span
                 class="name"
@@ -40,9 +41,9 @@
         class="user me"
         [cdkMenuTriggerFor]="menu"
         [cdkMenuTriggerData]="{ user: currentUser() }">
-        <tapiz-svg-icon
-          icon="user"
-          class="icon-svg"></tapiz-svg-icon>
+        <mat-icon
+          class="icon-svg"
+          svgIcon="user"></mat-icon>
         <p class="username">
           <span
             class="name"

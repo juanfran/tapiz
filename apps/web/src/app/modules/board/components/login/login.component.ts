@@ -1,7 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { SvgIconComponent } from '../svg-icon/svg-icon.component';
 import { ConfigService } from '../../../../services/config.service';
 import { NgOptimizedImage } from '@angular/common';
 
@@ -11,7 +10,7 @@ import { NgOptimizedImage } from '@angular/common';
   templateUrl: './login.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [MatButtonModule, MatIconModule, SvgIconComponent, NgOptimizedImage],
+  imports: [MatButtonModule, MatIconModule, NgOptimizedImage],
 })
 export class LoginComponent {
   private configService = inject(ConfigService);
