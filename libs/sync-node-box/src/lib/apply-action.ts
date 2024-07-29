@@ -5,6 +5,12 @@ const ignoreNodes = ['settings', 'user'];
 
 export function applyAction(nodes: TuNode[], action: StateActions) {
   if (action.op === 'add') {
+    const nodeAlreadyExists = nodes.some((it) => it.id === action.data.id);
+
+    if (nodeAlreadyExists) {
+      return nodes;
+    }
+
     nodes = [...nodes];
     const value = action.data;
 

@@ -15,6 +15,19 @@ describe('syncNodeBox', () => {
     expect(box.get()).toEqual([newNode]);
   });
 
+  it('add the same node twice', () => {
+    const box = syncNodeBox();
+    const newNode: TuNode = { id: '1', type: 'test', content: {} };
+    const actions: StateActions[] = [{ op: 'add', data: newNode }];
+
+    const newNode2: TuNode = { id: '1', type: 'test2', content: {} };
+    const actions2: StateActions[] = [{ op: 'add', data: newNode2 }];
+    box.actions(actions);
+    box.actions(actions2);
+
+    expect(box.get()).toEqual([newNode]);
+  });
+
   it('should apply patch action', () => {
     const box = syncNodeBox();
     const initialNode: TuNode = {
