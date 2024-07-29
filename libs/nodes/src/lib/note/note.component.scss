@@ -41,11 +41,13 @@ textarea {
   }
 
   &:not(.visible) .rich-text {
-    font-family:
-      "Redacted Script",
-      -apple-system,
-      system-ui,
-      sans-serif;
+    ::ng-deep * {
+      font-family:
+        "Redacted Script",
+        -apple-system,
+        system-ui,
+        sans-serif !important;
+    }
   }
 
   &.focus {
