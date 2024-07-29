@@ -1,7 +1,7 @@
 import {
   BoardCommonActions,
-  NodeAdd,
   StateActions,
+  TuNode,
   UserNode,
 } from '@tapiz/board-commons';
 import { Server } from './server.js';
@@ -198,7 +198,7 @@ export class Client {
       op: 'patch',
     };
 
-    this.sendAll(this.boardId, this.getSetStateAction([action]));
+    this.sendAll(this.boardId, this.getStateAction([action]));
     const roomSize =
       this.server.io.of('/').adapter.rooms.get(this.boardId)?.size || 0;
 
@@ -217,7 +217,7 @@ export class Client {
     }
 
     this.updateStateWithActions(actions);
-    this.sendAll(this.boardId, this.getSetStateAction(actions));
+    this.sendAll(this.boardId, this.getStateAction(actions));
   }
 
   private async join(message: { boardId: string }) {
@@ -274,27 +274,16 @@ export class Client {
       this.refreshIsAdmin();
       this.privateId = boardUser.privateId;
 
-      const initStateActions: StateActions[] = [
-        ...board.map((it) => {
-          const add: NodeAdd = {
-            data: it,
-            op: 'add',
-          };
-
-          return add;
-        }),
-      ];
-
       const userAction: StateActions = {
         data: user,
         op: isAlreadyInBoard ? 'patch' : 'add',
       };
 
-      this.sendAll(this.boardId, this.getSetStateAction([userAction]));
+      this.sendAll(this.boardId, this.getStateAction([userAction]));
 
       this.socket.join(this.boardId);
 
-      this.send(this.getSetStateAction(initStateActions));
+      this.send(this.getSetStateAction(board));
     } catch (e) {
       console.error(e);
     }
@@ -310,9 +299,16 @@ export class Client {
     this.isAdmin = admins.includes(this.id);
   }
 
-  getSetStateAction(action: StateActions[]) {
+  getSetStateAction(nodes: TuNode[]) {
     return {
       type: BoardCommonActions.setState,
+      data: nodes,
+    };
+  }
+
+  getStateAction(action: StateActions[]) {
+    return {
+      type: BoardCommonActions.stateAction,
       data: action,
     };
   }

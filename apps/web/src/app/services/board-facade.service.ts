@@ -30,39 +30,46 @@ export class BoardFacade {
   private board = syncNodeBox({ log: false });
   private store = inject(Store);
 
-  public start() {
+  start() {
     this.board.update(() => {
       return [];
     });
     addRawLog('start');
   }
 
-  public get() {
+  get() {
     return this.board.get();
   }
 
-  public applyActions(actions: StateActions[], history = false) {
+  setState(nodes: TuNode[]) {
+    this.board.update(() => {
+      return nodes;
+    });
+    addRawLog('setState');
+  }
+
+  applyActions(actions: StateActions[], history = false) {
     const state = this.board.actions(actions, history);
 
     addLog('facade', actions, state);
   }
 
-  public getNodes() {
+  getNodes() {
     return this.board.sync();
   }
 
-  public patchHistory(fn: Parameters<typeof this.board.patchHistory>[0]) {
+  patchHistory(fn: Parameters<typeof this.board.patchHistory>[0]) {
     this.board.patchHistory(fn);
     addRawLog('patchHistory');
   }
 
-  public getUsers(): Observable<UserNode[]> {
+  getUsers(): Observable<UserNode[]> {
     return this.getNodes().pipe(
       map((nodes) => nodes.filter((it): it is UserNode => it.type === 'user')),
     );
   }
 
-  public getSettings(): Observable<TuNode<BoardSettings> | undefined> {
+  getSettings(): Observable<TuNode<BoardSettings> | undefined> {
     return this.getNodes().pipe(
       map((nodes) => {
         return nodes.find((it) => isBoardSettings(it)) as
@@ -72,17 +79,17 @@ export class BoardFacade {
     );
   }
 
-  public selectNotes() {
+  selectNotes() {
     return this.getNodes().pipe(map((nodes) => nodes.filter(isNote)));
   }
 
-  public selectUserById(id: string) {
+  selectUserById(id: string) {
     return this.getUsers().pipe(
       map((nodes) => nodes.find((it) => it.id === id)),
     );
   }
 
-  public selectCursors() {
+  selectCursors() {
     return this.getUsers().pipe(
       concatLatestFrom(() => this.store.select(pageFeature.selectUserId)),
       map(([users, currentUser]) => {
@@ -98,7 +105,7 @@ export class BoardFacade {
     );
   }
 
-  public usernameById(userId: UserNode['id']) {
+  usernameById(userId: UserNode['id']) {
     return this.getUsers().pipe(
       map((users) => {
         const user = users.find((user) => userId === user.id);
@@ -108,7 +115,7 @@ export class BoardFacade {
     );
   }
 
-  public selectNode(id: string) {
+  selectNode(id: string) {
     return this.getNodes().pipe(
       map((nodes) => {
         return nodes.find((node) => node.id === id);
@@ -116,7 +123,7 @@ export class BoardFacade {
     );
   }
 
-  public readonly selectFocusNodes$ = combineLatest([
+  readonly selectFocusNodes$ = combineLatest([
     this.store.select(pageFeature.selectFocusId),
     this.getNodes(),
   ]).pipe(
@@ -129,7 +136,7 @@ export class BoardFacade {
     share(),
   );
 
-  public undo() {
+  undo() {
     const actions = this.board.undo(false);
 
     addLog('facade', actions, {});
@@ -137,7 +144,7 @@ export class BoardFacade {
     return actions;
   }
 
-  public redo() {
+  redo() {
     const actions = this.board.redo(false);
 
     addLog('facade', actions, {});

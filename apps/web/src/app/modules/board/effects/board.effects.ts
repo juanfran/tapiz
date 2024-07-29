@@ -91,6 +91,20 @@ export class BoardEffects {
       return this.actions$.pipe(
         ofType(BoardActions.setState),
         tap(({ data }) => {
+          this.boardFacade.setState(data);
+        }),
+      );
+    },
+    {
+      dispatch: false,
+    },
+  );
+
+  public stateAction$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(BoardActions.stateAction),
+        tap(({ data }) => {
           this.boardFacade.applyActions(data);
         }),
       );

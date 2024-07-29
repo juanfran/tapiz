@@ -1,6 +1,6 @@
 import { props, createAction } from '@ngrx/store';
 import { BoardCommonActions } from '../board-common-actions';
-import { BachStateActions, StateActions } from '../models/node.model';
+import { BachStateActions, StateActions, TuNode } from '../models/node.model';
 
 export const BoardActions = {
   broadcast: createAction(
@@ -17,6 +17,10 @@ export const BoardActions = {
   ),
   setState: createAction(
     BoardCommonActions.setState,
+    props<{ data: TuNode[] }>(),
+  ),
+  stateAction: createAction(
+    BoardCommonActions.stateAction,
     props<{ data: StateActions[] }>(),
   ),
 };
