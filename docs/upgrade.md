@@ -24,7 +24,7 @@ node-fetch - it will break scripts/
 [] pnpm start
 [] pnpm lint
 [] pnpm test
-[] pnpm build:prod
+[] pnpm build
 
 ## Revert failed update
 
