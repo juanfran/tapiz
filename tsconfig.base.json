@@ -20,6 +20,7 @@
     "lib": ["ESNext.Array", "es2023", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
       "@tapiz/api/*": ["apps/api/src/*"],
