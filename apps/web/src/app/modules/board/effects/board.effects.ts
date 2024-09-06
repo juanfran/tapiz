@@ -27,7 +27,10 @@ import { BoardFacade } from '../../../services/board-facade.service';
 import { pageFeature } from '../reducers/page.reducer';
 import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
 import { ConfigService } from '../../../services/config.service';
-import { LiveReactionStore } from '../components/live-reaction/live-reaction.store';
+import {
+  EmojiMessage,
+  LiveReactionStore,
+} from '../components/live-reaction/live-reaction.store';
 
 @Injectable()
 export class BoardEffects {
@@ -294,8 +297,8 @@ export class BoardEffects {
     () => {
       return this.actions$.pipe(
         ofType(BoardCommonActions.broadcast),
-        tap((message) => {
-          this.liveReactionStore.add(message.data.emoji, message.data.position);
+        tap((message: EmojiMessage) => {
+          this.liveReactionStore.add(message.data.url, message.data.position);
         }),
       );
     },

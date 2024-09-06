@@ -39,9 +39,7 @@ import {
         <img
           width="100"
           height="100"
-          src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/{{
-            emoji.emoji
-          }}" />
+          [src]="emoji.url" />
       </div>
     }
   `,

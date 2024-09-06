@@ -1,51 +1,56 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   signal,
 } from '@angular/core';
-import emojisSmiles from './emojis-smiles';
-import emojisHandGestures from './emojis-hand-gestures';
-import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { BoardMoveService } from '../../services/board-move.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs';
+import {
+  takeUntilDestroyed,
+  toObservable,
+  toSignal,
+} from '@angular/core/rxjs-interop';
+import { filter, switchMap } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { PageActions } from '../../actions/page.actions';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { LiveReactionStore } from './live-reaction.store';
+import {
+  MatFormField,
+  MatSelectChange,
+  MatSelectModule,
+} from '@angular/material/select';
+import { HttpClient } from '@angular/common/http';
+import { NgOptimizedImage } from '@angular/common';
 
-const emojis = [
-  ...emojisSmiles.map((emoji) => {
-    return `/Smilies/${emoji}`;
-  }),
-  ...emojisHandGestures.map((emoji) => {
-    return `/Hand%20gestures/${emoji}`;
-  }),
-];
+interface Emoji {
+  download_url: string;
+  name: string;
+}
 
 @Component({
   selector: 'tapiz-live-reaction',
   standalone: true,
-  imports: [InfiniteScrollDirective],
+  imports: [MatSelectModule, MatFormField, NgOptimizedImage],
   template: `
-    <div
-      infiniteScroll
-      [infiniteScrollDistance]="2"
-      [infiniteScrollThrottle]="50"
-      [scrollWindow]="false"
-      (scrolled)="onScroll()"
-      class="list">
-      @for (emoji of emojis; track $index) {
+    <mat-form-field>
+      <mat-select
+        [value]="category()"
+        (selectionChange)="newCategory($event)">
+        @for (category of categories; track category.value) {
+          <mat-option [value]="category.name">{{ category.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <div class="list">
+      @for (emoji of emojis(); track emoji.download_url) {
         <button
           type="button"
-          [class.selected]="selected() === emoji"
-          (click)="selected.set(emoji)">
+          [class.selected]="selected() === emoji.download_url"
+          (click)="selectEmoji(emoji.download_url)">
           <img
-            [src]="
-              'https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/' +
-              emoji
-            "
+            [ngSrc]="emoji.download_url"
             width="100"
             height="100" />
         </button>
@@ -56,11 +61,81 @@ const emojis = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LiveReactionComponent {
-  emojis = emojis.slice(0, 30);
   #boardMoveService = inject(BoardMoveService);
   #store = inject(Store);
   #liveReactionStore = inject(LiveReactionStore);
+  #http = inject(HttpClient);
   selected = signal<string>('');
+
+  category = signal('Smilies');
+
+  normalizedCategory = computed(() => {
+    return this.category().replaceAll(' ', '%20').replaceAll('&', 'and');
+  });
+
+  emojis$ = toObservable(this.normalizedCategory).pipe(
+    switchMap((category) => {
+      return this.#fetchCategory(category);
+    }),
+    takeUntilDestroyed(),
+  );
+
+  emojis = toSignal(this.emojis$, {
+    initialValue: [] as Emoji[],
+  });
+
+  visibleEmojis = computed(() => {
+    return this.emojis().slice(0, (this.page() + 1) * 30);
+  });
+
+  page = signal(0);
+
+  categories = [
+    {
+      name: 'Smilies',
+      value: 'smilies',
+    },
+    {
+      name: 'Hand gestures',
+      value: 'hand-gestures',
+    },
+    {
+      name: 'People',
+      value: 'people',
+    },
+    {
+      name: 'People with activities',
+      value: 'people-with-activities',
+    },
+    {
+      name: 'People with professions',
+      value: 'people-with-professions',
+    },
+    {
+      name: 'Animals',
+      value: 'animals',
+    },
+    {
+      name: 'Food',
+      value: 'food',
+    },
+    {
+      name: 'Activities',
+      value: 'activities',
+    },
+    {
+      name: 'Travel & places',
+      value: 'travel-and-places',
+    },
+    {
+      name: 'Objects',
+      value: 'objects',
+    },
+    {
+      name: 'Symbols',
+      value: 'symbols',
+    },
+  ];
 
   constructor() {
     explicitEffect([this.selected], ([selected]) => {
@@ -89,13 +164,19 @@ export class LiveReactionComponent {
       });
   }
 
-  onScroll() {
-    if (this.emojis.length >= emojis.length) {
-      return;
-    }
+  newCategory(event: MatSelectChange) {
+    this.category.set(event.value);
+  }
 
-    this.emojis.push(
-      ...emojis.slice(this.emojis.length, this.emojis.length + 20),
+  selectEmoji(url: string) {
+    this.selected.update((currentUrl) => {
+      return currentUrl === url ? '' : url;
+    });
+  }
+
+  #fetchCategory(category: string) {
+    return this.#http.get<Emoji[]>(
+      `https://api.github.com/repositories/516731265/contents/Emojis/${category}`,
     );
   }
 }

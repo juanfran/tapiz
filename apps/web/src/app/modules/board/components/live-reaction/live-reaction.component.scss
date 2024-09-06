@@ -13,6 +13,10 @@
   grid-gap: 10px;
 }
 
+mat-form-field {
+  margin-block-end: var(--spacing-2);
+}
+
 .selected {
   border: 2px solid var(--brand);
 }

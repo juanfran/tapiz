@@ -4,10 +4,18 @@ import { Point } from '@tapiz/board-commons';
 import { WsService } from '../../../ws/services/ws.service';
 import { BoardActions } from '../../actions/board.actions';
 
+export interface EmojiMessage {
+  data: {
+    type: 'emoji';
+    url: string;
+    position: Point;
+  };
+}
+
 type LiveReactionsState = {
   emojis: {
     id: symbol;
-    emoji: string;
+    url: string;
     position: Point;
   }[];
 };
@@ -20,7 +28,7 @@ export const LiveReactionStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
   withMethods((store, wsService = inject(WsService)) => {
-    function addEmoji(emoji: string, position: Point) {
+    function addEmoji(url: string, position: Point) {
       const id = Symbol();
 
       patchState(store, (state) => {
@@ -30,7 +38,7 @@ export const LiveReactionStore = signalStore(
             ...state.emojis,
             {
               id,
-              emoji,
+              url,
               position,
             },
           ],
@@ -48,21 +56,21 @@ export const LiveReactionStore = signalStore(
     }
 
     return {
-      broadcast: (emoji: string, position: Point) => {
+      broadcast: (url: string, position: Point) => {
         wsService.send([
           BoardActions.broadcast({
             data: {
               type: 'emoji',
-              emoji,
+              url,
               position,
             },
-          }),
+          } as EmojiMessage),
         ]);
 
-        addEmoji(emoji, position);
+        addEmoji(url, position);
       },
-      add(emoji: string, position: Point) {
-        addEmoji(emoji, position);
+      add(url: string, position: Point) {
+        addEmoji(url, position);
       },
     };
   }),
