@@ -166,7 +166,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     pageFeature.selectBoardMode,
   );
   public readonly nodeSelectionEnabled = this.store.selectSignal(
-    pageFeature.selectNodeSelection,
+    pageFeature.selectIsNodeSelectionEnabled,
   );
   public readonly loadingBar = this.store.selectSignal(
     pageFeature.selectLoadingBar,
@@ -385,7 +385,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       });
 
     this.store
-      .select(pageFeature.selectBoardCursor)
+      .select(pageFeature.selectCurrentBoardCursor)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((cursor) => {
         this.el.nativeElement.style.setProperty('--default-cursor', cursor);
@@ -447,24 +447,19 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         };
       }),
     );
-
     this.boardMoveService.move$
       .pipe(
+        withLatestFrom(this.store.select(pageFeature.selectDragInProgress)),
+        filter(([, inProgress]) => !inProgress),
         switchMap(() => {
-          this.store.dispatch(
-            PageActions.setBoardCursor({ cursor: 'grabbing' }),
-          );
+          this.store.dispatch(PageActions.dragInProgress({ inProgress: true }));
 
           return this.boardMoveService.mouseUp$.pipe(take(1));
         }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(() => {
-        const cursor = this.boardShourtcutsDirective.panInProgresss()
-          ? 'grab'
-          : 'default';
-
-        this.store.dispatch(PageActions.setBoardCursor({ cursor }));
+        this.store.dispatch(PageActions.dragInProgress({ inProgress: false }));
       });
 
     userView$

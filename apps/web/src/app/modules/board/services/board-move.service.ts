@@ -110,14 +110,16 @@ export class BoardMoveService {
         this.store.select(pageFeature.selectZoom),
         this.store.select(pageFeature.selectPosition),
         this.store.select(pageFeature.selectBoardMode),
+        this.store.select(pageFeature.selectPanInProgress),
       ),
-      map(([event, zoom, position, layer]) => {
+      map(([event, zoom, position, layer, panInProgress]) => {
         return {
           layer,
           position: {
             x: (-position.x + event.clientX) / zoom,
             y: (-position.y + event.clientY) / zoom,
           },
+          panInProgress,
         };
       }),
     );

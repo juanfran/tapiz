@@ -68,5 +68,8 @@ export const PageActions = createActionGroup({
     'Set board cursor': props<{ cursor: string }>(),
     'Set node selection': props<{ enabled: boolean }>(),
     'Set loading bar': props<{ loadingBar: boolean }>(),
+    'Pan in progress': props<{ panInProgress: boolean }>(),
+    addToBoardInProcess: props<{ inProcess: boolean }>(),
+    dragInProgress: props<{ inProgress: boolean }>(),
   },
 });

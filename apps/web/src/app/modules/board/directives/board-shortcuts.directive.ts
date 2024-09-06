@@ -9,7 +9,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 })
 export class BoardShourtcutsDirective {
   #store = inject(Store);
-  panInProgresss = signal<boolean | null>(null);
+  panInProgress = signal<boolean | null>(null);
 
   @HostListener('document:keydown.control.z', ['$event']) undoAction(
     e: KeyboardEvent,
@@ -30,7 +30,7 @@ export class BoardShourtcutsDirective {
   @HostListener('document:keydown.space', ['$event']) pan(e: KeyboardEvent) {
     if (e.repeat) return;
 
-    this.panInProgresss.set(true);
+    this.panInProgress.set(true);
   }
 
   @HostListener('document:keyup.space', ['$event']) finishPan(
@@ -38,22 +38,18 @@ export class BoardShourtcutsDirective {
   ) {
     if (e.repeat) return;
 
-    this.panInProgresss.set(false);
+    this.panInProgress.set(false);
   }
 
   constructor() {
-    explicitEffect([this.panInProgresss], ([panInProgress]) => {
+    explicitEffect([this.panInProgress], ([panInProgress]) => {
       if (panInProgress === null) {
         return;
       }
 
-      if (panInProgress) {
-        this.#store.dispatch(PageActions.setBoardCursor({ cursor: 'grab' }));
-        this.#store.dispatch(PageActions.setNodeSelection({ enabled: false }));
-      } else {
-        this.#store.dispatch(PageActions.setBoardCursor({ cursor: 'default' }));
-        this.#store.dispatch(PageActions.setNodeSelection({ enabled: true }));
-      }
+      this.#store.dispatch(
+        PageActions.panInProgress({ panInProgress: panInProgress }),
+      );
     });
   }
 }

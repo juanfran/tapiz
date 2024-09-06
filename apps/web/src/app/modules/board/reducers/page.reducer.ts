@@ -1,4 +1,4 @@
-import { createFeature, createReducer, on } from '@ngrx/store';
+import { createFeature, createReducer, createSelector, on } from '@ngrx/store';
 import {
   Point,
   User,
@@ -44,6 +44,9 @@ export interface PageState {
   loadingBar: boolean;
   teamName: string | null;
   teamId: string | null;
+  panInProgress: boolean;
+  addToBoardInProcess: boolean;
+  dragInProgress: boolean;
 }
 
 const initialPageState: PageState = {
@@ -83,6 +86,9 @@ const initialPageState: PageState = {
   loadingBar: false,
   teamName: null,
   teamId: null,
+  panInProgress: false,
+  addToBoardInProcess: false,
+  dragInProgress: false,
 };
 
 const reducer = createReducer(
@@ -268,6 +274,7 @@ const reducer = createReducer(
     state.dragEnabled = true;
     state.searching = false;
     state.nodeSelection = true;
+    state.addToBoardInProcess = false;
 
     return state;
   }),
@@ -403,9 +410,64 @@ const reducer = createReducer(
       loadingBar,
     };
   }),
+  on(PageActions.panInProgress, (state, { panInProgress }): PageState => {
+    return {
+      ...state,
+      panInProgress,
+    };
+  }),
+  on(PageActions.addToBoardInProcess, (state, { inProcess }): PageState => {
+    return {
+      ...state,
+      addToBoardInProcess: inProcess,
+    };
+  }),
+  on(PageActions.dragInProgress, (state, { inProgress }): PageState => {
+    return {
+      ...state,
+      dragInProgress: inProgress,
+    };
+  }),
 );
 
 export const pageFeature = createFeature({
   name: 'page',
   reducer,
+  extraSelectors: ({
+    selectBoardCursor,
+    selectAddToBoardInProcess,
+    selectPanInProgress,
+    selectDragInProgress,
+    selectNodeSelection,
+  }) => ({
+    selectIsNodeSelectionEnabled: createSelector(
+      selectNodeSelection,
+      selectAddToBoardInProcess,
+      selectPanInProgress,
+      (nodeSelection, addToBoardInProgress, panInProgress) => {
+        return nodeSelection && !addToBoardInProgress && !panInProgress;
+      },
+    ),
+    selectCurrentBoardCursor: createSelector(
+      selectBoardCursor,
+      selectAddToBoardInProcess,
+      selectPanInProgress,
+      selectDragInProgress,
+      (boardCursor, addToBoardInProgress, panInProgress, dragInProgress) => {
+        if (dragInProgress) {
+          return 'grabbing';
+        }
+
+        if (panInProgress) {
+          return 'grab';
+        }
+
+        if (addToBoardInProgress) {
+          return 'crosshair';
+        }
+
+        return boardCursor;
+      },
+    ),
+  }),
 });

@@ -98,13 +98,9 @@ export class CocomaterialComponent {
     });
 
     explicitEffect([this.selected], ([selected]) => {
-      if (selected) {
-        this.#store.dispatch(
-          PageActions.setBoardCursor({ cursor: 'crosshair' }),
-        );
-      } else {
-        this.#store.dispatch(PageActions.setBoardCursor({ cursor: 'default' }));
-      }
+      this.#store.dispatch(
+        PageActions.addToBoardInProcess({ inProcess: !!selected }),
+      );
     });
 
     this.#boardMoveService
@@ -114,6 +110,10 @@ export class CocomaterialComponent {
         filter(() => !!this.selected()),
       )
       .subscribe((data) => {
+        if (data.panInProgress) {
+          return;
+        }
+
         this.#addVectorToBoard(data);
       });
   }
