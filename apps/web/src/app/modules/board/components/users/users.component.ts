@@ -14,7 +14,12 @@ import { BoardActions } from '../../actions/board.actions';
 import { User } from '@tapiz/board-commons';
 import { map } from 'rxjs/operators';
 import { NgClass } from '@angular/common';
-import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
+import {
+  CdkMenu,
+  CdkMenuItem,
+  CdkMenuItemRadio,
+  CdkMenuTrigger,
+} from '@angular/cdk/menu';
 import { pageFeature } from '../../reducers/page.reducer';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -26,7 +31,14 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrls: ['./users.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [NgClass, CdkMenuTrigger, CdkMenu, CdkMenuItem, MatIconModule],
+  imports: [
+    NgClass,
+    CdkMenuTrigger,
+    CdkMenu,
+    CdkMenuItem,
+    MatIconModule,
+    CdkMenuItemRadio,
+  ],
 })
 export class UsersComponent {
   #store = inject(Store);
@@ -54,7 +66,7 @@ export class UsersComponent {
   });
   visible = computed(() => this.currentUser()?.visible);
 
-  toggleVisibility() {
+  setVisibility(visible: boolean) {
     this.#store.dispatch(
       BoardActions.batchNodeActions({
         history: false,
@@ -64,7 +76,7 @@ export class UsersComponent {
               type: 'user',
               id: this.userId(),
               content: {
-                visible: !this.currentUser()?.visible,
+                visible,
               },
             },
             op: 'patch',
