@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  HostListener,
   inject,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
@@ -38,6 +39,36 @@ export class ZoomControlComponent {
   zoomPercentage = computed(() => {
     return `${Math.round(this.#zoom() * 100)}%`;
   });
+
+  @HostListener('document:keydown.control.+', ['$event']) zoomIn(
+    e: KeyboardEvent,
+  ) {
+    if (e.repeat) return;
+
+    e.preventDefault();
+
+    this.increase();
+  }
+
+  @HostListener('document:keydown.control.-', ['$event']) zoomOut(
+    e: KeyboardEvent,
+  ) {
+    if (e.repeat) return;
+
+    e.preventDefault();
+
+    this.decrease();
+  }
+
+  @HostListener('document:keydown.control.0', ['$event']) resetZoom(
+    e: KeyboardEvent,
+  ) {
+    if (e.repeat) return;
+
+    e.preventDefault();
+
+    this.setNewZoom(1);
+  }
 
   setNewZoom(zoom: number) {
     if (zoom < 0.1) {
