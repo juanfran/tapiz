@@ -6,7 +6,7 @@ import { v4 } from 'uuid';
 import { createContext } from './auth.context.js';
 import { FastifyRequest } from 'fastify/types/request.js';
 import fastifyStatics from '@fastify/static';
-import { unlink } from 'fs';
+import { unlink, existsSync, mkdirSync } from 'fs';
 
 interface CheckAccessSuccess {
   success: true;
@@ -21,6 +21,10 @@ interface CheckAccessError {
 type CheckAccessResult = CheckAccessSuccess | CheckAccessError;
 
 const uploadFolder = path.join(import.meta.dirname, '../../../uploads');
+
+if (!existsSync(uploadFolder)) {
+  mkdirSync(uploadFolder);
+}
 
 async function checkAccess(
   boardId: string,
