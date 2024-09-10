@@ -13,6 +13,11 @@
   }
 }
 
+mat-icon {
+  inline-size: 33px;
+  block-size: 33px;
+}
+
 .toolbar-tooltip {
   align-items: center;
   background: #1f1f1f;
@@ -60,7 +65,7 @@
 }
 
 .toolbar-button-container {
-  margin-bottom: 0.15rem;
+  margin-block-end: var(--size-1);
   position: relative;
 
   &:last-child {
@@ -98,11 +103,7 @@
   justify-content: center;
   padding: 0;
   width: var(--toolbar-button-width);
-
-  svg {
-    height: 24px;
-    width: 24px;
-  }
+  padding: var(--size-4) 0;
 }
 
 .toolbar {
@@ -125,7 +126,6 @@ hr {
   font-size: 0;
   inline-size: 28px;
 }
-
 
 .toolbar-popup {
   background: var(--primary-color-background);

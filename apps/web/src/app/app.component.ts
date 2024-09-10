@@ -24,18 +24,24 @@ export class AppComponent {
   #matIconRegistry = inject(MatIconRegistry);
   #domSanitizer = inject(DomSanitizer);
   #icons = [
-    'mousepointer',
+    'add',
+    'area',
+    'coco',
+    'cursor',
+    'edit',
+    'emoji',
+    'estimation',
+    'group',
+    'heart',
+    'image',
+    'panel',
+    'poll',
+    'search',
+    'text',
+    'token',
+    'voting',
     'google',
     'user',
-    'add-note',
-    'group',
-    'voting-chip',
-    'mood',
-    'pencil-edit',
-    'panel',
-    'letter',
-    'picture',
-    'cocomaterial',
   ];
 
   constructor() {
