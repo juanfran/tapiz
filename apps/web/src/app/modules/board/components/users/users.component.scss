@@ -1,6 +1,6 @@
 :host {
   cursor: default;
-  max-width: 185px;
+  max-inline-size: 185px;
   position: fixed;
   right: 1rem;
   top: 70px;
@@ -19,6 +19,7 @@
   &.users {
     max-width: 185px;
     min-height: 18rem;
+    max-block-size: calc(100vh - 200px);
   }
 
   &:last-child {
@@ -38,7 +39,8 @@
 }
 
 .user-container {
-  flex-grow: 1;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .title-container {
