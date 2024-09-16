@@ -9,6 +9,7 @@ import { Store } from '@ngrx/store';
 import { pageFeature } from '../../reducers/page.reducer';
 import { PageActions } from '../../actions/page.actions';
 import { BoardFacade } from '../../../../services/board-facade.service';
+import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 
 @Component({
   selector: 'tapiz-zoom-control',
@@ -40,34 +41,22 @@ export class ZoomControlComponent {
     return `${Math.round(this.#zoom() * 100)}%`;
   });
 
-  @HostListener('document:keydown.control.+', ['$event']) zoomIn(
-    e: KeyboardEvent,
-  ) {
-    if (e.repeat) return;
+  @HostListener('document:keydown.z', ['$event']) zoomIn(e: KeyboardEvent) {
+    if (e.repeat || isInputField()) return;
 
     e.preventDefault();
 
     this.increase();
   }
 
-  @HostListener('document:keydown.control.-', ['$event']) zoomOut(
+  @HostListener('document:keydown.alt.z', ['$event']) zoomOut(
     e: KeyboardEvent,
   ) {
-    if (e.repeat) return;
+    if (e.repeat || isInputField()) return;
 
     e.preventDefault();
 
     this.decrease();
-  }
-
-  @HostListener('document:keydown.control.0', ['$event']) resetZoom(
-    e: KeyboardEvent,
-  ) {
-    if (e.repeat) return;
-
-    e.preventDefault();
-
-    this.setNewZoom(1);
   }
 
   setNewZoom(zoom: number) {
