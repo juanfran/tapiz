@@ -42,6 +42,7 @@ export class AppComponent {
     'voting',
     'google',
     'user',
+    'templates',
   ];
 
   constructor() {
