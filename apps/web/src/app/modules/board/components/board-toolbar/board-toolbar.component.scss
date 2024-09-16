@@ -14,8 +14,8 @@
 }
 
 mat-icon {
-  inline-size: 33px;
-  block-size: 33px;
+  inline-size: 24px;
+  block-size: 24px;
 }
 
 .toolbar-tooltip {
@@ -65,7 +65,7 @@ mat-icon {
 }
 
 .toolbar-button-container {
-  margin-block-end: var(--size-1);
+  margin-block: 0;
   position: relative;
 
   &:last-child {
@@ -122,9 +122,10 @@ mat-icon {
 hr {
   height: 2px;
   border: 0;
-  border-top: 1px solid #ABAAB5;
+  border-top: 1px solid #c4c1e3ff;
   font-size: 0;
   inline-size: 28px;
+  margin-block: var(--spacing-1);
 }
 
 .toolbar-popup {
