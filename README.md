@@ -1,20 +1,38 @@
-# Tapiz
+# Tapiz: Your Self-Hosted Collaborative Whiteboard
 
-Tapiz is a web-based collaborative board designed to assist teams with their online meetings and projects.
+Tapiz is a **self-hosted**, web-based collaborative board built for teams to run smoother online meetings, brainstorming sessions, and project planning. Whether you're organizing agile workflows, running retrospectives, or brainstorming ideas, Tapiz provides all the tools you need to collaborate in real-time — **on your own infrastructure**.
 
-![Demo](https://github.com/juanfran/tapiz/blob/main/resources/demo-tapiz-new.gif)
+![Tapiz Demo](https://github.com/juanfran/tapiz/blob/main/resources/demo-tapiz-new.gif)
 
-## Features
+## Key Features
 
-- Real-time collaboration with team members
-- Notes
-- Drawing
-- Polls
-- Templates
-- Estimations
-- And much more
+- 📝 **Real-time collaboration**
+- 🗒️ **Sticky notes**
+- 🎨 **Freehand drawing**
+- 📊 **Polling**
+- 📋 **Customizable templates**
+- 🔢 **Estimations**
+- ✅ **Voting**
+- ⚙️ **Self-hosted**
+- ➕ And much more
 
-## Technologies Used
+## Live Demo
+
+Try out the [live demo here](https://tapiz.pages.dev/board/demo) to explore its features directly in your browser.
+
+For the best experience, including **teams**, **multiple boards** and **real-time collaboration**, consider installing the full app on your own server.
+
+## Why Tapiz?
+
+Unlike other collaborative tools, Tapiz is open source and fully **self-hosted**. This gives you control over your data and deployment, perfect for teams who value privacy and customization.
+
+## Self-Host with Docker
+
+You can get started with Tapiz locally or self-host it using Docker.
+
+[Follow the step-by-step guide](./docs/INSTALL.md) to get started with Docker.
+
+## Built with:
 
 Tapiz is built using the following technologies and libraries:
 
@@ -26,13 +44,3 @@ Tapiz is built using the following technologies and libraries:
 - [TRPC](https://trpc.io/)
 - [Lucia](https://lucia-auth.com/)
 - [Nx](https://nx.dev/)
-
-## Installation with Docker
-
-You can get started with Tapiz locally or self-host it using Docker.
-
-[Follow the step-by-step guide](./docs/INSTALL.md) to get started with Docker.
-
-## Current Status
-
-This is an alpha release and is not yet ready for production use. Please open an issue to provide feedback on the current features and report any problems you encounter. We welcome suggestions for new features as well.

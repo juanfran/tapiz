@@ -1,6 +1,7 @@
 ## Prerequisites
 
 - Docker installed on your system.
+- Google Auth credentials.
 
 ## Installation & Configuration
 
