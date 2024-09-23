@@ -7,6 +7,8 @@ import { lucia } from '../auth.js';
 
 export const userRouter = router({
   removeAccount: protectedProcedure.mutation(async (req) => {
+    await lucia.invalidateUserSessions(req.ctx.user.sub);
+
     let teams = await db.team.getUserTeams(req.ctx.user.sub);
 
     teams = teams.filter(async (team) => {
