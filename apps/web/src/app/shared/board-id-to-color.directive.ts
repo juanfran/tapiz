@@ -1,4 +1,4 @@
-import { Directive, ElementRef, computed, effect, inject } from '@angular/core';
+import { Directive, ElementRef, computed, inject } from '@angular/core';
 import { contrast } from '@tapiz/cdk/utils/colors';
 import { input } from '@angular/core';
 
@@ -37,6 +37,10 @@ export const BoardColors = colors.map((backgroundColor) => {
   selector: '[tapizBoardIdToColor]',
   standalone: true,
   exportAs: 'tapizBoardIdToColor',
+  host: {
+    '[style.backgroundColor]': 'backgroundColor()',
+    '[style.color]': 'color()',
+  },
 })
 export class BoardIdToColorDirective {
   #elementRef = inject(ElementRef<HTMLElement>);
@@ -62,12 +66,4 @@ export class BoardIdToColorDirective {
   backgroundColor = computed(() => {
     return this.#colors[this.#index()].backgroundColor;
   });
-
-  constructor() {
-    effect(() => {
-      this.#elementRef.nativeElement.style.backgroundColor =
-        this.backgroundColor();
-      this.#elementRef.nativeElement.style.color = this.color();
-    });
-  }
 }

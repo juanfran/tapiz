@@ -56,6 +56,9 @@ import { EditorPortalComponent } from '../editor-portal/editor-portal.component'
     '[class.voting]': 'voting()',
     '[class.emoji-mode]': 'emojiMode()',
     '[class.active-layer]': 'activeLayer()',
+    '[style.--custom-fg]': '"#000"',
+    '[style.--custom-bg]': 'lightColor()',
+    '[style.--custom-main]': 'color()',
   },
   providers: [HotkeysService],
 })
@@ -154,6 +157,9 @@ export class NoteComponent {
     const defaultColor = this.node().content.color ?? '#fdab61';
     return this.findColor(position, panels, defaultColor);
   });
+  lightColor = computed(() => {
+    return lighter(this.color(), 70);
+  });
 
   constructor() {
     const highlight = computed(() => {
@@ -211,14 +217,6 @@ export class NoteComponent {
     explicitEffect([this.focus], ([focus]) => {
       if (!focus) {
         this.edit.set(false);
-      }
-    });
-
-    effect(() => {
-      const color = this.color();
-
-      if (color) {
-        this.setColor(color);
       }
     });
 
@@ -298,12 +296,6 @@ export class NoteComponent {
     }
 
     return defaultColor;
-  }
-
-  setColor(color: string) {
-    this.nativeElement.style.setProperty('--custom-fg', '#000');
-    this.nativeElement.style.setProperty('--custom-bg', lighter(color, 70));
-    this.nativeElement.style.setProperty('--custom-main', color);
   }
 
   initEdit() {

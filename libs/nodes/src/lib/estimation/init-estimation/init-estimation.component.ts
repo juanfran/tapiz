@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, model } from '@angular/core';
 
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { EstimationConfig } from '@tapiz/board-commons';
 import { output } from '@angular/core';
-import { input } from '@angular/core';
 
 @Component({
   selector: 'tapiz-init-estimation',
@@ -19,7 +18,7 @@ import { input } from '@angular/core';
       <mat-form-field>
         <mat-label>Scale</mat-label>
         <mat-select
-          [(ngModel)]="scaleField"
+          [(ngModel)]="scale"
           name="scale()">
           <mat-option value="t-shirt">T-Shirt</mat-option>
           <mat-option value="fibonacci">Fibonacci</mat-option>
@@ -41,19 +40,11 @@ import { input } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InitEstimationComponent {
-  public scale = input<EstimationConfig['scale']>('t-shirt');
+  scale = model<EstimationConfig['scale']>('t-shirt');
 
-  public completeSetup = output<EstimationConfig['scale']>();
+  completeSetup = output<EstimationConfig['scale']>();
 
-  scaleField: EstimationConfig['scale'] = 't-shirt';
-
-  constructor() {
-    effect(() => {
-      this.scaleField = this.scale();
-    });
-  }
-
-  public onSubmit() {
-    this.completeSetup.emit(this.scaleField);
+  onSubmit() {
+    this.completeSetup.emit(this.scale());
   }
 }

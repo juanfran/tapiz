@@ -1,7 +1,6 @@
-import { Directive, HostListener, inject, signal } from '@angular/core';
+import { Directive, HostListener, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { PageActions } from '../actions/page.actions';
-import { explicitEffect } from 'ngxtension/explicit-effect';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 import { pageFeature } from '../reducers/page.reducer';
 import { ZoneService } from '../components/zone/zone.service';
@@ -20,7 +19,6 @@ export class BoardShourtcutsDirective {
   #layer = this.#store.selectSignal(pageFeature.selectBoardMode);
   #selectedNodesIds = this.#store.selectSignal(pageFeature.selectFocusId);
   #boardFacade = inject(BoardFacade);
-  panInProgress = signal<boolean | null>(null);
 
   @HostListener('document:keydown.control.z', ['$event']) undoAction(
     e: KeyboardEvent,
@@ -41,7 +39,7 @@ export class BoardShourtcutsDirective {
   @HostListener('document:keydown.space', ['$event']) pan(e: KeyboardEvent) {
     if (e.repeat) return;
 
-    this.panInProgress.set(true);
+    this.#store.dispatch(PageActions.panInProgress({ panInProgress: true }));
   }
 
   @HostListener('document:keyup.space', ['$event']) finishPan(
@@ -49,7 +47,7 @@ export class BoardShourtcutsDirective {
   ) {
     if (e.repeat) return;
 
-    this.panInProgress.set(false);
+    this.#store.dispatch(PageActions.panInProgress({ panInProgress: false }));
   }
 
   @HostListener('document:keydown.control.a', ['$event']) selectAll(
@@ -122,17 +120,5 @@ export class BoardShourtcutsDirective {
           }),
         );
       });
-  }
-
-  constructor() {
-    explicitEffect([this.panInProgress], ([panInProgress]) => {
-      if (panInProgress === null) {
-        return;
-      }
-
-      this.#store.dispatch(
-        PageActions.panInProgress({ panInProgress: panInProgress }),
-      );
-    });
   }
 }

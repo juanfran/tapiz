@@ -41,6 +41,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   providers: [RxState, NodeStore],
   host: {
     '[class.highlight]': 'hightlight()',
+    '[style.width.px]': 'size().width',
+    '[style.height.px]': 'size().height',
+    '[style.transform]': 'transform()',
   },
 })
 export class NodeComponent implements OnInit {
@@ -74,14 +77,18 @@ export class NodeComponent implements OnInit {
 
     if ('width' in content && 'height' in content) {
       return {
-        size: {
-          width: content.width as number,
-          height: content.height as number,
-        },
+        width: content.width as number,
+        height: content.height as number,
       };
     }
 
     return {};
+  });
+
+  transform = computed(() => {
+    const { point, rotation } = this.position();
+
+    return toCSS(compose(translate(point.x, point.y), rotateDEG(rotation)));
   });
 
   focusId = this.store.selectSignal(selectFocusId);
@@ -111,22 +118,6 @@ export class NodeComponent implements OnInit {
   }
 
   constructor() {
-    effect(() => {
-      const { point, rotation } = this.position();
-      this.nativeElement.style.transform = toCSS(
-        compose(translate(point.x, point.y), rotateDEG(rotation)),
-      );
-    });
-
-    effect(() => {
-      const { size } = this.size();
-
-      if (size) {
-        this.nativeElement.style.width = `${size.width}px`;
-        this.nativeElement.style.height = `${size.height}px`;
-      }
-    });
-
     this.store
       .select(pageFeature.selectBoardMode)
       .pipe(takeUntilDestroyed())
