@@ -29,7 +29,7 @@ export class NotesService {
     };
   }
 
-  createNote(userId: User['id'], position: Point) {
+  createNote(userId: User['id'], position: Point, color?: string) {
     const anonymousMode = this.#settings()?.content.anonymousMode ?? false;
 
     const note = this.getNew({
@@ -37,6 +37,10 @@ export class NotesService {
       layer: this.#boardMode(),
       position,
     });
+
+    if (color) {
+      note.color = color;
+    }
 
     const action = this.#nodesActions.add<Note>('note', note);
 

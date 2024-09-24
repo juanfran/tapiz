@@ -215,6 +215,12 @@
         class="toolbar-popup" />
     }
 
+    @if (popup() === 'note') {
+      <tapiz-notes
+        class="toolbar-popup"
+        [(noteColor)]="noteColor" />
+    }
+
     @if (popup() === 'emoji') {
       <emoji-picker
         (emoji-click)="emojiSelected($event)"

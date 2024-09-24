@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   CUSTOM_ELEMENTS_SCHEMA,
   inject,
+  signal,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
@@ -43,6 +44,7 @@ import { FileUploadService } from '../../../../services/file-upload.service';
 import { getImageDimensions } from '@tapiz/cdk/utils/image-dimensions';
 import { pageFeature } from '../../reducers/page.reducer';
 import { LiveReactionComponent } from '../live-reaction/live-reaction.component';
+import { NotesComponent } from '../notes/notes.component';
 @Component({
   selector: 'tapiz-board-toolbar',
   templateUrl: './board-toolbar.component.html',
@@ -59,6 +61,7 @@ import { LiveReactionComponent } from '../live-reaction/live-reaction.component'
     AddImageComponent,
     LiveReactionComponent,
     CocomaterialComponent,
+    NotesComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [HotkeysService],
@@ -75,6 +78,7 @@ export class BoardToolbarComponent {
   toolbarSubscription?: Subscription;
   boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
   popup = this.#store.selectSignal(selectPopupOpen);
+  noteColor = signal<string>('#fdab61');
 
   constructor() {
     toObservable(this.popup)
@@ -143,7 +147,7 @@ export class BoardToolbarComponent {
     this.toolbarSubscription = this.#zoneService
       .select()
       .subscribe(({ userId, position }) => {
-        this.#notesService.createNote(userId, position);
+        this.#notesService.createNote(userId, position, this.noteColor());
         this.popupOpen('');
       });
   }
