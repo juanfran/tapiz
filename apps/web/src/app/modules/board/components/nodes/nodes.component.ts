@@ -14,7 +14,7 @@ import { PageActions } from '../../actions/page.actions';
 import { filter, merge } from 'rxjs';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
-import { BoardTuNode, User } from '@tapiz/board-commons';
+import { User } from '@tapiz/board-commons';
 import { pageFeature } from '../../reducers/page.reducer';
 import { AsyncPipe } from '@angular/common';
 import { ConfigService } from '../../../../services/config.service';
@@ -43,9 +43,7 @@ export class NodesComponent {
 
   public nodes$ = this.#boardFacade.getNodes().pipe(
     map((it) => {
-      return it.filter(
-        (it) => !['user', 'settings'].includes(it.type),
-      ) as BoardTuNode[];
+      return this.#boardFacade.filterBoardNodes(it);
     }),
   );
 

@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   BoardSettings,
+  BoardTuNode,
   StateActions,
   TuNode,
   UserNode,
@@ -121,6 +122,20 @@ export class BoardFacade {
         return nodes.find((node) => node.id === id);
       }),
     );
+  }
+
+  selectNodes(id: string[]) {
+    return this.getNodes().pipe(
+      map((nodes) => {
+        return nodes.filter((node) => id.includes(node.id));
+      }),
+    );
+  }
+
+  filterBoardNodes(nodes: TuNode[]) {
+    return nodes.filter(
+      (it) => !['user', 'settings'].includes(it.type),
+    ) as BoardTuNode[];
   }
 
   readonly selectFocusNodes$ = combineLatest([

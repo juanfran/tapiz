@@ -198,6 +198,13 @@ const reducer = createReducer(
   on(
     PageActions.setFocusId,
     (state, { focusId, ctrlKey = false }): PageState => {
+      if (!focusId) {
+        return {
+          ...state,
+          focusId: [],
+        };
+      }
+
       if (focusId && state.focusId.includes(focusId)) {
         return state;
       }
