@@ -205,15 +205,22 @@ const reducer = createReducer(
         };
       }
 
-      if (focusId && state.focusId.includes(focusId)) {
+      if (focusId && state.focusId.includes(focusId) && !ctrlKey) {
         return state;
       }
 
       if (ctrlKey) {
-        state = {
-          ...state,
-          focusId: [...state.focusId.filter((it) => !!it), focusId],
-        };
+        if (state.focusId.includes(focusId)) {
+          state = {
+            ...state,
+            focusId: state.focusId.filter((it) => it !== focusId),
+          };
+        } else {
+          state = {
+            ...state,
+            focusId: [...state.focusId.filter((it) => !!it), focusId],
+          };
+        }
       } else {
         state = {
           ...state,

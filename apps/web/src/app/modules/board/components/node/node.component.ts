@@ -93,6 +93,7 @@ export class NodeComponent implements OnInit {
   @ViewChild('nodeHost', { read: ViewContainerRef })
   public nodeHost!: ViewContainerRef;
 
+  // default focus, some components may override this with this.#nodesStore.setFocusNode
   @HostListener('mousedown', ['$event'])
   public mousedown(event: MouseEvent) {
     this.store.dispatch(
