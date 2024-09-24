@@ -4,6 +4,7 @@ import {
   CUSTOM_ELEMENTS_SCHEMA,
   inject,
   signal,
+  HostListener,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
@@ -45,6 +46,7 @@ import { getImageDimensions } from '@tapiz/cdk/utils/image-dimensions';
 import { pageFeature } from '../../reducers/page.reducer';
 import { LiveReactionComponent } from '../live-reaction/live-reaction.component';
 import { NotesComponent } from '../notes/notes.component';
+import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 @Component({
   selector: 'tapiz-board-toolbar',
   templateUrl: './board-toolbar.component.html',
@@ -79,6 +81,12 @@ export class BoardToolbarComponent {
   boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
   popup = this.#store.selectSignal(selectPopupOpen);
   noteColor = signal<string>('#fdab61');
+
+  @HostListener('document:keydown.alt') selectAreaShortcut() {
+    if (isInputField()) return;
+
+    this.select();
+  }
 
   constructor() {
     toObservable(this.popup)
