@@ -158,7 +158,7 @@ export class ZoneService {
     });
   }
 
-  nodesInZone(area: SelectAction) {
+  nodesInZone(area: { relativeRect: DOMRect; layer: number }) {
     const boardNodes = this.#boardFacade.get() as TuNode<
       { layer: number },
       string
