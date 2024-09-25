@@ -10,6 +10,7 @@ import {
   finalize,
   Observable,
   startWith,
+  Subscription,
 } from 'rxjs';
 import { PageActions } from '../../actions/page.actions';
 import { BoardFacade } from '../../../../services/board-facade.service';
@@ -79,9 +80,22 @@ export class ZoneService {
     this.#setMovement(false);
     this.#setCursor(cursor);
     this.#setNodeSelection(false);
+    let moveObs$: Subscription | null = null;
 
-    return new Observable<SelectAction | null>((subscriber) => {
-      this.#boardMoveService
+    const destroy = () => {
+      this.#areaSelector.set(null);
+      this.#setMovement(true);
+      this.#setCursor('default');
+      this.#setNodeSelection(true);
+
+      if (moveObs$) {
+        moveObs$.unsubscribe();
+        moveObs$ = null;
+      }
+    };
+
+    const obs$ = new Observable<SelectAction | null>((subscriber) => {
+      moveObs$ = this.#boardMoveService
         .nextMouseDown()
         .pipe(
           withLatestFrom(
@@ -143,11 +157,6 @@ export class ZoneService {
           finalize(() => {
             const result = this.#areaSelector();
 
-            this.#areaSelector.set(null);
-            this.#setMovement(true);
-            this.#setCursor('default');
-            this.#setNodeSelection(true);
-
             subscriber.next(result);
             subscriber.complete();
           }),
@@ -155,7 +164,13 @@ export class ZoneService {
         .subscribe((result) => {
           this.#areaSelector.set(result);
         });
+
+      return () => {
+        destroy();
+      };
     });
+
+    return obs$;
   }
 
   nodesInZone(area: { relativeRect: DOMRect; layer: number }) {

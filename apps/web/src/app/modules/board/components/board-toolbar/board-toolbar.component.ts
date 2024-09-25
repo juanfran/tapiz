@@ -88,6 +88,12 @@ export class BoardToolbarComponent {
     this.select();
   }
 
+  @HostListener('document:keyup.alt') unselectAreaShortcut() {
+    if (isInputField()) return;
+
+    this.popupOpen('');
+  }
+
   constructor() {
     toObservable(this.popup)
       .pipe(
