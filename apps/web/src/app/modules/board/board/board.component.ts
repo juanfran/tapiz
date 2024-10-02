@@ -27,6 +27,7 @@ import {
   throttleTime,
   pairwise,
   switchMap,
+  startWith,
 } from 'rxjs/operators';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { BoardActions } from '../actions/board.actions';
@@ -465,7 +466,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     userView$
       .pipe(
         withLatestFrom(
-          this.boardMoveService.mouseMove$,
+          this.boardMoveService.mouseMove$.pipe(startWith({ x: 0, y: 0 })),
           this.store.select(selectMoveEnabled),
         ),
         filter(([, , moveEnabled]) => moveEnabled),
