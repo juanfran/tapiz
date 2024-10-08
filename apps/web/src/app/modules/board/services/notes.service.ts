@@ -16,6 +16,7 @@ export class NotesService {
   #boardFacade = inject(BoardFacade);
   #settings = toSignal(this.#boardFacade.getSettings());
   #nodesActions = inject(NodesActions);
+  #lastColor = '';
 
   getNew(data: Pick<Note, 'ownerId' | 'position' | 'layer'>): Note {
     return {
@@ -30,6 +31,10 @@ export class NotesService {
   }
 
   createNote(userId: User['id'], position: Point, color?: string) {
+    if (color) {
+      this.#lastColor = color;
+    }
+
     const anonymousMode = this.#settings()?.content.anonymousMode ?? false;
 
     const note = this.getNew({
@@ -38,8 +43,8 @@ export class NotesService {
       position,
     });
 
-    if (color) {
-      note.color = color;
+    if (this.#lastColor) {
+      note.color = this.#lastColor;
     }
 
     const action = this.#nodesActions.add<Note>('note', note);
