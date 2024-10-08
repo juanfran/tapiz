@@ -80,7 +80,11 @@ export class Client {
 
     messages = (messages as unknown[]).filter((message) => !!message);
 
-    this.processMsg(messages);
+    try {
+      this.processMsg(messages);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
