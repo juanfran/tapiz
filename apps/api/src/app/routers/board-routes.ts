@@ -126,6 +126,9 @@ export const boardRouter = router({
 
     return req.ctx.userBoard;
   }),
+  boardUsers: boardMemberProcedure.query(async (req) => {
+    return db.board.getBoardUsers(req.input.boardId);
+  }),
   teamBoards: teamMemberProcedure
     .input(z.object({ teamId: z.string().uuid() }))
     .query(async (req) => {

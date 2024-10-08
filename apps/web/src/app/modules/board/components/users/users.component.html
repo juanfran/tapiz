@@ -17,9 +17,18 @@
             [class.offline]="!user.connected"
             [class.active]="user.id === userHighlight()"
             class="user">
-            <mat-icon
-              class="icon-svg"
-              svgIcon="user"></mat-icon>
+            @if (user.picture) {
+              <img
+                class="avatar"
+                [ngSrc]="user.picture"
+                width="24"
+                height="24"
+                [alt]="user.name" />
+            } @else {
+              <mat-icon
+                class="icon-svg"
+                svgIcon="user"></mat-icon>
+            }
 
             <p class="username">
               <span

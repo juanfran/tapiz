@@ -7,6 +7,7 @@ import {
   CocomaterialApiListVectors,
   NodeAdd,
   TuNode,
+  BoardUserInfo,
 } from '@tapiz/board-commons';
 import { NativeEmoji } from 'emoji-picker-element/shared';
 
@@ -71,5 +72,6 @@ export const PageActions = createActionGroup({
     'Pan in progress': props<{ panInProgress: boolean }>(),
     addToBoardInProcess: props<{ inProcess: boolean }>(),
     dragInProgress: props<{ inProgress: boolean }>(),
+    setBoardUsers: props<{ users: BoardUserInfo[] }>(),
   },
 });

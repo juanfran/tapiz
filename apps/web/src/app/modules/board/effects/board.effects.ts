@@ -207,6 +207,22 @@ export class BoardEffects {
     );
   });
 
+  public joinBoardUsers$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.joinBoard),
+      filter(() => !this.configService.config.DEMO),
+      switchMap((action) => {
+        return this.boardApiService.getBoardUseres(action.boardId).pipe(
+          map((boardUsers) => {
+            return PageActions.setBoardUsers({
+              users: boardUsers,
+            });
+          }),
+        );
+      }),
+    );
+  });
+
   public joinBoardDemo$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.joinBoard),

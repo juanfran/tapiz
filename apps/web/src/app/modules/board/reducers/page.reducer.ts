@@ -4,6 +4,7 @@ import {
   User,
   CocomaterialTag,
   CocomaterialApiListVectors,
+  BoardUserInfo,
 } from '@tapiz/board-commons';
 import { wsOpen } from '../../ws/ws.actions';
 import { BoardActions } from '../actions/board.actions';
@@ -47,6 +48,7 @@ export interface PageState {
   panInProgress: boolean;
   addToBoardInProcess: boolean;
   dragInProgress: boolean;
+  boardUsers: BoardUserInfo[];
 }
 
 const initialPageState: PageState = {
@@ -89,6 +91,7 @@ const initialPageState: PageState = {
   panInProgress: false,
   addToBoardInProcess: false,
   dragInProgress: false,
+  boardUsers: [],
 };
 
 const reducer = createReducer(
@@ -440,6 +443,12 @@ const reducer = createReducer(
     return {
       ...state,
       dragInProgress: inProgress,
+    };
+  }),
+  on(PageActions.setBoardUsers, (state, { users }): PageState => {
+    return {
+      ...state,
+      boardUsers: users,
     };
   }),
 );

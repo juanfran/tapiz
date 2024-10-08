@@ -40,6 +40,10 @@ export class BoardApiService {
     return from(this.trpc.board.board.query({ boardId }));
   }
 
+  public getBoardUseres(boardId: string) {
+    return from(this.trpc.board.boardUsers.query({ boardId }));
+  }
+
   public removeBoard(boardId: BoardUser['id']) {
     return from(this.trpc.board.delete.mutate({ boardId }));
   }

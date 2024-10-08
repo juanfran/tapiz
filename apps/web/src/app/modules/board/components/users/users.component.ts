@@ -13,7 +13,7 @@ import { PageActions } from '../../actions/page.actions';
 import { BoardActions } from '../../actions/board.actions';
 import { User } from '@tapiz/board-commons';
 import { map } from 'rxjs/operators';
-import { NgClass } from '@angular/common';
+import { NgClass, NgOptimizedImage } from '@angular/common';
 import {
   CdkMenu,
   CdkMenuItem,
@@ -38,11 +38,13 @@ import { MatIconModule } from '@angular/material/icon';
     CdkMenuItem,
     MatIconModule,
     CdkMenuItemRadio,
+    NgOptimizedImage,
   ],
 })
 export class UsersComponent {
   #store = inject(Store);
   #boardFacade = inject(BoardFacade);
+  #boardUsers = this.#store.selectSignal(pageFeature.selectBoardUsers);
   #users = toSignal(
     this.#boardFacade
       .getUsers()
@@ -55,9 +57,24 @@ export class UsersComponent {
   showUsers = computed(() => {
     return !this.#settings()?.content.anonymousMode;
   });
-  users = computed(() =>
-    this.#users().filter((user) => user.id !== this.userId()),
-  );
+  users = computed(() => {
+    const boardUsers = this.#boardUsers();
+
+    return this.#users()
+      .filter((user) => user.id !== this.userId())
+      .map((user) => {
+        console.log(boardUsers);
+        const boardUser = boardUsers.find(
+          (boardUser) => boardUser.id === user.id,
+        );
+
+        return {
+          ...user,
+          picture: boardUser?.picture,
+        };
+      });
+  });
+
   userId = this.#store.selectSignal(selectUserId);
   userHighlight = this.#store.selectSignal(selectUserHighlight);
   isFollowing = this.#store.selectSignal(pageFeature.selectFollow);

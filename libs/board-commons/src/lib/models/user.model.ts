@@ -11,4 +11,11 @@ export interface User {
   zoom?: number;
 }
 
+export interface BoardUserInfo {
+  name: string;
+  picture: string | null;
+  role: 'admin' | 'member' | 'guest';
+  id: string;
+}
+
 export type UserNode = TuNode<User>;

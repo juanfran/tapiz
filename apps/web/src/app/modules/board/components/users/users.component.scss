@@ -164,3 +164,9 @@
   }
 }
 
+.avatar {
+  border-radius: var(--radius-round);
+  img {
+    display: block;
+  }
+}

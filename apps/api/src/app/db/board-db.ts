@@ -3,6 +3,7 @@ import { db } from './init-db.js';
 import * as schema from '../schema.js';
 import type {
   BoardUser,
+  BoardUserInfo,
   PrivateBoardUser,
   TuNode,
   UserNode,
@@ -279,13 +280,14 @@ export async function getBoards(userId: string): Promise<BoardUser[]> {
   return finalBoards;
 }
 
-export async function getBoardUsers(boardId: string) {
+export async function getBoardUsers(boardId: string): Promise<BoardUserInfo[]> {
   const results = await db
     .select({
       id: schema.acountsToBoards.accountId,
       role: schema.acountsToBoards.role,
       accounts: {
         name: schema.accounts.name,
+        picture: schema.accounts.picture,
       },
     })
     .from(schema.acountsToBoards)
@@ -301,6 +303,7 @@ export async function getBoardUsers(boardId: string) {
       id: result.id,
       name: result.accounts.name,
       role: result.role,
+      picture: result.accounts.picture,
     }));
 }
 
