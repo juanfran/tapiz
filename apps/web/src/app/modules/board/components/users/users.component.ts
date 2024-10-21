@@ -63,7 +63,6 @@ export class UsersComponent {
     return this.#users()
       .filter((user) => user.id !== this.userId())
       .map((user) => {
-        console.log(boardUsers);
         const boardUser = boardUsers.find(
           (boardUser) => boardUser.id === user.id,
         );
