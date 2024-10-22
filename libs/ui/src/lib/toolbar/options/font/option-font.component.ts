@@ -1,47 +1,31 @@
 import {
-  CdkMenuTrigger,
-  CdkMenu,
-  CdkMenuGroup,
-  CdkMenuItemRadio,
-  CdkMenuItem,
-} from '@angular/cdk/menu';
-import {
   ChangeDetectionStrategy,
   Component,
+  effect,
   inject,
   input,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MatIconModule } from '@angular/material/icon';
 import { Editor } from '@tiptap/core';
 import { ToolbarEditorService } from '../../toolbar-editor.service';
 import { ColorPickerComponent } from '../../../color-picker';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
   selector: 'tapiz-toolbar-option-font',
   template: `
-    <button
-      [cdkMenuTriggerFor]="menu"
-      class="standalone-item">
-      Font
-    </button>
-
-    <ng-template #menu>
-      <div
-        class="menu"
-        cdkMenu>
-        @for (option of options; track option.value) {
-          <button
-            [class.active]="isActiveFont(option.value)"
-            (cdkMenuItemTriggered)="commandFont(option.value)"
-            cdkMenuItem
-            class="menu-item">
-            {{ option.name }}
-          </button>
+    <mat-form-field>
+      <mat-select
+        [value]="fontFamilyValue()"
+        (selectionChange)="command($event)">
+        @for (option of options; track $index) {
+          <mat-option [value]="option.value">{{ option.name }}</mat-option>
         }
-      </div>
-    </ng-template>
+      </mat-select>
+    </mat-form-field>
+
     <label
       [title]="'Font Color'"
       for="color-picker">
@@ -53,83 +37,76 @@ import { ColorPickerComponent } from '../../../color-picker';
   styleUrls: ['../options.scss', './option-font.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [
-    MatIconModule,
-    CdkMenuTrigger,
-    CdkMenu,
-    CdkMenuGroup,
-    CdkMenuItemRadio,
-    CdkMenuItem,
-    ColorPickerComponent,
-  ],
+  imports: [MatSelectModule, MatFormFieldModule, ColorPickerComponent],
 })
 export class OptionFontComponent {
   editor = input.required<Editor>();
 
   options = [
     {
-      type: 'text',
       name: 'Default',
-      value: 'raleway',
+      value: '"Raleway", -apple-system, system-ui, sans-serif',
     },
     {
-      type: 'text',
       name: 'Sans',
-      value: 'sans',
+      value:
+        'system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;',
     },
     {
-      type: 'text',
       name: 'Serif',
-      value: 'serif',
+      value: 'ui-serif, serif',
     },
     {
-      type: 'text',
       name: 'Mono',
-      value: 'mono',
+      value:
+        'Dank Mono, Operator Mono, Inconsolata, Fira Mono, ui-monospace, SF Mono, Monaco, Droid Sans Mono, Source Code Pro, Cascadia Code, Menlo, Consolas, DejaVu Sans Mono, monospace',
     },
     {
-      type: 'text',
       name: 'Handwriting',
-      value: 'handwritting',
+      value: 'Caveat, cursive',
     },
   ];
 
   color = signal<string>('#000000');
 
+  #defaultFontFamily = this.options[0].value;
+  fontFamilyValue = signal<string>(this.#defaultFontFamily);
+
   #toolbarEditorService = inject(ToolbarEditorService);
 
   constructor() {
+    effect(() => {
+      const value = this.fontFamilyValue();
+
+      if (value === this.#defaultFontFamily) {
+        this.editor().chain().focus().unsetFontFamily().run();
+        return;
+      }
+
+      this.editor().chain().focus().setFontFamily(value).run();
+    });
+
     this.#toolbarEditorService.events$
       .pipe(takeUntilDestroyed())
       .subscribe((editor) => {
+        const fontFamily = this.options.find((font) => {
+          return this.editor().isActive('textStyle', {
+            fontFamily: font.value,
+          });
+        });
+
+        this.fontFamilyValue.set(
+          fontFamily ? fontFamily.value : this.#defaultFontFamily,
+        );
+
         const color = editor.getAttributes('textStyle')['color'] ?? '#000000';
 
         this.color.set(color);
       });
   }
 
-  isActiveFont(fontOption: string) {
-    if (fontOption === 'raleway') {
-      return false;
-    }
-
-    const fontFamily = this.#getFontFamily(fontOption);
-
-    return this.editor().isActive('textStyle', {
-      fontFamily,
-    });
-  }
-
-  commandFont(value: string) {
-    if (value === 'raleway') {
-      this.editor().chain().focus().unsetFontFamily().run();
-
-      return;
-    }
-
-    const font = this.#getFontFamily(value);
-
-    this.editor().chain().focus().setFontFamily(font).run();
+  command(event: MatSelectChange) {
+    this.fontFamilyValue.set(event.value);
   }
 
   changeColor(color: string | undefined) {
@@ -138,9 +115,5 @@ export class OptionFontComponent {
       .focus()
       .setColor(color ?? '#000')
       .run();
-  }
-
-  #getFontFamily(value: string) {
-    return getComputedStyle(document.body).getPropertyValue(`--font-${value}`);
   }
 }
