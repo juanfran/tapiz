@@ -228,6 +228,10 @@ export class BoardEffects {
     return this.actions$.pipe(
       ofType(PageActions.fetchBoardSuccess),
       switchMap(() => {
+        if (this.configService.config.DEMO) {
+          return of(true);
+        }
+
         return this.wsService.connected$.pipe(
           filter((connected) => connected),
           take(1),
