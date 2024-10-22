@@ -21,6 +21,7 @@ export class WsService {
   #socket = io(this.#configService.config.WS_URL, {
     autoConnect: false,
     withCredentials: true,
+    transports: ['websocket', 'webtransport'],
   });
   correlationId = v4();
 
