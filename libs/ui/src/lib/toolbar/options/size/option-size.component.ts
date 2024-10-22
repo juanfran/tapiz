@@ -2,84 +2,68 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  effect,
   inject,
   input,
+  signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Editor } from '@tiptap/core';
-import { Level } from '@tiptap/extension-heading';
 import { ToolbarEditorService } from '../../toolbar-editor.service';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
   selector: 'tapiz-toolbar-option-size',
   template: `
-    <div class="buttons">
-      <button
-        title="Small"
-        [class.active]="active('')"
-        (click)="command('')">
-        S
-      </button>
-      <button
-        title="Medium"
-        [class.active]="active('3')"
-        (click)="command('3')">
-        M
-      </button>
-      <button
-        title="Large"
-        [class.active]="active('2')"
-        (click)="command('2')">
-        L
-      </button>
-      <button
-        title="Very large"
-        [class.active]="active('1')"
-        (click)="command('1')">
-        XL
-      </button>
-    </div>
+    <mat-form-field>
+      <mat-select
+        [value]="value()"
+        (selectionChange)="command($event)">
+        @for (size of sizes; track $index) {
+          <mat-option [value]="size.value">{{ size.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
   `,
   styleUrls: ['../options.scss', './option-size.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [],
+  imports: [MatSelectModule, MatFormFieldModule],
 })
 export class OptionSizeComponent {
   editor = input.required<Editor>();
 
   cd = inject(ChangeDetectorRef);
+  sizes = [
+    {
+      value: 8,
+      label: 'Tiny',
+    },
+    {
+      value: 12,
+      label: 'Small',
+    },
+    {
+      value: 24,
+      label: 'Default',
+    },
+    {
+      value: 160,
+      label: 'Large',
+    },
+    {
+      value: 320,
+      label: 'Huge',
+    },
+  ];
+  #defaultFontSize = 24;
   #toolbarEditorService = inject(ToolbarEditorService);
 
-  active(level: string) {
-    if (!level) {
-      return this.editor().isActive('paragraph');
-    }
+  value = signal<number>(this.#defaultFontSize);
 
-    return this.editor().isActive('heading', { level: Number(level) });
-  }
-
-  command(value: string) {
-    const attributes = this.getAttributes();
-
-    if (value) {
-      this.editor()
-        .chain()
-        .focus()
-        .toggleHeading({
-          ...attributes,
-          level: Number(value) as Level,
-        })
-        .run();
-    } else {
-      const commands = this.editor().chain().focus().setParagraph();
-
-      if (attributes['textAlign']) {
-        commands.setTextAlign(attributes['textAlign']);
-      }
-
-      commands.run();
-    }
+  command(event: MatSelectChange) {
+    this.value.set(event.value);
   }
 
   getAttributes() {
@@ -92,9 +76,25 @@ export class OptionSizeComponent {
   }
 
   constructor() {
+    effect(() => {
+      const value = this.value();
+
+      if (value === this.#defaultFontSize) {
+        this.editor().chain().focus().unsetFontSize().run();
+        return;
+      }
+
+      this.editor().chain().focus().setFontSize(String(value)).run();
+    });
+
     this.#toolbarEditorService.events$
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
+        const size = this.sizes.find((size) =>
+          this.editor().isActive('textStyle', { fontSize: size.value + 'px' }),
+        );
+
+        this.value.set(size ? size.value : this.#defaultFontSize);
         this.cd.detectChanges();
       });
   }

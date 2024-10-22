@@ -37,6 +37,7 @@ import { input } from '@angular/core';
 import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { Subject, sampleTime } from 'rxjs';
+import { FontSize } from './font-size-plugin';
 
 @Component({
   selector: 'tapiz-editor-view',
@@ -166,6 +167,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
           FontFamily.configure({
             types: ['textStyle'],
           }),
+          FontSize,
           History.configure(),
           BubbleMenu.configure({
             element: this.linkMenu.nativeElement,
