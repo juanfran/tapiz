@@ -12,6 +12,7 @@ import {
   catchError,
   filter,
   auditTime,
+  take,
 } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
@@ -219,6 +220,21 @@ export class BoardEffects {
             });
           }),
         );
+      }),
+    );
+  });
+
+  public fetchBoardSuccess$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.fetchBoardSuccess),
+      switchMap(() => {
+        return this.wsService.connected$.pipe(
+          filter((connected) => connected),
+          take(1),
+        );
+      }),
+      map(() => {
+        return PageActions.boardLoaded();
       }),
     );
   });

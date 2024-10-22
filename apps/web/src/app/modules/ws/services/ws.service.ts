@@ -8,6 +8,7 @@ import { ConfigService } from '../../../services/config.service';
 
 import { io } from 'socket.io-client';
 import { v4 } from 'uuid';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -24,6 +25,8 @@ export class WsService {
     transports: ['websocket', 'webtransport'],
   });
   correlationId = v4();
+  #connected = new BehaviorSubject<boolean>(false);
+  readonly connected$ = this.#connected.asObservable();
 
   constructor() {
     this.#poolLoop();
@@ -38,10 +41,9 @@ export class WsService {
       return;
     }
 
-    this.#socket.connect();
-
     this.#socket.on('connect', () => {
       this.#store.dispatch(wsOpen());
+      this.#connected.next(true);
       this.#socket.emit('correlationId', this.correlationId);
     });
 
@@ -102,11 +104,9 @@ export class WsService {
   }
 
   #poolLoop() {
-    if (this.#pool.length) {
+    if (this.#pool.length && this.#socket.connected) {
       const optimizedPool = optimize(this.#pool);
-      if (this.#socket.connected) {
-        this.#socket.emit('board', optimizedPool);
-      }
+      this.#socket.emit('board', optimizedPool);
       this.#pool = [];
     }
 

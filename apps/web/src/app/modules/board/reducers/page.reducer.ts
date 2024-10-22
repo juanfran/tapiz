@@ -134,13 +134,18 @@ const reducer = createReducer(
         isAdmin,
         isPublic,
         privateId,
-        loaded: true,
         moveEnabled: true,
         teamName,
         teamId,
       };
     },
   ),
+  on(PageActions.boardLoaded, (state): PageState => {
+    return {
+      ...state,
+      loaded: true,
+    };
+  }),
   on(PageActions.joinBoard, (state, { boardId }): PageState => {
     return {
       ...state,

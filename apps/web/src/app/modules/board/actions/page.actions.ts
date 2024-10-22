@@ -73,5 +73,6 @@ export const PageActions = createActionGroup({
     addToBoardInProcess: props<{ inProcess: boolean }>(),
     dragInProgress: props<{ inProgress: boolean }>(),
     setBoardUsers: props<{ users: BoardUserInfo[] }>(),
+    boardLoaded: emptyProps(),
   },
 });
