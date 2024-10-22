@@ -1,12 +1,16 @@
 import { FastifyInstance, FastifyReply } from 'fastify';
-import multer from 'fastify-multer';
 import db from './db/index.js';
 import path from 'path';
 import { v4 } from 'uuid';
+import FastifyMultipart, {
+  MultipartFile,
+  MultipartValue,
+} from '@fastify/multipart';
 import { createContext } from './auth.context.js';
 import { FastifyRequest } from 'fastify/types/request.js';
 import fastifyStatics from '@fastify/static';
 import { unlink, existsSync, mkdirSync } from 'fs';
+import sharp from 'sharp';
 
 interface CheckAccessSuccess {
   success: true;
@@ -53,29 +57,22 @@ async function checkAccess(
 }
 
 export async function fileUpload(fastify: FastifyInstance) {
-  fastify.register(multer.contentParser);
+  fastify.register(FastifyMultipart, {
+    attachFieldsToBody: true,
+    limits: {
+      fieldSize: 1000000, // Max field value (in bytes)
+      fileSize: 5000000, // For multipart forms, the max file size
+    },
+  });
   fastify.register(fastifyStatics, {
     root: uploadFolder,
     prefix: '/uploads/',
   });
 
-  const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, './uploads/');
-    },
-    filename: (req, file, cb) => {
-      const extension = path.extname(file.originalname);
-
-      const newName = v4() + extension;
-
-      cb(null, newName);
-    },
-  });
-
-  const upload = multer({ storage });
   fastify.route<{
     Body: {
-      boardId: string;
+      boardId: MultipartValue<string>;
+      file: MultipartFile;
     };
   }>({
     config: {
@@ -86,28 +83,30 @@ export async function fileUpload(fastify: FastifyInstance) {
     },
     method: 'POST',
     url: '/api/upload-file-board',
-    preHandler: upload.single('file'),
     handler: async (req, res) => {
-      const access = await checkAccess(req.body.boardId, req, res);
-
+      const access = await checkAccess(req.body.boardId.value, req, res);
       if (!access.success) {
         res.code(access.code);
         return { error: access.error };
       }
 
-      // TODO: fix types
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = (req as any).file;
+      const data = await req.body.file.toBuffer();
 
       if (!data) {
         res.code(400);
         return { error: 'Error uploading file' };
       }
 
-      await db.board.addFileToBoard(req.body.boardId, data.filename);
+      const fileName = v4() + '.webp';
+
+      await sharp(data, {
+        animated: true,
+      }).toFile('./uploads/' + fileName);
+
+      await db.board.addFileToBoard(req.body.boardId.value, fileName);
 
       return {
-        url: data.filename,
+        url: fileName,
       };
     },
   });
