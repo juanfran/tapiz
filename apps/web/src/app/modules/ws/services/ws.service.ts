@@ -41,6 +41,8 @@ export class WsService {
       return;
     }
 
+    this.#socket.connect();
+
     this.#socket.on('connect', () => {
       this.#store.dispatch(wsOpen());
       this.#connected.next(true);
