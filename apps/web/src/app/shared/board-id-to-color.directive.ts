@@ -1,4 +1,4 @@
-import { Directive, ElementRef, computed, inject } from '@angular/core';
+import { Directive, computed } from '@angular/core';
 import { contrast } from '@tapiz/cdk/utils/colors';
 import { input } from '@angular/core';
 
@@ -43,8 +43,6 @@ export const BoardColors = colors.map((backgroundColor) => {
   },
 })
 export class BoardIdToColorDirective {
-  #elementRef = inject(ElementRef<HTMLElement>);
-
   tapizBoardIdToColor = input.required<string>();
 
   #index = computed(() => {

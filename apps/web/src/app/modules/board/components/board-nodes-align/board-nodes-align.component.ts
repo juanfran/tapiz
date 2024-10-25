@@ -68,7 +68,6 @@ import { getNodeSize } from '../../../../shared/node-size';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BoardNodesAlignComponent {
-  #store = inject(Store);
   boardFacade = inject(BoardFacade);
   store = inject(Store);
   focusNodesIds = this.store.selectSignal(pageFeature.selectFocusId);

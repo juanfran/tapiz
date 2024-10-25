@@ -3,8 +3,8 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/board-components/src",
   "prefix": "lib",
-  "tags": ["scope:web"],
   "projectType": "library",
+  "tags": ["scope:web"],
   "targets": {
     "lint": {
       "executor": "@nx/eslint:lint"
