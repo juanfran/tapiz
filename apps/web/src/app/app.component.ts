@@ -8,6 +8,8 @@ import { appFeature } from './+state/app.reducer';
 import { WsService } from './modules/ws/services/ws.service';
 import { MatIconRegistry } from '@angular/material/icon';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { ReconnectionComponent } from './shared/reconnection/reconnection.component';
+import { GlobalStore } from './+state/global.store';
 
 @Component({
   selector: 'tapiz-root',
@@ -15,7 +17,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, ReconnectionComponent],
 })
 export class AppComponent {
   #authService = inject(AuthService);
@@ -23,6 +25,7 @@ export class AppComponent {
   #store = inject(Store);
   #matIconRegistry = inject(MatIconRegistry);
   #domSanitizer = inject(DomSanitizer);
+  #globalStore = inject(GlobalStore);
   #icons = [
     'add',
     'area',
@@ -63,6 +66,8 @@ export class AppComponent {
 
     this.#authService.configureLogin();
   }
+
+  showReconnection = this.#globalStore.wsConnectionLost;
 
   #setPath(url: string): SafeResourceUrl {
     return this.#domSanitizer.bypassSecurityTrustResourceUrl(url);

@@ -8,7 +8,8 @@ import { ConfigService } from '../../../services/config.service';
 
 import { io } from 'socket.io-client';
 import { v4 } from 'uuid';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { GlobalStore } from '../../../+state/global.store';
 
 @Injectable({
   providedIn: 'root',
@@ -25,8 +26,12 @@ export class WsService {
     transports: ['websocket', 'webtransport'],
   });
   correlationId = v4();
+  #reconnect = new Subject<void>();
   #connected = new BehaviorSubject<boolean>(false);
+  #globalStore = inject(GlobalStore);
+
   readonly connected$ = this.#connected.asObservable();
+  readonly reconnect$ = this.#reconnect.asObservable();
 
   constructor() {
     this.#poolLoop();
@@ -44,24 +49,37 @@ export class WsService {
     this.#socket.connect();
 
     this.#socket.on('connect', () => {
+      if (this.#socket.recovered) {
+        this.#reconnect.next();
+      }
+
       this.#store.dispatch(wsOpen());
       this.#connected.next(true);
       this.#socket.emit('correlationId', this.correlationId);
+      this.#globalStore.setWsConnectionLost(false);
     });
 
-    this.#socket.on('disconnect', (reason) => {
+    this.#socket.on('disconnect', (reason, details) => {
       if (reason.includes('client')) {
         return;
       }
 
-      this.#notificationService.open({
-        message: 'Connection lost',
-        action: 'Close',
-        type: 'error',
-        durantion: 3000,
-      });
+      if (reason === 'io server disconnect') {
+        this.#notificationService.open({
+          message: 'Connection lost',
+          action: 'Close',
+          type: 'error',
+          durantion: 3000,
+        });
 
-      this.#router.navigate(['/']);
+        this.#router.navigate(['/']);
+        return;
+      }
+
+      this.#globalStore.setWsConnectionLost(true);
+
+      console.log('WS disconnect');
+      console.log({ reason, details });
     });
 
     this.#socket.on(

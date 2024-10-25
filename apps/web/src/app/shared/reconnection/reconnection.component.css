@@ -1,0 +1,37 @@
+:host {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+p {
+  color: var(--gray-0);
+  font-family: var(--font-rounded-sans);
+  font-size: var(--font-size-8);
+
+  span {
+    visibility: hidden;
+  }
+}
+
+p.dots-1 .dot-1 {
+  visibility: visible;
+}
+
+p.dots-2 {
+  .dot-1,
+  .dot-2 {
+    visibility: visible;
+  }
+}
+
+p.dots-3 span {
+  visibility: visible;
+}

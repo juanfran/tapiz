@@ -195,6 +195,14 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       this.store.dispatch(PageActions.changeBoardMode({ boardMode: 1 }));
     }
 
+    this.wsService.reconnect$.pipe(takeUntilDestroyed()).subscribe(() => {
+      const boardId = this.route.snapshot.paramMap.get('id');
+
+      if (boardId) {
+        this.store.dispatch(PageActions.joinBoard({ boardId }));
+      }
+    });
+
     rxEffect(
       this.contextMenuStore.open$.pipe(
         pairwise(),

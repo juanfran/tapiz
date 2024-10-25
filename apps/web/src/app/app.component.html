@@ -1,3 +1,9 @@
 <main>
   <router-outlet></router-outlet>
+
+  @defer (when showReconnection()) {
+    @if (showReconnection()) {
+      <tapiz-reconnection />
+    }
+  }
 </main>

@@ -43,6 +43,11 @@ export class Client {
     this.socket.on('leaveBoard', () => {
       this.close();
     });
+
+    // simulate disconnect
+    // setTimeout(() => {
+    //   this.socket.conn.close();
+    // }, 10000);
   }
 
   categorySubscription(prefix: string, ids: string[]) {
