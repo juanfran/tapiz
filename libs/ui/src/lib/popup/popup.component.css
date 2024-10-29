@@ -1,0 +1,12 @@
+.popup {
+  max-inline-size: 300px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--primary-color-background);
+  color: var(--gray-0);
+  padding: var(--spacing-2);
+  border-radius: var(--radius-2);
+  max-block-size: 200px;
+  overflow-y: auto;
+}

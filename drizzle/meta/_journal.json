@@ -29,6 +29,13 @@
       "when": 1722271647656,
       "tag": "0003_volatile_lethal_legion",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1730829889060,
+      "tag": "0004_public_thor",
+      "breakpoints": true
     }
   ]
 }

@@ -20,59 +20,59 @@ export class BoardApiService {
     return this.apiConfigService.trpc();
   }
 
-  public fetchBoards() {
+  fetchBoards() {
     return from(this.trpc.board.boards.query());
   }
 
-  public fetchTeamBoards(teamId: string) {
+  fetchTeamBoards(teamId: string) {
     return from(this.trpc.board.teamBoards.query({ teamId }));
   }
 
-  public fetchStarredBoards() {
+  fetchStarredBoards() {
     return from(this.trpc.board.starreds.query());
   }
 
-  public createBoard(board: BoardUser['name'], teamId?: Team['id']) {
+  createBoard(board: BoardUser['name'], teamId?: Team['id']) {
     return from(this.trpc.board.create.mutate({ name: board, teamId }));
   }
 
-  public getBoard(boardId: string) {
+  getBoard(boardId: string) {
     return from(this.trpc.board.board.query({ boardId }));
   }
 
-  public getBoardUseres(boardId: string) {
+  getBoardUseres(boardId: string) {
     return from(this.trpc.board.boardUsers.query({ boardId }));
   }
 
-  public removeBoard(boardId: BoardUser['id']) {
+  removeBoard(boardId: BoardUser['id']) {
     return from(this.trpc.board.delete.mutate({ boardId }));
   }
 
-  public leaveBoard(boardId: BoardUser['id']) {
+  leaveBoard(boardId: BoardUser['id']) {
     return from(this.trpc.board.leave.mutate({ boardId }));
   }
 
-  public duplicateBoard(boardId: BoardUser['id']): Observable<BoardUser> {
+  duplicateBoard(boardId: BoardUser['id']): Observable<BoardUser> {
     return from(this.trpc.board.duplicate.mutate({ boardId }));
   }
 
-  public renameBoard(boardId: BoardUser['id'], name: BoardUser['name']) {
+  renameBoard(boardId: BoardUser['id'], name: BoardUser['name']) {
     return from(this.trpc.board.rename.mutate({ boardId, name }));
   }
 
-  public setBoardPrivacy(boardId: BoardUser['id'], isPublic: boolean) {
+  setBoardPrivacy(boardId: BoardUser['id'], isPublic: boolean) {
     return from(this.trpc.board.changePrivacy.mutate({ boardId, isPublic }));
   }
 
-  public addStar(boardId: BoardUser['id']) {
+  addStar(boardId: BoardUser['id']) {
     return from(this.trpc.board.addStar.mutate({ boardId }));
   }
 
-  public removeStar(boardId: BoardUser['id']) {
+  removeStar(boardId: BoardUser['id']) {
     return from(this.trpc.board.removeStar.mutate({ boardId }));
   }
 
-  public transferBoard(boardId: BoardUser['id'], teamId: Team['id'] | null) {
+  transferBoard(boardId: BoardUser['id'], teamId: Team['id'] | null) {
     return from(
       this.trpc.board.transferBoard.mutate({
         boardId,
@@ -81,13 +81,13 @@ export class BoardApiService {
     );
   }
 
-  public getCocomaterialTags() {
+  getCocomaterialTags() {
     return this.http.get<CocomaterialTag[]>(
       'https://cocomaterial.com/api/tags',
     );
   }
 
-  public getCocomaterialVectors(page = 1, page_size = 40, tags: string[] = []) {
+  getCocomaterialVectors(page = 1, page_size = 40, tags: string[] = []) {
     return this.http
       .get<CocomaterialApiListVectors>('https://cocomaterial.com/api/vectors', {
         params: {
@@ -109,5 +109,15 @@ export class BoardApiService {
           };
         }),
       );
+  }
+
+  getBoardMentions(boardId: BoardUser['id']) {
+    return from(this.trpc.board.boardMentions.query({ boardId }));
+  }
+
+  mentionBoardUser(boardId: BoardUser['id'], userId: string, nodeId?: string) {
+    return from(
+      this.trpc.board.mentionBoardUser.mutate({ boardId, userId, nodeId }),
+    );
   }
 }

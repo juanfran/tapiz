@@ -102,3 +102,7 @@ export interface NodeValidator {
     },
   ) => Promise<RemoveResponse>;
 }
+
+export const isBoardTuNode = (node: TuNode): node is BoardTuNode => {
+  return 'position' in node.content;
+};

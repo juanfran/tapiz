@@ -91,6 +91,7 @@ import { BoardNodesAlignComponent } from '../components/board-nodes-align/board-
 import { LiveReactionWallComponent } from '../components/live-reaction/live-reaction-wall.component';
 import { BoardEditorPortalComponent } from '../components/board-editor-portal/board-editor-portal.component';
 import { BoardShourtcutsDirective } from '../directives/board-shortcuts.directive';
+import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
 
 @Component({
   selector: 'tapiz-board',
@@ -125,6 +126,7 @@ import { BoardShourtcutsDirective } from '../directives/board-shortcuts.directiv
     BoardNodesAlignComponent,
     LiveReactionWallComponent,
     BoardEditorPortalComponent,
+    PopupPortalComponent,
   ],
   hostDirectives: [CopyPasteDirective, BoardShourtcutsDirective],
   host: {
@@ -151,7 +153,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   private configService = inject(ConfigService);
   private fileUploadService = inject(FileUploadService);
   private destroyRef = inject(DestroyRef);
-  private boardShourtcutsDirective = inject(BoardShourtcutsDirective);
   public readonly boardId$ = this.store.select(selectBoardId);
   public readonly nodes$ = this.boardFacade.getNodes();
 

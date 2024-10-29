@@ -21,6 +21,7 @@ import { input } from '@angular/core';
 import { EditorPortalComponent } from '../editor-portal/editor-portal.component';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { switchMap } from 'rxjs';
+import { NodesStore } from '../services/nodes.store';
 
 @Component({
   selector: 'tapiz-text',
@@ -45,6 +46,8 @@ import { switchMap } from 'rxjs';
             [content]="initialText()"
             [focus]="edit()"
             [fontSize]="true"
+            [mentions]="mentions()"
+            (mentioned)="onMention($event)"
             (contentChange)="setText($event)" />
         </tapiz-editor-portal>
       }
@@ -72,6 +75,7 @@ export class TextComponent implements OnInit {
   #historyService = inject(HistoryService);
   #store = inject(Store);
   #hotkeysService = inject(HotkeysService);
+  #nodesStore = inject(NodesStore);
 
   node = input.required<TuNode<Text>>();
   pasted = input.required<boolean>();
@@ -80,6 +84,7 @@ export class TextComponent implements OnInit {
   edit = signal(false);
   editText = signal('');
   initialText = signal('');
+  mentions = this.#nodesStore.mentions;
 
   @HostListener('dblclick', ['$event'])
   mousedown(event: MouseEvent) {
@@ -164,5 +169,9 @@ export class TextComponent implements OnInit {
         ],
       }),
     );
+  }
+
+  onMention(userId: string) {
+    this.#nodesStore.actions.mentionUser({ userId, nodeId: this.node().id });
   }
 }

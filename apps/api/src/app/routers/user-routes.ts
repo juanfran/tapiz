@@ -158,4 +158,26 @@ export const userRouter = router({
       success: true,
     };
   }),
+  notifications: protectedProcedure
+    .input(z.object({ offset: z.number().int().optional().default(0) }))
+    .query(async (req) => {
+      const notifications = await db.user.getUserNotifications(
+        req.ctx.user.sub,
+        req.input.offset,
+      );
+
+      const size = await db.user.getUserNotificationsCount(req.ctx.user.sub);
+
+      return {
+        items: notifications,
+        size,
+      };
+    }),
+  clearNotifications: protectedProcedure.mutation(async (req) => {
+    await db.user.clearUserNotifications(req.ctx.user.sub);
+
+    return {
+      success: true,
+    };
+  }),
 });

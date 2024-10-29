@@ -25,12 +25,12 @@ export const FontSize = Extension.create({
             default: null,
             parseHTML: (element: HTMLElement) =>
               element.style.fontSize.replace(/['"]+/g, ''),
-            renderHTML: (attributes: { fontSize: string | undefined }) => {
-              if (!attributes.fontSize) {
+            renderHTML: (attributes: Record<string, unknown>) => {
+              if (!attributes['fontSize']) {
                 return {};
               }
               return {
-                style: `font-size: ${attributes.fontSize}`,
+                style: `font-size: ${attributes['fontSize']}`,
               };
             },
           },

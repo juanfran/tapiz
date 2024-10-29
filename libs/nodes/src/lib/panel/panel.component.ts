@@ -31,6 +31,7 @@ import { NodesActions } from '../services/nodes-actions';
 import { input } from '@angular/core';
 import { EditorPortalComponent } from '../editor-portal/editor-portal.component';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import { NodesStore } from '../services/nodes.store';
 
 @Component({
   selector: 'tapiz-panel',
@@ -56,7 +57,9 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
                 [layoutToolbarOptions]="true"
                 [content]="initialText()"
                 [focus]="edit()"
+                [mentions]="mentions()"
                 [fontSize]="true"
+                (mentioned)="onMention($event)"
                 (contentChange)="setText($event)" />
             </tapiz-editor-portal>
           }
@@ -98,8 +101,10 @@ export class PanelComponent implements OnInit {
   #nodeStore = inject(NodeStore);
   #nodesActions = inject(NodesActions);
   #hotkeysService = inject(HotkeysService);
+  #nodesStore = inject(NodesStore);
 
   node = input.required<TuNode<Panel>>();
+  mentions = this.#nodesStore.mentions;
 
   pasted = input.required<boolean>();
 
@@ -210,6 +215,10 @@ export class PanelComponent implements OnInit {
       this.#historyService.finishEdit(this.node());
       this.edit.set(false);
     }
+  }
+
+  onMention(userId: string) {
+    this.#nodesStore.actions.mentionUser({ userId, nodeId: this.node().id });
   }
 
   get nativeElement(): HTMLElement {

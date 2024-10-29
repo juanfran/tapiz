@@ -14,12 +14,13 @@ export class NodesStore {
   #store = inject(Store);
 
   #focusNode$ = new Subject<{ id: string; ctrlKey: boolean }>();
-
   focusNode = this.#focusNode$.asObservable();
 
   actions = rxActions<{
     deleteNodes: { nodes: { id: string; type: string }[]; history?: boolean };
     copyNodes: { nodes: TuNode[] };
+    fetchMentions: void;
+    mentionUser: { userId: string; nodeId: string };
   }>();
 
   constructor() {
@@ -56,6 +57,7 @@ export class NodesStore {
   userHighlight!: Signal<string | null>;
   userVotes!: Signal<string | null>;
   apiUrl!: string;
+  mentions!: Signal<{ id: string; name: string }[]>;
   editorPortal = signal<{
     portal: Portal<unknown>;
     node: {

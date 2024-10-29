@@ -41,3 +41,7 @@
   overflow: hidden;
   line-height: 1.1;
 }
+
+span[data-type="mention"] {
+  font-weight: var(--font-weight-6);
+}

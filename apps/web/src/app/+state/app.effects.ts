@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { appFeature } from './app.reducer';
 import { AuthService } from '../services/auth.service';
+import { HomeActions } from '../modules/home/+state/home.actions';
 
 export const logout$ = createEffect(
   (
@@ -60,6 +61,58 @@ export const unauthorized$ = createEffect(
         }
 
         return of(AppActions.logout());
+      }),
+    );
+  },
+  {
+    functional: true,
+  },
+);
+
+export const fetchOnSetUser$ = createEffect(
+  (actions$ = inject(Actions)) => {
+    return actions$.pipe(
+      ofType(AppActions.setUser, HomeActions.userEvent),
+      map(() => {
+        return AppActions.fetchNotifications({ offset: 0 });
+      }),
+    );
+  },
+  {
+    functional: true,
+  },
+);
+
+export const notifications$ = createEffect(
+  (actions$ = inject(Actions), usersApiService = inject(UserApiService)) => {
+    return actions$.pipe(
+      ofType(AppActions.fetchNotifications),
+      exhaustMap(({ offset }) => {
+        return usersApiService.notifications(offset).pipe(
+          map((notifications) => {
+            return AppActions.fetchNotificationsSuccess({
+              ...notifications,
+              offset,
+            });
+          }),
+        );
+      }),
+    );
+  },
+  {
+    functional: true,
+  },
+);
+
+export const clearNotifications$ = createEffect(
+  (actions$ = inject(Actions), usersApiService = inject(UserApiService)) => {
+    return actions$.pipe(
+      ofType(AppActions.clearNotifications),
+      exhaustMap(() => {
+        return usersApiService.clearNotifications();
+      }),
+      map(() => {
+        return AppActions.fetchNotifications({ offset: 0 });
       }),
     );
   },

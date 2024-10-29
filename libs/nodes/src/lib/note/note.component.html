@@ -32,7 +32,9 @@
           [toolbar]="edit()"
           [content]="initialText()"
           [focus]="edit()"
+          [mentions]="mentions()"
           customClass="note-rich-text"
+          (mentioned)="onMention($event)"
           (contentChange)="setText($event)" />
       </tapiz-editor-portal>
     } @else {

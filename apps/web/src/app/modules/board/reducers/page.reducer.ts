@@ -49,6 +49,7 @@ export interface PageState {
   addToBoardInProcess: boolean;
   dragInProgress: boolean;
   boardUsers: BoardUserInfo[];
+  mentions: { id: User['id']; name: User['name'] }[];
 }
 
 const initialPageState: PageState = {
@@ -92,6 +93,7 @@ const initialPageState: PageState = {
   addToBoardInProcess: false,
   dragInProgress: false,
   boardUsers: [],
+  mentions: [],
 };
 
 const reducer = createReducer(
@@ -454,6 +456,12 @@ const reducer = createReducer(
     return {
       ...state,
       boardUsers: users,
+    };
+  }),
+  on(PageActions.fetchMentionsSuccess, (state, { mentions }): PageState => {
+    return {
+      ...state,
+      mentions,
     };
   }),
 );

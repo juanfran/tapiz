@@ -13,6 +13,7 @@ import {
   filter,
   auditTime,
   take,
+  withLatestFrom,
 } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
 import { PageActions } from '../actions/page.actions';
@@ -20,6 +21,7 @@ import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
 import {
   BoardCommonActions,
+  isBoardTuNode,
   NodeAdd,
   StateActions,
   TuNode,
@@ -32,6 +34,9 @@ import {
   EmojiMessage,
   LiveReactionStore,
 } from '../components/live-reaction/live-reaction.store';
+import { getRouterSelectors } from '@ngrx/router-store';
+
+export const { selectQueryParam } = getRouterSelectors();
 
 @Injectable()
 export class BoardEffects {
@@ -103,6 +108,26 @@ export class BoardEffects {
       dispatch: false,
     },
   );
+
+  public firstSetStateSetPositionIfNeeded$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.joinBoard),
+      switchMap(() => {
+        return this.actions$.pipe(ofType(BoardActions.setState)).pipe(take(1));
+      }),
+      withLatestFrom(this.store.select(selectQueryParam('nodeId'))),
+      filter(([, nodeId]) => !!nodeId),
+      map(([{ data }, nodeId]) => {
+        const node = data.find((it) => it.id === nodeId);
+
+        if (!node || !isBoardTuNode(node)) {
+          return { type: 'noop' };
+        }
+
+        return PageActions.goToNode({ nodeId: node.id });
+      }),
+    );
+  });
 
   public stateAction$ = createEffect(
     () => {

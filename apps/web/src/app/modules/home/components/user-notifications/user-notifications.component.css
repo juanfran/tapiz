@@ -1,0 +1,29 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-1);
+}
+
+.wrapper {
+  max-block-size: 320px;
+  overflow-y: auto;
+}
+
+.highlight {
+  font-weight: var(--font-weight-8);
+}
+
+a {
+  padding: var(--size-2) var(--size-4);
+  text-decoration: none;
+  display: block;
+
+  &:hover {
+    background-color: var(--gray-1);
+  }
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: flex-end;
+}

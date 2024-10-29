@@ -10,7 +10,7 @@ import {
 } from '../trpc.js';
 import db from '../db/index.js';
 import { checkBoardAccess, revokeBoardAccess } from '../global.js';
-import { triggerBoard, triggerTeam } from '../subscriptor.js';
+import { triggerBoard, triggerTeam, triggerUser } from '../subscriptor.js';
 
 export const boardRouter = router({
   create: protectedProcedure
@@ -188,6 +188,36 @@ export const boardRouter = router({
       if (!req.input.teamId) {
         triggerBoard(req.input.boardId, req.ctx.correlationId);
       }
+
+      return {
+        success: true,
+      };
+    }),
+  boardMentions: boardMemberProcedure
+    .input(
+      z.object({
+        boardId: z.string().uuid(),
+      }),
+    )
+    .query(async (req) => {
+      return db.board.getUsersToMention(req.input.boardId);
+    }),
+  mentionBoardUser: boardMemberProcedure
+    .input(
+      z.object({
+        boardId: z.string().uuid(),
+        nodeId: z.string().optional(),
+        userId: z.string(),
+      }),
+    )
+    .mutation(async (req) => {
+      await db.user.mentionUser(
+        req.input.boardId,
+        req.input.userId,
+        req.input.nodeId,
+      );
+
+      triggerUser(req.input.userId);
 
       return {
         success: true,
