@@ -10,7 +10,7 @@ import { AppComponent } from './app/app.component';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideStore } from '@ngrx/store';
-import { provideRouterStore } from '@ngrx/router-store';
+import { provideRouterStore, routerReducer } from '@ngrx/router-store';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -42,6 +42,7 @@ bootstrapApplication(AppComponent, {
     provideStore(
       {
         app: appFeature.reducer,
+        router: routerReducer,
       },
       {
         metaReducers: debugMetaReducers,

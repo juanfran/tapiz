@@ -33,3 +33,24 @@
     transform: rotate(45deg);
   }
 }
+
+
+.suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+
+  button {
+    text-align: left;
+    padding: var(--spacing-2);
+
+    &:hover,
+    &.selected {
+      background-color: var(--primary-color-button-bg);
+    }
+  }
+}
+
+.no-suggestions {
+  color: var(--gray-12)
+}

@@ -20,6 +20,8 @@ import { ActivatedRoute } from '@angular/router';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { Point, TuNode } from '@tapiz/board-commons';
 import { getNodeSize } from '../../../shared/node-size';
+import { getRouterSelectors } from '@ngrx/router-store';
+export const { selectQueryParam } = getRouterSelectors();
 
 @Injectable()
 export class PageEffects {
@@ -149,7 +151,11 @@ export class PageEffects {
   public restoreUserView$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(PageActions.fetchBoardSuccess),
-      withLatestFrom(this.store.select(selectBoardId)),
+      withLatestFrom(
+        this.store.select(selectBoardId),
+        this.store.select(selectQueryParam('nodeId')),
+      ),
+      filter(([, , nodeId]) => !nodeId),
       map(([, boardId]) => {
         const lastUserView = localStorage.getItem(`lastUserView-${boardId}`);
         const params = this.route.snapshot.queryParams;
@@ -228,4 +234,31 @@ export class PageEffects {
       filterNil(),
     );
   });
+
+  public fetchMentions$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(PageActions.fetchMentions, PageActions.fetchBoardSuccess),
+      concatLatestFrom(() => [this.store.select(selectBoardId)]),
+      switchMap(([, boardId]) => {
+        return this.boardApiService.getBoardMentions(boardId).pipe(
+          map((mentions) => {
+            return PageActions.fetchMentionsSuccess({ mentions });
+          }),
+        );
+      }),
+    );
+  });
+
+  public mentionUser$ = createEffect(
+    () => {
+      return this.actions$.pipe(
+        ofType(PageActions.mentionUser),
+        concatLatestFrom(() => [this.store.select(selectBoardId)]),
+        switchMap(([{ userId, nodeId }, boardId]) => {
+          return this.boardApiService.mentionBoardUser(boardId, userId, nodeId);
+        }),
+      );
+    },
+    { dispatch: false },
+  );
 }

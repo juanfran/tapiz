@@ -31,6 +31,14 @@ export class UserApiService {
     return from(this.trpc.user.user.query());
   }
 
+  notifications(offset = 0) {
+    return from(this.trpc.user.notifications.query({ offset }));
+  }
+
+  clearNotifications() {
+    return from(this.trpc.user.clearNotifications.mutate());
+  }
+
   logout() {
     return from(this.trpc.user.logout.query());
   }

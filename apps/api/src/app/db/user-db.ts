@@ -1,4 +1,4 @@
-import { eq, and, or } from 'drizzle-orm';
+import { eq, and, or, desc, sql } from 'drizzle-orm';
 import { db } from './init-db.js';
 import * as schema from '../schema.js';
 import { Invitation, Role, UserInvitation } from '@tapiz/board-commons';
@@ -242,4 +242,64 @@ export async function editInvitationRole(id: string, role: Role) {
     .update(schema.invitations)
     .set({ role })
     .where(eq(schema.invitations.id, id));
+}
+
+export async function mentionUser(
+  boardId: string,
+  userId: string,
+  nodeId?: string,
+) {
+  return db
+    .insert(schema.notifications)
+    .values({ boardId, userId, nodeId, type: 'mention' });
+}
+
+export async function getUserNotifications(
+  userId: string,
+  offset = 0,
+  limit = 10,
+) {
+  const notifications = await db
+    .select({
+      id: schema.notifications.id,
+      notificationId: schema.notifications.id,
+      boardId: schema.notifications.boardId,
+      userId: schema.notifications.userId,
+      nodeId: schema.notifications.nodeId,
+      createdAt: schema.notifications.createdAt,
+      type: schema.notifications.type,
+      userName: schema.accounts.name,
+      boardName: schema.boards.name,
+    })
+    .from(schema.notifications)
+    .leftJoin(
+      schema.accounts,
+      eq(schema.notifications.userId, schema.accounts.id),
+    )
+    .leftJoin(schema.boards, eq(schema.notifications.boardId, schema.boards.id))
+    .orderBy(desc(schema.notifications.createdAt))
+    .limit(limit)
+    .offset(offset)
+    .where(eq(schema.notifications.userId, userId));
+
+  return notifications;
+}
+
+export async function getUserNotificationsCount(
+  userId: string,
+): Promise<number> {
+  const totalCount = await db
+    .select({
+      count: sql`COUNT(*)`,
+    })
+    .from(schema.notifications)
+    .where(eq(schema.notifications.userId, userId));
+
+  return totalCount[0].count as number;
+}
+
+export async function clearUserNotifications(userId: string) {
+  return db
+    .delete(schema.notifications)
+    .where(eq(schema.notifications.userId, userId));
 }

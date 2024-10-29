@@ -189,3 +189,16 @@ export const boardFiles = pgTable('board_files', {
   name: varchar('name', { length: 256 }).notNull(),
   createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
 });
+
+export const notifications = pgTable('notifications', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  type: varchar('type', { length: 256 }).notNull(),
+  boardId: uuid('board_id').references(() => boards.id, {
+    onDelete: 'cascade',
+  }),
+  userId: varchar('user_id').references(() => accounts.id, {
+    onDelete: 'cascade',
+  }),
+  nodeId: uuid('node_id'),
+  createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
+});

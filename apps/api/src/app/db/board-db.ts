@@ -563,3 +563,33 @@ export async function addFileToBoard(boardId: string, name: string) {
     await db.insert(schema.boardFiles).values({ boardId, name }).returning()
   ).at(0);
 }
+
+export async function getUsersToMention(
+  boardId: string,
+  exclude: string[] = [],
+) {
+  const board = await getBoardBasic(boardId);
+
+  if (!board) {
+    return [];
+  }
+
+  if (board.teamId) {
+    const teamMembers = await team.getTeamMembers(board.teamId);
+    const teamUsers = teamMembers.map((member) => ({
+      id: member.id,
+      name: member.name,
+    }));
+
+    return teamUsers;
+  }
+
+  const users = await getBoardUsers(boardId);
+
+  return users
+    .filter((user) => !exclude.includes(user.id))
+    .map((user) => ({
+      id: user.id,
+      name: user.name,
+    }));
+}

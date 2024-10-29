@@ -99,6 +99,8 @@ export class NoteComponent {
     return 'grab';
   });
 
+  mentions = this.#nodesStore.mentions;
+
   visible = hostBinding(
     'class.visible',
     computed(() => {
@@ -349,6 +351,10 @@ export class NoteComponent {
 
   openComments() {
     this.#commentsStore.setParentNode(this.node().id);
+  }
+
+  onMention(userId: string) {
+    this.#nodesStore.actions.mentionUser({ userId, nodeId: this.node().id });
   }
 
   #noteHeight(width: number, height: number, text: string): number {

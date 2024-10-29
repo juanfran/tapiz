@@ -74,5 +74,10 @@ export const PageActions = createActionGroup({
     dragInProgress: props<{ inProgress: boolean }>(),
     setBoardUsers: props<{ users: BoardUserInfo[] }>(),
     boardLoaded: emptyProps(),
+    'Fetch mentions': emptyProps(),
+    'Fetch mentions success': props<{
+      mentions: { id: string; name: string }[];
+    }>(),
+    'Mention user': props<{ userId: string; nodeId?: string }>(),
   },
 });

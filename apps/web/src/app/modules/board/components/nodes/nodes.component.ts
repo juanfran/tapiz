@@ -71,6 +71,17 @@ export class NodesComponent {
       );
     });
 
+    this.#nodesStore.actions.mentionUser$
+      .pipe(takeUntilDestroyed())
+      .subscribe(({ userId, nodeId }) => {
+        this.#store.dispatch(
+          PageActions.mentionUser({
+            userId,
+            nodeId,
+          }),
+        );
+      });
+
     this.#nodesStore.users = toSignal(
       this.#boardFacade
         .getUsers()
@@ -104,6 +115,15 @@ export class NodesComponent {
     );
 
     this.#nodesStore.apiUrl = this.#configService.config.API_URL;
+    this.#nodesStore.mentions = this.#store.selectSignal(
+      pageFeature.selectMentions,
+    );
+
+    this.#nodesStore.actions.fetchMentions$
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.#store.dispatch(PageActions.fetchMentions());
+      });
   }
 
   #onDeletePress() {

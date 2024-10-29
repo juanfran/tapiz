@@ -17,6 +17,7 @@ import { ConfirmComponent } from '../../shared/confirm-action/confirm-actions.co
 import { SubscriptionService } from '../../services/subscription.service';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { appFeature } from '../../+state/app.reducer';
+import { UserNotificationsComponent } from './components/user-notifications/users-notifications.component';
 
 @Component({
   selector: 'tapiz-home',
@@ -34,6 +35,7 @@ import { appFeature } from '../../+state/app.reducer';
     MatButtonModule,
     MatBadgeModule,
     NgOptimizedImage,
+    UserNotificationsComponent,
   ],
 })
 export class HomeComponent {
@@ -45,6 +47,7 @@ export class HomeComponent {
   teams = this.#store.selectSignal(homeFeature.selectTeams);
   invitations = this.#store.selectSignal(homeFeature.selectUserInvitations);
   user = this.#store.selectSignal(appFeature.selectUser);
+  notifications = this.#store.selectSignal(appFeature.selectNotifications);
 
   constructor() {
     this.#store.dispatch(HomeActions.initHome());

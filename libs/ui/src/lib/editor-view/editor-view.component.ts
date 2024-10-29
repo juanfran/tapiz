@@ -9,6 +9,7 @@ import {
   effect,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 
 import { Editor } from '@tiptap/core';
@@ -32,12 +33,14 @@ import { Bold } from '@tiptap/extension-bold';
 import { Document } from '@tiptap/extension-document';
 import { Text } from '@tiptap/extension-text';
 import { ListItem } from '@tiptap/extension-list-item';
+import { Mention, MentionNodeAttrs } from '@tiptap/extension-mention';
 import { output } from '@angular/core';
 import { input } from '@angular/core';
 import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { Subject, sampleTime } from 'rxjs';
 import { FontSize } from './font-size-plugin';
+import { PopupComponent } from '../popup/popup.component';
 
 @Component({
   selector: 'tapiz-editor-view',
@@ -45,24 +48,39 @@ import { FontSize } from './font-size-plugin';
     <div
       class="editor"
       #editor></div>
-    <div style="isolation: isolete">
-      <div
-        class="link-menu"
-        #linkMenu>
-        <a
-          target="_blank"
-          [title]="linkUrl()"
-          [href]="linkUrl()"
-          >Open url: {{ linkUrl() }}</a
-        >
-        <div class="arrow"></div>
-      </div>
+
+    @if (suggestionElement(); as suggestionElement) {
+      <tapiz-popup [elRef]="suggestionElement">
+        <div class="suggestions">
+          @for (mention of suggestedMentions(); track mention) {
+            <button
+              [class.selected]="mentionIndex() === $index"
+              (click)="selectMention($index)">
+              {{ mention.name }}
+            </button>
+          } @empty {
+            <p class="no-suggestions">No suggestions</p>
+          }
+        </div>
+      </tapiz-popup>
+    }
+
+    <div
+      class="link-menu"
+      #linkMenu>
+      <a
+        target="_blank"
+        [title]="linkUrl()"
+        [href]="linkUrl()"
+        >Open url: {{ linkUrl() }}</a
+      >
+      <div class="arrow"></div>
     </div>
   `,
   styleUrl: './editor-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [ToolbarComponent, SafeHtmlPipe],
+  imports: [ToolbarComponent, SafeHtmlPipe, PopupComponent],
   exportAs: 'editorView',
   host: {
     '[class.show]': 'focus()',
@@ -78,12 +96,20 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
   contentChange = output<string>();
   focus = input<boolean>(false);
   customClass = input('');
+  popupComponent = viewChild(PopupComponent);
+  mentions = input<{ id: string; name: string }[]>([]);
+  suggestedMentions = signal<{ id: string; name: string }[]>([]);
+  mentioned = output<string>();
 
   @ViewChild('text') text!: ElementRef<HTMLElement>;
   @ViewChild('editor') editor!: ElementRef<HTMLElement>;
   @ViewChild('linkMenu') linkMenu!: ElementRef<HTMLElement>;
 
   #editor: WritableSignal<Editor | null> = signal(null);
+  suggestionElement = signal<null | Element>(null);
+
+  mentionIndex = signal(0);
+  mentionCommand: null | ((props: MentionNodeAttrs) => void) = null;
 
   #contentChange$ = new Subject<string>();
 
@@ -123,6 +149,21 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
 
   ngAfterViewInit() {
     this.initEditor(this.content());
+  }
+
+  selectMention(index: number) {
+    this.suggestionElement.set(null);
+    this.mentionIndex.set(0);
+
+    const item = this.suggestedMentions().at(index);
+
+    if (item && this.mentionCommand) {
+      this.mentionCommand({
+        id: this.suggestedMentions()[index].id,
+        label: this.suggestedMentions()[index].name,
+      });
+      this.mentioned.emit(this.suggestedMentions()[index].id);
+    }
   }
 
   initEditor(content: string) {
@@ -191,6 +232,59 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
               }
 
               return isLink;
+            },
+          }),
+          Mention.configure({
+            suggestion: {
+              render: () => {
+                return {
+                  onStart: (props) => {
+                    this.mentionCommand = props.command;
+                    this.suggestionElement.set(props.decorationNode);
+                    this.suggestedMentions.set(props.items);
+                  },
+                  onUpdate: (props) => {
+                    this.mentionCommand = props.command;
+                    this.suggestionElement.set(props.decorationNode);
+                    this.suggestedMentions.set(props.items);
+                  },
+                  onKeyDown: (props) => {
+                    if (props.event.key === 'Enter') {
+                      this.selectMention(this.mentionIndex());
+                      return true;
+                    } else if (props.event.key === 'Escape') {
+                      this.suggestionElement.set(null);
+
+                      return true;
+                    } else if (props.event.key === 'ArrowDown') {
+                      this.mentionIndex.update((index) => {
+                        return Math.min(
+                          index + 1,
+                          this.suggestedMentions().length - 1,
+                        );
+                      });
+
+                      return true;
+                    } else if (props.event.key === 'ArrowUp') {
+                      this.mentionIndex.update((index) => {
+                        return Math.max(index - 1, 0);
+                      });
+
+                      return true;
+                    }
+
+                    return false;
+                  },
+                  onExit: () => {
+                    this.suggestionElement.set(null);
+                  },
+                };
+              },
+              items: ({ query }) => {
+                return this.mentions().filter((item) => {
+                  return item.name.localeCompare(query) === 1;
+                });
+              },
             },
           }),
         ],
