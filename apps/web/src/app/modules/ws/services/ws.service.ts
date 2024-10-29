@@ -49,7 +49,7 @@ export class WsService {
     this.#socket.connect();
 
     this.#socket.on('connect', () => {
-      if (this.#socket.recovered) {
+      if (this.#connected.value) {
         this.#reconnect.next();
       }
 
