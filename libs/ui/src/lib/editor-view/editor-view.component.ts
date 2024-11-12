@@ -41,6 +41,7 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { Subject, sampleTime } from 'rxjs';
 import { FontSize } from './font-size-plugin';
 import { PopupComponent } from '../popup/popup.component';
+import { normalize } from '@tapiz/utils/normalize';
 
 @Component({
   selector: 'tapiz-editor-view',
@@ -282,7 +283,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
               },
               items: ({ query }) => {
                 return this.mentions().filter((item) => {
-                  return item.name.localeCompare(query) === 1;
+                  return normalize(item.name).includes(normalize(query));
                 });
               },
             },
