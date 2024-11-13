@@ -1,4 +1,4 @@
-import { createFeature, createReducer, on } from '@ngrx/store';
+import { createFeature, createReducer, createSelector, on } from '@ngrx/store';
 import {
   BoardUser,
   Invitation,
@@ -6,6 +6,7 @@ import {
   UserInvitation,
   TeamMember,
   SortBoard,
+  Space,
 } from '@tapiz/board-commons';
 import { HomeActions } from './home.actions';
 
@@ -18,6 +19,10 @@ export interface HomeState {
   userInvitations: UserInvitation[];
   sortBy: SortBoard;
   currentTeamId: string | null;
+  teamSpaces: {
+    teamId: string;
+    spaces: Space[];
+  } | null;
 }
 
 const sortBy = localStorage.getItem('boardSortBy') ?? '-createdAt';
@@ -31,6 +36,7 @@ const initialHomeState: HomeState = {
   userInvitations: [],
   sortBy: sortBy as SortBoard,
   currentTeamId: null,
+  teamSpaces: null,
 };
 
 const reducer = createReducer(
@@ -48,6 +54,7 @@ const reducer = createReducer(
       state.members = [];
       state.boards = [];
       state.currentTeamId = null;
+      state.teamSpaces = null;
 
       if (action.type === HomeActions.initTeamPage.type) {
         state.currentTeamId = action.teamId;
@@ -335,9 +342,79 @@ const reducer = createReducer(
 
     return state;
   }),
+  on(HomeActions.fetchTeamSpacesSuccess, (state, { teamId, spaces }) => {
+    return {
+      ...state,
+      teamSpaces: {
+        teamId,
+        spaces,
+      },
+    };
+  }),
+  on(HomeActions.createSpaceSuccess, (state, { space }) => {
+    if (!state.teamSpaces) {
+      return state;
+    }
+
+    return {
+      ...state,
+      teamSpaces: {
+        ...state.teamSpaces,
+        spaces: [space, ...state.teamSpaces.spaces],
+      },
+    };
+  }),
+
+  on(HomeActions.updateSpaceSuccess, (state, { space }) => {
+    if (!state.teamSpaces) {
+      return state;
+    }
+
+    return {
+      ...state,
+      teamSpaces: {
+        ...state.teamSpaces,
+        spaces: state.teamSpaces.spaces.map((s) => {
+          if (s.id === space.id) {
+            return space;
+          }
+
+          return s;
+        }),
+      },
+    };
+  }),
+  on(HomeActions.deleteSpaceSuccess, (state, { id }) => {
+    if (!state.teamSpaces) {
+      return state;
+    }
+
+    return {
+      ...state,
+      teamSpaces: {
+        ...state.teamSpaces,
+        spaces: state.teamSpaces.spaces.filter((space) => {
+          return space.id !== id;
+        }),
+      },
+    };
+  }),
 );
 
 export const homeFeature = createFeature({
   name: 'home',
   reducer,
+  extraSelectors: ({ selectCurrentTeamId, selectTeamSpaces }) => ({
+    selectCurrentTeamSpaces: createSelector(
+      selectCurrentTeamId,
+      selectTeamSpaces,
+      (teamId, spaces) => {
+        if (!teamId || !spaces || teamId !== spaces.teamId) {
+          return [];
+        }
+
+        return spaces.spaces;
+      },
+    ),
+  }),
 });

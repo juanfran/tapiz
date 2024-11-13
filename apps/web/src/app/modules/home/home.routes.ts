@@ -6,7 +6,6 @@ import * as homeEffects from './+state/effects/home.effects';
 import { homeFeature } from './+state/home.feature';
 import { AllBoardsComponent } from './components/all-boards/all-boards.component';
 import { TeamComponent } from './components/team/team.component';
-import { StarredComponent } from './components/starred/starred.component';
 
 export const homesRoutes: Route[] = [
   {
@@ -20,7 +19,10 @@ export const homesRoutes: Route[] = [
       },
       {
         path: 'starred',
-        component: StarredComponent,
+        loadComponent: () =>
+          import('./components/starred/starred.component').then(
+            (m) => m.StarredComponent,
+          ),
       },
       {
         path: '',

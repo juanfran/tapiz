@@ -1,7 +1,12 @@
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { db } from './init-db.js';
 import * as schema from '../schema.js';
-import { TeamInvitation, TeamMember, UserTeam } from '@tapiz/board-commons';
+import {
+  Board,
+  TeamInvitation,
+  TeamMember,
+  UserTeam,
+} from '@tapiz/board-commons';
 import { SetNonNullable } from 'type-fest';
 import { getUsersBoardsByTeam } from './board-db.js';
 
@@ -185,4 +190,68 @@ export async function renameTeam(teamId: string, name: string) {
     .update(schema.teams)
     .set({ name })
     .where(eq(schema.teams.id, teamId));
+}
+
+export async function getSpacesByTeam(teamId: string) {
+  return db
+    .select()
+    .from(schema.spaces)
+    .where(eq(schema.spaces.teamId, teamId));
+}
+
+export async function createSpace(teamId: string, name: string) {
+  return (
+    await db.insert(schema.spaces).values({ teamId, name }).returning()
+  ).at(0);
+}
+
+export async function addBoardsToSpace(spaceId: string, boardIds: string[]) {
+  return db.insert(schema.spaceToBoards).values(
+    boardIds.map((boardId) => {
+      return {
+        spaceId,
+        boardId,
+      };
+    }),
+  );
+}
+
+export async function deleteSpace(spaceId: string) {
+  return db.delete(schema.spaces).where(eq(schema.spaces.id, spaceId));
+}
+
+export async function renameSpace(spaceId: string, name: string) {
+  return db
+    .update(schema.spaces)
+    .set({ name })
+    .where(eq(schema.spaces.id, spaceId));
+}
+
+export async function deleteSpaceBoards(spaceId: string) {
+  return db
+    .delete(schema.spaceToBoards)
+    .where(eq(schema.spaceToBoards.spaceId, spaceId));
+}
+
+export async function getSpaceBoards(spaceId: string): Promise<Board[]> {
+  const boards = await db
+    .select()
+    .from(schema.spaceToBoards)
+    .where(eq(schema.spaceToBoards.spaceId, spaceId))
+    .leftJoin(
+      schema.boards,
+      eq(schema.spaceToBoards.boardId, schema.boards.id),
+    );
+
+  return boards
+    .filter((it): it is SetNonNullable<typeof it> => !!it.boards)
+    .map((it) => {
+      return it.boards;
+    });
+}
+
+export async function getSpace(spaceId: string) {
+  return (
+    await db.select().from(schema.spaces).where(eq(schema.spaces.id, spaceId))
+  ).at(0);
 }

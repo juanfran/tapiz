@@ -281,4 +281,138 @@ describe('Api - teams', () => {
       });
     });
   });
+
+  describe.only('team spaces', () => {
+    let teamId: string;
+    let boardId: string;
+
+    beforeAll(async () => {
+      const caller = await getUserCaller(1);
+
+      const result = await caller.team.new({
+        name: randProductName(),
+      });
+
+      teamId = result.id;
+
+      const board = await caller.board.create({
+        name: 'test',
+        teamId,
+      });
+
+      boardId = board.id;
+    });
+
+    it('create space', async () => {
+      const caller = await getUserCaller(1);
+
+      const result = await caller.team.createSpace({
+        teamId,
+        name: randProductName(),
+        boards: [boardId],
+      });
+
+      expect(result?.id).toBeDefined();
+      expect(result?.boards).toHaveLength(1);
+    });
+
+    it('get spaces', async () => {
+      const caller = await getUserCaller(1);
+
+      const result = await caller.team.spaces({
+        teamId,
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].boards).toHaveLength(1);
+    });
+
+    it('update space', async () => {
+      const caller = await getUserCaller(1);
+
+      const spaces = await caller.team.spaces({
+        teamId,
+      });
+
+      const result = await caller.team.updateSpace({
+        spaceId: spaces[0].id,
+        name: randProductName(),
+        boards: [],
+      });
+
+      expect(result.id).toEqual(spaces[0].id);
+      expect(result.boards).toHaveLength(0);
+    });
+
+    it('try to update space from another team', async () => {
+      const caller = await getUserCaller(1);
+      const caller2 = await getUserCaller(2);
+
+      const spaces = await caller.team.spaces({
+        teamId,
+      });
+
+      const result = await errorCall(() => {
+        return caller2.team.updateSpace({
+          spaceId: spaces[0].id,
+          name: randProductName(),
+          boards: [],
+        });
+      });
+
+      expect(result?.code).toEqual('UNAUTHORIZED');
+    });
+
+    it('try to delete space from another team', async () => {
+      const caller = await getUserCaller(1);
+      const caller2 = await getUserCaller(2);
+
+      const spaces = await caller.team.spaces({
+        teamId,
+      });
+
+      const result = await errorCall(() => {
+        return caller2.team.deleteSpace({
+          spaceId: spaces[0].id,
+        });
+      });
+
+      expect(result?.code).toEqual('UNAUTHORIZED');
+    });
+
+    it('delete space', async () => {
+      const caller = await getUserCaller(1);
+
+      const spaces = await caller.team.spaces({
+        teamId,
+      });
+
+      await caller.team.deleteSpace({
+        spaceId: spaces[0].id,
+      });
+
+      const result = await caller.team.spaces({
+        teamId,
+      });
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('try to create create space with an invalid board (different team)', async () => {
+      const caller = await getUserCaller(1);
+      const board = await caller.board.create({
+        name: 'test',
+      });
+
+      const result = await errorCall(() => {
+        return caller.team.createSpace({
+          teamId,
+          name: randProductName(),
+          boards: [board.id],
+        });
+      });
+
+      expect(result?.code).toEqual('BAD_REQUEST');
+    });
+  });
 });

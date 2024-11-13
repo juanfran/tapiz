@@ -34,9 +34,7 @@ import {
   EmojiMessage,
   LiveReactionStore,
 } from '../components/live-reaction/live-reaction.store';
-import { getRouterSelectors } from '@ngrx/router-store';
-
-export const { selectQueryParam } = getRouterSelectors();
+import { selectQueryParam } from '../../../router.selectors';
 
 @Injectable()
 export class BoardEffects {

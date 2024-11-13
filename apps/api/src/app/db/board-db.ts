@@ -280,6 +280,10 @@ export async function getBoards(userId: string): Promise<BoardUser[]> {
   return finalBoards;
 }
 
+export async function addBoardToSpace(boardId: string, spaceId: string) {
+  return db.insert(schema.spaceToBoards).values({ boardId, spaceId });
+}
+
 export async function getBoardUsers(boardId: string): Promise<BoardUserInfo[]> {
   const results = await db
     .select({

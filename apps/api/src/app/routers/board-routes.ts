@@ -130,7 +130,11 @@ export const boardRouter = router({
     return db.board.getBoardUsers(req.input.boardId);
   }),
   teamBoards: teamMemberProcedure
-    .input(z.object({ teamId: z.string().uuid() }))
+    .input(
+      z.object({
+        teamId: z.string().uuid(),
+      }),
+    )
     .query(async (req) => {
       return db.board.getUsersBoardsByTeam(req.ctx.user.sub, req.input.teamId);
     }),

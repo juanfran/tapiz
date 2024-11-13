@@ -44,10 +44,6 @@ export const boards = pgTable('boards', {
   public: boolean('public').notNull().default(false),
 });
 
-export const boardsRelations = relations(boards, ({ many }) => ({
-  accountsToBoards: many(acountsToBoards),
-}));
-
 export const acountsToBoards = pgTable(
   'accounts_boards',
   {
@@ -118,6 +114,7 @@ export const teamMembers = pgTable(
 
 export const teamRelations = relations(teams, ({ many }) => ({
   boards: many(boards),
+  spaces: many(spaces),
 }));
 
 export const teamMemberRelations = relations(teamMembers, ({ one }) => ({
@@ -202,3 +199,32 @@ export const notifications = pgTable('notifications', {
   nodeId: uuid('node_id'),
   createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
 });
+
+export const spaces = pgTable('spaces', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  name: varchar('name', { length: 256 }).notNull(),
+  teamId: uuid('team_id')
+    .references(() => teams.id, { onDelete: 'cascade' })
+    .notNull(),
+  createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
+});
+
+export const spaceToBoards = pgTable(
+  'space_boards',
+  {
+    spaceId: uuid('space_id')
+      .notNull()
+      .references(() => spaces.id, { onDelete: 'cascade' }),
+    boardId: uuid('board_id')
+      .notNull()
+      .references(() => boards.id, { onDelete: 'cascade' }),
+  },
+  (t) => ({
+    pk: primaryKey(t.spaceId, t.boardId),
+  }),
+);
+
+export const boardsRelations = relations(boards, ({ many }) => ({
+  accountsToBoards: many(acountsToBoards),
+  spaceToBoards: many(spaceToBoards),
+}));
