@@ -1,9 +1,20 @@
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { protectedProcedure, router, teamAdminProcedure } from '../trpc.js';
+import {
+  protectedProcedure,
+  router,
+  teamAdminProcedure,
+  teamMemberProcedure,
+} from '../trpc.js';
 import db from '../db/index.js';
 import { checkTeamBoardsAccess, revokeBoardAccess } from '../global.js';
 import { triggerTeam, triggerUser } from '../subscriptor.js';
+import {
+  addBoardsToSpace,
+  createSpace,
+  getSpaceBoards,
+} from '../db/team-db.js';
+import { Space } from '@tapiz/board-commons';
 
 export const teamRouter = router({
   new: protectedProcedure
@@ -155,7 +166,7 @@ export const teamRouter = router({
         success: true,
       };
     }),
-  leave: protectedProcedure
+  leave: teamMemberProcedure
     .input(
       z.object({
         teamId: z.string().uuid(),
@@ -215,5 +226,136 @@ export const teamRouter = router({
       return {
         success: true,
       };
+    }),
+  spaces: teamMemberProcedure
+    .input(
+      z.object({
+        teamId: z.string().uuid(),
+      }),
+    )
+    .query(async (req) => {
+      const spaces = await db.team.getSpacesByTeam(req.input.teamId);
+
+      const spacesPromises = spaces.map(async (space) => {
+        const boards = await getSpaceBoards(space.id);
+
+        return {
+          id: space.id,
+          name: space.name,
+          teamId: space.teamId,
+          boards,
+        } as Space;
+      });
+
+      return await Promise.all(spacesPromises);
+    }),
+  createSpace: teamMemberProcedure
+    .input(
+      z.object({
+        teamId: z.string().uuid(),
+        name: z.string().min(1).max(255),
+        boards: z.array(z.string().uuid()).default([]),
+      }),
+    )
+    .mutation(async (req) => {
+      const teamBoards = await db.board.getBoardsByTeam(req.input.teamId);
+      const boardIds = teamBoards.map((board) => board.id);
+      const validBoards = req.input.boards.every((boardId) =>
+        boardIds.includes(boardId),
+      );
+
+      if (!validBoards) {
+        throw new TRPCError({ code: 'BAD_REQUEST' });
+      }
+
+      const space = await createSpace(req.input.teamId, req.input.name);
+
+      if (!space) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+      }
+
+      if (req.input.boards.length) {
+        await addBoardsToSpace(space.id, req.input.boards);
+      }
+
+      triggerTeam(req.input.teamId, req.ctx.correlationId);
+
+      const boards = await getSpaceBoards(space.id);
+
+      return {
+        id: space.id,
+        name: space.name,
+        teamId: space.teamId,
+        boards,
+      } as Space;
+    }),
+  updateSpace: protectedProcedure
+    .input(
+      z.object({
+        spaceId: z.string().uuid(),
+        name: z.string().min(1).max(255),
+        boards: z.array(z.string().uuid()).default([]),
+      }),
+    )
+    .mutation(async (req) => {
+      const space = await db.team.getSpace(req.input.spaceId);
+
+      if (!space) {
+        throw new TRPCError({ code: 'NOT_FOUND' });
+      }
+
+      const userTeam = await db.team.getUserTeam(
+        space.teamId,
+        req.ctx.user.sub,
+      );
+
+      if (!userTeam) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' });
+      }
+
+      await db.team.renameSpace(req.input.spaceId, req.input.name);
+
+      await db.team.deleteSpaceBoards(req.input.spaceId);
+
+      if (req.input.boards.length) {
+        await addBoardsToSpace(req.input.spaceId, req.input.boards);
+      }
+
+      triggerTeam(space.teamId, req.ctx.correlationId);
+
+      const boards = await getSpaceBoards(space.id);
+
+      return {
+        id: space.id,
+        name: req.input.name,
+        teamId: space.teamId,
+        boards,
+      } as Space;
+    }),
+  deleteSpace: protectedProcedure
+    .input(
+      z.object({
+        spaceId: z.string().uuid(),
+      }),
+    )
+    .mutation(async (req) => {
+      const space = await db.team.getSpace(req.input.spaceId);
+
+      if (!space) {
+        throw new TRPCError({ code: 'NOT_FOUND' });
+      }
+
+      const userTeam = await db.team.getUserTeam(
+        space.teamId,
+        req.ctx.user.sub,
+      );
+
+      if (!userTeam) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' });
+      }
+
+      triggerTeam(space.teamId, req.ctx.correlationId);
+
+      return await db.team.deleteSpace(req.input.spaceId);
     }),
 });

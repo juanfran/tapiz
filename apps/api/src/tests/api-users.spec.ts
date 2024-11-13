@@ -1,3 +1,4 @@
+import { lucia } from '../app/auth';
 import db from '../app/db';
 import { startDB } from '../app/db/init-db';
 import { createMultipleUsers, getAuth, getUserCaller } from './test-helpers';
@@ -16,6 +17,7 @@ describe('user', () => {
     const user = await db.user.getUser(getAuth(5).sub);
 
     expect(user).toBeFalsy();
+    expect(lucia.invalidateUserSessions).toBeCalled();
   });
 
   it('delete account should delete empty team/board', async () => {
@@ -86,7 +88,7 @@ describe('user', () => {
     await caller.user.removeAccount();
 
     const teams = await newAdmin.team.getAll();
-    const boards = await newAdmin.board.boards();
+    const boards = await newAdmin.board.boards({});
 
     expect(teams[0].teamMember.role).toEqual('admin');
     expect(boards[0].isAdmin).toBeTruthy();

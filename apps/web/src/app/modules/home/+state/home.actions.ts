@@ -9,6 +9,7 @@ import {
   TeamMember,
   Member,
   SortBoard,
+  Space,
 } from '@tapiz/board-commons';
 
 export const HomeActions = createActionGroup({
@@ -17,7 +18,7 @@ export const HomeActions = createActionGroup({
     'Init home': emptyProps(),
     'Init all boards page': emptyProps(),
     'Fetch all boards': emptyProps(),
-    'Fetch team boards': props<{ teamId: Team['id'] }>(),
+    'Fetch team boards': props<{ teamId: Team['id']; spaceId?: string }>(),
     'Fetch boards success': props<{ boards: BoardUser[] }>(),
     'Remove board': props<{ id: BoardUser['id'] }>(),
     'Leave board': props<{ id: BoardUser['id'] }>(),
@@ -42,7 +43,7 @@ export const HomeActions = createActionGroup({
       id: Team['id'];
       invitation: Invitation;
     }>(),
-    'Init team page': props<{ teamId: Team['id'] }>(),
+    'Init team page': props<{ teamId: Team['id']; spaceId?: string }>(),
     'Init team members modal': props<{ teamId: Team['id'] }>(),
     'Fetch teams invitations success': props<{
       invitations: TeamInvitation[];
@@ -98,5 +99,25 @@ export const HomeActions = createActionGroup({
       teamId: Team['id'] | null;
     }>(),
     'User event': emptyProps(),
+    'Fetch team spaces': props<{ teamId: Team['id'] }>(),
+    'Fetch team spaces success': props<{
+      teamId: Team['id'];
+      spaces: Space[];
+    }>(),
+    'Create space': props<{
+      teamId: Team['id'];
+      name: string;
+      boards: string[];
+    }>(),
+    'Create space success': props<{ space: Space }>(),
+    'Delete space': props<{ spaceId: Space['id'] }>(),
+    'Delete space success': props<{ id: Space['id'] }>(),
+    'Update space': props<{
+      spaceId: Space['id'];
+      name: string;
+      boards: string[];
+    }>(),
+    'Update space success': props<{ space: Space }>(),
+    'Event update team': props<{ teamId: Team['id'] }>(),
   },
 });

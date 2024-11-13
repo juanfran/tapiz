@@ -61,13 +61,13 @@ describe('board', () => {
       teamId,
     });
 
-    const initialBoards = await caller.board.boards();
+    const initialBoards = await caller.board.boards({});
 
     await caller.board.duplicate({
       boardId: board.id,
     });
 
-    const boards = await caller.board.boards();
+    const boards = await caller.board.boards({});
 
     expect(boards.length).toEqual(initialBoards.length + 1);
   });
@@ -191,13 +191,13 @@ describe('board', () => {
       teamId: team.id,
     });
 
-    let boards = await callerUser7.board.boards();
+    let boards = await callerUser7.board.boards({});
 
     expect(boards.length).toEqual(1);
 
     await db.team.deleteTeam(team.id);
 
-    boards = await callerUser7.board.boards();
+    boards = await callerUser7.board.boards({});
 
     expect(boards.length).toEqual(0);
   });
@@ -235,13 +235,13 @@ describe('board', () => {
 
     await db.board.joinBoard(getAuth(70).sub, resultCreateBoard.id);
 
-    const initialBoards = await callerUser70.board.boards();
+    const initialBoards = await callerUser70.board.boards({});
 
     const resultLeave = await callerUser70.board.leave({
       boardId: resultCreateBoard.id,
     });
 
-    const boards = await callerUser70.board.boards();
+    const boards = await callerUser70.board.boards({});
 
     expect(resultLeave.success).toEqual(true);
     expect(boards.length).toEqual(initialBoards.length - 1);

@@ -17,6 +17,7 @@ vi.mock('./app/auth', async () => {
     },
     lucia: {
       sessionCookieName: 'auth',
+      invalidateUserSessions: vi.fn(),
     },
     setPsqlClient: () => {
       return;
