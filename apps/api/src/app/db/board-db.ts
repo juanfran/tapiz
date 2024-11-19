@@ -1,10 +1,11 @@
-import { eq, and, or, desc, notInArray } from 'drizzle-orm';
+import { eq, and, or, desc, inArray, asc, sql, SQLWrapper } from 'drizzle-orm';
 import { db } from './init-db.js';
 import * as schema from '../schema.js';
 import type {
   BoardUser,
   BoardUserInfo,
   PrivateBoardUser,
+  SortBoard,
   TuNode,
   UserNode,
 } from '@tapiz/board-commons';
@@ -195,91 +196,6 @@ export async function getBoardUser(
   };
 }
 
-export async function getBoards(userId: string): Promise<BoardUser[]> {
-  const teams = await team.getUserTeams(userId);
-  const teamBoards = [];
-
-  for (const team of teams) {
-    const boards = await getUsersBoardsByTeam(userId, team.id);
-
-    teamBoards.push(...boards);
-  }
-
-  const ids = teamBoards.map((it) => it.id);
-  const inArray = ids.length ? notInArray(schema.boards.id, ids) : undefined;
-
-  const boardsRaw = await db
-    .select({
-      boards: {
-        id: schema.boards.id,
-        name: schema.boards.name,
-        createdAt: schema.boards.createdAt,
-        teamId: schema.boards.teamId,
-        role: schema.acountsToBoards.role,
-        public: schema.boards.public,
-      },
-      starreds: schema.starreds,
-      accounts_boards: {
-        role: schema.acountsToBoards.role,
-        lastAccessedAt: schema.acountsToBoards.lastAccessedAt,
-      },
-    })
-    .from(schema.boards)
-    .leftJoin(
-      schema.acountsToBoards,
-      and(
-        eq(schema.boards.id, schema.acountsToBoards.boardId),
-        eq(schema.acountsToBoards.accountId, userId),
-      ),
-    )
-    .leftJoin(
-      schema.starreds,
-      and(
-        eq(schema.starreds.accountId, userId),
-        eq(schema.starreds.boardId, schema.boards.id),
-      ),
-    )
-    .where(
-      and(
-        or(
-          eq(schema.boards.public, true),
-          eq(schema.acountsToBoards.role, 'admin'),
-        ),
-        inArray,
-      ),
-    );
-
-  const boards = boardsRaw
-    .filter((it): it is SetNonNullable<typeof it> => !!it.accounts_boards)
-    .map((result) => {
-      const team = teams.find((it) => it.id === result.boards.teamId);
-      const teamRole = team?.teamMember.role ?? 'member';
-
-      return {
-        ...result.boards,
-        createdAt: result.boards.createdAt,
-        role: result.accounts_boards.role,
-        starred: !!result.starreds,
-        isAdmin:
-          teamRole === 'admin' || result.accounts_boards.role === 'admin',
-        lastAccessedAt:
-          result.accounts_boards.lastAccessedAt ?? result.boards.createdAt,
-      };
-    });
-
-  const finalBoards = [...boards, ...teamBoards];
-
-  finalBoards.sort((a, b) => {
-    if (a.createdAt > b.createdAt) {
-      return -1;
-    }
-
-    return 1;
-  });
-
-  return finalBoards;
-}
-
 export async function addBoardToSpace(boardId: string, spaceId: string) {
   return db.insert(schema.spaceToBoards).values({ boardId, spaceId });
 }
@@ -322,6 +238,8 @@ export async function getBoardsByTeam(teamId: string) {
 export async function getUsersBoardsByTeam(
   userId: string,
   teamId: string,
+  offset = 0,
+  limit = 10,
 ): Promise<BoardUser[]> {
   const userTeam = await getUserTeam(teamId, userId);
 
@@ -361,6 +279,8 @@ export async function getUsersBoardsByTeam(
       ),
     )
     .where(eq(schema.boards.teamId, teamId))
+    .limit(limit)
+    .offset(offset)
     .orderBy(desc(schema.boards.createdAt));
 
   return results.map((result) => ({
@@ -407,11 +327,14 @@ export async function createBoard(
     .values({ name, board, teamId })
     .returning();
 
-  await db.insert(schema.acountsToBoards).values({
-    accountId: ownerId,
-    boardId: result[0].id,
-    role: 'admin',
-  });
+  await db
+    .insert(schema.acountsToBoards)
+    .values({
+      accountId: ownerId,
+      boardId: result[0].id,
+      role: 'admin',
+    })
+    .returning();
 
   return result[0];
 }
@@ -458,28 +381,13 @@ export async function joinBoard(
   userId: string,
   boardId: string,
 ): Promise<void> {
-  const result = await db
-    .select({
-      id: schema.acountsToBoards.accountId,
-    })
-    .from(schema.boards)
-    .leftJoin(
-      schema.acountsToBoards,
-      eq(schema.boards.id, schema.acountsToBoards.boardId),
-    )
-    .where(
-      and(
-        eq(schema.acountsToBoards.accountId, userId),
-        eq(schema.acountsToBoards.boardId, boardId),
-      ),
-    );
-
-  if (result && !result.length) {
-    await db.insert(schema.acountsToBoards).values({
+  await db
+    .insert(schema.acountsToBoards)
+    .values({
       accountId: userId,
       boardId,
-    });
-  }
+    })
+    .onConflictDoNothing();
 }
 
 export async function updateBoard(id: string, board: TuNode[]) {
@@ -529,12 +437,6 @@ export async function updateBoardName(boardId: string, name: string) {
     .update(schema.boards)
     .set({ name })
     .where(eq(schema.boards.id, boardId));
-}
-
-export async function getStarredBoards(userId: string) {
-  const boards = await getBoards(userId);
-
-  return boards.filter((it) => it.starred);
 }
 
 export async function addStarredBoard(userId: string, boardId: string) {
@@ -596,4 +498,134 @@ export async function getUsersToMention(
       id: user.id,
       name: user.name,
     }));
+}
+
+interface GetBoardsOptions {
+  offset?: number;
+  limit?: number;
+  sortBy?: SortBoard;
+  starred?: boolean;
+  teamId?: string;
+}
+
+export async function getBoards(
+  userId: string,
+  options: GetBoardsOptions = {},
+): Promise<BoardUser[]> {
+  const {
+    offset = 0,
+    limit = 10,
+    sortBy = 'createdAt',
+    starred,
+    teamId,
+  } = options;
+
+  let teamIds: string[] = [];
+  let whereClauses: (SQLWrapper | undefined)[] = [];
+  const teamRoles: Record<string, string> = {};
+
+  if (teamId) {
+    const userTeam = await getUserTeam(teamId, userId);
+    if (!userTeam) {
+      return [];
+    }
+    teamRoles[teamId] = userTeam.role;
+
+    whereClauses = [eq(schema.boards.teamId, teamId)];
+  } else {
+    const teams = await team.getUserTeams(userId);
+    teamIds = teams.map((team) => team.id);
+    for (const team of teams) {
+      teamRoles[team.id] = team.teamMember.role;
+    }
+
+    const accessConditions = [eq(schema.acountsToBoards.accountId, userId)];
+    if (teamIds.length > 0) {
+      accessConditions.push(inArray(schema.boards.teamId, teamIds));
+    }
+
+    whereClauses = [or(...accessConditions)];
+  }
+
+  if (starred !== undefined) {
+    if (starred) {
+      whereClauses.push(sql`${schema.starreds.boardId} IS NOT NULL`);
+    } else {
+      whereClauses.push(sql`${schema.starreds.boardId} IS NULL`);
+    }
+  }
+
+  const query = db
+    .selectDistinct({
+      boards: {
+        id: schema.boards.id,
+        name: schema.boards.name,
+        createdAt: schema.boards.createdAt,
+        teamId: schema.boards.teamId,
+        public: schema.boards.public,
+      },
+      starreds: schema.starreds,
+      accounts_boards: {
+        role: schema.acountsToBoards.role,
+        lastAccessedAt: schema.acountsToBoards.lastAccessedAt,
+      },
+    })
+    .from(schema.boards)
+    .leftJoin(
+      schema.acountsToBoards,
+      and(
+        eq(schema.boards.id, schema.acountsToBoards.boardId),
+        eq(schema.acountsToBoards.accountId, userId),
+      ),
+    )
+    .leftJoin(
+      schema.starreds,
+      and(
+        eq(schema.starreds.accountId, userId),
+        eq(schema.starreds.boardId, schema.boards.id),
+      ),
+    )
+    .where(and(...whereClauses));
+
+  let sortField;
+  switch (sortBy) {
+    case 'name':
+    case '-name':
+      sortField = schema.boards.name;
+      break;
+    case 'lastAccess':
+    case '-lastAccess':
+      sortField = schema.acountsToBoards.lastAccessedAt;
+      break;
+    case 'createdAt':
+    default:
+      sortField = schema.boards.createdAt;
+      break;
+  }
+
+  const sortDirectionClause = sortBy.includes('-')
+    ? desc(sortField)
+    : asc(sortField);
+
+  query.orderBy(sortDirectionClause).limit(limit).offset(offset);
+
+  const results = await query;
+
+  const boards = results.map((result) => {
+    let teamRole = null;
+
+    if (result.boards.teamId) {
+      teamRole = teamRoles[result.boards.teamId] ?? 'member';
+    }
+
+    return {
+      ...result.boards,
+      role: result.accounts_boards?.role ?? 'member',
+      starred: !!result.starreds,
+      isAdmin: teamRole === 'admin' || result.accounts_boards?.role === 'admin',
+      lastAccessedAt: result.accounts_boards?.lastAccessedAt ?? '',
+    };
+  });
+
+  return boards;
 }

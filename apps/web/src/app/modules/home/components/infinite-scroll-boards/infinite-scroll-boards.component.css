@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+.main {
+  --header-height: 55px;
+
+  display: block;
+  padding: var(--spacing-4) var(--spacing-6);
+  overflow-y: auto;
+  height: calc(100vh - var(--header-height));
+  inline-size: 100%;
+}

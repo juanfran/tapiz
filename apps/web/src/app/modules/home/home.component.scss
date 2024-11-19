@@ -9,12 +9,6 @@
   inline-size: 100%;
 }
 
-.main {
-  overflow-y: auto;
-  height: calc(100vh - var(--header-height));
-  inline-size: 100%;
-}
-
 .header {
   width: 100%;
   height: var(--header-height);
@@ -24,9 +18,14 @@
   justify-content: space-between;
 }
 
+/* Preserve size of content, avoid blink on page change */
+.content {
+  inline-size: 100%;
+}
+
 .navigation-menu {
   height: calc(100vh - var(--header-height));
-  width: 240px;
+  min-width: 240px;
   padding-block-start: var(--spacing-4);
   padding-inline: var(--spacing-4);
   ul {

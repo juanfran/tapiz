@@ -211,7 +211,7 @@ describe('board', () => {
       teamId,
     });
 
-    const boards = await callerUser1.board.teamBoards({
+    const boards = await callerUser1.board.boards({
       teamId,
     });
 
@@ -258,7 +258,9 @@ describe('board', () => {
       boardId: resultCreateBoard.id,
     });
 
-    const boards = await callerUser1.board.starreds();
+    const boards = await callerUser1.board.boards({
+      starred: true,
+    });
 
     expect(boards.length).toEqual(1);
 
@@ -266,7 +268,9 @@ describe('board', () => {
       boardId: resultCreateBoard.id,
     });
 
-    const boards2 = await callerUser1.board.starreds();
+    const boards2 = await callerUser1.board.boards({
+      starred: true,
+    });
 
     expect(boards2.length).toEqual(0);
   });

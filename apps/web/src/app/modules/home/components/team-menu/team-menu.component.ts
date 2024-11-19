@@ -145,8 +145,6 @@ export class TeamMenuComponent {
       .afterClosed()
       .pipe(filter((it) => it))
       .subscribe((result) => {
-        console.log(result);
-
         this.#store.dispatch(
           HomeActions.createSpace({
             teamId: this.team().id,

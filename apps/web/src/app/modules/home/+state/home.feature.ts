@@ -5,7 +5,6 @@ import {
   UserTeam,
   UserInvitation,
   TeamMember,
-  SortBoard,
   Space,
 } from '@tapiz/board-commons';
 import { HomeActions } from './home.actions';
@@ -17,15 +16,12 @@ export interface HomeState {
   invitations: Invitation[];
   members: TeamMember[];
   userInvitations: UserInvitation[];
-  sortBy: SortBoard;
   currentTeamId: string | null;
   teamSpaces: {
     teamId: string;
     spaces: Space[];
   } | null;
 }
-
-const sortBy = localStorage.getItem('boardSortBy') ?? '-createdAt';
 
 const initialHomeState: HomeState = {
   boards: [],
@@ -34,50 +30,44 @@ const initialHomeState: HomeState = {
   invitations: [],
   members: [],
   userInvitations: [],
-  sortBy: sortBy as SortBoard,
   currentTeamId: null,
   teamSpaces: null,
 };
 
 const reducer = createReducer(
   initialHomeState,
-  on(
-    HomeActions.initHome,
-    HomeActions.initAllBoardsPage,
-    HomeActions.initTeamPage,
-    HomeActions.initStarredPage,
-    (state, action): HomeState => {
-      state = {
-        ...state,
-      };
-      state.invitations = [];
-      state.members = [];
-      state.boards = [];
-      state.currentTeamId = null;
-      state.teamSpaces = null;
+  on(HomeActions.initHome, (state): HomeState => {
+    state = {
+      ...state,
+    };
+    state.invitations = [];
+    state.members = [];
+    state.boards = [];
+    state.currentTeamId = null;
+    state.teamSpaces = null;
 
-      if (action.type === HomeActions.initTeamPage.type) {
-        state.currentTeamId = action.teamId;
-      }
-
-      return state;
-    },
-  ),
-  on(
-    HomeActions.initHome,
-    HomeActions.initAllBoardsPage,
-    (state): HomeState => {
-      return {
-        ...state,
-        loadingBoards: true,
-      };
-    },
-  ),
+    return state;
+  }),
+  on(HomeActions.initBoardsPage, (state): HomeState => {
+    return {
+      ...state,
+      boards: [],
+      currentTeamId: null,
+      teamSpaces: null,
+      loadingBoards: true,
+    };
+  }),
+  on(HomeActions.fetchBoardsPage, (state, { teamId }): HomeState => {
+    return {
+      ...state,
+      currentTeamId: teamId ?? null,
+    };
+  }),
   on(HomeActions.fetchBoardsSuccess, (state, { boards }): HomeState => {
     return {
       ...state,
       loadingBoards: false,
-      boards,
+      boards: [...state.boards, ...boards],
     };
   }),
   on(
@@ -310,12 +300,6 @@ const reducer = createReducer(
 
         return board;
       }),
-    };
-  }),
-  on(HomeActions.changeBoardSortBy, (state, { sortBy }) => {
-    return {
-      ...state,
-      sortBy,
     };
   }),
   on(HomeActions.transferBoard, (state, { id, teamId }) => {
