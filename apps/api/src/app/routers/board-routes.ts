@@ -6,7 +6,6 @@ import {
   boardMemberProcedure,
   protectedProcedure,
   router,
-  teamMemberProcedure,
 } from '../trpc.js';
 import db from '../db/index.js';
 import { checkBoardAccess, revokeBoardAccess } from '../global.js';
@@ -129,15 +128,6 @@ export const boardRouter = router({
   boardUsers: boardMemberProcedure.query(async (req) => {
     return db.board.getBoardUsers(req.input.boardId);
   }),
-  teamBoards: teamMemberProcedure
-    .input(
-      z.object({
-        teamId: z.string().uuid(),
-      }),
-    )
-    .query(async (req) => {
-      return db.board.getUsersBoardsByTeam(req.ctx.user.sub, req.input.teamId);
-    }),
   rename: boardAdminProcedure
     .input(
       z.object({
@@ -154,13 +144,35 @@ export const boardRouter = router({
         success: true,
       };
     }),
-
-  boards: protectedProcedure.query(async (req) => {
-    return await db.board.getBoards(req.ctx.user.sub);
-  }),
-  starreds: protectedProcedure.query(async (req) => {
-    return await db.board.getStarredBoards(req.ctx.user.sub);
-  }),
+  boards: protectedProcedure
+    .input(
+      z.object({
+        teamId: z.string().uuid().optional(),
+        starred: z.boolean().optional().default(false),
+        offset: z.number().int().optional().default(0),
+        limit: z.number().int().optional().default(10),
+        sortBy: z
+          .enum([
+            '-createdAt',
+            'createdAt',
+            '-lastAccess',
+            'lastAccess',
+            '-name',
+            'name',
+          ])
+          .optional()
+          .default('-createdAt'),
+      }),
+    )
+    .query(async (req) => {
+      return await db.board.getBoards(req.ctx.user.sub, {
+        teamId: req.input.teamId,
+        starred: req.input.starred,
+        offset: req.input.offset,
+        limit: req.input.limit,
+        sortBy: req.input.sortBy,
+      });
+    }),
   addStar: protectedProcedure
     .input(z.object({ boardId: z.string().uuid() }))
     .mutation(async (req) => {

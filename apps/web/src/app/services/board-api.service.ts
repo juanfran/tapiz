@@ -5,6 +5,7 @@ import {
   BoardUser,
   CocomaterialApiListVectors,
   CocomaterialTag,
+  SortBoard,
   Team,
 } from '@tapiz/board-commons';
 import { Observable, from, map } from 'rxjs';
@@ -20,16 +21,22 @@ export class BoardApiService {
     return this.apiConfigService.trpc();
   }
 
-  fetchBoards() {
-    return from(this.trpc.board.boards.query());
-  }
-
-  fetchTeamBoards(teamId: string) {
-    return from(this.trpc.board.teamBoards.query({ teamId }));
-  }
-
-  fetchStarredBoards() {
-    return from(this.trpc.board.starreds.query());
+  fetchBoards(options?: {
+    teamId?: string;
+    starred?: boolean;
+    offset?: number;
+    limit?: number;
+    sortBy?: SortBoard;
+  }) {
+    return from(
+      this.trpc.board.boards.query({
+        teamId: options?.teamId,
+        starred: options?.starred,
+        offset: options?.offset,
+        limit: options?.limit,
+        sortBy: options?.sortBy,
+      }),
+    );
   }
 
   createBoard(board: BoardUser['name'], teamId?: Team['id']) {

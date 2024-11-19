@@ -1,18 +1,4 @@
 :host {
   display: block;
-  padding: var(--spacing-4) var(--spacing-6);
-}
-
-.empty {
-  padding-block-start: var(--size-fluid-7);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-4);
-  block-size: 100%;
-
-  h1 {
-    font-size: var(--font-size-40);
-  }
+  inline-size: 100%;
 }

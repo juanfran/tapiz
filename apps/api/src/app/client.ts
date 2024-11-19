@@ -249,8 +249,6 @@ export class Client {
 
     this.boardId = message.boardId;
 
-    await db.board.joinBoard(this.id, this.boardId);
-
     try {
       await this.server.createBoard(this.boardId);
       const user: UserNode = {

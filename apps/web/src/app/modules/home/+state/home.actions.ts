@@ -16,10 +16,7 @@ export const HomeActions = createActionGroup({
   source: 'Home',
   events: {
     'Init home': emptyProps(),
-    'Init all boards page': emptyProps(),
-    'Fetch all boards': emptyProps(),
-    'Fetch team boards': props<{ teamId: Team['id']; spaceId?: string }>(),
-    'Fetch boards success': props<{ boards: BoardUser[] }>(),
+    'Init boards page': emptyProps(),
     'Remove board': props<{ id: BoardUser['id'] }>(),
     'Leave board': props<{ id: BoardUser['id'] }>(),
     'Create board': props<{ name: string; teamId?: Team['id'] }>(),
@@ -43,7 +40,6 @@ export const HomeActions = createActionGroup({
       id: Team['id'];
       invitation: Invitation;
     }>(),
-    'Init team page': props<{ teamId: Team['id']; spaceId?: string }>(),
     'Init team members modal': props<{ teamId: Team['id'] }>(),
     'Fetch teams invitations success': props<{
       invitations: TeamInvitation[];
@@ -92,8 +88,6 @@ export const HomeActions = createActionGroup({
     'Rename board': props<{ id: BoardUser['id']; name: string }>(),
     'Star board': props<{ id: BoardUser['id'] }>(),
     'Unstar board': props<{ id: BoardUser['id'] }>(),
-    'Init starred page': emptyProps(),
-    'Change board sort by': props<{ sortBy: SortBoard }>(),
     'Transfer board': props<{
       id: BoardUser['id'];
       teamId: Team['id'] | null;
@@ -119,5 +113,13 @@ export const HomeActions = createActionGroup({
     }>(),
     'Update space success': props<{ space: Space }>(),
     'Event update team': props<{ teamId: Team['id'] }>(),
+    'Fetch boards page': props<{
+      teamId?: Team['id'];
+      offset?: number;
+      limit?: number;
+      starred?: boolean;
+      sortBy?: SortBoard;
+    }>(),
+    'Fetch boards success': props<{ boards: BoardUser[] }>(),
   },
 });

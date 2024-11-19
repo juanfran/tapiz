@@ -282,7 +282,7 @@ describe('Api - teams', () => {
     });
   });
 
-  describe.only('team spaces', () => {
+  describe('team spaces', () => {
     let teamId: string;
     let boardId: string;
 

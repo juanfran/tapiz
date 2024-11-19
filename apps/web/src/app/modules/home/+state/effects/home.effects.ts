@@ -186,13 +186,25 @@ export const duplicateBoard$ = createEffect(
 export const fetchBoards$ = createEffect(
   (actions$ = inject(Actions), boardApiService = inject(BoardApiService)) => {
     return actions$.pipe(
-      ofType(HomeActions.initAllBoardsPage, HomeActions.fetchAllBoards),
-      switchMap(() => {
-        return boardApiService.fetchBoards().pipe(
-          map((boards) => {
-            return HomeActions.fetchBoardsSuccess({ boards });
-          }),
-        );
+      ofType(HomeActions.fetchBoardsPage),
+      switchMap((action) => {
+        if (action.sortBy) {
+          localStorage.setItem('boardSortBy', action.sortBy);
+        }
+
+        return boardApiService
+          .fetchBoards({
+            limit: action.limit,
+            offset: action.offset,
+            starred: action.starred,
+            teamId: action.teamId,
+            sortBy: action.sortBy,
+          })
+          .pipe(
+            map((boards) => {
+              return HomeActions.fetchBoardsSuccess({ boards });
+            }),
+          );
       }),
     );
   },
@@ -527,45 +539,6 @@ export const leaveTeam$ = createEffect(
   },
 );
 
-export const fetchTeamBoards$ = createEffect(
-  (actions$ = inject(Actions), boardApiService = inject(BoardApiService)) => {
-    return actions$.pipe(
-      ofType(HomeActions.initTeamPage, HomeActions.fetchTeamBoards),
-      switchMap((action) => {
-        return boardApiService.fetchTeamBoards(action.teamId).pipe(
-          map((boards) => {
-            return HomeActions.fetchBoardsSuccess({ boards });
-          }),
-        );
-      }),
-    );
-  },
-  {
-    functional: true,
-  },
-);
-
-export const fetchTeamSpaces$ = createEffect(
-  (actions$ = inject(Actions), teamApiService = inject(TeamApiService)) => {
-    return actions$.pipe(
-      ofType(HomeActions.initTeamPage, HomeActions.fetchTeamSpaces),
-      switchMap((action) => {
-        return teamApiService.spaces(action.teamId).pipe(
-          map((spaces) => {
-            return HomeActions.fetchTeamSpacesSuccess({
-              spaces,
-              teamId: action.teamId,
-            });
-          }),
-        );
-      }),
-    );
-  },
-  {
-    functional: true,
-  },
-);
-
 export const createSpace$ = createEffect(
   (actions$ = inject(Actions), teamApiService = inject(TeamApiService)) => {
     return actions$.pipe(
@@ -728,39 +701,6 @@ export const removeStar$ = createEffect(
       ofType(HomeActions.unstarBoard),
       mergeMap((action) => {
         return boardApiService.removeStar(action.id);
-      }),
-    );
-  },
-  {
-    functional: true,
-    dispatch: false,
-  },
-);
-
-export const initStarredPage$ = createEffect(
-  (actions$ = inject(Actions), boardApiService = inject(BoardApiService)) => {
-    return actions$.pipe(
-      ofType(HomeActions.initStarredPage),
-      switchMap(() => {
-        return boardApiService.fetchStarredBoards().pipe(
-          map((boards) => {
-            return HomeActions.fetchBoardsSuccess({ boards });
-          }),
-        );
-      }),
-    );
-  },
-  {
-    functional: true,
-  },
-);
-
-export const changeSortBy$ = createEffect(
-  (actions$ = inject(Actions)) => {
-    return actions$.pipe(
-      ofType(HomeActions.changeBoardSortBy),
-      tap((action) => {
-        localStorage.setItem('boardSortBy', action.sortBy);
       }),
     );
   },

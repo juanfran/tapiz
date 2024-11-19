@@ -1,8 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   inject,
+  output,
 } from '@angular/core';
 
 import { BoardUser, SortBoard } from '@tapiz/board-commons';
@@ -17,7 +17,6 @@ import { filter } from 'rxjs';
 import { BoardIdToColorDirective } from '../../../../shared/board-id-to-color.directive';
 import { RenameBoardComponent } from '../rename-board/rename-board.component';
 import { MatSelectModule } from '@angular/material/select';
-import { homeFeature } from '../../+state/home.feature';
 import { TransferBoardComponent } from '../transfer-board/transfer-board.component';
 import { input } from '@angular/core';
 
@@ -34,59 +33,149 @@ import { input } from '@angular/core';
     MatDialogModule,
     MatSelectModule,
   ],
-  templateUrl: './board-list.component.html',
   styleUrls: ['./board-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div class="board-options">
+      <mat-form-field>
+        <mat-label>Sort by</mat-label>
+        <mat-select
+          [value]="sortBy()"
+          (valueChange)="changeSortBy($event)">
+          <mat-option value="-createdAt">Newest First</mat-option>
+          <mat-option value="createdAt">Oldest First</mat-option>
+          <mat-option value="-lastAccess">Recently Accessed</mat-option>
+          <mat-option value="lastAccess">Least Recently Accessed</mat-option>
+          <mat-option value="name">Name</mat-option>
+          <mat-option value="-name">Reverse Name</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div class="board-list">
+      @for (board of boards(); track board.id) {
+        <div class="board-item">
+          <div
+            (click)="goBoard(board)"
+            class="board-bg"
+            [tapizBoardIdToColor]="board.id">
+            <a
+              class="board-title"
+              [routerLink]="['/board/', board.id]"
+              >{{ board.name }}</a
+            >
+          </div>
+          <div class="board-extra">
+            <button
+              type="button"
+              title="Settings"
+              [cdkMenuTriggerFor]="menu"
+              mat-icon-button>
+              <mat-icon fontIcon="more_vert"></mat-icon>
+            </button>
+
+            <ng-template #menu>
+              <div
+                class="menu"
+                cdkMenu>
+                @if (!board.starred) {
+                  <button
+                    cdkMenuItem
+                    class="menu-item menu-item-icon"
+                    title="Star"
+                    (cdkMenuItemTriggered)="addStar(board)">
+                    <mat-icon fontIcon="star"></mat-icon>
+                    Star
+                  </button>
+                }
+                @if (board.starred) {
+                  <button
+                    cdkMenuItem
+                    class="menu-item menu-item-icon"
+                    title="Unstar"
+                    (cdkMenuItemTriggered)="removeStar(board)">
+                    <mat-icon fontIcon="star"></mat-icon>
+                    Unstar
+                  </button>
+                }
+                @if (board.isAdmin) {
+                  <button
+                    cdkMenuItem
+                    class="menu-item menu-item-icon"
+                    title="Rename board"
+                    (cdkMenuItemTriggered)="renameBoard(board)">
+                    <mat-icon fontIcon="edit"></mat-icon>
+                    Rename board
+                  </button>
+                }
+                @if (board.isAdmin) {
+                  <button
+                    cdkMenuItem
+                    class="menu-item menu-item-icon"
+                    title="Transfer board"
+                    (cdkMenuItemTriggered)="transferBoard(board)">
+                    <mat-icon fontIcon="drive_file_move"></mat-icon>
+                    Transfer board
+                  </button>
+                }
+                <button
+                  cdkMenuItem
+                  class="menu-item menu-item-icon"
+                  title="Duplicate board"
+                  (cdkMenuItemTriggered)="duplicateBoard(board)">
+                  <mat-icon fontIcon="content_copy"></mat-icon>
+                  Duplicate
+                </button>
+                @if (board.isAdmin) {
+                  <button
+                    cdkMenuItem
+                    class="menu-item menu-item-icon"
+                    title="Delete board"
+                    (cdkMenuItemTriggered)="deleteBoard(board)">
+                    <mat-icon fontIcon="delete"></mat-icon>
+                    Delete board
+                  </button>
+                }
+                @if (board.role === 'guest') {
+                  <button
+                    cdkMenuItem
+                    class="menu-item menu-item-icon"
+                    title="Leave project"
+                    (cdkMenuItemTriggered)="leaveBoard(board)">
+                    <mat-icon fontIcon="directions_walk"></mat-icon>
+                    Leave project
+                  </button>
+                }
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      }
+    </div>
+  `,
 })
 export class BoardListComponent {
   private router = inject(Router);
   private store = inject(Store);
   private dialog = inject(MatDialog);
 
-  public sortBy = this.store.selectSignal(homeFeature.selectSortBy);
-
-  public sortedBoards = computed(() => {
-    const list = [...this.boards()];
-
-    list.sort((a, b) => {
-      const sortyBy = this.sortBy();
-
-      if (sortyBy === 'name') {
-        return a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1;
-      } else if (sortyBy === '-name') {
-        return a.name.toLowerCase() > b.name.toLowerCase() ? -1 : 1;
-      } else if (sortyBy === 'createdAt') {
-        return a.createdAt > b.createdAt ? 1 : -1;
-      } else if (sortyBy === '-createdAt') {
-        return a.createdAt > b.createdAt ? -1 : 1;
-      } else if (sortyBy === 'lastAccess') {
-        return a.lastAccessedAt > b.lastAccessedAt ? 1 : -1;
-      } else if (sortyBy === '-lastAccess') {
-        return a.lastAccessedAt > b.lastAccessedAt ? -1 : 1;
-      }
-
-      return 0;
-    });
-
-    return list;
-  });
-
+  sortBy = input.required<SortBoard>();
   boards = input.required<BoardUser[]>();
+  sortedBy = output<SortBoard>();
 
-  public sortByField(fieldName: string) {
+  sortByField(fieldName: string) {
     return (a: Record<string, string>, b: Record<string, string>) =>
       a[fieldName] > b[fieldName] ? 1 : -1;
   }
 
-  public goBoard(board: BoardUser) {
+  goBoard(board: BoardUser) {
     this.router.navigate(['/board/', board.id]);
   }
 
-  public duplicateBoard(board: BoardUser) {
+  duplicateBoard(board: BoardUser) {
     this.store.dispatch(HomeActions.duplicateBoard({ id: board.id }));
   }
 
-  public deleteBoard(board: BoardUser) {
+  deleteBoard(board: BoardUser) {
     const dialogRef = this.dialog.open(ConfirmComponent, {
       data: {
         title: 'Are you sure?',
@@ -111,11 +200,11 @@ export class BoardListComponent {
       });
   }
 
-  public leaveBoard(board: BoardUser) {
+  leaveBoard(board: BoardUser) {
     this.store.dispatch(HomeActions.leaveBoard({ id: board.id }));
   }
 
-  public transferBoard(board: BoardUser) {
+  transferBoard(board: BoardUser) {
     const dialogRef = this.dialog.open(TransferBoardComponent, {
       width: '400px',
       data: {
@@ -135,7 +224,7 @@ export class BoardListComponent {
       });
   }
 
-  public renameBoard(board: BoardUser) {
+  renameBoard(board: BoardUser) {
     const dialogRef = this.dialog.open(RenameBoardComponent, {
       width: '400px',
       autoFocus: 'dialog',
@@ -157,7 +246,7 @@ export class BoardListComponent {
       });
   }
 
-  public addStar(board: BoardUser) {
+  addStar(board: BoardUser) {
     this.store.dispatch(
       HomeActions.starBoard({
         id: board.id,
@@ -165,7 +254,7 @@ export class BoardListComponent {
     );
   }
 
-  public removeStar(board: BoardUser) {
+  removeStar(board: BoardUser) {
     this.store.dispatch(
       HomeActions.unstarBoard({
         id: board.id,
@@ -173,11 +262,7 @@ export class BoardListComponent {
     );
   }
 
-  public changeSortBy(sortBy: SortBoard) {
-    this.store.dispatch(
-      HomeActions.changeBoardSortBy({
-        sortBy,
-      }),
-    );
+  changeSortBy(sortBy: SortBoard) {
+    this.sortedBy.emit(sortBy);
   }
 }

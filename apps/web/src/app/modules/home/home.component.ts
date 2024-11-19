@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
 import { MatMenuModule } from '@angular/material/menu';
 import { NgOptimizedImage } from '@angular/common';
 import { Store } from '@ngrx/store';
@@ -152,7 +157,7 @@ import { injectQueryParams } from 'ngxtension/inject-query-params';
           </ul>
         </div>
       </nav>
-      <div class="main">
+      <div class="content">
         <router-outlet></router-outlet>
       </div>
     </div>`,
@@ -162,12 +167,13 @@ export class HomeComponent {
   #store = inject(Store);
   #dialog = inject(MatDialog);
   #subscriptionService = inject(SubscriptionService);
+  #boardsOffet = signal(0);
+  #boardsLimit = signal(50);
 
   teams = this.#store.selectSignal(homeFeature.selectTeams);
   invitations = this.#store.selectSignal(homeFeature.selectUserInvitations);
   user = this.#store.selectSignal(appFeature.selectUser);
   notifications = this.#store.selectSignal(appFeature.selectNotifications);
-  teamId = this.#store.selectSignal(homeFeature.selectCurrentTeamId);
   spaces = this.#store.selectSignal(homeFeature.selectTeamSpaces);
   boards = this.#store.selectSignal(homeFeature.selectBoards);
   spaceId = injectQueryParams('spaceId');
@@ -246,6 +252,12 @@ export class HomeComponent {
       data: {
         invitations: this.invitations(),
       },
+    });
+  }
+
+  onScroll() {
+    this.#boardsOffet.update((offset) => {
+      return offset + this.#boardsLimit();
     });
   }
 }

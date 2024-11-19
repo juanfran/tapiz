@@ -1,44 +1,37 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+} from '@angular/core';
+import { Store } from '@ngrx/store';
+import { HomeActions } from '../../+state/home.actions';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
-import { Store } from '@ngrx/store';
 import { CreateBoardComponent } from '../create-board/create-board.component';
 import { filter } from 'rxjs';
-import { HomeActions } from '../../+state/home.actions';
-import { input } from '@angular/core';
 
 @Component({
-  selector: 'tapiz-board-list-header',
+  selector: 'tapiz-empty-boards',
+  styleUrls: ['./empty-boards.component.css'],
+  template: `
+    <h1>No boards</h1>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="createBoard()">
+      Create your first board
+    </button>
+  `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [MatButtonModule],
-
-  template: `
-    <header>
-      <div class="content">
-        <ng-content></ng-content>
-      </div>
-
-      @if (showCreate()) {
-        <button
-          mat-flat-button
-          (click)="createBoard()"
-          color="primary">
-          Create board
-        </button>
-      }
-    </header>
-  `,
-  styleUrls: ['./board-list-header.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BoardListHeaderComponent {
-  #dialog = inject(MatDialog);
+export class EmptyBoardsComponent {
   #store = inject(Store);
+  #dialog = inject(MatDialog);
 
   teamId = input<string>();
-
-  showCreate = input(true);
 
   createBoard() {
     const dialogRef = this.#dialog.open(CreateBoardComponent, {
