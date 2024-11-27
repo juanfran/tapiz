@@ -15,7 +15,7 @@ export class CopyPasteService {
   public getNodes(text: string): TuNode[] {
     try {
       return JSON.parse(text);
-    } catch (e) {
+    } catch (_) {
       return [];
     }
   }

@@ -70,11 +70,10 @@ export default [
       files: ['**/*.ts', '**/*.tsx'],
       rules: {
         ...config.rules,
-        '@typescript-eslint/no-unused-vars': ['error'],
+        '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }],
         'no-multiple-empty-lines': [2, { max: 1 }],
         quotes: ['error', 'single', { avoidEscape: true }],
-        '@typescript-eslint/no-extra-semi': 'error',
-        'no-extra-semi': 'off',
+        'no-extra-semi': 'error',
       },
     })),
   ...compat.config({ extends: ['plugin:@nx/javascript'] }).map((config) => ({
@@ -82,8 +81,7 @@ export default [
     files: ['**/*.js', '**/*.jsx'],
     rules: {
       ...config.rules,
-      '@typescript-eslint/no-extra-semi': 'error',
-      'no-extra-semi': 'off',
+      'no-extra-semi': 'error',
     },
   })),
   { ignores: ['**/environment*.ts', '**/eslint.config.js'] },
