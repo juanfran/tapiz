@@ -50,3 +50,5 @@ apps/api/src/app/sessions/*
 
 uploads/*
 !uploads/.gitkeep
+
+vite.config.*.timestamp*
