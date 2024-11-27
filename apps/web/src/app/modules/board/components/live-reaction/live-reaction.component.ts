@@ -57,7 +57,7 @@ interface Emoji {
       }
     </div>
   `,
-  styleUrl: './live-reaction.component.scss',
+  styleUrls: ['./live-reaction.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LiveReactionComponent {

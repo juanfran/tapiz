@@ -47,7 +47,6 @@ import { BoardMoveService } from '../services/board-move.service';
 import { BoardZoomService } from '../services/board-zoom.service';
 import { ActivatedRoute } from '@angular/router';
 import { NotesService } from '../services/notes.service';
-import { BoardDragDirective } from '../directives/board-drag.directive';
 import { CursorsComponent } from '../components/cursors/cursors.component';
 import { ZoneComponent } from '../components/zone/zone.component';
 import { OverlayComponent } from '../components/overlay/overlay.component';
@@ -108,7 +107,6 @@ import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
     OverlayComponent,
     ZoneComponent,
     CursorsComponent,
-    BoardDragDirective,
     DrawingOptionsComponent,
     SearchOptionsComponent,
     TitleComponent,

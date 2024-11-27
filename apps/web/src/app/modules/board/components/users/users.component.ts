@@ -13,7 +13,7 @@ import { PageActions } from '../../actions/page.actions';
 import { BoardActions } from '../../actions/board.actions';
 import { User } from '@tapiz/board-commons';
 import { map } from 'rxjs/operators';
-import { NgClass, NgOptimizedImage } from '@angular/common';
+import { NgOptimizedImage } from '@angular/common';
 import {
   CdkMenu,
   CdkMenuItem,
@@ -32,7 +32,6 @@ import { MatIconModule } from '@angular/material/icon';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    NgClass,
     CdkMenuTrigger,
     CdkMenu,
     CdkMenuItem,

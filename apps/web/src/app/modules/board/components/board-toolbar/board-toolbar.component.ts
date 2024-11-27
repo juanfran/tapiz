@@ -22,7 +22,6 @@ import { EmojiClickEvent, NativeEmoji } from 'emoji-picker-element/shared';
 import { CocomaterialComponent } from '../cocomaterial/cocomaterial.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
-import { AsyncPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { TokenSelectorComponent } from '../token-selector/token-selector.component';
 import { Token } from '@tapiz/board-commons/models/token.model';
@@ -56,7 +55,6 @@ import { isInputField } from '@tapiz/cdk/utils/is-input-field';
   imports: [
     MatInputModule,
     MatButtonModule,
-    AsyncPipe,
     MatIconModule,
     TokenSelectorComponent,
     TemplateSelectorComponent,

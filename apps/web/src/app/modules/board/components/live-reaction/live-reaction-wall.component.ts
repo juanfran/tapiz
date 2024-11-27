@@ -43,7 +43,7 @@ import {
       </div>
     }
   `,
-  styleUrl: './live-reaction-wall.component.scss',
+  styleUrls: ['./live-reaction-wall.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LiveReactionWallComponent {

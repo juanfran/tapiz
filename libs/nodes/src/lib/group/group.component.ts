@@ -15,7 +15,6 @@ import {
 import { Store } from '@ngrx/store';
 import { Group, TuNode } from '@tapiz/board-commons';
 import { ResizeHandlerSingleComponent } from '@tapiz/ui/resize';
-import { NodeSpaceComponent } from '../node-space';
 import { hostBinding } from 'ngxtension/host-binding';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { NodesStore } from '../services/nodes.store';
@@ -57,7 +56,7 @@ import { input } from '@angular/core';
   styleUrls: ['./group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [ResizeHandlerSingleComponent, NodeSpaceComponent],
+  imports: [ResizeHandlerSingleComponent],
 })
 export class GroupComponent {
   #nodesStore = inject(NodesStore);

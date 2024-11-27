@@ -12,7 +12,7 @@ import { input } from '@angular/core';
 import { SpaceFormComponent } from '../space-form/space-form.component';
 @Component({
   selector: 'tapiz-space-menu',
-  styleUrls: ['./space-menu.component.scss'],
+  styleUrls: ['./space-menu.component.css'],
   standalone: true,
   imports: [MatIconModule, MatMenuModule, MatDialogModule, MatButtonModule],
   template: `

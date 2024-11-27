@@ -44,7 +44,7 @@ import { input } from '@angular/core';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [BoardDragDirective],
+  imports: [],
   hostDirectives: [BoardDragDirective],
 
   host: {

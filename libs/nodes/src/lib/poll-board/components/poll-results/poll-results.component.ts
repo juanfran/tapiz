@@ -41,7 +41,7 @@ interface PollResult {
       <p>Total votes {{ totalVotes() }}</p>
     }
   `,
-  styleUrls: ['./poll-results.component.scss'],
+  styleUrls: ['./poll-results.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PollResultsComponent {

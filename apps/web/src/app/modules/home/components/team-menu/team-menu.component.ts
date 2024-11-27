@@ -16,7 +16,7 @@ import { homeFeature } from '../../+state/home.feature';
 
 @Component({
   selector: 'tapiz-team-menu',
-  styleUrls: ['./team-menu.component.scss'],
+  styleUrls: ['./team-menu.component.css'],
   standalone: true,
   imports: [MatIconModule, MatMenuModule, MatDialogModule, MatButtonModule],
   template: `

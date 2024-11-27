@@ -80,7 +80,7 @@ import { output } from '@angular/core';
       </form>
     }
   `,
-  styleUrls: ['./poll-options.component.scss'],
+  styleUrls: ['./poll-options.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PollOptionsComponent {

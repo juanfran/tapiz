@@ -10,7 +10,6 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { CommentsStore } from './comments.store';
 import { CommentsInputComponent } from './components/comments-input/comments-input.component';
-import { DatePipe } from '@angular/common';
 import { TimeAgoPipe } from '@tapiz/cdk/pipes/time-ago';
 import { MatButtonModule } from '@angular/material/button';
 import { animate, style, transition, trigger } from '@angular/animations';
@@ -27,7 +26,6 @@ import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
   imports: [
     MatIconModule,
     CommentsInputComponent,
-    DatePipe,
     TimeAgoPipe,
     MatButtonModule,
   ],

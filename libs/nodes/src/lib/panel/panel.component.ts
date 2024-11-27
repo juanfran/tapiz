@@ -18,7 +18,6 @@ import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { HistoryService } from '../services/history.service';
 import { NodeSpaceComponent } from '../node-space';
-import { ToolbarComponent } from '@tapiz/ui/toolbar';
 import { EditorViewComponent } from '@tapiz/ui/editor-view';
 import { switchMap } from 'rxjs';
 import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
@@ -79,7 +78,6 @@ import { NodesStore } from '../services/nodes.store';
   standalone: true,
   imports: [
     NodeSpaceComponent,
-    ToolbarComponent,
     EditorViewComponent,
     SafeHtmlPipe,
     DrawingDirective,

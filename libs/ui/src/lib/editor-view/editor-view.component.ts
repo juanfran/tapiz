@@ -19,7 +19,6 @@ import { TextAlign } from '@tiptap/extension-text-align';
 import { Link } from '@tiptap/extension-link';
 import { FontFamily } from '@tiptap/extension-font-family';
 import { History } from '@tiptap/extension-history';
-import { ToolbarComponent } from '../toolbar';
 import { EditorViewSharedStateService } from './editor-view-shared-state.service';
 import { BubbleMenu } from './bubble-menu';
 import { TuNode } from '@tapiz/board-commons';
@@ -36,7 +35,6 @@ import { ListItem } from '@tiptap/extension-list-item';
 import { Mention, MentionNodeAttrs } from '@tiptap/extension-mention';
 import { output } from '@angular/core';
 import { input } from '@angular/core';
-import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { Subject, sampleTime } from 'rxjs';
 import { FontSize } from './font-size-plugin';
@@ -81,7 +79,7 @@ import { normalize } from '@tapiz/utils/normalize';
   styleUrl: './editor-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [ToolbarComponent, SafeHtmlPipe, PopupComponent],
+  imports: [PopupComponent],
   exportAs: 'editorView',
   host: {
     '[class.show]': 'focus()',

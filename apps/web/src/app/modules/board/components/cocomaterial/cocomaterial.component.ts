@@ -28,9 +28,7 @@ import { selectCocomaterial } from '../../selectors/page.selectors';
 import { filter, map, startWith } from 'rxjs';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { PageActions } from '../../actions/page.actions';
-import { SvgBackgroundDirective } from '../../directives/svg-background.directive';
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
-import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { BoardActions } from '../../actions/board.actions';
 import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
 import { pageFeature } from '../../reducers/page.reducer';
@@ -50,8 +48,6 @@ import { BoardMoveService } from '../../services/board-move.service';
     MatIconModule,
     MatAutocompleteModule,
     MatPaginatorModule,
-    SafeHtmlPipe,
-    SvgBackgroundDirective,
     InfiniteScrollDirective,
   ],
   templateUrl: './cocomaterial.component.html',

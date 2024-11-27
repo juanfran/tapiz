@@ -1,3 +1,5 @@
+@use "typography";
+
 *,
 *::before,
 *::after {
@@ -5,7 +7,7 @@
 }
 
 body {
-  @include font-body;
+  @include typography.font-body;
 
   .mat-raised-button.mat-primary {
     background: #736bdb;
@@ -65,23 +67,23 @@ h3,
 h4,
 h5,
 h6 {
-  @include font-body;
+  @include typography.font-body;
 }
 
 h1 {
-  @include font-heading-1;
+  @include typography.font-heading-1;
 }
 
 h2 {
-  @include font-heading-2;
+  @include typography.font-heading-2;
 }
 
 h3 {
-  @include font-heading-3;
+  @include typography.font-heading-3;
 }
 
 h4 {
-  @include font-heading-4;
+  @include typography.font-heading-4;
 }
 
 /* MEDIA */
