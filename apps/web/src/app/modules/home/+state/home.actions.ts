@@ -112,8 +112,8 @@ export const HomeActions = createActionGroup({
       boards: string[];
     }>(),
     'Update space success': props<{ space: Space }>(),
-    'Event update team': props<{ teamId: Team['id'] }>(),
     'Fetch boards page': props<{
+      spaceId?: Space['id'];
       teamId?: Team['id'];
       offset?: number;
       limit?: number;

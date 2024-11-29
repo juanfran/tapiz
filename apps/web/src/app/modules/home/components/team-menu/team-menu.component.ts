@@ -12,7 +12,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { ConfirmComponent } from '../../../../shared/confirm-action/confirm-actions.component';
 import { input } from '@angular/core';
 import { SpaceFormComponent } from '../space-form/space-form.component';
-import { homeFeature } from '../../+state/home.feature';
 
 @Component({
   selector: 'tapiz-team-menu',
@@ -71,7 +70,6 @@ export class TeamMenuComponent {
 
   #store = inject(Store);
   #dialog = inject(MatDialog);
-  #boards = this.#store.selectSignal(homeFeature.selectBoards);
 
   deleteTeam() {
     const dialogRef = this.#dialog.open(ConfirmComponent, {
@@ -137,7 +135,7 @@ export class TeamMenuComponent {
       width: '400px',
       autoFocus: 'dialog',
       data: {
-        boards: this.#boards(),
+        teamId: this.team().id,
       },
     });
 

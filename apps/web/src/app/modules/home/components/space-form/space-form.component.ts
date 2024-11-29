@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  resource,
+  signal,
+} from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -12,7 +20,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
-import { BoardUser, Space } from '@tapiz/board-commons';
+import type { Space } from '@tapiz/board-commons';
+import { BoardApiService } from '../../../../services/board-api.service';
 
 @Component({
   selector: 'tapiz-space-form',
@@ -43,15 +52,21 @@ import { BoardUser, Space } from '@tapiz/board-commons';
       </div>
       <div class="row-boards">
         <h2>Select Boards</h2>
-        @for (boardCtrl of boards.controls; track index; let index = $index) {
-          <div class="board-item">
-            <mat-checkbox
-              color="primary"
-              [formControl]="boardCtrl">
-              {{ data.boards[index].name }}
-            </mat-checkbox>
+        <div class="boards">
+          <div class="boards-inner">
+            @for (board of boards(); track index; let index = $index) {
+              @if (boardsForm.controls.at($index); as boardControl) {
+                <div class="board-item">
+                  <mat-checkbox
+                    color="primary"
+                    [formControl]="boardControl">
+                    {{ board.name }}
+                  </mat-checkbox>
+                </div>
+              }
+            }
           </div>
-        }
+        </div>
       </div>
       <div class="actions">
         <button
@@ -68,11 +83,11 @@ import { BoardUser, Space } from '@tapiz/board-commons';
 })
 export class SpaceFormComponent {
   data = inject<{
-    name: string;
-    boards: BoardUser[];
+    teamId: string;
     space?: Space;
   }>(MAT_DIALOG_DATA);
-  private dialogRef = inject(MatDialogRef);
+  #dialogRef = inject(MatDialogRef);
+  boardApiService = inject(BoardApiService);
 
   form = new FormGroup({
     name: new FormControl('', {
@@ -82,15 +97,39 @@ export class SpaceFormComponent {
     boards: new FormArray([] as FormControl[]),
   });
 
-  get boards() {
+  teamId = signal('');
+
+  boardsResource = resource({
+    request: () => ({ id: this.teamId() }),
+    loader: ({ request }) => {
+      if (!request.id) {
+        return Promise.resolve([]);
+      }
+
+      return this.boardApiService.fetchAllTeamBoards(request.id);
+    },
+  });
+
+  boards = computed(() => {
+    return this.boardsResource.value() ?? [];
+  });
+
+  get boardsForm() {
     return this.form.controls.boards;
   }
 
   constructor() {
-    this.data.boards.forEach((board) => {
-      const selected = this.data.space?.boards.some((it) => it.id === board.id);
+    this.teamId.set(this.data.teamId);
 
-      this.boards.push(new FormControl(selected));
+    effect(() => {
+      const boards = this.boards();
+
+      boards.forEach((board) => {
+        const selected = this.data.space?.boards.some(
+          (it) => it.id === board.id,
+        );
+        this.boardsForm.push(new FormControl(selected));
+      });
     });
 
     if (this.data.space) {
@@ -102,11 +141,10 @@ export class SpaceFormComponent {
 
   submit() {
     if (this.form.valid) {
-      const boards = this.data.boards
-        .filter((_, index) => this.boards.at(index).value)
+      const boards = this.boards()
+        .filter((_, index) => this.boardsForm.at(index).value)
         .map((board) => board.id);
-
-      this.dialogRef.close({
+      this.#dialogRef.close({
         name: this.form.value.name,
         boards,
       });

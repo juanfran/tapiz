@@ -1,4 +1,14 @@
-import { eq, and, or, desc, inArray, asc, sql, SQLWrapper } from 'drizzle-orm';
+import {
+  eq,
+  and,
+  or,
+  desc,
+  inArray,
+  asc,
+  sql,
+  SQLWrapper,
+  isNull,
+} from 'drizzle-orm';
 import { db } from './init-db.js';
 import * as schema from '../schema.js';
 import type {
@@ -63,7 +73,7 @@ export async function haveAccess(boardId: string, userId: string) {
 
   const boardUser = await getBoardUser(boardId, userId);
 
-  if (boardUser?.role === 'admin') {
+  if (boardUser?.role === 'admin' && !board?.teamId) {
     return true;
   }
 
@@ -366,6 +376,24 @@ export async function deleteBoard(boardId: string) {
   return db.delete(schema.boards).where(eq(schema.boards.id, boardId));
 }
 
+export async function deleteUserBoards(userId: string) {
+  const boards = await db
+    .select({
+      id: schema.boards.id,
+    })
+    .from(schema.boards)
+    .leftJoin(
+      schema.acountsToBoards,
+      and(
+        eq(schema.boards.id, schema.acountsToBoards.boardId),
+        eq(schema.acountsToBoards.accountId, userId),
+      ),
+    )
+    .where(eq(schema.acountsToBoards.accountId, userId));
+
+  await Promise.all(boards.map((board) => deleteBoard(board.id)));
+}
+
 export async function leaveBoard(userId: string, boardId: string) {
   return db
     .delete(schema.acountsToBoards)
@@ -506,6 +534,7 @@ interface GetBoardsOptions {
   sortBy?: SortBoard;
   starred?: boolean;
   teamId?: string;
+  spaceId?: string;
 }
 
 export async function getBoards(
@@ -518,13 +547,40 @@ export async function getBoards(
     sortBy = 'createdAt',
     starred,
     teamId,
+    spaceId,
   } = options;
 
   let teamIds: string[] = [];
   let whereClauses: (SQLWrapper | undefined)[] = [];
   const teamRoles: Record<string, string> = {};
 
-  if (teamId) {
+  if (teamId && spaceId) {
+    const spaceResult = await db
+      .select()
+      .from(schema.spaces)
+      .where(eq(schema.spaces.id, spaceId))
+      .limit(1);
+
+    const space = spaceResult[0];
+
+    if (!space) {
+      return [];
+    }
+
+    const spaceTeamId = space.teamId;
+
+    const userTeam = await getUserTeam(spaceTeamId, userId);
+    if (!userTeam) {
+      return [];
+    }
+
+    teamRoles[spaceTeamId] = userTeam.role;
+
+    whereClauses = [
+      eq(schema.spaceToBoards.spaceId, spaceId),
+      eq(schema.boards.teamId, spaceTeamId),
+    ];
+  } else if (teamId) {
     const userTeam = await getUserTeam(teamId, userId);
     if (!userTeam) {
       return [];
@@ -535,11 +591,25 @@ export async function getBoards(
   } else {
     const teams = await team.getUserTeams(userId);
     teamIds = teams.map((team) => team.id);
+
     for (const team of teams) {
       teamRoles[team.id] = team.teamMember.role;
     }
 
-    const accessConditions = [eq(schema.acountsToBoards.accountId, userId)];
+    const accessConditions = [
+      or(
+        and(
+          eq(schema.acountsToBoards.accountId, userId),
+          eq(schema.acountsToBoards.role, 'admin'),
+          isNull(schema.boards.teamId),
+        ),
+        and(
+          eq(schema.acountsToBoards.accountId, userId),
+          eq(schema.boards.public, true),
+        ),
+      ),
+    ];
+
     if (teamIds.length > 0) {
       accessConditions.push(inArray(schema.boards.teamId, teamIds));
     }
@@ -587,6 +657,13 @@ export async function getBoards(
     )
     .where(and(...whereClauses));
 
+  if (spaceId) {
+    query.innerJoin(
+      schema.spaceToBoards,
+      eq(schema.boards.id, schema.spaceToBoards.boardId),
+    );
+  }
+
   let sortField;
   switch (sortBy) {
     case 'name':
@@ -618,9 +695,20 @@ export async function getBoards(
       teamRole = teamRoles[result.boards.teamId] ?? 'member';
     }
 
+    let role: 'admin' | 'member' | 'guest' = 'member';
+
+    if (teamRole) {
+      role = result.accounts_boards?.role ?? 'member';
+    } else if (
+      result.boards.public &&
+      result.accounts_boards?.role !== 'admin'
+    ) {
+      role = 'guest';
+    }
+
     return {
       ...result.boards,
-      role: result.accounts_boards?.role ?? 'member',
+      role,
       starred: !!result.starreds,
       isAdmin: teamRole === 'admin' || result.accounts_boards?.role === 'admin',
       lastAccessedAt: result.accounts_boards?.lastAccessedAt ?? '',
@@ -628,4 +716,15 @@ export async function getBoards(
   });
 
   return boards;
+}
+
+export function getAllTeamBoards(teamId: string) {
+  return db
+    .select({
+      id: schema.boards.id,
+      name: schema.boards.name,
+    })
+    .from(schema.boards)
+    .orderBy(desc(schema.boards.name))
+    .where(eq(schema.boards.teamId, teamId));
 }

@@ -13,14 +13,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CreateTeamComponent } from './components/create-team/create-team.component';
 import { homeFeature } from './+state/home.feature';
-import { filter, switchMap } from 'rxjs';
+import { filter } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatBadgeModule } from '@angular/material/badge';
 import { UserInvitationsComponent } from './components/user-invitations/user-invitations.component';
 import { AuthService } from '../../services/auth.service';
 import { ConfirmComponent } from '../../shared/confirm-action/confirm-actions.component';
 import { SubscriptionService } from '../../services/subscription.service';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { appFeature } from '../../+state/app.reducer';
 import { UserNotificationsComponent } from './components/user-notifications/users-notifications.component';
 import { TeamMenuComponent } from './components/team-menu/team-menu.component';
@@ -186,19 +186,6 @@ export class HomeComponent {
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
         this.#store.dispatch(HomeActions.userEvent());
-      });
-
-    toObservable(this.teams)
-      .pipe(
-        takeUntilDestroyed(),
-        switchMap((teams) => {
-          return this.#subscriptionService.watchTeamIds(
-            teams.map((it) => it.id),
-          );
-        }),
-      )
-      .subscribe((teamId) => {
-        this.#store.dispatch(HomeActions.eventUpdateTeam({ teamId }));
       });
   }
 

@@ -6,6 +6,7 @@ import {
   boardMemberProcedure,
   protectedProcedure,
   router,
+  teamMemberProcedure,
 } from '../trpc.js';
 import db from '../db/index.js';
 import { checkBoardAccess, revokeBoardAccess } from '../global.js';
@@ -148,6 +149,7 @@ export const boardRouter = router({
     .input(
       z.object({
         teamId: z.string().uuid().optional(),
+        spaceId: z.string().uuid().optional(),
         starred: z.boolean().optional().default(false),
         offset: z.number().int().optional().default(0),
         limit: z.number().int().optional().default(10),
@@ -165,7 +167,23 @@ export const boardRouter = router({
       }),
     )
     .query(async (req) => {
+      if (req.input.teamId) {
+        const userTeam = await db.team.getUserTeam(
+          req.input.teamId,
+          req.ctx.user.sub,
+        );
+
+        if (!userTeam) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        }
+      }
+
+      if (req.input.spaceId && !req.input.teamId) {
+        throw new TRPCError({ code: 'BAD_REQUEST' });
+      }
+
       return await db.board.getBoards(req.ctx.user.sub, {
+        spaceId: req.input.spaceId,
         teamId: req.input.teamId,
         starred: req.input.starred,
         offset: req.input.offset,
@@ -238,5 +256,14 @@ export const boardRouter = router({
       return {
         success: true,
       };
+    }),
+  allTeamBoards: teamMemberProcedure
+    .input(
+      z.object({
+        teamId: z.string().uuid(),
+      }),
+    )
+    .query(async (req) => {
+      return db.board.getAllTeamBoards(req.input.teamId);
     }),
 });
