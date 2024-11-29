@@ -57,7 +57,15 @@ const reducer = createReducer(
       loadingBoards: true,
     };
   }),
-  on(HomeActions.fetchBoardsPage, (state, { teamId }): HomeState => {
+  on(HomeActions.fetchBoardsPage, (state, { teamId, offset }): HomeState => {
+    if (!offset) {
+      state = {
+        ...state,
+        loadingBoards: true,
+        boards: [],
+      };
+    }
+
     return {
       ...state,
       currentTeamId: teamId ?? null,

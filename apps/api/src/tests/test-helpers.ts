@@ -46,7 +46,7 @@ export const getAuth = (userIndex: number) => {
 export const createUser = async (userIndex: number) => {
   const auth = getAuth(userIndex);
 
-  await db.user.createUser(auth.sub, auth.name, auth.email, auth.googleId);
+  await db.user.createUser(auth.sub, auth.name, auth.email, '', auth.googleId);
 };
 
 export const createMultipleUsers = async (size = usersTest.length) => {

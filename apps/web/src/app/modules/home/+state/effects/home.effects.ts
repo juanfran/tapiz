@@ -17,11 +17,7 @@ import { selectRouteParams } from '../../../../router.selectors';
 export const initHomeFeatchTeams$ = createEffect(
   (actions$ = inject(Actions), teamApiService = inject(TeamApiService)) => {
     return actions$.pipe(
-      ofType(
-        HomeActions.initHome,
-        HomeActions.acceptInvitationSuccess,
-        HomeActions.eventUpdateTeam,
-      ),
+      ofType(HomeActions.initHome, HomeActions.acceptInvitationSuccess),
       exhaustMap(() => {
         return teamApiService.fetchTeams();
       }),
@@ -198,6 +194,7 @@ export const fetchBoards$ = createEffect(
             offset: action.offset,
             starred: action.starred,
             teamId: action.teamId,
+            spaceId: action.spaceId,
             sortBy: action.sortBy,
           })
           .pipe(
@@ -566,12 +563,11 @@ export const createSpaceSuccess$ = createEffect(
     return actions$.pipe(
       ofType(HomeActions.createSpaceSuccess),
       tap((action) => {
-        void router.navigate([
-          '/team',
-          action.space.teamId,
-          'space',
-          action.space.id,
-        ]);
+        void router.navigate(['/team', action.space.teamId], {
+          queryParams: {
+            spaceId: action.space.id,
+          },
+        });
       }),
     );
   },
@@ -602,18 +598,38 @@ export const updateSpace$ = createEffect(
   },
 );
 
-export const eventUpdateTeam$ = createEffect(
-  (actions$ = inject(Actions), store = inject(Store)) => {
+export const updateSpaceSuccess$ = createEffect(
+  (actions$ = inject(Actions)) => {
     return actions$.pipe(
-      ofType(HomeActions.eventUpdateTeam),
-      concatLatestFrom(() => {
-        return store.select(homeFeature.selectTeamSpaces);
+      ofType(HomeActions.updateSpaceSuccess),
+      map((action) => {
+        return HomeActions.fetchBoardsPage({
+          spaceId: action.space.id,
+          teamId: action.space.teamId,
+          offset: 0,
+          limit: 50,
+        });
       }),
-      filter(([action, spaces]) => {
-        return action.teamId === spaces?.teamId;
-      }),
-      map(([action]) => {
-        return HomeActions.fetchTeamSpaces({ teamId: action.teamId });
+    );
+  },
+  {
+    functional: true,
+  },
+);
+
+export const fetchTeamSpaces$ = createEffect(
+  (actions$ = inject(Actions), teamApiService = inject(TeamApiService)) => {
+    return actions$.pipe(
+      ofType(HomeActions.fetchTeamSpaces),
+      switchMap((action) => {
+        return teamApiService.spaces(action.teamId).pipe(
+          map((result) => {
+            return HomeActions.fetchTeamSpacesSuccess({
+              spaces: result,
+              teamId: action.teamId,
+            });
+          }),
+        );
       }),
     );
   },
@@ -651,11 +667,8 @@ export const deleteSpaceSuccess$ = createEffect(
       concatLatestFrom(() => {
         return store.select(selectRouteParams);
       }),
-      filter(([action, params]) => {
-        return params['spaceId'] === action.id;
-      }),
       tap(([, params]) => {
-        void router.navigate(['/team', params['id']]);
+        void router.navigate(['/team', params['teamId']]);
       }),
     );
   },

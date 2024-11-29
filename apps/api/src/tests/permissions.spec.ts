@@ -7,10 +7,16 @@ import {
 } from './test-helpers';
 import { randProductName, randUuid } from '@ngneat/falso';
 import { testRouter } from './routes-test';
+import { initTRPC } from '@trpc/server';
+import db from '../app/db/index';
 
 describe('permissions', () => {
   let teamId: string;
   let boardId: string;
+
+  const t = initTRPC.context().create();
+  const { createCallerFactory } = t;
+  const createCaller = createCallerFactory(testRouter);
 
   beforeAll(async () => {
     await startDB();
@@ -63,7 +69,7 @@ describe('permissions', () => {
   });
 
   it('no user', async () => {
-    const caller = testRouter.createCaller({
+    const caller = createCaller({
       user: null,
     });
 
@@ -77,7 +83,7 @@ describe('permissions', () => {
   it('login user', async () => {
     const user = getAuth(1);
 
-    const caller = testRouter.createCaller({
+    const caller = createCaller({
       user,
     });
 
@@ -90,7 +96,7 @@ describe('permissions', () => {
     it('team not found', async () => {
       const user = getAuth(1);
 
-      const caller = testRouter.createCaller({
+      const caller = createCaller({
         user,
       });
 
@@ -106,7 +112,7 @@ describe('permissions', () => {
     it('team admin not authorized', async () => {
       const user = getAuth(2);
 
-      const caller = testRouter.createCaller({
+      const caller = createCaller({
         user,
       });
 
@@ -122,7 +128,7 @@ describe('permissions', () => {
     it('team admin', async () => {
       const user = getAuth(1);
 
-      const caller = testRouter.createCaller({
+      const caller = createCaller({
         user,
       });
 
@@ -136,7 +142,7 @@ describe('permissions', () => {
     it('team member not authorized', async () => {
       const user = getAuth(9);
 
-      const caller = testRouter.createCaller({
+      const caller = createCaller({
         user,
       });
 
@@ -152,7 +158,7 @@ describe('permissions', () => {
     it('team member', async () => {
       const user = getAuth(2);
 
-      const caller = testRouter.createCaller({
+      const caller = createCaller({
         user,
       });
 
@@ -168,7 +174,7 @@ describe('permissions', () => {
     it('board not found', async () => {
       const user = getAuth(1);
 
-      const caller = testRouter.createCaller({
+      const caller = createCaller({
         user,
       });
 
@@ -184,7 +190,7 @@ describe('permissions', () => {
     it('board admin not authorized', async () => {
       const user = getAuth(9);
 
-      const caller = testRouter.createCaller({
+      const caller = createCaller({
         user,
       });
 
@@ -200,7 +206,7 @@ describe('permissions', () => {
     it('board admin', async () => {
       const user = getAuth(2);
 
-      const caller = testRouter.createCaller({
+      const caller = createCaller({
         user,
       });
 
@@ -214,7 +220,7 @@ describe('permissions', () => {
     it('board team admin', async () => {
       const user = getAuth(1);
 
-      const caller = testRouter.createCaller({
+      const caller = createCaller({
         user,
       });
 
@@ -228,7 +234,7 @@ describe('permissions', () => {
     it('board member not authorized', async () => {
       const user = getAuth(9);
 
-      const caller = testRouter.createCaller({
+      const caller = createCaller({
         user,
       });
 
@@ -244,7 +250,7 @@ describe('permissions', () => {
     it('board member', async () => {
       const user = getAuth(3);
 
-      const caller = testRouter.createCaller({
+      const caller = createCaller({
         user,
       });
 
@@ -253,6 +259,24 @@ describe('permissions', () => {
       });
 
       expect(result.ctx.board.id).toEqual(boardId);
+    });
+
+    it('board admin lost team access', async () => {
+      const user = getAuth(2);
+
+      const caller = createCaller({
+        user,
+      });
+
+      await db.team.deleteMember(teamId, user.sub);
+
+      const result = await errorCall(async () => {
+        return caller.boardMember({
+          boardId,
+        });
+      });
+
+      expect(result?.code).toEqual('UNAUTHORIZED');
     });
   });
 });

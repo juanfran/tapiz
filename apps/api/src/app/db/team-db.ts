@@ -57,7 +57,10 @@ export async function getUserTeams(userId: string): Promise<UserTeam[]> {
     .from(schema.teams)
     .leftJoin(
       schema.teamMembers,
-      eq(schema.teamMembers.teamId, schema.teams.id),
+      and(
+        eq(schema.teamMembers.teamId, schema.teams.id),
+        eq(schema.teamMembers.accountId, userId),
+      ),
     )
     .where(eq(schema.teamMembers.accountId, userId));
 
@@ -200,9 +203,12 @@ export async function getSpacesByTeam(teamId: string) {
 }
 
 export async function createSpace(teamId: string, name: string) {
-  return (
-    await db.insert(schema.spaces).values({ teamId, name }).returning()
-  ).at(0);
+  const spaces = await db
+    .insert(schema.spaces)
+    .values({ teamId, name })
+    .returning();
+
+  return spaces[0];
 }
 
 export async function addBoardsToSpace(spaceId: string, boardIds: string[]) {

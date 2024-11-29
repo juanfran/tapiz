@@ -23,6 +23,17 @@ import { SortBoard } from '@tapiz/board-commons';
 @Component({
   selector: 'tapiz-team',
   styleUrls: ['./team.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    TitleComponent,
+    BoardListComponent,
+    BoardListHeaderComponent,
+    TeamMenuComponent,
+    EmptyBoardsComponent,
+    InfiniteScrollBoardsComponent,
+  ],
+  providers: [RxState],
   template: `
     @if (team(); as team) {
       <tapiz-infinite-scroll-boards (scrolled)="onScroll()">
@@ -52,17 +63,6 @@ import { SortBoard } from '@tapiz/board-commons';
       </tapiz-infinite-scroll-boards>
     }
   `,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
-  imports: [
-    TitleComponent,
-    BoardListComponent,
-    BoardListHeaderComponent,
-    TeamMenuComponent,
-    EmptyBoardsComponent,
-    InfiniteScrollBoardsComponent,
-  ],
-  providers: [RxState],
 })
 export class TeamComponent {
   #store = inject(Store);
@@ -70,7 +70,7 @@ export class TeamComponent {
   teamId = input.required<string>();
   spaceId = injectQueryParams('spaceId');
 
-  #boards = this.#store.selectSignal(homeFeature.selectBoards);
+  boards = this.#store.selectSignal(homeFeature.selectBoards);
   #teamSpaces = this.#store.selectSignal(homeFeature.selectCurrentTeamSpaces);
   #teams = this.#store.selectSignal(homeFeature.selectTeams);
 
@@ -85,21 +85,6 @@ export class TeamComponent {
     (localStorage.getItem('boardSortBy') as SortBoard) ?? '-createdAt',
   );
 
-  boards = computed(() => {
-    const space = this.space();
-
-    if (!space) {
-      return this.#boards();
-    }
-
-    return space.boards
-      .filter((it) => it.teamId === this.teamId())
-      .map((spaceBoard) => {
-        return this.#boards().find((it) => it.id === spaceBoard.id);
-      })
-      .filter((it) => !!it);
-  });
-
   loading = this.#store.selectSignal(homeFeature.selectLoadingBoards);
 
   team = computed(() => {
@@ -108,19 +93,28 @@ export class TeamComponent {
 
   constructor() {
     explicitEffect([this.teamId], () => {
-      this.#store.dispatch(HomeActions.initBoardsPage());
-    });
+      this.#boardsOffet.set(0);
 
-    explicitEffect([this.#boardsOffet, this.teamId, this.sortBy], () => {
+      this.#store.dispatch(HomeActions.initBoardsPage());
       this.#store.dispatch(
-        HomeActions.fetchBoardsPage({
-          teamId: this.teamId(),
-          offset: this.#boardsOffet(),
-          limit: this.#boardsLimit(),
-          sortBy: this.sortBy(),
-        }),
+        HomeActions.fetchTeamSpaces({ teamId: this.teamId() }),
       );
     });
+
+    explicitEffect(
+      [this.#boardsOffet, this.teamId, this.spaceId, this.sortBy],
+      () => {
+        this.#store.dispatch(
+          HomeActions.fetchBoardsPage({
+            spaceId: this.spaceId() ?? undefined,
+            teamId: this.teamId(),
+            offset: this.#boardsOffet(),
+            limit: this.#boardsLimit(),
+            sortBy: this.sortBy(),
+          }),
+        );
+      },
+    );
   }
 
   onScroll() {

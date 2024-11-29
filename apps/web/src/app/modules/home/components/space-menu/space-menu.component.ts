@@ -53,7 +53,7 @@ export class SpaceMenuComponent {
         description:
           'This will delete only the space, boards inside will not be deleted.',
         confirm: {
-          text: 'Delete team',
+          text: 'Delete space',
           color: 'warn',
         },
         cancel: {
@@ -79,8 +79,8 @@ export class SpaceMenuComponent {
       width: '400px',
       autoFocus: 'dialog',
       data: {
-        boards: this.boards(),
         space: this.space(),
+        teamId: this.space().teamId,
       },
     });
 

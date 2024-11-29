@@ -22,6 +22,7 @@ export class BoardApiService {
   }
 
   fetchBoards(options?: {
+    spaceId?: string;
     teamId?: string;
     starred?: boolean;
     offset?: number;
@@ -30,6 +31,7 @@ export class BoardApiService {
   }) {
     return from(
       this.trpc.board.boards.query({
+        spaceId: options?.spaceId,
         teamId: options?.teamId,
         starred: options?.starred,
         offset: options?.offset,
@@ -126,5 +128,9 @@ export class BoardApiService {
     return from(
       this.trpc.board.mentionBoardUser.mutate({ boardId, userId, nodeId }),
     );
+  }
+
+  fetchAllTeamBoards(teamId: Team['id']) {
+    return this.trpc.board.allTeamBoards.query({ teamId });
   }
 }

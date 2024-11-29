@@ -21,3 +21,12 @@ mat-form-field {
 h2 {
   margin-block-start: var(--spacing-4);
 }
+
+.boards {
+  max-height: 25vh;
+  overflow-y: auto;
+}
+
+.boards-inner {
+  overflow: hidden;
+}
