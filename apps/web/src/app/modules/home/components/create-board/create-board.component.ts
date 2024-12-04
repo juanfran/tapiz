@@ -18,7 +18,6 @@ import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'tapiz-create-board',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     MatButtonModule,

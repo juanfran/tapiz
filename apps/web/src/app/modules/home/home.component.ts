@@ -32,7 +32,6 @@ import { injectQueryParams } from 'ngxtension/inject-query-params';
   styleUrls: ['./home.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [],
-  standalone: true,
   imports: [
     MatMenuModule,
     RouterModule,

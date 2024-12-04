@@ -15,7 +15,6 @@ import { input } from '@angular/core';
 
 @Component({
   selector: 'tapiz-resize-single',
-  standalone: true,
   imports: [],
   template: '<ng-content></ng-content>',
   styles: `

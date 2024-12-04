@@ -98,7 +98,6 @@ import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
   styleUrls: ['./board.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [DrawingStore],
-  standalone: true,
   imports: [
     CommonModule,
     HeaderComponent,

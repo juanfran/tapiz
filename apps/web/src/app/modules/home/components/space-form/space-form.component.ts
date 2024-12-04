@@ -27,7 +27,6 @@ import { BoardApiService } from '../../../../services/board-api.service';
   selector: 'tapiz-space-form',
   styleUrls: ['./space-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     MatButtonModule,
     MatIconModule,

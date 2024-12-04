@@ -16,7 +16,6 @@ import { input } from '@angular/core';
 
 @Component({
   selector: 'tapiz-rotate-handler',
-  standalone: true,
   imports: [MatIconModule],
   template: `
     <div

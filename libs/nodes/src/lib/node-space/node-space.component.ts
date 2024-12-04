@@ -46,7 +46,6 @@ import { input } from '@angular/core';
   `,
   styleUrl: './node-space.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [ResizeHandlerComponent, RotateHandlerComponent],
   host: {
     '[style.--cursor]': 'cursor()',

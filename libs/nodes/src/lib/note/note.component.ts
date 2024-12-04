@@ -42,7 +42,6 @@ import { EditorPortalComponent } from '../editor-portal/editor-portal.component'
   templateUrl: './note.component.html',
   styleUrls: ['./note.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     DrawingDirective,
     MatIconModule,

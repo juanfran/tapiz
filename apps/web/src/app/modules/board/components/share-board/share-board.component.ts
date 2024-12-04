@@ -21,7 +21,6 @@ import { ConfigService } from '../../../../services/config.service';
 
 @Component({
   selector: 'tapiz-share-board',
-  standalone: true,
   imports: [
     MatIconModule,
     MatDialogModule,

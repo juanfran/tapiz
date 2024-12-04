@@ -34,7 +34,6 @@ interface TeamMembersComponentState {
   styleUrls: ['./team-members.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState],
-  standalone: true,
   imports: [CommonModule, MembersComponent],
 })
 export class TeamMembersComponent {

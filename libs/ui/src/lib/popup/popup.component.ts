@@ -31,7 +31,6 @@ import { TemplatePortal } from '@angular/cdk/portal';
   `,
   styleUrl: './popup.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [],
 })
 export class PopupComponent implements OnDestroy {

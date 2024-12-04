@@ -18,7 +18,6 @@ import { ConfigService } from '../../../../services/config.service';
 
 @Component({
   selector: 'tapiz-add-image',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     MatButtonModule,

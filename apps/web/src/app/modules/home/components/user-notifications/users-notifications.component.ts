@@ -13,7 +13,6 @@ import { MatBadgeModule } from '@angular/material/badge';
   selector: 'tapiz-user-notifications',
   styleUrls: ['./user-notifications.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     RouterModule,
     MatIconModule,

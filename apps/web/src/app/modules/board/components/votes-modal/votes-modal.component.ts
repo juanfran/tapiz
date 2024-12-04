@@ -7,7 +7,6 @@ import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'tapiz-votes-modal',
-  standalone: true,
   template: `
     <tapiz-modal-header title="Votes"></tapiz-modal-header>
 

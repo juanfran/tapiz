@@ -16,7 +16,6 @@ import { SpaceFormComponent } from '../space-form/space-form.component';
 @Component({
   selector: 'tapiz-team-menu',
   styleUrls: ['./team-menu.component.css'],
-  standalone: true,
   imports: [MatIconModule, MatMenuModule, MatDialogModule, MatButtonModule],
   template: `
     <button

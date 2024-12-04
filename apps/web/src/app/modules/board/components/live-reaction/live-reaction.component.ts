@@ -31,7 +31,6 @@ interface Emoji {
 
 @Component({
   selector: 'tapiz-live-reaction',
-  standalone: true,
   imports: [MatSelectModule, MatFormField, NgOptimizedImage],
   template: `
     <mat-form-field>

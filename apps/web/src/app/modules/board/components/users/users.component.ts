@@ -30,7 +30,6 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     CdkMenuTrigger,
     CdkMenu,

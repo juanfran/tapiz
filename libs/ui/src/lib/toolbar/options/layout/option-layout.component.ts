@@ -99,7 +99,6 @@ import { MatSliderModule } from '@angular/material/slider';
   `,
   styleUrls: ['../options.scss', './option-layout.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [MatIconModule, ColorPickerComponent, MatSliderModule],
 })
 export class OptionLayoutComponent {

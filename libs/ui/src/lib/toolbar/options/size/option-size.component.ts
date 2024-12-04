@@ -28,7 +28,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   `,
   styleUrls: ['../options.scss', './option-size.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [MatSelectModule, MatFormFieldModule],
 })
 export class OptionSizeComponent {

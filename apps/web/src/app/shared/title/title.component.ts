@@ -11,7 +11,6 @@ import { input } from '@angular/core';
   selector: 'tapiz-title',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: '',
-  standalone: true,
   imports: [],
   styles: [':host {display: none; }'],
 })

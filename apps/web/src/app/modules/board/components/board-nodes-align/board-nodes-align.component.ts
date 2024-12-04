@@ -12,7 +12,6 @@ import { getNodeSize } from '../../../../shared/node-size';
 
 @Component({
   selector: 'tapiz-board-nodes-align',
-  standalone: true,
   imports: [MatIconModule, MatButtonModule],
   template: `
     @if (focusNodesIds().length > 1) {

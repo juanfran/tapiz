@@ -12,7 +12,6 @@ import { popupState } from './popup.state';
       }
     `,
   ],
-  standalone: true,
   imports: [PortalModule],
 })
 export class PopupPortalComponent {

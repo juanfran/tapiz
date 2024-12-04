@@ -19,7 +19,6 @@ import { input } from '@angular/core';
   `,
   styleUrls: ['./vector.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [NodeSpaceComponent],
 })
 export class VectorComponent {

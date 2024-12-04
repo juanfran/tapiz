@@ -30,7 +30,6 @@ export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 
 @Component({
   selector: 'tapiz-estimation',
-  standalone: true,
   imports: [
     MatSelectModule,
     FormsModule,

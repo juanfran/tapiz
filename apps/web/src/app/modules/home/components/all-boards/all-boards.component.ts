@@ -37,7 +37,6 @@ import { SortBoard } from '@tapiz/board-commons';
     </tapiz-infinite-scroll-boards>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     TitleComponent,
     BoardListComponent,

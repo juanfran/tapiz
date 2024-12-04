@@ -53,7 +53,6 @@ import { ConfigService } from '../../../../services/config.service';
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [BoardIdToColorDirective],
 })
 export class TokenSelectorComponent {

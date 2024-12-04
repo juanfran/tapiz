@@ -7,7 +7,6 @@ import { input } from '@angular/core';
 
 @Component({
   selector: 'tapiz-modal-header',
-  standalone: true,
   imports: [MatButtonModule, MatIconModule],
 
   template: `

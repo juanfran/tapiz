@@ -20,7 +20,6 @@ export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 
 @Component({
   selector: 'tapiz-estimation-stories',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     MatButtonModule,

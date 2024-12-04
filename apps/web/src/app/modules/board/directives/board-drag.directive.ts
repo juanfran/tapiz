@@ -4,7 +4,6 @@ import { MultiDragService } from '@tapiz/cdk/services/multi-drag.service';
 
 @Directive({
   selector: '[tapizBoardDrag]',
-  standalone: true,
 })
 export class BoardDragDirective implements AfterViewInit {
   public host?: Draggable;

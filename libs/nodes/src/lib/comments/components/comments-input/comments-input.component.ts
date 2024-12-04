@@ -14,7 +14,6 @@ import { CommentNode } from '@tapiz/board-commons';
 
 @Component({
   selector: 'tapiz-comments-input',
-  standalone: true,
   imports: [
     MatIconModule,
     FormsModule,

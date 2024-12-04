@@ -17,7 +17,6 @@ interface PollResult {
 
 @Component({
   selector: 'tapiz-poll-results',
-  standalone: true,
   imports: [MatButtonModule, MatIconModule],
   template: `
     @if (node().content; as nodeContent) {

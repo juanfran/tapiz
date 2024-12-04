@@ -55,7 +55,6 @@ import { input } from '@angular/core';
   `,
   styleUrls: ['./group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [ResizeHandlerSingleComponent],
 })
 export class GroupComponent {

@@ -12,7 +12,6 @@ import { ZoneService } from './zone.service';
   template: '',
   styleUrls: ['./zone.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   host: {
     '[style.display]': 'areaSelector()',
     '[style.transform]': 'transform()',

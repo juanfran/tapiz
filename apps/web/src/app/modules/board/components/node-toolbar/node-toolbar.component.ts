@@ -49,7 +49,6 @@ interface Toolbar {
   `,
   styleUrl: './node-toolbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [ToolbarComponent],
 })
 export class NodeToolbarComponent {

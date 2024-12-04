@@ -12,7 +12,6 @@ import {
     ><span class="dot-3">.</span>
   </p>`,
   styleUrls: ['./reconnection.component.css'],
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReconnectionComponent {

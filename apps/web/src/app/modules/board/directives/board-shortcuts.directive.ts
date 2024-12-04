@@ -11,7 +11,6 @@ import { NodePatch } from '@tapiz/board-commons';
 
 @Directive({
   selector: '[tapizBoardShourtcuts]',
-  standalone: true,
 })
 export class BoardShourtcutsDirective {
   #store = inject(Store);

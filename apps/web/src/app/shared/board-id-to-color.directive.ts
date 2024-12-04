@@ -35,7 +35,6 @@ export const BoardColors = colors.map((backgroundColor) => {
 
 @Directive({
   selector: '[tapizBoardIdToColor]',
-  standalone: true,
   exportAs: 'tapizBoardIdToColor',
   host: {
     '[style.backgroundColor]': 'backgroundColor()',

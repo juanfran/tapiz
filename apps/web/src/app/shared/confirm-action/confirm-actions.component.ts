@@ -6,7 +6,6 @@ import { MatButtonModule } from '@angular/material/button';
   selector: 'tapiz-confirm',
   templateUrl: './confirm-actions.component.html',
   styleUrls: ['./confirm-actions.component.scss'],
-  standalone: true,
   imports: [MatDialogModule, MatButtonModule],
 })
 export class ConfirmComponent {

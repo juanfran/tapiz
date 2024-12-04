@@ -36,7 +36,6 @@ import { OptionHeadingComponent } from './options/heading/option-heading.compone
   `,
   styleUrl: './toolbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     OptionFormatComponent,
     OptionFontComponent,

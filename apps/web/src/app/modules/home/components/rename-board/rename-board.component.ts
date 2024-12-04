@@ -42,7 +42,6 @@ import { ModalHeaderComponent } from '../../../../shared/modal-header/modal-head
     </form>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     MatButtonModule,
     MatIconModule,

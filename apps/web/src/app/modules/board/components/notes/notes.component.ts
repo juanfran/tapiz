@@ -3,7 +3,6 @@ import { lighter } from '@tapiz/cdk/utils/colors';
 
 @Component({
   selector: 'tapiz-notes',
-  standalone: true,
   template: `
     <div class="list">
       @for (note of notes; track note.color) {

@@ -17,7 +17,6 @@ import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [InfiniteScrollDirective],
 })
 export class InfiniteScrollBoardsComponent {

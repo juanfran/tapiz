@@ -19,7 +19,6 @@ import { input } from '@angular/core';
 
 @Component({
   selector: 'tapiz-estimation-workspace',
-  standalone: true,
   imports: [MatButtonModule, MatIconModule],
   template: `
     <div class="nav">

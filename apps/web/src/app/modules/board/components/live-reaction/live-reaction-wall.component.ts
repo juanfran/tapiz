@@ -10,7 +10,6 @@ import {
 
 @Component({
   selector: 'tapiz-live-reaction-wall',
-  standalone: true,
   imports: [],
   animations: [
     trigger('fadeInOut', [

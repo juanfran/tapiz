@@ -3,7 +3,6 @@ import { input } from '@angular/core';
 
 @Directive({
   selector: '[tapizSvgBackground]',
-  standalone: true,
 })
 export class SvgBackgroundDirective {
   tapizSvgBackground = input.required<string>();

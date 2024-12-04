@@ -44,7 +44,6 @@ import { ToolbarEditorService } from '../../toolbar-editor.service';
   `,
   styleUrls: ['../options.scss', './option-format.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [MatIconModule],
 })
 export class OptionFormatComponent {

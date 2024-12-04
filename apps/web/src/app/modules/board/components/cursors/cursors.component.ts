@@ -26,7 +26,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
   `,
   styleUrls: ['./cursors.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [],
 })
 export class CursorsComponent {

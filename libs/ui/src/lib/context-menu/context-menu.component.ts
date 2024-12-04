@@ -28,7 +28,6 @@ import { MatIconModule } from '@angular/material/icon';
     }
   </div>`,
   styleUrls: ['./context-menu.component.scss'],
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ClickOutside, MatIconModule],
 })

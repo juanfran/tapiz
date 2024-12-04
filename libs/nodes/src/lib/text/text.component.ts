@@ -55,7 +55,6 @@ import { NodesStore } from '../services/nodes.store';
   styleUrls: ['./text.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [HotkeysService],
-  standalone: true,
   imports: [
     NodeSpaceComponent,
     EditorViewComponent,

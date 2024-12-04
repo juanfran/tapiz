@@ -22,7 +22,6 @@ import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 
 @Component({
   selector: 'tapiz-comments',
-  standalone: true,
   imports: [
     MatIconModule,
     CommentsInputComponent,

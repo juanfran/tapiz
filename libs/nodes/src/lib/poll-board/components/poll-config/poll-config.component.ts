@@ -16,7 +16,6 @@ import { output } from '@angular/core';
 
 @Component({
   selector: 'tapiz-poll-config',
-  standalone: true,
   imports: [
     MatButtonModule,
     MatIconModule,

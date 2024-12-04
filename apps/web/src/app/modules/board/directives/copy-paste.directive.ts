@@ -10,7 +10,6 @@ import { NotificationService } from '../../../shared/notification/notification.s
 
 @Directive({
   selector: '[tapizCopyPaste]',
-  standalone: true,
 })
 export class CopyPasteDirective {
   @HostListener('document:keydown.control.c') public copyEvent() {

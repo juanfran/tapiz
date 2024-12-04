@@ -5,7 +5,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'tapiz-demo-intro-dialog',
-  standalone: true,
   imports: [MatButtonModule, MatDialogModule, NgOptimizedImage],
   template: `
     <div class="logo">

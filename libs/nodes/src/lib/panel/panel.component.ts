@@ -75,7 +75,6 @@ import { NodesStore } from '../services/nodes.store';
   styleUrls: ['./panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState, HotkeysService],
-  standalone: true,
   imports: [
     NodeSpaceComponent,
     EditorViewComponent,

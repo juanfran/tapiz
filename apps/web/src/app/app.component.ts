@@ -16,7 +16,6 @@ import { GlobalStore } from './+state/global.store';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [RouterOutlet, ReconnectionComponent],
 })
 export class AppComponent {

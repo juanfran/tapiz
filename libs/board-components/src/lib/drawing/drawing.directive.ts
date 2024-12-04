@@ -30,7 +30,6 @@ export interface MouseDrawingEvent {
 
 @Directive({
   selector: '[tapizDrawing]',
-  standalone: true,
 })
 export class DrawingDirective {
   #drawingStore = inject(DrawingStore);

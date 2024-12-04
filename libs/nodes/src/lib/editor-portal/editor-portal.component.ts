@@ -15,7 +15,6 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   selector: 'tapiz-editor-portal',
-  standalone: true,
   imports: [],
   template: `
     <div #domPortalContent>

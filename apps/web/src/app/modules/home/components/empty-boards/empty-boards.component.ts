@@ -24,7 +24,6 @@ import { filter } from 'rxjs';
     </button>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [MatButtonModule],
 })
 export class EmptyBoardsComponent {

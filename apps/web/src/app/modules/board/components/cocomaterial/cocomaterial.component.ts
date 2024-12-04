@@ -38,7 +38,6 @@ import { BoardMoveService } from '../../services/board-move.service';
 
 @Component({
   selector: 'tapiz-cocomaterial',
-  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,

@@ -22,7 +22,6 @@ interface Template {
 
 @Component({
   selector: 'tapiz-template-selector',
-  standalone: true,
   imports: [NgOptimizedImage],
   template: `<div class="templates">
     @for (template of elements; track template.title) {

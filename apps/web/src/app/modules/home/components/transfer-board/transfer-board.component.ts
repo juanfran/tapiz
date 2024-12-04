@@ -13,7 +13,6 @@ import { ModalHeaderComponent } from '../../../../shared/modal-header/modal-head
 
 @Component({
   selector: 'tapiz-transfer-board',
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     MatButtonModule,

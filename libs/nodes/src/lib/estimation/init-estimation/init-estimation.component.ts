@@ -8,7 +8,6 @@ import { output } from '@angular/core';
 
 @Component({
   selector: 'tapiz-init-estimation',
-  standalone: true,
   imports: [MatSelectModule, FormsModule, MatButtonModule],
 
   template: `

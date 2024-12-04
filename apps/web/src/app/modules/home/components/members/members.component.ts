@@ -150,7 +150,6 @@ import { input } from '@angular/core';
   styleUrls: ['./members.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [],
-  standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,

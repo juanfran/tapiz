@@ -8,7 +8,6 @@ import { ColorPickerComponent } from '@tapiz/ui/color-picker';
   templateUrl: './drawing-options.component.html',
   styleUrls: ['./drawing-options.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [ReactiveFormsModule, MatIconModule, ColorPickerComponent],
 })
 export class DrawingOptionsComponent {

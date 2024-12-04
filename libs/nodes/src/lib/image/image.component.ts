@@ -33,7 +33,6 @@ import { NodesStore } from '../services/nodes.store';
   styleUrls: ['./image.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [RxState, HotkeysService],
-  standalone: true,
   imports: [NodeSpaceComponent],
 
   host: {

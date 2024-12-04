@@ -36,7 +36,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   styleUrls: ['./node.component.scss'],
   template: ' <ng-container #nodeHost></ng-container>',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [],
   providers: [RxState, NodeStore],
   host: {

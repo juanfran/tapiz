@@ -4,7 +4,6 @@ import { NodesStore } from '@tapiz/nodes/services/nodes.store';
 
 @Component({
   selector: 'tapiz-board-editor-portal',
-  standalone: true,
   imports: [PortalModule],
   template: `
     @if (selectedPortal(); as contentPortal) {

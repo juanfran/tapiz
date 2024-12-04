@@ -42,7 +42,6 @@ import { ToolbarEditorService } from '../../toolbar-editor.service';
   `,
   styleUrls: ['../options.scss', './option-heading.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [],
 })
 export class OptionHeadingComponent {

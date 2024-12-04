@@ -50,7 +50,6 @@ import { MatInputModule } from '@angular/material/input';
   styleUrls: ['./create-team.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [],
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     MatFormFieldModule,

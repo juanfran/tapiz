@@ -36,7 +36,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
   `,
   styleUrls: ['../options.scss', './option-font.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [MatSelectModule, MatFormFieldModule, ColorPickerComponent],
 })
 export class OptionFontComponent {

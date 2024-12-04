@@ -10,7 +10,6 @@ import { input } from '@angular/core';
 
 @Component({
   selector: 'tapiz-board-list-header',
-  standalone: true,
   imports: [MatButtonModule],
 
   template: `

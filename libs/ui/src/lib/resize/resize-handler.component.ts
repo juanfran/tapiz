@@ -15,7 +15,6 @@ import { input } from '@angular/core';
 
 @Component({
   selector: 'tapiz-resize-handler',
-  standalone: true,
   imports: [],
 
   template: `

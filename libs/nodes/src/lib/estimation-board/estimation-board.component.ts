@@ -23,7 +23,6 @@ import { input } from '@angular/core';
 
 @Component({
   selector: 'tapiz-estimation-board',
-  standalone: true,
   imports: [EstimationComponent, MatIconModule],
 
   template: `

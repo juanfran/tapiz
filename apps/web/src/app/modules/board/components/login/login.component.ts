@@ -9,7 +9,6 @@ import { NgOptimizedImage } from '@angular/common';
   styleUrls: ['./login.component.scss'],
   templateUrl: './login.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [MatButtonModule, MatIconModule, NgOptimizedImage],
 })
 export class LoginComponent {

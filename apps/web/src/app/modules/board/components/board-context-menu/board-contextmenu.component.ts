@@ -29,7 +29,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
       display: none;
     }
   `,
-  standalone: true,
   imports: [MatDialogModule],
 })
 export class BoardContextMenuComponent implements OnInit {

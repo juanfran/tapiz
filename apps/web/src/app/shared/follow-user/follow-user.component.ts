@@ -10,7 +10,6 @@ import { BoardFacade } from '../../services/board-facade.service';
 
 @Component({
   selector: 'tapiz-follow-user',
-  standalone: true,
   imports: [CommonModule, MatButtonModule],
   template: `
     @if (userToFollow$ | async) {

@@ -32,7 +32,6 @@ import { MatButtonModule } from '@angular/material/button';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     RouterLink,
     AutoFocusDirective,

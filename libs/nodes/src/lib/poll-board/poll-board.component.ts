@@ -29,7 +29,6 @@ import { input } from '@angular/core';
 
 @Component({
   selector: 'tapiz-poll-board',
-  standalone: true,
   imports: [
     MatButtonModule,
     MatIconModule,

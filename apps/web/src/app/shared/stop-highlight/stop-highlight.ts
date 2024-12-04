@@ -7,7 +7,6 @@ import { isUserHighlighActive } from '../../modules/board/selectors/page.selecto
 
 @Component({
   selector: 'tapiz-stop-highlight',
-  standalone: true,
   imports: [MatButtonModule],
   template: `
     @if (highlight()) {

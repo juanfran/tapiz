@@ -4,7 +4,6 @@ import { DemoIntroDialogComponent } from './demo-intro-dialog.component';
 
 @Component({
   selector: 'tapiz-demo-intro',
-  standalone: true,
   imports: [MatDialogModule],
   template: '',
   styleUrl: './demo-intro.component.scss',

@@ -13,7 +13,6 @@ import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 
 @Component({
   selector: 'tapiz-zoom-control',
-  standalone: true,
   imports: [],
   template: `<button
       title="Zoom out"

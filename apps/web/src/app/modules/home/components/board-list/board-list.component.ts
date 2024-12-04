@@ -22,7 +22,6 @@ import { input } from '@angular/core';
 
 @Component({
   selector: 'tapiz-board-list',
-  standalone: true,
   imports: [
     CdkMenuTrigger,
     CdkMenu,

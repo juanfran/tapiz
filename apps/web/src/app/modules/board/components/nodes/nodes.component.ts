@@ -28,7 +28,6 @@ import { ConfigService } from '../../../../services/config.service';
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [NodeComponent, AsyncPipe],
   providers: [HotkeysService],
 })

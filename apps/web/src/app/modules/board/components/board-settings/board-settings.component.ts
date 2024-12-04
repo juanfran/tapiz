@@ -18,7 +18,6 @@ import { BoardFacade } from '../../../../services/board-facade.service';
 
 @Component({
   selector: 'tapiz-board-settings',
-  standalone: true,
   imports: [
     MatIconModule,
     MatDialogModule,

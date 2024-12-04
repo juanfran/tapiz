@@ -78,7 +78,6 @@ import { normalize } from '@tapiz/utils/normalize';
   `,
   styleUrl: './editor-view.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [PopupComponent],
   exportAs: 'editorView',
   host: {

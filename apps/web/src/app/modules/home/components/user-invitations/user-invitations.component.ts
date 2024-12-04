@@ -56,7 +56,6 @@ import { trackByProp } from '../../../../shared/track-by-prop';
   `,
   styleUrls: ['./user-invitations.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [MatIconModule, MatDialogModule, MatButtonModule],
 })
 export class UserInvitationsComponent {

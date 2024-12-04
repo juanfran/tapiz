@@ -24,7 +24,6 @@ import { SortBoard } from '@tapiz/board-commons';
   selector: 'tapiz-team',
   styleUrls: ['./team.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     TitleComponent,
     BoardListComponent,

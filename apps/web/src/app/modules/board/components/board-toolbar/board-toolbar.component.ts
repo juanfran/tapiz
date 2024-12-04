@@ -51,7 +51,6 @@ import { isInputField } from '@tapiz/cdk/utils/is-input-field';
   templateUrl: './board-toolbar.component.html',
   styleUrls: ['./board-toolbar.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     MatInputModule,
     MatButtonModule,

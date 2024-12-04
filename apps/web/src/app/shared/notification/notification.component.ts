@@ -10,7 +10,6 @@ import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'tapiz-notification',
-  standalone: true,
   imports: [MatButtonModule, MatIconModule],
   template: `
     {{ data.message }}

@@ -32,7 +32,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
   templateUrl: './search-options.component.html',
   styleUrls: ['./search-options.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [
     ReactiveFormsModule,
     MatInputModule,

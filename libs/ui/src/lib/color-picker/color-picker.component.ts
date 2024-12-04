@@ -16,7 +16,6 @@ import { colorPickerConfig } from './color-picker.config';
   selector: 'tapiz-color-picker',
   template: '',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
 })
 export class ColorPickerComponent implements OnDestroy {
   #el = inject(ElementRef);

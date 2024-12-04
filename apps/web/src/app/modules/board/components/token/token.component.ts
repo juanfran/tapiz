@@ -43,7 +43,6 @@ import { input } from '@angular/core';
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  standalone: true,
   imports: [],
   hostDirectives: [BoardDragDirective],
 
