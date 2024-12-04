@@ -29,7 +29,8 @@
   },
   "private": true,
   "dependencies": {
-    "@analogjs/vite-plugin-angular": "^1.9.4",
+    "@analogjs/vite-plugin-angular": "^1.10.0",
+    "@analogjs/vitest-angular": "^1.10.0",
     "@angular/animations": "19.0.1",
     "@angular/cdk": "19.0.1",
     "@angular/common": "19.0.1",
