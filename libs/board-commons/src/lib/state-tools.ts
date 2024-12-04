@@ -23,10 +23,23 @@ export function optimize(actions: StateActions[] | unknown[]) {
     if (!optimizedTmp[key]) {
       optimizedTmp[key] = action;
     } else {
-      optimizedTmp[key] = {
-        ...optimizedTmp[key],
-        ...action,
-      };
+      if (action.op === 'remove') {
+        optimizedTmp[key] = {
+          ...optimizedTmp[key],
+          ...action,
+        };
+      } else {
+        optimizedTmp[key] = {
+          ...optimizedTmp[key],
+          data: {
+            ...optimizedTmp[key].data,
+            content: {
+              ...optimizedTmp[key].data.content,
+              ...action.data.content,
+            },
+          },
+        };
+      }
     }
   });
 
