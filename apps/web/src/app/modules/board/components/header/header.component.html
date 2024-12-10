@@ -80,25 +80,27 @@
       <mat-icon>file_download</mat-icon>
     </button>
   }
-  <div class="change-mode-button-holder">
-    @if (boardMode() === 0) {
-      <button
-        title="Edit board"
-        aria-label="Edit board"
-        class="change-mode-button change-edit"
-        (click)="changeBoardMode(1)">
-        <mat-icon>mode_edit</mat-icon>
-        Edit board
-      </button>
-    } @else {
-      <button
-        title="Edit board"
-        aria-label="Edit board"
-        class="change-mode-button change-close"
-        (click)="changeBoardMode(0)">
-        Close board edition
-        <mat-icon>close</mat-icon>
-      </button>
-    }
-  </div>
+  @if (allowSwitchMode()) {
+    <div class="change-mode-button-holder">
+      @if (boardMode() === 0) {
+        <button
+          title="Edit board"
+          aria-label="Edit board"
+          class="change-mode-button change-edit"
+          (click)="changeBoardMode(1)">
+          <mat-icon>mode_edit</mat-icon>
+          Edit board
+        </button>
+      } @else {
+        <button
+          title="Edit board"
+          aria-label="Edit board"
+          class="change-mode-button change-close"
+          (click)="changeBoardMode(0)">
+          Close board edition
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </div>
+  }
 </div>

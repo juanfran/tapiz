@@ -11,7 +11,7 @@
   }
 
   @defer {
-    <tapiz-header />
+    <tapiz-header [allowSwitchMode]="!isReadonlyUser()" />
     @if (!isDemo) {
       <tapiz-users [showNotesVisibility]="!isReadonlyUser()" />
     }

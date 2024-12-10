@@ -5,6 +5,7 @@ import {
   signal,
   inject,
   viewChild,
+  input,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
@@ -51,6 +52,8 @@ export class HeaderComponent {
   #configService = inject(ConfigService);
 
   textarea = viewChild<ElementRef<HTMLInputElement>>('textarea');
+
+  allowSwitchMode = input(true);
 
   edit = signal(false);
   boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
