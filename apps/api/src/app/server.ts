@@ -1,4 +1,9 @@
-import type { StateActions, TuNode, UserNode } from '@tapiz/board-commons';
+import type {
+  BoardSettings,
+  StateActions,
+  TuNode,
+  UserNode,
+} from '@tapiz/board-commons';
 import type { Socket, Server as WsServer } from 'socket.io';
 import { Client } from './client.js';
 import db from './db/index.js';
@@ -11,6 +16,7 @@ export class Server {
   public clients: Client[] = [];
   private state: Record<string, ReturnType<typeof syncNodeBox>> = {};
   private stateSubscriptions: Record<string, Subscription> = {};
+  private boardSettings: Record<string, BoardSettings> = {};
 
   constructor(public io: WsServer) {}
 
@@ -43,6 +49,28 @@ export class Server {
     }
 
     socket.disconnect();
+  }
+
+  private findBoardSettings(boardId: string): BoardSettings {
+    const board = this.getBoard(boardId);
+
+    if (!board) {
+      return {} as BoardSettings;
+    }
+
+    const boardSettings = board.find(
+      (it): it is TuNode<BoardSettings> => it.type === 'settings',
+    );
+
+    return boardSettings?.content ?? ({} as BoardSettings);
+  }
+
+  public getBoardSettings(boardId: string) {
+    if (!this.boardSettings[boardId]) {
+      this.boardSettings[boardId] = this.findBoardSettings(boardId);
+    }
+
+    return this.boardSettings[boardId];
   }
 
   public clientClose(client: Client) {
@@ -167,7 +195,19 @@ export class Server {
   }
 
   public applyAction(boardId: string, actions: StateActions[]) {
-    return this.state[boardId].actions(actions);
+    const newState = this.state[boardId].actions(actions);
+
+    const hasNewSettings = actions.some(
+      (it) => it.op === 'patch' && it.data.type === 'settings',
+    );
+
+    if (hasNewSettings) {
+      const settings = this.findBoardSettings(boardId);
+
+      this.boardSettings[boardId] = settings;
+    }
+
+    return newState;
   }
 
   public updateBoardName(boardId: string, name: string) {

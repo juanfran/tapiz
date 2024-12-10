@@ -9,6 +9,7 @@ import {
   HostBinding,
   inject,
   DestroyRef,
+  computed,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { rxEffect } from 'ngxtension/rx-effect';
@@ -78,7 +79,11 @@ import { appFeature } from '../../../+state/app.reducer';
 import { SubscriptionService } from '../../../services/subscription.service';
 import { DrawingStore } from '@tapiz/board-components/drawing/drawing.store';
 import { DrawingOptionsComponent } from '@tapiz/board-components/drawing-options';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import {
+  takeUntilDestroyed,
+  toObservable,
+  toSignal,
+} from '@angular/core/rxjs-interop';
 import { CommentsComponent } from '@tapiz/nodes/comments/comments.component';
 import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
 import { ConfigService } from '../../../services/config.service';
@@ -128,6 +133,7 @@ import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
   hostDirectives: [CopyPasteDirective, BoardShourtcutsDirective],
   host: {
     '[class.node-selection-disabled]': '!nodeSelectionEnabled()',
+    '[class.readonly]': 'isReadonlyUser()',
   },
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
@@ -170,6 +176,17 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly loadingBar = this.store.selectSignal(
     pageFeature.selectLoadingBar,
   );
+  public readonly isAdmin = this.store.selectSignal(pageFeature.selectIsAdmin);
+  public readonly readonly = toSignal(
+    this.boardFacade.getSettings().pipe(
+      map((it) => {
+        return it?.content.readOnly ?? false;
+      }),
+    ),
+  );
+  public readonly isReadonlyUser = computed(() => {
+    return this.readonly() && !this.isAdmin();
+  });
 
   @ViewChild('workLayer', { read: ElementRef }) public workLayer!: ElementRef;
 

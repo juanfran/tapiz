@@ -11,11 +11,13 @@
   }
 
   @defer {
-    <tapiz-header />
+    <tapiz-header [allowSwitchMode]="!isReadonlyUser()" />
     @if (!isDemo) {
-      <tapiz-users />
+      <tapiz-users [showNotesVisibility]="!isReadonlyUser()" />
     }
-    <tapiz-board-toolbar />
+    @if (!isReadonlyUser()) {
+      <tapiz-board-toolbar />
+    }
     @if (drawing()) {
       <tapiz-drawing-options />
     }
