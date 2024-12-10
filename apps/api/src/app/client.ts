@@ -225,6 +225,15 @@ export class Client {
       return;
     }
 
+    const settings = this.server.getBoardSettings(this.boardId);
+    if (!this.isAdmin && settings.readOnly) {
+      actions = actions.filter((it) => it.data.type === 'user');
+    }
+
+    if (!actions.length) {
+      return;
+    }
+
     this.updateStateWithActions(actions);
     this.sendAll(this.boardId, this.getStateAction(actions));
   }

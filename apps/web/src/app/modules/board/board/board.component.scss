@@ -7,7 +7,8 @@
   width: 100vw;
   cursor: var(--default-cursor, auto);
 
-  &.node-selection-disabled {
+  &.node-selection-disabled,
+  &.readonly {
     tapiz-nodes {
       pointer-events: none;
     }

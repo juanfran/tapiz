@@ -41,6 +41,17 @@ import { BoardFacade } from '../../../../services/board-facade.service';
       <div class="field">
         <mat-checkbox
           color="primary"
+          formControlName="readOnly">
+          <span class="label-text">Readonly</span>
+        </mat-checkbox>
+        <span class="help"
+          >Only the board owner and team admin can edit the board.</span
+        >
+      </div>
+
+      <div class="field">
+        <mat-checkbox
+          color="primary"
           formControlName="anonymousMode">
           <span class="label-text">Anonymous mode</span>
         </mat-checkbox>
@@ -78,6 +89,7 @@ export class BoardSettingsComponent {
   );
 
   form = new FormGroup({
+    readOnly: new FormControl(false),
     anonymousMode: new FormControl(false),
   });
 

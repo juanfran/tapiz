@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { NodeValidator } from '../models/node.model.js';
 
-const settings = z.object({
+export const settingsValidator = z.object({
+  readOnly: z.boolean().default(false),
   anonymousMode: z.boolean().default(false),
 });
 
@@ -21,7 +22,7 @@ export const SETTINGS_VALIDATOR: NodeValidator = {
       };
     }
 
-    const validation = settings.safeParse(data.content);
+    const validation = settingsValidator.safeParse(data.content);
 
     if (validation.success) {
       return {
@@ -44,7 +45,7 @@ export const SETTINGS_VALIDATOR: NodeValidator = {
       };
     }
 
-    const validation = settings.partial().safeParse(data.content);
+    const validation = settingsValidator.partial().safeParse(data.content);
 
     if (validation.success) {
       return {

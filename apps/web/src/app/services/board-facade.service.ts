@@ -77,6 +77,7 @@ export class BoardFacade {
           | TuNode<BoardSettings>
           | undefined;
       }),
+      distinctUntilChanged(),
     );
   }
 

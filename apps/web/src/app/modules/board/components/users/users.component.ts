@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   inject,
   computed,
+  input,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
@@ -79,6 +80,7 @@ export class UsersComponent {
     return this.#users()?.find((user) => user.id === this.userId());
   });
   visible = computed(() => this.currentUser()?.visible);
+  showNotesVisibility = input(true);
 
   setVisibility(visible: boolean) {
     this.#store.dispatch(
