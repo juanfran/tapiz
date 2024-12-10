@@ -475,7 +475,16 @@ export const pageFeature = createFeature({
     selectPanInProgress,
     selectDragInProgress,
     selectNodeSelection,
+    selectMoveEnabled,
+    selectFollow,
   }) => ({
+    selectMoveEnabled: createSelector(
+      selectMoveEnabled,
+      selectFollow,
+      (moveEnabled, follow) => {
+        return moveEnabled && !follow;
+      },
+    ),
     selectIsNodeSelectionEnabled: createSelector(
       selectNodeSelection,
       selectAddToBoardInProcess,

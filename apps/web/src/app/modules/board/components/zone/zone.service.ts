@@ -34,6 +34,8 @@ export class ZoneService {
   #areaSelector = signal<SelectAction | null>(null);
   #boardFacade = inject(BoardFacade);
 
+  selectMoveEnabled = this.#store.selectSignal(pageFeature.selectMoveEnabled);
+
   areaSelector = computed(() => this.#areaSelector());
 
   #setCursor(cursor: string) {
@@ -77,6 +79,8 @@ export class ZoneService {
   }
 
   selectArea(style: SelectAction['style'] = 'select', cursor = 'crosshair') {
+    const originalMoveEnabled = this.selectMoveEnabled();
+
     this.#setMovement(false);
     this.#setCursor(cursor);
     this.#setNodeSelection(false);
@@ -84,7 +88,7 @@ export class ZoneService {
 
     const destroy = () => {
       this.#areaSelector.set(null);
-      this.#setMovement(true);
+      this.#setMovement(originalMoveEnabled);
       this.#setCursor('default');
       this.#setNodeSelection(true);
 

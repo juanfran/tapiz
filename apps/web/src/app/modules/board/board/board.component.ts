@@ -456,8 +456,11 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     );
     this.boardMoveService.move$
       .pipe(
-        withLatestFrom(this.store.select(pageFeature.selectDragInProgress)),
-        filter(([, inProgress]) => !inProgress),
+        withLatestFrom(
+          this.store.select(pageFeature.selectDragInProgress),
+          this.store.select(selectMoveEnabled),
+        ),
+        filter(([, inProgress, moveEnabled]) => !inProgress && moveEnabled),
         switchMap(() => {
           this.store.dispatch(PageActions.dragInProgress({ inProgress: true }));
 
@@ -475,7 +478,9 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
           this.boardMoveService.mouseMove$.pipe(startWith({ x: 0, y: 0 })),
           this.store.select(selectMoveEnabled),
         ),
-        filter(([, , moveEnabled]) => moveEnabled),
+        filter(([, , moveEnabled]) => {
+          return moveEnabled;
+        }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(([{ move, zoom }, mousePosition]) => {
