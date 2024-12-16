@@ -1,6 +1,6 @@
 :host {
-  --toolbar-button-height: 2.25rem;
-  --toolbar-button-width: 2.875rem;
+  --toolbar-button-height: 3rem;
+  --toolbar-button-width: 3rem;
 
   cursor: default;
   height: auto;
@@ -37,7 +37,7 @@ mat-icon {
   padding: 0.25rem;
   pointer-events: none;
   position: absolute;
-  top: 0;
+  top: 8px;
   transition: all 0.5s ease;
   z-index: var(--board-tools-layer);
   white-space: nowrap;
@@ -77,7 +77,7 @@ mat-icon {
   }
 
   .toolbar-button:hover {
-    background: var(--primary-color-button-bg);
+    background: var(--grey-30);
 
     + .toolbar-tooltip {
       left: calc(100% + 0.5rem);
@@ -88,6 +88,10 @@ mat-icon {
 
   &.active {
     background: var(--primary-color-button-bg);
+    border-radius: var(--radius-6);
+    .mat-icon {
+      fill: white;
+    }
 
     .toolbar-tooltip {
       display: none;
@@ -98,20 +102,24 @@ mat-icon {
 .toolbar-button {
   align-items: center;
   background: none;
+  border-radius: var(--radius-6);
   display: flex;
   height: var(--toolbar-button-height);
   justify-content: center;
   padding: 0;
   width: var(--toolbar-button-width);
   padding: var(--size-4) 0;
+  .mat-icon {
+    fill: var(--primary-color-button-bg);
+  }
 }
 
 .toolbar {
   background: var(--primary-color-background);
-  border-radius: var(--radius-2);
+  border-radius: var(--radius-6);
   display: flex;
   flex-direction: column;
-  padding: var(--size-2) 0;
+  padding: var(--size-2);
   transition: background 0.5s ease;
 }
 
