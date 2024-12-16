@@ -7,8 +7,10 @@
   height: 0;
   pointer-events: none;
   position: absolute;
+  transform-origin: top left;
   width: 0;
   z-index: var(--board-tools-layer);
+
 
   span {
     background-color: var(--primary-color);
@@ -22,11 +24,22 @@
     pointer-events: none;
     position: absolute;
     top: -5px;
+    transform-origin: top left;
     width: 24px;
     z-index: var(--board-tools-layer);
   }
+
+  .cursor-avatar {
+    border: 2px solid var(--primary-color);
+    border-radius: 100%;
+    overflow: hidden;
+    top: -6px;
+    left: 4px;
+  }
+
 }
 
 .icon-svg {
   fill: var(--black);
 }
+
