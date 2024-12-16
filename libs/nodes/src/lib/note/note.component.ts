@@ -58,6 +58,7 @@ import { EditorPortalComponent } from '../editor-portal/editor-portal.component'
     '[style.--custom-fg]': '"#000"',
     '[style.--custom-bg]': 'lightColor()',
     '[style.--custom-main]': 'color()',
+    '[style.transform]': '"rotate(" + this.rotation() + "deg)"',
   },
   providers: [HotkeysService],
 })
@@ -76,6 +77,27 @@ export class NoteComponent {
   pasted = input.required<boolean>();
 
   focus = input.required<boolean>();
+  height = computed(() => {
+    return this.node().content.height;
+  });
+  width = computed(() => {
+    return this.node().content.width;
+  });
+
+  rotation = signal(0);
+
+  generateRandomRotation() {
+    let rotation: number;
+    const aspectRatio = this.height() / this.width();
+    do {
+      if (aspectRatio > 2 || aspectRatio < 0.5) {
+      rotation = Math.random() * 2.5 - 1.25; // Generates a number between -1.25 and 1.25
+      } else {
+      rotation = Math.random() * 5 - 2.5; // Generates a number between -2.5 and 2.5
+      }
+    } while (rotation > -0.5 && rotation < 0.5); // Ensures the number is not between -0.5 and 0.5
+    return rotation;
+  }
 
   @HostBinding('class.focus') get focusClass() {
     return this.focus();
@@ -224,6 +246,15 @@ export class NoteComponent {
     afterNextRender(() => {
       if (this.focus() && !this.pasted()) {
         this.initEdit();
+      }
+    });
+
+    explicitEffect([this.focus], ([focus]) => {
+      if (focus) {
+        this.rotation.set(0);
+      } else {
+        const rotation = this.generateRandomRotation();
+        this.rotation.set(rotation);
       }
     });
   }

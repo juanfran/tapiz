@@ -29,6 +29,7 @@ textarea {
   display: block;
   inline-size: 100%;
   block-size: 100%;
+  transition: transform 0.1s ease-in-out;
 
   canvas {
     pointer-events: none;
