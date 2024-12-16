@@ -38,7 +38,7 @@ canvas {
 tapiz-board-toolbar {
   left: 1rem;
   position: fixed;
-  top: 70px;
+  top: calc(50% - 407px);
   z-index: var(--board-tools-layer);
 }
 
