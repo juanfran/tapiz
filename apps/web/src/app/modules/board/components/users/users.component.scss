@@ -1,29 +1,33 @@
 :host {
   cursor: default;
-  max-inline-size: 185px;
+  max-inline-size: 300px;
   position: fixed;
   right: 1rem;
   top: 70px;
 }
 
 .right-col-toolbar {
-  background: var(--primary-color-background);
-  border-radius: 8px;
+  align-items: flex-end;
   display: flex;
   flex-direction: column;
   margin-bottom: 1rem;
-  min-width: 185px;
+  min-width: 300px;
   padding: var(--size-3) var(--size-2);
   transition: background 0.5s ease;
 
   &.users {
-    max-width: 185px;
-    min-height: 18rem;
-    max-block-size: calc(100vh - 200px);
+    max-width: 300px;
+    max-block-size: calc(100vh - 300px);
   }
 
   &:last-child {
     margin-bottom: 0;
+  }
+  
+  &:hover {
+    .username {
+      opacity: 1;
+    }
   }
 }
 
@@ -66,7 +70,9 @@
   display: flex;
   margin-bottom: 0.5rem;
   max-width: 100%;
-  padding-left: 0;
+  height: 48px;
+  padding: 0;
+  font-size: 1rem;
 
   &.offline {
     opacity: 0.2;
@@ -74,11 +80,13 @@
 
   .username {
     display: flex;
+    align-items: center;
     height: 24px;
-    line-height: 24px;
-    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0;
     max-width: calc(100% - 2rem);
     transition: color 0.5s ease;
+    opacity: 0;
 
     .name {
       overflow: hidden;
@@ -104,6 +112,11 @@
 
     .icon-svg {
       fill: var(--primary-color);
+      background: var(--grey-20);
+      border-radius: 48px;
+      width: 48px;
+      height: 48px;
+      padding: 10px;
     }
   }
 
@@ -126,20 +139,23 @@
 
 .note-visibility {
   padding: 0;
-
+  
   span {
-    font-size: var(--font-size-0);
+    font-size: var(--font-size-1);
     font-family:
-      "Inter",
-      -apple-system,
-      system-ui,
-      sans-serif;
+    "Inter",
+    -apple-system,
+    system-ui,
+    sans-serif;
   }
-
+  
   button {
     display: flex;
+    border-radius: 30px;
+    background: var(--grey-20);
     justify-content: space-between;
-    padding: var(--size-3) var(--size-2);
+    padding: var(--size-3);
+    gap: 1rem;
     font-family:
       "Inter",
       -apple-system,

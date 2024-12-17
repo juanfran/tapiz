@@ -17,7 +17,7 @@
 @include meta.load-css("layers.scss");
 
 .participate-mode {
-  --primary-color: var(--purple);
+  --primary-color: var(--grey-90);
   --primary-color-background: var(--grey-20);
   --primary-color-button-bg: var(--grey-90);
 }
