@@ -2,9 +2,8 @@
   bottom: 0.5rem;
   color: var(--orange);
   font-size: 1.125rem;
-  font-weight: 700;
   height: 1.75rem;
-  left: 0.5rem;
+  left: 1rem;
   max-width: 70%;
   opacity: 0;
   overflow: hidden;
@@ -53,6 +52,7 @@ textarea {
 
   &.focus {
     border-color: var(--custom-main);
+    box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.15);
 
     .name {
       opacity: 1;
@@ -75,8 +75,9 @@ textarea {
 .inner {
   background-color: var(--custom-bg);
   border: solid 2px transparent;
-  box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.15);
-  padding: var(--spacing-2);
+  border-radius: 20px;
+  /*box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.15);*/
+  padding: var(--spacing-4);
   inline-size: 100%;
   block-size: 100%;
 }
@@ -104,7 +105,8 @@ textarea {
 }
 
 .vote {
-  background-color: rgba(0, 0, 0, 0.15);
+  background-color: var(--white);
+  color: var(--gray-80);
   width: 20px;
   height: 20px;
   line-height: 20px;
