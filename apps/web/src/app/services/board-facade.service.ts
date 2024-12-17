@@ -92,22 +92,26 @@ export class BoardFacade {
   }
   selectCursors() {
     return this.getUsers().pipe(
-      concatLatestFrom(() => [this.store.select(pageFeature.selectUserId), this.store.select(pageFeature.selectBoardUsers)]),
+      concatLatestFrom(() => [
+        this.store.select(pageFeature.selectUserId),
+        this.store.select(pageFeature.selectBoardUsers),
+      ]),
       map(([users, currentUser, boardUsers]) => {
-        console.log('users board facade', users);
-        return users.filter((user) => {
-          return (
-            !!user.content.cursor &&
-            user.content.connected &&
-            user.id !== currentUser
-          );
-        }).map((user) => {
-          const boardUser = boardUsers.find((bu) => bu.id === user.id);
-          return {
-            ...user.content,
-            picture: boardUser?.picture
-          };
-        });
+        return users
+          .filter((user) => {
+            return (
+              !!user.content.cursor &&
+              user.content.connected &&
+              user.id !== currentUser
+            );
+          })
+          .map((user) => {
+            const boardUser = boardUsers.find((bu) => bu.id === user.id);
+            return {
+              ...user.content,
+              picture: boardUser?.picture,
+            };
+          });
       }),
     );
   }

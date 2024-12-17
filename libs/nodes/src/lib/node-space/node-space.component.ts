@@ -7,6 +7,7 @@ import {
   ViewChild,
   computed,
   inject,
+  output,
 } from '@angular/core';
 import { Point, Resizable, Rotatable, TuNode } from '@tapiz/board-commons';
 import { MultiDragService } from '@tapiz/cdk/services/multi-drag.service';
@@ -78,6 +79,7 @@ export class NodeSpaceComponent implements AfterViewInit {
   resize = input(false);
   rotate = input(false);
   cursor = input('grab');
+  drop = output();
 
   @ViewChild('drag')
   drag!: ElementRef<HTMLElement>;
@@ -118,6 +120,9 @@ export class NodeSpaceComponent implements AfterViewInit {
       preventDrag: () => this.preventDrag,
       position: () => this.position,
       destroyRef: this.#destroyRef,
+      drop: () => {
+        this.drop.emit();
+      },
     });
   }
 }

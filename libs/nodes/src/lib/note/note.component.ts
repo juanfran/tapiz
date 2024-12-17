@@ -529,4 +529,8 @@ export class NoteComponent {
       );
     }
   }
+
+  onDrop() {
+    // pass
+  }
 }

@@ -22,6 +22,7 @@ export interface Draggable {
   destroyRef: DestroyRef;
   position: () => Point;
   preventDrag?: () => boolean;
+  drop?: () => void;
 }
 
 interface SetupConfig {
@@ -277,6 +278,8 @@ export class MultiDragService {
           initialIndex: dragElement.initialIndex,
           finalPosition: dragElement.final,
         });
+
+        dragElement.draggable.drop?.();
       }
     });
 

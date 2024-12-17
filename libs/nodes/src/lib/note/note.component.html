@@ -3,7 +3,8 @@
   [resize]="true"
   [rotate]="false"
   [enabled]="!edit() && focus()"
-  [cursor]="cursor()">
+  [cursor]="cursor()"
+  (drop)="onDrop()">
   <div class="inner">
     <div class="top-info">
       @if (comments()) {
