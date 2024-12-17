@@ -41,6 +41,11 @@
 .user-container {
   flex: 1;
   overflow-y: auto;
+  font-family:
+    "Inter",
+    -apple-system,
+    system-ui,
+    sans-serif;
 }
 
 .title-container {
@@ -79,6 +84,11 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      font-family:
+        "Inter",
+        -apple-system,
+        system-ui,
+        sans-serif;
     }
   }
 
@@ -119,12 +129,22 @@
 
   span {
     font-size: var(--font-size-0);
+    font-family:
+      "Inter",
+      -apple-system,
+      system-ui,
+      sans-serif;
   }
 
   button {
     display: flex;
     justify-content: space-between;
     padding: var(--size-3) var(--size-2);
+    font-family:
+      "Inter",
+      -apple-system,
+      system-ui,
+      sans-serif;
   }
 
   .title {
