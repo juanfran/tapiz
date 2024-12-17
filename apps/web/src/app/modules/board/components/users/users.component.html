@@ -1,12 +1,12 @@
 @if (boardMode() === 0) {
   <div class="right-col-toolbar users">
     <button class="title-container">
-      <h2 class="title">
+      <!--h2 class="title">
         People
         @if (showUsers() && users().length > 0) {
           <span class="count">({{ users().length + 1 }})</span>
         }
-      </h2>
+      </h2-->
     </button>
     <div class="user-container">
       @if (showUsers()) {
@@ -17,19 +17,6 @@
             [class.offline]="!user.connected"
             [class.active]="user.id === userHighlight()"
             class="user">
-            @if (user.picture) {
-              <img
-                class="avatar"
-                [ngSrc]="user.picture"
-                width="24"
-                height="24"
-                [alt]="user.name" />
-            } @else {
-              <mat-icon
-                class="icon-svg"
-                svgIcon="user"></mat-icon>
-            }
-
             <p class="username">
               <span
                 class="name"
@@ -37,6 +24,19 @@
                 >{{ user.name }}</span
               >
             </p>
+            @if (user.picture) {
+              <img
+                class="avatar"
+                [ngSrc]="user.picture"
+                width="48"
+                height="48"
+                [alt]="user.name" />
+            } @else {
+              <mat-icon
+                class="icon-svg"
+                svgIcon="user"></mat-icon>
+            }
+
           </button>
         }
       } @else {
@@ -50,17 +50,17 @@
         class="user me"
         [cdkMenuTriggerFor]="menu"
         [cdkMenuTriggerData]="{ user: currentUser() }">
-        <mat-icon
-          class="icon-svg"
-          svgIcon="user"></mat-icon>
         <p class="username">
           <span
-            class="name"
-            [title]="user.name"
-            >{{ user.name }}</span
+          class="name"
+          [title]="user.name"
+          >{{ user.name }}</span
           >
           <span class="myself">(me)</span>
         </p>
+        <mat-icon
+          class="icon-svg"
+          svgIcon="user"></mat-icon>
       </button>
     }
   </div>
