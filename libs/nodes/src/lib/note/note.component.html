@@ -4,7 +4,8 @@
   [rotate]="false"
   [enabled]="!edit() && focus()"
   [cursor]="cursor()"
-  (drop)="onDrop()">
+  (drop)="onDrop()"
+  (dragging)="onDrag()">
   <div class="inner">
     <div class="top-info">
       @if (comments()) {

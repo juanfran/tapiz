@@ -23,6 +23,7 @@ export interface Draggable {
   position: () => Point;
   preventDrag?: () => boolean;
   drop?: () => void;
+  dragging?: () => void;
 }
 
 interface SetupConfig {
@@ -215,6 +216,8 @@ export class MultiDragService {
               final: null,
               draggable,
             });
+
+            draggable.dragging?.();
           }
 
           const initialPosition = this.#dragElements.get(draggable.id)
