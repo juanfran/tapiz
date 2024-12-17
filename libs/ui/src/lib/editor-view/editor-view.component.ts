@@ -40,6 +40,7 @@ import { Subject, sampleTime } from 'rxjs';
 import { FontSize } from './font-size-plugin';
 import { PopupComponent } from '../popup/popup.component';
 import { normalize } from '@tapiz/utils/normalize';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   selector: 'tapiz-editor-view',
@@ -114,11 +115,14 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
   linkUrl = signal('');
 
   constructor() {
-    effect(() => {
-      if (this.focus()) {
-        this.#editor()?.view.focus();
-      }
-    });
+    explicitEffect(
+      [this.focus, this.#editorViewSharedStateService.editorPortal],
+      ([focus, editorPortal]) => {
+        if (focus && editorPortal?.attached) {
+          this.#editor()?.view.focus();
+        }
+      },
+    );
 
     effect(() => {
       const instance = this.#editor();

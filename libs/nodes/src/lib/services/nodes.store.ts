@@ -1,11 +1,10 @@
-import { Injectable, Signal, inject, signal } from '@angular/core';
-import { Point, TuNode, User } from '@tapiz/board-commons';
+import { Injectable, Signal, inject } from '@angular/core';
+import { TuNode, User } from '@tapiz/board-commons';
 import { Subject } from 'rxjs';
 import { rxActions } from '@rx-angular/state/actions';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import type { NativeEmoji } from 'emoji-picker-element/shared';
-import { Portal } from '@angular/cdk/portal';
 
 @Injectable({
   providedIn: 'root',
@@ -58,14 +57,6 @@ export class NodesStore {
   userVotes!: Signal<string | null>;
   apiUrl!: string;
   mentions!: Signal<{ id: string; name: string }[]>;
-  editorPortal = signal<{
-    portal: Portal<unknown>;
-    node: {
-      width: number;
-      height: number;
-      position: Point;
-    };
-  } | null>(null);
 
   setFocusNode(event: { id: string; ctrlKey: boolean }) {
     this.#focusNode$.next(event);

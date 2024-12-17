@@ -4,14 +4,17 @@ import {
   Component,
   ElementRef,
   OnDestroy,
+  afterNextRender,
   computed,
   inject,
   input,
+  signal,
   viewChild,
 } from '@angular/core';
 import { BoardTuNode, Point } from '@tapiz/board-commons';
 import { NodesStore } from '../services/nodes.store';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import { EditorViewSharedStateService } from '@tapiz/ui/editor-view';
 
 @Component({
   selector: 'tapiz-editor-portal',
@@ -26,6 +29,7 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 })
 export class EditorPortalComponent implements OnDestroy {
   #nodesStore = inject(NodesStore);
+  #editorViewSharedStateService = inject(EditorViewSharedStateService);
   #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
   domPortalContent =
@@ -35,14 +39,19 @@ export class EditorPortalComponent implements OnDestroy {
   #width = computed(() => this.node().content.width);
   #height = computed(() => this.node().content.height);
   #position = computed(() => this.node().content.position);
+  #ready = signal(false);
 
   #zoom = this.#nodesStore.zoom;
 
   constructor() {
+    afterNextRender(() => {
+      this.#ready.set(true);
+    });
+
     explicitEffect(
-      [this.#width, this.#height, this.#position],
-      ([width, height, position]) => {
-        if (!width || !height) {
+      [this.#ready, this.#width, this.#height, this.#position],
+      ([ready, width, height, position]) => {
+        if (!ready || !width || !height) {
           return;
         }
 
@@ -58,13 +67,13 @@ export class EditorPortalComponent implements OnDestroy {
   #refreshPortal(node: { width: number; height: number; position: Point }) {
     const { left, top } = this.#getDiff();
 
-    let portal = this.#nodesStore.editorPortal()?.portal;
+    let portal = this.#editorViewSharedStateService.editorPortal()?.portal;
 
     if (!portal) {
       portal = new DomPortal(this.domPortalContent());
     }
 
-    this.#nodesStore.editorPortal.set({
+    this.#editorViewSharedStateService.editorPortal.set({
       portal,
       node: {
         width: node.width - left * 2,
@@ -74,6 +83,7 @@ export class EditorPortalComponent implements OnDestroy {
           y: node.position.y + top,
         },
       },
+      attached: false,
     });
   }
 
@@ -96,6 +106,6 @@ export class EditorPortalComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.#nodesStore.editorPortal.set(null);
+    this.#editorViewSharedStateService.editorPortal.set(null);
   }
 }
