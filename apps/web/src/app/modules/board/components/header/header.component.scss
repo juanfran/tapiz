@@ -52,6 +52,11 @@
 
 .board-name {
   font-weight: var(--font-weight-7);
+  font-family:
+    "Inter",
+    -apple-system,
+    system-ui,
+    sans-serif;
 }
 
 .edit-name {
@@ -68,7 +73,7 @@
   align-items: center;
   display: flex;
   font-family:
-    "Open Sans",
+    "Inter",
     -apple-system,
     system-ui,
     sans-serif;
