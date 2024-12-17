@@ -4,7 +4,7 @@
   routerLink="/">
   <img
     priority="true"
-    ngSrc="/assets/logo-small.webp"
+    ngSrc="/assets/svgs/tapiz-logo.svg"
     width="35"
     height="36"
     alt="Tapiz logo" />
@@ -46,16 +46,30 @@
   </div>
 }
 <div class="header-end">
+  @if (allowSwitchMode()) {
+    <div class="change-mode-button-holder">
+      @if (boardMode() === 0) {
+        <button
+          title="Edit board"
+          aria-label="Edit board"
+          class="change-mode-button change-edit"
+          (click)="changeBoardMode(1)">
+          Edit board
+        </button>
+      } @else {
+        <button
+          title="Edit board"
+          aria-label="Edit board"
+          class="change-mode-button change-close"
+          (click)="changeBoardMode(0)">
+          Close board edition
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </div>
+  }
   @if (boardMode() === 0) {
-    @if (!isDemo && user()?.picture; as picture) {
-      <img
-        class="avatar"
-        [ngSrc]="picture"
-        width="32"
-        height="32"
-        alt="User avatar" />
-    }
-
+    
     @if (isAdmin() && !isDemo) {
       <button
         title="Settings"
@@ -79,28 +93,13 @@
       (click)="export()">
       <mat-icon>file_download</mat-icon>
     </button>
-  }
-  @if (allowSwitchMode()) {
-    <div class="change-mode-button-holder">
-      @if (boardMode() === 0) {
-        <button
-          title="Edit board"
-          aria-label="Edit board"
-          class="change-mode-button change-edit"
-          (click)="changeBoardMode(1)">
-          <mat-icon>mode_edit</mat-icon>
-          Edit board
-        </button>
-      } @else {
-        <button
-          title="Edit board"
-          aria-label="Edit board"
-          class="change-mode-button change-close"
-          (click)="changeBoardMode(0)">
-          Close board edition
-          <mat-icon>close</mat-icon>
-        </button>
-      }
-    </div>
+    @if (!isDemo && user()?.picture; as picture) {
+      <img
+        class="avatar"
+        [ngSrc]="picture"
+        width="32"
+        height="32"
+        alt="User avatar" />
+    }
   }
 </div>
