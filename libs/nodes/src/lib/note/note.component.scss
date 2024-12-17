@@ -21,6 +21,29 @@ textarea {
   padding: 0;
 }
 
+@keyframes dragAnimation {
+  from {
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25);
+    transform: scale(1);
+  }
+  to {
+    box-shadow: 0 0 30px 10px rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes dropAnimation {
+  from {
+    box-shadow: 0 0 30px 10px rgba(0, 0, 0, 0.1);
+    transform: scale(1.05);
+  }
+  to {
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25);
+    transform: scale(1);
+  }
+}
+
+
 :host {
   --emoji-width: 27px;
   --emoji-height: 33px;
@@ -33,6 +56,15 @@ textarea {
   canvas {
     pointer-events: none;
   }
+
+  &.drop-animation {
+    animation: dropAnimation .2s forwards;
+  }
+
+  &.drag-animation {
+    animation: dragAnimation .2s forwards;
+  }
+
 
   &:hover {
     .name {
@@ -159,4 +191,3 @@ canvas {
   top: 0;
   left: 0;
 }
-
