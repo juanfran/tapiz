@@ -24,7 +24,7 @@
   @defer {
     <tapiz-header [allowSwitchMode]="!isReadonlyUser()" />
     @if (!isDemo) {
-      <tapiz-users [showNotesVisibility]="!isReadonlyUser()" />
+      <tapiz-users />
     }
     @if (!isReadonlyUser()) {
       <tapiz-board-toolbar />
@@ -66,6 +66,9 @@
     <tapiz-board-context-menu />
     <tapiz-node-toolbar />
     <tapiz-comments />
+    @if (!isReadonlyUser()) {
+      <tapiz-notes-visibility />
+    }
     <tapiz-zoom-control />
     <tapiz-board-nodes-align />
     <tapiz-popup-portal />

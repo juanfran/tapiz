@@ -36,7 +36,6 @@
                 class="icon-svg"
                 svgIcon="user"></mat-icon>
             }
-
           </button>
         }
       } @else {
@@ -52,9 +51,9 @@
         [cdkMenuTriggerData]="{ user: currentUser() }">
         <p class="username">
           <span
-          class="name"
-          [title]="user.name"
-          >{{ user.name }}</span
+            class="name"
+            [title]="user.name"
+            >{{ user.name }}</span
           >
           <span class="myself">(me)</span>
         </p>
@@ -64,23 +63,6 @@
       </button>
     }
   </div>
-
-  @if (showNotesVisibility()) {
-    <div class="right-col-toolbar note-visibility">
-      <button
-        [cdkMenuTriggerFor]="selectVisibility"
-        [class.no-visible]="!visible()">
-        <span class="title">Notes visibility</span>
-        <span class="value">
-          @if (visible()) {
-            Public
-          } @else {
-            Private
-          }
-        </span>
-      </button>
-    </div>
-  }
 }
 
 <ng-template
@@ -119,29 +101,6 @@
       class="menu-item"
       (cdkMenuItemTriggered)="showVotes(user.id)">
       Show votes
-    </button>
-  </div>
-</ng-template>
-
-<ng-template #selectVisibility>
-  <div
-    class="menu radio-menu"
-    cdkMenu>
-    <button
-      cdkMenuItemRadio
-      class="radio-menu-item"
-      [class.selected]="visible()"
-      (cdkMenuItemTriggered)="setVisibility(true)">
-      <p>Public</p>
-      <p>Yours notes will be visible to everyone</p>
-    </button>
-    <button
-      cdkMenuItemRadio
-      class="radio-menu-item"
-      [class.selected]="!visible()"
-      (cdkMenuItemTriggered)="setVisibility(false)">
-      <p>Private</p>
-      <p>Yours notes will be visible only to you</p>
     </button>
   </div>
 </ng-template>

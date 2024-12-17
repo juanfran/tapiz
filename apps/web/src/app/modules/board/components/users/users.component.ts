@@ -3,7 +3,6 @@ import {
   ChangeDetectionStrategy,
   inject,
   computed,
-  input,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
@@ -11,16 +10,10 @@ import {
   selectUserId,
 } from '../../selectors/page.selectors';
 import { PageActions } from '../../actions/page.actions';
-import { BoardActions } from '../../actions/board.actions';
 import { User } from '@tapiz/board-commons';
 import { map } from 'rxjs/operators';
 import { NgOptimizedImage } from '@angular/common';
-import {
-  CdkMenu,
-  CdkMenuItem,
-  CdkMenuItemRadio,
-  CdkMenuTrigger,
-} from '@angular/cdk/menu';
+import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
 import { pageFeature } from '../../reducers/page.reducer';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -36,7 +29,6 @@ import { MatIconModule } from '@angular/material/icon';
     CdkMenu,
     CdkMenuItem,
     MatIconModule,
-    CdkMenuItemRadio,
     NgOptimizedImage,
   ],
 })
@@ -79,28 +71,6 @@ export class UsersComponent {
   currentUser = computed(() => {
     return this.#users()?.find((user) => user.id === this.userId());
   });
-  visible = computed(() => this.currentUser()?.visible);
-  showNotesVisibility = input(true);
-
-  setVisibility(visible: boolean) {
-    this.#store.dispatch(
-      BoardActions.batchNodeActions({
-        history: false,
-        actions: [
-          {
-            data: {
-              type: 'user',
-              id: this.userId(),
-              content: {
-                visible,
-              },
-            },
-            op: 'patch',
-          },
-        ],
-      }),
-    );
-  }
 
   toggleUserHighlight(userId: User['id']) {
     this.#store.dispatch(PageActions.toggleUserHighlight({ id: userId }));

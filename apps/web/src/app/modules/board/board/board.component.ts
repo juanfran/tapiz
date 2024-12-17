@@ -98,6 +98,7 @@ import { LiveReactionWallComponent } from '../components/live-reaction/live-reac
 import { BoardEditorPortalComponent } from '../components/board-editor-portal/board-editor-portal.component';
 import { BoardShourtcutsDirective } from '../directives/board-shortcuts.directive';
 import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
+import { NotesVisibilityComponent } from '../components/notes-visibility/notes-visibility.component';
 
 @Component({
   selector: 'tapiz-board',
@@ -131,6 +132,7 @@ import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
     LiveReactionWallComponent,
     BoardEditorPortalComponent,
     PopupPortalComponent,
+    NotesVisibilityComponent,
   ],
   hostDirectives: [CopyPasteDirective, BoardShourtcutsDirective],
   host: {
