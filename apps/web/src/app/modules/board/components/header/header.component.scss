@@ -1,12 +1,13 @@
 :host {
+  --toolbar-button-height: 3rem;
+  --toolbar-button-width: 3rem;
+
   align-items: center;
-  background: var(--primary-color);
   cursor: default;
   display: flex;
   justify-content: space-between;
   left: 0;
-  block-size: 48px;
-  padding-inline: var(--spacing-4);
+  padding: 1rem;
   position: fixed;
   top: 0;
   transition: background 0.5s ease;
@@ -19,6 +20,8 @@
 
   img {
     display: block;
+    width: 70px;
+    margin-top: 6px;
   }
 }
 
@@ -42,7 +45,7 @@
   button,
   span,
   a {
-    color: var(--white);
+    color: var(--grey-90);
     font-size: 1rem;
   }
 }
@@ -59,7 +62,6 @@
 
 .change-mode-button-holder {
   display: flex;
-  margin-inline-start: var(--spacing-5);
 }
 
 .change-mode-button {
@@ -71,11 +73,11 @@
     system-ui,
     sans-serif;
   justify-content: center;
-  block-size: 36px;
-  padding: 0 var(--spacing-3);
-  color: #5c5983;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: var(--radius-1);
+  block-size: 50px;
+  padding: var(--spacing-3) var(--spacing-4);
+  color: var(--grey-90);
+  background: var(--grey-30);
+  border-radius: var(--radius-6);
   font-weight: var(--font-weight-6);
   font-size: var(--font-size-1);
 
@@ -88,8 +90,7 @@
   }
 
   &:hover {
-    color: #121232;
-    background: rgba(255, 255, 255, 1);
+    background: var(--grey-40);
   }
 }
 
@@ -102,16 +103,16 @@
 }
 
 .header-end {
+  background: var(--grey-20);
+  border-radius: var(--radius-6);
   display: flex;
   align-items: center;
   gap: var(--spacing-1);
   margin-inline-start: auto;
   flex-shrink: 0;
   position: relative;
-
-  .icon-svg {
-    margin-right: 0.5rem;
-  }
+  padding: var(--size-2);
+  height: 65px;
 }
 
 .textarea {
@@ -127,18 +128,25 @@
 .button-action {
   display: flex;
   align-items: center;
-  color: white;
+  color: var(--primary-color-button-bg);
   border-radius: var(--radius-round);
   padding: var(--spacing-2);
+  justify-content: center;
+  height: var(--toolbar-button-height);
+  width: var(--toolbar-button-width);
+  .mat-icon {
+    fill: var(--primary-color-button-bg);
+  }
   &:hover {
     transition: background 0.2s ease;
-    background: rgba(0, 0, 0, 0.15);
+    background: var(--grey-30);
   }
 }
 
 .avatar {
   border-radius: var(--radius-round);
-  margin-inline-end: var(--spacing-5);
+  width: 48px;
+  height: 48px;
   img {
     display: block;
   }
