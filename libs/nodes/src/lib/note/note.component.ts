@@ -36,7 +36,6 @@ import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { EditorViewComponent } from '@tapiz/ui/editor-view';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { EditorPortalComponent } from '../editor-portal/editor-portal.component';
-
 @Component({
   selector: 'tapiz-note',
   templateUrl: './note.component.html',
@@ -55,6 +54,8 @@ import { EditorPortalComponent } from '../editor-portal/editor-portal.component'
     '[class.voting]': 'voting()',
     '[class.emoji-mode]': 'emojiMode()',
     '[class.active-layer]': 'activeLayer()',
+    '[class.drop-animation]': 'dropAnimation()',
+    '[class.drag-animation]': 'dragAnimation()',
     '[style.--custom-fg]': '"#000"',
     '[style.--custom-bg]': 'lightColor()',
     '[style.--custom-main]': 'color()',
@@ -71,6 +72,8 @@ export class NoteComponent {
   #nodesStore = inject(NodesStore);
   #nodeStore = inject(NodeStore);
   #hotkeysService = inject(HotkeysService);
+  dropAnimation = signal(false);
+  dragAnimation = signal(false);
 
   node = input.required<TuNode<Note>>();
 
@@ -562,6 +565,21 @@ export class NoteComponent {
   }
 
   onDrop() {
-    // pass
+    const nativeElement: HTMLElement = this.#el.nativeElement;
+
+    this.dragAnimation.set(false);
+    this.dropAnimation.set(true);
+
+    const onAnimationEnd = () => {
+      this.dropAnimation.set(false);
+      nativeElement.removeEventListener('animationend', onAnimationEnd);
+
+    };
+
+    nativeElement.addEventListener('animationend', onAnimationEnd);
+  }
+
+  onDrag() {
+    this.dragAnimation.set(true);
   }
 }

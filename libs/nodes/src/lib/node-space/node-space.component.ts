@@ -80,6 +80,7 @@ export class NodeSpaceComponent implements AfterViewInit {
   rotate = input(false);
   cursor = input('grab');
   drop = output();
+  dragging = output();
 
   @ViewChild('drag')
   drag!: ElementRef<HTMLElement>;
@@ -122,6 +123,9 @@ export class NodeSpaceComponent implements AfterViewInit {
       destroyRef: this.#destroyRef,
       drop: () => {
         this.drop.emit();
+      },
+      dragging: () => {
+        this.dragging.emit();
       },
     });
   }
