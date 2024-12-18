@@ -88,7 +88,41 @@
   }
 
   <hr />
-
+  @if (boardMode() === 1) {
+    <div
+      class="toolbar-button-container"
+      [class.active]="popup() === 'panel'">
+      <button
+        aria-label="Panel"
+        class="toolbar-button"
+        (click)="panel()">
+        <mat-icon svgIcon="panel"></mat-icon>
+      </button>
+      <div class="toolbar-tooltip">Panel</div>
+    </div>
+    <div
+      class="toolbar-button-container"
+      [class.active]="popup() === 'text'">
+      <button
+        aria-label="Text"
+        class="toolbar-button"
+        (click)="text()">
+        <mat-icon svgIcon="text"></mat-icon>
+      </button>
+      <div class="toolbar-tooltip">Text</div>
+    </div>
+    <div
+      class="toolbar-button-container"
+      [class.active]="popup() === 'image'">
+      <button
+        aria-label="Image"
+        class="toolbar-button"
+        (click)="togglePopup('image')">
+        <mat-icon svgIcon="image"></mat-icon>
+      </button>
+      <div class="toolbar-tooltip">Image</div>
+    </div>
+  }
   <div
     class="toolbar-button-container"
     [class.active]="popup() === 'cocomaterial'">
