@@ -22,7 +22,7 @@
 .menu-item{
   &:hover,
   &.active {
-    background-color: var(--purple-bbg);
+    background-color: var(--grey-20);
   }
 }
 
@@ -45,6 +45,7 @@
   &.active,
   &:hover {
     background-color: var(--primary-color-button-bg);
+    color: var(--grey-40);
   }
 }
 
