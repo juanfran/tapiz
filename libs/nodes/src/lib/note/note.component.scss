@@ -1,3 +1,9 @@
+:host {
+  --border-radius: 20px;
+
+  border-radius: var(--border-radius);
+}
+
 .name {
   bottom: 0.5rem;
   color: var(--orange);
@@ -107,7 +113,7 @@ textarea {
 .inner {
   background-color: var(--custom-bg);
   border: solid 2px transparent;
-  border-radius: 20px;
+  border-radius: var(--border-radius);
   /*box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.15);*/
   padding: var(--spacing-4);
   inline-size: 100%;
