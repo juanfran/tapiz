@@ -142,6 +142,7 @@ export class MultiDragService {
       document.body,
       'mousemove',
     ).pipe(
+      throttleTime(0, animationFrameScheduler),
       takeUntil(fromEvent<MouseEvent>(window, 'mouseup')),
       takeUntilDestroyed(destroyRef),
       withLatestFrom(setUpConfig.zoom, setUpConfig.relativePosition),
@@ -153,6 +154,7 @@ export class MultiDragService {
           },
           [mouseMove, zoom, position],
         ) => {
+          console.log('a');
           const posX = -position.x + mouseMove.x;
           const posY = -position.y + mouseMove.y;
 
@@ -180,6 +182,7 @@ export class MultiDragService {
           return false;
         }
 
+        console.log('b');
         return (
           Math.abs(acc.initial.x - (acc.last?.x ?? acc.initial.x)) >
             deltaInitDrag ||
