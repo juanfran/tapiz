@@ -1,17 +1,17 @@
 <div class="toolbar">
-  <div
-    class="toolbar-button-container"
-    [class.active]="!popup()">
-    <button
-      aria-label="Select"
-      class="toolbar-button"
-      (click)="popupOpen('')">
-      <mat-icon svgIcon="cursor"></mat-icon>
-    </button>
-    <div class="toolbar-tooltip">Select</div>
-  </div>
-
   @if (boardMode() === 1) {
+    <div
+      class="toolbar-button-container"
+      [class.active]="!popup()">
+      <button
+        aria-label="Select"
+        class="toolbar-button"
+        (click)="popupOpen('')">
+        <mat-icon svgIcon="cursor"></mat-icon>
+      </button>
+      <div class="toolbar-tooltip">Select</div>
+    </div>
+
     <div
       class="toolbar-button-container"
       [class.active]="popup() === 'templates'">
@@ -27,37 +27,28 @@
   @if (boardMode() === 0) {
     <div
       class="toolbar-button-container"
-      [class.active]="popup() === 'note'">
+      [class.active]="popup() === 'tools'">
       <button
         aria-label="Note"
-        (click)="note()"
+        (click)="tools()"
         class="toolbar-button">
         <mat-icon svgIcon="add"></mat-icon>
       </button>
-      <div class="toolbar-tooltip">Note</div>
+      <div class="toolbar-tooltip">Extras</div>
     </div>
+
     <div
       class="toolbar-button-container"
-      [class.active]="popup() === 'group'">
+      [class.active]="!popup()">
       <button
-        aria-label="Group"
+        aria-label="Select"
         class="toolbar-button"
-        (click)="group()">
-        <mat-icon svgIcon="group"></mat-icon>
+        (click)="popupOpen('')">
+        <mat-icon svgIcon="cursor"></mat-icon>
       </button>
-      <div class="toolbar-tooltip">Group</div>
+      <div class="toolbar-tooltip">Select</div>
     </div>
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'vote'">
-      <button
-        aria-label="Vote Notes & Groups"
-        class="toolbar-button"
-        (click)="vote()">
-        <mat-icon svgIcon="voting"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Vote Notes & Groups</div>
-    </div>
+
     <div
       class="toolbar-button-container"
       [class.active]="popup() === 'emoji'">
@@ -100,39 +91,6 @@
 
   <div
     class="toolbar-button-container"
-    [class.active]="popup() === 'panel'">
-    <button
-      aria-label="Panel"
-      class="toolbar-button"
-      (click)="panel()">
-      <mat-icon svgIcon="panel"></mat-icon>
-    </button>
-    <div class="toolbar-tooltip">Panel</div>
-  </div>
-  <div
-    class="toolbar-button-container"
-    [class.active]="popup() === 'text'">
-    <button
-      aria-label="Text"
-      class="toolbar-button"
-      (click)="text()">
-      <mat-icon svgIcon="text"></mat-icon>
-    </button>
-    <div class="toolbar-tooltip">Text</div>
-  </div>
-  <div
-    class="toolbar-button-container"
-    [class.active]="popup() === 'image'">
-    <button
-      aria-label="Image"
-      class="toolbar-button"
-      (click)="togglePopup('image')">
-      <mat-icon svgIcon="image"></mat-icon>
-    </button>
-    <div class="toolbar-tooltip">Image</div>
-  </div>
-  <div
-    class="toolbar-button-container"
     [class.active]="popup() === 'cocomaterial'">
     <button
       aria-label="Cocomaterial"
@@ -156,18 +114,6 @@
 
   @if (boardMode() === 0) {
     <hr />
-
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'estimation'">
-      <button
-        aria-label="Estimation"
-        class="toolbar-button"
-        (click)="estimation()">
-        <mat-icon svgIcon="estimation"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Estimation</div>
-    </div>
     <div
       class="toolbar-button-container"
       [class.active]="popup() === 'poll'">
@@ -212,6 +158,12 @@
     @if (popup() === 'token') {
       <tapiz-token-selector
         (selectToken)="tokenSelected($event)"
+        class="toolbar-popup" />
+    }
+
+    @if (popup() === 'tools') {
+      <tapiz-tools
+        (selectedTool)="toolsEvent($event)"
         class="toolbar-popup" />
     }
 

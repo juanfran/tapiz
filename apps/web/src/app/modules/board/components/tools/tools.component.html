@@ -1,0 +1,68 @@
+<div class="list">
+  <div class="list-item">
+    <button
+      type="button"
+      (click)="selectedPostIt()">
+      <mat-icon
+        class="icon"
+        svgIcon="add"></mat-icon>
+      <span>PostIt</span>
+    </button>
+    <span class="key">Double Click</span>
+  </div>
+  <div class="list-item">
+    <button
+      type="button"
+      (click)="selectedBoard()">
+      <mat-icon
+        class="icon"
+        svgIcon="panel"></mat-icon>
+      <span>Board</span>
+    </button>
+    <span class="key">Cntrl+A</span>
+  </div>
+  <div class="list-item">
+    <button
+      type="button"
+      (click)="selectedText()">
+      <mat-icon
+        class="icon"
+        svgIcon="text"></mat-icon>
+      <span>Text</span>
+    </button>
+    <span class="key">Cntrl+T</span>
+  </div>
+  <div class="list-item">
+    <button
+      type="button"
+      (click)="selectedImage()">
+      <mat-icon
+        class="icon"
+        svgIcon="image"></mat-icon>
+      <span>Image</span>
+    </button>
+    <span class="key">Cntrl+K</span>
+  </div>
+  <div class="list-item">
+    <button
+      type="button"
+      (click)="selectedPoll()">
+      <mat-icon
+        class="icon"
+        svgIcon="poll"></mat-icon>
+      <span>Poll</span>
+    </button>
+    <span class="key">Cntrl+P</span>
+  </div>
+  <div class="list-item">
+    <button
+      type="button"
+      (click)="selectedEstimation()">
+      <mat-icon
+        class="icon"
+        svgIcon="estimation"></mat-icon>
+      <span>Estimation</span>
+    </button>
+    <span class="key">Cntrl+E</span>
+  </div>
+</div>
