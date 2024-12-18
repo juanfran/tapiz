@@ -5,10 +5,21 @@
   --mdc-protected-button-container-color: var(--brand);
   border-radius: var(--radius-6);
   padding: var(--size-4);
+  &:hover {
+    background: var(--grey-80);
+  }
 }
 
 .mat-mdc-mini-fab.mat-primary {
   background: var(--brand);
+  &:hover {
+    background: var(--grey-80);
+  }
+}
+
+.mat-mdc-raised-button:not(:disabled) {
+  border-radius: var(--radius-6);
+  padding: var(--size-4);
 }
 
 /* MODALS */
