@@ -10,6 +10,8 @@ import {
   inject,
   DestroyRef,
   computed,
+  effect,
+  signal,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { rxEffect } from 'ngxtension/rx-effect';
@@ -159,6 +161,10 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly boardId$ = this.store.select(selectBoardId);
   public readonly nodes$ = this.boardFacade.getNodes();
 
+  smallScale = signal(0);
+  bigScale = signal(0);
+
+  public readonly userZoom = this.store.selectSignal(pageFeature.selectZoom);
   public readonly historyService = inject(HistoryService);
   public readonly newNote$ = new Subject<MouseEvent>();
   public readonly drawing = this.drawingStore.drawing;
@@ -204,11 +210,41 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     this.newNote$.next(event);
   }
 
+  calcPatterns = computed(() => {
+    let smallCalc = 0;
+    let bigCalc = 0;
+    const zoom = Math.max(this.userZoom(), 0.1);
+    const constant = 0.3;
+    const baseSize = 0.8;
+    const total = baseSize + (constant / zoom);
+
+    smallCalc = Math.min(total, 2.5);
+    const zoomFactor = Math.max(this.userZoom(), 0.1);
+
+    const smallMinSize = 18;
+    const smallMaxSize = 40;
+    smallCalc = smallMinSize + (smallMaxSize - smallMinSize) * (zoomFactor - 0.1) / (1 - 0.1);
+    smallCalc = Math.min(smallCalc, smallMaxSize);
+
+    const bigMinSize = 200;
+    const bigMaxSize = 1600;
+    bigCalc = bigMinSize + (bigMaxSize - bigMinSize) * (zoomFactor - 0.1) / (1 - 0.1);
+    bigCalc = Math.max(bigCalc, bigMinSize);
+
+    return { 'smallCalc': smallCalc, 'bigCalc': bigCalc };
+  });
+
   constructor() {
     if (sessionStorage.getItem('new-board')) {
       sessionStorage.removeItem('new-board');
       this.store.dispatch(PageActions.changeBoardMode({ boardMode: 1 }));
     }
+
+    effect(() => {
+      const sizePatterns = this.calcPatterns();
+      this.smallScale.set(sizePatterns.smallCalc);
+      this.bigScale.set(sizePatterns.bigCalc);
+    });
 
     this.wsService.reconnect$.pipe(takeUntilDestroyed()).subscribe(() => {
       const boardId = this.route.snapshot.paramMap.get('id');
