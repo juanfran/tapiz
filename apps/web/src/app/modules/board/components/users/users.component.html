@@ -9,25 +9,24 @@
       </h2-->
     </button>
     <div class="user-container">
-      @if (showUsers()) {
-        @for (user of users(); track user.id) {
+      <div class="user-wrapper">
+        @if (currentUser(); as user) {
           <button
+            class="user me"
             [cdkMenuTriggerFor]="menu"
-            [cdkMenuTriggerData]="{ user: user }"
-            [class.offline]="!user.connected"
-            [class.active]="user.id === userHighlight()"
-            class="user">
+            [cdkMenuTriggerData]="{ user: currentUser() }">
             <p class="username">
               <span
                 class="name"
                 [title]="user.name"
                 >{{ user.name }}</span
               >
+              <span class="myself">(me)</span>
             </p>
-            @if (user.picture) {
+            @if (userPicture() && userPicture() !== '') {
               <img
                 class="avatar"
-                [ngSrc]="user.picture"
+                [ngSrc]="userPicture()"
                 width="48"
                 height="48"
                 [alt]="user.name" />
@@ -38,30 +37,42 @@
             }
           </button>
         }
-      } @else {
-        <div class="no-users">
-          <p>Anonymous mode</p>
-        </div>
-      }
+        @if (showUsers()) {
+          @for (user of users(); track user.id) {
+            <button
+              [cdkMenuTriggerFor]="menu"
+              [cdkMenuTriggerData]="{ user: user }"
+              [class.offline]="!user.connected"
+              [class.active]="user.id === userHighlight()"
+              class="user">
+              <p class="username">
+                <span
+                  class="name"
+                  [title]="user.name"
+                  >{{ user.name }}</span
+                >
+              </p>
+              @if (user.picture) {
+                <img
+                  class="avatar"
+                  [ngSrc]="user.picture"
+                  width="48"
+                  height="48"
+                  [alt]="user.name" />
+              } @else {
+                <mat-icon
+                  class="icon-svg"
+                  svgIcon="user"></mat-icon>
+              }
+            </button>
+          }
+        } @else {
+          <div class="no-users">
+            <p>Anonymous mode</p>
+          </div>
+        }
+      </div>
     </div>
-    @if (currentUser(); as user) {
-      <button
-        class="user me"
-        [cdkMenuTriggerFor]="menu"
-        [cdkMenuTriggerData]="{ user: currentUser() }">
-        <p class="username">
-          <span
-            class="name"
-            [title]="user.name"
-            >{{ user.name }}</span
-          >
-          <span class="myself">(me)</span>
-        </p>
-        <mat-icon
-          class="icon-svg"
-          svgIcon="user"></mat-icon>
-      </button>
-    }
   </div>
 }
 

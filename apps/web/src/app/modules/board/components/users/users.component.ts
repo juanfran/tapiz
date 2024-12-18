@@ -72,6 +72,13 @@ export class UsersComponent {
     return this.#users()?.find((user) => user.id === this.userId());
   });
 
+  userPicture = computed(() => {
+    const boardUsers = this.#boardUsers();
+    const userId = this.userId();
+    const user = boardUsers.find((boardUser) => boardUser.id === userId);
+    return user?.picture || '';
+  });
+
   toggleUserHighlight(userId: User['id']) {
     this.#store.dispatch(PageActions.toggleUserHighlight({ id: userId }));
   }
