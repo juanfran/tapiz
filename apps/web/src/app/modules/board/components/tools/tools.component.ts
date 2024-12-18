@@ -12,12 +12,12 @@ import { MatIconModule } from '@angular/material/icon';
 export class ToolsComponent {
   selectedTool = output<string>({ alias: 'selectedTool' });
 
-  selectedPostIt() {
-    this.selectedTool.emit('selectedPostIt');
+  selectedNote() {
+    this.selectedTool.emit('selectedNote');
   }
 
-  selectedBoard() {
-    this.selectedTool.emit('selectedBoard');
+  selectedPanel() {
+    this.selectedTool.emit('selectedPanel');
   }
 
   selectedText() {

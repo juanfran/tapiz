@@ -164,12 +164,11 @@ export class BoardToolbarComponent {
 
   toolsEvent(event: string) {
     this.popupOpen('');
-    console.log(event);
     switch (event) {
-      case 'selectedPostIt':
+      case 'selectedNote':
         this.note();
         break;
-      case 'selectedBoard':
+      case 'selectedPanel':
         this.panel();
         break;
       case 'selectedText':
