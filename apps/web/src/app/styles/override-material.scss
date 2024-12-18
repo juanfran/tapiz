@@ -1,7 +1,24 @@
+/* BUTTONS */
 .mat-mdc-unelevated-button.mat-primary,
 .mat-mdc-raised-button.mat-primary {
   --mdc-filled-button-container-color: var(--brand);
   --mdc-protected-button-container-color: var(--brand);
+  border-radius: var(--radius-6);
+  padding: var(--size-4);
+}
+
+.mat-mdc-mini-fab.mat-primary {
+  background: var(--brand);
+}
+
+/* MODALS */
+.mat-mdc-dialog-surface {
+  border-radius: var(--radius-3) !important;
+  padding: var(--size-3);
+  .title {
+    font-size: var(--size-6);
+    margin-bottom: 2rem;
+  }
 }
 
 .mdc-snackbar.error {
