@@ -36,7 +36,8 @@
     text-decoration: none;
   }
 
-  span, a {
+  span,
+  a {
     max-width: 500px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -156,4 +157,25 @@
   img {
     display: block;
   }
+}
+
+.user-count {
+  display: inline-flex;
+  align-items: center;
+  font-family:
+    "Work Sans",
+    -apple-system,
+    system-ui,
+    sans-serif;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--grey-30);
+  font-size: var(--font-size-1);
+  font-weight: 400;
+  color: #2c2c2c;
+  margin-left: 8px;
+  box-sizing: border-box;
+  line-height: 1.2;
 }
