@@ -94,9 +94,9 @@ export class NoteComponent {
     const aspectRatio = this.height() / this.width();
     do {
       if (aspectRatio > 2 || aspectRatio < 0.5) {
-      rotation = Math.random() * 2.5 - 1.25; // Generates a number between -1.25 and 1.25
+        rotation = Math.random() * 2.5 - 1.25; // Generates a number between -1.25 and 1.25
       } else {
-      rotation = Math.random() * 5 - 2.5; // Generates a number between -2.5 and 2.5
+        rotation = Math.random() * 5 - 2.5; // Generates a number between -2.5 and 2.5
       }
     } while (rotation > -0.5 && rotation < 0.5); // Ensures the number is not between -0.5 and 0.5
     return rotation;
@@ -573,7 +573,6 @@ export class NoteComponent {
     const onAnimationEnd = () => {
       this.dropAnimation.set(false);
       nativeElement.removeEventListener('animationend', onAnimationEnd);
-
     };
 
     nativeElement.addEventListener('animationend', onAnimationEnd);
