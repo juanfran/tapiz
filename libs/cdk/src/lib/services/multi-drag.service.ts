@@ -154,7 +154,6 @@ export class MultiDragService {
           },
           [mouseMove, zoom, position],
         ) => {
-          console.log('a');
           const posX = -position.x + mouseMove.x;
           const posY = -position.y + mouseMove.y;
 
@@ -182,7 +181,6 @@ export class MultiDragService {
           return false;
         }
 
-        console.log('b');
         return (
           Math.abs(acc.initial.x - (acc.last?.x ?? acc.initial.x)) >
             deltaInitDrag ||
