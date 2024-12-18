@@ -64,6 +64,8 @@ import { EditorPortalComponent } from '../editor-portal/editor-portal.component'
   providers: [HotkeysService],
 })
 export class NoteComponent {
+  @HostBinding('style.--rotate-angle') rotateAngle = '0deg';
+
   #commentsStore = inject(CommentsStore);
   #el = inject(ElementRef);
   #store = inject(Store);
@@ -186,6 +188,22 @@ export class NoteComponent {
   lightColor = computed(() => {
     return lighter(this.color(), 70);
   });
+
+  randomizeAngle(): void {
+    const previousAngle = parseFloat(this.rotateAngle);
+    let randomAngle;
+    do {
+      randomAngle = Math.floor(Math.random() * 13) - 6; // random angle between -6 and 6 degrees
+    } while (
+      randomAngle === previousAngle ||
+      randomAngle === 2 ||
+      randomAngle === -2
+    );
+
+    requestAnimationFrame(() => {
+      this.rotateAngle = `${randomAngle}deg`;
+    });
+  }
 
   constructor() {
     const highlight = computed(() => {
@@ -579,6 +597,7 @@ export class NoteComponent {
   }
 
   onDrag() {
+    this.randomizeAngle();
     this.dragAnimation.set(true);
   }
 }
