@@ -2,7 +2,6 @@ import {
   Component,
   ChangeDetectionStrategy,
   ElementRef,
-  ViewChild,
   AfterViewInit,
   HostListener,
   OnDestroy,
@@ -10,6 +9,7 @@ import {
   inject,
   DestroyRef,
   computed,
+  viewChild,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { rxEffect } from 'ngxtension/rx-effect';
@@ -163,7 +163,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
 
   smallScale = computed(() => this.calcPatterns().smallCalc);
   bigScale = computed(() => this.calcPatterns().bigCalc);
-
   public readonly userZoom = this.store.selectSignal(pageFeature.selectZoom);
   public readonly historyService = inject(HistoryService);
   public readonly newNote$ = new Subject<MouseEvent>();
@@ -194,7 +193,9 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     return this.readonly() && !this.isAdmin();
   });
 
-  @ViewChild('workLayer', { read: ElementRef }) public workLayer!: ElementRef;
+  workLayer = viewChild.required<ElementRef<HTMLElement>>('workLayer');
+
+  dots = viewChild.required<ElementRef<HTMLElement>>('dots');
 
   @HostBinding('class.follow-user')
   public get isFollowUser() {
@@ -581,6 +582,8 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([zoom, position]) => {
         this.workLayerNativeElement.style.transform = `translate(${position.x}px, ${position.y}px) scale(${zoom})`;
+
+        this.dots().nativeElement.style.transform = `translate(${position.x}px, ${position.y}px)`;
       });
   }
 
@@ -601,7 +604,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   }
 
   get workLayerNativeElement() {
-    return this.workLayer.nativeElement as HTMLElement;
+    return this.workLayer().nativeElement;
   }
 
   get isDemo() {
