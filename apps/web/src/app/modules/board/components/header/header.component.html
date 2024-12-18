@@ -69,7 +69,6 @@
     </div>
   }
   @if (boardMode() === 0) {
-    
     @if (isAdmin() && !isDemo) {
       <button
         title="Settings"
@@ -94,12 +93,9 @@
       <mat-icon>file_download</mat-icon>
     </button>
     @if (!isDemo && user()?.picture; as picture) {
-      <img
-        class="avatar"
-        [ngSrc]="picture"
-        width="32"
-        height="32"
-        alt="User avatar" />
+      @if (showUsers() && users().length > 0) {
+        <span class="user-count">{{ users().length + 1 }}</span>
+      }
     }
   }
 </div>
