@@ -139,6 +139,14 @@ import { NotesVisibilityComponent } from '../components/notes-visibility/notes-v
   },
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
+  @HostBinding('class.following-user')
+  public get isFollowingUser() {
+    let hasPeople = false;
+    this.userToFollow$.subscribe((user) => {
+      hasPeople = !!user;
+    });
+    return hasPeople;
+  }
   public el = inject(ElementRef);
   private wsService = inject(WsService);
   private store = inject(Store);
@@ -196,6 +204,17 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   workLayer = viewChild.required<ElementRef<HTMLElement>>('workLayer');
 
   dots = viewChild.required<ElementRef<HTMLElement>>('dots');
+  #store = inject(Store);
+  #boardFacade = inject(BoardFacade);
+  userToFollow$ = this.#store.select(pageFeature.selectFollow).pipe(
+    switchMap((follow) => {
+      return this.#boardFacade.getUsers().pipe(
+        map((users) => {
+          return users.find((user) => user.id === follow)?.content;
+        }),
+      );
+    }),
+  );
 
   @HostBinding('class.follow-user')
   public get isFollowUser() {
