@@ -27,12 +27,13 @@
               <img
                 class="avatar"
                 [ngSrc]="userPicture()"
+                referrerpolicy="no-referrer"
                 width="48"
                 height="48"
                 [alt]="user.name" />
             } @else {
               <mat-icon
-                class="icon-svg"
+                class="icon-svg no-picture"
                 svgIcon="user"></mat-icon>
             }
           </button>
@@ -56,12 +57,13 @@
                 <img
                   class="avatar"
                   [ngSrc]="user.picture"
+                  referrerpolicy="no-referrer"
                   width="48"
                   height="48"
                   [alt]="user.name" />
               } @else {
                 <mat-icon
-                  class="icon-svg"
+                  class="icon-svg no-picture"
                   svgIcon="user"></mat-icon>
               }
             </button>
