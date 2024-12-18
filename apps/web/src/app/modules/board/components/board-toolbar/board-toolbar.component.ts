@@ -46,6 +46,7 @@ import { pageFeature } from '../../reducers/page.reducer';
 import { LiveReactionComponent } from '../live-reaction/live-reaction.component';
 import { NotesComponent } from '../notes/notes.component';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
+import { ToolsComponent } from '../tools/tools.component';
 @Component({
   selector: 'tapiz-board-toolbar',
   templateUrl: './board-toolbar.component.html',
@@ -61,6 +62,7 @@ import { isInputField } from '@tapiz/cdk/utils/is-input-field';
     LiveReactionComponent,
     CocomaterialComponent,
     NotesComponent,
+    ToolsComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [HotkeysService],
@@ -145,6 +147,44 @@ export class BoardToolbarComponent {
           }),
         );
       });
+  }
+
+  tools() {
+    if (this.popup() === 'tools') {
+      this.popupOpen('');
+      return;
+    }
+
+    this.popupOpen('tools');
+
+    this.toolbarSubscription = this.#zoneService.select().subscribe(() => {
+      this.popupOpen('');
+    });
+  }
+
+  toolsEvent(event: string) {
+    this.popupOpen('');
+    console.log(event);
+    switch (event) {
+      case 'selectedPostIt':
+        this.note();
+        break;
+      case 'selectedBoard':
+        this.panel();
+        break;
+      case 'selectedText':
+        this.text();
+        break;
+      case 'selectedImage':
+        this.togglePopup('image');
+        break;
+      case 'selectedPoll':
+        this.poll();
+        break;
+      case 'selectedEstimation':
+        this.estimation();
+        break;
+    }
   }
 
   note() {

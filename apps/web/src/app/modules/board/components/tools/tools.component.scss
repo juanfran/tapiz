@@ -1,0 +1,41 @@
+:host {
+  display: block;
+  min-width: 270px;
+}
+
+.list {
+  max-block-size: 563px;
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  grid-gap: 10px;
+}
+
+.icon {
+  margin-right: 10px;
+}
+
+.list-item {
+  display: flex;
+  justify-content: space-between;
+}
+
+button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.key {
+  display: inline-flex;
+  background-color: #eef0f5;
+  color: #1f255a;
+  font-size: 16px;
+  font-weight: normal;
+  padding: 0.5em 1em;
+  border-radius: 9999px;
+  text-align: center;
+}

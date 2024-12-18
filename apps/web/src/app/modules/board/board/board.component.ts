@@ -229,7 +229,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       ((smallMaxSize - smallMinSize) * (zoomFactor - 0.1)) / (1 - 0.1);
     smallCalc = Math.min(smallCalc, smallMaxSize);
 
-    const bigMinSize = 200;
+    const bigMinSize = 300;
     const bigMaxSize = 1600;
     bigCalc =
       bigMinSize + ((bigMaxSize - bigMinSize) * (zoomFactor - 0.1)) / (1 - 0.1);
