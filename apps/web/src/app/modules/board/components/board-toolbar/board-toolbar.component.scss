@@ -151,7 +151,9 @@ hr {
 }
 
 .toolbar-popup {
-  background: var(--primary-color-background);
-  border-radius: var(--radius-2);
+  background: var(--white);
+  border: 1px solid var(--primary-color-background);
+  border-radius: var(--radius-3);
   padding: var(--spacing-4);
+  box-shadow: 0 0 15px 3px rgba(66, 62, 82, 0.1);
 }

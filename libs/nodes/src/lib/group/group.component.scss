@@ -54,8 +54,11 @@
 }
 
 .vote {
-  background-color: rgba(0, 0, 0, 0.15);
-  border-radius: var(--radius-2);
+  background-color: var(--white);
+  border-radius: var(--radius-6);
   text-align: center;
   font-size: var(--font-size-3);
+  font-weight: 500;
+  color: var(--black);
+  width: 28px;
 }

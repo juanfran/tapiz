@@ -17,6 +17,8 @@
 .logo {
   flex-shrink: 0;
   margin-inline-end: var(--spacing-6);
+  padding-right: var(--spacing-6);
+  border-right: 1px solid var(--grey-30);
 
   img {
     display: block;
