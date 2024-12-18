@@ -1,6 +1,10 @@
 :host {
   display: block;
   min-width: 270px;
+
+  &.toolbar-popup {
+    padding: 0;
+  }
 }
 
 .list {
@@ -9,7 +13,6 @@
 
   display: flex;
   flex-direction: column;
-  grid-gap: 10px;
 }
 
 .icon {
@@ -17,11 +20,21 @@
 }
 
 .list-item {
+  align-items: center;
   display: flex;
   justify-content: space-between;
+  padding: var(--spacing-2);
+
+  span {
+    color: var(--grey-70);
+  }
+
+  &:hover {
+    background: var(--grey-30);
+  }
 }
 
-button {
+.list-name {
   display: flex;
   align-items: center;
   justify-content: center;
