@@ -1,68 +1,74 @@
 <div class="list">
-  <div class="list-item">
-    <button
-      type="button"
-      (click)="selectedNote()">
+  <button
+    type="button"
+    class="list-item"
+    (click)="selectedPostIt()">
+    <div class="list-name">
       <mat-icon
         class="icon"
         svgIcon="add"></mat-icon>
-      <span>Note</span>
-    </button>
+      <span>PostIt</span>
+    </div>
     <span class="key">Double Click</span>
-  </div>
-  <div class="list-item">
-    <button
-      type="button"
-      (click)="selectedPanel()">
+  </button>
+  <button
+    type="button"
+    class="list-item"
+    (click)="selectedBoard()">
+    <div class="list-name">
       <mat-icon
         class="icon"
         svgIcon="panel"></mat-icon>
-      <span>Panel</span>
-    </button>
+      <span>Board</span>
+    </div>
     <span class="key">Cntrl+A</span>
-  </div>
-  <div class="list-item">
-    <button
-      type="button"
-      (click)="selectedText()">
+  </button>
+  <button
+    type="button"
+    class="list-item"
+    (click)="selectedText()">
+    <div class="list-name">
       <mat-icon
         class="icon"
         svgIcon="text"></mat-icon>
       <span>Text</span>
-    </button>
+    </div>
     <span class="key">Cntrl+T</span>
-  </div>
-  <div class="list-item">
-    <button
-      type="button"
-      (click)="selectedImage()">
+  </button>
+  <button
+    type="button"
+    class="list-item"
+    (click)="selectedImage()">
+    <div class="list-name">
       <mat-icon
         class="icon"
         svgIcon="image"></mat-icon>
       <span>Image</span>
-    </button>
+    </div>
     <span class="key">Cntrl+K</span>
-  </div>
-  <div class="list-item">
-    <button
-      type="button"
-      (click)="selectedPoll()">
+  </button>
+  <button
+    type="button"
+    class="list-item"
+    (click)="selectedPoll()">
+    <div class="list-name">
       <mat-icon
         class="icon"
         svgIcon="poll"></mat-icon>
       <span>Poll</span>
-    </button>
+    </div>
     <span class="key">Cntrl+P</span>
-  </div>
-  <div class="list-item">
-    <button
-      type="button"
-      (click)="selectedEstimation()">
+  </button>
+  <button
+    type="button"
+    class="list-item"
+    (click)="selectedEstimation()">
+    <div class="list-name">
       <mat-icon
         class="icon"
         svgIcon="estimation"></mat-icon>
       <span>Estimation</span>
-    </button>
+    </div>
     <span class="key">Cntrl+E</span>
-  </div>
+  </button>
 </div>

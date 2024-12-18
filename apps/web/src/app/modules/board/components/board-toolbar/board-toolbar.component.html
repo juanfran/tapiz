@@ -36,7 +36,7 @@
       </button>
       <div class="toolbar-tooltip">Extras</div>
     </div>
-
+    <hr />
     <div
       class="toolbar-button-container"
       [class.active]="!popup()">
@@ -48,19 +48,88 @@
       </button>
       <div class="toolbar-tooltip">Select</div>
     </div>
+    <div
+      class="toolbar-button-container"
+      [class.active]="popup() === 'group'">
+      <button
+        aria-label="Group"
+        class="toolbar-button"
+        (click)="group()">
+        <mat-icon svgIcon="group"></mat-icon>
+      </button>
+      <div class="toolbar-tooltip">Group</div>
+    </div>
 
     <div
       class="toolbar-button-container"
-      [class.active]="popup() === 'emoji'">
+      [class.active]="popup() === 'select'">
       <button
-        aria-label="React to Notes"
-        class="toolbar-button"
-        (click)="emoji()">
-        <mat-icon svgIcon="emoji"></mat-icon>
+        aria-label="Select"
+        (click)="select()"
+        class="toolbar-button">
+        <mat-icon svgIcon="area"></mat-icon>
       </button>
-      <div class="toolbar-tooltip">React to Notes</div>
+      <div class="toolbar-tooltip">Area select (Alt+click)</div>
+    </div>
+    <hr />
+    <div
+      class="toolbar-button-container"
+      [class.active]="popup() === 'vote'">
+      <button
+        aria-label="Vote Notes & Groups"
+        class="toolbar-button"
+        (click)="vote()">
+        <mat-icon svgIcon="voting"></mat-icon>
+      </button>
+      <div class="toolbar-tooltip">Vote Notes & Groups</div>
+    </div>
+    <div
+      class="toolbar-button-container"
+      [class.active]="popup() === 'token'">
+      <button
+        aria-label="Token"
+        (click)="token()"
+        class="toolbar-button">
+        <mat-icon svgIcon="token"></mat-icon>
+      </button>
+      <div class="toolbar-tooltip">Token</div>
     </div>
   }
+
+  <div
+    class="toolbar-button-container"
+    [class.active]="popup() === 'cocomaterial'">
+    <button
+      aria-label="Cocomaterial"
+      class="toolbar-button"
+      (click)="togglePopup('cocomaterial')">
+      <mat-icon svgIcon="coco"></mat-icon>
+    </button>
+    <div class="toolbar-tooltip">Cocomaterial</div>
+  </div>
+  <div
+    class="toolbar-button-container"
+    [class.active]="popup() === 'emoji'">
+    <button
+      aria-label="React to Notes"
+      class="toolbar-button"
+      (click)="emoji()">
+      <mat-icon svgIcon="emoji"></mat-icon>
+    </button>
+    <div class="toolbar-tooltip">React to Notes</div>
+  </div>
+  <div
+    class="toolbar-button-container"
+    [class.active]="popup() === 'live-reaction'">
+    <button
+      aria-label="Live Reactions"
+      class="toolbar-button"
+      (click)="togglePopup('live-reaction')">
+      <mat-icon svgIcon="heart"></mat-icon>
+    </button>
+    <div class="toolbar-tooltip">Live Reactions</div>
+  </div>
+
   <div
     class="toolbar-button-container"
     [class.active]="popup() === 'draw'">
@@ -72,20 +141,6 @@
     </button>
     <div class="toolbar-tooltip">Draw Notes & Panels</div>
   </div>
-
-  @if (boardMode() === 0) {
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'live-reaction'">
-      <button
-        aria-label="Live Reactions"
-        class="toolbar-button"
-        (click)="togglePopup('live-reaction')">
-        <mat-icon svgIcon="heart"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Live Reactions</div>
-    </div>
-  }
 
   <hr />
   @if (boardMode() === 1) {
@@ -122,46 +177,9 @@
       </button>
       <div class="toolbar-tooltip">Image</div>
     </div>
-  }
-  <div
-    class="toolbar-button-container"
-    [class.active]="popup() === 'cocomaterial'">
-    <button
-      aria-label="Cocomaterial"
-      class="toolbar-button"
-      (click)="togglePopup('cocomaterial')">
-      <mat-icon svgIcon="coco"></mat-icon>
-    </button>
-    <div class="toolbar-tooltip">Cocomaterial</div>
-  </div>
-  <div
-    class="toolbar-button-container"
-    [class.active]="popup() === 'token'">
-    <button
-      aria-label="Token"
-      (click)="token()"
-      class="toolbar-button">
-      <mat-icon svgIcon="token"></mat-icon>
-    </button>
-    <div class="toolbar-tooltip">Token</div>
-  </div>
 
-  @if (boardMode() === 0) {
     <hr />
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'poll'">
-      <button
-        aria-label="Poll"
-        class="toolbar-button"
-        (click)="poll()">
-        <mat-icon svgIcon="poll"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Poll</div>
-    </div>
   }
-
-  <hr />
   <div
     class="toolbar-button-container"
     [class.active]="popup() === 'search'">
@@ -172,18 +190,6 @@
       <mat-icon svgIcon="search"></mat-icon>
     </button>
     <div class="toolbar-tooltip">Search</div>
-  </div>
-
-  <div
-    class="toolbar-button-container"
-    [class.active]="popup() === 'select'">
-    <button
-      aria-label="Select"
-      (click)="select()"
-      class="toolbar-button">
-      <mat-icon svgIcon="area"></mat-icon>
-    </button>
-    <div class="toolbar-tooltip">Area select (Alt+click)</div>
   </div>
 </div>
 
