@@ -4,7 +4,7 @@
   align-items: center;
   gap: var(--spacing-2);
   display: flex;
-  padding: var(--size-2);
+  padding: var(--size-1);
   position: absolute;
   inset-block-end: 4rem;
   inset-inline-end: var(--spacing-2);
@@ -47,6 +47,7 @@
 
   .title {
     color: var(--grey-70);
+    margin-left: 6px;
   }
 
   .value {
