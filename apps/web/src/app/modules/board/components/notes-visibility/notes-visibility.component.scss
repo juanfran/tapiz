@@ -1,14 +1,14 @@
 :host {
   background: var(--primary-color-background);
-  border-radius: var(--radius-2);
+  border-radius: var(--radius-6);
   align-items: center;
   gap: var(--spacing-2);
   display: flex;
   padding: var(--size-2);
   position: absolute;
-  inset-block-end: 6rem;
+  inset-block-end: 4rem;
   inset-inline-end: var(--spacing-2);
-  inline-size: 210px;
+  inline-size: 190px;
 }
 
 .title {
@@ -22,20 +22,21 @@
   padding: 0;
 
   span {
-    font-size: var(--font-size-1);
+    font-size: var(--font-size-0);
     font-family:
     "Inter",
     -apple-system,
     system-ui,
     sans-serif;
+    flex-shrink: 0;
   }
 
   button {
+    align-items: center;
     display: flex;
-    border-radius: 30px;
+    border-radius: var(--radius-6);
     background: var(--grey-20);
     justify-content: space-between;
-    padding: var(--size-3);
     gap: 1rem;
     font-family:
       "Inter",
@@ -45,11 +46,15 @@
   }
 
   .title {
-    color: var(--gray-6);
+    color: var(--grey-70);
   }
 
   .value {
-    font-weight: var(--font-weight-bold);
+    border-radius: var(--radius-6);
+    background: var(--grey-30);
+    padding: var(--size-2) var(--size-3);
+    color: var(--grey-90);
+    width: 70px;
   }
 }
 
