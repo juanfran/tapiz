@@ -48,6 +48,7 @@ export class AppComponent {
     'download',
     'settings',
     'share',
+    'add_simple',
   ];
 
   constructor() {
