@@ -4,7 +4,6 @@
 
 .ProseMirror,
 .rich-text {
-
   outline: none;
   font-feature-settings: "liga" 0;
   font-variant-ligatures: none;
@@ -31,12 +30,17 @@
   }
 }
 
+.ProseMirror::selection,
+.rich-text::selection {
+  background: #ead9f4;
+}
+
 .note-rich-text {
   font-family:
-  "Inter",
-  -apple-system,
-  system-ui,
-  sans-serif;
+    "Inter",
+    -apple-system,
+    system-ui,
+    sans-serif;
 
   overflow: hidden;
   line-height: 1.1;

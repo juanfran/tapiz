@@ -6,6 +6,10 @@
   box-sizing: border-box;
 }
 
+*::selection {
+  background: var(--accent-purple-light);
+}
+
 body {
   @include typography.font-body;
 
