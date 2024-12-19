@@ -94,6 +94,30 @@ export class BoardToolbarComponent {
     this.popupOpen('');
   }
 
+  @HostListener('document:keydown.p') panelShortcut() {
+    if (isInputField()) return;
+
+    this.panel();
+  }
+
+  @HostListener('document:keydown.g') groupShortcut() {
+    if (isInputField()) return;
+
+    this.group();
+  }
+
+  @HostListener('document:keydown.t') textShortcut() {
+    if (isInputField()) return;
+
+    this.text();
+  }
+
+  @HostListener('document:keydown.i') imageShortcut() {
+    if (isInputField()) return;
+
+    this.togglePopup('image');
+  }
+
   constructor() {
     toObservable(this.popup)
       .pipe(
