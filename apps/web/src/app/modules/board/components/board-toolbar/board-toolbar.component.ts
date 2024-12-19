@@ -47,6 +47,7 @@ import { LiveReactionComponent } from '../live-reaction/live-reaction.component'
 import { NotesComponent } from '../notes/notes.component';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 import { ToolsComponent } from '../tools/tools.component';
+import { defaultNoteColor } from '@tapiz/nodes/note';
 @Component({
   selector: 'tapiz-board-toolbar',
   templateUrl: './board-toolbar.component.html',
@@ -79,7 +80,7 @@ export class BoardToolbarComponent {
   toolbarSubscription?: Subscription;
   boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
   popup = this.#store.selectSignal(selectPopupOpen);
-  noteColor = signal<string>('#fdab61');
+  noteColor = signal<string>(defaultNoteColor);
 
   @HostListener('document:keydown.alt') selectAreaShortcut() {
     if (isInputField()) return;

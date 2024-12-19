@@ -109,10 +109,9 @@ textarea {
 }
 
 .inner {
-  background-color: var(--custom-bg);
-  border: solid 2px transparent;
+  background-color: var(--custom-main);
+  border: solid 2px var(--custom-light);
   border-radius: var(--border-radius);
-  /*box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.15);*/
   padding: var(--spacing-4);
   inline-size: 100%;
   block-size: 100%;
@@ -179,7 +178,7 @@ textarea {
 
 .name,
 .characters {
-  color: var(--custom-main);
+  color: var(--black);
 }
 
 .vote,
