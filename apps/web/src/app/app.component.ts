@@ -49,6 +49,7 @@ export class AppComponent {
     'settings',
     'share',
     'add_simple',
+    'note',
   ];
 
   constructor() {
