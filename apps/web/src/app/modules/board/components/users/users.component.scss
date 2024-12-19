@@ -65,6 +65,7 @@
       opacity: 1;
       width: auto;
       height: auto;
+      transition: opacity 0.1s ease;
     }
   }
 
@@ -86,12 +87,13 @@
     text-align: right;
     pointer-events: none;
     padding: var(--size-4) var(--size-2);
-    background: rgba(255,255,255,.7);
+    background: rgba(255, 255, 255, 0.7);
     border-radius: var(--radius-4);
     width: max-content;
     backdrop-filter: blur(2px);
     width: 0;
     height: 0;
+    transition: opacity 0.1s ease;
 
     .name {
       overflow: hidden;
