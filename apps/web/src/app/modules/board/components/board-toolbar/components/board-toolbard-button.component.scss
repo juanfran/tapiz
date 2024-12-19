@@ -45,7 +45,7 @@
   color: var(--white);
   display: flex;
   font-family:
-    'Work Sans',
+    "Work Sans",
     -apple-system,
     system-ui,
     sans-serif;
@@ -64,7 +64,7 @@
 
   &::before {
     background: #1f1f1f;
-    content: '';
+    content: "";
     height: 10px;
     position: absolute;
     right: calc(100% - 5px);
@@ -75,7 +75,7 @@
 
   label {
     font-family:
-      'Inter',
+      "Inter",
       -apple-system,
       system-ui,
       sans-serif;
