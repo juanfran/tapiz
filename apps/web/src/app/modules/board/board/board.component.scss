@@ -14,7 +14,8 @@
     }
   }
 
-  &.following-user {
+  &.following-user,
+  &.edit-mode {
     &::after {
       content: "";
       position: absolute;
