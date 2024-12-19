@@ -97,7 +97,7 @@
     <tapiz-board-context-menu />
     <tapiz-node-toolbar />
     <tapiz-comments />
-    @if (!isReadonlyUser()) {
+    @if (!isReadonlyUser() && boardMode() === 0) {
       <tapiz-notes-visibility />
     }
     <tapiz-zoom-control />
