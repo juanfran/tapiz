@@ -1,201 +1,42 @@
 <div class="toolbar">
   @if (boardMode() === 1) {
-    <div
-      class="toolbar-button-container"
-      [class.active]="!popup()">
-      <button
-        aria-label="Select"
-        class="toolbar-button"
-        (click)="popupOpen('')">
-        <mat-icon svgIcon="cursor"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Select</div>
-    </div>
-
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'templates'">
-      <button
-        aria-label="Templates"
-        class="toolbar-button"
-        (click)="templateSelector()">
-        <mat-icon svgIcon="templates"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Templates</div>
-    </div>
+    <ng-container [ngTemplateOutlet]="selectButton"></ng-container>
+    <ng-container [ngTemplateOutlet]="templatesButton"></ng-container>
   }
   @if (boardMode() === 0) {
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'tools'">
-      <button
-        aria-label="Note"
-        (click)="tools()"
-        class="toolbar-button">
-        <mat-icon svgIcon="add_simple"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Extras</div>
-    </div>
+    <ng-container [ngTemplateOutlet]="extrasButton"></ng-container>
     <hr />
-    <div
-      class="toolbar-button-container"
-      [class.active]="!popup()">
-      <button
-        aria-label="Select"
-        class="toolbar-button"
-        (click)="popupOpen('')">
-        <mat-icon svgIcon="cursor"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Select</div>
-    </div>
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'group'">
-      <button
-        aria-label="Group"
-        class="toolbar-button"
-        (click)="group()">
-        <mat-icon svgIcon="group"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Group (G)</div>
-    </div>
+    <ng-container [ngTemplateOutlet]="selectButton"></ng-container>
+    <ng-container [ngTemplateOutlet]="groupButton"></ng-container>
   }
 
-  <div
-    class="toolbar-button-container"
-    [class.active]="popup() === 'select'">
-    <button
-      aria-label="Select"
-      (click)="select()"
-      class="toolbar-button">
-      <mat-icon svgIcon="area"></mat-icon>
-    </button>
-    <div class="toolbar-tooltip">Area select (Alt+click)</div>
-  </div>
+  <ng-container [ngTemplateOutlet]="areaButton"></ng-container>
+
   @if (boardMode() === 0) {
     <hr />
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'vote'">
-      <button
-        aria-label="Vote Notes & Groups"
-        class="toolbar-button"
-        (click)="vote()">
-        <mat-icon svgIcon="voting"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Vote Notes & Groups</div>
-    </div>
+    <ng-container [ngTemplateOutlet]="voteButton"></ng-container>
   }
 
-  <div
-    class="toolbar-button-container"
-    [class.active]="popup() === 'token'">
-    <button
-      aria-label="Token"
-      (click)="token()"
-      class="toolbar-button">
-      <mat-icon svgIcon="token"></mat-icon>
-    </button>
-    <div class="toolbar-tooltip">Token</div>
-  </div>
+  <ng-container [ngTemplateOutlet]="tokenButton"></ng-container>
+  <ng-container [ngTemplateOutlet]="cocomaterialButton"></ng-container>
 
-  <div
-    class="toolbar-button-container"
-    [class.active]="popup() === 'cocomaterial'">
-    <button
-      aria-label="Cocomaterial"
-      class="toolbar-button"
-      (click)="togglePopup('cocomaterial')">
-      <mat-icon svgIcon="coco"></mat-icon>
-    </button>
-    <div class="toolbar-tooltip">Cocomaterial</div>
-  </div>
   @if (boardMode() === 0) {
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'emoji'">
-      <button
-        aria-label="React to Notes"
-        class="toolbar-button"
-        (click)="emoji()">
-        <mat-icon svgIcon="emoji"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">React to Notes</div>
-    </div>
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'live-reaction'">
-      <button
-        aria-label="Live Reactions"
-        class="toolbar-button"
-        (click)="togglePopup('live-reaction')">
-        <mat-icon svgIcon="heart"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Live Reactions</div>
-    </div>
+    <ng-container [ngTemplateOutlet]="emojiButton"></ng-container>
+    <ng-container [ngTemplateOutlet]="liveReactionButton"></ng-container>
   }
 
-  <div
-    class="toolbar-button-container"
-    [class.active]="popup() === 'draw'">
-    <button
-      aria-label="Draw Notes & Panels"
-      class="toolbar-button"
-      (click)="draw()">
-      <mat-icon svgIcon="edit"></mat-icon>
-    </button>
-    <div class="toolbar-tooltip">Draw Notes & Panels</div>
-  </div>
+  <ng-container [ngTemplateOutlet]="drawButton"></ng-container>
 
   <hr />
-  @if (boardMode() === 1) {
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'panel'">
-      <button
-        aria-label="Panel"
-        class="toolbar-button"
-        (click)="panel()">
-        <mat-icon svgIcon="panel"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Panel</div>
-    </div>
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'text'">
-      <button
-        aria-label="Text"
-        class="toolbar-button"
-        (click)="text()">
-        <mat-icon svgIcon="text"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Text</div>
-    </div>
-    <div
-      class="toolbar-button-container"
-      [class.active]="popup() === 'image'">
-      <button
-        aria-label="Image"
-        class="toolbar-button"
-        (click)="togglePopup('image')">
-        <mat-icon svgIcon="image"></mat-icon>
-      </button>
-      <div class="toolbar-tooltip">Image</div>
-    </div>
 
+  @if (boardMode() === 1) {
+    <ng-container [ngTemplateOutlet]="panelButton"></ng-container>
+    <ng-container [ngTemplateOutlet]="textButton"></ng-container>
+    <ng-container [ngTemplateOutlet]="imageButton"></ng-container>
     <hr />
   }
-  <div
-    class="toolbar-button-container"
-    [class.active]="popup() === 'search'">
-    <button
-      aria-label="Search"
-      class="toolbar-button"
-      (click)="search()">
-      <mat-icon svgIcon="search"></mat-icon>
-    </button>
-    <div class="toolbar-tooltip">Search</div>
-  </div>
+
+  <ng-container [ngTemplateOutlet]="searchButton"></ng-container>
 </div>
 
 @defer (prefetch on idle) {
@@ -203,46 +44,202 @@
     @if (popup() === 'token') {
       <tapiz-token-selector
         (selectToken)="tokenSelected($event)"
-        class="toolbar-popup" />
+        class="toolbar-popup">
+      </tapiz-token-selector>
     }
 
     @if (popup() === 'tools') {
       <tapiz-tools
         (selectedTool)="toolsEvent($event)"
-        class="toolbar-popup" />
+        class="toolbar-popup">
+      </tapiz-tools>
     }
 
     @if (popup() === 'note') {
       <tapiz-notes
         class="toolbar-popup"
-        [(noteColor)]="noteColor" />
+        [(noteColor)]="noteColor">
+      </tapiz-notes>
     }
 
     @if (popup() === 'emoji') {
       <emoji-picker
         (emoji-click)="emojiSelected($event)"
-        class="light toolbar-popup" />
+        class="light toolbar-popup">
+      </emoji-picker>
     }
 
     @if (popup() === 'templates') {
       <tapiz-template-selector
         (selected)="seletedTemplate()"
-        class="toolbar-popup" />
+        class="toolbar-popup">
+      </tapiz-template-selector>
     }
 
     @if (popup() === 'cocomaterial') {
-      <tapiz-cocomaterial class="toolbar-popup" />
+      <tapiz-cocomaterial class="toolbar-popup"></tapiz-cocomaterial>
     }
 
     @if (popup() === 'live-reaction') {
-      <tapiz-live-reaction class="toolbar-popup" />
+      <tapiz-live-reaction class="toolbar-popup"></tapiz-live-reaction>
     }
 
     @if (popup() === 'image') {
       <tapiz-add-image
         class="toolbar-popup"
         (newImageUrl)="newImageUrl($event)"
-        (newImageFile)="newImageFile($event)" />
+        (newImageFile)="newImageFile($event)">
+      </tapiz-add-image>
     }
   </div>
 }
+
+<ng-template #selectButton>
+  <tapiz-board-toolbar-button
+    icon="cursor"
+    tooltip="Select"
+    label="Select"
+    [active]="!popup()"
+    (clicked)="popupOpen('')">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #templatesButton>
+  <tapiz-board-toolbar-button
+    icon="templates"
+    tooltip="Templates"
+    label="Templates"
+    [active]="popup() === 'templates'"
+    (clicked)="popupOpen('templates')">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #extrasButton>
+  <tapiz-board-toolbar-button
+    icon="add_simple"
+    tooltip="Extras"
+    label="Extras"
+    [active]="popup() === 'tools'"
+    (clicked)="popupOpen('tools')">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #groupButton>
+  <tapiz-board-toolbar-button
+    icon="group"
+    tooltip="Group (G)"
+    label="Group"
+    [active]="popup() === 'group'"
+    (clicked)="group()">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #areaButton>
+  <tapiz-board-toolbar-button
+    icon="area"
+    tooltip="Area Select  (Alt+click)"
+    label="Area"
+    [active]="popup() === 'select'"
+    (clicked)="select()">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #voteButton>
+  <tapiz-board-toolbar-button
+    icon="voting"
+    tooltip="Vote Notes & Groups"
+    label="Vote"
+    [active]="popup() === 'vote'"
+    (clicked)="vote()">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #tokenButton>
+  <tapiz-board-toolbar-button
+    icon="token"
+    tooltip="Token"
+    label="Token"
+    [active]="popup() === 'token'"
+    (clicked)="token()">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #cocomaterialButton>
+  <tapiz-board-toolbar-button
+    icon="coco"
+    tooltip="Cocomaterial"
+    label="Cocomaterial"
+    [active]="popup() === 'cocomaterial'"
+    (clicked)="togglePopup('cocomaterial')">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #emojiButton>
+  <tapiz-board-toolbar-button
+    icon="emoji"
+    tooltip="React to Notes"
+    label="React to Notes"
+    [active]="popup() === 'emoji'"
+    (clicked)="emoji()">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #liveReactionButton>
+  <tapiz-board-toolbar-button
+    icon="heart"
+    tooltip="Live Reactions"
+    label="Live Reactions"
+    [active]="popup() === 'live-reaction'"
+    (clicked)="togglePopup('live-reaction')">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #drawButton>
+  <tapiz-board-toolbar-button
+    icon="edit"
+    tooltip="Draw Notes & Panels"
+    label="Draw Notes & Panels"
+    [active]="popup() === 'draw'"
+    (clicked)="draw()">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #panelButton>
+  <tapiz-board-toolbar-button
+    icon="panel"
+    tooltip="Panel"
+    label="Panel"
+    [active]="popup() === 'panel'"
+    (clicked)="panel()">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #textButton>
+  <tapiz-board-toolbar-button
+    icon="text"
+    tooltip="Text"
+    label="Text"
+    [active]="popup() === 'text'"
+    (clicked)="text()">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #imageButton>
+  <tapiz-board-toolbar-button
+    icon="image"
+    tooltip="Image"
+    label="Image"
+    [active]="popup() === 'image'"
+    (clicked)="togglePopup('image')">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #searchButton>
+  <tapiz-board-toolbar-button
+    icon="search"
+    tooltip="Search"
+    label="Search"
+    [active]="popup() === 'search'"
+    (clicked)="search()">
+  </tapiz-board-toolbar-button>
+</ng-template>
