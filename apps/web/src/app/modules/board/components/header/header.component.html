@@ -77,7 +77,7 @@
         aria-label="Settings"
         class="button-action"
         (click)="settings()">
-        <mat-icon>settings</mat-icon>
+        <mat-icon svgIcon="settings"></mat-icon>
       </button>
     }
     <button
@@ -85,14 +85,14 @@
       aria-label="Share"
       class="button-action"
       (click)="share()">
-      <mat-icon>share</mat-icon>
+      <mat-icon svgIcon="share"></mat-icon>
     </button>
     <button
       title="Download"
       aria-label="Download"
       class="button-action"
       (click)="export()">
-      <mat-icon>file_download</mat-icon>
+      <mat-icon svgIcon="download"></mat-icon>
     </button>
     @if (!isDemo && user()?.picture; as picture) {
       @if (showUsers() && users().length > 0) {
