@@ -81,11 +81,22 @@
   
   .item {
     border-radius: 8px !important;
-    padding: var(--size-2) var(--size-3);
+    padding: var(--size-2);
     font-family: "Inter", sans-serif;
     color: var(--grey-70);
+
     &:hover {
       color: var(--grey-90);
+      .help {
+        color: var(--grey-90) !important;
+        background: var(--white);
+      }
+    }
+    .help {
+      background: var(--grey-20);
+      padding: var(--size-1) var(--size-2);
+      border-radius: var(--radius-4);
+      color: var(--grey-70) !important;
     }
   }
 }
