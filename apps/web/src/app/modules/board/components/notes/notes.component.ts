@@ -6,11 +6,15 @@ import { lighter } from '@tapiz/cdk/utils/colors';
   template: `
     <div class="list">
       @for (note of notes; track note.color) {
-        <button
-          type="button"
-          [style.background]="note.color"
-          [style.borderColor]="note.lightColor"
-          (click)="selectNote(note.color)"></button>
+        <div>
+          <button
+            type="button"
+            [style.background]="note.color"
+            [style.borderColor]="
+              note.color === noteColor() ? 'var(--grey-90)' : note.lightColor
+            "
+            (click)="selectNote(note.color)"></button>
+        </div>
       }
     </div>
   `,
