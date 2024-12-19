@@ -97,6 +97,7 @@ import { BoardEditorPortalComponent } from '../components/board-editor-portal/bo
 import { BoardShourtcutsDirective } from '../directives/board-shortcuts.directive';
 import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
 import { NotesVisibilityComponent } from '../components/notes-visibility/notes-visibility.component';
+import { NoteHeightCalculatorComponent } from '@tapiz/nodes/note';
 
 @Component({
   selector: 'tapiz-board',
@@ -131,6 +132,7 @@ import { NotesVisibilityComponent } from '../components/notes-visibility/notes-v
     BoardEditorPortalComponent,
     PopupPortalComponent,
     NotesVisibilityComponent,
+    NoteHeightCalculatorComponent,
   ],
   hostDirectives: [CopyPasteDirective, BoardShourtcutsDirective],
   host: {
