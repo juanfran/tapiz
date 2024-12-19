@@ -36,6 +36,8 @@ import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { EditorViewComponent } from '@tapiz/ui/editor-view';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { EditorPortalComponent } from '../editor-portal/editor-portal.component';
+import { NoteHeightCalculatorService } from './components/note-height-calculator/note-height-calculator.service';
+
 @Component({
   selector: 'tapiz-note',
   templateUrl: './note.component.html',
@@ -61,7 +63,7 @@ import { EditorPortalComponent } from '../editor-portal/editor-portal.component'
     '[style.--custom-main]': 'color()',
     '[style.transform]': '"rotate(" + this.rotation() + "deg)"',
   },
-  providers: [HotkeysService],
+  providers: [HotkeysService, NoteHeightCalculatorService],
 })
 export class NoteComponent {
   @HostBinding('style.--rotate-angle') rotateAngle = '0deg';
@@ -76,6 +78,7 @@ export class NoteComponent {
   #hotkeysService = inject(HotkeysService);
   dropAnimation = signal(false);
   dragAnimation = signal(false);
+  noteHeightCalculatorService = inject(NoteHeightCalculatorService);
 
   node = input.required<TuNode<Note>>();
 
@@ -155,12 +158,24 @@ export class NoteComponent {
     return user?.name ?? '';
   });
 
+  #noteWidth = computed(() => {
+    return this.node().content.width;
+  });
+
+  #noteHeight = computed(() => {
+    return this.node().content.height;
+  });
+
+  #noteText = computed(() => {
+    return this.node().content.text;
+  });
+
   textSize = computed(() => {
-    return this.#noteHeight(
-      this.node().content.width,
-      this.node().content.height,
-      this.node().content.text,
-    );
+    return this.noteHeightCalculatorService.newNoteHeight({
+      height: this.#noteHeight(),
+      width: this.#noteWidth(),
+      text: this.#noteText(),
+    });
   });
 
   userId = this.#nodesStore.userId;
@@ -406,54 +421,6 @@ export class NoteComponent {
 
   onMention(userId: string) {
     this.#nodesStore.actions.mentionUser({ userId, nodeId: this.node().id });
-  }
-
-  #noteHeight(width: number, height: number, text: string): number {
-    const container = document.querySelector('#size-calculator');
-    const minFontSize = 1;
-    const maxFontSize = 56;
-    let fontSize = maxFontSize;
-    const increment = 1;
-
-    if (!container) {
-      return maxFontSize;
-    }
-
-    const div = document.createElement('div');
-    const textDiv = document.createElement('div');
-    const padding = 10;
-    const nameHeight = 28;
-
-    div.style.overflow = 'scroll-y';
-    div.style.width = `${width}px`;
-    div.style.height = `${height - nameHeight}px`;
-    div.style.padding = `${padding}px`;
-    div.style.position = 'absolute';
-    div.style.top = '-1000px';
-    div.id = 'textDivCalculator';
-    textDiv.classList.add('rich-text', 'note-rich-text');
-
-    textDiv.innerHTML = text;
-
-    div.appendChild(textDiv);
-
-    container.appendChild(div);
-
-    while (fontSize >= minFontSize) {
-      div.style.setProperty('--text-editor-font-size', `${fontSize}px`);
-
-      if (textDiv.clientHeight + padding / 2 < div.clientHeight) {
-        break;
-      }
-
-      fontSize -= increment;
-    }
-
-    if (fontSize < minFontSize) {
-      return minFontSize;
-    }
-
-    return fontSize - increment;
   }
 
   #voteEvent(event: MouseEvent) {
