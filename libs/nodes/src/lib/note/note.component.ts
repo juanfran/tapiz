@@ -4,7 +4,6 @@ import {
   ChangeDetectionStrategy,
   HostListener,
   ElementRef,
-  HostBinding,
   inject,
   computed,
   signal,
@@ -54,6 +53,7 @@ import { NoteHeightCalculatorService } from './components/note-height-calculator
   host: {
     '[class.drawing]': 'drawing()',
     '[class.voting]': 'voting()',
+    '[class.focus]': 'focus()',
     '[class.emoji-mode]': 'emojiMode()',
     '[class.active-layer]': 'activeLayer()',
     '[class.drop-animation]': 'dropAnimation()',
@@ -62,12 +62,11 @@ import { NoteHeightCalculatorService } from './components/note-height-calculator
     '[style.--custom-bg]': 'lightColor()',
     '[style.--custom-main]': 'color()',
     '[style.transform]': '"rotate(" + this.rotation() + "deg)"',
+    '[style.--rotate-angle]': 'rotateAngle()',
   },
   providers: [HotkeysService, NoteHeightCalculatorService],
 })
 export class NoteComponent {
-  @HostBinding('style.--rotate-angle') rotateAngle = '0deg';
-
   #commentsStore = inject(CommentsStore);
   #el = inject(ElementRef);
   #store = inject(Store);
@@ -93,6 +92,7 @@ export class NoteComponent {
   });
 
   rotation = signal(0);
+  rotateAngle = signal('0deg');
 
   generateRandomRotation() {
     let rotation: number;
@@ -105,10 +105,6 @@ export class NoteComponent {
       }
     } while (rotation > -0.5 && rotation < 0.5); // Ensures the number is not between -0.5 and 0.5
     return rotation;
-  }
-
-  @HostBinding('class.focus') get focusClass() {
-    return this.focus();
   }
 
   editorView = viewChild<EditorViewComponent>('editorView');
@@ -205,7 +201,7 @@ export class NoteComponent {
   });
 
   randomizeAngle(): void {
-    const previousAngle = parseFloat(this.rotateAngle);
+    const previousAngle = parseFloat(this.rotateAngle());
     let randomAngle;
     do {
       randomAngle = Math.floor(Math.random() * 13) - 6; // random angle between -6 and 6 degrees
@@ -216,7 +212,7 @@ export class NoteComponent {
     );
 
     requestAnimationFrame(() => {
-      this.rotateAngle = `${randomAngle}deg`;
+      this.rotateAngle.set(`${randomAngle}deg`);
     });
   }
 
