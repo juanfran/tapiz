@@ -54,3 +54,38 @@
   --mat-sliderfocus-state-layer-color: rgba(30,37,75, 0.12);
 
 }
+
+/* DROPDOWNS */
+.cdk-menu {
+  border-radius: 12px;
+  padding: var(--size-1) !important;
+  border: 2px solid var(--grey-20);
+  box-shadow: none !important;
+  .menu-item {
+    font-family: "Inter", sans-serif;
+    border-radius: var(--size-2);
+    padding: 0 var(--size-2);
+    color: var(--grey-70);
+    &:hover {
+      background: var(--grey-20);
+      color: var(--grey-90);
+    }
+  }
+}
+
+.menu.open {
+  border-radius: 12px !important;
+  padding: var(--size-1) !important;
+  border: 2px solid var(--grey-20);
+  box-shadow: none !important;
+  
+  .item {
+    border-radius: 8px !important;
+    padding: var(--size-2) var(--size-3);
+    font-family: "Inter", sans-serif;
+    color: var(--grey-70);
+    &:hover {
+      color: var(--grey-90);
+    }
+  }
+}
