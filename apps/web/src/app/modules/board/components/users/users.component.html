@@ -1,19 +1,12 @@
 @if (boardMode() === 0) {
   <div class="right-col-toolbar users">
-    <button class="title-container">
-      <!--h2 class="title">
-        People
-        @if (showUsers() && users().length > 0) {
-          <span class="count">({{ users().length + 1 }})</span>
-        }
-      </h2-->
-    </button>
     <div class="user-container">
       <div class="user-wrapper">
         @if (currentUser(); as user) {
           <button
             class="user me"
             [cdkMenuTriggerFor]="menu"
+            [cdkMenuPosition]="menuPosition"
             [cdkMenuTriggerData]="{ user: currentUser() }">
             <p class="username">
               <span
@@ -43,6 +36,7 @@
             <button
               [cdkMenuTriggerFor]="menu"
               [cdkMenuTriggerData]="{ user: user }"
+              [cdkMenuPosition]="menuPosition"
               [class.offline]="!user.connected"
               [class.active]="user.id === userHighlight()"
               class="user">
