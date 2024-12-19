@@ -96,7 +96,10 @@
     </button>
     @if (!isDemo && user()?.picture; as picture) {
       @if (showUsers() && users().length > 0) {
-        <span class="user-count">{{ users().length + 1 }}</span>
+        <button class="user-count">
+          <mat-icon svgIcon="user"></mat-icon>
+          <span class="user-hover">{{ users().length + 1 }} Users</span>
+        </button>
       }
     }
   }

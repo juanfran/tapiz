@@ -142,6 +142,7 @@
   height: var(--toolbar-button-height);
   width: var(--toolbar-button-width);
   .mat-icon {
+    color: var(--primary-color-button-bg);
     fill: var(--primary-color-button-bg);
   }
   &:hover {
@@ -160,22 +161,66 @@
 }
 
 .user-count {
-  display: inline-flex;
   align-items: center;
+  background: var(--grey-30);
+  border-radius: 30px;
+  box-sizing: border-box;
+  color: #2c2c2c;
+  display: inline-flex;
   font-family:
     "Work Sans",
     -apple-system,
     system-ui,
     sans-serif;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--grey-30);
   font-size: var(--font-size-1);
   font-weight: 400;
-  color: #2c2c2c;
-  margin-left: 8px;
-  box-sizing: border-box;
+  height: 44px;
+  width: 44px;
+  justify-content: center;
   line-height: 1.2;
+  margin-left: 8px;
+  position: relative;
+
+  &:hover {
+    background: var(--grey-40);
+
+    .user-hover {
+      background: var(--grey-90);
+      border-radius: 20px;
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      font-size: 16px;
+      font-weight: var(--font-weight-medium);
+      line-height: 1.2;
+      height: 44px;
+      width: 200%;
+      padding: 0 16px;
+      opacity: 1;
+
+      &::after {
+        content: "";
+        position: absolute;
+        top: 50%; /* Start at vertical center */
+        left: calc(100% - 0.18rem); /* Align to the right edge */
+        transform: translateY(-50%); /* Center vertically */
+
+        /* Create the triangle using borders */
+        width: 0;
+        height: 0;
+        border-left: 10px solid #1f255a; /* Color matches the bubble background */
+        border-top: 6px solid transparent;
+        border-bottom: 6px solid transparent;
+      }
+    }
+  }
+
+  .user-hover {
+    height: 0;
+    width: 0;
+    opacity: 0;
+    position: absolute;
+    right: calc(100% + 0.5rem);
+    top: 0;
+  }
 }
