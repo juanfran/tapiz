@@ -51,19 +51,6 @@
   align-items: flex-end;
 }
 
-.title-container {
-  align-items: center;
-  background: none;
-  border: 0;
-  display: flex;
-  justify-content: space-between;
-  margin: 0 0 0.5rem 0;
-  padding: 0;
-  transition:
-    background 0.5s ease,
-    color 0.5s ease;
-}
-
 .user {
   align-items: center;
   display: flex;
@@ -76,13 +63,15 @@
   &:hover {
     .username {
       opacity: 1;
+      width: auto;
+      height: auto;
     }
   }
-  
+
   &.offline {
     opacity: 0.2;
   }
-  
+
   .username {
     display: flex;
     gap: 0.5rem;
@@ -91,9 +80,6 @@
     height: 24px;
     margin-bottom: 0;
     transition: color 0.5s ease;
-    position: absolute;
-    left: 12px;
-    transform: translate(calc(-100% - 10px), 0px);
     justify-content: flex-end;
     opacity: 0;
     inline-size: 300px;
@@ -104,6 +90,8 @@
     border-radius: var(--radius-4);
     width: max-content;
     backdrop-filter: blur(2px);
+    width: 0;
+    height: 0;
 
     .name {
       overflow: hidden;

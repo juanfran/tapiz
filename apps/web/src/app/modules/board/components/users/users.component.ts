@@ -64,6 +64,20 @@ export class UsersComponent {
         };
       });
   });
+  menuPosition = [
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+    },
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'top',
+    },
+  ];
 
   userId = this.#store.selectSignal(selectUserId);
   userHighlight = this.#store.selectSignal(selectUserHighlight);
