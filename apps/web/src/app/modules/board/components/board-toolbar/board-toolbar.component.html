@@ -4,7 +4,23 @@
     <ng-container [ngTemplateOutlet]="templatesButton"></ng-container>
   }
   @if (boardMode() === 0) {
-    <ng-container [ngTemplateOutlet]="extrasButton"></ng-container>
+    @switch (popup()) {
+      @case ('note') {
+        <ng-container [ngTemplateOutlet]="noteButton"></ng-container>
+      }
+      @case ('panel') {
+        <ng-container [ngTemplateOutlet]="panelButton"></ng-container>
+      }
+      @case ('text') {
+        <ng-container [ngTemplateOutlet]="textButton"></ng-container>
+      }
+      @case ('image') {
+        <ng-container [ngTemplateOutlet]="imageButton"></ng-container>
+      }
+      @default {
+        <ng-container [ngTemplateOutlet]="extrasButton"></ng-container>
+      }
+    }
     <hr />
     <ng-container [ngTemplateOutlet]="selectButton"></ng-container>
     <ng-container [ngTemplateOutlet]="groupButton"></ng-container>
@@ -93,6 +109,16 @@
     }
   </div>
 }
+
+<ng-template #noteButton>
+  <tapiz-board-toolbar-button
+    icon="add"
+    tooltip="Note"
+    label="Note"
+    [active]="popup() === 'note'"
+    (clicked)="popupOpen('note')">
+  </tapiz-board-toolbar-button>
+</ng-template>
 
 <ng-template #selectButton>
   <tapiz-board-toolbar-button
