@@ -1,6 +1,6 @@
 .title {
   align-items: center;
-  background-color: #5fb0b7;
+  background-color: var(--brand);
   border-radius: 16px;
   color: var(--white);
   cursor: pointer;
@@ -12,8 +12,9 @@
     sans-serif;
   padding: var(--spacing-2);
   position: absolute;
-  right: 10px;
-  top: 10px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  top: 0px;
   user-select: none;
   white-space: pre-wrap;
   font-size: var(--font-size-5);
@@ -32,7 +33,7 @@
 
 :host {
   display: block;
-  border: 2px dashed #5fb0b7;
+  border: 2px dashed var(--grey-40);
   border-radius: 36px;
   cursor: grab;
   padding: 1rem;
@@ -41,11 +42,7 @@
   block-size: 100%;
 
   &.focus {
-    border-color: #a672f8;
-
-    .title {
-      background-color: #a672f8;
-    }
+    border-color: var(--brand);
   }
 
   &.voting, &.voting .title {

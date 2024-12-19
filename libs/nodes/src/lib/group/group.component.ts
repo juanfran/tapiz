@@ -25,7 +25,6 @@ import { input } from '@angular/core';
 
 @Component({
   selector: 'tapiz-group',
-
   template: `
     <div
       class="title"
