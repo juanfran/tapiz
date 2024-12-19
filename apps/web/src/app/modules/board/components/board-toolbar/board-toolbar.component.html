@@ -5,20 +5,13 @@
   }
   @if (boardMode() === 0) {
     @switch (popup()) {
-      @case ('note') {
-        <ng-container [ngTemplateOutlet]="noteButton"></ng-container>
-      }
-      @case ('panel') {
-        <ng-container [ngTemplateOutlet]="panelButton"></ng-container>
-      }
-      @case ('text') {
-        <ng-container [ngTemplateOutlet]="textButton"></ng-container>
-      }
-      @case ('image') {
-        <ng-container [ngTemplateOutlet]="imageButton"></ng-container>
+      @case ('tools') {
+        <ng-container [ngTemplateOutlet]="extrasButton"></ng-container>
       }
       @default {
-        <ng-container [ngTemplateOutlet]="extrasButton"></ng-container>
+        <ng-container
+          [ngTemplateOutlet]="extrasButton"
+          [ngTemplateOutletContext]="{ icon: popup() }"></ng-container>
       }
     }
     <hr />
@@ -140,12 +133,14 @@
   </tapiz-board-toolbar-button>
 </ng-template>
 
-<ng-template #extrasButton>
+<ng-template
+  #extrasButton
+  let-icon="icon">
   <tapiz-board-toolbar-button
-    icon="add_simple"
+    [icon]="icon || 'add_simple'"
     tooltip="Extras"
     label="Extras"
-    [active]="popup() === 'tools'"
+    [active]="popup() === (icon ? icon : 'tools')"
     (clicked)="popupOpen('tools')">
   </tapiz-board-toolbar-button>
 </ng-template>
