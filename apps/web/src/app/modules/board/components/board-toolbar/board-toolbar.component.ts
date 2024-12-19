@@ -46,6 +46,8 @@ import { pageFeature } from '../../reducers/page.reducer';
 import { LiveReactionComponent } from '../live-reaction/live-reaction.component';
 import { NotesComponent } from '../notes/notes.component';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
+import { ToolsComponent } from '../tools/tools.component';
+import { defaultNoteColor } from '@tapiz/nodes/note';
 @Component({
   selector: 'tapiz-board-toolbar',
   templateUrl: './board-toolbar.component.html',
@@ -61,6 +63,7 @@ import { isInputField } from '@tapiz/cdk/utils/is-input-field';
     LiveReactionComponent,
     CocomaterialComponent,
     NotesComponent,
+    ToolsComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [HotkeysService],
@@ -77,7 +80,7 @@ export class BoardToolbarComponent {
   toolbarSubscription?: Subscription;
   boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
   popup = this.#store.selectSignal(selectPopupOpen);
-  noteColor = signal<string>('#fdab61');
+  noteColor = signal<string>(defaultNoteColor);
 
   @HostListener('document:keydown.alt') selectAreaShortcut() {
     if (isInputField()) return;
@@ -89,6 +92,30 @@ export class BoardToolbarComponent {
     if (isInputField()) return;
 
     this.popupOpen('');
+  }
+
+  @HostListener('document:keydown.p') panelShortcut() {
+    if (isInputField()) return;
+
+    this.panel();
+  }
+
+  @HostListener('document:keydown.g') groupShortcut() {
+    if (isInputField()) return;
+
+    this.group();
+  }
+
+  @HostListener('document:keydown.t') textShortcut() {
+    if (isInputField()) return;
+
+    this.text();
+  }
+
+  @HostListener('document:keydown.i') imageShortcut() {
+    if (isInputField()) return;
+
+    this.togglePopup('image');
   }
 
   constructor() {
@@ -145,6 +172,43 @@ export class BoardToolbarComponent {
           }),
         );
       });
+  }
+
+  tools() {
+    if (this.popup() === 'tools') {
+      this.popupOpen('');
+      return;
+    }
+
+    this.popupOpen('tools');
+
+    this.toolbarSubscription = this.#zoneService.select().subscribe(() => {
+      this.popupOpen('');
+    });
+  }
+
+  toolsEvent(event: string) {
+    this.popupOpen('');
+    switch (event) {
+      case 'selectedNote':
+        this.note();
+        break;
+      case 'selectedPanel':
+        this.panel();
+        break;
+      case 'selectedText':
+        this.text();
+        break;
+      case 'selectedImage':
+        this.togglePopup('image');
+        break;
+      case 'selectedPoll':
+        this.poll();
+        break;
+      case 'selectedEstimation':
+        this.estimation();
+        break;
+    }
   }
 
   note() {

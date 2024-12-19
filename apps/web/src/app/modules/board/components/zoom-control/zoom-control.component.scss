@@ -1,23 +1,31 @@
 :host {
   background: var(--primary-color-background);
-  border-radius: var(--radius-2);
+  border-radius: var(--radius-6);
   align-items: center;
   gap: var(--spacing-2);
   display: flex;
-  padding: var(--size-2);
+  padding: var(--size-1);
   position: absolute;
   inset-block-end: var(--spacing-2);
   inset-inline-end: var(--spacing-2);
-  inline-size: 210px;
+  inline-size: 190px;
 }
 
 button {
-  padding: var(--size-1) var(--size-7);
+  background: var(--grey-30);
+  border-radius: var(--radius-6);
+  color: var(--grey-90);
+  padding: var(--size-2) var(--size-2);
   font-size: var(--font-size-1);
   font-weight: var(--font-weight-9);
+  width: 50px;
+  &:hover {
+    background: var(--grey-40);
+  }
 }
 
 .percentage {
+  color: var(--grey-90);
   inline-size: 100%;
   text-align: center;
 }

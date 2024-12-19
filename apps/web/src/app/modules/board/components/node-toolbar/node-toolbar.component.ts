@@ -44,7 +44,9 @@ interface Toolbar {
         [editor]="toolbar.view"
         [node]="toolbar.node()"
         [layoutOptions]="toolbar.options.layoutOptions"
-        [fontSize]="toolbar.options.fontSize" />
+        [fontSize]="toolbar.options.fontSize"
+        [style.left.px]="toolbar.x"
+        [style.top.px]="toolbar.y" />
     }
   `,
   styleUrl: './node-toolbar.component.scss',
@@ -58,7 +60,7 @@ export class NodeToolbarComponent {
   #nodes = this.#boardFacade.getNodes() as Observable<
     TuNode<{
       position: Point;
-      rotation: number;
+      rotation?: number;
       width: number;
       height: number;
     }>[]
@@ -94,17 +96,21 @@ export class NodeToolbarComponent {
 
             const matrix = compose(
               translate(node.content.position.x, node.content.position.y),
-              rotateDEG(node.content.rotation),
+              rotateDEG(node.content.rotation ?? 0),
             );
 
-            const { x: centerX, y: topY } = this.getTopCenterPosition(
+            const { topLeft, topRight } = this.getPosition(
               matrix,
               node.content.width,
               node.content.height,
             );
 
-            const x = centerX * zoom + position.x;
-            const y = topY * zoom + position.y;
+            let x = topLeft.x * zoom + position.x - 300;
+            const y = topLeft.y * zoom + position.y;
+
+            if (x < 0) {
+              x = topRight.x * zoom + position.x;
+            }
 
             return {
               id: node.id,
@@ -118,10 +124,33 @@ export class NodeToolbarComponent {
           .filter((it): it is Toolbar => !!it);
       }),
       distinctUntilChanged((prev, curr) => {
-        return R.equals(prev, curr);
+        return R.isDeepEqual(prev, curr);
       }),
     ),
   );
+
+  getPosition(matrix: Matrix, width: number, height: number) {
+    const topLeft = { x: matrix.e, y: matrix.f };
+    const topRight = {
+      x: matrix.e + matrix.a * width,
+      y: matrix.f + matrix.b * width,
+    };
+    const bottomLeft = {
+      x: matrix.e + matrix.c * height,
+      y: matrix.f + matrix.d * height,
+    };
+    const bottomRight = {
+      x: matrix.e + matrix.a * width + matrix.c * height,
+      y: matrix.f + matrix.b * width + matrix.d * height,
+    };
+
+    return {
+      topLeft,
+      topRight,
+      bottomLeft,
+      bottomRight,
+    };
+  }
 
   getTopCenterPosition(matrix: Matrix, width: number, height: number) {
     const topLeft = { x: matrix.e, y: matrix.f };

@@ -44,7 +44,7 @@ export class OptionFontComponent {
   options = [
     {
       name: 'Default',
-      value: '"Raleway", -apple-system, system-ui, sans-serif',
+      value: '"Inter", -apple-system, system-ui, sans-serif',
     },
     {
       name: 'Sans',

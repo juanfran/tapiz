@@ -20,6 +20,7 @@ import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
 import Pickr from '@simonwep/pickr';
 import { colorPickerConfig } from '@tapiz/ui/color-picker/color-picker.config';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { defaultNoteColor } from '@tapiz/nodes/note';
 
 @Component({
   selector: 'tapiz-board-context-menu',
@@ -236,7 +237,7 @@ export class BoardContextMenuComponent implements OnInit {
                       ...colorPickerConfig,
                       el: noteEl,
                       useAsButton: true,
-                      default: note.content.color ?? '#fdab61',
+                      default: note.content.color ?? defaultNoteColor,
                     });
 
                     pickr.show();

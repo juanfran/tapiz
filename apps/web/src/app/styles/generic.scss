@@ -6,6 +6,10 @@
   box-sizing: border-box;
 }
 
+*::selection {
+  background: var(--accent-purple-light);
+}
+
 body {
   @include typography.font-body;
 
@@ -19,7 +23,7 @@ body {
   background-color: var(--white);
   color: var(--color-black);
   font-family:
-    "Raleway",
+    "Inter",
     -apple-system,
     system-ui,
     sans-serif;

@@ -10,7 +10,7 @@ import {
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
 import { PageActions } from '../../actions/page.actions';
-import { selectIsAdmin } from '../../selectors/page.selectors';
+import { selectIsAdmin, selectUserId } from '../../selectors/page.selectors';
 import { ExportService } from '../../services/export.service';
 import { ClickOutside } from 'ngxtension/click-outside';
 import { AutoFocusDirective } from '../../directives/autofocus.directive';
@@ -21,12 +21,18 @@ import { ShareBoardComponent } from '../share-board/share-board.component';
 import { pageFeature } from '../../reducers/page.reducer';
 import { BoardSettingsComponent } from '../board-settings/board-settings.component';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { switchMap } from 'rxjs';
+import {
+  takeUntilDestroyed,
+  toObservable,
+  toSignal,
+} from '@angular/core/rxjs-interop';
+import { map, switchMap } from 'rxjs';
+import { computed } from '@angular/core';
 import { ConfigService } from '../../../../services/config.service';
 import { NgOptimizedImage } from '@angular/common';
 import { appFeature } from '../../../../+state/app.reducer';
 import { MatButtonModule } from '@angular/material/button';
+import { BoardFacade } from '../../../../services/board-facade.service';
 
 @Component({
   selector: 'tapiz-header',
@@ -49,7 +55,37 @@ export class HeaderComponent {
   #store = inject(Store);
   #dialog = inject(MatDialog);
   #hotkeysService = inject(HotkeysService);
+  #boardFacade = inject(BoardFacade);
+  #boardUsers = this.#store.selectSignal(pageFeature.selectBoardUsers);
   #configService = inject(ConfigService);
+  #users = toSignal(
+    this.#boardFacade
+      .getUsers()
+      .pipe(map((users) => users.map((user) => user.content))),
+    { initialValue: [] },
+  );
+  userId = this.#store.selectSignal(selectUserId);
+  users = computed(() => {
+    const boardUsers = this.#boardUsers();
+
+    return this.#users()
+      .filter((user) => user.id !== this.userId())
+      .map((user) => {
+        const boardUser = boardUsers.find(
+          (boardUser) => boardUser.id === user.id,
+        );
+
+        return {
+          ...user,
+          picture: boardUser?.picture,
+        };
+      });
+  });
+  #settings = toSignal(this.#boardFacade.getSettings(), { initialValue: null });
+
+  showUsers = computed(() => {
+    return !this.#settings()?.content.anonymousMode;
+  });
 
   textarea = viewChild<ElementRef<HTMLInputElement>>('textarea');
 

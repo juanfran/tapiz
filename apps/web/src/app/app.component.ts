@@ -45,6 +45,10 @@ export class AppComponent {
     'google',
     'user',
     'templates',
+    'download',
+    'settings',
+    'share',
+    'add_simple',
   ];
 
   constructor() {

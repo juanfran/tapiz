@@ -1,11 +1,44 @@
+/* BUTTONS */
 .mat-mdc-unelevated-button.mat-primary,
 .mat-mdc-raised-button.mat-primary {
   --mdc-filled-button-container-color: var(--brand);
   --mdc-protected-button-container-color: var(--brand);
+  border-radius: var(--radius-6);
+  padding: var(--size-4);
+  &:hover {
+    background: var(--grey-80);
+  }
+}
+
+.mat-mdc-mini-fab.mat-primary {
+  background: var(--brand);
+  &:hover {
+    background: var(--grey-80);
+  }
+}
+
+.mat-mdc-raised-button:not(:disabled) {
+  border-radius: var(--radius-6);
+  padding: var(--size-4);
+}
+
+/* MODALS */
+.mat-mdc-dialog-surface {
+  border-radius: var(--radius-3) !important;
+  padding: var(--size-3);
+  .title {
+    font-size: var(--size-6);
+    margin-bottom: 2rem;
+  }
 }
 
 .mdc-snackbar.error {
   --mdc-snackbar-container-color: var(--error);
+}
+
+.mat-mdc-checkbox.mat-primary {
+  --mdc-checkbox-selected-focus-icon-color: var(--brand);
+  --mdc-checkbox-selected-focus-state-layer-color: var(--grey-70);
 }
 
 :root {
@@ -13,4 +46,57 @@
   --mdc-outlined-text-field-caret-color: var(--brand);
   --mdc-outlined-text-field-focus-label-text-color: var(--brand);
   --mdc-fab-small-container-shape: 12px;
+  --mat-option-selected-state-label-text-color: var(--brand);
+  --mdc-slider-handle-color: var(--brand);
+  --mdc-slider-focus-handle-color: var(--brand);
+  --mdc-slider-inactive-track-color: var(--grey-70);
+  --mdc-slider-active-track-color: var(--brand);
+  --mat-sliderfocus-state-layer-color: rgba(30,37,75, 0.12);
+
+}
+
+/* DROPDOWNS */
+.cdk-menu {
+  border-radius: 12px;
+  padding: var(--size-1) !important;
+  border: 2px solid var(--grey-20);
+  box-shadow: none !important;
+  .menu-item {
+    font-family: "Inter", sans-serif;
+    border-radius: var(--size-2);
+    padding: 0 var(--size-2);
+    color: var(--grey-70);
+    &:hover {
+      background: var(--grey-20);
+      color: var(--grey-90);
+    }
+  }
+}
+
+.menu.open {
+  border-radius: 12px !important;
+  padding: var(--size-1) !important;
+  border: 2px solid var(--grey-20);
+  box-shadow: none !important;
+  
+  .item {
+    border-radius: 8px !important;
+    padding: var(--size-2);
+    font-family: "Inter", sans-serif;
+    color: var(--grey-70);
+
+    &:hover {
+      color: var(--grey-90);
+      .help {
+        color: var(--grey-90) !important;
+        background: var(--white);
+      }
+    }
+    .help {
+      background: var(--grey-20);
+      padding: var(--size-1) var(--size-2);
+      border-radius: var(--radius-4);
+      color: var(--grey-70) !important;
+    }
+  }
 }

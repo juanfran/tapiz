@@ -50,11 +50,10 @@ import { injectQueryParams } from 'ngxtension/inject-query-params';
         routerLink="/">
         <img
           priority="true"
-          ngSrc="/assets/logo-45.webp"
-          width="45"
+          ngSrc="/assets/svgs/tapiz-logo.svg"
+          width="70"
           height="47"
           alt="Tapiz logo" />
-        <span class="name">Tapiz</span>
       </a>
       <div class="inline-end-header">
         @if (invitations().length) {
