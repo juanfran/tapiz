@@ -7,7 +7,7 @@
   overflow-y: auto;
 
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   grid-template-rows: 100px;
   grid-gap: 10px;
 }
@@ -20,4 +20,5 @@ button {
   border: solid 2px transparent;
   inline-size: 100px;
   block-size: 100px;
+  border-radius: 20px;
 }

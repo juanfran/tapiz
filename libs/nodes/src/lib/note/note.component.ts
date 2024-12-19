@@ -36,6 +36,7 @@ import { EditorViewComponent } from '@tapiz/ui/editor-view';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { EditorPortalComponent } from '../editor-portal/editor-portal.component';
 import { NoteHeightCalculatorService } from './components/note-height-calculator/note-height-calculator.service';
+import { defaultNoteColor } from '.';
 
 @Component({
   selector: 'tapiz-note',
@@ -59,7 +60,7 @@ import { NoteHeightCalculatorService } from './components/note-height-calculator
     '[class.drop-animation]': 'dropAnimation()',
     '[class.drag-animation]': 'dragAnimation()',
     '[style.--custom-fg]': '"#000"',
-    '[style.--custom-bg]': 'lightColor()',
+    '[style.--custom-light]': 'lightColor()',
     '[style.--custom-main]': 'color()',
     '[style.transform]': '"rotate(" + this.rotation() + "deg)"',
     '[style.--rotate-angle]': 'rotateAngle()',
@@ -193,7 +194,7 @@ export class NoteComponent {
     const panels = this.#nodesStore.nodes().filter(isPanel);
 
     const position = this.node().content.position;
-    const defaultColor = this.node().content.color ?? '#fdab61';
+    const defaultColor = this.node().content.color ?? defaultNoteColor;
     return this.findColor(position, panels, defaultColor);
   });
   lightColor = computed(() => {

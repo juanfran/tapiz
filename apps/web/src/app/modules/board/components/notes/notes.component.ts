@@ -8,10 +8,8 @@ import { lighter } from '@tapiz/cdk/utils/colors';
       @for (note of notes; track note.color) {
         <button
           type="button"
-          [style.background]="note.lightColor"
-          [style.borderColor]="
-            noteColor() === note.color ? note.color : 'transparent'
-          "
+          [style.background]="note.color"
+          [style.borderColor]="note.lightColor"
           (click)="selectNote(note.color)"></button>
       }
     </div>
@@ -24,49 +22,28 @@ export class NotesComponent {
 
   notes = [
     {
-      color: '#fdab61',
+      color: '#a6caf4',
     },
     {
-      color: '#F44336',
+      color: '#d6b4ea',
     },
     {
-      color: '#E91E63',
+      color: '#92d1b2',
     },
     {
-      color: '#9C27B0',
+      color: '#ffa4ac',
     },
     {
-      color: '#673AB7',
+      color: '#a8d672',
     },
     {
-      color: '#3F51B5',
+      color: '#fbb980',
     },
     {
-      color: '#2196F3',
+      color: '#cfd45f',
     },
     {
-      color: '#03A9F4',
-    },
-    {
-      color: '#00BCD4',
-    },
-    {
-      color: '#009688',
-    },
-    {
-      color: '#4CAF50',
-    },
-    {
-      color: '#8BC34A',
-    },
-    {
-      color: '#CDDC39',
-    },
-    {
-      color: '#FFEB3B',
-    },
-    {
-      color: '#FFC107',
+      color: '#f7d44c',
     },
   ].map((note) => {
     return {
