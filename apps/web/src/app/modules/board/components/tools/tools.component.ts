@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ToolsComponent {
-  selectedTool = output<string>({ alias: 'selectedTool' });
+  selectedTool = output<string>();
 
   selectedNote() {
     this.selectedTool.emit('selectedNote');
