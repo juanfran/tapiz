@@ -34,7 +34,6 @@
   }
 }
 
-
 .suggestions {
   display: flex;
   flex-direction: column;
@@ -52,5 +51,5 @@
 }
 
 .no-suggestions {
-  color: var(--gray-12)
+  color: var(--gray-12);
 }
