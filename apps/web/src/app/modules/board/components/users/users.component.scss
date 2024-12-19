@@ -78,25 +78,32 @@
       opacity: 1;
     }
   }
-
+  
   &.offline {
     opacity: 0.2;
   }
-
+  
   .username {
     display: flex;
     gap: 0.5rem;
+    color: var(--grey-90);
     align-items: center;
     height: 24px;
     margin-bottom: 0;
     transition: color 0.5s ease;
     position: absolute;
+    left: 12px;
     transform: translate(calc(-100% - 10px), 0px);
     justify-content: flex-end;
     opacity: 0;
     inline-size: 300px;
     text-align: right;
     pointer-events: none;
+    padding: var(--size-4) var(--size-2);
+    background: rgba(255,255,255,.7);
+    border-radius: var(--radius-4);
+    width: max-content;
+    backdrop-filter: blur(2px);
 
     .name {
       overflow: hidden;

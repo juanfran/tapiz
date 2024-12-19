@@ -45,6 +45,10 @@
 
   &:hover {
     background: var(--grey-20);
+
+    span {
+      color: var(--grey-90);
+    }
     
     .key {
       color: var(--grey-70);
@@ -64,7 +68,7 @@
 
 .key {
   display: inline-flex;
-  background-color: var(--grey-30);
+  background-color: var(--grey-20);
   color: var(--grey-70);
   font-size: 16px;
   font-weight: normal;
