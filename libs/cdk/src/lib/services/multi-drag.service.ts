@@ -6,6 +6,8 @@ import {
   filter,
   fromEvent,
   map,
+  scan,
+  switchMap,
   take,
   takeUntil,
   throttleTime,
@@ -23,6 +25,7 @@ export interface Draggable {
   position: () => Point;
   preventDrag?: () => boolean;
   drop?: () => void;
+  dragging?: () => void;
 }
 
 interface SetupConfig {
@@ -133,24 +136,82 @@ export class MultiDragService {
     }
 
     this.#eventInitialPoisition = null;
+    const deltaInitDrag = 3;
 
-    fromEvent<MouseEvent>(document.body, 'mousemove')
-      .pipe(
-        throttleTime(0, animationFrameScheduler),
-        takeUntil(fromEvent<MouseEvent>(window, 'mouseup')),
-        takeUntilDestroyed(destroyRef),
-        withLatestFrom(setUpConfig.zoom, setUpConfig.relativePosition),
-        map(([mouseMove, zoom, position]) => {
+    const initialMouseMove$ = fromEvent<MouseEvent>(
+      document.body,
+      'mousemove',
+    ).pipe(
+      throttleTime(0, animationFrameScheduler),
+      takeUntil(fromEvent<MouseEvent>(window, 'mouseup')),
+      takeUntilDestroyed(destroyRef),
+      withLatestFrom(setUpConfig.zoom, setUpConfig.relativePosition),
+      scan(
+        (
+          acc: null | {
+            initial: Point;
+            last: Point | null;
+          },
+          [mouseMove, zoom, position],
+        ) => {
           const posX = -position.x + mouseMove.x;
           const posY = -position.y + mouseMove.y;
 
-          return {
-            position: {
-              x: posX / zoom,
-              y: posY / zoom,
-            },
-            ctrlKey: mouseMove.ctrlKey,
+          const event = {
+            x: posX / zoom,
+            y: posY / zoom,
           };
+
+          if (!acc) {
+            return {
+              initial: event,
+              last: null,
+            };
+          }
+
+          return {
+            initial: acc.initial,
+            last: event,
+          };
+        },
+        null,
+      ),
+      filter((acc) => {
+        if (!acc) {
+          return false;
+        }
+
+        return (
+          Math.abs(acc.initial.x - (acc.last?.x ?? acc.initial.x)) >
+            deltaInitDrag ||
+          Math.abs(acc.initial.y - (acc.last?.y ?? acc.initial.y)) >
+            deltaInitDrag
+        );
+      }),
+      take(1),
+    );
+
+    initialMouseMove$
+      .pipe(
+        switchMap(() => {
+          return fromEvent<MouseEvent>(document.body, 'mousemove').pipe(
+            throttleTime(0, animationFrameScheduler),
+            takeUntil(fromEvent<MouseEvent>(window, 'mouseup')),
+            takeUntilDestroyed(destroyRef),
+            withLatestFrom(setUpConfig.zoom, setUpConfig.relativePosition),
+            map(([mouseMove, zoom, position]) => {
+              const posX = -position.x + mouseMove.x;
+              const posY = -position.y + mouseMove.y;
+
+              return {
+                position: {
+                  x: posX / zoom,
+                  y: posY / zoom,
+                },
+                ctrlKey: mouseMove.ctrlKey,
+              };
+            }),
+          );
         }),
       )
       .subscribe({
@@ -215,6 +276,8 @@ export class MultiDragService {
               final: null,
               draggable,
             });
+
+            draggable.dragging?.();
           }
 
           const initialPosition = this.#dragElements.get(draggable.id)

@@ -17,13 +17,13 @@
 @include meta.load-css("layers.scss");
 
 .participate-mode {
-  --primary-color: var(--purple);
-  --primary-color-background: #f1f0fc;
-  --primary-color-button-bg: var(--purple-bbg);
+  --primary-color: var(--grey-90);
+  --primary-color-background: var(--grey-20);
+  --primary-color-button-bg: var(--grey-90);
 }
 
 .edit-mode {
-  --primary-color: var(--baby-blue);
-  --primary-color-background: #ddf2f7;
-  --primary-color-button-bg: var(--baby-blue-bbg);
+  --primary-color: var(--grey-90);
+  --primary-color-background: var(--grey-20);
+  --primary-color-button-bg: var(--grey-90);
 }

@@ -1,19 +1,20 @@
 .title {
   align-items: center;
-  background-color: #5fb0b7;
+  background-color: var(--brand);
   border-radius: 16px;
   color: var(--white);
   cursor: pointer;
   display: flex;
   font-family:
-    "Ubuntu",
+    "Inter",
     -apple-system,
     system-ui,
     sans-serif;
   padding: var(--spacing-2);
   position: absolute;
-  right: 10px;
-  top: 10px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  top: 0px;
   user-select: none;
   white-space: pre-wrap;
   font-size: var(--font-size-5);
@@ -32,7 +33,7 @@
 
 :host {
   display: block;
-  border: 2px dashed #5fb0b7;
+  border: 2px dashed var(--grey-40);
   border-radius: 36px;
   cursor: grab;
   padding: 1rem;
@@ -41,11 +42,7 @@
   block-size: 100%;
 
   &.focus {
-    border-color: #a672f8;
-
-    .title {
-      background-color: #a672f8;
-    }
+    border-color: var(--brand);
   }
 
   &.voting, &.voting .title {
@@ -54,8 +51,11 @@
 }
 
 .vote {
-  background-color: rgba(0, 0, 0, 0.15);
-  border-radius: var(--radius-2);
+  background-color: var(--white);
+  border-radius: var(--radius-6);
   text-align: center;
   font-size: var(--font-size-3);
+  font-weight: 500;
+  color: var(--black);
+  width: 28px;
 }

@@ -4,7 +4,6 @@ import {
   ChangeDetectionStrategy,
   HostListener,
   ElementRef,
-  HostBinding,
   inject,
   computed,
   signal,
@@ -36,6 +35,8 @@ import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 import { EditorViewComponent } from '@tapiz/ui/editor-view';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { EditorPortalComponent } from '../editor-portal/editor-portal.component';
+import { NoteHeightCalculatorService } from './components/note-height-calculator/note-height-calculator.service';
+import { defaultNoteColor } from '.';
 
 @Component({
   selector: 'tapiz-note',
@@ -53,14 +54,18 @@ import { EditorPortalComponent } from '../editor-portal/editor-portal.component'
   host: {
     '[class.drawing]': 'drawing()',
     '[class.voting]': 'voting()',
+    '[class.focus]': 'focus()',
     '[class.emoji-mode]': 'emojiMode()',
     '[class.active-layer]': 'activeLayer()',
+    '[class.drop-animation]': 'dropAnimation()',
+    '[class.drag-animation]': 'dragAnimation()',
     '[style.--custom-fg]': '"#000"',
-    '[style.--custom-bg]': 'lightColor()',
+    '[style.--custom-light]': 'lightColor()',
     '[style.--custom-main]': 'color()',
     '[style.transform]': '"rotate(" + this.rotation() + "deg)"',
+    '[style.--rotate-angle]': 'rotateAngle()',
   },
-  providers: [HotkeysService],
+  providers: [HotkeysService, NoteHeightCalculatorService],
 })
 export class NoteComponent {
   #commentsStore = inject(CommentsStore);
@@ -71,6 +76,9 @@ export class NoteComponent {
   #nodesStore = inject(NodesStore);
   #nodeStore = inject(NodeStore);
   #hotkeysService = inject(HotkeysService);
+  dropAnimation = signal(false);
+  dragAnimation = signal(false);
+  noteHeightCalculatorService = inject(NoteHeightCalculatorService);
 
   node = input.required<TuNode<Note>>();
 
@@ -85,22 +93,19 @@ export class NoteComponent {
   });
 
   rotation = signal(0);
+  rotateAngle = signal('0deg');
 
   generateRandomRotation() {
     let rotation: number;
     const aspectRatio = this.height() / this.width();
     do {
       if (aspectRatio > 2 || aspectRatio < 0.5) {
-      rotation = Math.random() * 2.5 - 1.25; // Generates a number between -1.25 and 1.25
+        rotation = Math.random() * 2.5 - 1.25; // Generates a number between -1.25 and 1.25
       } else {
-      rotation = Math.random() * 5 - 2.5; // Generates a number between -2.5 and 2.5
+        rotation = Math.random() * 5 - 2.5; // Generates a number between -2.5 and 2.5
       }
     } while (rotation > -0.5 && rotation < 0.5); // Ensures the number is not between -0.5 and 0.5
     return rotation;
-  }
-
-  @HostBinding('class.focus') get focusClass() {
-    return this.focus();
   }
 
   editorView = viewChild<EditorViewComponent>('editorView');
@@ -150,12 +155,24 @@ export class NoteComponent {
     return user?.name ?? '';
   });
 
+  #noteWidth = computed(() => {
+    return this.node().content.width;
+  });
+
+  #noteHeight = computed(() => {
+    return this.node().content.height;
+  });
+
+  #noteText = computed(() => {
+    return this.node().content.text;
+  });
+
   textSize = computed(() => {
-    return this.#noteHeight(
-      this.node().content.width,
-      this.node().content.height,
-      this.node().content.text,
-    );
+    return this.noteHeightCalculatorService.newNoteHeight({
+      height: this.#noteHeight(),
+      width: this.#noteWidth(),
+      text: this.#noteText(),
+    });
   });
 
   userId = this.#nodesStore.userId;
@@ -177,12 +194,28 @@ export class NoteComponent {
     const panels = this.#nodesStore.nodes().filter(isPanel);
 
     const position = this.node().content.position;
-    const defaultColor = this.node().content.color ?? '#fdab61';
+    const defaultColor = this.node().content.color ?? defaultNoteColor;
     return this.findColor(position, panels, defaultColor);
   });
   lightColor = computed(() => {
     return lighter(this.color(), 70);
   });
+
+  randomizeAngle(): void {
+    const previousAngle = parseFloat(this.rotateAngle());
+    let randomAngle;
+    do {
+      randomAngle = Math.floor(Math.random() * 13) - 6; // random angle between -6 and 6 degrees
+    } while (
+      randomAngle === previousAngle ||
+      randomAngle === 2 ||
+      randomAngle === -2
+    );
+
+    requestAnimationFrame(() => {
+      this.rotateAngle.set(`${randomAngle}deg`);
+    });
+  }
 
   constructor() {
     const highlight = computed(() => {
@@ -387,54 +420,6 @@ export class NoteComponent {
     this.#nodesStore.actions.mentionUser({ userId, nodeId: this.node().id });
   }
 
-  #noteHeight(width: number, height: number, text: string): number {
-    const container = document.querySelector('#size-calculator');
-    const minFontSize = 1;
-    const maxFontSize = 56;
-    let fontSize = maxFontSize;
-    const increment = 1;
-
-    if (!container) {
-      return maxFontSize;
-    }
-
-    const div = document.createElement('div');
-    const textDiv = document.createElement('div');
-    const padding = 10;
-    const nameHeight = 28;
-
-    div.style.overflow = 'scroll-y';
-    div.style.width = `${width}px`;
-    div.style.height = `${height - nameHeight}px`;
-    div.style.padding = `${padding}px`;
-    div.style.position = 'absolute';
-    div.style.top = '-1000px';
-    div.id = 'textDivCalculator';
-    textDiv.classList.add('rich-text', 'note-rich-text');
-
-    textDiv.innerHTML = text;
-
-    div.appendChild(textDiv);
-
-    container.appendChild(div);
-
-    while (fontSize >= minFontSize) {
-      div.style.setProperty('--text-editor-font-size', `${fontSize}px`);
-
-      if (textDiv.clientHeight + padding / 2 < div.clientHeight) {
-        break;
-      }
-
-      fontSize -= increment;
-    }
-
-    if (fontSize < minFontSize) {
-      return minFontSize;
-    }
-
-    return fontSize - increment;
-  }
-
   #voteEvent(event: MouseEvent) {
     let votes = this.node().content.votes;
 
@@ -562,6 +547,21 @@ export class NoteComponent {
   }
 
   onDrop() {
-    // pass
+    const nativeElement: HTMLElement = this.#el.nativeElement;
+
+    this.dragAnimation.set(false);
+    this.dropAnimation.set(true);
+
+    const onAnimationEnd = () => {
+      this.dropAnimation.set(false);
+      nativeElement.removeEventListener('animationend', onAnimationEnd);
+    };
+
+    nativeElement.addEventListener('animationend', onAnimationEnd);
+  }
+
+  onDrag() {
+    this.randomizeAngle();
+    this.dragAnimation.set(true);
   }
 }

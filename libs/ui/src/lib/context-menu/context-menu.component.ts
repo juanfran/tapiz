@@ -23,7 +23,9 @@ import { MatIconModule } from '@angular/material/icon';
           <mat-icon>{{ item.icon }}</mat-icon>
         }
         <div class="label">{{ item.label }}</div>
-        <div class="help">{{ item.help }}</div>
+        @if (item.help) {
+          <div class="help">{{ item.help }}</div>
+        }
       </button>
     }
   </div>`,

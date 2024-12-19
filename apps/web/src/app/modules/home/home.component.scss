@@ -42,10 +42,10 @@
     border-radius: 5px;
     text-align: left;
     position: relative;
+    border-radius: var(--radius-6);
     a {
       display: block;
       text-decoration: none;
-      font-weight: 500;
       font-size: var(--font-size-14);
       padding: var(--spacing-2) var(--spacing-4);
       inline-size: 100%;
@@ -59,7 +59,7 @@
     }
     &:hover,
     &.active {
-      background-color: var(--accent--ui);
+      background-color: var(--grey-20);
     }
   }
 }
@@ -74,8 +74,7 @@
   display: flex;
   text-decoration: none;
   align-items: center;
-  font-size: var(--font-size-24);
-  font-weight: 700;
+  margin-left: var(--spacing-2);
 
   .name {
     color: var(--brand);
@@ -83,19 +82,41 @@
 
   img {
     margin-inline-end: var(--spacing-2);
+    margin-top: 10px;
+    width: 70px;
   }
 }
 
 .teams {
+  display: flex;
+  flex-direction: column;
   padding-block-start: var(--spacing-4);
-  border-block-start: 1px solid var(--accent--ui);
+  border-block-start: 1px solid var(--grey-20);
 
   h4 {
     align-items: center;
     margin: 0;
     margin-block-end: var(--spacing-2);
+    justify-content: space-between;
     gap: var(--spacing-1);
     display: flex;
+    width: 100%;
+    font-size: var(--font-size-16);
+    font-weight: 600;
+    padding-left: var(--spacing-3);
+
+    button {
+      height: 40px;
+      width: 40px;
+      background: var(--grey-20);
+      border-radius: var(--radius-6);
+      .mat-icon {
+        padding: 0 8px;
+      }
+      &:hover {
+        background: var(--grey-30);
+      }
+    }
   }
 }
 

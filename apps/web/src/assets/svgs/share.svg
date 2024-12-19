@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 27.541 27.451">
+  <defs>
+    <clipPath id="a" class="frame-clip frame-clip-def">
+      <rect width="27.541" height="27.451" rx="0" ry="0"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#a)">
+    <g class="fills">
+      <rect width="27.541" height="27.451" class="frame-background" rx="0" ry="0"/>
+    </g>
+    <g class="frame-children">
+      <g class="feather feather-share-2">
+        <circle cx="19.77" cy="6.725" r="3" class="fills"/>
+        <g stroke-linejoin="round" class="strokes">
+          <circle cx="19.77" cy="6.725" r="3" stroke="#1e254b" stroke-linecap="round" stroke-width="2" class="stroke-shape"/>
+        </g>
+        <circle cx="7.77" cy="13.725" r="3" class="fills"/>
+        <g stroke-linejoin="round" class="strokes">
+          <circle cx="7.77" cy="13.725" r="3" stroke="#1e254b" stroke-linecap="round" stroke-width="2" class="stroke-shape"/>
+        </g>
+        <circle cx="19.77" cy="20.725" r="3" class="fills"/>
+        <g stroke-linejoin="round" class="strokes">
+          <circle cx="19.77" cy="20.725" r="3" stroke="#1e254b" stroke-linecap="round" stroke-width="2" class="stroke-shape"/>
+        </g>
+        <path d="m10.36 15.235 6.83 3.98" class="fills"/>
+        <g stroke-linejoin="round" class="strokes">
+          <path stroke="#1e254b" stroke-linecap="round" stroke-width="2" d="m10.36 15.235 6.83 3.98" class="stroke-shape"/>
+        </g>
+        <path d="m17.18 8.235-6.82 3.98" class="fills"/>
+        <g stroke-linejoin="round" class="strokes">
+          <path stroke="#1e254b" stroke-linecap="round" stroke-width="2" d="m17.18 8.235-6.82 3.98" class="stroke-shape"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

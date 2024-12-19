@@ -2,7 +2,6 @@ import {
   Component,
   ChangeDetectionStrategy,
   ElementRef,
-  ViewChild,
   AfterViewInit,
   HostListener,
   OnDestroy,
@@ -10,8 +9,7 @@ import {
   inject,
   DestroyRef,
   computed,
-  effect,
-  signal,
+  viewChild,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { rxEffect } from 'ngxtension/rx-effect';
@@ -98,6 +96,8 @@ import { LiveReactionWallComponent } from '../components/live-reaction/live-reac
 import { BoardEditorPortalComponent } from '../components/board-editor-portal/board-editor-portal.component';
 import { BoardShourtcutsDirective } from '../directives/board-shortcuts.directive';
 import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
+import { NotesVisibilityComponent } from '../components/notes-visibility/notes-visibility.component';
+import { NoteHeightCalculatorComponent } from '@tapiz/nodes/note';
 
 @Component({
   selector: 'tapiz-board',
@@ -131,14 +131,25 @@ import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
     LiveReactionWallComponent,
     BoardEditorPortalComponent,
     PopupPortalComponent,
+    NotesVisibilityComponent,
+    NoteHeightCalculatorComponent,
   ],
   hostDirectives: [CopyPasteDirective, BoardShourtcutsDirective],
   host: {
     '[class.node-selection-disabled]': '!nodeSelectionEnabled()',
     '[class.readonly]': 'isReadonlyUser()',
+    '[class.edit-mode]': 'boardMode() === 1',
   },
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
+  @HostBinding('class.following-user')
+  public get isFollowingUser() {
+    let hasPeople = false;
+    this.userToFollow$.subscribe((user) => {
+      hasPeople = !!user;
+    });
+    return hasPeople;
+  }
   public el = inject(ElementRef);
   private wsService = inject(WsService);
   private store = inject(Store);
@@ -161,9 +172,8 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly boardId$ = this.store.select(selectBoardId);
   public readonly nodes$ = this.boardFacade.getNodes();
 
-  smallScale = signal(0);
-  bigScale = signal(0);
-
+  smallScale = computed(() => this.calcPatterns().smallCalc);
+  bigScale = computed(() => this.calcPatterns().bigCalc);
   public readonly userZoom = this.store.selectSignal(pageFeature.selectZoom);
   public readonly historyService = inject(HistoryService);
   public readonly newNote$ = new Subject<MouseEvent>();
@@ -194,7 +204,20 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     return this.readonly() && !this.isAdmin();
   });
 
-  @ViewChild('workLayer', { read: ElementRef }) public workLayer!: ElementRef;
+  workLayer = viewChild.required<ElementRef<HTMLElement>>('workLayer');
+
+  dots = viewChild.required<ElementRef<HTMLElement>>('dots');
+  #store = inject(Store);
+  #boardFacade = inject(BoardFacade);
+  userToFollow$ = this.#store.select(pageFeature.selectFollow).pipe(
+    switchMap((follow) => {
+      return this.#boardFacade.getUsers().pipe(
+        map((users) => {
+          return users.find((user) => user.id === follow)?.content;
+        }),
+      );
+    }),
+  );
 
   @HostBinding('class.follow-user')
   public get isFollowUser() {
@@ -216,22 +239,25 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     const zoom = Math.max(this.userZoom(), 0.1);
     const constant = 0.3;
     const baseSize = 0.8;
-    const total = baseSize + (constant / zoom);
+    const total = baseSize + constant / zoom;
 
     smallCalc = Math.min(total, 2.5);
     const zoomFactor = Math.max(this.userZoom(), 0.1);
 
     const smallMinSize = 18;
     const smallMaxSize = 40;
-    smallCalc = smallMinSize + (smallMaxSize - smallMinSize) * (zoomFactor - 0.1) / (1 - 0.1);
+    smallCalc =
+      smallMinSize +
+      ((smallMaxSize - smallMinSize) * (zoomFactor - 0.1)) / (1 - 0.1);
     smallCalc = Math.min(smallCalc, smallMaxSize);
 
-    const bigMinSize = 200;
+    const bigMinSize = 300;
     const bigMaxSize = 1600;
-    bigCalc = bigMinSize + (bigMaxSize - bigMinSize) * (zoomFactor - 0.1) / (1 - 0.1);
+    bigCalc =
+      bigMinSize + ((bigMaxSize - bigMinSize) * (zoomFactor - 0.1)) / (1 - 0.1);
     bigCalc = Math.max(bigCalc, bigMinSize);
 
-    return { 'smallCalc': smallCalc, 'bigCalc': bigCalc };
+    return { smallCalc: smallCalc, bigCalc: bigCalc };
   });
 
   constructor() {
@@ -239,12 +265,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       sessionStorage.removeItem('new-board');
       this.store.dispatch(PageActions.changeBoardMode({ boardMode: 1 }));
     }
-
-    effect(() => {
-      const sizePatterns = this.calcPatterns();
-      this.smallScale.set(sizePatterns.smallCalc);
-      this.bigScale.set(sizePatterns.bigCalc);
-    });
 
     this.wsService.reconnect$.pipe(takeUntilDestroyed()).subscribe(() => {
       const boardId = this.route.snapshot.paramMap.get('id');
@@ -584,6 +604,8 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([zoom, position]) => {
         this.workLayerNativeElement.style.transform = `translate(${position.x}px, ${position.y}px) scale(${zoom})`;
+
+        this.dots().nativeElement.style.transform = `translate(${position.x}px, ${position.y}px)`;
       });
   }
 
@@ -604,7 +626,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   }
 
   get workLayerNativeElement() {
-    return this.workLayer.nativeElement as HTMLElement;
+    return this.workLayer().nativeElement;
   }
 
   get isDemo() {

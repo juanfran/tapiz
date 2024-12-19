@@ -1,6 +1,6 @@
 :host {
-  --toolbar-button-height: 2.25rem;
-  --toolbar-button-width: 2.875rem;
+  --toolbar-button-height: 3rem;
+  --toolbar-button-width: 3rem;
 
   cursor: default;
   height: auto;
@@ -13,105 +13,13 @@
   }
 }
 
-mat-icon {
-  inline-size: 24px;
-  block-size: 24px;
-}
-
-.toolbar-tooltip {
-  align-items: center;
-  background: #1f1f1f;
-  border-radius: 8px;
-  color: var(--white);
-  display: flex;
-  font-family:
-    "Work Sans",
-    -apple-system,
-    system-ui,
-    sans-serif;
-  justify-content: center;
-  left: 100%;
-  min-height: 2rem;
-  min-width: 4.125rem;
-  opacity: 0;
-  padding: 0.25rem;
-  pointer-events: none;
-  position: absolute;
-  top: 0;
-  transition: all 0.5s ease;
-  z-index: var(--board-tools-layer);
-  white-space: nowrap;
-
-  &::before {
-    background: #1f1f1f;
-    content: "";
-    height: 10px;
-    position: absolute;
-    right: calc(100% - 5px);
-    top: calc(50% - 5px);
-    transform: rotate(45deg);
-    width: 10px;
-  }
-
-  label {
-    font-family:
-      "Raleway",
-      -apple-system,
-      system-ui,
-      sans-serif;
-    font-size: 1.3rem;
-    margin-bottom: 0.25rem;
-  }
-}
-
-.toolbar-button-container {
-  margin-block: 0;
-  position: relative;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  &.mt {
-    margin-top: 2rem;
-  }
-
-  .toolbar-button:hover {
-    background: var(--primary-color-button-bg);
-
-    + .toolbar-tooltip {
-      left: calc(100% + 0.5rem);
-      opacity: 1;
-      padding: 0 10px;
-    }
-  }
-
-  &.active {
-    background: var(--primary-color-button-bg);
-
-    .toolbar-tooltip {
-      display: none;
-    }
-  }
-}
-
-.toolbar-button {
-  align-items: center;
-  background: none;
-  display: flex;
-  height: var(--toolbar-button-height);
-  justify-content: center;
-  padding: 0;
-  width: var(--toolbar-button-width);
-  padding: var(--size-4) 0;
-}
-
 .toolbar {
   background: var(--primary-color-background);
-  border-radius: var(--radius-2);
+  border-radius: var(--radius-6);
   display: flex;
   flex-direction: column;
-  padding: var(--size-2) 0;
+  gap: var(--spacing-1);
+  padding: var(--size-2);
   transition: background 0.5s ease;
 }
 
@@ -129,7 +37,9 @@ hr {
 }
 
 .toolbar-popup {
-  background: var(--primary-color-background);
-  border-radius: var(--radius-2);
+  background: var(--white);
+  border: 1px solid var(--primary-color-background);
+  border-radius: var(--radius-3);
   padding: var(--spacing-4);
+  box-shadow: 0 0 15px 3px rgba(66, 62, 82, 0.1);
 }

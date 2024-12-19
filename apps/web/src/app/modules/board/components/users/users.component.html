@@ -1,86 +1,75 @@
 @if (boardMode() === 0) {
   <div class="right-col-toolbar users">
-    <button class="title-container">
-      <h2 class="title">
-        People
-        @if (showUsers() && users().length > 0) {
-          <span class="count">({{ users().length + 1 }})</span>
-        }
-      </h2>
-    </button>
     <div class="user-container">
-      @if (showUsers()) {
-        @for (user of users(); track user.id) {
+      <div class="user-wrapper">
+        @if (currentUser(); as user) {
           <button
+            class="user me"
             [cdkMenuTriggerFor]="menu"
-            [cdkMenuTriggerData]="{ user: user }"
-            [class.offline]="!user.connected"
-            [class.active]="user.id === userHighlight()"
-            class="user">
-            @if (user.picture) {
-              <img
-                class="avatar"
-                [ngSrc]="user.picture"
-                width="24"
-                height="24"
-                [alt]="user.name" />
-            } @else {
-              <mat-icon
-                class="icon-svg"
-                svgIcon="user"></mat-icon>
-            }
-
+            [cdkMenuPosition]="menuPosition"
+            [cdkMenuTriggerData]="{ user: currentUser() }">
             <p class="username">
               <span
                 class="name"
                 [title]="user.name"
                 >{{ user.name }}</span
               >
+              <span class="myself">(me)</span>
             </p>
+            @if (userPicture() && userPicture() !== '') {
+              <img
+                class="avatar"
+                [ngSrc]="userPicture()"
+                referrerpolicy="no-referrer"
+                width="48"
+                height="48"
+                [alt]="user.name" />
+            } @else {
+              <mat-icon
+                class="icon-svg no-picture"
+                svgIcon="user"></mat-icon>
+            }
           </button>
         }
-      } @else {
-        <div class="no-users">
-          <p>Anonymous mode</p>
-        </div>
-      }
-    </div>
-    @if (currentUser(); as user) {
-      <button
-        class="user me"
-        [cdkMenuTriggerFor]="menu"
-        [cdkMenuTriggerData]="{ user: currentUser() }">
-        <mat-icon
-          class="icon-svg"
-          svgIcon="user"></mat-icon>
-        <p class="username">
-          <span
-            class="name"
-            [title]="user.name"
-            >{{ user.name }}</span
-          >
-          <span class="myself">(me)</span>
-        </p>
-      </button>
-    }
-  </div>
-
-  @if (showNotesVisibility()) {
-    <div class="right-col-toolbar note-visibility">
-      <button
-        [cdkMenuTriggerFor]="selectVisibility"
-        [class.no-visible]="!visible()">
-        <span class="title">Notes visibility</span>
-        <span class="value">
-          @if (visible()) {
-            Public
-          } @else {
-            Private
+        @if (showUsers()) {
+          @for (user of users(); track user.id) {
+            <button
+              [cdkMenuTriggerFor]="menu"
+              [cdkMenuTriggerData]="{ user: user }"
+              [cdkMenuPosition]="menuPosition"
+              [class.offline]="!user.connected"
+              [class.active]="user.id === userHighlight()"
+              class="user">
+              <p class="username">
+                <span
+                  class="name"
+                  [title]="user.name"
+                  >{{ user.name }}</span
+                >
+              </p>
+              @if (user.picture) {
+                <img
+                  class="avatar"
+                  [ngSrc]="user.picture"
+                  referrerpolicy="no-referrer"
+                  width="48"
+                  height="48"
+                  [alt]="user.name" />
+              } @else {
+                <mat-icon
+                  class="icon-svg no-picture"
+                  svgIcon="user"></mat-icon>
+              }
+            </button>
           }
-        </span>
-      </button>
+        } @else {
+          <div class="no-users">
+            <p>Anonymous mode</p>
+          </div>
+        }
+      </div>
     </div>
-  }
+  </div>
 }
 
 <ng-template
@@ -119,29 +108,6 @@
       class="menu-item"
       (cdkMenuItemTriggered)="showVotes(user.id)">
       Show votes
-    </button>
-  </div>
-</ng-template>
-
-<ng-template #selectVisibility>
-  <div
-    class="menu radio-menu"
-    cdkMenu>
-    <button
-      cdkMenuItemRadio
-      class="radio-menu-item"
-      [class.selected]="visible()"
-      (cdkMenuItemTriggered)="setVisibility(true)">
-      <p>Public</p>
-      <p>Yours notes will be visible to everyone</p>
-    </button>
-    <button
-      cdkMenuItemRadio
-      class="radio-menu-item"
-      [class.selected]="!visible()"
-      (cdkMenuItemTriggered)="setVisibility(false)">
-      <p>Private</p>
-      <p>Yours notes will be visible only to you</p>
     </button>
   </div>
 </ng-template>
