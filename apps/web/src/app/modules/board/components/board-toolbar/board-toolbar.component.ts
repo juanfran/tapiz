@@ -48,6 +48,8 @@ import { NotesComponent } from '../notes/notes.component';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 import { ToolsComponent } from '../tools/tools.component';
 import { defaultNoteColor } from '@tapiz/nodes/note';
+import { NgTemplateOutlet } from '@angular/common';
+import { BoardToolbardButtonComponent } from './components/board-toolboard-button.component';
 @Component({
   selector: 'tapiz-board-toolbar',
   templateUrl: './board-toolbar.component.html',
@@ -64,6 +66,8 @@ import { defaultNoteColor } from '@tapiz/nodes/note';
     CocomaterialComponent,
     NotesComponent,
     ToolsComponent,
+    NgTemplateOutlet,
+    BoardToolbardButtonComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [HotkeysService],
@@ -399,6 +403,7 @@ export class BoardToolbarComponent {
   }
 
   emoji() {
+    console.log('sdfdsf');
     if (this.popup() !== 'emoji') {
       this.popupOpen('emoji');
     } else {
@@ -483,6 +488,7 @@ export class BoardToolbarComponent {
   }
 
   popupOpen(popupName: string) {
+    console.log('popupOpen', popupName);
     this.#store.dispatch(PageActions.setPopupOpen({ popup: popupName }));
 
     if (this.toolbarSubscription) {
