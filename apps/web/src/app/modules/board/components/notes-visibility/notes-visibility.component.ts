@@ -7,10 +7,8 @@ import {
 import { Store } from '@ngrx/store';
 import { selectUserId } from '../../selectors/page.selectors';
 import { BoardActions } from '../../actions/board.actions';
-
 import { map } from 'rxjs/operators';
 import { CdkMenu, CdkMenuItemRadio, CdkMenuTrigger } from '@angular/cdk/menu';
-import { pageFeature } from '../../reducers/page.reducer';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,23 +19,20 @@ import { MatIconModule } from '@angular/material/icon';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CdkMenuTrigger, CdkMenu, MatIconModule, CdkMenuItemRadio],
   template: `
-    @if (boardMode() === 0) {
-      <div class="right-col-toolbar note-visibility">
-        <button
-          [cdkMenuTriggerFor]="selectVisibility"
-          [class.no-visible]="!visible()">
-          <span class="title">Notes visibility</span>
-          <span class="value">
-            @if (visible()) {
-              Public
-            } @else {
-              Private
-            }
-          </span>
-        </button>
-      </div>
-    }
-
+    <div class="right-col-toolbar note-visibility">
+      <button
+        [cdkMenuTriggerFor]="selectVisibility"
+        [class.no-visible]="!visible()">
+        <span class="title">Notes visibility</span>
+        <span class="value">
+          @if (visible()) {
+            Public
+          } @else {
+            Private
+          }
+        </span>
+      </button>
+    </div>
     <ng-template #selectVisibility>
       <div
         class="menu radio-menu"
@@ -71,7 +66,6 @@ export class NotesVisibilityComponent {
       .pipe(map((users) => users.map((user) => user.content))),
     { initialValue: [] },
   );
-  boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
   userId = this.#store.selectSignal(selectUserId);
   currentUser = computed(() => {
     return this.#users()?.find((user) => user.id === this.userId());
