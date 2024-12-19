@@ -488,7 +488,6 @@ export class BoardToolbarComponent {
   }
 
   popupOpen(popupName: string) {
-    console.log('popupOpen', popupName);
     this.#store.dispatch(PageActions.setPopupOpen({ popup: popupName }));
 
     if (this.toolbarSubscription) {
