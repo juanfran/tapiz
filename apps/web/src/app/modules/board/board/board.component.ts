@@ -138,6 +138,7 @@ import { NoteHeightCalculatorComponent } from '@tapiz/nodes/note';
   host: {
     '[class.node-selection-disabled]': '!nodeSelectionEnabled()',
     '[class.readonly]': 'isReadonlyUser()',
+    '[class.edit-mode]': 'boardMode() === 1',
   },
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
