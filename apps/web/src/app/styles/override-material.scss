@@ -36,6 +36,11 @@
   --mdc-snackbar-container-color: var(--error);
 }
 
+.mat-mdc-checkbox.mat-primary {
+  --mdc-checkbox-selected-focus-icon-color: var(--brand);
+  --mdc-checkbox-selected-focus-state-layer-color: var(--grey-70);
+}
+
 :root {
   --mdc-outlined-text-field-focus-outline-color: var(--brand);
   --mdc-outlined-text-field-caret-color: var(--brand);
@@ -46,5 +51,6 @@
   --mdc-slider-focus-handle-color: var(--brand);
   --mdc-slider-inactive-track-color: var(--grey-70);
   --mdc-slider-active-track-color: var(--brand);
-  --mat-slider-focus-state-layer-color: rgba(30,37,75, 0.12);
+  --mat-sliderfocus-state-layer-color: rgba(30,37,75, 0.12);
+
 }
