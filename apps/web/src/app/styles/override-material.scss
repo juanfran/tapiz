@@ -17,6 +17,15 @@
   }
 }
 
+.mat-mdc-button-touch-target {
+  background: var(--brand);
+  border-radius: var(--radius-4);
+}
+
+.mat-mdc-raised-button {
+  color: var(--white) !important;
+}
+
 .mat-mdc-raised-button:not(:disabled) {
   border-radius: var(--radius-6);
   padding: var(--size-4);

@@ -4,6 +4,8 @@
   justify-content: center;
   padding-block-start: 20vh;
   align-items: flex-start;
+  background-image: url("/assets/dot-bg.png");
+  background-size: 40px;
 
   @media (max-width: 800px) {
     display: flex;
@@ -16,11 +18,14 @@
   flex-direction: column;
   justify-self: flex-start;
   padding: var(--size-8);
-  background: #dcdaf6;
+  position: relative;
+  background: var(--white);
   justify-self: flex-end;
   max-width: 715px;
   min-width: 500px;
-  box-shadow: var(--shadow-2);
+  width: 100%;
+  border-radius: var(--radius-4);
+  border: 2px solid var(--grey-30);
 
   @media (max-width: 800px) {
     max-width: 100%;
@@ -29,23 +34,21 @@
 
 .logo {
   display: flex;
-  text-decoration: none;
-  align-items: center;
-  font-size: var(--font-size-7);
-  font-weight: var(--font-weight-7);
   margin-block-end: var(--spacing-4);
-  gap: var(--spacing-2);
+}
 
-  .name {
-    color: var(--brand);
-  }
+.login-img {
+  position: absolute;
+  top: 40px;
+  right: -120px;
 }
 
 .claim {
-  color: #736bdb;
+  color: var(--grey-60);
   font-size: var(--font-size-4);
   margin-block-end: var(--spacing-8);
   text-wrap: pretty;
+  max-width: 460px;
 }
 
 .button-inner {
@@ -59,6 +62,6 @@
 
 .login-buttons {
   display: flex;
-  justify-content: center;
   inline-size: 100%;
+  margin-top: 30px;
 }
