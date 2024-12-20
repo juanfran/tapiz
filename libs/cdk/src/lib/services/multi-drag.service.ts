@@ -93,12 +93,6 @@ export class MultiDragService {
   }
 
   register(draggable: Draggable) {
-    const setUpConfig = this.#setUpConfig;
-
-    if (!setUpConfig) {
-      throw new Error('MultiDragService.setUp() must be called before use');
-    }
-
     this.remove(draggable.id);
 
     this.draggableElements.push(draggable);
@@ -112,7 +106,17 @@ export class MultiDragService {
 
           return true;
         }),
-        concatLatestFrom(() => setUpConfig.dragEnabled),
+        concatLatestFrom(() => {
+          const setUpConfig = this.#setUpConfig;
+
+          if (!setUpConfig) {
+            throw new Error(
+              'MultiDragService.setUp() must be called before use',
+            );
+          }
+
+          return setUpConfig.dragEnabled;
+        }),
         filter(([, dragEnabled]) => dragEnabled),
         map(([event]) => {
           return event;

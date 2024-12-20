@@ -1,5 +1,4 @@
 import { Point } from './point.model.js';
-import { SetRequired } from 'type-fest';
 
 export interface TuNode<C = object, T = string> {
   id: string;
