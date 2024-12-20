@@ -9,10 +9,11 @@ export function getNodeSize(
   const nodeWidths = {
     poll: 650,
     estimation: 650,
+    token: 100,
   } as Record<string, number>;
 
-  width ??= nodeWidths[node.type] || 0;
-  height ??= width;
+  width = width || nodeWidths[node.type];
+  height = height || width;
 
   return { width, height };
 }

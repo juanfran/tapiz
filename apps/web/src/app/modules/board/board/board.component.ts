@@ -106,6 +106,7 @@ import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
 import { NotesVisibilityComponent } from '../components/notes-visibility/notes-visibility.component';
 import { NoteHeightCalculatorComponent } from '@tapiz/nodes/note';
 import { nodesInsideNode } from '@tapiz/cdk/utils/nodes-inside';
+import { getNodeSize } from '../../../shared/node-size';
 
 @Component({
   selector: 'tapiz-board',
@@ -367,7 +368,21 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         const node = this.boardFacade.getNode(triggerNode);
 
         if (node && (isPanel(node) || isGroup(node))) {
-          const nodesInside = nodesInsideNode(node, this.boardFacade.get());
+          const nodesInside = nodesInsideNode(
+            node,
+            this.boardFacade.get().map((node) => {
+              const { width, height } = getNodeSize(node);
+
+              return {
+                ...node,
+                content: {
+                  ...node.content,
+                  width,
+                  height,
+                },
+              };
+            }),
+          );
 
           const nodeIds = nodesInside.map((node) => node.id);
 

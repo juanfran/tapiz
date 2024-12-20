@@ -282,7 +282,9 @@ export class MultiDragService {
           draggable.dragging?.();
         }
 
-        const initialPosition = this.#dragElements.get(draggable.id)?.init ?? {
+        const draggableElement = this.#dragElements.get(draggable.id);
+
+        const initialPosition = draggableElement?.init ?? {
           x: 0,
           y: 0,
         };
@@ -303,8 +305,6 @@ export class MultiDragService {
             y: Math.round(finalPosition.y / this.#snap) * this.#snap,
           };
         }
-
-        const draggableElement = this.#dragElements.get(draggable.id);
 
         if (draggableElement) {
           this.#dragElements.set(draggable.id, {
