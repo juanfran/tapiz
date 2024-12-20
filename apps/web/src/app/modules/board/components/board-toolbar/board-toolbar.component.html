@@ -1,9 +1,14 @@
 <div class="toolbar">
   @if (boardMode() === 1) {
     <ng-container [ngTemplateOutlet]="selectButton"></ng-container>
+    <hr />
+
     <ng-container [ngTemplateOutlet]="templatesButton"></ng-container>
   }
   @if (boardMode() === 0) {
+    <ng-container [ngTemplateOutlet]="selectButton"></ng-container>
+    <hr />
+
     @switch (popup()) {
       @case ('note') {
         <ng-container
@@ -39,15 +44,9 @@
         <ng-container [ngTemplateOutlet]="extrasButton"></ng-container>
       }
     }
-    <hr />
-    <ng-container [ngTemplateOutlet]="selectButton"></ng-container>
-    <ng-container [ngTemplateOutlet]="groupButton"></ng-container>
   }
 
-  <ng-container [ngTemplateOutlet]="areaButton"></ng-container>
-
   @if (boardMode() === 0) {
-    <hr />
     <ng-container [ngTemplateOutlet]="voteButton"></ng-container>
   }
 
@@ -69,6 +68,12 @@
     <ng-container [ngTemplateOutlet]="imageButton"></ng-container>
     <hr />
   }
+
+  @if (boardMode() === 0) {
+    <ng-container [ngTemplateOutlet]="groupButton"></ng-container>
+  }
+
+  <ng-container [ngTemplateOutlet]="areaButton"></ng-container>
 
   <ng-container [ngTemplateOutlet]="searchButton"></ng-container>
 </div>
