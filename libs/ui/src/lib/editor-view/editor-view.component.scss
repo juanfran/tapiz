@@ -42,10 +42,11 @@
   button {
     text-align: left;
     padding: var(--spacing-2);
+    border-radius: var(--radius-2);
 
     &:hover,
     &.selected {
-      background-color: var(--primary-color-button-bg);
+      background-color: var(--grey-30);
     }
   }
 }

@@ -6,7 +6,7 @@
   background: var(--primary-color-background);
   color: var(--gray-0);
   padding: var(--spacing-2);
-  border-radius: var(--radius-2);
+  border-radius: var(--radius-3);
   max-block-size: 200px;
   overflow-y: auto;
 }

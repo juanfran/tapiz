@@ -508,6 +508,13 @@ export async function getUsersToMention(
     return [];
   }
 
+  const usersDB = await getBoardUsers(boardId);
+
+  const users = usersDB.map((user) => ({
+    id: user.id,
+    name: user.name,
+  }));
+
   if (board.teamId) {
     const teamMembers = await team.getTeamMembers(board.teamId);
     const teamUsers = teamMembers.map((member) => ({
@@ -515,17 +522,21 @@ export async function getUsersToMention(
       name: member.name,
     }));
 
-    return teamUsers;
+    users.push(...teamUsers);
   }
 
-  const users = await getBoardUsers(boardId);
+  const uniqueUsers = users.reduce(
+    (acc, user) => {
+      if (!acc.some((it) => it.id === user.id)) {
+        acc.push(user);
+      }
 
-  return users
-    .filter((user) => !exclude.includes(user.id))
-    .map((user) => ({
-      id: user.id,
-      name: user.name,
-    }));
+      return acc;
+    },
+    [] as { id: string; name: string }[],
+  );
+
+  return uniqueUsers.filter((user) => !exclude.includes(user.id));
 }
 
 interface GetBoardsOptions {
