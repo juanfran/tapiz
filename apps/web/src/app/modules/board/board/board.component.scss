@@ -67,7 +67,10 @@ tapiz-board-toolbar {
 }
 
 tapiz-drawing-options {
-  left: calc(50% - 150px);
+  background: var(--white);
+  border-radius: var(--radius-3);
+  border: 1px solid var(--grey-30);
+  left: calc(50% - 140px);
   position: fixed;
   top: 50px;
   z-index: var(--board-tools-layer);
