@@ -109,10 +109,9 @@ export class OptionFontComponent {
   }
 
   changeColor(color: string | undefined) {
-    this.editor()
-      .chain()
-      .focus()
-      .setColor(color ?? '#000')
-      .run();
+    const newColor = color ?? '#000';
+
+    this.color.set(newColor);
+    this.editor().chain().focus().setColor(newColor).run();
   }
 }
