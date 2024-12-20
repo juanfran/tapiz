@@ -11,6 +11,7 @@ export interface Group {
     userId: string;
     vote: number;
   }[];
+  unLocked?: boolean;
 }
 
 export function isGroup(node: TuNode): node is TuNode<Group> {

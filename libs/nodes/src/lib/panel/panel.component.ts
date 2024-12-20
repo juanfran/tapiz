@@ -39,7 +39,8 @@ import { NodesStore } from '../services/nodes.store';
       [node]="node()"
       [resize]="true"
       [rotate]="true"
-      [enabled]="!edit() && focus()">
+      [showOutline]="focus()"
+      [enabled]="!edit()">
       <div class="inner">
         <div class="editor-wrapper">
           @if (!edit()) {

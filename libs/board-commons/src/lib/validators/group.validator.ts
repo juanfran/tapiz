@@ -14,6 +14,7 @@ const group = z.object({
       vote: z.number().int().min(0),
     }),
   ),
+  unLocked: z.boolean().optional(),
 });
 
 export const patchGroup = group.partial();

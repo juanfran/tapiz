@@ -16,6 +16,7 @@ export interface Panel {
   borderRadius?: number | null;
   textAlign?: 'start' | 'center' | 'end';
   drawing: Drawing[];
+  unLocked?: boolean;
 }
 
 export function isPanel(node: TuNode): node is TuNode<Panel> {

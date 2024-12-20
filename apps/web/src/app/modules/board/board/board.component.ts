@@ -41,7 +41,6 @@ import {
   selectUserId,
   selectZoom,
   selectSearching,
-  selectDragEnabled,
 } from '../selectors/page.selectors';
 
 import { BoardMoveService } from '../services/board-move.service';
@@ -62,7 +61,6 @@ import { Drawing, Point, StateActions, TuNode } from '@tapiz/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NodesComponent } from '../components/nodes/nodes.component';
-import { MultiDragService } from '@tapiz/cdk/services/multi-drag.service';
 import { ContextMenuComponent } from '@tapiz/ui/context-menu/context-menu.component';
 import { ContextMenuStore } from '@tapiz/ui/context-menu/context-menu.store';
 import { BoardContextMenuComponent } from '../components/board-context-menu/board-contextmenu.component';
@@ -98,6 +96,7 @@ import { BoardShourtcutsDirective } from '../directives/board-shortcuts.directiv
 import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
 import { NotesVisibilityComponent } from '../components/notes-visibility/notes-visibility.component';
 import { NoteHeightCalculatorComponent } from '@tapiz/nodes/note';
+import { BoardDragDirective } from './directives/board-drag.directive';
 
 @Component({
   selector: 'tapiz-board',
@@ -134,7 +133,11 @@ import { NoteHeightCalculatorComponent } from '@tapiz/nodes/note';
     NotesVisibilityComponent,
     NoteHeightCalculatorComponent,
   ],
-  hostDirectives: [CopyPasteDirective, BoardShourtcutsDirective],
+  hostDirectives: [
+    CopyPasteDirective,
+    BoardShourtcutsDirective,
+    BoardDragDirective,
+  ],
   host: {
     '[class.node-selection-disabled]': '!nodeSelectionEnabled()',
     '[class.readonly]': 'isReadonlyUser()',
@@ -158,7 +161,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private notesService = inject(NotesService);
   private boardFacade = inject(BoardFacade);
-  private multiDragService = inject(MultiDragService);
   private contextMenuStore = inject(ContextMenuStore);
   private moveService = inject(MoveService);
   private resizeService = inject(ResizeService);
@@ -348,52 +350,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     this.moveService.setUp({
       zoom: this.store.select(selectZoom),
       relativePosition: this.store.select(selectPosition),
-    });
-
-    this.multiDragService.setUp({
-      dragEnabled: this.store.select(selectDragEnabled),
-      zoom: this.store.select(selectZoom),
-      relativePosition: this.store.select(selectPosition),
-      draggableId: this.store.select(pageFeature.selectFocusId),
-      nodes: () => {
-        return this.boardFacade.get();
-      },
-      move: (elements) => {
-        const nodes = elements.map(({ draggable, position }) => {
-          return {
-            node: {
-              type: draggable.nodeType,
-              id: draggable.id,
-              content: {
-                position,
-              },
-            },
-          };
-        });
-
-        const actions = this.nodesActions.bulkPatch(nodes);
-
-        this.store.dispatch(
-          BoardActions.batchNodeActions({
-            history: false,
-            actions,
-          }),
-        );
-      },
-      end: (dragElements) => {
-        const actions = dragElements.map((action) => {
-          return {
-            nodeType: action.draggable.nodeType,
-            id: action.draggable.id,
-            initialPosition: action.initialPosition,
-            initialIndex: action.initialIndex,
-            finalPosition: action.finalPosition,
-          };
-        });
-        if (actions.length) {
-          this.store.dispatch(PageActions.endDragNode({ nodes: actions }));
-        }
-      },
     });
 
     this.store
