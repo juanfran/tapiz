@@ -2,7 +2,7 @@
 
 Tapiz is a **self-hosted**, web-based collaborative board built for teams to run smoother online meetings, brainstorming sessions, and project planning. Whether you're organizing agile workflows, running retrospectives, or brainstorming ideas, Tapiz provides all the tools you need to collaborate in real-time — **on your own infrastructure**.
 
-![Tapiz Demo](https://github.com/juanfran/tapiz/blob/main/resources/demo-tapiz-new.gif)
+![Tapiz Demo](https://github.com/juanfran/tapiz/blob/main/resources/demo-tapiz-new.webp)
 
 ## Key Features
 
