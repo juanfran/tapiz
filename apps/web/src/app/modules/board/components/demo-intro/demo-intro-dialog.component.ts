@@ -9,7 +9,7 @@ import { MatDialogModule } from '@angular/material/dialog';
   template: `
     <div class="logo">
       <img
-        ngSrc="/assets/logo.webp"
+        ngSrc="/assets/svgs/tapiz-logo.svg"
         alt="Tapiz logo"
         width="75"
         height="78" />
