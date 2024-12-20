@@ -42,6 +42,10 @@ export class BoardFacade {
     return this.board.get();
   }
 
+  getNode(id: string) {
+    return this.board.getNode(id);
+  }
+
   setState(nodes: TuNode[]) {
     this.board.update(() => {
       return nodes;

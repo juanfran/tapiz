@@ -2,7 +2,8 @@
   [node]="node()"
   [resize]="true"
   [rotate]="false"
-  [enabled]="!edit() && focus()"
+  [showOutline]="focus()"
+  [enabled]="!edit()"
   [cursor]="cursor()"
   (drop)="onDrop()"
   (dragging)="onDrag()">
