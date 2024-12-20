@@ -86,8 +86,10 @@ export class BoardToolbarComponent {
   popup = this.#store.selectSignal(selectPopupOpen);
   noteColor = signal<string>(defaultNoteColor);
 
-  @HostListener('document:keydown.alt') selectAreaShortcut() {
-    if (isInputField()) return;
+  @HostListener('document:keydown.alt', ['$event']) selectAreaShortcut(
+    e: KeyboardEvent,
+  ) {
+    if (isInputField() || e.repeat) return;
 
     this.select();
   }
