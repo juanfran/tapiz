@@ -245,7 +245,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     const zoomFactor = Math.max(this.userZoom(), 0.1);
 
     const smallMinSize = 18;
-    const smallMaxSize = 40;
+    const smallMaxSize = 45;
     smallCalc =
       smallMinSize +
       ((smallMaxSize - smallMinSize) * (zoomFactor - 0.1)) / (1 - 0.1);
