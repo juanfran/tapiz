@@ -52,6 +52,10 @@ export class ImageComponent {
   url = computed(() => {
     const url = this.node().content.url;
 
+    if (url.startsWith('http')) {
+      return url;
+    }
+
     if (url.startsWith('data:')) {
       return url;
     }
