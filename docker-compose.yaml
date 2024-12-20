@@ -26,6 +26,8 @@ services:
       - '${API_PORT}:${API_PORT}'
     environment:
       - NODE_ENV=production
+    volumes:
+      - ./uploads:/home/tapiz/uploads
 
   web:
     restart: always
