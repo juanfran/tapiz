@@ -18,8 +18,11 @@
 }
 
 .mat-mdc-button-touch-target {
-  background: var(--brand);
   border-radius: var(--radius-4);
+}
+
+.google {
+  --mdc-protected-button-container-color: var(--brand);
 }
 
 .mat-mdc-raised-button {
