@@ -21,7 +21,7 @@ import { NodesStore } from '../services/nodes.store';
   template: `
     <tapiz-node-space
       [node]="node()"
-      [enabled]="focus()"
+      [showOutline]="focus()"
       [rotate]="true"
       [resize]="true">
       <img

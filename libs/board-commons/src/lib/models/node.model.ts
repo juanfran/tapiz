@@ -1,4 +1,5 @@
 import { Point } from './point.model.js';
+import { SetRequired } from 'type-fest';
 
 export interface TuNode<C = object, T = string> {
   id: string;
@@ -65,6 +66,13 @@ export type BoardTuNode = TuNode<{
   height?: number;
 }>;
 
+export type BoardTuNodeFull = TuNode<{
+  position: Point;
+  layer: number;
+  rotation?: number;
+  width: number;
+  height: number;
+}>;
 export interface NodeValidator {
   add: (
     data: TuNode,
@@ -105,4 +113,8 @@ export interface NodeValidator {
 
 export const isBoardTuNode = (node: TuNode): node is BoardTuNode => {
   return 'position' in node.content;
+};
+
+export const isBoardTuNodeFull = (node: TuNode): node is BoardTuNodeFull => {
+  return 'position' in node.content && 'width' in node.content;
 };

@@ -58,7 +58,14 @@ import { HeaderComponent } from '../components/header/header.component';
 import { SearchOptionsComponent } from '../components/search-options/search-options.component';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { TitleComponent } from '../../../shared/title/title.component';
-import { Drawing, Point, StateActions, TuNode } from '@tapiz/board-commons';
+import {
+  Drawing,
+  isGroup,
+  isPanel,
+  Point,
+  StateActions,
+  TuNode,
+} from '@tapiz/board-commons';
 import { pageFeature } from '../reducers/page.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NodesComponent } from '../components/nodes/nodes.component';
@@ -98,6 +105,7 @@ import { BoardShourtcutsDirective } from '../directives/board-shortcuts.directiv
 import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
 import { NotesVisibilityComponent } from '../components/notes-visibility/notes-visibility.component';
 import { NoteHeightCalculatorComponent } from '@tapiz/nodes/note';
+import { nodesInsideNode } from '@tapiz/cdk/utils/nodes-inside';
 
 @Component({
   selector: 'tapiz-board',
@@ -203,6 +211,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly isReadonlyUser = computed(() => {
     return this.readonly() && !this.isAdmin();
   });
+  public readonly focusIds = this.store.selectSignal(pageFeature.selectFocusId);
 
   workLayer = viewChild.required<ElementRef<HTMLElement>>('workLayer');
 
@@ -354,7 +363,19 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       dragEnabled: this.store.select(selectDragEnabled),
       zoom: this.store.select(selectZoom),
       relativePosition: this.store.select(selectPosition),
-      draggableId: this.store.select(pageFeature.selectFocusId),
+      draggableIds: (triggerNode: string) => {
+        const node = this.boardFacade.getNode(triggerNode);
+
+        if (node && (isPanel(node) || isGroup(node))) {
+          const nodesInside = nodesInsideNode(node, this.boardFacade.get());
+
+          const nodeIds = nodesInside.map((node) => node.id);
+
+          return [...nodeIds, ...this.focusIds()];
+        }
+
+        return this.focusIds();
+      },
       nodes: () => {
         return this.boardFacade.get();
       },

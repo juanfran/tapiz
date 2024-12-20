@@ -9,7 +9,7 @@ import { input } from '@angular/core';
   template: `
     <tapiz-node-space
       [node]="node()"
-      [enabled]="focus()"
+      [showOutline]="focus()"
       [rotate]="true"
       [resize]="true">
       <img

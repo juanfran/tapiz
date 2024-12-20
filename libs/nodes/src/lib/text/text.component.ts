@@ -30,7 +30,8 @@ import { NodesStore } from '../services/nodes.store';
       [node]="node()"
       [resize]="true"
       [rotate]="true"
-      [enabled]="!edit() && focus()">
+      [showOutline]="focus()"
+      [enabled]="!edit()">
       @if (!edit()) {
         <div
           class="rich-text"

@@ -23,12 +23,12 @@ import { input } from '@angular/core';
     <div
       #drag
       class="content"
-      [class.drag-outline]="enabled()">
+      [class.drag-outline]="showOutline()">
       <ng-content />
     </div>
 
     @if (node(); as node) {
-      @if (enabled()) {
+      @if (showOutline()) {
         @if (isResizable(node)) {
           <tapiz-resize-handler
             [node]="node"
@@ -68,6 +68,7 @@ export class NodeSpaceComponent implements AfterViewInit {
   });
 
   enabled = input(true);
+  showOutline = input(false);
 
   node = input.required<
     TuNode<{

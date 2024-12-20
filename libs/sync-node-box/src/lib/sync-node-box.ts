@@ -151,6 +151,9 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
     get: () => {
       return getState();
     },
+    getNode: (id: string) => {
+      return getState().find((it) => it.id === id);
+    },
     update: (fn: (state: TuNode[]) => TuNode[]) => {
       const currentState = getState();
 
