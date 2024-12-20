@@ -52,7 +52,7 @@ import { injectQueryParams } from 'ngxtension/inject-query-params';
           priority="true"
           ngSrc="/assets/svgs/tapiz-logo.svg"
           width="70"
-          height="47"
+          height="32"
           alt="Tapiz logo" />
       </a>
       <div class="inline-end-header">
