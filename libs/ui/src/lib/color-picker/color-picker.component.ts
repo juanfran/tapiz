@@ -31,9 +31,24 @@ export class ColorPickerComponent implements OnDestroy {
         ...colorPickerConfig,
         el: this.#el.nativeElement,
         default: this.color() || '',
+        components: {
+          preview: true,
+          opacity: true,
+          hue: true,
+          interaction: {
+            hex: true,
+            rgba: true,
+            hsla: true,
+            hsva: true,
+            cmyk: true,
+            input: true,
+            clear: true,
+            save: false,
+          },
+        },
       });
 
-      this.#pickr.on('save', (color: Pickr.HSVaColor | null) => {
+      this.#pickr.on('change', (color: Pickr.HSVaColor | null) => {
         if (this.mode() === 'HEX') {
           this.change.emit(color?.toHEXA().toString() ?? undefined);
         } else if (this.mode() === 'RGBA') {

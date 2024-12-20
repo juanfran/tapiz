@@ -238,11 +238,26 @@ export class BoardContextMenuComponent implements OnInit {
                       el: noteEl,
                       useAsButton: true,
                       default: note.content.color ?? defaultNoteColor,
+                      components: {
+                        preview: true,
+                        opacity: true,
+                        hue: true,
+                        interaction: {
+                          hex: true,
+                          rgba: true,
+                          hsla: true,
+                          hsva: true,
+                          cmyk: true,
+                          input: true,
+                          clear: true,
+                          save: false,
+                        },
+                      },
                     });
 
                     pickr.show();
 
-                    pickr.on('save', (color: Pickr.HSVaColor | null) => {
+                    pickr.on('change', (color: Pickr.HSVaColor | null) => {
                       const patchNote: NodePatch<Note> = {
                         data: {
                           type: 'note',
