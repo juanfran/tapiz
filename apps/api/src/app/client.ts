@@ -31,7 +31,6 @@ export class Client {
     public username: string,
     public id: string,
     public email: string,
-    public picture: string | null,
   ) {
     this.socket.on('board', this.boardIncomingMessage.bind(this));
     this.socket.on('sub', this.subscriptorMessage.bind(this));
@@ -267,7 +266,6 @@ export class Client {
         content: {
           id: this.id,
           name: this.username,
-          picture: this.picture,
           visible: false,
           connected: true,
           cursor: null,

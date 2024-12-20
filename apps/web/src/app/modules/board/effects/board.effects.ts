@@ -238,10 +238,11 @@ export class BoardEffects {
 
   public joinBoardUsers$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(PageActions.joinBoard),
+      ofType(PageActions.joinBoard, PageActions.newUserJoined),
+      concatLatestFrom(() => [this.store.select(pageFeature.selectBoardId)]),
       filter(() => !this.configService.config.DEMO),
-      switchMap((action) => {
-        return this.boardApiService.getBoardUseres(action.boardId).pipe(
+      switchMap(([, boardId]) => {
+        return this.boardApiService.getBoardUseres(boardId).pipe(
           map((boardUsers) => {
             return PageActions.setBoardUsers({
               users: boardUsers,
