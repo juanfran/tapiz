@@ -5,9 +5,9 @@
 @use "@angular/material/prebuilt-themes/deeppurple-amber.css";
 @use "@simonwep/pickr/dist/themes/monolith.min.css";
 @include meta.load-css("override-material.scss");
+@include meta.load-css("override-color-picker.scss");
 @include meta.load-css("fonts.scss");
 @include meta.load-css("typography.scss");
-@include meta.load-css("fonts.scss");
 @include meta.load-css("responsive.scss");
 @include meta.load-css("spacing.scss");
 @include meta.load-css("generic.scss");

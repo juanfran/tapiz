@@ -64,7 +64,8 @@ export class ColorPickerComponent implements OnDestroy {
     });
 
     effect(() => {
-      this.#pickr?.setColor(this.color() || '');
+      const color = this.color();
+      this.#pickr?.setColor(color || '');
     });
   }
 
