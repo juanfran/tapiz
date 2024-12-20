@@ -54,14 +54,18 @@ export class UsersComponent {
     return this.#users()
       .filter((user) => user.id !== this.userId())
       .map((user) => {
-        const boardUser = boardUsers.find(
-          (boardUser) => boardUser.id === user.id,
-        );
+        if (user.picture) {
+          const boardUser = boardUsers.find(
+            (boardUser) => boardUser.id === user.id,
+          );
 
-        return {
-          ...user,
-          picture: boardUser?.picture,
-        };
+          return {
+            ...user,
+            picture: boardUser?.picture || user.picture,
+          };
+        }
+
+        return user;
       });
   });
   menuPosition = [

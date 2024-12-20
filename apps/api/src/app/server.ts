@@ -35,6 +35,7 @@ export class Server {
             dbUser.name,
             dbUser.id,
             dbUser.email,
+            dbUser.picture,
           );
 
           this.clients.push(client);
