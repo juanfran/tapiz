@@ -237,7 +237,11 @@ export class PageEffects {
 
   public fetchMentions$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(PageActions.fetchMentions, PageActions.fetchBoardSuccess),
+      ofType(
+        PageActions.fetchMentions,
+        PageActions.fetchBoardSuccess,
+        PageActions.newUserJoined,
+      ),
       concatLatestFrom(() => [this.store.select(selectBoardId)]),
       switchMap(([, boardId]) => {
         return this.boardApiService.getBoardMentions(boardId).pipe(

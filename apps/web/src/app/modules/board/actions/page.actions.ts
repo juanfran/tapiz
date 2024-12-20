@@ -79,5 +79,6 @@ export const PageActions = createActionGroup({
       mentions: { id: string; name: string }[];
     }>(),
     'Mention user': props<{ userId: string; nodeId?: string }>(),
+    'New user joined': emptyProps(),
   },
 });

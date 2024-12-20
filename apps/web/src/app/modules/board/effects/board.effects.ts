@@ -127,19 +127,24 @@ export class BoardEffects {
     );
   });
 
-  public stateAction$ = createEffect(
-    () => {
-      return this.actions$.pipe(
-        ofType(BoardActions.stateAction),
-        tap(({ data }) => {
-          this.boardFacade.applyActions(data);
-        }),
-      );
-    },
-    {
-      dispatch: false,
-    },
-  );
+  public stateAction$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(BoardActions.stateAction),
+      map(({ data }) => {
+        const hasNewUser = data.some(
+          (it) => it.op === 'add' && it.data.type === 'user',
+        );
+
+        this.boardFacade.applyActions(data);
+
+        if (hasNewUser) {
+          return PageActions.newUserJoined();
+        }
+
+        return { type: 'noop' };
+      }),
+    );
+  });
 
   public updateBoardName$ = createEffect(
     () => {
