@@ -1,5 +1,6 @@
 :host {
-  background: var(--primary-color-background);
+  background: var(--blur-bg);
+  backdrop-filter: blur(90px);
   border-radius: var(--radius-6);
   align-items: center;
   gap: var(--spacing-2);
@@ -35,7 +36,6 @@
     align-items: center;
     display: flex;
     border-radius: var(--radius-6);
-    background: var(--grey-20);
     justify-content: space-between;
     gap: 1rem;
     font-family:

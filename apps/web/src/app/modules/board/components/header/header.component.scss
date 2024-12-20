@@ -110,7 +110,7 @@
 }
 
 .header-end {
-  background: var(--grey-20);
+  background: var(--blur-bg);
   border-radius: var(--radius-6);
   display: flex;
   align-items: center;
@@ -120,6 +120,7 @@
   position: relative;
   padding: var(--size-2);
   height: 65px;
+  backdrop-filter: blur(90px);
 }
 
 .textarea {
