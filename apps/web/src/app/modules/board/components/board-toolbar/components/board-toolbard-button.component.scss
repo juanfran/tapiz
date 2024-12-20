@@ -63,7 +63,7 @@
   white-space: nowrap;
 
   &::before {
-    background: #1f1f1f;
+    background: var(--grey-90);
     content: "";
     height: 10px;
     position: absolute;
