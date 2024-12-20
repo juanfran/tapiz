@@ -27,6 +27,7 @@ const panel = z.object({
       ),
     }),
   ),
+  unLocked: z.boolean().optional(),
 });
 
 export const patchPanel = panel.partial();

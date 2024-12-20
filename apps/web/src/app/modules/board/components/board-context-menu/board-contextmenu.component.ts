@@ -14,7 +14,15 @@ import { CopyPasteService } from '../../../../services/copy-paste.service';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { VotesModalComponent } from '../votes-modal/votes-modal.component';
-import { Group, NodePatch, Note, TuNode } from '@tapiz/board-commons';
+import {
+  Group,
+  isGroup,
+  isPanel,
+  NodePatch,
+  Note,
+  Panel,
+  TuNode,
+} from '@tapiz/board-commons';
 import { CommentsStore } from '@tapiz/nodes/comments/comments.store';
 import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
 import Pickr from '@simonwep/pickr';
@@ -302,6 +310,37 @@ export class BoardContextMenuComponent implements OnInit {
                     node: showVotesNode,
                   },
                 });
+              },
+            });
+          }
+
+          const nodeWithNested = currentNodes
+            .filter((node) => {
+              return isGroup(node) || isPanel(node);
+            })
+            .at(0) as TuNode<Group | Panel> | undefined;
+
+          if (nodeWithNested && currentNodes.length === 1) {
+            actions.push({
+              label: nodeWithNested.content.unLocked
+                ? 'Lock Nested Items'
+                : 'Unlock  Nested Items',
+              icon: 'unfold_more',
+              action: () => {
+                this.store.dispatch(
+                  BoardActions.batchNodeActions({
+                    history: true,
+                    actions: currentNodes.map((node) => {
+                      return this.nodesActions.patch({
+                        type: node.type,
+                        id: node.id,
+                        content: {
+                          unLocked: !nodeWithNested.content.unLocked,
+                        },
+                      });
+                    }),
+                  }),
+                );
               },
             });
           }
