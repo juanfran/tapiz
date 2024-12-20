@@ -106,5 +106,29 @@
   border-radius: var(--radius-3);
   border: 1px solid var(--grey-30);
   padding: var(--size-3) !important;
+  width: 15rem !important;
+
+  .pcr-type,
+  .pcr-save,
+  .pcr-clear,
+  .pcr-result {
+    border-radius: var(--radius-3) !important;
+    padding: var(--size-2) !important;
+    font-family: "Inter", sans-serif;
+    font-size: 12px !important;
+
+    &.active {
+      background: var(--grey-30) !important;
+      color: var(--grey-90) !important;
+    }
+  }
+  .pcr-save {
+    background: var(--grey-90) !important;
+    margin-top: var(--size-4) !important;
+  }
+
+  .pcr-clear {
+    margin-top: var(--size-4) !important;
+  }
 }
 
