@@ -107,7 +107,9 @@ export class CommentsComponent {
     ),
   );
 
-  userId = this.#nodesStore.userId;
+  get userId() {
+    return this.#nodesStore.userId;
+  }
 
   close() {
     this.commentsStore.clear();
