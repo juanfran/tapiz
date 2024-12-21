@@ -12,7 +12,7 @@ import { MatDialogModule } from '@angular/material/dialog';
         ngSrc="/assets/svgs/tapiz-logo.svg"
         alt="Tapiz logo"
         width="75"
-        height="78" />
+        height="34" />
     </div>
 
     <h1>Welcome to Tapiz!</h1>
