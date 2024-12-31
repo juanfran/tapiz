@@ -185,7 +185,10 @@ export class Client {
         if (node.id === this.id) {
           return {
             ...node,
-            connected: false,
+            content: {
+              ...node.content,
+              connected: false,
+            },
           };
         }
 
