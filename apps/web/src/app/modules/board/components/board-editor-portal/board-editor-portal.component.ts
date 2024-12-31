@@ -1,7 +1,6 @@
 import { CdkPortalOutlet, Portal, PortalModule } from '@angular/cdk/portal';
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   inject,
   signal,
@@ -33,7 +32,6 @@ export class BoardEditorPortalComponent {
   hidden = signal(true);
   portalHost = viewChild('portalHost');
   thePortal: Portal<unknown> | null = null;
-  cd = inject(ChangeDetectorRef);
   cdkPortalOutlet = viewChild(CdkPortalOutlet);
 
   constructor() {

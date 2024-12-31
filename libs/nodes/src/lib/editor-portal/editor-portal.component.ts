@@ -68,6 +68,8 @@ export class EditorPortalComponent implements OnDestroy {
     const { left, top } = this.#getDiff();
 
     let portal = this.#editorViewSharedStateService.editorPortal()?.portal;
+    const attached =
+      this.#editorViewSharedStateService.editorPortal()?.attached || false;
 
     if (!portal) {
       portal = new DomPortal(this.domPortalContent());
@@ -83,7 +85,7 @@ export class EditorPortalComponent implements OnDestroy {
           y: node.position.y + top,
         },
       },
-      attached: false,
+      attached,
     });
   }
 
