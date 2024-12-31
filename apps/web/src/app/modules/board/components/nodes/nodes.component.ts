@@ -57,7 +57,8 @@ export class NodesComponent {
           return !isInputField();
         }),
       )
-      .subscribe(() => {
+      .subscribe((e) => {
+        e.preventDefault();
         this.#onDeletePress();
       });
 
