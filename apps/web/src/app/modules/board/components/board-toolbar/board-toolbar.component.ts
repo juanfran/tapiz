@@ -405,7 +405,6 @@ export class BoardToolbarComponent {
   }
 
   emoji() {
-    console.log('sdfdsf');
     if (this.popup() !== 'emoji') {
       this.popupOpen('emoji');
     } else {

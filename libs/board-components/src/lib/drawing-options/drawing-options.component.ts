@@ -49,7 +49,6 @@ export class DrawingOptionsComponent {
   }
 
   updateColor(color: string | undefined) {
-    console.log('color', color);
     this.form.patchValue({ color: color ?? this.defaultColor });
   }
 }
