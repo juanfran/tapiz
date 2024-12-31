@@ -48,6 +48,11 @@ export class ColorPickerComponent implements OnDestroy {
         },
       });
 
+      this.#pickr.on('clear', () => {
+        this.change.emit(undefined);
+        this.#pickr?.hide();
+      });
+
       this.#pickr.on('change', (color: Pickr.HSVaColor | null) => {
         if (this.mode() === 'HEX') {
           this.change.emit(color?.toHEXA().toString() ?? undefined);
