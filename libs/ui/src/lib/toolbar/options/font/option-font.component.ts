@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   effect,
@@ -27,10 +28,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
     </mat-form-field>
 
     <label
+      class="color-picker"
       [title]="'Font Color'"
       for="color-picker">
       <tapiz-color-picker
-        [color]="color() || '#000000'"
+        [color]="color() || defaultTextColor()"
         (change)="changeColor($event)" />
     </label>
   `,
@@ -40,6 +42,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 })
 export class OptionFontComponent {
   editor = input.required<Editor>();
+  defaultTextColor = input('#000000');
 
   options = [
     {
@@ -66,7 +69,7 @@ export class OptionFontComponent {
     },
   ];
 
-  color = signal<string>('#000000');
+  color = signal<string | null>(null);
 
   #defaultFontFamily = this.options[0].value;
   fontFamilyValue = signal<string>(this.#defaultFontFamily);
@@ -74,6 +77,12 @@ export class OptionFontComponent {
   #toolbarEditorService = inject(ToolbarEditorService);
 
   constructor() {
+    afterNextRender(() => {
+      const color =
+        this.editor().getAttributes('textStyle')['color'] ?? '#000000';
+      this.color.set(color);
+    });
+
     effect(() => {
       const value = this.fontFamilyValue();
 

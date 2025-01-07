@@ -30,6 +30,7 @@
       <tapiz-editor-portal [node]="node()">
         <tapiz-editor-view
           [class.readonly]="!edit()"
+          [defaultTextColor]="defaultTextColor()"
           #editorView="editorView"
           [node]="node()"
           [toolbar]="edit()"

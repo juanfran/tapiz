@@ -39,6 +39,7 @@ export class EditorViewSharedStateService {
     options: {
       layoutOptions: boolean;
       fontSize: boolean;
+      defaultTextColor: string;
     },
   ) {
     this.#nodes.next(

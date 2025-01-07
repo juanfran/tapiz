@@ -13,7 +13,7 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Drawing, Note, Panel, TuNode, isPanel } from '@tapiz/board-commons';
-import { lighter } from '@tapiz/cdk/utils/colors';
+import { contrast, lighter } from '@tapiz/cdk/utils/colors';
 import { insideNode } from '@tapiz/cdk/utils/inside-node';
 import {
   DrawingDirective,
@@ -94,6 +94,19 @@ export class NoteComponent {
 
   rotation = signal(0);
   rotateAngle = signal('0deg');
+
+  defaultTextColor = computed(() => {
+    // if the note has text, the color is by the current text color
+    if (this.node().content.text.length) {
+      return null;
+    }
+
+    const color = this.node().content.color ?? defaultNoteColor;
+
+    const contrastColor = contrast(color, '#ffffff');
+
+    return contrastColor > 2 ? '#ffffff' : '#000000';
+  });
 
   generateRandomRotation() {
     let rotation: number;

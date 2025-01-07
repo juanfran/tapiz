@@ -13,7 +13,6 @@ import {
 } from '@angular/core';
 
 import { Editor } from '@tiptap/core';
-import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { TextAlign } from '@tiptap/extension-text-align';
 import { Link } from '@tiptap/extension-link';
@@ -41,6 +40,7 @@ import { FontSize } from './font-size-plugin';
 import { PopupComponent } from '../popup/popup.component';
 import { normalize } from '@tapiz/utils/normalize';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import Color from '@tiptap/extension-color';
 
 @Component({
   selector: 'tapiz-editor-view',
@@ -95,6 +95,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
   contentChange = output<string>();
   focus = input<boolean>(false);
   customClass = input('');
+  defaultTextColor = input<string | null>(null);
   popupComponent = viewChild(PopupComponent);
   mentions = input<{ id: string; name: string }[]>([]);
   suggestedMentions = signal<{ id: string; name: string }[]>([]);
@@ -178,129 +179,136 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
       }
     });
 
-    this.#editor.set(
-      new Editor({
-        element: this.editor.nativeElement,
-        editorProps: {
-          attributes: {
-            class: this.customClass(),
-          },
+    const editor = new Editor({
+      element: this.editor.nativeElement,
+      editorProps: {
+        attributes: {
+          class: this.customClass(),
         },
-        extensions: [
-          ListItem,
-          Text,
-          Document,
-          OrderedList,
-          Italic,
-          Bold,
-          Paragraph,
-          BulletList,
-          Strike,
-          Heading.configure({
-            levels: [1, 2, 3],
-          }),
-          TextStyle,
-          Color,
-          TextAlign.configure({
-            types: ['heading', 'paragraph'],
-          }),
-          Link.configure({
-            openOnClick: true,
-          }),
-          FontFamily.configure({
-            types: ['textStyle'],
-          }),
-          FontSize,
-          History.configure(),
-          BubbleMenu.configure({
-            element: this.linkMenu.nativeElement,
-            shouldShow: ({ editor, nodeDom }) => {
-              if (
-                (nodeDom?.tagName !== 'A' && !nodeDom?.closest('a')) ||
-                !this.toolbar()
-              ) {
+      },
+      extensions: [
+        ListItem,
+        Text,
+        Document,
+        OrderedList,
+        Italic,
+        Bold,
+        Paragraph,
+        BulletList,
+        Strike,
+        Heading.configure({
+          levels: [1, 2, 3],
+        }),
+        TextStyle,
+        Color,
+        // CustomDefaultColorPlugin(this.defaultTextColor()),
+        TextAlign.configure({
+          types: ['heading', 'paragraph'],
+        }),
+        Link.configure({
+          openOnClick: true,
+        }),
+        FontFamily.configure({
+          types: ['textStyle'],
+        }),
+        FontSize,
+        History.configure(),
+        BubbleMenu.configure({
+          element: this.linkMenu.nativeElement,
+          shouldShow: ({ editor, nodeDom }) => {
+            if (
+              (nodeDom?.tagName !== 'A' && !nodeDom?.closest('a')) ||
+              !this.toolbar()
+            ) {
+              return false;
+            }
+
+            const isLink = editor.isActive('link');
+
+            if (isLink) {
+              const currentUrl = editor.getAttributes('link')['href'] ?? '';
+              this.linkUrl.set(currentUrl);
+
+              if (!currentUrl) {
                 return false;
               }
+            }
 
-              const isLink = editor.isActive('link');
-
-              if (isLink) {
-                const currentUrl = editor.getAttributes('link')['href'] ?? '';
-                this.linkUrl.set(currentUrl);
-
-                if (!currentUrl) {
-                  return false;
-                }
-              }
-
-              return isLink;
-            },
-          }),
-          Mention.configure({
-            suggestion: {
-              render: () => {
-                return {
-                  onStart: (props) => {
-                    this.mentionCommand = props.command;
-                    this.suggestionElement.set(props.decorationNode);
-                    this.suggestedMentions.set(props.items);
-                  },
-                  onUpdate: (props) => {
-                    this.mentionCommand = props.command;
-                    this.suggestionElement.set(props.decorationNode);
-                    this.suggestedMentions.set(props.items);
-                  },
-                  onKeyDown: (props) => {
-                    if (props.event.key === 'Enter') {
-                      this.selectMention(this.mentionIndex());
-                      return true;
-                    } else if (props.event.key === 'Escape') {
-                      this.suggestionElement.set(null);
-
-                      return true;
-                    } else if (props.event.key === 'ArrowDown') {
-                      this.mentionIndex.update((index) => {
-                        return Math.min(
-                          index + 1,
-                          this.suggestedMentions().length - 1,
-                        );
-                      });
-
-                      return true;
-                    } else if (props.event.key === 'ArrowUp') {
-                      this.mentionIndex.update((index) => {
-                        return Math.max(index - 1, 0);
-                      });
-
-                      return true;
-                    }
-
-                    return false;
-                  },
-                  onExit: () => {
+            return isLink;
+          },
+        }),
+        Mention.configure({
+          suggestion: {
+            render: () => {
+              return {
+                onStart: (props) => {
+                  this.mentionCommand = props.command;
+                  this.suggestionElement.set(props.decorationNode);
+                  this.suggestedMentions.set(props.items);
+                },
+                onUpdate: (props) => {
+                  this.mentionCommand = props.command;
+                  this.suggestionElement.set(props.decorationNode);
+                  this.suggestedMentions.set(props.items);
+                },
+                onKeyDown: (props) => {
+                  if (props.event.key === 'Enter') {
+                    this.selectMention(this.mentionIndex());
+                    return true;
+                  } else if (props.event.key === 'Escape') {
                     this.suggestionElement.set(null);
-                  },
-                };
-              },
-              items: ({ query }) => {
-                return this.mentions().filter((item) => {
-                  return normalize(item.name).includes(normalize(query));
-                });
-              },
+
+                    return true;
+                  } else if (props.event.key === 'ArrowDown') {
+                    this.mentionIndex.update((index) => {
+                      return Math.min(
+                        index + 1,
+                        this.suggestedMentions().length - 1,
+                      );
+                    });
+
+                    return true;
+                  } else if (props.event.key === 'ArrowUp') {
+                    this.mentionIndex.update((index) => {
+                      return Math.max(index - 1, 0);
+                    });
+
+                    return true;
+                  }
+
+                  return false;
+                },
+                onExit: () => {
+                  this.suggestionElement.set(null);
+                },
+              };
             },
-          }),
-        ],
-        content: node.innerHTML,
-        onUpdate: ({ editor }) => {
-          this.#contentChange$.next(editor.getHTML());
-        },
-        onCreate: ({ editor }) => {
-          if (this.focus()) {
-            editor.view.focus();
-          }
-        },
-      }),
-    );
+            items: ({ query }) => {
+              return this.mentions().filter((item) => {
+                return normalize(item.name).includes(normalize(query));
+              });
+            },
+          },
+        }),
+      ],
+      content: node.innerHTML,
+      onUpdate: ({ editor }) => {
+        this.#contentChange$.next(editor.getHTML());
+      },
+      onCreate: ({ editor }) => {
+        if (this.focus()) {
+          editor.view.focus();
+        }
+
+        const defaultTextColor = this.defaultTextColor();
+
+        if (defaultTextColor) {
+          editor.chain().setColor(defaultTextColor).run();
+        }
+      },
+    });
+
+    this.#editor.set(editor);
 
     if (this.toolbar()) {
       this.#showToolbar();
@@ -335,6 +343,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
     this.#editorViewSharedStateService.addNode(this.node, instance, {
       layoutOptions: this.layoutToolbarOptions(),
       fontSize: this.fontSize(),
+      defaultTextColor: this.defaultTextColor() ?? '',
     });
   }
 
