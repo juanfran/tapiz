@@ -30,6 +30,7 @@ interface Toolbar {
   options: {
     layoutOptions: boolean;
     fontSize: boolean;
+    defaultTextColor: string;
   };
   node: Signal<TuNode<NodeToolbar, string>>;
   x: number;
@@ -45,6 +46,7 @@ interface Toolbar {
         [node]="toolbar.node()"
         [layoutOptions]="toolbar.options.layoutOptions"
         [fontSize]="toolbar.options.fontSize"
+        [defaultTextColor]="toolbar.options.defaultTextColor"
         [style.left.px]="toolbar.x"
         [style.top.px]="toolbar.y" />
     }

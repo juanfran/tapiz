@@ -22,7 +22,9 @@ import { OptionHeadingComponent } from './options/heading/option-heading.compone
   selector: 'tapiz-toolbar',
   template: `
     <tapiz-toolbar-option-format [editor]="editor()" />
-    <tapiz-toolbar-option-font [editor]="editor()" />
+    <tapiz-toolbar-option-font
+      [editor]="editor()"
+      [defaultTextColor]="defaultTextColor()" />
     @if (fontSize()) {
       <tapiz-toolbar-option-size [editor]="editor()" />
       <tapiz-toolbar-option-heading [editor]="editor()" />
@@ -61,6 +63,7 @@ export class ToolbarComponent {
 
   layoutOptions = input(false);
   fontSize = input(false);
+  defaultTextColor = input('#000000');
 
   constructor() {
     afterNextRender(() => {
