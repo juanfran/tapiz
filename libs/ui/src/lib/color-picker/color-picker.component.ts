@@ -19,7 +19,7 @@ import { colorPickerConfig } from './color-picker.config';
 })
 export class ColorPickerComponent implements OnDestroy {
   #el = inject(ElementRef);
-  #pickr?: Pickr;
+  pickr?: Pickr;
 
   color = input<string>();
   change = output<string | undefined>();
@@ -27,7 +27,7 @@ export class ColorPickerComponent implements OnDestroy {
 
   constructor() {
     afterNextRender(() => {
-      this.#pickr = Pickr.create({
+      this.pickr = Pickr.create({
         ...colorPickerConfig,
         el: this.#el.nativeElement,
         default: this.color() || '',
@@ -48,12 +48,12 @@ export class ColorPickerComponent implements OnDestroy {
         },
       });
 
-      this.#pickr.on('clear', () => {
+      this.pickr.on('clear', () => {
         this.change.emit(undefined);
-        this.#pickr?.hide();
+        this.pickr?.hide();
       });
 
-      this.#pickr.on('change', (color: Pickr.HSVaColor | null) => {
+      this.pickr.on('change', (color: Pickr.HSVaColor | null) => {
         if (this.mode() === 'HEX') {
           this.change.emit(color?.toHEXA().toString() ?? undefined);
         } else if (this.mode() === 'RGBA') {
@@ -64,17 +64,17 @@ export class ColorPickerComponent implements OnDestroy {
           this.change.emit(color?.toHSVA().toString() ?? undefined);
         }
 
-        this.#pickr?.hide();
+        this.pickr?.hide();
       });
     });
 
     effect(() => {
       const color = this.color();
-      this.#pickr?.setColor(color || '');
+      this.pickr?.setColor(color || '');
     });
   }
 
   ngOnDestroy() {
-    this.#pickr?.destroyAndRemove();
+    this.pickr?.destroyAndRemove();
   }
 }
