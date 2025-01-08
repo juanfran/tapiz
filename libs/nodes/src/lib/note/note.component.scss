@@ -6,7 +6,6 @@
 
 .name {
   bottom: 0.5rem;
-  color: var(--orange);
   font-size: 1.125rem;
   height: 1.75rem;
   left: 1rem;
@@ -176,14 +175,12 @@ textarea {
   height: var(--emoji-height);
 }
 
-.name,
-.characters {
-  color: var(--black);
+.name{
+  color: var(--contrast-color);
 }
 
 .vote,
-.name,
-.characters {
+.name {
   pointer-events: none;
   z-index: 1;
 }

@@ -62,6 +62,7 @@ import { defaultNoteColor } from '.';
     '[style.--custom-fg]': '"#000"',
     '[style.--custom-light]': 'lightColor()',
     '[style.--custom-main]': 'color()',
+    '[style.--contrast-color]': 'contrastColor()',
     '[style.transform]': '"rotate(" + this.rotation() + "deg)"',
     '[style.--rotate-angle]': 'rotateAngle()',
   },
@@ -91,9 +92,18 @@ export class NoteComponent {
   width = computed(() => {
     return this.node().content.width;
   });
+  bgColor = computed(() => {
+    return this.node().content.color ?? defaultNoteColor;
+  });
 
   rotation = signal(0);
   rotateAngle = signal('0deg');
+  contrast = computed(() => {
+    return contrast(this.bgColor(), '#ffffff');
+  });
+  contrastColor = computed(() => {
+    return this.contrast() > 2 ? '#ffffff' : '#000000';
+  });
 
   defaultTextColor = computed(() => {
     // if the note has text, the color is by the current text color
@@ -101,11 +111,7 @@ export class NoteComponent {
       return null;
     }
 
-    const color = this.node().content.color ?? defaultNoteColor;
-
-    const contrastColor = contrast(color, '#ffffff');
-
-    return contrastColor > 2 ? '#ffffff' : '#000000';
+    return this.contrast() > 2 ? '#ffffff' : '#000000';
   });
 
   generateRandomRotation() {
