@@ -68,11 +68,29 @@ export class ContextMenuStore {
   public config(options: ContextMenuOptions) {
     const { element, items } = options;
 
-    element.addEventListener('contextmenu', (event: Event) => {
+    let lastMouseDownPosition: { x: number; y: number } | null = null;
+
+    element.addEventListener('contextmenu', (event: MouseEvent) => {
       event.preventDefault();
       event.stopPropagation();
 
-      if (!event.target || !options.isValid(event)) {
+      lastMouseDownPosition = {
+        x: event.clientX,
+        y: event.clientY,
+      };
+    });
+
+    element.addEventListener('mouseup', (event: MouseEvent) => {
+      if (!event.target || event.button !== 2 || !options.isValid(event)) {
+        return;
+      }
+
+      // Prevent context menu from showing up if the user has dragged the mouse
+      if (
+        lastMouseDownPosition &&
+        Math.abs(lastMouseDownPosition.x - event.clientX) > 5 &&
+        Math.abs(lastMouseDownPosition.y - event.clientY) > 5
+      ) {
         return;
       }
 
