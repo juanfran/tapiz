@@ -12,6 +12,7 @@ import { CdkMenu, CdkMenuItemRadio, CdkMenuTrigger } from '@angular/cdk/menu';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
+import { isNote, StateActions } from '@tapiz/board-commons';
 
 @Component({
   selector: 'tapiz-notes-visibility',
@@ -73,10 +74,33 @@ export class NotesVisibilityComponent {
   visible = computed(() => this.currentUser()?.visible);
 
   setVisibility(visible: boolean) {
+    const notesActions: StateActions[] = this.#boardFacade
+      .get()
+      .filter((it) => {
+        return (
+          isNote(it) &&
+          (it.content.textHidden ?? null) !== null &&
+          it.content.ownerId === this.userId()
+        );
+      })
+      .map((it) => {
+        return {
+          data: {
+            type: 'note',
+            id: it.id,
+            content: {
+              textHidden: null,
+            },
+          },
+          op: 'patch',
+        };
+      });
+
     this.#store.dispatch(
       BoardActions.batchNodeActions({
         history: false,
         actions: [
+          ...notesActions,
           {
             data: {
               type: 'user',

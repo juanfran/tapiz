@@ -290,6 +290,33 @@ export class BoardContextMenuComponent implements OnInit {
                   },
                 },
               );
+
+              if (note.content.ownerId === this.boardFacade.currentUser()?.id) {
+                let textHidden = note.content.textHidden;
+
+                textHidden ??= !this.boardFacade.currentUser()?.visible;
+
+                actions.push({
+                  label: textHidden ? 'Make text public' : 'Make text private',
+                  icon: textHidden ? 'visibility' : 'visibility_off',
+                  action: () => {
+                    this.store.dispatch(
+                      BoardActions.batchNodeActions({
+                        history: true,
+                        actions: [
+                          this.nodesActions.patch({
+                            type: 'note',
+                            id: note.id,
+                            content: {
+                              textHidden: !textHidden,
+                            },
+                          }),
+                        ],
+                      }),
+                    );
+                  },
+                });
+              }
             }
           }
 
@@ -302,7 +329,7 @@ export class BoardContextMenuComponent implements OnInit {
           if (showVotesNode && showVotesNode.content.votes.length) {
             actions.push({
               label: 'Show votes',
-              icon: 'visibility',
+              icon: 'poll',
               action: () => {
                 this.dialog.open(VotesModalComponent, {
                   width: '400px',

@@ -19,6 +19,7 @@ export interface Note {
   width: number;
   height: number;
   color?: string | null;
+  textHidden?: boolean;
 }
 
 export function isNote(node: TuNode): node is TuNode<Note> {

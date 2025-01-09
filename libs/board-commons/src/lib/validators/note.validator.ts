@@ -41,6 +41,7 @@ const note = z.object({
   width: z.number().positive(),
   height: z.number().positive(),
   color: z.string().length(7).regex(/^#/).nullable().optional(),
+  textHidden: z.boolean().nullable().optional(),
 });
 
 export const patchNote = note.partial();

@@ -153,6 +153,10 @@ export class NoteComponent {
         return true;
       }
 
+      if ((this.node().content.textHidden ?? null) !== null) {
+        return !this.node().content.textHidden;
+      }
+
       return this.user()?.visible ?? true;
     }),
   );

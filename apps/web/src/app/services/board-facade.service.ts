@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, inject } from '@angular/core';
 
 import { Store } from '@ngrx/store';
 import {
@@ -21,6 +21,7 @@ import { pageFeature } from '../modules/board/reducers/page.reducer';
 import { concatLatestFrom } from '@ngrx/operators';
 import * as R from 'remeda';
 import { addLog, addRawLog } from '../debug/debug';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 const isBoardSettings = (it: TuNode): it is TuNode<BoardSettings> => {
   return it.type === 'settings';
@@ -30,6 +31,15 @@ const isBoardSettings = (it: TuNode): it is TuNode<BoardSettings> => {
 export class BoardFacade {
   private board = syncNodeBox({ log: false });
   private store = inject(Store);
+
+  users = toSignal(
+    this.getUsers().pipe(map((users) => users.map((user) => user.content))),
+    { initialValue: [] },
+  );
+  userId = this.store.selectSignal(pageFeature.selectUserId);
+  currentUser = computed(() => {
+    return this.users()?.find((user) => user.id === this.userId());
+  });
 
   start() {
     this.board.update(() => {
