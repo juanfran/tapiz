@@ -114,6 +114,7 @@ export class BoardMoveService {
       ),
       map(([event, zoom, position, layer, panInProgress]) => {
         return {
+          button: event.button,
           layer,
           position: {
             x: (-position.x + event.clientX) / zoom,

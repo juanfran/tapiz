@@ -102,7 +102,7 @@ export class CocomaterialComponent {
       .relativeMouseDown()
       .pipe(
         takeUntilDestroyed(),
-        filter(() => !!this.selected()),
+        filter((e) => !!this.selected() && e.button === 0),
       )
       .subscribe((data) => {
         if (data.panInProgress) {
