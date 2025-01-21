@@ -16,8 +16,7 @@ import {
 import { MatOptionModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
 import { combineLatest, map, startWith, withLatestFrom } from 'rxjs';
-import { PageActions } from '../../actions/page.actions';
-import { selectUserId } from '../../selectors/page.selectors';
+import { BoardPageActions } from '../../actions/board-page.actions';
 import {
   PanelNode,
   PollBoardNode,
@@ -26,6 +25,7 @@ import {
 } from '@tapiz/board-commons';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 
 @Component({
   selector: 'tapiz-search-options',
@@ -53,7 +53,7 @@ export class SearchOptionsComponent {
 
   notes$ = this.nodes.pipe(map((nodes) => nodes.filter(isNote)));
   users$ = this.boardFacade.getUsers();
-  currentUser$ = this.store.select(selectUserId);
+  currentUser$ = this.store.select(boardPageFeature.selectUserId);
   visibleNotes$ = combineLatest([this.notes$, this.users$]).pipe(
     withLatestFrom(this.currentUser$),
     map(([[notes, users], currentUserId]) => {
@@ -168,7 +168,9 @@ export class SearchOptionsComponent {
   selected(event: MatAutocompleteSelectedEvent) {
     this.form.get('search')?.setValue('');
 
-    this.store.dispatch(PageActions.goToNode({ nodeId: event.option.value }));
+    this.store.dispatch(
+      BoardPageActions.goToNode({ nodeId: event.option.value }),
+    );
   }
 
   normalizeText(text: string) {

@@ -16,7 +16,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
-import { PageActions } from '../actions/page.actions';
+import { BoardPageActions } from '../actions/board-page.actions';
 import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
 import {
@@ -27,14 +27,15 @@ import {
   TuNode,
 } from '@tapiz/board-commons';
 import { BoardFacade } from '../../../services/board-facade.service';
-import { pageFeature } from '../reducers/page.reducer';
-import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
+import { boardPageFeature } from '../reducers/boardPage.reducer';
+import { NodesActions } from '../services/nodes-actions';
 import { ConfigService } from '../../../services/config.service';
 import {
   EmojiMessage,
   LiveReactionStore,
 } from '../components/live-reaction/live-reaction.store';
 import { selectQueryParam } from '../../../router.selectors';
+import { filterNil } from 'ngxtension/filter-nil';
 
 @Injectable()
 export class BoardEffects {
@@ -50,7 +51,7 @@ export class BoardEffects {
   public initBoard$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(PageActions.initBoard),
+        ofType(BoardPageActions.initBoard),
         tap(() => {
           this.boardFacade.start();
         }),
@@ -81,7 +82,9 @@ export class BoardEffects {
       return this.actions$.pipe(
         ofType(BoardActions.batchNodeActions),
         auditTime(500),
-        concatLatestFrom(() => this.store.select(pageFeature.selectBoardId)),
+        concatLatestFrom(() =>
+          this.store.select(boardPageFeature.selectBoardId),
+        ),
         filter(() => !!this.configService.config.DEMO),
         tap(([, boardId]) => {
           localStorage.setItem(boardId, JSON.stringify(this.boardFacade.get()));
@@ -109,7 +112,7 @@ export class BoardEffects {
 
   public firstSetStateSetPositionIfNeeded$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(PageActions.joinBoard),
+      ofType(BoardPageActions.joinBoard),
       switchMap(() => {
         return this.actions$.pipe(ofType(BoardActions.setState)).pipe(take(1));
       }),
@@ -122,7 +125,7 @@ export class BoardEffects {
           return { type: 'noop' };
         }
 
-        return PageActions.goToNode({ nodeId: node.id });
+        return BoardPageActions.goToNode({ nodeId: node.id });
       }),
     );
   });
@@ -138,18 +141,21 @@ export class BoardEffects {
         this.boardFacade.applyActions(data);
 
         if (hasNewUser) {
-          return PageActions.newUserJoined();
+          return BoardPageActions.newUserJoined();
         }
 
-        return { type: 'noop' };
+        return null;
       }),
+      filterNil(),
     );
   });
 
   public updateBoardName$ = createEffect(
     () => {
       return this.actions$.pipe(ofType(BoardActions.setBoardName)).pipe(
-        concatLatestFrom(() => this.store.select(pageFeature.selectBoardId)),
+        concatLatestFrom(() =>
+          this.store.select(boardPageFeature.selectBoardId),
+        ),
         mergeMap(([action, boardId]) => {
           return this.boardApiService.renameBoard(boardId, action.name);
         }),
@@ -162,14 +168,14 @@ export class BoardEffects {
 
   public pasteNodes$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(PageActions.pasteNodes),
+      ofType(BoardPageActions.pasteNodes),
       map((action) => {
         const batchActions = this.nodesActions.bulkAdd(action.nodes);
 
         this.boardFacade.applyActions(batchActions, true);
         this.wsService.send(batchActions);
 
-        return PageActions.pasteNodesSuccess({
+        return BoardPageActions.pasteNodesSuccess({
           nodes: batchActions,
         });
       }),
@@ -178,12 +184,12 @@ export class BoardEffects {
 
   public refetchBoard$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(PageActions.refetchBoard),
-      concatLatestFrom(() => this.store.select(pageFeature.selectBoardId)),
+      ofType(BoardPageActions.refetchBoard),
+      concatLatestFrom(() => this.store.select(boardPageFeature.selectBoardId)),
       switchMap(([, boardId]) => {
         return this.boardApiService.getBoard(boardId).pipe(
           map((board) => {
-            return PageActions.fetchBoardSuccess({
+            return BoardPageActions.fetchBoardSuccess({
               name: board.name,
               isAdmin: board.isAdmin,
               isPublic: board.public,
@@ -199,7 +205,7 @@ export class BoardEffects {
 
   public joinBoard$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(PageActions.joinBoard),
+      ofType(BoardPageActions.joinBoard),
       filter(() => !this.configService.config.DEMO),
       switchMap((action) => {
         return this.boardApiService.getBoard(action.boardId).pipe(
@@ -211,7 +217,7 @@ export class BoardEffects {
               },
             ]);
 
-            return PageActions.fetchBoardSuccess({
+            return BoardPageActions.fetchBoardSuccess({
               name: board.name,
               isAdmin: board.isAdmin,
               isPublic: board.public,
@@ -223,7 +229,7 @@ export class BoardEffects {
           catchError((e) => {
             if (e.data.httpStatus !== 200) {
               return of(
-                PageActions.boardNotFound({
+                BoardPageActions.boardNotFound({
                   id: action.boardId,
                 }),
               );
@@ -238,13 +244,15 @@ export class BoardEffects {
 
   public joinBoardUsers$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(PageActions.joinBoard, PageActions.newUserJoined),
-      concatLatestFrom(() => [this.store.select(pageFeature.selectBoardId)]),
+      ofType(BoardPageActions.joinBoard, BoardPageActions.newUserJoined),
+      concatLatestFrom(() => [
+        this.store.select(boardPageFeature.selectBoardId),
+      ]),
       filter(() => !this.configService.config.DEMO),
       switchMap(([, boardId]) => {
         return this.boardApiService.getBoardUseres(boardId).pipe(
           map((boardUsers) => {
-            return PageActions.setBoardUsers({
+            return BoardPageActions.setBoardUsers({
               users: boardUsers,
             });
           }),
@@ -255,7 +263,7 @@ export class BoardEffects {
 
   public fetchBoardSuccess$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(PageActions.fetchBoardSuccess),
+      ofType(BoardPageActions.fetchBoardSuccess),
       switchMap(() => {
         if (this.configService.config.DEMO) {
           return of(true);
@@ -267,16 +275,16 @@ export class BoardEffects {
         );
       }),
       map(() => {
-        return PageActions.boardLoaded();
+        return BoardPageActions.boardLoaded();
       }),
     );
   });
 
   public joinBoardDemo$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(PageActions.joinBoard),
+      ofType(BoardPageActions.joinBoard),
       filter(() => !!this.configService.config.DEMO),
-      concatLatestFrom(() => this.store.select(pageFeature.selectBoardId)),
+      concatLatestFrom(() => this.store.select(boardPageFeature.selectBoardId)),
       map(([, boardId]) => {
         let board: TuNode<object, string>[] = [];
 
@@ -301,7 +309,7 @@ export class BoardEffects {
 
         this.boardFacade.applyActions(initStateActions);
 
-        return PageActions.fetchBoardSuccess({
+        return BoardPageActions.fetchBoardSuccess({
           name: 'Demo',
           isAdmin: true,
           isPublic: false,
@@ -323,7 +331,7 @@ export class BoardEffects {
       }),
       map(({ actions }) => {
         if ('id' in actions[0].data) {
-          return PageActions.setFocusId({ focusId: actions[0].data.id });
+          return BoardPageActions.setFocusId({ focusId: actions[0].data.id });
         }
 
         return { type: 'noop' };
@@ -337,7 +345,7 @@ export class BoardEffects {
   public boardNotFound$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(PageActions.boardNotFound),
+        ofType(BoardPageActions.boardNotFound),
         tap(() => {
           this.router.navigate(['/404']);
         }),
@@ -349,7 +357,7 @@ export class BoardEffects {
   public closeBoard$ = createEffect(
     () => {
       return this.actions$.pipe(
-        ofType(PageActions.closeBoard),
+        ofType(BoardPageActions.closeBoard),
         tap(() => {
           this.wsService.leaveBoard();
         }),

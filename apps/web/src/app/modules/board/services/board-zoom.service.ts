@@ -10,7 +10,7 @@ import {
 } from 'rxjs/operators';
 import { Point } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
-import { selectPosition, selectZoom } from '../selectors/page.selectors';
+import { boardPageFeature } from '../reducers/boardPage.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -61,7 +61,7 @@ export class BoardZoomService {
           },
         };
       }),
-      withLatestFrom(this.store.select(selectZoom)),
+      withLatestFrom(this.store.select(boardPageFeature.selectZoom)),
       map(([zoomEvent, zoom]) => {
         if (zoomEvent.zoom > 0) {
           return {
@@ -96,8 +96,8 @@ export class BoardZoomService {
     this.zoomMove$ = this.zoom$.pipe(
       startWith({ zoom: 1, point: { x: 0, y: 0 } }),
       withLatestFrom(
-        this.store.select(selectZoom),
-        this.store.select(selectPosition),
+        this.store.select(boardPageFeature.selectZoom),
+        this.store.select(boardPageFeature.selectPosition),
       ),
       map(([zoomEvent, prevZoomEvent, position]) => {
         const xs = (zoomEvent.point.x - position.x) / prevZoomEvent;

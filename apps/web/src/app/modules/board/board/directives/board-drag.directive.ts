@@ -2,13 +2,13 @@ import { Directive, inject } from '@angular/core';
 import { MultiDragService } from '@tapiz/cdk/services/multi-drag.service';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { Store } from '@ngrx/store';
-import { pageFeature } from '../../reducers/page.reducer';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { isGroup, isPanel } from '@tapiz/board-commons';
 import { nodesInsideNode } from '@tapiz/cdk/utils/nodes-inside';
 import { getNodeSize } from '../../../../shared/node-size';
-import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
+import { NodesActions } from '../../services/nodes-actions';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
-import { PageActions } from '../../actions/page.actions';
+import { BoardPageActions } from '../../actions/board-page.actions';
 
 @Directive({
   selector: '[tapizBoardDragDirective]',
@@ -19,13 +19,13 @@ export class BoardDragDirective {
   #store = inject(Store);
   #nodesActions = inject(NodesActions);
 
-  readonly #focusIds = this.#store.selectSignal(pageFeature.selectFocusId);
+  readonly #focusIds = this.#store.selectSignal(boardPageFeature.selectFocusId);
 
   constructor() {
     this.#multiDragService.setUp({
-      dragEnabled: this.#store.select(pageFeature.selectDragEnabled),
-      zoom: this.#store.select(pageFeature.selectZoom),
-      relativePosition: this.#store.select(pageFeature.selectPosition),
+      dragEnabled: this.#store.select(boardPageFeature.selectDragEnabled),
+      zoom: this.#store.select(boardPageFeature.selectZoom),
+      relativePosition: this.#store.select(boardPageFeature.selectPosition),
       draggableIds: (triggerNode: string) => {
         const node = this.#boardFacade.getNode(triggerNode);
 
@@ -93,7 +93,9 @@ export class BoardDragDirective {
           };
         });
         if (actions.length) {
-          this.#store.dispatch(PageActions.endDragNode({ nodes: actions }));
+          this.#store.dispatch(
+            BoardPageActions.endDragNode({ nodes: actions }),
+          );
         }
       },
     });

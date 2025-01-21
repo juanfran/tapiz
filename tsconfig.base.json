@@ -28,7 +28,6 @@
       "@tapiz/board-commons/*": ["libs/board-commons/src/lib/*"],
       "@tapiz/board-components/*": ["libs/board-components/src/lib/*"],
       "@tapiz/cdk/*": ["libs/cdk/src/lib/*"],
-      "@tapiz/nodes/*": ["libs/nodes/src/lib/*"],
       "@tapiz/sync-node-box": ["libs/sync-node-box/src/index.ts"],
       "@tapiz/ui/*": ["libs/ui/src/lib/*"],
       "@tapiz/utils/*": ["libs/utils/src/lib/*"]

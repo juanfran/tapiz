@@ -6,8 +6,8 @@ import {
   inject,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { pageFeature } from '../../reducers/page.reducer';
-import { PageActions } from '../../actions/page.actions';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
+import { BoardPageActions } from '../../actions/board-page.actions';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 
@@ -32,8 +32,8 @@ import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 })
 export class ZoomControlComponent {
   #store = inject(Store);
-  #zoom = this.#store.selectSignal(pageFeature.selectZoom);
-  #userPosition = this.#store.selectSignal(pageFeature.selectPosition);
+  #zoom = this.#store.selectSignal(boardPageFeature.selectZoom);
+  #userPosition = this.#store.selectSignal(boardPageFeature.selectPosition);
   boardFacade = inject(BoardFacade);
 
   zoomPercentage = computed(() => {
@@ -80,7 +80,7 @@ export class ZoomControlComponent {
     const centerY = -positionY * zoom + height / 2;
 
     this.#store.dispatch(
-      PageActions.setUserView({
+      BoardPageActions.setUserView({
         zoom,
         position: {
           x: centerX,

@@ -1,9 +1,0 @@
-{
-  "name": "nodes",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/nodes/src",
-  "prefix": "lib",
-  "tags": ["scope:web"],
-  "projectType": "library",
-  "targets": {}
-}

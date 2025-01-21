@@ -13,7 +13,7 @@ import {
 } from '@angular/core/rxjs-interop';
 import { filter, switchMap } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { PageActions } from '../../actions/page.actions';
+import { BoardPageActions } from '../../actions/board-page.actions';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { LiveReactionStore } from './live-reaction.store';
 import {
@@ -139,7 +139,7 @@ export class LiveReactionComponent {
   constructor() {
     explicitEffect([this.selected], ([selected]) => {
       this.#store.dispatch(
-        PageActions.addToBoardInProcess({ inProcess: !!selected }),
+        BoardPageActions.addToBoardInProcess({ inProcess: !!selected }),
       );
     });
 

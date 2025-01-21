@@ -32,17 +32,7 @@ import {
 } from 'rxjs/operators';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { BoardActions } from '../actions/board.actions';
-import { PageActions } from '../actions/page.actions';
-
-import {
-  selectMoveEnabled,
-  selectPosition,
-  selectBoardId,
-  selectUserId,
-  selectZoom,
-  selectSearching,
-} from '../selectors/page.selectors';
-
+import { BoardPageActions } from '../actions/board-page.actions';
 import { BoardMoveService } from '../services/board-move.service';
 import { BoardZoomService } from '../services/board-zoom.service';
 import { ActivatedRoute } from '@angular/router';
@@ -57,14 +47,14 @@ import { HeaderComponent } from '../components/header/header.component';
 import { SearchOptionsComponent } from '../components/search-options/search-options.component';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { TitleComponent } from '../../../shared/title/title.component';
-import { Drawing, Point, StateActions, TuNode } from '@tapiz/board-commons';
-import { pageFeature } from '../reducers/page.reducer';
+import { Point, StateActions } from '@tapiz/board-commons';
+import { boardPageFeature } from '../reducers/boardPage.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NodesComponent } from '../components/nodes/nodes.component';
 import { ContextMenuComponent } from '@tapiz/ui/context-menu/context-menu.component';
 import { ContextMenuStore } from '@tapiz/ui/context-menu/context-menu.store';
 import { BoardContextMenuComponent } from '../components/board-context-menu/board-contextmenu.component';
-import { HistoryService } from '@tapiz/nodes/services/history.service';
+import { HistoryService } from '../services/history.service';
 import { MoveService } from '@tapiz/cdk/services/move.service';
 import { ResizeService } from '@tapiz/ui/resize/resize.service';
 import { RotateService } from '@tapiz/ui/rotate/rotate.service';
@@ -75,15 +65,11 @@ import { StopHighlightComponent } from '../../../shared/stop-highlight/stop-high
 import { BoardFacade } from '../../../services/board-facade.service';
 import { appFeature } from '../../../+state/app.reducer';
 import { SubscriptionService } from '../../../services/subscription.service';
-import { DrawingStore } from '@tapiz/board-components/drawing/drawing.store';
-import { DrawingOptionsComponent } from '@tapiz/board-components/drawing-options';
-import {
-  takeUntilDestroyed,
-  toObservable,
-  toSignal,
-} from '@angular/core/rxjs-interop';
-import { CommentsComponent } from '@tapiz/nodes/comments/comments.component';
-import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
+import { DrawingStore } from '../components/drawing/drawing.store';
+import { DrawingOptionsComponent } from '../components/drawing-options';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { CommentsComponent } from '../components/comments/comments.component';
+import { NodesActions } from '../services/nodes-actions';
 import { ConfigService } from '../../../services/config.service';
 import { FileUploadService } from '../../../services/file-upload.service';
 import { DemoIntroComponent } from '../components/demo-intro/demo-intro.component';
@@ -95,7 +81,7 @@ import { BoardEditorPortalComponent } from '../components/board-editor-portal/bo
 import { BoardShourtcutsDirective } from '../directives/board-shortcuts.directive';
 import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
 import { NotesVisibilityComponent } from '../components/notes-visibility/notes-visibility.component';
-import { NoteHeightCalculatorComponent } from '@tapiz/nodes/note';
+import { NoteHeightCalculatorComponent } from '../components/note/components/note-height-calculator/note-height-calculator.component';
 import { BoardDragDirective } from './directives/board-drag.directive';
 import { BoardHeaderOptionsComponent } from '../components/board-header-options/board-header-options.component';
 
@@ -173,30 +159,44 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   private configService = inject(ConfigService);
   private fileUploadService = inject(FileUploadService);
   private destroyRef = inject(DestroyRef);
-  public readonly boardId$ = this.store.select(selectBoardId);
+  public readonly boardId$ = this.store.select(boardPageFeature.selectBoardId);
   public readonly nodes$ = this.boardFacade.getNodes();
 
   smallScale = computed(() => this.calcPatterns().smallCalc);
   bigScale = computed(() => this.calcPatterns().bigCalc);
-  public readonly userZoom = this.store.selectSignal(pageFeature.selectZoom);
+  public readonly userZoom = this.store.selectSignal(
+    boardPageFeature.selectZoom,
+  );
   public readonly historyService = inject(HistoryService);
   public readonly newNote$ = new Subject<MouseEvent>();
   public readonly drawing = this.drawingStore.drawing;
-  public readonly search = this.store.selectSignal(selectSearching);
-  public readonly boardTitle = this.store.selectSignal(pageFeature.selectName);
-  public readonly folloUser = this.store.selectSignal(pageFeature.selectFollow);
-  public readonly loaded = this.store.selectSignal(pageFeature.selectLoaded);
-  public readonly userId = this.store.selectSignal(selectUserId);
+  public readonly search = this.store.selectSignal(
+    boardPageFeature.selectSearching,
+  );
+  public readonly boardTitle = this.store.selectSignal(
+    boardPageFeature.selectName,
+  );
+  public readonly folloUser = this.store.selectSignal(
+    boardPageFeature.selectFollow,
+  );
+  public readonly loaded = this.store.selectSignal(
+    boardPageFeature.selectLoaded,
+  );
+  public readonly userId = this.store.selectSignal(
+    boardPageFeature.selectUserId,
+  );
   public readonly boardMode = this.store.selectSignal(
-    pageFeature.selectBoardMode,
+    boardPageFeature.selectBoardMode,
   );
   public readonly nodeSelectionEnabled = this.store.selectSignal(
-    pageFeature.selectIsNodeSelectionEnabled,
+    boardPageFeature.selectIsNodeSelectionEnabled,
   );
   public readonly loadingBar = this.store.selectSignal(
-    pageFeature.selectLoadingBar,
+    boardPageFeature.selectLoadingBar,
   );
-  public readonly isAdmin = this.store.selectSignal(pageFeature.selectIsAdmin);
+  public readonly isAdmin = this.store.selectSignal(
+    boardPageFeature.selectIsAdmin,
+  );
   public readonly readonly = toSignal(
     this.boardFacade.getSettings().pipe(
       map((it) => {
@@ -213,7 +213,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   dots = viewChild.required<ElementRef<HTMLElement>>('dots');
   #store = inject(Store);
   #boardFacade = inject(BoardFacade);
-  userToFollow$ = this.#store.select(pageFeature.selectFollow).pipe(
+  userToFollow$ = this.#store.select(boardPageFeature.selectFollow).pipe(
     switchMap((follow) => {
       return this.#boardFacade.getUsers().pipe(
         map((users) => {
@@ -267,14 +267,14 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   constructor() {
     if (sessionStorage.getItem('new-board')) {
       sessionStorage.removeItem('new-board');
-      this.store.dispatch(PageActions.changeBoardMode({ boardMode: 1 }));
+      this.store.dispatch(BoardPageActions.changeBoardMode({ boardMode: 1 }));
     }
 
     this.wsService.reconnect$.pipe(takeUntilDestroyed()).subscribe(() => {
       const boardId = this.route.snapshot.paramMap.get('id');
 
       if (boardId) {
-        this.store.dispatch(PageActions.joinBoard({ boardId }));
+        this.store.dispatch(BoardPageActions.joinBoard({ boardId }));
       }
     });
 
@@ -289,7 +289,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       {
         next: (open) => {
           this.store.dispatch(
-            PageActions.lockBoard({
+            BoardPageActions.lockBoard({
               lock: open,
             }),
           );
@@ -298,7 +298,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     );
 
     this.historyService.event$.pipe(takeUntilDestroyed()).subscribe((event) => {
-      this.store.dispatch(PageActions.nodeSnapshot(event));
+      this.store.dispatch(BoardPageActions.nodeSnapshot(event));
     });
 
     this.rotateService.onStart$.pipe(takeUntilDestroyed()).subscribe((node) => {
@@ -350,8 +350,8 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       });
 
     this.moveService.setUp({
-      zoom: this.store.select(selectZoom),
-      relativePosition: this.store.select(selectPosition),
+      zoom: this.store.select(boardPageFeature.selectZoom),
+      relativePosition: this.store.select(boardPageFeature.selectPosition),
     });
 
     this.store
@@ -359,7 +359,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       .pipe(filterNil(), take(1))
       .subscribe((userId) => {
         this.store.dispatch(
-          PageActions.initBoard({
+          BoardPageActions.initBoard({
             userId,
           }),
         );
@@ -372,162 +372,12 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
         .watchBoardIds([boardId])
         .pipe(takeUntilDestroyed())
         .subscribe(() => {
-          this.store.dispatch(PageActions.refetchBoard());
+          this.store.dispatch(BoardPageActions.refetchBoard());
         });
-
-      this.dragConfig();
     }
   }
 
-  public dragConfig() {
-    // todo:  better way to sync
-    this.boardFacade.selectFocusNodes$
-      .pipe(takeUntilDestroyed())
-      .subscribe((nodes) => {
-        this.drawingStore.selectNode$.next(nodes);
-      });
-
-    this.boardFacade
-      .getNodes()
-      .pipe(
-        takeUntilDestroyed(),
-        map((nodes) => {
-          return nodes.filter(
-            (node) => node.type === 'note' || node.type === 'panel',
-          ) as TuNode<{ drawing: Drawing[] }>[];
-        }),
-      )
-      .subscribe((nodes) => {
-        this.drawingStore.nodes$.next(nodes);
-      });
-
-    toObservable(this.drawingStore.drawing)
-      .pipe(takeUntilDestroyed())
-      .subscribe((drawing) => {
-        this.store.dispatch(
-          PageActions.drawing({
-            drawing,
-          }),
-        );
-      });
-  }
-
   public initBoard() {
-    fromEvent<MouseEvent>(this.el.nativeElement, 'wheel', { passive: false })
-      .pipe(
-        filter((event: MouseEvent) => event.ctrlKey),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((event: MouseEvent) => {
-        event.preventDefault();
-      });
-
-    this.store
-      .select(pageFeature.selectCurrentBoardCursor)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((cursor) => {
-        this.el.nativeElement.style.setProperty('--default-cursor', cursor);
-
-        if (cursor === 'text') {
-          this.el.nativeElement.classList.add('cursor-text');
-        } else {
-          this.el.nativeElement.classList.remove('cursor-text');
-        }
-      });
-
-    this.newNote$
-      .pipe(
-        withLatestFrom(
-          this.store.select(selectZoom),
-          this.store.select(selectPosition),
-          this.store.select(selectUserId),
-        ),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(([event, zoom, position, userId]) => {
-        this.notesService.createNote(userId, {
-          x: (-position.x + event.clientX) / zoom,
-          y: (-position.y + event.clientY) / zoom,
-        });
-      });
-
-    this.boardMoveService.listen(this.el.nativeElement);
-
-    this.boardMoveService.mouseDown$
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.store.dispatch(PageActions.setFocusId({ focusId: '' }));
-      });
-
-    this.boardMoveService.mouseMove$
-      .pipe(
-        withLatestFrom(
-          this.store.select(selectZoom),
-          this.store.select(selectPosition),
-        ),
-        throttleTime(0, animationFrameScheduler),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(([mousePosition, zoom, position]) => {
-        updateUserPosition(position, mousePosition, zoom);
-      });
-
-    const userView$ = merge(
-      this.boardZoomService.zoomMove$,
-      this.boardMoveService.boardMove$.pipe(
-        withLatestFrom(this.store.select(selectZoom)),
-      ),
-    ).pipe(
-      map(([move, zoom]) => {
-        return {
-          move,
-          zoom,
-        };
-      }),
-    );
-    this.boardMoveService.move$
-      .pipe(
-        withLatestFrom(
-          this.store.select(pageFeature.selectDragInProgress),
-          this.store.select(selectMoveEnabled),
-        ),
-        filter(([, inProgress, moveEnabled]) => !inProgress && moveEnabled),
-        switchMap(() => {
-          this.store.dispatch(PageActions.dragInProgress({ inProgress: true }));
-
-          return this.boardMoveService.mouseUp$.pipe(take(1));
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(() => {
-        this.store.dispatch(PageActions.dragInProgress({ inProgress: false }));
-      });
-
-    userView$
-      .pipe(
-        withLatestFrom(
-          this.boardMoveService.mouseMove$.pipe(startWith({ x: 0, y: 0 })),
-          this.store.select(selectMoveEnabled),
-        ),
-        filter(([, , moveEnabled]) => {
-          return moveEnabled;
-        }),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(([{ move, zoom }, mousePosition]) => {
-        this.store.dispatch(
-          PageActions.setUserView({
-            zoom,
-            position: {
-              x: Math.round(move.x),
-              y: Math.round(move.y),
-            },
-          }),
-        );
-
-        updateUserPosition(move, mousePosition, zoom);
-      });
-
     const updateUserPosition = (
       position: Point,
       mousePosition: Point,
@@ -555,9 +405,128 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       this.wsService.send([action]);
     };
 
+    fromEvent<MouseEvent>(this.el.nativeElement, 'wheel', { passive: false })
+      .pipe(
+        filter((event: MouseEvent) => event.ctrlKey),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((event: MouseEvent) => {
+        event.preventDefault();
+      });
+
+    this.store
+      .select(boardPageFeature.selectCurrentBoardCursor)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((cursor) => {
+        this.el.nativeElement.style.setProperty('--default-cursor', cursor);
+
+        if (cursor === 'text') {
+          this.el.nativeElement.classList.add('cursor-text');
+        } else {
+          this.el.nativeElement.classList.remove('cursor-text');
+        }
+      });
+
+    this.newNote$
+      .pipe(
+        withLatestFrom(
+          this.store.select(boardPageFeature.selectZoom),
+          this.store.select(boardPageFeature.selectPosition),
+          this.store.select(boardPageFeature.selectUserId),
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(([event, zoom, position, userId]) => {
+        this.notesService.createNote(userId, {
+          x: (-position.x + event.clientX) / zoom,
+          y: (-position.y + event.clientY) / zoom,
+        });
+      });
+
+    this.boardMoveService.listen(this.el.nativeElement);
+
+    this.boardMoveService.mouseDown$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.store.dispatch(BoardPageActions.setFocusId({ focusId: '' }));
+      });
+
+    this.boardMoveService.mouseMove$
+      .pipe(
+        withLatestFrom(
+          this.store.select(boardPageFeature.selectZoom),
+          this.store.select(boardPageFeature.selectPosition),
+        ),
+        throttleTime(0, animationFrameScheduler),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(([mousePosition, zoom, position]) => {
+        updateUserPosition(position, mousePosition, zoom);
+      });
+
+    const userView$ = merge(
+      this.boardZoomService.zoomMove$,
+      this.boardMoveService.boardMove$.pipe(
+        withLatestFrom(this.store.select(boardPageFeature.selectZoom)),
+      ),
+    ).pipe(
+      map(([move, zoom]) => {
+        return {
+          move,
+          zoom,
+        };
+      }),
+    );
+    this.boardMoveService.move$
+      .pipe(
+        withLatestFrom(
+          this.store.select(boardPageFeature.selectDragInProgress),
+          this.store.select(boardPageFeature.selectMoveEnabled),
+        ),
+        filter(([, inProgress, moveEnabled]) => !inProgress && moveEnabled),
+        switchMap(() => {
+          this.store.dispatch(
+            BoardPageActions.dragInProgress({ inProgress: true }),
+          );
+
+          return this.boardMoveService.mouseUp$.pipe(take(1));
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        this.store.dispatch(
+          BoardPageActions.dragInProgress({ inProgress: false }),
+        );
+      });
+
+    userView$
+      .pipe(
+        withLatestFrom(
+          this.boardMoveService.mouseMove$.pipe(startWith({ x: 0, y: 0 })),
+          this.store.select(boardPageFeature.selectMoveEnabled),
+        ),
+        filter(([, , moveEnabled]) => {
+          return moveEnabled;
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(([{ move, zoom }, mousePosition]) => {
+        this.store.dispatch(
+          BoardPageActions.setUserView({
+            zoom,
+            position: {
+              x: Math.round(move.x),
+              y: Math.round(move.y),
+            },
+          }),
+        );
+
+        updateUserPosition(move, mousePosition, zoom);
+      });
+
     combineLatest([
-      this.store.select(selectZoom),
-      this.store.select(selectPosition),
+      this.store.select(boardPageFeature.selectZoom),
+      this.store.select(boardPageFeature.selectPosition),
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([zoom, position]) => {
@@ -595,7 +564,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     const boardId = this.route.snapshot.paramMap.get('id');
 
     if (boardId) {
-      this.store.dispatch(PageActions.joinBoard({ boardId }));
+      this.store.dispatch(BoardPageActions.joinBoard({ boardId }));
       this.initBoard();
     }
   }
@@ -605,6 +574,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   }
 
   public ngOnDestroy() {
-    this.store.dispatch(PageActions.closeBoard());
+    this.store.dispatch(BoardPageActions.closeBoard());
   }
 }

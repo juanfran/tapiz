@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { BoardMoveService } from '../../services/board-move.service';
 import { Store } from '@ngrx/store';
-import { pageFeature } from '../../reducers/page.reducer';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import {
   withLatestFrom,
   map,
@@ -12,7 +12,7 @@ import {
   startWith,
   Subscription,
 } from 'rxjs';
-import { PageActions } from '../../actions/page.actions';
+import { BoardPageActions } from '../../actions/board-page.actions';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { TuNode } from '@tapiz/board-commons';
 
@@ -34,20 +34,22 @@ export class ZoneService {
   #areaSelector = signal<SelectAction | null>(null);
   #boardFacade = inject(BoardFacade);
 
-  selectMoveEnabled = this.#store.selectSignal(pageFeature.selectMoveEnabled);
+  selectMoveEnabled = this.#store.selectSignal(
+    boardPageFeature.selectMoveEnabled,
+  );
 
   areaSelector = computed(() => this.#areaSelector());
 
   #setCursor(cursor: string) {
-    this.#store.dispatch(PageActions.setBoardCursor({ cursor }));
+    this.#store.dispatch(BoardPageActions.setBoardCursor({ cursor }));
   }
 
   #setMovement(enabled: boolean) {
-    this.#store.dispatch(PageActions.setMoveEnabled({ enabled }));
+    this.#store.dispatch(BoardPageActions.setMoveEnabled({ enabled }));
   }
 
   #setNodeSelection(enabled: boolean) {
-    this.#store.dispatch(PageActions.setNodeSelection({ enabled }));
+    this.#store.dispatch(BoardPageActions.setNodeSelection({ enabled }));
   }
 
   select(cursor = 'crosshair') {
@@ -56,10 +58,10 @@ export class ZoneService {
 
     return this.#boardMoveService.nextMouseDown().pipe(
       withLatestFrom(
-        this.#store.select(pageFeature.selectZoom),
-        this.#store.select(pageFeature.selectPosition),
-        this.#store.select(pageFeature.selectUserId),
-        this.#store.select(pageFeature.selectBoardMode),
+        this.#store.select(boardPageFeature.selectZoom),
+        this.#store.select(boardPageFeature.selectPosition),
+        this.#store.select(boardPageFeature.selectUserId),
+        this.#store.select(boardPageFeature.selectBoardMode),
       ),
       map(([event, zoom, position, userId, layer]) => {
         return {
@@ -103,10 +105,10 @@ export class ZoneService {
         .nextMouseDown()
         .pipe(
           withLatestFrom(
-            this.#store.select(pageFeature.selectZoom),
-            this.#store.select(pageFeature.selectPosition),
-            this.#store.select(pageFeature.selectUserId),
-            this.#store.select(pageFeature.selectBoardMode),
+            this.#store.select(boardPageFeature.selectZoom),
+            this.#store.select(boardPageFeature.selectPosition),
+            this.#store.select(boardPageFeature.selectUserId),
+            this.#store.select(boardPageFeature.selectBoardMode),
           ),
           switchMap(([mouseDownEvent, zoom, position, userId, layer]) => {
             const zoneDom = document.querySelector<HTMLElement>('tapiz-zone');

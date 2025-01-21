@@ -2,13 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { ConfigService } from './config.service';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, switchMap, take, zip } from 'rxjs';
-import { pageFeature } from '../modules/board/reducers/page.reducer';
+import { boardPageFeature } from '../modules/board/reducers/boardPage.reducer';
 import { Store } from '@ngrx/store';
 import { getImageDimensions } from '@tapiz/cdk/utils/image-dimensions';
 import { BoardActions } from '../modules/board/actions/board.actions';
-import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
+import { NodesActions } from '../modules/board/services/nodes-actions';
 import { Image } from '@tapiz/board-commons';
-import { PageActions } from '../modules/board/actions/page.actions';
+import { BoardPageActions } from '../modules/board/actions/board-page.actions';
 
 @Injectable({
   providedIn: 'root',
@@ -50,13 +50,13 @@ export class FileUploadService {
       y: number;
     },
   ): void {
-    this.#store.dispatch(PageActions.setLoadingBar({ loadingBar: true }));
+    this.#store.dispatch(BoardPageActions.setLoadingBar({ loadingBar: true }));
 
     zip(
-      this.#store.select(pageFeature.selectZoom),
-      this.#store.select(pageFeature.selectPosition),
-      this.#store.select(pageFeature.selectBoardId),
-      this.#store.select(pageFeature.selectBoardMode),
+      this.#store.select(boardPageFeature.selectZoom),
+      this.#store.select(boardPageFeature.selectPosition),
+      this.#store.select(boardPageFeature.selectBoardId),
+      this.#store.select(boardPageFeature.selectBoardMode),
     )
       .pipe(take(1))
       .subscribe(([zoom, position, boardId, layer]) => {
@@ -89,7 +89,7 @@ export class FileUploadService {
               }
 
               this.#store.dispatch(
-                PageActions.setLoadingBar({ loadingBar: false }),
+                BoardPageActions.setLoadingBar({ loadingBar: false }),
               );
 
               this.#store.dispatch(

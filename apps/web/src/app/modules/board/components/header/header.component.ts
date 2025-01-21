@@ -8,13 +8,12 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
-import { PageActions } from '../../actions/page.actions';
-import { selectIsAdmin } from '../../selectors/page.selectors';
+import { BoardPageActions } from '../../actions/board-page.actions';
 import { ClickOutside } from 'ngxtension/click-outside';
 import { AutoFocusDirective } from '../../directives/autofocus.directive';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { pageFeature } from '../../reducers/page.reducer';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs';
@@ -44,11 +43,11 @@ export class HeaderComponent {
   textarea = viewChild<ElementRef<HTMLInputElement>>('textarea');
 
   edit = signal(false);
-  name = this.#store.selectSignal(pageFeature.selectName);
-  isAdmin = this.#store.selectSignal(selectIsAdmin);
-  boardId = this.#store.selectSignal(pageFeature.selectBoardId);
-  teamName = this.#store.selectSignal(pageFeature.selectTeamName);
-  teamId = this.#store.selectSignal(pageFeature.selectTeamId);
+  name = this.#store.selectSignal(boardPageFeature.selectName);
+  isAdmin = this.#store.selectSignal(boardPageFeature.selectIsAdmin);
+  boardId = this.#store.selectSignal(boardPageFeature.selectBoardId);
+  teamName = this.#store.selectSignal(boardPageFeature.selectTeamName);
+  teamId = this.#store.selectSignal(boardPageFeature.selectTeamId);
 
   get isDemo() {
     return !!this.#configService.config.DEMO;
@@ -72,7 +71,7 @@ export class HeaderComponent {
 
   changeBoardMode(boardMode: number) {
     this.#store.dispatch(
-      PageActions.changeBoardMode({
+      BoardPageActions.changeBoardMode({
         boardMode,
       }),
     );

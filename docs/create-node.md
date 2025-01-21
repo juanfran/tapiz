@@ -5,7 +5,7 @@ Add the action to `board-toolbar.component.html`.
 Add the new node to `apps/web/src/app/app-node.ts`.
 
 ```ts
-import { ESTIMATION_CONFIG } from '@tapiz/nodes/estimation';
+import { ESTIMATION_CONFIG } from './modules/board/components/estimation';
 
 registerNode('estimation', ESTIMATION_CONFIG);
 ```

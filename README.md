@@ -10,7 +10,6 @@ Tapiz is a **self-hosted**, web-based collaborative board built for teams to run
 - 🗒️ **Sticky notes**
 - 🎨 **Freehand drawing**
 - 📊 **Polling**
-- 📋 **Customizable templates**
 - 🔢 **Estimations**
 - ✅ **Voting**
 - ⚙️ **Self-hosted**

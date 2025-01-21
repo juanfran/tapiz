@@ -2,11 +2,11 @@ import { Directive, HostListener, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { take } from 'rxjs';
 import { concatLatestFrom } from '@ngrx/operators';
-import { selectFocusId } from '../selectors/page.selectors';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { CopyPasteService } from '../../../services/copy-paste.service';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 import { NotificationService } from '../../../shared/notification/notification.service';
+import { boardPageFeature } from '../reducers/boardPage.reducer';
 
 @Directive({
   selector: '[tapizCopyPaste]',
@@ -34,7 +34,9 @@ export class CopyPasteDirective {
       .getNodes()
       .pipe(
         take(1),
-        concatLatestFrom(() => [this.store.select(selectFocusId)]),
+        concatLatestFrom(() => [
+          this.store.select(boardPageFeature.selectFocusId),
+        ]),
       )
       .subscribe(([nodes, focusId]) => {
         const copyNodes = nodes.filter((node) => focusId.includes(node.id));

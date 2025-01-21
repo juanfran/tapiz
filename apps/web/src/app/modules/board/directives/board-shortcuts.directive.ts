@@ -1,8 +1,8 @@
 import { Directive, HostListener, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { PageActions } from '../actions/page.actions';
+import { BoardPageActions } from '../actions/board-page.actions';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
-import { pageFeature } from '../reducers/page.reducer';
+import { boardPageFeature } from '../reducers/boardPage.reducer';
 import { ZoneService } from '../components/zone/zone.service';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { take } from 'rxjs';
@@ -15,8 +15,8 @@ import { NodePatch } from '@tapiz/board-commons';
 export class BoardShourtcutsDirective {
   #store = inject(Store);
   #zoneService = inject(ZoneService);
-  #layer = this.#store.selectSignal(pageFeature.selectBoardMode);
-  #selectedNodesIds = this.#store.selectSignal(pageFeature.selectFocusId);
+  #layer = this.#store.selectSignal(boardPageFeature.selectBoardMode);
+  #selectedNodesIds = this.#store.selectSignal(boardPageFeature.selectFocusId);
   #boardFacade = inject(BoardFacade);
 
   @HostListener('document:keydown.control.z', ['$event']) undoAction(
@@ -24,7 +24,7 @@ export class BoardShourtcutsDirective {
   ) {
     if (e.repeat) return;
 
-    this.#store.dispatch(PageActions.undo());
+    this.#store.dispatch(BoardPageActions.undo());
   }
 
   @HostListener('document:keydown.control.y', ['$event']) redoAction(
@@ -32,13 +32,15 @@ export class BoardShourtcutsDirective {
   ) {
     if (e.repeat) return;
 
-    this.#store.dispatch(PageActions.redo());
+    this.#store.dispatch(BoardPageActions.redo());
   }
 
   @HostListener('document:keydown.space', ['$event']) pan(e: KeyboardEvent) {
     if (e.repeat) return;
 
-    this.#store.dispatch(PageActions.panInProgress({ panInProgress: true }));
+    this.#store.dispatch(
+      BoardPageActions.panInProgress({ panInProgress: true }),
+    );
   }
 
   @HostListener('document:keyup.space', ['$event']) finishPan(
@@ -46,7 +48,9 @@ export class BoardShourtcutsDirective {
   ) {
     if (e.repeat) return;
 
-    this.#store.dispatch(PageActions.panInProgress({ panInProgress: false }));
+    this.#store.dispatch(
+      BoardPageActions.panInProgress({ panInProgress: false }),
+    );
   }
 
   @HostListener('document:keydown.control.a', ['$event']) selectAll(
@@ -61,7 +65,7 @@ export class BoardShourtcutsDirective {
       layer: this.#layer(),
     });
 
-    this.#store.dispatch(PageActions.selectNodes({ ids: selectedNodes }));
+    this.#store.dispatch(BoardPageActions.selectNodes({ ids: selectedNodes }));
   }
 
   @HostListener('document:keydown.ArrowLeft', ['$event'])

@@ -1,15 +1,15 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { NodesStore } from '@tapiz/nodes/services/nodes.store';
+import { NodesStore } from '../../services/nodes.store';
 import {
   ContextMenuItem,
   ContextMenuStore,
 } from '@tapiz/ui/context-menu/context-menu.store';
 import { combineLatest, take } from 'rxjs';
-import { pageFeature } from '../../reducers/page.reducer';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardComponent } from '../../board/board.component';
 import { BoardActions } from '../../actions/board.actions';
-import { PageActions } from '../../actions/page.actions';
+import { BoardPageActions } from '../../actions/board-page.actions';
 import { CopyPasteService } from '../../../../services/copy-paste.service';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -23,12 +23,12 @@ import {
   Panel,
   TuNode,
 } from '@tapiz/board-commons';
-import { CommentsStore } from '@tapiz/nodes/comments/comments.store';
-import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
+import { CommentsStore } from '../comments/comments.store';
+import { NodesActions } from '../../services/nodes-actions';
 import Pickr from '@simonwep/pickr';
 import { colorPickerConfig } from '@tapiz/ui/color-picker/color-picker.config';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { defaultNoteColor } from '@tapiz/nodes/note';
+import { defaultNoteColor } from '../note';
 
 @Component({
   selector: 'tapiz-board-context-menu',
@@ -50,18 +50,23 @@ export class BoardContextMenuComponent implements OnInit {
   private dialog = inject(MatDialog);
   private commentsStore = inject(CommentsStore);
   private nodesActions = inject(NodesActions);
-  private showUserVotes = this.store.selectSignal(pageFeature.selectVoting);
+  private showUserVotes = this.store.selectSignal(
+    boardPageFeature.selectVoting,
+  );
   private selectFocusNodes = toSignal(this.boardFacade.selectFocusNodes$);
+  private activeToolbarOption = this.store.selectSignal(
+    boardPageFeature.selectPopupOpen,
+  );
 
   public readonly boardMode = this.store.selectSignal(
-    pageFeature.selectBoardMode,
+    boardPageFeature.selectBoardMode,
   );
 
   ngOnInit() {
     this.contextMenuStore.config({
       element: this.boardComponent.el.nativeElement,
       isValid: () => {
-        const activeToolbarOption = this.nodesStore.activeToolbarOption();
+        const activeToolbarOption = this.activeToolbarOption();
 
         if (activeToolbarOption === 'emoji' || activeToolbarOption === 'vote') {
           return false;
@@ -180,7 +185,7 @@ export class BoardContextMenuComponent implements OnInit {
                 );
 
                 this.store.dispatch(
-                  PageActions.setFocusId({
+                  BoardPageActions.setFocusId({
                     focusId: '',
                   }),
                 );
@@ -207,7 +212,7 @@ export class BoardContextMenuComponent implements OnInit {
                 );
 
                 this.store.dispatch(
-                  PageActions.setFocusId({
+                  BoardPageActions.setFocusId({
                     focusId: '',
                   }),
                 );
@@ -382,8 +387,8 @@ export class BoardContextMenuComponent implements OnInit {
             help: 'Ctrl + V',
             action: (event: MouseEvent) => {
               combineLatest([
-                this.store.select(pageFeature.selectPosition),
-                this.store.select(pageFeature.selectZoom),
+                this.store.select(boardPageFeature.selectPosition),
+                this.store.select(boardPageFeature.selectZoom),
               ])
                 .pipe(take(1))
                 .subscribe(([position, zoom]) => {

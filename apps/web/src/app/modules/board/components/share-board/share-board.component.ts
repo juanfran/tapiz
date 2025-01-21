@@ -10,13 +10,8 @@ import { FormsModule } from '@angular/forms';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Store } from '@ngrx/store';
-import {
-  selectIsAdmin,
-  selectPosition,
-  selectZoom,
-} from '../../selectors/page.selectors';
-import { PageActions } from '../../actions/page.actions';
-import { pageFeature } from '../../reducers/page.reducer';
+import { BoardPageActions } from '../../actions/board-page.actions';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { ConfigService } from '../../../../services/config.service';
 
 @Component({
@@ -102,11 +97,10 @@ import { ConfigService } from '../../../../services/config.service';
 export class ShareBoardComponent {
   #store = inject(Store);
   #configService = inject(ConfigService);
-  #zoom = this.#store.selectSignal(selectZoom);
-  #position = this.#store.selectSignal(selectPosition);
-  #isPublic = this.#store.selectSignal(pageFeature.selectIsPublic);
-
-  isAdmin = this.#store.selectSignal(selectIsAdmin);
+  #zoom = this.#store.selectSignal(boardPageFeature.selectZoom);
+  #position = this.#store.selectSignal(boardPageFeature.selectPosition);
+  #isPublic = this.#store.selectSignal(boardPageFeature.selectIsPublic);
+  isAdmin = this.#store.selectSignal(boardPageFeature.selectIsAdmin);
   url = '';
   visibility = 'private';
 
@@ -121,7 +115,7 @@ export class ShareBoardComponent {
 
   newVisibility(visibility: string) {
     this.#store.dispatch(
-      PageActions.setBoardPrivacy({
+      BoardPageActions.setBoardPrivacy({
         isPublic: visibility === 'public',
       }),
     );
