@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { isUserHighlighActive } from '../../selectors/page.selectors';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 
 interface State {
   highlight: boolean;
@@ -30,6 +30,9 @@ export class OverlayComponent {
   }
 
   constructor() {
-    this.state.connect('highlight', this.store.select(isUserHighlighActive()));
+    this.state.connect(
+      'highlight',
+      this.store.select(boardPageFeature.isUserHighlighActive),
+    );
   }
 }

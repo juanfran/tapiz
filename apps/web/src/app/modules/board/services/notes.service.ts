@@ -4,15 +4,15 @@ import { Note, Point, User } from '@tapiz/board-commons';
 import { BoardActions } from '../actions/board.actions';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
-import { pageFeature } from '../reducers/page.reducer';
+import { NodesActions } from '../services/nodes-actions';
+import { boardPageFeature } from '../reducers/boardPage.reducer';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NotesService {
   #store = inject(Store);
-  #boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
+  #boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
   #boardFacade = inject(BoardFacade);
   #settings = toSignal(this.#boardFacade.getSettings());
   #nodesActions = inject(NodesActions);

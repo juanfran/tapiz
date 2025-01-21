@@ -24,14 +24,13 @@ import {
   Point,
 } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
-import { selectCocomaterial } from '../../selectors/page.selectors';
 import { filter, map, startWith } from 'rxjs';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { PageActions } from '../../actions/page.actions';
+import { BoardPageActions } from '../../actions/board-page.actions';
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { BoardActions } from '../../actions/board.actions';
-import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
-import { pageFeature } from '../../reducers/page.reducer';
+import { NodesActions } from '../../services/nodes-actions';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { BoardMoveService } from '../../services/board-move.service';
@@ -58,12 +57,12 @@ export class CocomaterialComponent {
   #nodesActions = inject(NodesActions);
   tagInput = viewChild.required<ElementRef<HTMLInputElement>>('tagInput');
 
-  boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
+  boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
 
   tags = signal<CocomaterialTag[]>([]);
   filteredTags!: Signal<CocomaterialTag[]>;
 
-  cocomaterial = this.#store.selectSignal(selectCocomaterial);
+  cocomaterial = this.#store.selectSignal(boardPageFeature.selectCocomaterial);
   allTags = computed(() => this.cocomaterial().tags);
   vectors = computed(() => this.cocomaterial().vectors?.results ?? []);
   selected = signal<CocomaterialApiVector | null>(null);
@@ -89,12 +88,12 @@ export class CocomaterialComponent {
     explicitEffect([this.tags], ([tags]) => {
       const tagSlugs = tags.map((tag) => tag.slug);
 
-      this.#store.dispatch(PageActions.fetchVectors({ tags: tagSlugs }));
+      this.#store.dispatch(BoardPageActions.fetchVectors({ tags: tagSlugs }));
     });
 
     explicitEffect([this.selected], ([selected]) => {
       this.#store.dispatch(
-        PageActions.addToBoardInProcess({ inProcess: !!selected }),
+        BoardPageActions.addToBoardInProcess({ inProcess: !!selected }),
       );
     });
 
@@ -176,7 +175,7 @@ export class CocomaterialComponent {
   onScroll() {
     const tags = this.tags().map((tag) => tag.slug);
 
-    this.#store.dispatch(PageActions.nextVectorsPage({ tags }));
+    this.#store.dispatch(BoardPageActions.nextVectorsPage({ tags }));
   }
 
   #addVectorToBoard(data: { layer: number; position: Point }) {

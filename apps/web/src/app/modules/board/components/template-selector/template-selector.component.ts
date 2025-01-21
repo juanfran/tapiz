@@ -8,9 +8,9 @@ import { NgOptimizedImage } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
 import { NodeAdd, TuNode } from '@tapiz/board-commons';
-import { pageFeature } from '../../reducers/page.reducer';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { TemplaNode } from './template-node.model';
-import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
+import { NodesActions } from '../../services/nodes-actions';
 
 interface Template {
   title: string;
@@ -46,9 +46,9 @@ export class TemplateSelectorComponent {
 
   selected = output();
 
-  boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
-  userPostion = this.#store.selectSignal(pageFeature.selectPosition);
-  userZoom = this.#store.selectSignal(pageFeature.selectZoom);
+  boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
+  userPostion = this.#store.selectSignal(boardPageFeature.selectPosition);
+  userZoom = this.#store.selectSignal(boardPageFeature.selectZoom);
 
   elements: Template[] = [
     {

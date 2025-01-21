@@ -5,13 +5,12 @@ import {
   input,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { PageActions } from '../../actions/page.actions';
-import { selectIsAdmin, selectUserId } from '../../selectors/page.selectors';
+import { BoardPageActions } from '../../actions/board-page.actions';
 import { ExportService } from '../../services/export.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ShareBoardComponent } from '../share-board/share-board.component';
-import { pageFeature } from '../../reducers/page.reducer';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardSettingsComponent } from '../board-settings/board-settings.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -32,7 +31,7 @@ export class BoardHeaderOptionsComponent {
   #store = inject(Store);
   #dialog = inject(MatDialog);
   #boardFacade = inject(BoardFacade);
-  #boardUsers = this.#store.selectSignal(pageFeature.selectBoardUsers);
+  #boardUsers = this.#store.selectSignal(boardPageFeature.selectBoardUsers);
   #configService = inject(ConfigService);
   #users = toSignal(
     this.#boardFacade
@@ -40,7 +39,7 @@ export class BoardHeaderOptionsComponent {
       .pipe(map((users) => users.map((user) => user.content))),
     { initialValue: [] },
   );
-  userId = this.#store.selectSignal(selectUserId);
+  userId = this.#store.selectSignal(boardPageFeature.selectUserId);
   users = computed(() => {
     const boardUsers = this.#boardUsers();
 
@@ -65,9 +64,9 @@ export class BoardHeaderOptionsComponent {
 
   allowSwitchMode = input(true);
 
-  boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
-  isAdmin = this.#store.selectSignal(selectIsAdmin);
-  boardId = this.#store.selectSignal(pageFeature.selectBoardId);
+  boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
+  isAdmin = this.#store.selectSignal(boardPageFeature.selectIsAdmin);
+  boardId = this.#store.selectSignal(boardPageFeature.selectBoardId);
 
   get isDemo() {
     return !!this.#configService.config.DEMO;
@@ -75,7 +74,7 @@ export class BoardHeaderOptionsComponent {
 
   changeBoardMode(boardMode: number) {
     this.#store.dispatch(
-      PageActions.changeBoardMode({
+      BoardPageActions.changeBoardMode({
         boardMode,
       }),
     );

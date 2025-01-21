@@ -1,13 +1,13 @@
 import { registerNode } from './register-node';
-import { ESTIMATION_BOARD_CONFIG } from '@tapiz/nodes/estimation-board';
-import { TEXT_CONFIG } from '@tapiz/nodes/text';
-import { IMAGE_CONFIG } from '@tapiz/nodes/image';
-import { VECTOR_CONFIG } from '@tapiz/nodes/vector';
-import { PANEL_CONFIG } from '@tapiz/nodes/panel';
-import { POLL_BOARD_CONFIG } from '@tapiz/nodes/poll-board';
+import { ESTIMATION_BOARD_CONFIG } from './modules/board/components/estimation-board';
+import { TEXT_CONFIG } from './modules/board/components/text';
+import { IMAGE_CONFIG } from './modules/board/components/image';
+import { VECTOR_CONFIG } from './modules/board/components/vector';
+import { PANEL_CONFIG } from './modules/board/components/panel';
+import { POLL_BOARD_CONFIG } from './modules/board/components/poll-board';
 import { PERSONAL_TOKEN_CONFIG } from './modules/board/components/token/register';
-import { NOTE_CONFIG } from '@tapiz/nodes/note';
-import { GROUP_CONFIG } from '@tapiz/nodes/group';
+import { NOTE_CONFIG } from './modules/board/components/note';
+import { GROUP_CONFIG } from './modules/board/components/group';
 
 registerNode('token', PERSONAL_TOKEN_CONFIG);
 registerNode('estimation', ESTIMATION_BOARD_CONFIG);

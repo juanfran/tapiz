@@ -5,16 +5,12 @@ import {
   computed,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import {
-  selectUserHighlight,
-  selectUserId,
-} from '../../selectors/page.selectors';
-import { PageActions } from '../../actions/page.actions';
+import { BoardPageActions } from '../../actions/board-page.actions';
 import { User } from '@tapiz/board-commons';
 import { map } from 'rxjs/operators';
 import { NgOptimizedImage } from '@angular/common';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
-import { pageFeature } from '../../reducers/page.reducer';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
@@ -35,7 +31,7 @@ import { MatIconModule } from '@angular/material/icon';
 export class UsersComponent {
   #store = inject(Store);
   #boardFacade = inject(BoardFacade);
-  #boardUsers = this.#store.selectSignal(pageFeature.selectBoardUsers);
+  #boardUsers = this.#store.selectSignal(boardPageFeature.selectBoardUsers);
   #users = toSignal(
     this.#boardFacade
       .getUsers()
@@ -44,7 +40,7 @@ export class UsersComponent {
   );
   #settings = toSignal(this.#boardFacade.getSettings(), { initialValue: null });
 
-  boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
+  boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
   showUsers = computed(() => {
     return !this.#settings()?.content.anonymousMode;
   });
@@ -79,9 +75,11 @@ export class UsersComponent {
     },
   ];
 
-  userId = this.#store.selectSignal(selectUserId);
-  userHighlight = this.#store.selectSignal(selectUserHighlight);
-  isFollowing = this.#store.selectSignal(pageFeature.selectFollow);
+  userId = this.#store.selectSignal(boardPageFeature.selectUserId);
+  userHighlight = this.#store.selectSignal(
+    boardPageFeature.selectUserHighlight,
+  );
+  isFollowing = this.#store.selectSignal(boardPageFeature.selectFollow);
   currentUser = computed(() => {
     return this.#users()?.find((user) => user.id === this.userId());
   });
@@ -94,18 +92,18 @@ export class UsersComponent {
   });
 
   toggleUserHighlight(userId: User['id']) {
-    this.#store.dispatch(PageActions.toggleUserHighlight({ id: userId }));
+    this.#store.dispatch(BoardPageActions.toggleUserHighlight({ id: userId }));
   }
 
   follow(userId: User['id']) {
-    this.#store.dispatch(PageActions.followUser({ id: userId }));
+    this.#store.dispatch(BoardPageActions.followUser({ id: userId }));
   }
 
   goToUser(userId: User['id']) {
-    this.#store.dispatch(PageActions.goToUser({ id: userId }));
+    this.#store.dispatch(BoardPageActions.goToUser({ id: userId }));
   }
 
   showVotes(userId: User['id']) {
-    this.#store.dispatch(PageActions.toggleShowVotes({ userId }));
+    this.#store.dispatch(BoardPageActions.toggleShowVotes({ userId }));
   }
 }

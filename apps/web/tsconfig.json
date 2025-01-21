@@ -4,11 +4,14 @@
   "include": [],
   "references": [
     {
-      "path": "./tsconfig.app.json",
+      "path": "./tsconfig.app.json"
     },
     {
-      "path": "./tsconfig.editor.json",
+      "path": "./tsconfig.editor.json"
     },
+    {
+      "path": "./tsconfig.spec.json"
+    }
   ],
   "compilerOptions": {
     "forceConsistentCasingInFileNames": true,
@@ -17,7 +20,7 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
@@ -25,5 +28,5 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true,
     "strictStandalone": true
-  },
+  }
 }

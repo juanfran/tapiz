@@ -17,7 +17,7 @@ import {
 } from 'rxjs';
 import { Point, TuNode } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
-import { pageFeature } from '../../reducers/page.reducer';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import * as R from 'remeda';
 import { compose, rotateDEG, translate, Matrix } from 'transformation-matrix';
 import { EditorViewSharedStateService } from '@tapiz/ui/editor-view';
@@ -71,10 +71,10 @@ export class NodeToolbarComponent {
   toolbars = toSignal(
     combineLatest([
       this.#nodes,
-      this.#store.select(pageFeature.selectZoom),
+      this.#store.select(boardPageFeature.selectZoom),
       this.#editorViewSharedStateService.getNodes$(),
     ]).pipe(
-      withLatestFrom(this.#store.select(pageFeature.selectPosition)),
+      withLatestFrom(this.#store.select(boardPageFeature.selectPosition)),
       map(([[nodes, zoom, toolbarNodes], position]) => {
         return {
           nodes,

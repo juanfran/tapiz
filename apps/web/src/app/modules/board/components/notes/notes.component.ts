@@ -8,8 +8,7 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { lighter } from '@tapiz/cdk/utils/colors';
 import { ColorPickerComponent } from '@tapiz/ui/color-picker';
-
-import { defaultNoteColor } from '@tapiz/nodes/note';
+import { defaultNoteColor } from '../note';
 
 @Component({
   selector: 'tapiz-notes',

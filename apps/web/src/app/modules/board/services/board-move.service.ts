@@ -13,8 +13,7 @@ import {
 } from 'rxjs/operators';
 import { Point } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
-import { selectPosition } from '../selectors/page.selectors';
-import { pageFeature } from '../reducers/page.reducer';
+import { boardPageFeature } from '../reducers/boardPage.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -80,7 +79,7 @@ export class BoardMoveService {
     );
 
     this.boardMove$ = this.move$.pipe(
-      withLatestFrom(this.store.select(selectPosition)),
+      withLatestFrom(this.store.select(boardPageFeature.selectPosition)),
       map(([moveDiff, position]) => {
         return {
           x: position.x - moveDiff.x,
@@ -107,10 +106,10 @@ export class BoardMoveService {
   public relativeMouseDown() {
     return this.mouseDown$.pipe(
       withLatestFrom(
-        this.store.select(pageFeature.selectZoom),
-        this.store.select(pageFeature.selectPosition),
-        this.store.select(pageFeature.selectBoardMode),
-        this.store.select(pageFeature.selectPanInProgress),
+        this.store.select(boardPageFeature.selectZoom),
+        this.store.select(boardPageFeature.selectPosition),
+        this.store.select(boardPageFeature.selectBoardMode),
+        this.store.select(boardPageFeature.selectPanInProgress),
       ),
       map(([event, zoom, position, layer, panInProgress]) => {
         return {

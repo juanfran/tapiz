@@ -5,7 +5,6 @@ import {
   computed,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { selectUserId } from '../../selectors/page.selectors';
 import { BoardActions } from '../../actions/board.actions';
 import { map } from 'rxjs/operators';
 import { CdkMenu, CdkMenuItemRadio, CdkMenuTrigger } from '@angular/cdk/menu';
@@ -13,6 +12,7 @@ import { BoardFacade } from '../../../../services/board-facade.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { isNote, StateActions } from '@tapiz/board-commons';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 
 @Component({
   selector: 'tapiz-notes-visibility',
@@ -67,7 +67,7 @@ export class NotesVisibilityComponent {
       .pipe(map((users) => users.map((user) => user.content))),
     { initialValue: [] },
   );
-  userId = this.#store.selectSignal(selectUserId);
+  userId = this.#store.selectSignal(boardPageFeature.selectUserId);
   currentUser = computed(() => {
     return this.#users()?.find((user) => user.id === this.userId());
   });

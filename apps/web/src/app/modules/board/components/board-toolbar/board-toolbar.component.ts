@@ -8,12 +8,7 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
-import { PageActions } from '../../actions/page.actions';
-import {
-  selectPopupOpen,
-  selectPosition,
-  selectZoom,
-} from '../../selectors/page.selectors';
+import { BoardPageActions } from '../../actions/board-page.actions';
 import { switchMap, take } from 'rxjs/operators';
 import { NotesService } from '../../services/notes.service';
 import { Subscription, zip } from 'rxjs';
@@ -33,21 +28,21 @@ import {
   PollBoard,
   Text,
 } from '@tapiz/board-commons';
-import { DrawingStore } from '@tapiz/board-components/drawing/drawing.store';
+import { DrawingStore } from '../drawing/drawing.store';
 import { TemplateSelectorComponent } from '../template-selector/template-selector.component';
-import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
+import { NodesActions } from '../../services/nodes-actions';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ZoneService } from '../zone/zone.service';
 import { AddImageComponent } from '../add-image/add-image.component';
 import { FileUploadService } from '../../../../services/file-upload.service';
 import { getImageDimensions } from '@tapiz/cdk/utils/image-dimensions';
-import { pageFeature } from '../../reducers/page.reducer';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { LiveReactionComponent } from '../live-reaction/live-reaction.component';
 import { NotesComponent } from '../notes/notes.component';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 import { ToolsComponent } from '../tools/tools.component';
-import { defaultNoteColor } from '@tapiz/nodes/note';
+import { defaultNoteColor } from '../note';
 import { NgTemplateOutlet } from '@angular/common';
 import { BoardToolbardButtonComponent } from './components/board-toolboard-button.component';
 @Component({
@@ -82,8 +77,8 @@ export class BoardToolbarComponent {
   #fileUploadService = inject(FileUploadService);
 
   toolbarSubscription?: Subscription;
-  boardMode = this.#store.selectSignal(pageFeature.selectBoardMode);
-  popup = this.#store.selectSignal(selectPopupOpen);
+  boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
+  popup = this.#store.selectSignal(boardPageFeature.selectPopupOpen);
   noteColor = signal<string>(defaultNoteColor);
 
   @HostListener('document:keydown.alt', ['$event']) selectAreaShortcut(
@@ -251,7 +246,9 @@ export class BoardToolbarComponent {
         }
 
         const selectedNodes = this.#zoneService.nodesInZone(result);
-        this.#store.dispatch(PageActions.selectNodes({ ids: selectedNodes }));
+        this.#store.dispatch(
+          BoardPageActions.selectNodes({ ids: selectedNodes }),
+        );
       });
   }
 
@@ -303,7 +300,7 @@ export class BoardToolbarComponent {
   vote() {
     if (this.popup() !== 'vote') {
       this.popupOpen('vote');
-      this.#store.dispatch(PageActions.readyToVote());
+      this.#store.dispatch(BoardPageActions.readyToVote());
     } else {
       this.popupOpen('');
     }
@@ -322,7 +319,7 @@ export class BoardToolbarComponent {
   search() {
     if (this.popup() !== 'search') {
       this.popupOpen('search');
-      this.#store.dispatch(PageActions.readyToSearch());
+      this.#store.dispatch(BoardPageActions.readyToSearch());
     } else {
       this.popupOpen('');
     }
@@ -414,7 +411,7 @@ export class BoardToolbarComponent {
 
   emojiSelected(emojiEvent: EmojiClickEvent) {
     this.#store.dispatch(
-      PageActions.selectEmoji({
+      BoardPageActions.selectEmoji({
         emoji: emojiEvent.detail.emoji as NativeEmoji,
       }),
     );
@@ -489,7 +486,7 @@ export class BoardToolbarComponent {
   }
 
   popupOpen(popupName: string) {
-    this.#store.dispatch(PageActions.setPopupOpen({ popup: popupName }));
+    this.#store.dispatch(BoardPageActions.setPopupOpen({ popup: popupName }));
 
     if (this.toolbarSubscription) {
       this.toolbarSubscription.unsubscribe();
@@ -508,8 +505,8 @@ export class BoardToolbarComponent {
 
   newImageUrl(url: string) {
     zip(
-      this.#store.select(selectZoom),
-      this.#store.select(selectPosition),
+      this.#store.select(boardPageFeature.selectZoom),
+      this.#store.select(boardPageFeature.selectPosition),
       getImageDimensions(url),
     )
       .pipe(take(1))

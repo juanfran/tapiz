@@ -10,7 +10,7 @@ import {
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { pageFeature } from '../../reducers/page.reducer';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -25,10 +25,12 @@ import { CommonModule } from '@angular/common';
             [style.top.px]="user.cursor.y"
             [style.left.px]="user.cursor.x">
             <span
-            [ngClass]="{'cursor-avatar': user.picture}"
-            [style.transform]="'scale(' + scale() + ')'">
+              [ngClass]="{ 'cursor-avatar': user.picture }"
+              [style.transform]="'scale(' + scale() + ')'">
               @if (user.picture) {
-                <img [src]="user.picture" alt="{{ user.name }}" />
+                <img
+                  [src]="user.picture"
+                  alt="{{ user.name }}" />
               } @else {
                 {{ user.name.charAt(0).toUpperCase() }}
               }
@@ -47,7 +49,7 @@ export class CursorsComponent {
   #boardFacade = inject(BoardFacade);
 
   users = toSignal(this.#boardFacade.selectCursors());
-  userZoom = this.#store.selectSignal(pageFeature.selectZoom);
+  userZoom = this.#store.selectSignal(boardPageFeature.selectZoom);
 
   scale = signal(1);
   #settings = toSignal(this.#boardFacade.getSettings());
@@ -66,7 +68,7 @@ export class CursorsComponent {
     const zoom = Math.max(this.userZoom(), 0.1);
     const constant = 0.3;
     const baseSize = 0.8;
-    const total = baseSize + (constant / zoom);
+    const total = baseSize + constant / zoom;
 
     return Math.min(total, 2.5);
   });

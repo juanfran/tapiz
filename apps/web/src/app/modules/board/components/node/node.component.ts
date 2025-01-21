@@ -21,12 +21,11 @@ import { RxState } from '@rx-angular/state';
 import { BoardTuNode } from '@tapiz/board-commons';
 import { take } from 'rxjs';
 import { Store } from '@ngrx/store';
-import { selectFocusId } from '../../selectors/page.selectors';
-import { PageActions } from '../../actions/page.actions';
-import { pageFeature } from '../../reducers/page.reducer';
+import { BoardPageActions } from '../../actions/board-page.actions';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { DynamicComponent } from './dynamic-component';
 import { compose, rotateDEG, translate, toCSS } from 'transformation-matrix';
-import { NodeStore } from '@tapiz/nodes/node/node.store';
+import { NodeStore } from '../../services/node.store';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 import { input } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -90,7 +89,7 @@ export class NodeComponent implements OnInit {
     return toCSS(compose(translate(point.x, point.y), rotateDEG(rotation)));
   });
 
-  focusId = this.store.selectSignal(selectFocusId);
+  focusId = this.store.selectSignal(boardPageFeature.selectFocusId);
 
   focus = computed(() => {
     return this.focusId().includes(this.node().id);
@@ -103,7 +102,7 @@ export class NodeComponent implements OnInit {
   @HostListener('mousedown', ['$event'])
   public mousedown(event: MouseEvent) {
     this.store.dispatch(
-      PageActions.setFocusId({
+      BoardPageActions.setFocusId({
         focusId: this.node().id,
         ctrlKey: event.ctrlKey,
       }),
@@ -118,7 +117,7 @@ export class NodeComponent implements OnInit {
 
   constructor() {
     this.store
-      .select(pageFeature.selectBoardMode)
+      .select(boardPageFeature.selectBoardMode)
       .pipe(takeUntilDestroyed())
       .subscribe((layer) => {
         this.#nodeStore.updateState({
@@ -149,7 +148,7 @@ export class NodeComponent implements OnInit {
 
   private loadComponent(component: Type<DynamicComponent>) {
     this.store
-      .select(pageFeature.selectAdditionalContext)
+      .select(boardPageFeature.selectAdditionalContext)
       .pipe(take(1))
       .subscribe((context) => {
         const pasted = signal(context[this.node().id] === 'pasted');

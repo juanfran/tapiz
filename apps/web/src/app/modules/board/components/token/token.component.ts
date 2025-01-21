@@ -15,12 +15,12 @@ import { Token, TuNode } from '@tapiz/board-commons';
 import { DynamicComponent } from '../node/dynamic-component';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
-import { HistoryService } from '@tapiz/nodes/services/history.service';
+import { HistoryService } from '../../services/history.service';
 import { BoardDragDirective } from '../../directives/board-drag.directive';
 import { Draggable } from '@tapiz/cdk/models/draggable.model';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
-import { NodesActions } from '@tapiz/nodes/services/nodes-actions';
+import { NodesActions } from '../../services/nodes-actions';
 import { input } from '@angular/core';
 
 @Component({

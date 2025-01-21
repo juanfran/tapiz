@@ -1,0 +1,194 @@
+:host {
+  --border-radius: 20px;
+
+  border-radius: var(--border-radius);
+}
+
+.name {
+  bottom: 0.5rem;
+  font-size: 1.125rem;
+  height: 1.75rem;
+  left: 1rem;
+  max-width: 70%;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+textarea {
+  background: transparent;
+  border: 0;
+  height: 100%;
+  outline: none;
+  resize: none;
+  padding: 0;
+}
+
+@keyframes dragAnimation {
+  from {
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.25);
+    transform: scale(1) rotate(0deg);
+  }
+  to {
+    box-shadow: 0 0 30px 10px rgba(0, 0, 0, 0.1);
+    transform: scale(1.05) rotate(var(--rotate-angle));
+  }
+}
+
+@keyframes dropAnimation {
+  0% {
+    transform: scale(1.05) rotate(var(--rotate-angle));
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+:host {
+  --emoji-width: 27px;
+  --emoji-height: 33px;
+
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  transition: transform 0.1s ease-in-out;
+
+  canvas {
+    pointer-events: none;
+  }
+
+  &.drop-animation {
+    animation: dropAnimation 0.2s forwards;
+  }
+
+  &.drag-animation {
+    animation: dragAnimation 0.2s forwards;
+  }
+
+  &:hover {
+    .name {
+      opacity: 1;
+    }
+  }
+
+  &:not(.visible) .rich-text {
+    ::ng-deep * {
+      font-family:
+        "Redacted Script",
+        -apple-system,
+        system-ui,
+        sans-serif !important;
+    }
+  }
+
+  &.focus {
+    border-color: var(--custom-main);
+    box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.15);
+
+    .name {
+      opacity: 1;
+    }
+
+    .characters {
+      opacity: 1;
+    }
+  }
+
+  &.drawing.active-layer canvas {
+    pointer-events: all;
+  }
+
+  &.voting,
+  &.emoji-mode {
+    cursor: crosshair;
+  }
+}
+
+.inner {
+  background-color: var(--custom-main);
+  border: solid 2px var(--custom-light);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-4);
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.rich-text {
+  color: var(--custom-fg);
+}
+
+.rich-text {
+  font-family:
+    "Inter",
+    -apple-system,
+    system-ui,
+    sans-serif;
+  overflow: hidden;
+  line-height: 1.1;
+}
+
+.top-info {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: flex;
+  gap: 5px;
+}
+
+.vote {
+  background-color: var(--white);
+  color: var(--gray-80);
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  font-weight: bold;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.comments {
+  background-color: var(--white);
+  color: var(--gray-80);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  padding: 0 5px;
+  gap: 5px;
+
+  mat-icon {
+    inline-size: 13px;
+    block-size: 13px;
+    font-size: 13px;
+  }
+}
+
+.emoji {
+  position: absolute;
+  font-family: "Twemoji Mozilla", "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji", "EmojiOne Color", "Android Emoji",
+    sans-serif;
+  font-size: 1.375rem;
+  width: var(--emoji-width);
+  height: var(--emoji-height);
+}
+
+.name {
+  color: var(--contrast-color);
+}
+
+.vote,
+.name {
+  pointer-events: none;
+  z-index: 1;
+}
+
+canvas {
+  cursor: crosshair;
+  position: absolute;
+  top: 0;
+  left: 0;
+}

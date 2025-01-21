@@ -17,7 +17,7 @@ import {
   map,
   share,
 } from 'rxjs';
-import { pageFeature } from '../modules/board/reducers/page.reducer';
+import { boardPageFeature } from '../modules/board/reducers/boardPage.reducer';
 import { concatLatestFrom } from '@ngrx/operators';
 import * as R from 'remeda';
 import { addLog, addRawLog } from '../debug/debug';
@@ -36,10 +36,11 @@ export class BoardFacade {
     this.getUsers().pipe(map((users) => users.map((user) => user.content))),
     { initialValue: [] },
   );
-  userId = this.store.selectSignal(pageFeature.selectUserId);
+  userId = this.store.selectSignal(boardPageFeature.selectUserId);
   currentUser = computed(() => {
     return this.users()?.find((user) => user.id === this.userId());
   });
+  nodes = toSignal(this.getNodes(), { initialValue: [] });
 
   start() {
     this.board.update(() => {
@@ -107,8 +108,8 @@ export class BoardFacade {
   selectCursors() {
     return this.getUsers().pipe(
       concatLatestFrom(() => [
-        this.store.select(pageFeature.selectUserId),
-        this.store.select(pageFeature.selectBoardUsers),
+        this.store.select(boardPageFeature.selectUserId),
+        this.store.select(boardPageFeature.selectBoardUsers),
       ]),
       map(([users, currentUser, boardUsers]) => {
         return users
@@ -163,7 +164,7 @@ export class BoardFacade {
   }
 
   readonly selectFocusNodes$ = combineLatest([
-    this.store.select(pageFeature.selectFocusId),
+    this.store.select(boardPageFeature.selectFocusId),
     this.getNodes(),
   ]).pipe(
     map(([focusId, nodes]) => {
