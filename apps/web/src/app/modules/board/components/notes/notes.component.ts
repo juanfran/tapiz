@@ -47,7 +47,7 @@ import { defaultNoteColor } from '../note';
           <tapiz-color-picker
             #picker
             [color]="customColor()"
-            (change)="changeColor($event)" />
+            (changed)="changeColor($event)" />
         </div>
       </div>
     </div>

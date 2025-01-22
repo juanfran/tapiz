@@ -20,7 +20,8 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": false
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

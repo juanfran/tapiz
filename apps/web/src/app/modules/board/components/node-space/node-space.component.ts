@@ -81,7 +81,7 @@ export class NodeSpaceComponent implements AfterViewInit {
   resize = input(false);
   rotate = input(false);
   cursor = input('grab');
-  drop = output();
+  dropped = output();
   dragging = output();
 
   @ViewChild('drag')
@@ -124,7 +124,7 @@ export class NodeSpaceComponent implements AfterViewInit {
       position: () => this.position,
       destroyRef: this.#destroyRef,
       drop: () => {
-        this.drop.emit();
+        this.dropped.emit();
       },
       dragging: () => {
         this.dragging.emit();

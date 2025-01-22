@@ -22,7 +22,7 @@ export class ColorPickerComponent implements OnDestroy {
   pickr?: Pickr;
 
   color = input<string>();
-  change = output<string | undefined>();
+  changed = output<string | undefined>();
   mode = input<'HEX' | 'RGBA' | 'HSL' | 'HSVA'>('HEX');
 
   constructor() {
@@ -49,19 +49,19 @@ export class ColorPickerComponent implements OnDestroy {
       });
 
       this.pickr.on('clear', () => {
-        this.change.emit(undefined);
+        this.changed.emit(undefined);
         this.pickr?.hide();
       });
 
       this.pickr.on('change', (color: Pickr.HSVaColor | null) => {
         if (this.mode() === 'HEX') {
-          this.change.emit(color?.toHEXA().toString() ?? undefined);
+          this.changed.emit(color?.toHEXA().toString() ?? undefined);
         } else if (this.mode() === 'RGBA') {
-          this.change.emit(color?.toRGBA().toString() ?? undefined);
+          this.changed.emit(color?.toRGBA().toString() ?? undefined);
         } else if (this.mode() === 'HSL') {
-          this.change.emit(color?.toHSLA().toString() ?? undefined);
+          this.changed.emit(color?.toHSLA().toString() ?? undefined);
         } else if (this.mode() === 'HSVA') {
-          this.change.emit(color?.toHSVA().toString() ?? undefined);
+          this.changed.emit(color?.toHSVA().toString() ?? undefined);
         }
 
         this.pickr?.hide();

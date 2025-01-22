@@ -33,7 +33,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
       for="color-picker">
       <tapiz-color-picker
         [color]="color() || defaultTextColor()"
-        (change)="changeColor($event)" />
+        (changed)="changeColor($event)" />
     </label>
   `,
   styleUrls: ['../options.scss', './option-font.component.scss'],

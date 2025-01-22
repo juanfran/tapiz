@@ -52,3 +52,4 @@ uploads/*
 !uploads/.gitkeep
 
 vite.config.*.timestamp*
+vitest.config.*.timestamp*

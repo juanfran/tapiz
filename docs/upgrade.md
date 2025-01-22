@@ -2,8 +2,8 @@
 
 ```bash
 pnpm nx migrate latest
-pnpm i
-pnpm nx migrate --run-migrations
+pnpm install --no-frozen-lockfile
+pnpm exec nx migrate --run-migrations
 rm migrations.json
 ```
 

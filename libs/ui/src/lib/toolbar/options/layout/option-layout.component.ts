@@ -21,7 +21,7 @@ import { MatSliderModule } from '@angular/material/slider';
 
         <tapiz-color-picker
           [color]="node().content.backgroundColor"
-          (change)="updateNodeValue($event, 'backgroundColor')" />
+          (changed)="updateNodeValue($event, 'backgroundColor')" />
       </label>
     </div>
 
@@ -31,7 +31,7 @@ import { MatSliderModule } from '@angular/material/slider';
 
         <tapiz-color-picker
           [color]="node().content.borderColor"
-          (change)="updateNodeValue($event, 'borderColor')" />
+          (changed)="updateNodeValue($event, 'borderColor')" />
       </label>
     </div>
 
@@ -93,7 +93,7 @@ import { MatSliderModule } from '@angular/material/slider';
 
         <tapiz-color-picker
           [color]="node().content.color"
-          (change)="updateNodeValue($event, 'color')" />
+          (changed)="updateNodeValue($event, 'color')" />
       </label>
     </div>
   `,
