@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  output,
   signal,
 } from '@angular/core';
 import { BoardMoveService } from '../../services/board-move.service';
@@ -65,6 +66,8 @@ export class LiveReactionComponent {
   #liveReactionStore = inject(LiveReactionStore);
   #http = inject(HttpClient);
   selected = signal<string>('');
+
+  reactionSelected = output<string>();
 
   category = signal('Smilies');
 
@@ -158,6 +161,8 @@ export class LiveReactionComponent {
           x: data.position.x - 50,
           y: data.position.y - 50,
         });
+
+        this.reactionSelected.emit(this.selected());
       });
   }
 

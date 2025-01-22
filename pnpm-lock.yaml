@@ -203,6 +203,9 @@ importers:
       lucia:
         specifier: ^3.2.0
         version: 3.2.0
+      lucide-angular:
+        specifier: ^0.473.0
+        version: 0.473.0(@angular/common@19.1.0(@angular/core@19.1.0(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1))(@angular/core@19.1.0(rxjs@7.8.1)(zone.js@0.15.0))
       ngx-infinite-scroll:
         specifier: ^19.0.0
         version: 19.0.0(@angular/common@19.1.0(@angular/core@19.1.0(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1))(@angular/core@19.1.0(rxjs@7.8.1)(zone.js@0.15.0))
@@ -7177,6 +7180,12 @@ packages:
 
   lucia@3.2.0:
     resolution: {integrity: sha512-eXMxXwk6hqtjRTj4W/x3EnTUtAztLPm0p2N2TEBMDEbakDLXiYnDQ9z/qahjPdPdhPguQc+vwO0/88zIWxlpuw==}
+
+  lucide-angular@0.473.0:
+    resolution: {integrity: sha512-V2g0j8/pMm2qQcwPohIrez1pwXEXTlnjiTHCcJ7dXCxQQDaaupBJhaDG6W5ZvApPjWx1zeDlV3ORLHLqjKK9rw==}
+    peerDependencies:
+      '@angular/common': 13.x - 19.x
+      '@angular/core': 13.x - 19.x
 
   luxon@3.5.0:
     resolution: {integrity: sha512-rh+Zjr6DNfUYR3bPwJEnuwDdqMbxZW7LOQfUN4B54+Cl+0o5zaU9RJ6bcidfDtC1cWCZXQ+nvX8bf6bAji37QQ==}
@@ -17842,6 +17851,12 @@ snapshots:
   lucia@3.2.0:
     dependencies:
       oslo: 1.2.0
+
+  lucide-angular@0.473.0(@angular/common@19.1.0(@angular/core@19.1.0(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1))(@angular/core@19.1.0(rxjs@7.8.1)(zone.js@0.15.0)):
+    dependencies:
+      '@angular/common': 19.1.0(@angular/core@19.1.0(rxjs@7.8.1)(zone.js@0.15.0))(rxjs@7.8.1)
+      '@angular/core': 19.1.0(rxjs@7.8.1)(zone.js@0.15.0)
+      tslib: 2.8.1
 
   luxon@3.5.0: {}
 

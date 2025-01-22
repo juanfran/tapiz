@@ -6,6 +6,7 @@ import {
   computed,
   inject,
   signal,
+  output,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -56,6 +57,7 @@ export class CocomaterialComponent {
   #boardMoveService = inject(BoardMoveService);
   #nodesActions = inject(NodesActions);
   tagInput = viewChild.required<ElementRef<HTMLInputElement>>('tagInput');
+  cocomaterialSelected = output<CocomaterialApiVector | null>();
 
   boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
 
@@ -197,6 +199,8 @@ export class CocomaterialComponent {
           ],
         }),
       );
+
+      this.cocomaterialSelected.emit(vector);
     }
   }
 

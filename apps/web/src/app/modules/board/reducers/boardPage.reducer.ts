@@ -26,6 +26,7 @@ export interface BoardPageState {
   showUserVotes: User['id'] | null;
   boardMode: number;
   popupOpen: string;
+  popupPinned: boolean;
   isAdmin: boolean;
   privateId: string;
   owners: string[];
@@ -69,6 +70,7 @@ const initialPageState: BoardPageState = {
   showUserVotes: null,
   boardMode: 0,
   popupOpen: '',
+  popupPinned: false,
   isAdmin: false,
   privateId: '',
   owners: [],
@@ -307,6 +309,12 @@ const reducer = createReducer(
     state.addToBoardInProcess = false;
 
     return state;
+  }),
+  on(BoardPageActions.setPopupPinned, (state, { pinned }): BoardPageState => {
+    return {
+      ...state,
+      popupPinned: pinned,
+    };
   }),
   on(BoardPageActions.readyToVote, (state): BoardPageState => {
     return {

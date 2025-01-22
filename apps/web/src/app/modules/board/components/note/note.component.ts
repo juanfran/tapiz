@@ -36,6 +36,7 @@ import { NoteHeightCalculatorService } from './components/note-height-calculator
 import { defaultNoteColor } from '.';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
+import { BoardPageActions } from '../../actions/board-page.actions';
 
 @Component({
   selector: 'tapiz-note',
@@ -84,6 +85,7 @@ export class NoteComponent {
   #activeToolbarOption = this.#store.selectSignal(
     boardPageFeature.selectPopupOpen,
   );
+  #toolbarPinned = this.#store.selectSignal(boardPageFeature.selectPopupPinned);
   #mentions = this.#store.selectSignal(boardPageFeature.selectMentions);
   #emoji = this.#store.selectSignal(boardPageFeature.selectEmoji);
   #userHighlight = this.#store.selectSignal(
@@ -576,6 +578,10 @@ export class NoteComponent {
           ],
         }),
       );
+    }
+
+    if (!this.#toolbarPinned()) {
+      this.#store.dispatch(BoardPageActions.setPopupOpen({ popup: '' }));
     }
   }
 

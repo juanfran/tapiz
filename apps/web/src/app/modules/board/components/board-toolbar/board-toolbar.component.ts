@@ -5,6 +5,7 @@ import {
   inject,
   signal,
   HostListener,
+  computed,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
@@ -45,6 +46,9 @@ import { ToolsComponent } from '../tools/tools.component';
 import { defaultNoteColor } from '../note';
 import { NgTemplateOutlet } from '@angular/common';
 import { BoardToolbardButtonComponent } from './components/board-toolboard-button.component';
+import { LucideAngularModule, Pin, PinOff } from 'lucide-angular';
+
+export class AppModule {}
 @Component({
   selector: 'tapiz-board-toolbar',
   templateUrl: './board-toolbar.component.html',
@@ -63,6 +67,7 @@ import { BoardToolbardButtonComponent } from './components/board-toolboard-butto
     ToolsComponent,
     NgTemplateOutlet,
     BoardToolbardButtonComponent,
+    LucideAngularModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [HotkeysService],
@@ -76,10 +81,44 @@ export class BoardToolbarComponent {
   #zoneService = inject(ZoneService);
   #fileUploadService = inject(FileUploadService);
 
+  icons = {
+    pin: Pin,
+    pinOff: PinOff,
+  };
+
   toolbarSubscription?: Subscription;
   boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
   popup = this.#store.selectSignal(boardPageFeature.selectPopupOpen);
+  pinned = this.#store.selectSignal(boardPageFeature.selectPopupPinned);
   noteColor = signal<string>(defaultNoteColor);
+  showPopup = computed(() => {
+    const withPopup = [
+      'token',
+      'tools',
+      'note',
+      'emoji',
+      'templates',
+      'cocomaterial',
+      'live-reaction',
+      'image',
+    ];
+
+    return withPopup.includes(this.popup());
+  });
+
+  showPin = computed(() => {
+    const withPin = [
+      'token',
+      'note',
+      'emoji',
+      'templates',
+      'cocomaterial',
+      'live-reaction',
+      'image',
+    ];
+
+    return withPin.includes(this.popup());
+  });
 
   @HostListener('document:keydown.alt', ['$event']) selectAreaShortcut(
     e: KeyboardEvent,
@@ -213,6 +252,21 @@ export class BoardToolbarComponent {
   }
 
   note() {
+    const createNote = () => {
+      console.log('create note');
+      this.toolbarSubscription = this.#zoneService
+        .select()
+        .subscribe(({ userId, position }) => {
+          this.#notesService.createNote(userId, position, this.noteColor());
+
+          if (!this.pinned()) {
+            this.popupOpen('');
+          } else {
+            createNote();
+          }
+        });
+    };
+
     if (this.popup() === 'note') {
       this.popupOpen('');
       return;
@@ -220,12 +274,7 @@ export class BoardToolbarComponent {
 
     this.popupOpen('note');
 
-    this.toolbarSubscription = this.#zoneService
-      .select()
-      .subscribe(({ userId, position }) => {
-        this.#notesService.createNote(userId, position, this.noteColor());
-        this.popupOpen('');
-      });
+    createNote();
   }
 
   select() {
@@ -410,6 +459,7 @@ export class BoardToolbarComponent {
   }
 
   emojiSelected(emojiEvent: EmojiClickEvent) {
+    console.log(emojiEvent);
     this.#store.dispatch(
       BoardPageActions.selectEmoji({
         emoji: emojiEvent.detail.emoji as NativeEmoji,
@@ -466,7 +516,9 @@ export class BoardToolbarComponent {
     this.toolbarSubscription = this.#zoneService
       .select()
       .subscribe(({ position }) => {
-        this.popupOpen('');
+        if (!this.pinned()) {
+          this.popupOpen('');
+        }
 
         const tokenContent: Token = {
           ...token,
@@ -543,6 +595,14 @@ export class BoardToolbarComponent {
     this.popupOpen('');
   }
 
+  togglePinned() {
+    this.#store.dispatch(
+      BoardPageActions.setPopupPinned({
+        pinned: this.pinned() ? false : true,
+      }),
+    );
+  }
+
   templateSelector() {
     if (this.popup() === 'templates') {
       this.popupOpen('');
@@ -553,6 +613,20 @@ export class BoardToolbarComponent {
   }
 
   seletedTemplate() {
-    this.popupOpen('');
+    if (!this.pinned()) {
+      this.popupOpen('');
+    }
+  }
+
+  cocomaterialSelected() {
+    if (!this.pinned()) {
+      this.popupOpen('');
+    }
+  }
+
+  reactionSelected() {
+    if (!this.pinned()) {
+      this.popupOpen('');
+    }
   }
 }

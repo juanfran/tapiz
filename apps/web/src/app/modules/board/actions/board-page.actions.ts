@@ -42,6 +42,7 @@ export const BoardPageActions = createActionGroup({
     Redo: emptyProps(),
     'Toggle user highlight': props<{ id: User['id'] }>(),
     'Set popup open': props<{ popup: string }>(),
+    'Set popup pinned': props<{ pinned: boolean }>(),
     'Ready to vote': emptyProps(),
     'Board not found': props<{ id: BoardUser['id'] }>(),
     'Select emoji': props<{ emoji: NativeEmoji }>(),

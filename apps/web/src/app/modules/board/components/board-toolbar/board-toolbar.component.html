@@ -79,58 +79,62 @@
 </div>
 
 @defer (prefetch on idle) {
-  <div class="toolbar-container">
-    @if (popup() === 'token') {
-      <tapiz-token-selector
-        (selectToken)="tokenSelected($event)"
-        class="toolbar-popup">
-      </tapiz-token-selector>
-    }
+  @if (showPopup()) {
+    <div class="toolbar-container">
+      <div class="toolbar-popup">
+        @if (showPin()) {
+          <div class="toolbar-pinned">
+            <div class="pinned-wrapper">
+              <button
+                mat-icon-button
+                type="button"
+                [title]="pinned() ? 'Unpin' : 'Pin'"
+                (click)="togglePinned()">
+                @if (pinned()) {
+                  <lucide-icon [img]="icons.pinOff"></lucide-icon>
+                } @else {
+                  <lucide-icon [img]="icons.pin"></lucide-icon>
+                }
+              </button>
+            </div>
+          </div>
+        }
 
-    @if (popup() === 'tools') {
-      <tapiz-tools
-        (selectedTool)="toolsEvent($event)"
-        class="toolbar-popup">
-      </tapiz-tools>
-    }
-
-    @if (popup() === 'note') {
-      <tapiz-notes
-        class="toolbar-popup"
-        [(noteColor)]="noteColor">
-      </tapiz-notes>
-    }
-
-    @if (popup() === 'emoji') {
-      <emoji-picker
-        (emoji-click)="emojiSelected($event)"
-        class="light toolbar-popup">
-      </emoji-picker>
-    }
-
-    @if (popup() === 'templates') {
-      <tapiz-template-selector
-        (selected)="seletedTemplate()"
-        class="toolbar-popup">
-      </tapiz-template-selector>
-    }
-
-    @if (popup() === 'cocomaterial') {
-      <tapiz-cocomaterial class="toolbar-popup"></tapiz-cocomaterial>
-    }
-
-    @if (popup() === 'live-reaction') {
-      <tapiz-live-reaction class="toolbar-popup"></tapiz-live-reaction>
-    }
-
-    @if (popup() === 'image') {
-      <tapiz-add-image
-        class="toolbar-popup"
-        (newImageUrl)="newImageUrl($event)"
-        (newImageFile)="newImageFile($event)">
-      </tapiz-add-image>
-    }
-  </div>
+        @switch (popup()) {
+          @case ('token') {
+            <tapiz-token-selector (selectToken)="tokenSelected($event)" />
+          }
+          @case ('tools') {
+            <tapiz-tools (selectedTool)="toolsEvent($event)" />
+          }
+          @case ('note') {
+            <tapiz-notes [(noteColor)]="noteColor" />
+          }
+          @case ('emoji') {
+            <emoji-picker
+              (emoji-click)="emojiSelected($event)"
+              class="light" />
+          }
+          @case ('templates') {
+            <tapiz-template-selector (selected)="seletedTemplate()" />
+          }
+          @case ('cocomaterial') {
+            <tapiz-cocomaterial
+              (cocomaterialSelected)="cocomaterialSelected()" />
+          }
+          @case ('live-reaction') {
+            <tapiz-live-reaction (reactionSelected)="reactionSelected()" />
+          }
+          @case ('image') {
+            <tapiz-add-image
+              class="toolbar-popup"
+              (newImageUrl)="newImageUrl($event)"
+              (newImageFile)="newImageFile($event)" />
+          }
+        }
+      </div>
+    </div>
+  }
 }
 
 <ng-template #noteButton>
