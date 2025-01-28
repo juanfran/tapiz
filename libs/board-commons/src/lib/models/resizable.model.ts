@@ -1,4 +1,5 @@
 import { Point } from '../models/point.model.js';
+import { TuNode } from './node.model.js';
 
 export interface Resizable {
   width: number;
@@ -12,3 +13,11 @@ export type ResizePosition =
   | 'top-right'
   | 'bottom-left'
   | 'bottom-right';
+
+export const isResizable = (node: TuNode): node is TuNode<Resizable> => {
+  return (
+    'width' in node.content &&
+    'height' in node.content &&
+    'position' in node.content
+  );
+};

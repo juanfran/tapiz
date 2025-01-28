@@ -253,7 +253,6 @@ export class BoardToolbarComponent {
 
   note() {
     const createNote = () => {
-      console.log('create note');
       this.toolbarSubscription = this.#zoneService
         .select()
         .subscribe(({ userId, position }) => {

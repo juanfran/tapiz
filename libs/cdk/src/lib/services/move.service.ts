@@ -8,22 +8,16 @@ import {
   endWith,
   withLatestFrom,
   tap,
+  startWith,
 } from 'rxjs/operators';
-import type {
-  Resizable,
-  ResizePosition,
-  Point,
-  RotatableHost,
-} from '@tapiz/board-commons';
+import type { Point, RotatableHost } from '@tapiz/board-commons';
 import {
   compose,
   decomposeTSR,
-  rotate,
   rotateDEG,
   translate,
 } from 'transformation-matrix';
 import { concatLatestFrom } from '@ngrx/operators';
-import { filterNil } from 'ngxtension/filter-nil';
 
 @Injectable({
   providedIn: 'root',
@@ -69,12 +63,7 @@ export class MoveService {
     );
   }
 
-  public listenIncrementalAreaSelector(
-    el: HTMLElement,
-    host: Resizable,
-    position: ResizePosition,
-    onStart: () => void,
-  ) {
+  public mouseDownAndMove(el: HTMLElement) {
     const setUpConfig = this.setUpConfig;
 
     if (!setUpConfig) {
@@ -89,6 +78,7 @@ export class MoveService {
       withLatestFrom(setUpConfig.zoom),
       map(([mouseDown, zoom]) => {
         return {
+          shiftKey: mouseDown.shiftKey,
           x: mouseDown.x / zoom,
           y: mouseDown.y / zoom,
         };
@@ -100,90 +90,36 @@ export class MoveService {
     const mouseMove$ = fromEvent<MouseEvent>(window, 'mousemove').pipe(
       throttleTime(0, animationFrameScheduler),
       withLatestFrom(setUpConfig.zoom),
-      map(([mouseDown, zoom]) => {
+      map(([mouseMove, zoom]) => {
         return {
-          x: mouseDown.x / zoom,
-          y: mouseDown.y / zoom,
+          shiftKey: mouseMove.shiftKey,
+          x: mouseMove.x / zoom,
+          y: mouseMove.y / zoom,
         };
       }),
     );
 
     return mouseDown$.pipe(
-      switchMap((event) => {
+      switchMap((e) => {
         const initialPosition = {
-          x: event.x,
-          y: event.y,
-          hostX: host.position.x,
-          hostY: host.position.y,
-          width: host.width,
-          height: host.height,
+          x: e.x,
+          y: e.y,
         };
-
-        onStart();
 
         return mouseMove$.pipe(
           takeUntil(mouseUp$),
-          map((mouseMove) => {
+          map((event) => {
             return {
-              diffX: mouseMove.x - initialPosition.x,
-              diffY: mouseMove.y - initialPosition.y,
+              type: 'move',
+              event,
+              initialPosition,
             };
           }),
-          filterNil(),
-          map((mouseMove) => {
-            const rotation = host.rotation ?? 0;
-            const angle = rotation * (Math.PI / 180);
-            const deltaX = Math.round(
-              mouseMove.diffX * Math.cos(angle) +
-                mouseMove.diffY * Math.sin(angle),
-            );
-            const deltaY = Math.round(
-              mouseMove.diffY * Math.cos(angle) -
-                mouseMove.diffX * Math.sin(angle),
-            );
-
-            let newWidth = initialPosition.width;
-            let newHeight = initialPosition.height;
-
-            let currentMatrix = compose(
-              translate(initialPosition.hostX, initialPosition.hostY),
-              rotate(angle),
-            );
-
-            if (position === 'top-left') {
-              newWidth -= deltaX;
-              newHeight -= deltaY;
-
-              currentMatrix = compose(currentMatrix, translate(deltaX, deltaY));
-            } else if (position === 'top-right') {
-              newWidth += deltaX;
-              newHeight -= deltaY;
-
-              currentMatrix = compose(currentMatrix, translate(0, deltaY));
-            } else if (position === 'bottom-left') {
-              newWidth -= deltaX;
-              newHeight += deltaY;
-
-              currentMatrix = compose(currentMatrix, translate(deltaX, 0));
-            } else if (position === 'bottom-right') {
-              newWidth += deltaX;
-              newHeight += deltaY;
-            }
-
-            const decomposed = decomposeTSR(currentMatrix);
-
-            if (newWidth < 5 || newHeight < 5) {
-              return;
-            }
-
-            return {
-              x: decomposed.translate.tx,
-              y: decomposed.translate.ty,
-              width: newWidth,
-              height: newHeight,
-            };
+          startWith({
+            type: 'start',
+            event: e,
+            initialPosition,
           }),
-          endWith(null),
         );
       }),
     );

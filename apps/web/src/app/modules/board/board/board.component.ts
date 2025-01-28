@@ -56,7 +56,6 @@ import { ContextMenuStore } from '@tapiz/ui/context-menu/context-menu.store';
 import { BoardContextMenuComponent } from '../components/board-context-menu/board-contextmenu.component';
 import { HistoryService } from '../services/history.service';
 import { MoveService } from '@tapiz/cdk/services/move.service';
-import { ResizeService } from '@tapiz/ui/resize/resize.service';
 import { RotateService } from '@tapiz/ui/rotate/rotate.service';
 import { NodeToolbarComponent } from '../components/node-toolbar/node-toolbar.component';
 import { WsService } from '../../ws/services/ws.service';
@@ -84,6 +83,7 @@ import { NotesVisibilityComponent } from '../components/notes-visibility/notes-v
 import { NoteHeightCalculatorComponent } from '../components/note/components/note-height-calculator/note-height-calculator.component';
 import { BoardDragDirective } from './directives/board-drag.directive';
 import { BoardHeaderOptionsComponent } from '../components/board-header-options/board-header-options.component';
+import { BoardResizeDirective } from './directives/board-resize.directive';
 
 @Component({
   selector: 'tapiz-board',
@@ -125,6 +125,7 @@ import { BoardHeaderOptionsComponent } from '../components/board-header-options/
     CopyPasteDirective,
     BoardShourtcutsDirective,
     BoardDragDirective,
+    BoardResizeDirective,
   ],
   host: {
     '[class.node-selection-disabled]': '!nodeSelectionEnabled()',
@@ -151,7 +152,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   private boardFacade = inject(BoardFacade);
   private contextMenuStore = inject(ContextMenuStore);
   private moveService = inject(MoveService);
-  private resizeService = inject(ResizeService);
   private rotateService = inject(RotateService);
   private subscriptionService = inject(SubscriptionService);
   private drawingStore = inject(DrawingStore);
@@ -315,30 +315,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     });
 
     this.rotateService.onRotate$
-      .pipe(takeUntilDestroyed())
-      .subscribe((node) => {
-        this.store.dispatch(
-          BoardActions.batchNodeActions({
-            history: false,
-            actions: [this.nodesActions.patch(node)],
-          }),
-        );
-      });
-
-    this.resizeService.onStart$.pipe(takeUntilDestroyed()).subscribe((node) => {
-      this.boardFacade.patchHistory((history) => {
-        const nodeAction: StateActions = {
-          data: node,
-          op: 'patch',
-        };
-        history.past.unshift([nodeAction]);
-        history.future = [];
-
-        return history;
-      });
-    });
-
-    this.resizeService.onResize$
       .pipe(takeUntilDestroyed())
       .subscribe((node) => {
         this.store.dispatch(
