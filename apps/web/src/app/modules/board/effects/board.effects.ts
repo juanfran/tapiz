@@ -371,7 +371,9 @@ export class BoardEffects {
       return this.actions$.pipe(
         ofType(BoardCommonActions.broadcast),
         tap((message: EmojiMessage) => {
-          this.liveReactionStore.add(message.data.url, message.data.position);
+          if (message.data.type === 'emoji') {
+            this.liveReactionStore.add(message.data.url, message.data.position);
+          }
         }),
       );
     },

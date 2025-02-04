@@ -84,6 +84,7 @@ import { NoteHeightCalculatorComponent } from '../components/note/components/not
 import { BoardDragDirective } from './directives/board-drag.directive';
 import { BoardHeaderOptionsComponent } from '../components/board-header-options/board-header-options.component';
 import { BoardResizeDirective } from './directives/board-resize.directive';
+import { TimerComponent } from '../components/timer/timer.component';
 
 @Component({
   selector: 'tapiz-board',
@@ -120,6 +121,7 @@ import { BoardResizeDirective } from './directives/board-resize.directive';
     NotesVisibilityComponent,
     NoteHeightCalculatorComponent,
     BoardHeaderOptionsComponent,
+    TimerComponent,
   ],
   hostDirectives: [
     CopyPasteDirective,
@@ -222,6 +224,8 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       );
     }),
   );
+
+  timer = this.#boardFacade.timer;
 
   @HostBinding('class.follow-user')
   public get isFollowUser() {

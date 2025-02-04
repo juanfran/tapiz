@@ -1,4 +1,4 @@
-Create component in `libs/nodes/src/lib/`.
+Create component in `modules/board/components`.
 
 Add the action to `board-toolbar.component.html`.
 
