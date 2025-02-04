@@ -35,4 +35,8 @@ export class ToolsComponent {
   selectedEstimation() {
     this.selectedTool.emit('selectedEstimation');
   }
+
+  selectedTimer() {
+    this.selectedTool.emit('selectedTimer');
+  }
 }

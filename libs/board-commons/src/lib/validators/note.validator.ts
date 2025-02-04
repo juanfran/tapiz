@@ -52,7 +52,7 @@ const NOTE_VALIDATOR: NodeValidator = {
   add: async (data) => {
     const validation = newNote.safeParse(data.content);
 
-    if (validation.success) {
+    if (validation.success && data.id === 'timer') {
       return {
         success: true,
         data: {

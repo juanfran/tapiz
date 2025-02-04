@@ -5,6 +5,7 @@ import { ESTIMATION_VALIDATORS } from '@tapiz/board-commons/validators/estimatio
 import { POLL_VALIDATORS } from '@tapiz/board-commons/validators/poll.validator.js';
 import { COMMENTS_VALIDATORS } from '@tapiz/board-commons/validators/comments.validator.js';
 import { SETTINGS_VALIDATOR } from '@tapiz/board-commons/validators/settings.validators.js';
+import { TIMER_VALIDATORS } from '@tapiz/board-commons/validators/timer.validators.js';
 
 import { NOTE_VALIDATORS } from '@tapiz/board-commons/validators/note.validator.js';
 
@@ -41,6 +42,7 @@ const validations = {
     ...POLL_VALIDATORS,
     ...COMMENTS_VALIDATORS,
     ...NOTE_VALIDATORS,
+    ...TIMER_VALIDATORS,
   ],
 };
 

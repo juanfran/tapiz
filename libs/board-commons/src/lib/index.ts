@@ -26,6 +26,7 @@ export * from './models/poll.model.js';
 export * from './models/comments.model.js';
 export * from './models/auth-user.model.js';
 export * from './models/space.model.js';
+export * from './models/timer.model.js';
 export * from './state-tools.js';
 export * from './board-common-actions.js';
 export * from './validators/index.js';

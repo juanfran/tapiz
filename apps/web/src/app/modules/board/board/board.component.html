@@ -61,11 +61,16 @@
     @if (!isReadonlyUser()) {
       <tapiz-board-toolbar />
     }
+
     @if (drawing()) {
       <tapiz-drawing-options />
     }
     @if (search()) {
       <tapiz-search-options />
+    }
+
+    @if (timer(); as timer) {
+      <tapiz-timer [timer]="timer" />
     }
   }
   <div

@@ -8,6 +8,7 @@ import {
   TuNode,
   UserNode,
   isNote,
+  isTimer,
 } from '@tapiz/board-commons';
 import { syncNodeBox } from '@tapiz/sync-node-box';
 import {
@@ -41,6 +42,9 @@ export class BoardFacade {
     return this.users()?.find((user) => user.id === this.userId());
   });
   nodes = toSignal(this.getNodes(), { initialValue: [] });
+  timer = computed(() => {
+    return this.nodes().find((it) => isTimer(it))?.content;
+  });
 
   start() {
     this.board.update(() => {
@@ -159,7 +163,7 @@ export class BoardFacade {
 
   filterBoardNodes(nodes: TuNode[]) {
     return nodes.filter(
-      (it) => !['user', 'settings'].includes(it.type),
+      (it) => !['user', 'settings', 'timer'].includes(it.type),
     ) as BoardTuNode[];
   }
 

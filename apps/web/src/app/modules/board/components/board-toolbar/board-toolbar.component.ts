@@ -25,9 +25,11 @@ import {
   EstimationBoard,
   Group,
   Image,
+  NodeAdd,
   Panel,
   PollBoard,
   Text,
+  Timer,
 } from '@tapiz/board-commons';
 import { DrawingStore } from '../drawing/drawing.store';
 import { TemplateSelectorComponent } from '../template-selector/template-selector.component';
@@ -247,6 +249,9 @@ export class BoardToolbarComponent {
         break;
       case 'selectedEstimation':
         this.estimation();
+        break;
+      case 'selectedTimer':
+        this.timer();
         break;
     }
   }
@@ -482,6 +487,24 @@ export class BoardToolbarComponent {
     }
 
     this.popupOpen('token');
+  }
+
+  timer() {
+    const nodeAdd: NodeAdd<Timer> = {
+      op: 'add',
+      data: {
+        id: 'timer',
+        type: 'timer',
+        content: {},
+      },
+    };
+
+    this.#store.dispatch(
+      BoardActions.batchNodeActions({
+        history: false,
+        actions: [nodeAdd],
+      }),
+    );
   }
 
   estimation() {
