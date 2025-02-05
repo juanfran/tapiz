@@ -20,7 +20,7 @@ const TIMER_VALIDATOR: NodeValidator = {
 
     const validation = timer.safeParse(data.content);
 
-    if (validation.success) {
+    if (validation.success && data.id === 'timer') {
       return {
         success: true,
         data: {
