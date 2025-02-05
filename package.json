@@ -21,6 +21,7 @@
     "studio": "pnpm exec drizzle-kit studio",
     "lint": "nx run-many --all --target=lint --parallel",
     "format": "nx format:write --libs-and-apps",
+    "demo": "nx run api:demo",
     "prepare": "husky"
   },
   "engines": {
