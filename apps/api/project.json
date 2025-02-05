@@ -60,6 +60,13 @@
       "options": {
         "command": "pnpm exec tsx apps/api/src/app/db/migrate.ts"
       }
+    },
+    "demo": {
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "pnpm exec tsx apps/api/src/simulate-users.ts"
+      }
     }
   },
   "tags": ["scope:server"]
