@@ -463,7 +463,6 @@ export class BoardToolbarComponent {
   }
 
   emojiSelected(emojiEvent: EmojiClickEvent) {
-    console.log(emojiEvent);
     this.#store.dispatch(
       BoardPageActions.selectEmoji({
         emoji: emojiEvent.detail.emoji as NativeEmoji,

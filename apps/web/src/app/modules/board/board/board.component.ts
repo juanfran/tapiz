@@ -5,7 +5,6 @@ import {
   AfterViewInit,
   HostListener,
   OnDestroy,
-  HostBinding,
   inject,
   DestroyRef,
   computed,
@@ -133,17 +132,10 @@ import { TimerComponent } from '../components/timer/timer.component';
     '[class.node-selection-disabled]': '!nodeSelectionEnabled()',
     '[class.readonly]': 'isReadonlyUser()',
     '[class.edit-mode]': 'boardMode() === 1',
+    '[class.following-user]': 'followUser()',
   },
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
-  @HostBinding('class.following-user')
-  public get isFollowingUser() {
-    let hasPeople = false;
-    this.userToFollow$.subscribe((user) => {
-      hasPeople = !!user;
-    });
-    return hasPeople;
-  }
   public el = inject(ElementRef);
   private wsService = inject(WsService);
   private store = inject(Store);
@@ -178,7 +170,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly boardTitle = this.store.selectSignal(
     boardPageFeature.selectName,
   );
-  public readonly folloUser = this.store.selectSignal(
+  public readonly followUser = this.store.selectSignal(
     boardPageFeature.selectFollow,
   );
   public readonly loaded = this.store.selectSignal(
@@ -213,24 +205,8 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   workLayer = viewChild.required<ElementRef<HTMLElement>>('workLayer');
 
   dots = viewChild.required<ElementRef<HTMLElement>>('dots');
-  #store = inject(Store);
   #boardFacade = inject(BoardFacade);
-  userToFollow$ = this.#store.select(boardPageFeature.selectFollow).pipe(
-    switchMap((follow) => {
-      return this.#boardFacade.getUsers().pipe(
-        map((users) => {
-          return users.find((user) => user.id === follow)?.content;
-        }),
-      );
-    }),
-  );
-
   timer = this.#boardFacade.timer;
-
-  @HostBinding('class.follow-user')
-  public get isFollowUser() {
-    return this.folloUser();
-  }
 
   @HostListener('dblclick', ['$event'])
   public dblclick(event: MouseEvent) {

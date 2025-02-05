@@ -13,6 +13,8 @@ import {
 import { syncNodeBox } from '@tapiz/sync-node-box';
 import {
   Observable,
+  animationFrameScheduler,
+  auditTime,
   combineLatest,
   distinctUntilChanged,
   map,
@@ -75,7 +77,7 @@ export class BoardFacade {
   }
 
   getNodes() {
-    return this.board.sync();
+    return this.board.sync().pipe(auditTime(20, animationFrameScheduler));
   }
 
   patchHistory(fn: Parameters<typeof this.board.patchHistory>[0]) {
