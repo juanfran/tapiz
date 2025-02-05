@@ -14,6 +14,7 @@ import {
   auditTime,
   take,
   withLatestFrom,
+  bufferTime,
 } from 'rxjs/operators';
 import { BoardActions } from '../actions/board.actions';
 import { BoardPageActions } from '../actions/board-page.actions';
@@ -133,18 +134,18 @@ export class BoardEffects {
   public stateAction$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BoardActions.stateAction),
-      map(({ data }) => {
-        const hasNewUser = data.some(
-          (it) => it.op === 'add' && it.data.type === 'user',
+      bufferTime(20),
+      filter((actions) => actions.length > 0),
+      map((actions) => {
+        const aggregatedData = actions.flatMap((action) => action.data);
+
+        const hasNewUser = aggregatedData.some(
+          (item) => item.op === 'add' && item.data.type === 'user',
         );
 
-        this.boardFacade.applyActions(data);
+        this.boardFacade.applyActions(aggregatedData);
 
-        if (hasNewUser) {
-          return BoardPageActions.newUserJoined();
-        }
-
-        return null;
+        return hasNewUser ? BoardPageActions.newUserJoined() : null;
       }),
       filterNil(),
     );

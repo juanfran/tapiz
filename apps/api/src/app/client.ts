@@ -302,7 +302,7 @@ export class Client {
 
       this.socket.join(this.boardId);
 
-      this.send(this.getSetStateAction(board));
+      this.sendToClient(this.getSetStateAction(board));
     } catch (e) {
       console.error(e);
     }
@@ -332,7 +332,11 @@ export class Client {
     };
   }
 
-  send(msg: unknown) {
+  sendToClient(msg: unknown) {
+    this.socket.emit('board', [msg]);
+  }
+
+  sendAll(boardId: string, msg: unknown) {
     this.pendingMsgs.push(msg);
 
     if (this.sendTimeout) {
@@ -340,14 +344,11 @@ export class Client {
     }
 
     this.sendTimeout = setTimeout(() => {
-      this.socket.emit('board', this.pendingMsgs);
+      // send to all users in boardId but client
+      this.socket.to(boardId).emit('board', this.pendingMsgs);
       this.pendingMsgs = [];
       this.sendTimeout = undefined;
     }, 50);
-  }
-
-  sendAll(boardId: string, message: unknown) {
-    this.socket.to(boardId).emit('board', [message]);
   }
 
   private updateStateWithActions(actions: StateActions[]) {
