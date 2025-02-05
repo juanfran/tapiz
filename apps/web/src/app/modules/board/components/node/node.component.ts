@@ -38,7 +38,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   imports: [],
   providers: [RxState, NodeStore],
   host: {
-    '[class.highlight]': 'hightlight()',
+    '[class.highlight]': 'highlight()',
     '[style.width.px]': 'size().width',
     '[style.height.px]': 'size().height',
     '[style.transform]': 'transform()',
@@ -109,7 +109,7 @@ export class NodeComponent implements OnInit {
     );
   }
 
-  public hightlight = this.#nodeStore.highlight;
+  public highlight = this.#nodeStore.highlight;
 
   public get nativeElement() {
     return this.el.nativeElement;
