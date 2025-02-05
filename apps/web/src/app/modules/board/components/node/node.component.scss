@@ -4,6 +4,6 @@
   z-index: var(--z-index-node, 1);
 
   &.highlight {
-    z-index: var(--board-hightlight-node-layer);
+    z-index: var(--board-highlight-node-layer);
   }
 }
