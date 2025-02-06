@@ -12,6 +12,9 @@
   p {
     margin-block-end: var(--size-1);
     font-size: var(--text-editor-font-size);
+    text-wrap: balance;
+    hyphens: none;
+
     &:empty::after {
       content: "\00A0";
     }
