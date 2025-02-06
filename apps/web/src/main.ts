@@ -2,13 +2,11 @@ import {
   enableProdMode,
   importProvidersFrom,
   provideExperimentalZonelessChangeDetection,
-  isDevMode,
 } from '@angular/core';
 
 import { environment } from './environments/environment';
 import { AppComponent } from './app/app.component';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
-import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideStore } from '@ngrx/store';
 import { provideRouterStore, routerReducer } from '@ngrx/router-store';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -44,21 +42,20 @@ bootstrapApplication(AppComponent, {
         app: appFeature.reducer,
         router: routerReducer,
       },
-      {
-        metaReducers: debugMetaReducers,
-        runtimeChecks: {
-          strictStateImmutability: true,
-          strictActionImmutability: true,
-          strictStateSerializability: true,
-          strictActionSerializability: true,
-          strictActionTypeUniqueness: true,
-        },
-      },
+      environment.production
+        ? {}
+        : {
+            metaReducers: debugMetaReducers,
+            runtimeChecks: {
+              strictStateImmutability: true,
+              strictActionImmutability: true,
+              strictStateSerializability: true,
+              strictActionSerializability: true,
+              strictActionTypeUniqueness: true,
+            },
+          },
     ),
     provideEffects(appEffects),
-    provideStoreDevtools({
-      logOnly: !isDevMode(),
-    }),
     provideRouterStore(),
 
     provideHttpClient(withInterceptors([authInterceptor])),
@@ -68,5 +65,6 @@ bootstrapApplication(AppComponent, {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: { appearance: 'outline', subscriptSizing: 'dynamic' },
     },
+    environment.providers,
   ],
 }).catch((err) => console.error(err));

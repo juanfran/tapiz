@@ -23,12 +23,17 @@ front.forEach((key) => {
 const prodConfig = JSON.stringify({
   ...frontConfig,
   production: true,
+  providers: [],
 });
 
-const devConfig = JSON.stringify({
+const devBaseConfig = JSON.stringify({
   ...frontConfig,
   production: false,
-});
+}, null, 2);
+
+const devConfigWithProviders = `${devBaseConfig.slice(0, -1)},
+  providers: [provideStoreDevtools({ maxAge: 25 })]
+}`;
 
 writeFileSync(
   './apps/web/src/environments/environment.prod.ts',
@@ -37,5 +42,7 @@ writeFileSync(
 
 writeFileSync(
   './apps/web/src/environments/environment.ts',
-  `export const environment = ${devConfig};`
+  `import { provideStoreDevtools } from '@ngrx/store-devtools';
+
+export const environment = ${devConfigWithProviders};`
 );
