@@ -43,3 +43,4 @@ Tapiz is built using the following technologies and libraries:
 - [TRPC](https://trpc.io/)
 - [Lucia](https://lucia-auth.com/)
 - [Nx](https://nx.dev/)
+- [Lucide](https://lucide.dev/)

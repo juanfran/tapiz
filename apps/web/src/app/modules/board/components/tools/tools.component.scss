@@ -36,6 +36,7 @@
   }
 
   .icon {
+    color: var(--grey-90);
     fill: var(--grey-90);
   }
 
@@ -49,12 +50,11 @@
     span {
       color: var(--grey-90);
     }
-    
+
     .key {
       color: var(--grey-70);
       background: var(--white);
     }
-
   }
 }
 

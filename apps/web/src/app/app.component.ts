@@ -50,6 +50,7 @@ export class AppComponent {
     'share',
     'add_simple',
     'note',
+    'clock',
   ];
 
   constructor() {
