@@ -91,9 +91,9 @@
                 [title]="pinned() ? 'Unpin' : 'Pin'"
                 (click)="togglePinned()">
                 @if (pinned()) {
-                  <lucide-icon [img]="icons.pinOff"></lucide-icon>
-                } @else {
                   <lucide-icon [img]="icons.pin"></lucide-icon>
+                } @else {
+                  <lucide-icon [img]="icons.pinOff"></lucide-icon>
                 }
               </button>
             </div>
