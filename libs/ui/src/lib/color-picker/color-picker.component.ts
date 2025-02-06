@@ -63,8 +63,6 @@ export class ColorPickerComponent implements OnDestroy {
         } else if (this.mode() === 'HSVA') {
           this.changed.emit(color?.toHSVA().toString() ?? undefined);
         }
-
-        this.pickr?.hide();
       });
     });
 
