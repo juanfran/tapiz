@@ -20,7 +20,7 @@ export class NoteHeightCalculatorService {
     const container = this.container;
 
     const minFontSize = 1;
-    const maxFontSize = 56;
+    const maxFontSize = 46;
     let fontSize = maxFontSize;
     const increment = 1;
 
