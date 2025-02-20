@@ -13,25 +13,38 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { isNote, StateActions } from '@tapiz/board-commons';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'tapiz-notes-visibility',
   styleUrls: ['./notes-visibility.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CdkMenuTrigger, CdkMenu, MatIconModule, CdkMenuItemRadio],
+  imports: [
+    CdkMenuTrigger,
+    CdkMenu,
+    MatIconModule,
+    CdkMenuItemRadio,
+    LucideAngularModule,
+  ],
   template: `
     <div class="right-col-toolbar note-visibility">
       <button
         [cdkMenuTriggerFor]="selectVisibility"
         [class.no-visible]="!visible()">
         <span class="title">Notes visibility</span>
-        <span class="value">
+        <div class="value">
           @if (visible()) {
             Public
+            <lucide-icon
+              name="eye"
+              size="18" />
           } @else {
             Private
+            <lucide-icon
+              name="eye-closed"
+              size="18" />
           }
-        </span>
+        </div>
       </button>
     </div>
     <ng-template #selectVisibility>
