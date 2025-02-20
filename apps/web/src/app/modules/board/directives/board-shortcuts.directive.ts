@@ -36,7 +36,7 @@ export class BoardShourtcutsDirective {
   }
 
   @HostListener('document:keydown.space', ['$event']) pan(e: KeyboardEvent) {
-    if (e.repeat) return;
+    if (e.repeat || isInputField()) return;
 
     this.#store.dispatch(
       BoardPageActions.panInProgress({ panInProgress: true }),
@@ -46,7 +46,7 @@ export class BoardShourtcutsDirective {
   @HostListener('document:keyup.space', ['$event']) finishPan(
     e: KeyboardEvent,
   ) {
-    if (e.repeat) return;
+    if (e.repeat || isInputField()) return;
 
     this.#store.dispatch(
       BoardPageActions.panInProgress({ panInProgress: false }),
