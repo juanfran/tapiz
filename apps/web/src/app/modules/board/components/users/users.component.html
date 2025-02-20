@@ -83,7 +83,7 @@
         cdkMenuItem
         class="menu-item"
         (cdkMenuItemTriggered)="follow(user.id)">
-        @if (isFollowing()) {
+        @if (isFollowing() === user.id) {
           Unfollow
         } @else {
           Follow
