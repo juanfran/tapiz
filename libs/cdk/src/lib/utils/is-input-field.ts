@@ -1,7 +1,17 @@
+export function getActitveElement() {
+  if (document.activeElement?.shadowRoot) {
+    return document.activeElement.shadowRoot.activeElement;
+  }
+
+  return document.activeElement;
+}
+
 export function isInputField() {
+  const activeElement = getActitveElement();
+
   return (
-    document.activeElement?.hasAttribute('contenteditable') ||
-    document.activeElement?.tagName === 'INPUT' ||
-    document.activeElement?.tagName === 'TEXTAREA'
+    activeElement?.hasAttribute('contenteditable') ||
+    activeElement?.tagName === 'INPUT' ||
+    activeElement?.tagName === 'TEXTAREA'
   );
 }
