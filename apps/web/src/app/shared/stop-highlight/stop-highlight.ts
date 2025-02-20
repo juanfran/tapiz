@@ -9,12 +9,12 @@ import { boardPageFeature } from '../../modules/board/reducers/boardPage.reducer
   selector: 'tapiz-stop-highlight',
   imports: [MatButtonModule],
   template: `
-    @if (highlight()) {
+    @if (highlight(); as user) {
       <button
         (click)="stop()"
         mat-raised-button
         color="primary">
-        Stop highlight user
+        Stop highlight {{ user.name }}
       </button>
     }
   `,
@@ -24,7 +24,7 @@ import { boardPageFeature } from '../../modules/board/reducers/boardPage.reducer
 export class StopHighlightComponent {
   #store = inject(Store);
 
-  highlight = this.#store.selectSignal(boardPageFeature.isUserHighlighActive);
+  highlight = this.#store.selectSignal(boardPageFeature.userHighlightInfo);
 
   stop() {
     this.#store.dispatch(BoardPageActions.stopHighlight());

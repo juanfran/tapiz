@@ -518,6 +518,7 @@ export const boardPageFeature = createFeature({
     selectUserHighlight,
     selectShowUserVotes,
     selectFocusId,
+    selectBoardUsers,
   }) => ({
     isFocus: (id: string) => {
       return createSelector(selectFocusId, (focusId) => focusId.includes(id));
@@ -530,6 +531,16 @@ export const boardPageFeature = createFeature({
       selectShowUserVotes,
       (id, userVotes) => {
         return id ? !!id : !!userVotes;
+      },
+    ),
+    userHighlightInfo: createSelector(
+      selectUserHighlight,
+      selectShowUserVotes,
+      selectBoardUsers,
+      (userHighlight, userVotes, users) => {
+        return users.find(
+          (it) => it.id === userHighlight || it.id === userVotes,
+        );
       },
     ),
     selectMoveEnabled: createSelector(
