@@ -4,9 +4,11 @@ import { v4 as uuidv4 } from 'uuid';
 /*
 Tested scenario:
 
-50+fps
+pnpm build
+pnpm serve-dist
+pnpm demo
 
-Production build false
+50+fps
 
 const NUM_CONNECTIONS = 100;
 const PORT = 8000;
@@ -17,8 +19,6 @@ const MAX_EMITS = 250;
 Text on
 Color on
 Position on
-
-Without provideStoreDevtools
 */
 
 const NUM_CONNECTIONS = 100;

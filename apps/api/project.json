@@ -67,6 +67,13 @@
       "options": {
         "command": "pnpm exec tsx apps/api/src/simulate-users.ts"
       }
+    },
+    "serveDist": {
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "pnpm exec tsx apps/api/src/serve-dist.ts"
+      }
     }
   },
   "tags": ["scope:server"]

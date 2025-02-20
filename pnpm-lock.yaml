@@ -20278,7 +20278,7 @@ snapshots:
 
   union@0.5.0:
     dependencies:
-      qs: 6.12.3
+      qs: 6.13.0
 
   unique-filename@3.0.0:
     dependencies:

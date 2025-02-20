@@ -22,7 +22,8 @@
     "lint": "nx run-many --all --target=lint --parallel",
     "format": "nx format:write --libs-and-apps",
     "demo": "nx run api:demo",
-    "prepare": "husky"
+    "prepare": "husky",
+    "serve-dist": "nx run api:serveDist"
   },
   "engines": {
     "node": "^22.1.0",
