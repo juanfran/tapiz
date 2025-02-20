@@ -24,7 +24,7 @@ export interface BoardPageState {
   nodeSelection: boolean;
   userHighlight: User['id'] | null;
   showUserVotes: User['id'] | null;
-  boardMode: number;
+  boardMode: number; // 0 - normal, 1 - edit mode
   popupOpen: string;
   popupPinned: boolean;
   isAdmin: boolean;

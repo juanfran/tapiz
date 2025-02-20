@@ -3,7 +3,12 @@ import { MultiDragService } from '@tapiz/cdk/services/multi-drag.service';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { Store } from '@ngrx/store';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
-import { isGroup, isPanel } from '@tapiz/board-commons';
+import {
+  BoardTuNode,
+  isBoardTuNode,
+  isGroup,
+  isPanel,
+} from '@tapiz/board-commons';
 import { nodesInsideNode } from '@tapiz/cdk/utils/nodes-inside';
 import { getNodeSize } from '../../../../shared/node-size';
 import { NodesActions } from '../../services/nodes-actions';
@@ -28,7 +33,6 @@ export class BoardDragDirective {
       relativePosition: this.#store.select(boardPageFeature.selectPosition),
       draggableIds: (triggerNode: string) => {
         const node = this.#boardFacade.getNode(triggerNode);
-
         if (
           node &&
           (isPanel(node) || isGroup(node)) &&
@@ -36,18 +40,31 @@ export class BoardDragDirective {
         ) {
           const nodesInside = nodesInsideNode(
             node,
-            this.#boardFacade.get().map((node) => {
-              const { width, height } = getNodeSize(node);
+            this.#boardFacade
+              .get()
+              .filter((itNode): itNode is BoardTuNode => {
+                if (!isBoardTuNode(itNode)) {
+                  return false;
+                }
 
-              return {
-                ...node,
-                content: {
-                  ...node.content,
-                  width,
-                  height,
-                },
-              };
-            }),
+                if (node.content.layer === 1) {
+                  return true;
+                }
+
+                return itNode.content.layer === node.content.layer;
+              })
+              .map((node) => {
+                const { width, height } = getNodeSize(node);
+
+                return {
+                  ...node,
+                  content: {
+                    ...node.content,
+                    width,
+                    height,
+                  },
+                };
+              }),
           );
 
           const nodeIds = nodesInside.map((node) => node.id);
