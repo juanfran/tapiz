@@ -3,11 +3,14 @@
 .mat-mdc-raised-button.mat-primary {
   --mdc-filled-button-container-color: var(--brand);
   --mdc-protected-button-container-color: var(--brand);
-  border-radius: var(--radius-6);
-  padding: var(--size-4);
   &:hover {
     background: var(--grey-80);
   }
+}
+
+button.mdc-button {
+  border-radius: var(--radius-6);
+  padding: var(--size-4);
 }
 
 .mat-mdc-mini-fab.mat-primary {
@@ -63,8 +66,7 @@
   --mdc-slider-focus-handle-color: var(--brand);
   --mdc-slider-inactive-track-color: var(--grey-70);
   --mdc-slider-active-track-color: var(--brand);
-  --mat-sliderfocus-state-layer-color: rgba(30,37,75, 0.12);
-
+  --mat-sliderfocus-state-layer-color: rgba(30, 37, 75, 0.12);
 }
 
 /* DROPDOWNS */
@@ -112,4 +114,3 @@
     }
   }
 }
-
