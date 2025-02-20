@@ -4,6 +4,7 @@ import {
   ElementRef,
   afterNextRender,
   inject,
+  output,
 } from '@angular/core';
 
 import { MoveService } from '@tapiz/cdk/services/move.service';
@@ -34,29 +35,30 @@ export class ResizeHandlerSingleComponent implements Resizable {
   private resizeService = inject(ResizeService);
   private el: ElementRef<HTMLElement> = inject(ElementRef);
 
-  public node = input.required<TuNode<Resizable>>();
+  node = input.required<TuNode<Resizable>>();
+  initResize = output();
 
-  public get nodeType() {
+  get nodeType() {
     return this.node().type;
   }
 
-  public get width() {
+  get width() {
     return this.node().content.width;
   }
 
-  public get height() {
+  get height() {
     return this.node().content.height;
   }
 
-  public get position() {
+  get position() {
     return this.node().content.position;
   }
 
-  public get rotation() {
+  get rotation() {
     return this.node().content.rotation;
   }
 
-  public get id() {
+  get id() {
     return this.node().id;
   }
 
@@ -66,11 +68,15 @@ export class ResizeHandlerSingleComponent implements Resizable {
     });
   }
 
-  public listen(handler: HTMLElement, position: ResizePosition) {
+  listen(handler: HTMLElement, position: ResizePosition) {
     this.moveService
       .mouseDownAndMove(handler)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((mouseEvent) => {
+        if (mouseEvent.type === 'start') {
+          this.initResize.emit();
+        }
+
         this.resizeService.resizeEvent.next({
           ...mouseEvent,
           position,

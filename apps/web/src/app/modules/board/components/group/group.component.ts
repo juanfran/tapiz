@@ -52,7 +52,9 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
         }
       }
     </div>
-    <tapiz-resize-single [node]="node()" />
+    <tapiz-resize-single
+      [node]="node()"
+      (initResize)="initResize()" />
   `,
   styleUrls: ['./group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -273,5 +275,12 @@ export class GroupComponent {
 
   public get nativeElement(): HTMLElement {
     return this.#el.nativeElement as HTMLElement;
+  }
+
+  initResize() {
+    this.#nodesStore.setFocusNode({
+      id: this.node().id,
+      ctrlKey: false,
+    });
   }
 }
