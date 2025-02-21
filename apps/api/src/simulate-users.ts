@@ -29,91 +29,79 @@ const MAX_EMITS = 250;
 const PORT = 8000;
 const AUTH = '';
 const BOARD_ID = '';
+const clientData: Record<
+  string,
+  {
+    totalMessages: number;
+  }
+> = {};
+
+console.time('time');
 
 function randomRange(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
 
 function createClient(index: number) {
-  let interval: NodeJS.Timeout;
-  let emits = 0;
-  let init = false;
-  const noteId = uuidv4();
-  const ownerId = `user_${index}_${Date.now()}`;
-  const randomInitX = Math.random() * 1000;
-  const randomInitY = Math.random() * 1000;
+  return new Promise((resolve) => {
+    const clientId = `user_${index}`;
+    let interval: NodeJS.Timeout;
+    let intervalTimeout: NodeJS.Timeout;
+    let emits = 0;
+    let init = false;
+    const noteId = uuidv4();
+    const ownerId = `user_${index}_${Date.now()}`;
+    const randomInitX = Math.random() * 1000;
+    const randomInitY = Math.random() * 1000;
+    let lastMessage = Date.now();
 
-  const initialX = randomInitX + index * 50;
-  const initialY = randomInitY;
+    clientData[clientId] = {
+      totalMessages: 0,
+    };
 
-  const ws = io(`ws://localhost:${PORT}`, {
-    extraHeaders: { Cookie: AUTH },
-  });
+    const initialX = randomInitX + index * 50;
+    const initialY = randomInitY;
 
-  function start() {
-    interval = setInterval(() => {
-      const progress = (Date.now() % 4000) / 1000;
-      const side = Math.floor(progress);
-      const sideProgress = progress - side;
+    const ws = io(`ws://localhost:${PORT}`, {
+      extraHeaders: { Cookie: AUTH },
+    });
 
-      let x = initialX;
-      let y = initialY;
+    const close = (reason: string) => {
+      clearInterval(interval);
+      clearInterval(intervalTimeout);
 
-      switch (side) {
-        case 0:
-          x += SQUARE_SIZE * sideProgress;
-          break;
-        case 1:
-          x += SQUARE_SIZE;
-          y += SQUARE_SIZE * sideProgress;
-          break;
-        case 2:
-          x += SQUARE_SIZE * (1 - sideProgress);
-          y += SQUARE_SIZE;
-          break;
-        case 3:
-          y += SQUARE_SIZE * (1 - sideProgress);
-          break;
-      }
+      resolve({
+        clientId,
+        totalMessages: clientData[clientId].totalMessages,
+        reason,
+      });
+    };
 
-      ws.emit('board', [
-        {
-          data: {
-            type: 'note',
-            id: noteId,
-            content: {
-              text: `Client ${index} ${Math.random()}`,
-              position: { x, y },
-              color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-            },
-          },
-          position: randomRange(0, NUM_CONNECTIONS - 1),
-          op: 'patch',
-        },
-      ]);
+    function start() {
+      interval = setInterval(() => {
+        const progress = (Date.now() % 4000) / 1000;
+        const side = Math.floor(progress);
+        const sideProgress = progress - side;
 
-      emits++;
+        let x = initialX;
+        let y = initialY;
 
-      if (emits >= MAX_EMITS) {
-        clearInterval(interval);
-        console.log(`Client ${index} finished`);
-      }
-    }, STEP_DELAY);
-  }
-
-  ws.on('connect', () => {
-    console.log(`Client ${index} connected`);
-
-    ws.emit('board', [
-      {
-        boardId: BOARD_ID,
-        action: 'join',
-      },
-    ]);
-
-    ws.on('board', (response) => {
-      if (response && response[0].type === '[Board] State action' && !init) {
-        init = true;
+        switch (side) {
+          case 0:
+            x += SQUARE_SIZE * sideProgress;
+            break;
+          case 1:
+            x += SQUARE_SIZE;
+            y += SQUARE_SIZE * sideProgress;
+            break;
+          case 2:
+            x += SQUARE_SIZE * (1 - sideProgress);
+            y += SQUARE_SIZE;
+            break;
+          case 3:
+            y += SQUARE_SIZE * (1 - sideProgress);
+            break;
+        }
 
         ws.emit('board', [
           {
@@ -121,39 +109,119 @@ function createClient(index: number) {
               type: 'note',
               id: noteId,
               content: {
-                text: '',
-                votes: [],
-                emojis: [],
-                drawing: [],
-                width: 300,
-                height: 300,
-                ownerId: ownerId,
-                layer: 0,
+                text: `Client ${index} ${Math.random()}`,
+                position: { x, y },
                 color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-                position: { x: initialX, y: initialY },
               },
             },
-            op: 'add',
+            position: randomRange(0, NUM_CONNECTIONS - 1),
+            op: 'patch',
           },
         ]);
 
-        setTimeout(() => {
-          start();
-        }, 500);
-      }
+        emits++;
+
+        if (emits >= MAX_EMITS) {
+          ws.emit('board', [
+            {
+              data: {
+                type: 'note',
+                id: noteId,
+              },
+              op: 'remove',
+            },
+          ]);
+
+          console.log(`Client ${index} finished`);
+          clearInterval(interval);
+        }
+      }, STEP_DELAY);
+    }
+
+    ws.on('error', (err) => {
+      console.error(`Error client ${index}:`, err.message);
     });
 
-    ws.on('disconnect', () => {
-      clearInterval(interval);
-      console.log(`Client ${index} disconnected`);
-    });
-  });
+    ws.on('connect', () => {
+      console.log(`Client ${index} connected`);
 
-  ws.on('connect_error', (err) => {
-    console.error(`Error client ${index}:`, err.message);
+      ws.emit('board', [
+        {
+          boardId: BOARD_ID,
+          action: 'join',
+        },
+      ]);
+
+      intervalTimeout = setInterval(() => {
+        let timeout = 300;
+
+        if (!init) {
+          timeout = 500;
+        }
+
+        const diff = Date.now() - lastMessage;
+
+        if (diff > timeout) {
+          close(`Client ${index} timeout ${diff}`);
+        }
+      }, 100);
+
+      ws.on('board', (response) => {
+        lastMessage = Date.now();
+        clientData[clientId].totalMessages++;
+
+        if (response && response[0].type === '[Board] State action' && !init) {
+          init = true;
+
+          ws.emit('board', [
+            {
+              data: {
+                type: 'note',
+                id: noteId,
+                content: {
+                  text: '',
+                  votes: [],
+                  emojis: [],
+                  drawing: [],
+                  width: 300,
+                  height: 300,
+                  ownerId: ownerId,
+                  layer: 0,
+                  color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+                  position: { x: initialX, y: initialY },
+                },
+              },
+              op: 'add',
+            },
+          ]);
+
+          setTimeout(() => {
+            start();
+          }, 500);
+        }
+      });
+
+      ws.on('disconnect', () => {
+        close(`Client ${index} disconnected`);
+      });
+    });
+
+    ws.on('connect_error', (err) => {
+      console.error(`Error client ${index}:`, err.message);
+    });
   });
 }
+
+const clients = [];
 
 for (let i = 0; i < NUM_CONNECTIONS; i++) {
-  createClient(i);
+  clients.push(createClient(i));
 }
+
+Promise.all(clients).then((results) => {
+  console.log(results);
+
+  console.timeEnd('time');
+
+  process.exit(0);
+});
