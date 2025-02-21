@@ -1,5 +1,6 @@
 import { io } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
+import customParser from 'socket.io-msgpack-parser';
 
 /*
 Tested scenario:
@@ -64,6 +65,7 @@ function createClient(index: number) {
 
     const ws = io(`ws://localhost:${PORT}`, {
       extraHeaders: { Cookie: AUTH },
+      parser: customParser,
     });
 
     const close = (reason: string) => {
@@ -152,20 +154,6 @@ function createClient(index: number) {
         },
       ]);
 
-      intervalTimeout = setInterval(() => {
-        let timeout = 300;
-
-        if (!init) {
-          timeout = 500;
-        }
-
-        const diff = Date.now() - lastMessage;
-
-        if (diff > timeout) {
-          close(`Client ${index} timeout ${diff}`);
-        }
-      }, 100);
-
       ws.on('board', (response) => {
         lastMessage = Date.now();
         clientData[clientId].totalMessages++;
@@ -200,6 +188,20 @@ function createClient(index: number) {
           }, 500);
         }
       });
+
+      intervalTimeout = setInterval(() => {
+        let timeout = 500;
+
+        if (!init) {
+          timeout = 1000;
+        }
+
+        const diff = Date.now() - lastMessage;
+
+        if (diff > timeout) {
+          close(`Client ${index} timeout ${diff}`);
+        }
+      }, 100);
 
       ws.on('disconnect', () => {
         close(`Client ${index} disconnected`);

@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { wsOpen } from '../ws.actions';
 import { optimize } from '@tapiz/board-commons';
 import { Router } from '@angular/router';
+import customParser from 'socket.io-msgpack-parser';
 import { NotificationService } from '../../../shared/notification/notification.service';
 import { ConfigService } from '../../../services/config.service';
 
@@ -24,6 +25,7 @@ export class WsService {
     autoConnect: false,
     withCredentials: true,
     transports: ['websocket', 'webtransport'],
+    parser: customParser,
   });
   correlationId = v4();
   #reconnect = new Subject<void>();

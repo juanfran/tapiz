@@ -5,6 +5,7 @@ import fastifyCookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import fastifyIO from 'fastify-socket.io';
 import { parse } from 'cookie';
+import customParser from 'socket.io-msgpack-parser';
 
 import {
   fastifyTRPCPlugin,
@@ -64,6 +65,7 @@ fastify.register(fastifyIO as any, {
     origin: process.env['FRONTEND_URL'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   },
+  parser: customParser,
 });
 
 fastify.register(async function (fastify) {
