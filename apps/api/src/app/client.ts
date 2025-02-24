@@ -142,9 +142,7 @@ export class Client {
       return;
     }
 
-    if (validationResult.length) {
-      this.updateSendAllStateActions(validationResult);
-    }
+    this.updateSendAllStateActions(validationResult);
   }
 
   unauthorizedClose(disconnect = true) {

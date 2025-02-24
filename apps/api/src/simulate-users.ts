@@ -1,6 +1,7 @@
 import { io } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 import customParser from 'socket.io-msgpack-parser';
+import readline from 'node:readline';
 
 /*
 Tested scenario:
@@ -9,7 +10,7 @@ pnpm build
 pnpm serve-dist
 pnpm demo
 
-50+fps
+55+fps
 
 const NUM_CONNECTIONS = 100;
 const PORT = 8000;
@@ -37,24 +38,29 @@ const clientData: Record<
   }
 > = {};
 
-console.time('time');
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
 function randomRange(min: number, max: number) {
   return Math.random() * (max - min) + min;
+}
+
+function getRandomColor() {
+  return '#' + (((1 << 24) * Math.random()) | 0).toString(16).padStart(6, '0');
 }
 
 function createClient(index: number) {
   return new Promise((resolve) => {
     const clientId = `user_${index}`;
     let interval: NodeJS.Timeout;
-    let intervalTimeout: NodeJS.Timeout;
     let emits = 0;
     let init = false;
     const noteId = uuidv4();
     const ownerId = `user_${index}_${Date.now()}`;
     const randomInitX = Math.random() * 1000;
     const randomInitY = Math.random() * 1000;
-    let lastMessage = Date.now();
 
     clientData[clientId] = {
       totalMessages: 0,
@@ -70,7 +76,6 @@ function createClient(index: number) {
 
     const close = (reason: string) => {
       clearInterval(interval);
-      clearInterval(intervalTimeout);
 
       resolve({
         clientId,
@@ -113,7 +118,7 @@ function createClient(index: number) {
               content: {
                 text: `Client ${index} ${Math.random()}`,
                 position: { x, y },
-                color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+                color: getRandomColor(),
               },
             },
             position: randomRange(0, NUM_CONNECTIONS - 1),
@@ -136,6 +141,7 @@ function createClient(index: number) {
 
           console.log(`Client ${index} finished`);
           clearInterval(interval);
+          close('Finished');
         }
       }, STEP_DELAY);
     }
@@ -144,18 +150,18 @@ function createClient(index: number) {
       console.error(`Error client ${index}:`, err.message);
     });
 
-    ws.on('connect', () => {
+    ws.on('disconnect', () => {
+      close(`Client ${index} disconnected`);
+    });
+
+    ws.on('connect_error', (err) => {
+      console.error(`Error client ${index}:`, err.message);
+    });
+
+    ws.on('connect', async () => {
       console.log(`Client ${index} connected`);
 
-      ws.emit('board', [
-        {
-          boardId: BOARD_ID,
-          action: 'join',
-        },
-      ]);
-
       ws.on('board', (response) => {
-        lastMessage = Date.now();
         clientData[clientId].totalMessages++;
 
         if (response && response[0].type === '[Board] State action' && !init) {
@@ -175,7 +181,7 @@ function createClient(index: number) {
                   height: 300,
                   ownerId: ownerId,
                   layer: 0,
-                  color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+                  color: getRandomColor(),
                   position: { x: initialX, y: initialY },
                 },
               },
@@ -185,45 +191,30 @@ function createClient(index: number) {
 
           setTimeout(() => {
             start();
-          }, 500);
+          }, 200);
         }
       });
 
-      intervalTimeout = setInterval(() => {
-        let timeout = 500;
-
-        if (!init) {
-          timeout = 1000;
-        }
-
-        const diff = Date.now() - lastMessage;
-
-        if (diff > timeout) {
-          close(`Client ${index} timeout ${diff}`);
-        }
+      // some joins are lost withou setTimeout
+      setTimeout(() => {
+        ws.emit('board', [
+          {
+            boardId: BOARD_ID,
+            action: 'join',
+          },
+        ]);
       }, 100);
-
-      ws.on('disconnect', () => {
-        close(`Client ${index} disconnected`);
-      });
-    });
-
-    ws.on('connect_error', (err) => {
-      console.error(`Error client ${index}:`, err.message);
     });
   });
 }
 
-const clients = [];
+const clients: ReturnType<typeof createClient>[] = [];
 
 for (let i = 0; i < NUM_CONNECTIONS; i++) {
   clients.push(createClient(i));
 }
 
-Promise.all(clients).then((results) => {
-  console.log(results);
-
-  console.timeEnd('time');
-
-  process.exit(0);
+rl.question('Print results', () => {
+  console.log('Results: ' + Object.keys(clientData).length);
+  console.log(clientData);
 });
