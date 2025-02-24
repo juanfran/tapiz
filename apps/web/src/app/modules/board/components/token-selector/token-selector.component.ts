@@ -1,6 +1,9 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  computed,
+} from '@angular/core';
 import {
   BoardColors,
   BoardIdToColorDirective,
@@ -65,25 +68,17 @@ export class TokenSelectorComponent {
   #boardFacade = inject(BoardFacade);
   #configService = inject(ConfigService);
 
-  users = toSignal(
-    this.#boardFacade.getUsers().pipe(
-      map((users) => {
-        return users
-          .map((user) => {
-            return user.content;
-          })
-          .map((user) => ({
-            id: user.id,
-            name: user.name
-              .split(' ')
-              .slice(0, 2)
-              .map((it) => it[0])
-              .join('')
-              .toUpperCase(),
-          }));
-      }),
-    ),
-  );
+  users = computed(() => {
+    return this.#boardFacade.users().map((user) => ({
+      id: user.id,
+      name: user.name
+        .split(' ')
+        .slice(0, 2)
+        .map((it) => it[0])
+        .join('')
+        .toUpperCase(),
+    }));
+  });
 
   colors = BoardColors;
 

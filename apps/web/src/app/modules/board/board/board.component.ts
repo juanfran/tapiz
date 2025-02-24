@@ -65,7 +65,7 @@ import { appFeature } from '../../../+state/app.reducer';
 import { SubscriptionService } from '../../../services/subscription.service';
 import { DrawingStore } from '../components/drawing/drawing.store';
 import { DrawingOptionsComponent } from '../components/drawing-options';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommentsComponent } from '../components/comments/comments.component';
 import { NodesActions } from '../services/nodes-actions';
 import { ConfigService } from '../../../services/config.service';
@@ -154,7 +154,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   private fileUploadService = inject(FileUploadService);
   private destroyRef = inject(DestroyRef);
   public readonly boardId$ = this.store.select(boardPageFeature.selectBoardId);
-  public readonly nodes$ = this.boardFacade.getNodes();
 
   smallScale = computed(() => this.calcPatterns().smallCalc);
   bigScale = computed(() => this.calcPatterns().bigCalc);
@@ -191,13 +190,10 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   public readonly isAdmin = this.store.selectSignal(
     boardPageFeature.selectIsAdmin,
   );
-  public readonly readonly = toSignal(
-    this.boardFacade.getSettings().pipe(
-      map((it) => {
-        return it?.content.readOnly ?? false;
-      }),
-    ),
-  );
+  public readonly readonly = computed(() => {
+    return this.boardFacade.settings()?.content.readOnly ?? false;
+  });
+
   public readonly isReadonlyUser = computed(() => {
     return this.readonly() && !this.isAdmin();
   });
@@ -210,6 +206,10 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
 
   @HostListener('dblclick', ['$event'])
   public dblclick(event: MouseEvent) {
+    if (this.readonly()) {
+      return;
+    }
+
     if (event.target !== this.el.nativeElement) {
       return;
     }

@@ -99,7 +99,9 @@
       <tapiz-demo-intro />
     }
 
-    <tapiz-context-menu />
+    @if (!isReadonlyUser()) {
+      <tapiz-context-menu />
+    }
     <tapiz-board-context-menu />
     <tapiz-node-toolbar />
     <tapiz-comments />

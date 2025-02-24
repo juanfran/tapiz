@@ -3,7 +3,9 @@ import {
   Component,
   ElementRef,
   afterRender,
+  computed,
   inject,
+  signal,
   viewChild,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -15,7 +17,6 @@ import {
 } from '@angular/material/autocomplete';
 import { MatOptionModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
-import { combineLatest, map, startWith, withLatestFrom } from 'rxjs';
 import { BoardPageActions } from '../../actions/board-page.actions';
 import {
   PanelNode,
@@ -24,8 +25,8 @@ import {
   isNote,
 } from '@tapiz/board-commons';
 import { BoardFacade } from '../../../../services/board-facade.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'tapiz-search-options',
@@ -49,15 +50,22 @@ export class SearchOptionsComponent {
 
   store = inject(Store);
   boardFacade = inject(BoardFacade);
-  nodes = this.boardFacade.getNodes();
+  nodes = this.boardFacade.nodes;
 
-  notes$ = this.nodes.pipe(map((nodes) => nodes.filter(isNote)));
-  users$ = this.boardFacade.getUsers();
-  currentUser$ = this.store.select(boardPageFeature.selectUserId);
-  visibleNotes$ = combineLatest([this.notes$, this.users$]).pipe(
-    withLatestFrom(this.currentUser$),
-    map(([[notes, users], currentUserId]) => {
-      const filteredNotes = notes.filter((note) => {
+  notes = computed(() => {
+    return this.nodes().filter(isNote);
+  });
+
+  usersNodes = this.boardFacade.usersNodes;
+  currentUser = this.store.selectSignal(boardPageFeature.selectUserId);
+
+  visibleNotes = computed(() => {
+    const notes = this.notes();
+    const users = this.usersNodes();
+    const currentUserId = this.currentUser();
+
+    return notes
+      .filter((note) => {
         const user = users.find((user) => user.id === note.content.ownerId);
 
         if (user) {
@@ -69,95 +77,83 @@ export class SearchOptionsComponent {
         }
 
         return true;
-      });
-
-      return filteredNotes.map((note) => {
+      })
+      .map((note) => {
         return {
           id: note.id,
           type: 'note',
           text: this.cleanHtml(note.content.text),
         };
       });
-    }),
-  );
+  });
 
-  polls$ = this.nodes.pipe(
-    map((nodes) => {
-      return nodes
-        .filter((node): node is PollBoardNode => node.type === 'poll')
-        .map((node) => {
-          return {
-            id: node.id,
-            type: 'poll',
-            text: node.content.title,
-          };
-        });
-    }),
-  );
+  polls = computed(() => {
+    return this.nodes()
+      .filter((node): node is PollBoardNode => node.type === 'poll')
+      .map((node) => {
+        return {
+          id: node.id,
+          type: 'poll',
+          text: node.content.title,
+        };
+      });
+  });
 
-  panels$ = this.nodes.pipe(
-    map((nodes) => {
-      return nodes
-        .filter((node): node is PanelNode => node.type === 'panel')
-        .map((node) => {
-          return {
-            id: node.id,
-            type: 'panel',
-            text: this.cleanHtml(node.content.text),
-          };
-        });
-    }),
-  );
+  panels = computed(() => {
+    return this.nodes()
+      .filter((node): node is PanelNode => node.type === 'panel')
+      .map((node) => {
+        return {
+          id: node.id,
+          type: 'panel',
+          text: this.cleanHtml(node.content.text),
+        };
+      });
+  });
 
-  text$ = this.nodes.pipe(
-    map((nodes) => {
-      return nodes
-        .filter((node): node is TextNode => node.type === 'text')
-        .map((node) => {
-          return {
-            id: node.id,
-            type: 'text',
-            text: this.cleanHtml(node.content.text),
-          };
-        });
-    }),
-  );
+  text = computed(() => {
+    return this.nodes()
+      .filter((node): node is TextNode => node.type === 'text')
+      .map((node) => {
+        return {
+          id: node.id,
+          type: 'text',
+          text: this.cleanHtml(node.content.text),
+        };
+      });
+  });
 
-  searchableNodes$ = combineLatest([
-    this.visibleNotes$,
-    this.polls$,
-    this.panels$,
-    this.text$,
-  ]).pipe(
-    map(([notes, polls, panels, text]) => {
-      return [...notes, ...polls, ...panels, ...text];
-    }),
-  );
+  searchableNodes = computed(() => {
+    return [
+      ...this.visibleNotes(),
+      ...this.polls(),
+      ...this.panels(),
+      ...this.text(),
+    ];
+  });
 
   get searchFormControl() {
     return this.form.get('search') as FormControl;
   }
 
-  #options$ = combineLatest([
-    this.searchFormControl.valueChanges.pipe(startWith('')),
-    this.searchableNodes$,
-  ]).pipe(
-    map(([value, nodes]) => {
-      if (value) {
-        return nodes.filter((note) =>
-          this.normalizeText(note.text).includes(value),
-        );
-      }
-
-      return nodes;
-    }),
-  );
-  options = toSignal(this.#options$);
+  options = signal<
+    {
+      id: string;
+      type: string;
+      text: string;
+    }[]
+  >(this.searchableNodes());
 
   constructor() {
     afterRender(() => {
       this.searchInput().nativeElement.focus();
     });
+
+    this.searchFormControl.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe((value) => {
+        this.searchChange(value);
+      });
   }
 
   cleanHtml(html: string) {
@@ -171,6 +167,18 @@ export class SearchOptionsComponent {
     this.store.dispatch(
       BoardPageActions.goToNode({ nodeId: event.option.value }),
     );
+  }
+
+  searchChange(value: string) {
+    const nodes = this.searchableNodes();
+
+    if (value) {
+      this.options.set(
+        nodes.filter((note) => this.normalizeText(note.text).includes(value)),
+      );
+    } else {
+      this.options.set(nodes);
+    }
   }
 
   normalizeText(text: string) {

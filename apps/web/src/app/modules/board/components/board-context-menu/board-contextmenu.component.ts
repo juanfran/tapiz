@@ -27,7 +27,6 @@ import { CommentsStore } from '../comments/comments.store';
 import { NodesActions } from '../../services/nodes-actions';
 import Pickr from '@simonwep/pickr';
 import { colorPickerConfig } from '@tapiz/ui/color-picker/color-picker.config';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { defaultNoteColor } from '../note';
 
 @Component({
@@ -53,7 +52,7 @@ export class BoardContextMenuComponent implements OnInit {
   private showUserVotes = this.store.selectSignal(
     boardPageFeature.selectVoting,
   );
-  private selectFocusNodes = toSignal(this.boardFacade.selectFocusNodes$);
+  private selectFocusNodes = this.boardFacade.focusNodes;
   private activeToolbarOption = this.store.selectSignal(
     boardPageFeature.selectPopupOpen,
   );

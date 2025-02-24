@@ -7,12 +7,10 @@ import {
 import { Store } from '@ngrx/store';
 import { BoardPageActions } from '../../actions/board-page.actions';
 import { User } from '@tapiz/board-commons';
-import { map } from 'rxjs/operators';
 import { NgOptimizedImage } from '@angular/common';
 import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardFacade } from '../../../../services/board-facade.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -32,13 +30,8 @@ export class UsersComponent {
   #store = inject(Store);
   #boardFacade = inject(BoardFacade);
   #boardUsers = this.#store.selectSignal(boardPageFeature.selectBoardUsers);
-  #users = toSignal(
-    this.#boardFacade
-      .getUsers()
-      .pipe(map((users) => users.map((user) => user.content))),
-    { initialValue: [] },
-  );
-  #settings = toSignal(this.#boardFacade.getSettings(), { initialValue: null });
+  #users = this.#boardFacade.users;
+  #settings = this.#boardFacade.settings;
 
   boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
   showUsers = computed(() => {

@@ -1,15 +1,13 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, inject } from '@angular/core';
 import { Drawing, TuNode } from '@tapiz/board-commons';
 import { rxState } from '@rx-angular/state';
-import { filter, map, skip, withLatestFrom } from 'rxjs';
+import { filter, map, skip } from 'rxjs';
 import { rxActions } from '@rx-angular/state/actions';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { Action } from '@ngrx/store';
-import { concatLatestFrom } from '@ngrx/operators';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { BoardPageActions } from '../../actions/board-page.actions';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface DrawingState {
   undoable: { action: Action; inverseAction: Action }[];
@@ -32,14 +30,13 @@ export class DrawingStore {
   #store = inject(Store);
   #boardFacade = inject(BoardFacade);
 
-  nodes$ = this.#boardFacade.getNodes().pipe(
-    takeUntilDestroyed(),
-    map((nodes) => {
-      return nodes.filter(
+  nodes = computed(() => {
+    return this.#boardFacade
+      .nodes()
+      .filter(
         (node) => node.type === 'note' || node.type === 'panel',
       ) as TuNode<{ drawing: Drawing[] }>[];
-    }),
-  );
+  });
 
   actions = rxActions<{
     undoDrawing: void;
@@ -88,20 +85,19 @@ export class DrawingStore {
       }
     });
 
-    this.actions.cleanDrawing$
-      .pipe(withLatestFrom(this.#boardFacade.selectFocusNodes$))
-      .subscribe(([, nodes]) => {
-        const node = nodes?.at(0);
+    this.actions.cleanDrawing$.subscribe(() => {
+      const nodes = this.#boardFacade.focusNodes();
+      const node = nodes?.at(0);
 
-        if (node?.type === 'note' || node?.type === 'panel') {
-          this.actions.setDrawing({
-            id: node.id,
-            type: node.type,
-            drawing: [],
-            history: true,
-          });
-        }
-      });
+      if (node?.type === 'note' || node?.type === 'panel') {
+        this.actions.setDrawing({
+          id: node.id,
+          type: node.type,
+          drawing: [],
+          history: true,
+        });
+      }
+    });
 
     this.actions.readyToDraw$.subscribe(() => {
       this.#state.set({ drawing: true });
@@ -118,8 +114,9 @@ export class DrawingStore {
     this.actions.setDrawing$
       .pipe(
         filter((action) => action.history),
-        concatLatestFrom(() => this.nodes$),
-        map(([action, nodes]) => {
+        map((action) => {
+          const nodes = this.nodes();
+
           return {
             id: action.id,
             drawing: action.drawing,
@@ -133,40 +130,38 @@ export class DrawingStore {
           return;
         }
 
-        if (node.type === 'note' || node.type === 'panel') {
-          this.#newUndoneAction(
-            BoardActions.batchNodeActions({
-              history: true,
-              actions: [
-                {
-                  data: {
-                    type,
-                    id,
-                    content: {
-                      drawing,
-                    },
+        this.#newUndoneAction(
+          BoardActions.batchNodeActions({
+            history: true,
+            actions: [
+              {
+                data: {
+                  type,
+                  id,
+                  content: {
+                    drawing,
                   },
-                  op: 'patch',
                 },
-              ],
-            }),
-            BoardActions.batchNodeActions({
-              history: false,
-              actions: [
-                {
-                  data: {
-                    type,
-                    id,
-                    content: {
-                      drawing: node.content.drawing,
-                    },
+                op: 'patch',
+              },
+            ],
+          }),
+          BoardActions.batchNodeActions({
+            history: false,
+            actions: [
+              {
+                data: {
+                  type,
+                  id,
+                  content: {
+                    drawing: node.content.drawing,
                   },
-                  op: 'patch',
                 },
-              ],
-            }),
-          );
-        }
+                op: 'patch',
+              },
+            ],
+          }),
+        );
       });
 
     this.actions.setDrawing$.subscribe(({ id, drawing, history }) => {

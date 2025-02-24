@@ -1,12 +1,15 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+} from '@angular/core';
 import { Store } from '@ngrx/store';
 import { boardPageFeature } from '../../modules/board/reducers/boardPage.reducer';
-import { map, switchMap } from 'rxjs';
-import { filterNil } from '../../commons/operators/filter-nil';
 import { BoardPageActions } from '../../modules/board/actions/board-page.actions';
 import { MatButtonModule } from '@angular/material/button';
 import { BoardFacade } from '../../services/board-facade.service';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
   selector: 'tapiz-follow-user',
@@ -27,26 +30,20 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class FollowUserComponent {
   #store = inject(Store);
   #boardFacade = inject(BoardFacade);
+  #follow = this.#store.selectSignal(boardPageFeature.selectFollow);
 
-  #userToFollow$ = this.#store.select(boardPageFeature.selectFollow).pipe(
-    switchMap((follow) => {
-      return this.#boardFacade.getUsers().pipe(
-        map((users) => {
-          return users.find((user) => user.id === follow)?.content;
-        }),
-      );
-    }),
-  );
-
-  userToFollow = toSignal(this.#userToFollow$);
+  userToFollow = computed(() => {
+    return this.#boardFacade.usersNodes().find((it) => it.id === this.#follow())
+      ?.content;
+  });
 
   stopFollowingUser() {
     this.#store.dispatch(BoardPageActions.followUser({ id: '' }));
   }
 
   constructor() {
-    this.#userToFollow$.pipe(filterNil()).subscribe((user) => {
-      if (user.position && user.zoom) {
+    explicitEffect([this.userToFollow], ([user]) => {
+      if (user?.position && user?.zoom) {
         this.#store.dispatch(
           BoardPageActions.setUserView({
             zoom: user.zoom,

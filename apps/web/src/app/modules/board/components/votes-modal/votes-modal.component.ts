@@ -3,7 +3,6 @@ import { ModalHeaderComponent } from '../../../../shared/modal-header/modal-head
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Group, Note, TuNode } from '@tapiz/board-commons';
 import { BoardFacade } from '../../../../services/board-facade.service';
-import { take } from 'rxjs/operators';
 
 @Component({
   selector: 'tapiz-votes-modal',
@@ -36,25 +35,22 @@ export class VotesModalComponent {
   usersVotes = signal<{ id: string; name: string; votes: number }[]>([]);
 
   constructor() {
-    this.#boardFacade
-      .getUsers()
-      .pipe(take(1))
-      .subscribe((users) => {
-        const usersVotes = users
-          .map((user) => {
-            const userVote = this.#data.node.content.votes.find((it) => {
-              return it.userId === user.id;
-            });
+    const users = this.#boardFacade.usersNodes();
 
-            return {
-              id: user.id,
-              name: user.content.name,
-              votes: userVote?.vote ?? 0,
-            };
-          })
-          .filter((it) => it.votes > 0);
+    const usersVotes = users
+      .map((user) => {
+        const userVote = this.#data.node.content.votes.find((it) => {
+          return it.userId === user.id;
+        });
 
-        this.usersVotes.set(usersVotes);
-      });
+        return {
+          id: user.id,
+          name: user.content.name,
+          votes: userVote?.vote ?? 0,
+        };
+      })
+      .filter((it) => it.votes > 0);
+
+    this.usersVotes.set(usersVotes);
   }
 }

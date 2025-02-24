@@ -6,10 +6,8 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
-import { map } from 'rxjs/operators';
 import { CdkMenu, CdkMenuItemRadio, CdkMenuTrigger } from '@angular/cdk/menu';
 import { BoardFacade } from '../../../../services/board-facade.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { isNote, StateActions } from '@tapiz/board-commons';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
@@ -74,12 +72,7 @@ import { LucideAngularModule } from 'lucide-angular';
 export class NotesVisibilityComponent {
   #store = inject(Store);
   #boardFacade = inject(BoardFacade);
-  #users = toSignal(
-    this.#boardFacade
-      .getUsers()
-      .pipe(map((users) => users.map((user) => user.content))),
-    { initialValue: [] },
-  );
+  #users = this.#boardFacade.users;
   userId = this.#store.selectSignal(boardPageFeature.selectUserId);
   currentUser = computed(() => {
     return this.#users()?.find((user) => user.id === this.userId());

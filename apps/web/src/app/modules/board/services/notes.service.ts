@@ -3,7 +3,6 @@ import { Store } from '@ngrx/store';
 import { Note, Point, User } from '@tapiz/board-commons';
 import { BoardActions } from '../actions/board.actions';
 import { BoardFacade } from '../../../services/board-facade.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { NodesActions } from '../services/nodes-actions';
 import { boardPageFeature } from '../reducers/boardPage.reducer';
 
@@ -14,7 +13,7 @@ export class NotesService {
   #store = inject(Store);
   #boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
   #boardFacade = inject(BoardFacade);
-  #settings = toSignal(this.#boardFacade.getSettings());
+  #settings = this.#boardFacade.settings;
   #nodesActions = inject(NodesActions);
   #lastColor = '';
 

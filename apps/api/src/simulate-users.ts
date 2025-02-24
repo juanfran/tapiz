@@ -195,7 +195,7 @@ function createClient(index: number) {
         }
       });
 
-      // some joins are lost withou setTimeout
+      // some joins are lost without setTimeout
       setTimeout(() => {
         ws.emit('board', [
           {

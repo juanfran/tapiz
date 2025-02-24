@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 
 import { BoardFacade } from '../../../../services/board-facade.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { CommonModule } from '@angular/common';
@@ -48,11 +47,11 @@ export class CursorsComponent {
   #store = inject(Store);
   #boardFacade = inject(BoardFacade);
 
-  users = toSignal(this.#boardFacade.selectCursors());
+  users = this.#boardFacade.cursors;
   userZoom = this.#store.selectSignal(boardPageFeature.selectZoom);
 
   scale = signal(1);
-  #settings = toSignal(this.#boardFacade.getSettings());
+  #settings = this.#boardFacade.settings;
 
   showCursors = computed(() => {
     const settings = this.#settings();

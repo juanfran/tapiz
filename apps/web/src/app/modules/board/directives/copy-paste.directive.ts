@@ -1,7 +1,5 @@
 import { Directive, HostListener, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { take } from 'rxjs';
-import { concatLatestFrom } from '@ngrx/operators';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { CopyPasteService } from '../../../services/copy-paste.service';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
@@ -28,32 +26,29 @@ export class CopyPasteDirective {
   private boardFacade = inject(BoardFacade);
   private copyPasteService = inject(CopyPasteService);
   private notificationService = inject(NotificationService);
+  private selectFocusId = this.store.selectSignal(
+    boardPageFeature.selectFocusId,
+  );
 
   public copy() {
-    this.boardFacade
-      .getNodes()
-      .pipe(
-        take(1),
-        concatLatestFrom(() => [
-          this.store.select(boardPageFeature.selectFocusId),
-        ]),
-      )
-      .subscribe(([nodes, focusId]) => {
-        const copyNodes = nodes.filter((node) => focusId.includes(node.id));
+    const nodes = this.boardFacade.nodes();
 
-        if (copyNodes) {
-          const hasReadText = navigator.clipboard.readText as unknown;
-          if (hasReadText) {
-            navigator.clipboard.writeText(JSON.stringify(copyNodes));
-          } else {
-            this.notificationService.open({
-              message: 'Your browser does not support clipboard access.',
-              action: 'Close',
-              type: 'info',
-            });
-          }
-        }
-      });
+    const copyNodes = nodes.filter((node) =>
+      this.selectFocusId().includes(node.id),
+    );
+
+    if (copyNodes) {
+      const hasReadText = navigator.clipboard.readText as unknown;
+      if (hasReadText) {
+        navigator.clipboard.writeText(JSON.stringify(copyNodes));
+      } else {
+        this.notificationService.open({
+          message: 'Your browser does not support clipboard access.',
+          action: 'Close',
+          type: 'info',
+        });
+      }
+    }
   }
 
   public async paste() {

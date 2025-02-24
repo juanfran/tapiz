@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
 } from '@angular/core';
@@ -12,8 +13,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
 import { v4 } from 'uuid';
-import { map } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { BoardFacade } from '../../../../services/board-facade.service';
 
 @Component({
@@ -80,13 +79,9 @@ export class BoardSettingsComponent {
   #boardFacade = inject(BoardFacade);
   #dialogRef = inject(MatDialogRef);
 
-  #settings = toSignal(
-    this.#boardFacade.getNodes().pipe(
-      map((it) => {
-        return it.find((it) => it.type === 'settings');
-      }),
-    ),
-  );
+  #settings = computed(() => {
+    return this.#boardFacade.nodes().find((it) => it.type === 'settings');
+  });
 
   form = new FormGroup({
     readOnly: new FormControl(false),

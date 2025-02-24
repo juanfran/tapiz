@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardFacade } from '../../../../services/board-facade.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Point, StateActions, TuNode } from '@tapiz/board-commons';
@@ -70,7 +69,7 @@ export class BoardNodesAlignComponent {
   boardFacade = inject(BoardFacade);
   store = inject(Store);
   focusNodesIds = this.store.selectSignal(boardPageFeature.selectFocusId);
-  #focusNodes = toSignal(this.boardFacade.selectFocusNodes$);
+  #focusNodes = this.boardFacade.focusNodes;
   #nodesActions = inject(NodesActions);
 
   alignBottom() {

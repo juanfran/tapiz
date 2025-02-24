@@ -3,9 +3,9 @@ import {
   ChangeDetectionStrategy,
   inject,
   viewChildren,
+  computed,
 } from '@angular/core';
 import { NodeComponent } from '../node/node.component';
-import { map } from 'rxjs/operators';
 import { NodesStore } from '../../services/nodes.store';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -19,7 +19,7 @@ import { RxFor } from '@rx-angular/template/for';
   styleUrls: ['./nodes.component.scss'],
   template: `
     <tapiz-node
-      *rxFor="let node of nodes$; trackBy: 'id'"
+      *rxFor="let node of nodes(); trackBy: 'id'"
       [node]="node" />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,11 +33,9 @@ export class NodesComponent {
 
   nodesComponents = viewChildren<NodeComponent>(NodeComponent);
 
-  public nodes$ = this.#boardFacade.getNodes().pipe(
-    map((it) => {
-      return this.#boardFacade.filterBoardNodes(it);
-    }),
-  );
+  nodes = computed(() => {
+    return this.#boardFacade.filterBoardNodes(this.#boardFacade.nodes());
+  });
 
   constructor() {
     merge(

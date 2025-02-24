@@ -12,8 +12,6 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ShareBoardComponent } from '../share-board/share-board.component';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardSettingsComponent } from '../board-settings/board-settings.component';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
 import { computed } from '@angular/core';
 import { ConfigService } from '../../../../services/config.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,12 +31,8 @@ export class BoardHeaderOptionsComponent {
   #boardFacade = inject(BoardFacade);
   #boardUsers = this.#store.selectSignal(boardPageFeature.selectBoardUsers);
   #configService = inject(ConfigService);
-  #users = toSignal(
-    this.#boardFacade
-      .getUsers()
-      .pipe(map((users) => users.map((user) => user.content))),
-    { initialValue: [] },
-  );
+  #users = this.#boardFacade.users;
+
   userId = this.#store.selectSignal(boardPageFeature.selectUserId);
   users = computed(() => {
     const boardUsers = this.#boardUsers();
@@ -56,7 +50,7 @@ export class BoardHeaderOptionsComponent {
         };
       });
   });
-  #settings = toSignal(this.#boardFacade.getSettings(), { initialValue: null });
+  #settings = this.#boardFacade.settings;
 
   showUsers = computed(() => {
     return !this.#settings()?.content.anonymousMode;

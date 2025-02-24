@@ -5,7 +5,6 @@ import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 import { boardPageFeature } from '../reducers/boardPage.reducer';
 import { ZoneService } from '../components/zone/zone.service';
 import { BoardFacade } from '../../../services/board-facade.service';
-import { take } from 'rxjs';
 import { BoardActions } from '../actions/board.actions';
 import { NodePatch } from '@tapiz/board-commons';
 
@@ -94,34 +93,31 @@ export class BoardShourtcutsDirective {
         break;
     }
 
-    this.#boardFacade
-      .selectNodes(this.#selectedNodesIds())
-      .pipe(take(1))
-      .subscribe((nodes) => {
-        const boardNodes = this.#boardFacade.filterBoardNodes(nodes);
-
-        const actions = boardNodes.map((node) => {
-          return {
-            data: {
-              id: node.id,
-              type: node.type,
-              content: {
-                position: {
-                  x: node.content.position.x + diff.x,
-                  y: node.content.position.y + diff.y,
-                },
-              },
+    const nodes = this.#boardFacade
+      .nodes()
+      .filter((node) => this.#selectedNodesIds().includes(node.id));
+    const boardNodes = this.#boardFacade.filterBoardNodes(nodes);
+    const actions = boardNodes.map((node) => {
+      return {
+        data: {
+          id: node.id,
+          type: node.type,
+          content: {
+            position: {
+              x: node.content.position.x + diff.x,
+              y: node.content.position.y + diff.y,
             },
-            op: 'patch',
-          } as NodePatch;
-        });
+          },
+        },
+        op: 'patch',
+      } as NodePatch;
+    });
 
-        this.#store.dispatch(
-          BoardActions.batchNodeActions({
-            history: true,
-            actions,
-          }),
-        );
-      });
+    this.#store.dispatch(
+      BoardActions.batchNodeActions({
+        history: true,
+        actions,
+      }),
+    );
   }
 }

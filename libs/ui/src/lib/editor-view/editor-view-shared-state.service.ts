@@ -10,7 +10,7 @@ import { Portal } from '@angular/cdk/portal';
 })
 export class EditorViewSharedStateService {
   #nodes = new BehaviorSubject<
-    Map<
+    Record<
       string,
       {
         view: Editor;
@@ -21,7 +21,7 @@ export class EditorViewSharedStateService {
         node: Signal<TuNode<NodeToolbar>>;
       }
     >
-  >(new Map());
+  >({});
 
   editorPortal = signal<{
     portal: Portal<unknown>;
@@ -42,19 +42,19 @@ export class EditorViewSharedStateService {
       defaultTextColor: string;
     },
   ) {
-    this.#nodes.next(
-      this.#nodes.getValue().set(node().id, {
-        view,
-        options,
-        node,
-      }),
-    );
+    const nodes = this.#nodes.getValue();
+    nodes[node().id] = { view, options, node };
+    this.#nodes.next({
+      ...nodes,
+    });
   }
 
   removeNode(id: string) {
     const nodes = this.#nodes.getValue();
-    nodes.delete(id);
-    this.#nodes.next(nodes);
+    delete nodes[id];
+    this.#nodes.next({
+      ...nodes,
+    });
   }
 
   getNodes$() {

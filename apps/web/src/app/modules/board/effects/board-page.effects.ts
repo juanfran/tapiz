@@ -7,7 +7,6 @@ import {
   filter,
   map,
   switchMap,
-  take,
   tap,
   withLatestFrom,
 } from 'rxjs';
@@ -89,8 +88,8 @@ export class BoardPageEffects {
   public goToNode$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BoardPageActions.goToNode),
-      concatLatestFrom(() => [this.boardFacade.getNodes()]),
-      map(([{ nodeId }, nodes]) => {
+      map(({ nodeId }) => {
+        const nodes = this.boardFacade.nodes();
         return nodes.find((it) => it.id === nodeId) as TuNode<{
           position: Point;
           width?: number;
@@ -220,15 +219,11 @@ export class BoardPageEffects {
   public goToUser$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BoardPageActions.goToUser),
-      switchMap(({ id }) => {
-        return this.boardFacade.getUsers().pipe(
-          map((users) => {
-            return users.find((user) => user.id === id)?.content;
-          }),
-          take(1),
-        );
-      }),
-      map((user) => {
+      map(({ id }) => {
+        const user = this.boardFacade
+          .usersNodes()
+          .find((it) => it.id === id)?.content;
+
         if (user?.position && user?.zoom) {
           return BoardPageActions.setUserView({
             zoom: user.zoom,

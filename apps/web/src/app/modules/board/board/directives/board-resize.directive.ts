@@ -5,7 +5,7 @@ import { isResizable, StateActions } from '@tapiz/board-commons';
 import { NodesActions } from '../../services/nodes-actions';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { ResizeService } from '@tapiz/ui/resize';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { Resizable, TuNode } from '@tapiz/board-commons';
 import { filter, map, share } from 'rxjs';
@@ -23,7 +23,7 @@ export class BoardResizeDirective {
   #boardFacade = inject(BoardFacade);
   #store = inject(Store);
   #nodesActions = inject(NodesActions);
-  #selectFocusNodes = toSignal(this.#boardFacade.selectFocusNodes$);
+  #selectFocusNodes = this.#boardFacade.focusNodes;
   #initialNodes: TuNode<Resizable>[] = [];
 
   constructor() {
