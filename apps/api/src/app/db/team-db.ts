@@ -10,7 +10,10 @@ import {
 import { SetNonNullable } from 'type-fest';
 import { getUsersBoardsByTeam } from './board-db.js';
 
-export async function createTeam(name: string, userId: string) {
+export async function createTeam(
+  name: string,
+  userId: string,
+): Promise<UserTeam> {
   const teams = await db.insert(schema.teams).values({ name }).returning();
   const team = teams[0];
 
@@ -25,7 +28,7 @@ export async function createTeam(name: string, userId: string) {
     teamMember: {
       role: 'admin',
     },
-  } as UserTeam;
+  };
 }
 
 export async function getTeam(id: string) {
@@ -146,7 +149,7 @@ export async function getTeamAdmins(teamId: string) {
   return admins;
 }
 
-export async function getTeamMembers(teamId: string) {
+export async function getTeamMembers(teamId: string): Promise<TeamMember[]> {
   const response = await db
     .select()
     .from(schema.teamMembers)
@@ -165,11 +168,13 @@ export async function getTeamMembers(teamId: string) {
         name: it.accounts.name,
         email: it.accounts?.email,
         role: it.team_members?.role,
-      } as TeamMember;
+      };
     });
 }
 
-export async function getTeamInvitations(teamId: string) {
+export async function getTeamInvitations(
+  teamId: string,
+): Promise<TeamInvitation[]> {
   const invitations = await db
     .select()
     .from(schema.invitations)

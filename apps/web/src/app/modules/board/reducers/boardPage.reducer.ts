@@ -9,7 +9,7 @@ import {
 import { wsOpen } from '../../ws/ws.actions';
 import { BoardActions } from '../actions/board.actions';
 import { BoardPageActions } from '../actions/board-page.actions';
-import type { NativeEmoji } from 'emoji-picker-element/shared';
+import type { Emoji } from 'emoji-picker-element/shared';
 
 export interface BoardPageState {
   name: string;
@@ -32,7 +32,7 @@ export interface BoardPageState {
   owners: string[];
   boardCursor: string;
   voting: boolean;
-  emoji: NativeEmoji | null;
+  emoji: Emoji | null;
   dragEnabled: boolean;
   cocomaterial: {
     page: number;
@@ -325,7 +325,7 @@ const reducer = createReducer(
   on(BoardPageActions.selectEmoji, (state, { emoji }): BoardPageState => {
     return {
       ...state,
-      emoji: emoji,
+      emoji,
     };
   }),
   on(

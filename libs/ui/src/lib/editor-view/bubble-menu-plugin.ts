@@ -111,10 +111,7 @@ export class BubbleMenuView {
       return;
     }
 
-    if (
-      event?.relatedTarget &&
-      this.element.parentNode?.contains(event.relatedTarget as Node)
-    ) {
+    if (this.element.parentNode?.contains(event.relatedTarget as Node)) {
       return;
     }
 

@@ -1,4 +1,6 @@
 import { NodeConfig } from '@tapiz/board-commons';
+import { DynamicComponent } from './modules/board/components/node/dynamic-component';
+import { Type } from '@angular/core';
 
 const nodes = new Map<string, NodeConfig>();
 
@@ -15,7 +17,7 @@ export function loadNode(type: string) {
 
   return nodeConfig.loadComponent().then((component) => {
     return {
-      component,
+      component: component as Type<DynamicComponent>,
       config: nodeConfig.config,
     };
   });

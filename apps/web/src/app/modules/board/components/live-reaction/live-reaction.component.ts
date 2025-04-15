@@ -83,7 +83,7 @@ export class LiveReactionComponent {
   );
 
   emojis = toSignal(this.emojis$, {
-    initialValue: [] as Emoji[],
+    initialValue: [],
   });
 
   visibleEmojis = computed(() => {

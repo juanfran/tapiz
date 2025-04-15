@@ -19,6 +19,16 @@ import {
 } from 'transformation-matrix';
 import { concatLatestFrom } from '@ngrx/operators';
 
+export interface MouseDownAndMoveEvent {
+  type: 'start' | 'move';
+  event: {
+    shiftKey: boolean;
+    x: number;
+    y: number;
+  };
+  initialPosition: Point;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -63,7 +73,7 @@ export class MoveService {
     );
   }
 
-  public mouseDownAndMove(el: HTMLElement) {
+  public mouseDownAndMove(el: HTMLElement): Observable<MouseDownAndMoveEvent> {
     const setUpConfig = this.setUpConfig;
 
     if (!setUpConfig) {
@@ -113,13 +123,13 @@ export class MoveService {
               type: 'move',
               event,
               initialPosition,
-            };
+            } satisfies MouseDownAndMoveEvent;
           }),
           startWith({
             type: 'start',
             event: e,
             initialPosition,
-          }),
+          } satisfies MouseDownAndMoveEvent),
         );
       }),
     );

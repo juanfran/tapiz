@@ -5,4 +5,4 @@ type PortalState = {
   portal: TemplatePortal<unknown> | null;
 };
 
-export const popupState = signalState(<PortalState>{ portal: null });
+export const popupState = signalState<PortalState>({ portal: null });

@@ -6,11 +6,11 @@ export function getNodeSize(
   let width = node.content.width;
   let height = node.content.height;
 
-  const nodeWidths = {
+  const nodeWidths: Record<string, number> = {
     poll: 650,
     estimation: 650,
     token: 100,
-  } as Record<string, number>;
+  };
 
   width = width || nodeWidths[node.type];
   height = height || width;

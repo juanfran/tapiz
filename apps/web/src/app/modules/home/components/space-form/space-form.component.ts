@@ -113,7 +113,7 @@ export class SpaceFormComponent {
     return this.boardsResource.value() ?? [];
   });
 
-  get boardsForm() {
+  get boardsForm(): FormArray<FormControl> {
     return this.form.controls.boards;
   }
 

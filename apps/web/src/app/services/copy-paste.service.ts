@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { NodeAdd, Point, TuNode } from '@tapiz/board-commons';
+import { isBoardTuNode, NodeAdd, TuNode } from '@tapiz/board-commons';
 import { BoardPageActions } from '../modules/board/actions/board-page.actions';
 import { boardPageFeature } from '../modules/board/reducers/boardPage.reducer';
 
@@ -29,7 +29,7 @@ export class CopyPasteService {
     incX?: number;
     incY?: number;
   }) {
-    const hasReadText = navigator.clipboard.readText as unknown;
+    const hasReadText = navigator.clipboard.readText;
 
     if (!hasReadText) {
       return;
@@ -43,7 +43,7 @@ export class CopyPasteService {
     }
 
     const nodes: NodeAdd['data'][] = copyNode.map((it, index): TuNode => {
-      if ('position' in it.content) {
+      if (isBoardTuNode(it)) {
         if (options?.x && options?.y) {
           it.content.position = {
             x: options.x + index * 10,
@@ -51,8 +51,8 @@ export class CopyPasteService {
           };
         } else if (options?.incX || options?.incY) {
           it.content.position = {
-            x: (it.content.position as Point).x + (options?.incX ?? 0),
-            y: (it.content.position as Point).y + (options?.incY ?? 0),
+            x: it.content.position.x + (options?.incX ?? 0),
+            y: it.content.position.y + (options?.incY ?? 0),
           };
         }
 

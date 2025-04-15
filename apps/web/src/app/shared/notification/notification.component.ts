@@ -25,7 +25,7 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class NotificationComponent {
   public snackBarRef = inject(MatSnackBarRef);
-  public data = inject(MAT_SNACK_BAR_DATA) as NotificationData;
+  public data: NotificationData = inject(MAT_SNACK_BAR_DATA);
 
   public close() {
     this.snackBarRef.dismiss();

@@ -5,6 +5,16 @@ import { BehaviorSubject } from 'rxjs';
 import { NodeToolbar } from '../toolbar/node-toolbar.model';
 import { Portal } from '@angular/cdk/portal';
 
+export interface EditorPortal {
+  portal: Portal<unknown>;
+  attached: boolean;
+  node: {
+    width: number;
+    height: number;
+    position: Point;
+  };
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -23,15 +33,7 @@ export class EditorViewSharedStateService {
     >
   >({});
 
-  editorPortal = signal<{
-    portal: Portal<unknown>;
-    attached: boolean;
-    node: {
-      width: number;
-      height: number;
-      position: Point;
-    };
-  } | null>(null);
+  editorPortal = signal<EditorPortal | null>(null);
 
   addNode(
     node: Signal<TuNode<NodeToolbar>>,

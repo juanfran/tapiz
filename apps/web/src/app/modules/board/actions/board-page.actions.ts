@@ -9,7 +9,7 @@ import {
   TuNode,
   BoardUserInfo,
 } from '@tapiz/board-commons';
-import { NativeEmoji } from 'emoji-picker-element/shared';
+import { Emoji } from 'emoji-picker-element/shared';
 
 export const BoardPageActions = createActionGroup({
   source: 'Page',
@@ -45,7 +45,7 @@ export const BoardPageActions = createActionGroup({
     'Set popup pinned': props<{ pinned: boolean }>(),
     'Ready to vote': emptyProps(),
     'Board not found': props<{ id: BoardUser['id'] }>(),
-    'Select emoji': props<{ emoji: NativeEmoji }>(),
+    'Select emoji': props<{ emoji: Emoji }>(),
     'Fetch cocomaterial tags success': props<{ tags: CocomaterialTag[] }>(),
     'Fetch vectors': props<{ tags: string[] }>(),
     'Fetch vectors success': props<{

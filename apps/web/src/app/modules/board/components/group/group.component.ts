@@ -274,7 +274,7 @@ export class GroupComponent {
   }
 
   public get nativeElement(): HTMLElement {
-    return this.#el.nativeElement as HTMLElement;
+    return this.#el.nativeElement;
   }
 
   initResize() {

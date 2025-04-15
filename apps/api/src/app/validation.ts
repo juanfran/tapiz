@@ -9,8 +9,6 @@ import { TIMER_VALIDATORS } from '@tapiz/board-commons/validators/timer.validato
 
 import { NOTE_VALIDATORS } from '@tapiz/board-commons/validators/note.validator.js';
 
-import { type ZodAny } from 'zod';
-
 const validations = {
   custom: {
     user: Validators.userValidator,
@@ -21,14 +19,14 @@ const validations = {
     image: Validators.newImage,
     vector: Validators.newVector,
     text: Validators.newText,
-  } as Record<string, unknown>,
+  },
   patch: {
     panel: Validators.patchPanel,
     group: Validators.patchGroup,
     image: Validators.patchImage,
     vector: Validators.patchVector,
     text: Validators.patchText,
-  } as Record<string, unknown>,
+  },
   newValidators: [
     {
       type: 'token',
@@ -53,7 +51,7 @@ export const validateAction = async (
   isAdmin: boolean,
   boardId: string,
   userPrivateId: string,
-) => {
+): Promise<StateActions | false> => {
   const customValidators = msg.data.type in validations.custom;
 
   const validatorConfig = validations.newValidators.find(
@@ -161,7 +159,8 @@ export const validateAction = async (
     );
   } else {
     if (msg.op === 'patch' || msg.op === 'remove') {
-      const validator = validations['patch'][msg.data.type];
+      const validator =
+        validations['patch'][msg.data.type as keyof typeof validations.patch];
 
       // check if the element present in the state
       const node = nodes.find((it) => it.id === msg.data.id);
@@ -180,9 +179,7 @@ export const validateAction = async (
         };
       } else if (msg.op === 'patch') {
         if (validator) {
-          const validatorResult = (validator as ZodAny).safeParse(
-            msg.data.content,
-          );
+          const validatorResult = validator.safeParse(msg.data.content);
 
           if (!validatorResult.success) {
             return false;
@@ -201,12 +198,11 @@ export const validateAction = async (
         }
       }
     } else if (msg.op === 'add') {
-      const validator = validations['new'][msg.data.type];
+      const validator =
+        validations['new'][msg.data.type as keyof typeof validations.new];
 
       if (validator) {
-        const validatorResult = (validator as ZodAny).safeParse(
-          msg.data.content,
-        );
+        const validatorResult = validator.safeParse(msg.data.content);
 
         if (!validatorResult.success) {
           return false;
@@ -246,8 +242,8 @@ export const validation = async (
       }),
     );
 
-    if (actions.every((it) => it)) {
-      return actions as StateActions[];
+    if (actions.every((it): it is StateActions => !!it)) {
+      return actions;
     }
   }
 

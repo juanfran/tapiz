@@ -75,8 +75,8 @@ export class NodeComponent implements OnInit {
 
     if ('width' in content && 'height' in content) {
       return {
-        width: content.width as number,
-        height: content.height as number,
+        width: content.width,
+        height: content.height,
       };
     }
 
@@ -128,7 +128,7 @@ export class NodeComponent implements OnInit {
 
   public ngOnInit() {
     loadNode(this.node().type).then((node) => {
-      this.loadComponent(node.component as Type<DynamicComponent>);
+      this.loadComponent(node.component);
     });
   }
 
@@ -164,7 +164,7 @@ export class NodeComponent implements OnInit {
           focus: this.focus(),
         });
 
-        const zIndex = (this.cmp.instance as { zIndex?: number })?.zIndex ?? 1;
+        const zIndex = this.cmp.instance.zIndex ?? 1;
 
         this.nativeElement.style.setProperty('--z-index-node', zIndex);
       });

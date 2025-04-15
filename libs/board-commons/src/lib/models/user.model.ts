@@ -19,3 +19,7 @@ export interface BoardUserInfo {
 }
 
 export type UserNode = TuNode<User>;
+
+export function isUserNode(node: TuNode): node is UserNode {
+  return node.type === 'user';
+}

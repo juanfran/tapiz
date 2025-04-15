@@ -15,13 +15,11 @@ import { BoardFacade } from '../../../../services/board-facade.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { VotesModalComponent } from '../votes-modal/votes-modal.component';
 import {
-  Group,
   isGroup,
+  isNote,
   isPanel,
   NodePatch,
   Note,
-  Panel,
-  TuNode,
 } from '@tapiz/board-commons';
 import { CommentsStore } from '../comments/comments.store';
 import { NodesActions } from '../../services/nodes-actions';
@@ -220,11 +218,8 @@ export class BoardContextMenuComponent implements OnInit {
           }
 
           if (currentNodes.length === 1) {
-            const isNote = currentNodes[0].type === 'note';
-
-            if (isNote) {
-              const note = currentNodes[0] as TuNode<Note>;
-
+            const note = currentNodes[0];
+            if (isNote(note)) {
               actions.push(
                 {
                   label: 'Comments',
@@ -326,9 +321,9 @@ export class BoardContextMenuComponent implements OnInit {
 
           const showVotesNode = currentNodes
             .filter((node) => {
-              return node.type === 'note' || node.type === 'group';
+              return isNote(node) || isGroup(node);
             })
-            .at(0) as TuNode<Group | Note> | undefined;
+            .at(0);
 
           if (showVotesNode && showVotesNode.content.votes.length) {
             actions.push({
@@ -349,7 +344,7 @@ export class BoardContextMenuComponent implements OnInit {
             .filter((node) => {
               return isGroup(node) || isPanel(node);
             })
-            .at(0) as TuNode<Group | Panel> | undefined;
+            .at(0);
 
           if (nodeWithNested && currentNodes.length === 1) {
             actions.push({

@@ -12,7 +12,7 @@ import {
   signal,
 } from '@angular/core';
 
-import { EstimationBoard, TuNode, EstimationNodes } from '@tapiz/board-commons';
+import { EstimationNodes, EstimationBoardNode } from '@tapiz/board-commons';
 import { MatIconModule } from '@angular/material/icon';
 import { EstimationComponent } from '../estimation/estimation.component';
 import * as R from 'remeda';
@@ -48,7 +48,7 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EstimationBoardComponent implements AfterViewInit, OnInit {
-  node = input.required<TuNode<EstimationBoard, 'estimation'>>();
+  node = input.required<EstimationBoardNode>();
   pasted = input.required<boolean>();
   focus = input.required<boolean>();
 
@@ -82,10 +82,10 @@ export class EstimationBoardComponent implements AfterViewInit, OnInit {
     toObservable(this.node, {
       injector: this.#injector,
     }).subscribe((node) => {
-      const children = (node.children as EstimationNodes[]) ?? [];
+      const children = node.children ?? [];
 
-      if (!R.equals(children, this.estimation())) {
-        this.estimation.set((node.children as EstimationNodes[]) ?? []);
+      if (!R.isDeepEqual(children, this.estimation())) {
+        this.estimation.set(node.children ?? []);
       }
     });
   }

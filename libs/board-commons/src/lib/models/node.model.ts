@@ -1,10 +1,10 @@
 import { Point } from './point.model.js';
 
-export interface TuNode<C = object, T = string> {
+export interface TuNode<C = object, T = string, H = object> {
   id: string;
   type: T;
   content: C;
-  children?: TuNode[];
+  children?: TuNode<H>[];
 }
 
 export interface NodeAdd<T = object> {

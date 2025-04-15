@@ -14,7 +14,6 @@ import {
 } from 'rxjs';
 import { BoardPageActions } from '../../actions/board-page.actions';
 import { BoardFacade } from '../../../../services/board-facade.service';
-import { TuNode } from '@tapiz/board-commons';
 
 interface SelectAction {
   userId: string;
@@ -180,10 +179,7 @@ export class ZoneService {
   }
 
   nodesInZone(area: { relativeRect: DOMRect; layer: number }) {
-    const boardNodes = this.#boardFacade.get() as TuNode<
-      { layer: number },
-      string
-    >[];
+    const boardNodes = this.#boardFacade.get();
 
     const nodes = document.querySelectorAll<HTMLElement>('tapiz-node');
 
@@ -213,7 +209,9 @@ export class ZoneService {
       .map((el) => {
         const node = boardNodes.find(
           (node) =>
-            node.id === el.dataset['id'] && node.content.layer === area.layer,
+            node.id === el.dataset['id'] &&
+            'layer' in node.content &&
+            node.content.layer === area.layer,
         );
 
         if (node) {

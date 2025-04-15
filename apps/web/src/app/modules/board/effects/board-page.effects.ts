@@ -16,7 +16,7 @@ import { boardPageFeature } from '../reducers/boardPage.reducer';
 import { filterNil } from '../../../commons/operators/filter-nil';
 import { ActivatedRoute } from '@angular/router';
 import { BoardFacade } from '../../../services/board-facade.service';
-import { Point, TuNode } from '@tapiz/board-commons';
+import { isBoardTuNode } from '@tapiz/board-commons';
 import { getNodeSize } from '../../../shared/node-size';
 import { getRouterSelectors } from '@ngrx/router-store';
 export const { selectQueryParam } = getRouterSelectors();
@@ -90,13 +90,10 @@ export class BoardPageEffects {
       ofType(BoardPageActions.goToNode),
       map(({ nodeId }) => {
         const nodes = this.boardFacade.nodes();
-        return nodes.find((it) => it.id === nodeId) as TuNode<{
-          position: Point;
-          width?: number;
-          height?: number;
-        }>;
+        return nodes.find((it) => it.id === nodeId);
       }),
       filterNil(),
+      filter((node) => isBoardTuNode(node)),
       concatLatestFrom(() => [this.store.select(boardPageFeature.selectZoom)]),
       map(([node, zoom]) => {
         const { width, height } = getNodeSize(node);

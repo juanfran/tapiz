@@ -94,7 +94,7 @@ export class ContextMenuStore {
         return;
       }
 
-      const el = event.target as HTMLElement;
+      const el = event.target as HTMLInputElement;
 
       if (el.tagName.toUpperCase() !== 'tapiz-board'.toUpperCase()) {
         const isProsemirror = el.closest('.ProseMirror');
@@ -110,11 +110,9 @@ export class ContextMenuStore {
         }
       }
 
-      const pointerEvent = event as PointerEvent;
-
       const { x, y } = {
-        x: pointerEvent.clientX,
-        y: pointerEvent.clientY,
+        x: event.clientX,
+        y: event.clientY,
       };
 
       this.actions.open({ position: { x, y }, items: items() });

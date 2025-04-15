@@ -108,7 +108,6 @@ export class OptionLayoutComponent {
 
   updateNode(event: Event, key: keyof NodeToolbar) {
     const target = event.target as HTMLInputElement;
-
     const isNumber = target.type === 'number';
 
     this.#store.dispatch(

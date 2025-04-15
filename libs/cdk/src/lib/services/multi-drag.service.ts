@@ -141,7 +141,7 @@ export class MultiDragService {
 
     this.#eventInitialPoisition = null;
     const deltaInitDrag = 3;
-    let ids = [] as string[];
+    let ids: string[] = [];
 
     const initialMouseMove$ = fromEvent<MouseEvent>(
       document.body,
