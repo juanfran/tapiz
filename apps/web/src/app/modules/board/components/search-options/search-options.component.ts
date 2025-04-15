@@ -133,7 +133,7 @@ export class SearchOptionsComponent {
   });
 
   get searchFormControl() {
-    return this.form.get('search') as FormControl;
+    return this.form.controls.search;
   }
 
   options = signal<

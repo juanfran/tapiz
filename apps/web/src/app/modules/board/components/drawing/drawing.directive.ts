@@ -96,19 +96,18 @@ export class DrawingDirective {
         takeUntilDestroyed(),
         filter(() => this.canDraw()),
         switchMap(() => {
-          return mouseMove$.pipe(
-            scan(
-              (acc, event) => {
-                acc.points.push({ x: event.offsetX, y: event.offsetY });
+          const initialDrawing: Drawing = {
+            size: this.#drawingStore.size(),
+            color: this.#drawingStore.color(),
+            points: [],
+          } satisfies Drawing;
 
-                return acc;
-              },
-              {
-                size: this.#drawingStore.size(),
-                color: this.#drawingStore.color(),
-                points: [],
-              } as Drawing,
-            ),
+          return mouseMove$.pipe(
+            scan((acc, event) => {
+              acc.points.push({ x: event.offsetX, y: event.offsetY });
+
+              return acc;
+            }, initialDrawing),
           );
         }),
       )

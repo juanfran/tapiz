@@ -38,3 +38,7 @@ export type EstimationResultNode = TuNode<
 >;
 
 export type EstimationNodes = EstimationConfigNode | EstimationResultNode;
+export interface EstimationBoardNode
+  extends TuNode<EstimationBoard, 'estimation'> {
+  children: EstimationNodes[];
+}

@@ -4,7 +4,7 @@ import {
   computed,
   input,
 } from '@angular/core';
-import { PollAnswerNode, PollBoardNode, User } from '@tapiz/board-commons';
+import { PollBoardNode, User } from '@tapiz/board-commons';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
@@ -56,7 +56,7 @@ export class PollResultsComponent {
   results = computed(() => {
     const node = this.node();
 
-    const children = (node.children ?? []) as PollAnswerNode[];
+    const children = node.children ?? [];
 
     return node.content.options
       .map((option) => {

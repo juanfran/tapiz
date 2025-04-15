@@ -104,7 +104,7 @@ export class EstimationStoriesComponent implements OnInit {
   closeConfig = output<void>();
 
   get stories() {
-    return (this.form.get('stories') as FormArray).controls as FormGroup[];
+    return this.form.controls.stories.controls;
   }
 
   ngOnInit(): void {
@@ -118,11 +118,18 @@ export class EstimationStoriesComponent implements OnInit {
   }
 
   form = new FormGroup({
-    stories: new FormArray([]),
+    stories: new FormArray<
+      FormGroup<{
+        id: FormControl<string>;
+        title: FormControl<string>;
+        description: FormControl<string>;
+        show: FormControl<boolean>;
+      }>
+    >([]),
   });
 
   deleteStory(index: number) {
-    const stories = this.form.get('stories') as FormArray;
+    const stories = this.form.controls.stories;
 
     stories.removeAt(index);
   }
@@ -135,7 +142,7 @@ export class EstimationStoriesComponent implements OnInit {
       show: false,
     },
   ) {
-    const stories = this.form.get('stories') as FormArray;
+    const stories = this.form.controls.stories;
 
     stories.push(
       new FormGroup({
@@ -156,7 +163,7 @@ export class EstimationStoriesComponent implements OnInit {
       return;
     }
 
-    const stories = this.form.value.stories as EstimationStory[];
+    const stories: EstimationStory[] = this.form.getRawValue().stories;
 
     this.addStory.emit(stories);
   }

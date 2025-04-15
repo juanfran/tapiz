@@ -64,7 +64,7 @@ export const LiveReactionStore = signalStore(
               url,
               position,
             },
-          } as EmojiMessage),
+          } satisfies EmojiMessage),
         ]);
 
         addEmoji(url, position);

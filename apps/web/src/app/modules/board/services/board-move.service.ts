@@ -84,7 +84,7 @@ export class BoardMoveService {
         return {
           x: position.x - moveDiff.x,
           y: position.y - moveDiff.y,
-        } as Point;
+        } satisfies Point;
       }),
     );
   }

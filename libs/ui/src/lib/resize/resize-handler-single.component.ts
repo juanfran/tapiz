@@ -77,10 +77,13 @@ export class ResizeHandlerSingleComponent implements Resizable {
           this.initResize.emit();
         }
 
-        this.resizeService.resizeEvent.next({
+        const resizeEvent: ResizeEvent = {
           ...mouseEvent,
           position,
-        } as ResizeEvent);
+          nodeRotation: this.node().content.rotation ?? 0,
+        };
+
+        this.resizeService.resizeEvent.next(resizeEvent);
       });
   }
 }

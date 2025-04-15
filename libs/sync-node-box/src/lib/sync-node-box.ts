@@ -80,7 +80,7 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
       setState(
         actions.reduce((state, action) => {
           if (action.parent) {
-            return state.map((it: TuNode<object, string>) => {
+            return state.map((it) => {
               if (it.id === action.parent) {
                 return {
                   ...it,

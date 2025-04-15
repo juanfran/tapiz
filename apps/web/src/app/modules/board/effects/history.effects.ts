@@ -62,7 +62,7 @@ export class HistoryEffects {
               position: node.initialIndex,
               op: 'patch',
             };
-          }) as StateActions[];
+          }) satisfies StateActions[];
 
           this.#boardFacade.patchHistory((history) => {
             history.past.unshift(nodesActions);
@@ -92,7 +92,7 @@ export class HistoryEffects {
                   content: action.prev.content,
                 },
                 op: 'patch',
-              } as StateActions,
+              } satisfies StateActions,
             ]);
             history.future = [];
 

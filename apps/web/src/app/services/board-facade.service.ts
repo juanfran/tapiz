@@ -6,8 +6,8 @@ import {
   BoardTuNode,
   StateActions,
   TuNode,
-  UserNode,
   isTimer,
+  isUserNode,
 } from '@tapiz/board-commons';
 import { syncNodeBox } from '@tapiz/sync-node-box';
 import { boardPageFeature } from '../modules/board/reducers/boardPage.reducer';
@@ -32,7 +32,7 @@ export class BoardFacade {
   });
 
   usersNodes = computed(() => {
-    return this.nodes().filter((it) => it.type === 'user') as UserNode[];
+    return this.nodes().filter((it) => isUserNode(it));
   });
 
   users = computed(() => {
@@ -109,7 +109,7 @@ export class BoardFacade {
     addRawLog('patchHistory');
   }
 
-  filterBoardNodes(nodes: TuNode[]) {
+  filterBoardNodes(nodes: TuNode[]): BoardTuNode[] {
     return nodes.filter(
       (it) => !['user', 'settings', 'timer'].includes(it.type),
     ) as BoardTuNode[];

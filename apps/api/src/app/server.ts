@@ -1,8 +1,9 @@
-import type {
-  BoardSettings,
-  StateActions,
-  TuNode,
-  UserNode,
+import {
+  isUserNode,
+  type BoardSettings,
+  type StateActions,
+  type TuNode,
+  type UserNode,
 } from '@tapiz/board-commons';
 import type { Socket, Server as WsServer } from 'socket.io';
 import { Client } from './client.js';
@@ -53,16 +54,17 @@ export class Server {
 
   private findBoardSettings(boardId: string): BoardSettings {
     const board = this.getBoard(boardId);
+    const defaultBoardSettings: BoardSettings = {};
 
     if (!board) {
-      return {} as BoardSettings;
+      return defaultBoardSettings;
     }
 
     const boardSettings = board.find(
       (it): it is TuNode<BoardSettings> => it.type === 'settings',
     );
 
-    return boardSettings?.content ?? ({} as BoardSettings);
+    return boardSettings?.content ?? defaultBoardSettings;
   }
 
   public getBoardSettings(boardId: string) {
@@ -96,7 +98,7 @@ export class Server {
       this.updateBoard(
         boardId,
         boardNodes.map((it) => {
-          if (it.type !== 'user') {
+          if (!isUserNode(it)) {
             return it;
           }
 
@@ -107,7 +109,7 @@ export class Server {
               connected: false,
               cursor: null,
             },
-          } as UserNode;
+          } satisfies UserNode;
         }),
       );
       this.stateSubscriptions[boardId] = this.state[boardId]

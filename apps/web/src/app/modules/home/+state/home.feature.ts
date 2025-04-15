@@ -120,7 +120,9 @@ const reducer = createReducer(
           id: invitation.id,
           email: invitation.email,
           role: invitation.role,
-        } as Invitation;
+          userId: invitation.userId,
+          createdAt: invitation.createdAt,
+        };
       }),
     };
   }),

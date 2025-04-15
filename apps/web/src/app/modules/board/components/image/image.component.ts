@@ -95,7 +95,7 @@ export class ImageComponent {
     }
   }
 
-  get imageNativeElement() {
-    return this.imageRef().nativeElement as HTMLImageElement;
+  get imageNativeElement(): HTMLImageElement {
+    return this.imageRef().nativeElement;
   }
 }

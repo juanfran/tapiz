@@ -127,11 +127,13 @@ export class ResizeHandlerComponent {
       .mouseDownAndMove(handler)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((mouseEvent) => {
-        this.resizeService.resizeEvent.next({
+        const resizeEvent: ResizeEvent = {
           ...mouseEvent,
           position,
-          nodeRotation: this.node().content.rotation,
-        } as ResizeEvent);
+          nodeRotation: this.node().content.rotation ?? 0,
+        };
+
+        this.resizeService.resizeEvent.next(resizeEvent);
       });
   }
 }

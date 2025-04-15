@@ -148,7 +148,7 @@ export const userRouter = router({
       };
     }),
   logout: publicProcedure.query(async (req) => {
-    const mayLogout = req.ctx as { user?: { sub: string } };
+    const mayLogout: { user?: { sub: string } } = req.ctx;
 
     if (mayLogout.user) {
       await lucia.invalidateUserSessions(mayLogout.user.sub);

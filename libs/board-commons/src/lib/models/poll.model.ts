@@ -21,4 +21,4 @@ export interface PollBoard {
 }
 
 export type PollAnswerNode = TuNode<PollAnswer, 'poll.answer'>;
-export type PollBoardNode = TuNode<PollBoard, 'poll'>;
+export type PollBoardNode = TuNode<PollBoard, 'poll', PollAnswer>;

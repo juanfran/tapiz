@@ -43,7 +43,7 @@ export class TeamMembersComponent {
   }>(MAT_DIALOG_DATA);
   public dialogRef = inject(MatDialogRef);
   public store = inject(Store);
-  public state = inject(RxState) as RxState<TeamMembersComponentState>;
+  public state = inject(RxState<TeamMembersComponentState>);
   public model$ = this.state.select();
 
   constructor() {
@@ -121,7 +121,7 @@ export class TeamMembersComponent {
     invitations.forEach((invitation) => {
       const role = invitation.role;
 
-      if (role !== 'guest') {
+      if (role !== 'guest' && invitation.email) {
         this.store.dispatch(
           HomeActions.inviteToTeam({
             id: this.data.teamId,

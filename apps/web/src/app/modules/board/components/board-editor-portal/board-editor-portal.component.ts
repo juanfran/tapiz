@@ -7,6 +7,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { EditorViewSharedStateService } from '@tapiz/ui/editor-view';
+import { EditorPortal } from '@tapiz/ui/editor-view/editor-view-shared-state.service';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 
 @Component({
@@ -43,12 +44,17 @@ export class BoardEditorPortalComponent {
         }
 
         cdkPortalOutlet.attach(selectedPortal.portal);
+
         this.#editorViewSharedStateService.editorPortal.update(
-          (editorPortal) => {
+          (editorPortal): EditorPortal | null => {
+            if (!editorPortal) {
+              return null;
+            }
+
             return {
               ...editorPortal,
               attached: true,
-            } as typeof editorPortal;
+            };
           },
         );
       },

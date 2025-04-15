@@ -431,7 +431,7 @@ export class NoteComponent {
   }
 
   get nativeElement(): HTMLElement {
-    return this.#el.nativeElement as HTMLElement;
+    return this.#el.nativeElement;
   }
 
   get id() {
@@ -514,7 +514,7 @@ export class NoteComponent {
     if (event.button === 0) {
       const emoji = this.#emoji();
 
-      if (!emoji) {
+      if (!emoji || !('unicode' in emoji)) {
         return;
       }
 

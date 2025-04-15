@@ -15,14 +15,14 @@ export class NodesActions {
   #boardFacade = inject(BoardFacade);
 
   add<T>(type: string, content: T, options?: Options): NodeAdd<T> {
-    const nodeAdd = {
+    const nodeAdd: NodeAdd<T> = {
       data: {
         type,
         id: v4(),
         content,
       },
       op: 'add',
-    } as NodeAdd<T>;
+    };
 
     if (options?.parent) {
       nodeAdd.parent = options.parent;
@@ -47,10 +47,10 @@ export class NodesActions {
   }
 
   patch<T>(node: TuNode<Partial<T>>, options?: Options): NodePatch<T> {
-    const nodePatch = {
+    const nodePatch: NodePatch<T> = {
       data: node,
       op: 'patch',
-    } as NodePatch<T>;
+    };
 
     if (options?.parent) {
       nodePatch.parent = options.parent;

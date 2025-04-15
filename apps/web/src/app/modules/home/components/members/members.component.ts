@@ -80,8 +80,8 @@ import { input } from '@angular/core';
                       member: {
                         id: invitation.id,
                         name: invitation.email,
-                        role: invitation.role
-                      }
+                        role: invitation.role,
+                      },
                     }
                   ">
                 </ng-container>
@@ -100,8 +100,8 @@ import { input } from '@angular/core';
                       id: member.id,
                       name: member.name,
                       email: member.email,
-                      role: member.role
-                    }
+                      role: member.role,
+                    },
                   }
                 ">
               </ng-container>
@@ -174,7 +174,7 @@ export class MembersComponent implements OnChanges {
       nonNullable: true,
       validators: Validators.required,
     }),
-    role: new FormControl('member', {
+    role: new FormControl<Invitation['role']>('member', {
       nonNullable: true,
       validators: Validators.required,
     }),
@@ -215,11 +215,17 @@ export class MembersComponent implements OnChanges {
       );
 
     if (emails.length) {
+      const role = this.form.value.role;
+
+      if (!role) {
+        return;
+      }
+
       this.invited.emit(
         emails.map((email) => {
           return {
             email,
-            role: this.form.value.role as Invitation['role'],
+            role,
           };
         }),
       );
@@ -229,11 +235,15 @@ export class MembersComponent implements OnChanges {
     this.formDirective.resetForm();
   }
 
-  public onRoleChange(role: string, id: string, isInvitation: boolean) {
+  public onRoleChange(
+    role: Invitation['role'],
+    id: string,
+    isInvitation: boolean,
+  ) {
     if (isInvitation) {
-      this.roleInvitationChanged.emit({ id, role: role as Invitation['role'] });
+      this.roleInvitationChanged.emit({ id, role });
     } else {
-      this.roleMemberChanged.emit({ id, role: role as Member['role'] });
+      this.roleMemberChanged.emit({ id, role: role });
     }
   }
 

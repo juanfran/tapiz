@@ -100,10 +100,13 @@ export class NodeToolbarComponent {
           id: node.id,
           view: toolbar.view,
           node: toolbar.node,
-          options: toolbar.options,
+          options: {
+            defaultTextColor: '#000000',
+            ...toolbar.options,
+          },
           x,
           y,
-        } as Toolbar;
+        } satisfies Toolbar;
       })
       .filter((it): it is Toolbar => !!it);
   });

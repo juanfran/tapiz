@@ -218,7 +218,7 @@ export class PanelComponent implements OnInit {
   }
 
   get nativeElement(): HTMLElement {
-    return this.#el.nativeElement as HTMLElement;
+    return this.#el.nativeElement;
   }
 
   #setCssVariables(panel: TuNode<Panel>) {

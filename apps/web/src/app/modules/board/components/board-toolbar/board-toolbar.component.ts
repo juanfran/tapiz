@@ -14,7 +14,7 @@ import { switchMap, take } from 'rxjs/operators';
 import { NotesService } from '../../services/notes.service';
 import { Subscription, zip } from 'rxjs';
 import 'emoji-picker-element';
-import { EmojiClickEvent, NativeEmoji } from 'emoji-picker-element/shared';
+import { EmojiClickEvent } from 'emoji-picker-element/shared';
 import { CocomaterialComponent } from '../cocomaterial/cocomaterial.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
@@ -465,7 +465,7 @@ export class BoardToolbarComponent {
   emojiSelected(emojiEvent: EmojiClickEvent) {
     this.#store.dispatch(
       BoardPageActions.selectEmoji({
-        emoji: emojiEvent.detail.emoji as NativeEmoji,
+        emoji: emojiEvent.detail.emoji,
       }),
     );
   }

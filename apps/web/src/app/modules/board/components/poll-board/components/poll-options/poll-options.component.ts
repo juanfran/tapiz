@@ -142,10 +142,10 @@ export class PollOptionsComponent {
     this.endPoll.emit();
   }
 
-  async #userVote() {
+  async #userVote(): Promise<PollAnswerNode | undefined> {
     const userId = this.userId();
     const isPrivate = this.node().content.mode === 'anonymous';
-    const children = (this.node().children ?? []) as PollAnswerNode[];
+    const children = (this.node().children as PollAnswerNode[]) ?? [];
 
     if (isPrivate) {
       const parseChildren = await Promise.all(

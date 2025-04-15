@@ -97,7 +97,7 @@ export class BoardShourtcutsDirective {
       .nodes()
       .filter((node) => this.#selectedNodesIds().includes(node.id));
     const boardNodes = this.#boardFacade.filterBoardNodes(nodes);
-    const actions = boardNodes.map((node) => {
+    const actions: NodePatch[] = boardNodes.map((node) => {
       return {
         data: {
           id: node.id,
@@ -110,7 +110,7 @@ export class BoardShourtcutsDirective {
           },
         },
         op: 'patch',
-      } as NodePatch;
+      };
     });
 
     this.#store.dispatch(

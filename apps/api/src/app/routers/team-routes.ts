@@ -233,7 +233,7 @@ export const teamRouter = router({
         teamId: z.string().uuid(),
       }),
     )
-    .query(async (req) => {
+    .query(async (req): Promise<Space[]> => {
       const spaces = await db.team.getSpacesByTeam(req.input.teamId);
 
       const spacesPromises = spaces.map(async (space) => {
@@ -244,7 +244,7 @@ export const teamRouter = router({
           name: space.name,
           teamId: space.teamId,
           boards,
-        } as Space;
+        };
       });
 
       return await Promise.all(spacesPromises);
@@ -257,7 +257,7 @@ export const teamRouter = router({
         boards: z.array(z.string().uuid()).default([]),
       }),
     )
-    .mutation(async (req) => {
+    .mutation(async (req): Promise<Space> => {
       const teamBoards = await db.board.getBoardsByTeam(req.input.teamId);
       const boardIds = teamBoards.map((board) => board.id);
       const validBoards = req.input.boards.every((boardId) =>
@@ -287,7 +287,7 @@ export const teamRouter = router({
         name: space.name,
         teamId: space.teamId,
         boards,
-      } as Space;
+      };
     }),
   updateSpace: protectedProcedure
     .input(
@@ -297,7 +297,7 @@ export const teamRouter = router({
         boards: z.array(z.string().uuid()).default([]),
       }),
     )
-    .mutation(async (req) => {
+    .mutation(async (req): Promise<Space> => {
       const space = await db.team.getSpace(req.input.spaceId);
 
       if (!space) {
@@ -330,7 +330,7 @@ export const teamRouter = router({
         name: req.input.name,
         teamId: space.teamId,
         boards,
-      } as Space;
+      };
     }),
   deleteSpace: protectedProcedure
     .input(

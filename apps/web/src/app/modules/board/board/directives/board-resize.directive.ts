@@ -52,7 +52,7 @@ export class BoardResizeDirective {
                 width: node.content.width,
                 height: node.content.height,
               },
-            } as TuNode<Resizable>,
+            } satisfies TuNode<Resizable>,
             op: 'patch',
           };
         });
@@ -166,7 +166,7 @@ export class BoardResizeDirective {
                 width: newWidth,
                 height: newHeight,
               },
-            } as TuNode<Resizable>;
+            } satisfies TuNode<Resizable>;
           });
         }),
       )
