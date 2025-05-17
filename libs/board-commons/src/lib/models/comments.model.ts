@@ -1,4 +1,4 @@
-import { TuNode } from './node.model.js';
+import { BaseNode } from './node.model.js';
 import { User } from './user.model.js';
 
 export interface Comment {
@@ -7,4 +7,4 @@ export interface Comment {
   userId: User['id'];
 }
 
-export type CommentNode = TuNode<Comment, 'comment'>;
+export interface CommentNode extends BaseNode<'comment', Comment> {}

@@ -1,9 +1,9 @@
-import { TuNode } from './node.model.js';
+import { TNode } from './node.model.js';
 
 export interface Board {
   id: string;
   name: string;
-  board: TuNode<object, string>[];
+  board: TNode[];
   createdAt: string;
   teamId: string | null;
   public: boolean;

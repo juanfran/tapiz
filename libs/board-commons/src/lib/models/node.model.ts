@@ -1,29 +1,68 @@
-import { Point } from './point.model.js';
+import { NoteNode, Note } from './note.model.js';
+import { Panel, PanelNode } from './panel.model.js';
+import {
+  PollAnswer,
+  PollBoard,
+  PollAnswerNode,
+  PollNode,
+} from './poll.model.js';
+import { Image, ImageNode } from './image.model.js';
+import { Group, GroupNode } from './group.model.js';
+import { Prettify } from '@ngrx/store/src/models.js';
+// import { Point } from './point.model.js';
+import type { Simplify, Get } from 'type-fest';
 
-export interface TuNode<C = object, T = string, H = object> {
+export interface BaseNode<
+  T extends string, // discrimination type
+  C, // content type
+  Ch extends BaseNode<string, unknown, []>[] = BaseNode<string, unknown, []>[],
+> {
   id: string;
   type: T;
   content: C;
-  children?: TuNode<H>[];
+  children?: Ch;
 }
 
-export interface NodeAdd<T = object> {
+export type ContentOfNode<T extends TNode['type']> = Extract<
+  TNode,
+  { type: T }
+>['content'];
+
+export type TNode =
+  | PanelNode
+  | NoteNode
+  | ImageNode
+  | PollNode
+  | PollAnswerNode
+  | GroupNode;
+
+export interface NodeAdd {
   op: 'add';
-  data: TuNode<T>;
+  data: Simplify<
+    Pick<TNode, 'id' | 'type'> & {
+      content: ContentOfNode<TNode['type']>;
+    }
+  >;
   parent?: string;
   position?: number;
 }
 
-export interface NodePatch<T = object> {
-  op: 'patch';
-  data: TuNode<Partial<T>>;
-  parent?: string;
-  position?: number;
-}
+export type NodePatch = {
+  [T in TNode['type']]: {
+    op: 'patch';
+    data: {
+      id: string;
+      type: T;
+      content: Partial<ContentOfNode<T>>;
+    };
+    parent?: string;
+    position?: number;
+  };
+}[TNode['type']];
 
 export interface NodeRemove {
   op: 'remove';
-  data: Pick<TuNode, 'id' | 'type'>;
+  data: Pick<TNode, 'id' | 'type'>;
   parent?: string;
 }
 
@@ -46,7 +85,7 @@ export interface NodeConfig {
 type AddPatchResponse =
   | {
       success: true;
-      data: TuNode;
+      data: TNode;
     }
   | NodeValidatorError;
 
@@ -57,63 +96,63 @@ type RemoveResponse =
     }
   | NodeValidatorError;
 
-export type BoardTuNode = TuNode<{
-  position: Point;
-  layer: number;
-  rotation?: number;
-  width?: number;
-  height?: number;
-}>;
+// export type BoardTuNode = TuNode<{
+//   position: Point;
+//   layer: number;
+//   rotation?: number;
+//   width?: number;
+//   height?: number;
+// }>;
 
-export type BoardTuNodeFull = TuNode<{
-  position: Point;
-  layer: number;
-  rotation?: number;
-  width: number;
-  height: number;
-}>;
+// export type BoardTuNodeFull = TuNode<{
+//   position: Point;
+//   layer: number;
+//   rotation?: number;
+//   width: number;
+//   height: number;
+// }>;
 export interface NodeValidator {
   add: (
-    data: TuNode,
+    data: TNode,
     state: {
       userId: string;
-      nodes: TuNode[];
+      nodes: TNode[];
       isAdmin: boolean;
       boardId: string;
       userPrivateId: string;
-      parentNode?: TuNode;
+      parentNode?: TNode;
     },
   ) => Promise<AddPatchResponse>;
   patch: (
-    data: TuNode,
+    data: TNode,
     state: {
       userId: string;
-      nodes: TuNode[];
+      nodes: TNode[];
       isAdmin: boolean;
       boardId: string;
       userPrivateId: string;
-      node: TuNode;
-      parentNode?: TuNode;
+      node: TNode;
+      parentNode?: TNode;
     },
   ) => Promise<AddPatchResponse>;
   remove: (
     data: NodeRemove['data'],
     state: {
       userId: string;
-      nodes: TuNode[];
+      nodes: TNode[];
       isAdmin: boolean;
       boardId: string;
       userPrivateId: string;
-      node: TuNode;
-      parentNode?: TuNode;
+      node: TNode;
+      parentNode?: TNode;
     },
   ) => Promise<RemoveResponse>;
 }
 
-export const isBoardTuNode = (node: TuNode): node is BoardTuNode => {
-  return 'position' in node.content;
-};
+// export const isBoardTuNode = (node: TuNode): node is BoardTuNode => {
+//   return 'position' in node.content;
+// };
 
-export const isBoardTuNodeFull = (node: TuNode): node is BoardTuNodeFull => {
-  return 'position' in node.content && 'width' in node.content;
-};
+// export const isBoardTuNodeFull = (node: TuNode): node is BoardTuNodeFull => {
+//   return 'position' in node.content && 'width' in node.content;
+// };

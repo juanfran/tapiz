@@ -1,4 +1,4 @@
-import { TuNode } from './node.model.js';
+import { BaseNode } from './node.model.js';
 import { Point } from './point.model.js';
 
 export interface Group {
@@ -13,7 +13,4 @@ export interface Group {
   }[];
   unLocked?: boolean;
 }
-
-export function isGroup(node: TuNode): node is TuNode<Group> {
-  return node.type === 'group';
-}
+export interface GroupNode extends BaseNode<'group', Group> {}

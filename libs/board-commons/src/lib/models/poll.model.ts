@@ -1,4 +1,4 @@
-import { TuNode } from './node.model.js';
+import { BaseNode } from './node.model.js';
 import { Point } from './point.model.js';
 
 export interface PollOption {
@@ -20,5 +20,7 @@ export interface PollBoard {
   options: PollOption[];
 }
 
-export type PollAnswerNode = TuNode<PollAnswer, 'poll.answer'>;
-export type PollBoardNode = TuNode<PollBoard, 'poll', PollAnswer>;
+export interface PollAnswerNode
+  extends BaseNode<'poll.answer', PollAnswer, []> {}
+export interface PollNode
+  extends BaseNode<'poll', PollBoard, PollAnswerNode[]> {}

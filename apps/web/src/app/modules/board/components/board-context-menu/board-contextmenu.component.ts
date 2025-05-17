@@ -265,7 +265,7 @@ export class BoardContextMenuComponent implements OnInit {
                     pickr.show();
 
                     pickr.on('change', (color: Pickr.HSVaColor | null) => {
-                      const patchNote: NodePatch<Note> = {
+                      const patchNote: NodePatch = {
                         data: {
                           type: 'note',
                           id: note.id,

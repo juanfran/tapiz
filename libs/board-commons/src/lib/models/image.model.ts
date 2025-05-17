@@ -1,4 +1,4 @@
-import { TuNode } from './node.model.js';
+import { BaseNode } from './node.model.js';
 import { Point } from './point.model.js';
 
 export interface Image {
@@ -10,6 +10,4 @@ export interface Image {
   rotation: number;
 }
 
-export function isImage(node: TuNode): node is TuNode<Image> {
-  return node.type === 'image';
-}
+export interface ImageNode extends BaseNode<'image', Image> {}

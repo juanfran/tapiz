@@ -1,4 +1,4 @@
-import { TuNode } from './node.model.js';
+import { BaseNode } from './node.model.js';
 import { Point } from './point.model.js';
 
 export interface CocomaterialTag {
@@ -38,6 +38,4 @@ export interface Vector {
   rotation: number;
 }
 
-export function isVector(node: TuNode): node is TuNode<Vector> {
-  return node.type === 'vector';
-}
+export interface VectorNode extends BaseNode<'vector', Vector> {}

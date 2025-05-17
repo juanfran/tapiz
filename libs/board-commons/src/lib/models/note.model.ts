@@ -1,5 +1,5 @@
 import { Drawing } from './drawing.model.js';
-import { TuNode } from './node.model.js';
+import { BaseNode } from './node.model.js';
 import { Point } from './point.model.js';
 
 export interface Note {
@@ -22,6 +22,4 @@ export interface Note {
   textHidden?: boolean;
 }
 
-export function isNote(node: TuNode): node is TuNode<Note> {
-  return node.type === 'note';
-}
+export interface NoteNode extends BaseNode<'note', Note, []> {}

@@ -46,7 +46,7 @@ export class NotesService {
       note.color = this.#lastColor;
     }
 
-    const action = this.#nodesActions.add<Note>('note', note);
+    const action = this.#nodesActions.add('note', note);
 
     this.#store.dispatch(
       BoardActions.batchNodeActions({

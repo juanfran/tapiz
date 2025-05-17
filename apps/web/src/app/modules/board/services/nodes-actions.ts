@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { NodeAdd, NodePatch, TuNode } from '@tapiz/board-commons';
+import { NodeAdd, NodePatch, TNode, ContentOfNode } from '@tapiz/board-commons';
 import { v4 } from 'uuid';
 import { BoardFacade } from '../../../services/board-facade.service';
 
@@ -14,8 +14,12 @@ interface Options {
 export class NodesActions {
   #boardFacade = inject(BoardFacade);
 
-  add<T>(type: string, content: T, options?: Options): NodeAdd<T> {
-    const nodeAdd: NodeAdd<T> = {
+  add<T extends TNode['type']>(
+    type: T,
+    content: ContentOfNode<T>,
+    options?: Options,
+  ): NodeAdd {
+    const nodeAdd: NodeAdd = {
       data: {
         type,
         id: v4(),
@@ -46,28 +50,28 @@ export class NodesActions {
     return actions;
   }
 
-  patch<T>(node: TuNode<Partial<T>>, options?: Options): NodePatch<T> {
-    const nodePatch: NodePatch<T> = {
-      data: node,
-      op: 'patch',
+  patch<T extends TNode['type']>(
+    data: {
+      id: string;
+      type: T;
+      content: Partial<ContentOfNode<T>>;
+    },
+    options?: { parent?: string; position?: number },
+  ): NodePatch {
+    const nodePatch: NodePatch = {
+      op: 'patch' as const,
+      data,
+      parent: options?.parent,
+      position: this.getPositionCandidatePatch(
+        data.type,
+        data.id,
+        options?.position,
+      ),
     };
-
-    if (options?.parent) {
-      nodePatch.parent = options.parent;
-    }
-
-    const positionCandidate = this.getPositionCandidatePatch(
-      node.type,
-      node.id,
-      options?.position,
-    );
-
-    nodePatch.position = positionCandidate;
-
     return nodePatch;
   }
 
-  bulkPatch(nodes: { node: TuNode; options?: Options }[]): NodePatch[] {
+  bulkPatch(nodes: { node: TNode; options?: Options }[]): NodePatch[] {
     const storeNodes = this.#boardFacade.nodes();
 
     const actions = nodes
@@ -77,7 +81,7 @@ export class NodesActions {
 
         return aIndex - bIndex;
       })
-      .map(({ node, options }) => this.patch<object>(node, options));
+      .map(({ node, options }) => this.patch(node, options));
 
     return actions;
   }

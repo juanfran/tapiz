@@ -1,4 +1,4 @@
-import { TuNode } from './node.model.js';
+import { BaseNode } from './node.model.js';
 import { Point } from './point.model.js';
 
 export interface EstimationStory {
@@ -27,18 +27,12 @@ export interface EstimationBoard {
   layer: number;
 }
 
-export type EstimationConfigNode = TuNode<
-  EstimationConfig,
-  'estimation.config'
->;
+export interface EstimationConfigNode
+  extends BaseNode<'estimation.config', EstimationConfig> {}
 
-export type EstimationResultNode = TuNode<
-  EstimationResult,
-  'estimation.result'
->;
+export interface EstimationResultNode
+  extends BaseNode<'estimation.result', EstimationResult> {}
 
 export type EstimationNodes = EstimationConfigNode | EstimationResultNode;
 export interface EstimationBoardNode
-  extends TuNode<EstimationBoard, 'estimation'> {
-  children: EstimationNodes[];
-}
+  extends BaseNode<'estimation', EstimationBoard, EstimationNodes[]> {}
