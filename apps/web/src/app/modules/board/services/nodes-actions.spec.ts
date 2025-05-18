@@ -4,7 +4,7 @@ import {
   provideExperimentalZonelessChangeDetection,
   signal,
 } from '@angular/core';
-import { TuNode } from '@tapiz/board-commons';
+import { TNode } from '@tapiz/board-commons';
 import { vi } from 'vitest';
 import { NodesActions } from './nodes-actions';
 import { BoardFacade } from '../../../services/board-facade.service';
@@ -19,7 +19,7 @@ vi.mock('uuid', () => ({
 describe('NodesActions', () => {
   let service: NodesActions;
   let boardFacadeStoreMock: Partial<BoardFacade>;
-  let nodes = signal<TuNode[]>([]);
+  let nodes = signal<TNode[]>([]);
 
   beforeEach(() => {
     nodes = signal([]);

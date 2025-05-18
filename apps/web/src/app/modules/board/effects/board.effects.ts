@@ -22,10 +22,10 @@ import { BoardApiService } from '../../../services/board-api.service';
 import { Router } from '@angular/router';
 import {
   BoardCommonActions,
-  isBoardTuNode,
+  isBoardTNode,
   NodeAdd,
   StateActions,
-  TuNode,
+  TNode,
 } from '@tapiz/board-commons';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { boardPageFeature } from '../reducers/boardPage.reducer';
@@ -122,7 +122,7 @@ export class BoardEffects {
       map(([{ data }, nodeId]) => {
         const node = data.find((it) => it.id === nodeId);
 
-        if (!node || !isBoardTuNode(node)) {
+        if (!node || !isBoardTNode(node)) {
           return { type: 'noop' };
         }
 
@@ -287,7 +287,7 @@ export class BoardEffects {
       filter(() => !!this.configService.config.DEMO),
       concatLatestFrom(() => this.store.select(boardPageFeature.selectBoardId)),
       map(([, boardId]) => {
-        let board: TuNode<object, string>[] = [];
+        let board: TNode<object, string>[] = [];
 
         const storeItem = localStorage.getItem(boardId) || '[]';
 

@@ -16,7 +16,7 @@ import type {
   BoardUserInfo,
   PrivateBoardUser,
   SortBoard,
-  TuNode,
+  TNode,
   UserNode,
 } from '@tapiz/board-commons';
 import { SetNonNullable } from 'type-fest';
@@ -329,7 +329,7 @@ export async function getAllBoardAdmins(boardId: string) {
 export async function createBoard(
   name = 'New board',
   ownerId: string,
-  board: TuNode[],
+  board: TNode[],
   teamId: string | null,
 ) {
   const result = await db
@@ -418,7 +418,7 @@ export async function joinBoard(
     .onConflictDoNothing();
 }
 
-export async function updateBoard(id: string, board: TuNode[]) {
+export async function updateBoard(id: string, board: TNode[]) {
   if (!board) {
     console.trace();
   }

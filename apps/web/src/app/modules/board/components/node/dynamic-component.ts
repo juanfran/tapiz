@@ -1,10 +1,10 @@
 import { Signal } from '@angular/core';
-import { Point, TuNode } from '@tapiz/board-commons';
+import { Point, TNode } from '@tapiz/board-commons';
 
 export interface DynamicComponent {
   preventDelete?: () => boolean;
   position?: Point;
-  node: Signal<TuNode>;
+  node: Signal<TNode>;
   pasted: Signal<boolean>;
   focus: Signal<boolean>;
   zIndex?: number;

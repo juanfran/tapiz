@@ -11,7 +11,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { BoardTuNode, Point } from '@tapiz/board-commons';
+import { BoardTNode, Point } from '@tapiz/board-commons';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { EditorViewSharedStateService } from '@tapiz/ui/editor-view';
 import { Store } from '@ngrx/store';
@@ -35,7 +35,7 @@ export class EditorPortalComponent implements OnDestroy {
 
   domPortalContent =
     viewChild.required<ElementRef<HTMLElement>>('domPortalContent');
-  node = input.required<BoardTuNode>();
+  node = input.required<BoardTNode>();
 
   #width = computed(() => this.node().content.width);
   #height = computed(() => this.node().content.height);

@@ -18,7 +18,7 @@ import {
   computed,
 } from '@angular/core';
 import { RxState } from '@rx-angular/state';
-import { BoardTuNode } from '@tapiz/board-commons';
+import { BoardTNode } from '@tapiz/board-commons';
 import { take } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { BoardPageActions } from '../../actions/board-page.actions';
@@ -59,7 +59,7 @@ export class NodeComponent implements OnInit {
     return this.node().id;
   }
 
-  node = input.required<BoardTuNode>();
+  node = input.required<BoardTNode>();
 
   position = computed(() => {
     const content = this.node().content;

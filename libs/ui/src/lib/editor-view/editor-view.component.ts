@@ -20,7 +20,7 @@ import { FontFamily } from '@tiptap/extension-font-family';
 import { History } from '@tiptap/extension-history';
 import { EditorViewSharedStateService } from './editor-view-shared-state.service';
 import { BubbleMenu } from './bubble-menu';
-import { TuNode } from '@tapiz/board-commons';
+import { TNode } from '@tapiz/board-commons';
 import { Heading } from '@tiptap/extension-heading';
 import { Paragraph } from '@tiptap/extension-paragraph';
 import { BulletList } from '@tiptap/extension-bullet-list';
@@ -88,7 +88,7 @@ import Color from '@tiptap/extension-color';
 export class EditorViewComponent implements OnDestroy, AfterViewInit {
   #editorViewSharedStateService = inject(EditorViewSharedStateService);
   content = input('');
-  node = input.required<TuNode>();
+  node = input.required<TNode>();
   layoutToolbarOptions = input<boolean>(false);
   fontSize = input<boolean>(false);
   toolbar = input<boolean>(false);

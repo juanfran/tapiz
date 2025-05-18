@@ -1,8 +1,4 @@
-import {
-  BoardTuNodeFull,
-  isBoardTuNodeFull,
-  TuNode,
-} from '@tapiz/board-commons';
+import { BoardTNodeFull, isBoardTNodeFull, TNode } from '@tapiz/board-commons';
 import {
   applyToPoint,
   compose,
@@ -12,9 +8,9 @@ import {
 } from 'transformation-matrix';
 
 export function nodesInsideNode(
-  containerNode: BoardTuNodeFull,
-  nodes: TuNode[],
-): BoardTuNodeFull[] {
+  containerNode: BoardTNodeFull,
+  nodes: TNode[],
+): BoardTNodeFull[] {
   const containerTransform = compose(
     translate(
       containerNode.content.position.x,
@@ -25,8 +21,8 @@ export function nodesInsideNode(
 
   const containerInverseTransform = inverse(containerTransform);
 
-  return nodes.filter((node): node is BoardTuNodeFull => {
-    if (!isBoardTuNodeFull(node)) {
+  return nodes.filter((node): node is BoardTNodeFull => {
+    if (!isBoardTNodeFull(node)) {
       return false;
     }
 

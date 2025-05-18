@@ -1,9 +1,9 @@
-import type { TuNode, StateActions } from '@tapiz/board-commons';
+import type { TNode, StateActions } from '@tapiz/board-commons';
 import { arrayMove } from '@tapiz/utils/array.js';
 
 const ignoreNodes = ['settings', 'user'];
 
-export function applyAction(nodes: TuNode[], action: StateActions) {
+export function applyAction(nodes: TNode[], action: StateActions) {
   if (action.op === 'add') {
     const nodeAlreadyExists = nodes.some((it) => it.id === action.data.id);
 

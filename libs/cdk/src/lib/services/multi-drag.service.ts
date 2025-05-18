@@ -14,7 +14,7 @@ import {
   withLatestFrom,
 } from 'rxjs';
 import { concatLatestFrom } from '@ngrx/operators';
-import { Point, TuNode } from '@tapiz/board-commons';
+import { Point, TNode } from '@tapiz/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 export interface Draggable {
@@ -33,7 +33,7 @@ interface SetupConfig {
   draggableIds: (init: string) => string[];
   zoom: Observable<number>;
   relativePosition: Observable<Point>;
-  nodes: () => TuNode[];
+  nodes: () => TNode[];
   move: (
     elements: {
       draggable: Draggable;

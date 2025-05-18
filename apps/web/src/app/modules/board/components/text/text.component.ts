@@ -8,7 +8,7 @@ import {
   Injector,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Text, TuNode } from '@tapiz/board-commons';
+import { Text, TNode } from '@tapiz/board-commons';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
@@ -76,7 +76,7 @@ export class TextComponent implements OnInit {
   #hotkeysService = inject(HotkeysService);
   #nodesStore = inject(NodesStore);
 
-  node = input.required<TuNode<Text>>();
+  node = input.required<TNode<Text>>();
   pasted = input.required<boolean>();
   focus = input.required<boolean>();
 

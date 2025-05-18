@@ -20,7 +20,5 @@ export interface PollBoard {
   options: PollOption[];
 }
 
-export interface PollAnswerNode
-  extends BaseNode<'poll.answer', PollAnswer, []> {}
-export interface PollNode
-  extends BaseNode<'poll', PollBoard, PollAnswerNode[]> {}
+export type PollAnswerNode = BaseNode<'poll.answer', PollAnswer, []>;
+export type PollNode = BaseNode<'poll', PollBoard, PollAnswerNode[]>;

@@ -7,4 +7,4 @@ export interface Comment {
   userId: User['id'];
 }
 
-export interface CommentNode extends BaseNode<'comment', Comment> {}
+export type CommentNode = BaseNode<'comment', Comment>;

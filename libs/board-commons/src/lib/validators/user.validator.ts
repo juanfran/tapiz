@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { StateActions, TuNode } from '../models/node.model.js';
+import { StateActions, TNode } from '../models/node.model.js';
 
 const user = z.object({
   visible: z.boolean(),
@@ -20,7 +20,7 @@ const patchUser = user.partial();
 
 export const userValidator = (
   msg: StateActions,
-  _state: TuNode[],
+  _state: TNode[],
   userId: string,
 ): StateActions | false => {
   let validatorResult: unknown | null = null;

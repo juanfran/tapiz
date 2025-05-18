@@ -3,7 +3,7 @@ import {
   Group,
   Note,
   Panel,
-  TuNode,
+  TNode,
   UserNode,
   isNote,
 } from '@tapiz/board-commons';
@@ -21,14 +21,14 @@ export class ExportService {
       const nodes = this.boardFacade.get();
       const users = nodes.filter((it): it is UserNode => it.type === 'user');
       const panels = nodes.filter(
-        (it): it is TuNode<Panel> => it.type === 'panel',
+        (it): it is TNode<Panel> => it.type === 'panel',
       );
       const groups = nodes.filter(
-        (it): it is TuNode<Group> => it.type === 'group',
+        (it): it is TNode<Group> => it.type === 'group',
       );
 
       const exportedNotes = nodes
-        .filter((it): it is TuNode<Note> => isNote(it))
+        .filter((it): it is TNode<Note> => isNote(it))
         .map((note) => {
           const user = users.find((user) => user.id === note.content.ownerId);
 

@@ -13,4 +13,4 @@ export interface Group {
   }[];
   unLocked?: boolean;
 }
-export interface GroupNode extends BaseNode<'group', Group> {}
+export type GroupNode = BaseNode<'group', Group>;

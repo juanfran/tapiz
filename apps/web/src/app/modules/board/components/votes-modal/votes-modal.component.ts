@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { ModalHeaderComponent } from '../../../../shared/modal-header/modal-header.component';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Group, Note, TuNode } from '@tapiz/board-commons';
+import { Group, Note, TNode } from '@tapiz/board-commons';
 import { BoardFacade } from '../../../../services/board-facade.service';
 
 @Component({
@@ -29,7 +29,7 @@ import { BoardFacade } from '../../../../services/board-facade.service';
 export class VotesModalComponent {
   #boardFacade = inject(BoardFacade);
   #data = inject<{
-    node: TuNode<Group | Note>;
+    node: TNode<Group | Note>;
   }>(MAT_DIALOG_DATA);
 
   usersVotes = signal<{ id: string; name: string; votes: number }[]>([]);

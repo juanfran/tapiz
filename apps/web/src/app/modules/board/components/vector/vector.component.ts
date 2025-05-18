@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { TuNode, Vector } from '@tapiz/board-commons';
+import { TNode, Vector } from '@tapiz/board-commons';
 import { NodeSpaceComponent } from '../node-space';
 import { input } from '@angular/core';
 
@@ -22,7 +22,7 @@ import { input } from '@angular/core';
   imports: [NodeSpaceComponent],
 })
 export class VectorComponent {
-  public node = input.required<TuNode<Vector>>();
+  public node = input.required<TNode<Vector>>();
 
   public pasted = input.required<boolean>();
 

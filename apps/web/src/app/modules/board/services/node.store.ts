@@ -1,8 +1,8 @@
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
-import { TuNode } from '@tapiz/board-commons';
+import { TNode } from '@tapiz/board-commons';
 
 type NodeState = {
-  node: TuNode | null;
+  node: TNode | null;
   focus: boolean;
   pasted: boolean;
   highlight: boolean;

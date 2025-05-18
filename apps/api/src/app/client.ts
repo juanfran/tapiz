@@ -1,7 +1,9 @@
 import {
   BoardCommonActions,
+  NodeAdd,
+  NodePatch,
   StateActions,
-  TuNode,
+  TNode,
   UserNode,
 } from '@tapiz/board-commons';
 import { Server } from './server.js';
@@ -291,12 +293,21 @@ export class Client {
       this.refreshIsAdmin();
       this.privateId = boardUser.privateId;
 
-      const userAction: StateActions = {
-        data: user,
-        op: isAlreadyInBoard ? 'patch' : 'add',
-      };
+      if (isAlreadyInBoard) {
+        const userAction: NodePatch = {
+          data: user,
+          op: 'patch',
+        };
 
-      this.sendAll(this.boardId, this.getStateAction([userAction]));
+        this.sendAll(this.boardId, this.getStateAction([userAction]));
+      } else {
+        const userAction: NodeAdd = {
+          data: user,
+          op: 'add',
+        };
+
+        this.sendAll(this.boardId, this.getStateAction([userAction]));
+      }
 
       this.socket.join(this.boardId);
 
@@ -316,7 +327,7 @@ export class Client {
     this.isAdmin = admins.includes(this.id);
   }
 
-  getSetStateAction(nodes: TuNode[]) {
+  getSetStateAction(nodes: TNode[]) {
     return {
       type: BoardCommonActions.setState,
       data: nodes,

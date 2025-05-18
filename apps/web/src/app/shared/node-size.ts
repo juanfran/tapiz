@@ -1,7 +1,7 @@
-import { TuNode } from '@tapiz/board-commons';
+import { TNode } from '@tapiz/board-commons';
 
 export function getNodeSize(
-  node: TuNode<{ width?: number; height?: number }, string>,
+  node: TNode<{ width?: number; height?: number }, string>,
 ) {
   let width = node.content.width;
   let height = node.content.height;

@@ -38,4 +38,4 @@ export interface Vector {
   rotation: number;
 }
 
-export interface VectorNode extends BaseNode<'vector', Vector> {}
+export type VectorNode = BaseNode<'vector', Vector>;

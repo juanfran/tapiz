@@ -1,4 +1,4 @@
-import { TuNode } from './node.model.js';
+import { BaseNode } from './node.model.js';
 import { Point } from './point.model.js';
 
 export interface Text {
@@ -10,8 +10,4 @@ export interface Text {
   rotation: number;
 }
 
-export function isText(node: TuNode): node is TuNode<Text> {
-  return node.type === 'text';
-}
-
-export type TextNode = TuNode<Text, 'text'>;
+export type TextNode = BaseNode<'text', Text>;

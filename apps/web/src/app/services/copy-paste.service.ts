@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { isBoardTuNode, NodeAdd, TuNode } from '@tapiz/board-commons';
+import { isBoardTNode, NodeAdd, TNode } from '@tapiz/board-commons';
 import { BoardPageActions } from '../modules/board/actions/board-page.actions';
 import { boardPageFeature } from '../modules/board/reducers/boardPage.reducer';
 
@@ -14,7 +14,7 @@ export class CopyPasteService {
     boardPageFeature.selectBoardMode,
   );
 
-  public getNodes(text: string): TuNode[] {
+  public getNodes(text: string): TNode[] {
     try {
       return JSON.parse(text);
     } catch (_) {
@@ -42,8 +42,8 @@ export class CopyPasteService {
       return;
     }
 
-    const nodes: NodeAdd['data'][] = copyNode.map((it, index): TuNode => {
-      if (isBoardTuNode(it)) {
+    const nodes: NodeAdd['data'][] = copyNode.map((it, index): TNode => {
+      if (isBoardTNode(it)) {
         if (options?.x && options?.y) {
           it.content.position = {
             x: options.x + index * 10,

@@ -6,11 +6,11 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { CommentNode, TuNode } from '@tapiz/board-commons';
+import { CommentNode, TNode } from '@tapiz/board-commons';
 import { BoardFacade } from '../../../../services/board-facade.service';
 
 type CommentsState = {
-  parentNodeId: TuNode['id'] | undefined;
+  parentNodeId: TNode['id'] | undefined;
 };
 
 const initialState: CommentsState = {

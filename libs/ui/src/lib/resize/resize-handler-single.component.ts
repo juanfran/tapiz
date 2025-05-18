@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 
 import { MoveService } from '@tapiz/cdk/services/move.service';
-import { Resizable, ResizePosition, TuNode } from '@tapiz/board-commons';
+import { Resizable, ResizePosition, TNode } from '@tapiz/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ResizeService } from './resize.service';
 import { input } from '@angular/core';
@@ -35,7 +35,7 @@ export class ResizeHandlerSingleComponent implements Resizable {
   private resizeService = inject(ResizeService);
   private el: ElementRef<HTMLElement> = inject(ElementRef);
 
-  node = input.required<TuNode<Resizable>>();
+  node = input.required<TNode<Resizable>>();
   initResize = output();
 
   get nodeType() {

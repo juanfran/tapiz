@@ -6,8 +6,8 @@ import {
   inject,
 } from '@angular/core';
 import type { Editor } from '@tiptap/core';
-import { NodeToolbar } from './node-toolbar.model';
-import { TuNode } from '@tapiz/board-commons';
+
+import { TNode } from '@tapiz/board-commons';
 import { input } from '@angular/core';
 import { OptionFormatComponent } from './options/format/option-format.component';
 import { OptionFontComponent } from './options/font/option-font.component';
@@ -56,7 +56,7 @@ export class ToolbarComponent {
   #toolbarEditorService = inject(ToolbarEditorService);
 
   editor = input.required<Editor>();
-  node = input.required<TuNode<NodeToolbar>>();
+  node = input.required<TNode>();
 
   x = input(0);
   y = input(0);

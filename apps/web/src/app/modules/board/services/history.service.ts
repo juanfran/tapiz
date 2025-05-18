@@ -1,22 +1,22 @@
 import { Injectable } from '@angular/core';
-import { TuNode } from '@tapiz/board-commons';
+import { TNode } from '@tapiz/board-commons';
 import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HistoryService {
-  private eventSubject = new Subject<{ prev: TuNode; curr: TuNode }>();
+  private eventSubject = new Subject<{ prev: TNode; curr: TNode }>();
 
-  public editingNodes = new Map<string, TuNode>();
+  public editingNodes = new Map<string, TNode>();
 
   public event$ = this.eventSubject.asObservable();
 
-  public initEdit(node: TuNode) {
+  public initEdit(node: TNode) {
     this.editingNodes.set(node.id, node);
   }
 
-  public finishEdit(node: TuNode) {
+  public finishEdit(node: TNode) {
     const previousState = this.editingNodes.get(node.id);
 
     if (previousState) {

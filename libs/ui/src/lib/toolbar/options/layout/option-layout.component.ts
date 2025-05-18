@@ -5,7 +5,7 @@ import {
   input,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { TuNode } from '@tapiz/board-commons';
+import { isBoardTNodeFull, TNode } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { NodeToolbar } from '../../node-toolbar.model';
@@ -104,29 +104,31 @@ import { MatSliderModule } from '@angular/material/slider';
 export class OptionLayoutComponent {
   #store = inject(Store);
 
-  node = input.required<TuNode<NodeToolbar>>();
+  node = input.required<TNode>();
 
   updateNode(event: Event, key: keyof NodeToolbar) {
     const target = event.target as HTMLInputElement;
     const isNumber = target.type === 'number';
 
-    this.#store.dispatch(
-      BoardActions.batchNodeActions({
-        history: true,
-        actions: [
-          {
-            op: 'patch',
-            data: {
-              id: this.node().id,
-              type: this.node().type,
-              content: {
-                [key]: isNumber ? Number(target.value) : target.value,
+    if (isBoardTNodeFull(this.node())) {
+      this.#store.dispatch(
+        BoardActions.batchNodeActions({
+          history: true,
+          actions: [
+            {
+              op: 'patch',
+              data: {
+                id: this.node().id,
+                type: this.node().type,
+                content: {
+                  [key]: isNumber ? Number(target.value) : target.value,
+                },
               },
             },
-          },
-        ],
-      }),
-    );
+          ],
+        }),
+      );
+    }
   }
 
   updateNodeValue(value: string | number | undefined, key: keyof NodeToolbar) {

@@ -1,16 +1,17 @@
-import { NoteNode, Note } from './note.model.js';
-import { Panel, PanelNode } from './panel.model.js';
-import {
-  PollAnswer,
-  PollBoard,
-  PollAnswerNode,
-  PollNode,
-} from './poll.model.js';
-import { Image, ImageNode } from './image.model.js';
-import { Group, GroupNode } from './group.model.js';
-import { Prettify } from '@ngrx/store/src/models.js';
+import { NoteNode } from './note.model.js';
+import { PanelNode } from './panel.model.js';
+import { PollAnswerNode, PollNode } from './poll.model.js';
+import { ImageNode } from './image.model.js';
+import { GroupNode } from './group.model.js';
 // import { Point } from './point.model.js';
-import type { Simplify, Get } from 'type-fest';
+import type { Simplify } from 'type-fest';
+import { TextNode } from './text.model.js';
+import { UserNode } from './user.model.js';
+import { CommentNode } from './comments.model.js';
+import { EstimationBoardNode } from './estimation.model.js';
+import { VectorNode } from './cocomaterial.model.js';
+import { TimerNode } from './timer.model.js';
+import { TokenNode } from './token.model.js';
 
 export interface BaseNode<
   T extends string, // discrimination type
@@ -32,9 +33,16 @@ export type TNode =
   | PanelNode
   | NoteNode
   | ImageNode
+  | VectorNode
   | PollNode
   | PollAnswerNode
-  | GroupNode;
+  | GroupNode
+  | TextNode
+  | UserNode
+  | CommentNode
+  | EstimationBoardNode
+  | TimerNode
+  | TokenNode;
 
 export interface NodeAdd {
   op: 'add';
@@ -96,7 +104,9 @@ type RemoveResponse =
     }
   | NodeValidatorError;
 
-// export type BoardTuNode = TuNode<{
+export type BoardTNodeFull = PanelNode | ImageNode | VectorNode;
+
+// export type BoardTNode = TNode<{
 //   position: Point;
 //   layer: number;
 //   rotation?: number;
@@ -104,7 +114,7 @@ type RemoveResponse =
 //   height?: number;
 // }>;
 
-// export type BoardTuNodeFull = TuNode<{
+// export type BoardTNodeFull = TNode<{
 //   position: Point;
 //   layer: number;
 //   rotation?: number;
@@ -149,10 +159,12 @@ export interface NodeValidator {
   ) => Promise<RemoveResponse>;
 }
 
-// export const isBoardTuNode = (node: TuNode): node is BoardTuNode => {
+// export const isBoardTNode = (node: TNode): node is BoardTNode => {
 //   return 'position' in node.content;
 // };
 
-// export const isBoardTuNodeFull = (node: TuNode): node is BoardTuNodeFull => {
-//   return 'position' in node.content && 'width' in node.content;
-// };
+export const isBoardTNodeFull = (node: TNode): node is BoardTNodeFull => {
+  return (
+    node.type === 'panel' || node.type === 'image' || node.type === 'vector'
+  );
+};

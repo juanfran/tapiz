@@ -9,12 +9,11 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { ToolbarComponent } from '@tapiz/ui/toolbar';
-import { BoardTuNodeFull, TuNode } from '@tapiz/board-commons';
+import { isBoardTNodeFull, TNode } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { compose, rotateDEG, translate, Matrix } from 'transformation-matrix';
 import { EditorViewSharedStateService } from '@tapiz/ui/editor-view';
-import { NodeToolbar } from '@tapiz/ui/toolbar/node-toolbar.model';
 import type { Editor } from '@tiptap/core';
 
 interface Toolbar {
@@ -25,7 +24,7 @@ interface Toolbar {
     fontSize: boolean;
     defaultTextColor: string;
   };
-  node: Signal<TuNode<NodeToolbar, string>>;
+  node: Signal<TNode>;
   x: number;
   y: number;
 }
@@ -70,9 +69,7 @@ export class NodeToolbarComponent {
 
     return toolbarNodes
       .map((toolbar) => {
-        const node = nodes.find(
-          (n): n is BoardTuNodeFull => n.id === toolbar.id,
-        );
+        const node = nodes.find((n) => isBoardTNodeFull(n));
 
         if (!node) {
           return;

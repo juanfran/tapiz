@@ -2,7 +2,7 @@ import {
   isUserNode,
   type BoardSettings,
   type StateActions,
-  type TuNode,
+  type TNode,
   type UserNode,
 } from '@tapiz/board-commons';
 import type { Socket, Server as WsServer } from 'socket.io';
@@ -61,7 +61,7 @@ export class Server {
     }
 
     const boardSettings = board.find(
-      (it): it is TuNode<BoardSettings> => it.type === 'settings',
+      (it): it is TNode<BoardSettings> => it.type === 'settings',
     );
 
     return boardSettings?.content ?? defaultBoardSettings;
@@ -121,7 +121,7 @@ export class Server {
     }
   }
 
-  public getBoard(boardId: string): TuNode[] | undefined {
+  public getBoard(boardId: string): TNode[] | undefined {
     if (!this.state[boardId]) {
       return;
     }
@@ -129,7 +129,7 @@ export class Server {
     return this.state[boardId].get();
   }
 
-  public setState(boardId: string, fn: (state: TuNode[]) => TuNode[]) {
+  public setState(boardId: string, fn: (state: TNode[]) => TNode[]) {
     const nextState = fn(this.state[boardId].get());
 
     this.updateBoard(boardId, nextState);
@@ -216,7 +216,7 @@ export class Server {
     db.board.updateBoardName(boardId, name);
   }
 
-  private updateBoard(boardId: string, state: TuNode[]) {
+  private updateBoard(boardId: string, state: TNode[]) {
     this.state[boardId].update(() => state);
   }
 }

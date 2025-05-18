@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { TuNode } from '@tapiz/board-commons';
+import { TNode } from '@tapiz/board-commons';
 import { rxActions } from '@rx-angular/state/actions';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
@@ -14,7 +14,7 @@ export class NodesStore {
 
   actions = rxActions<{
     deleteNodes: { nodes: { id: string; type: string }[]; history?: boolean };
-    copyNodes: { nodes: TuNode[] };
+    copyNodes: { nodes: TNode[] };
     fetchMentions: void;
     mentionUser: { userId: string; nodeId: string };
   }>();

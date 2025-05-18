@@ -27,12 +27,19 @@ export interface EstimationBoard {
   layer: number;
 }
 
-export interface EstimationConfigNode
-  extends BaseNode<'estimation.config', EstimationConfig> {}
+export type EstimationConfigNode = BaseNode<
+  'estimation.config',
+  EstimationConfig
+>;
 
-export interface EstimationResultNode
-  extends BaseNode<'estimation.result', EstimationResult> {}
+export type EstimationResultNode = BaseNode<
+  'estimation.result',
+  EstimationResult
+>;
 
 export type EstimationNodes = EstimationConfigNode | EstimationResultNode;
-export interface EstimationBoardNode
-  extends BaseNode<'estimation', EstimationBoard, EstimationNodes[]> {}
+export type EstimationBoardNode = BaseNode<
+  'estimation',
+  EstimationBoard,
+  EstimationNodes[]
+>;

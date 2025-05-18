@@ -1,5 +1,5 @@
 import { Injectable, signal, Signal } from '@angular/core';
-import { Point, TuNode } from '@tapiz/board-commons';
+import { Point, TNode } from '@tapiz/board-commons';
 import type { Editor } from '@tiptap/core';
 import { BehaviorSubject } from 'rxjs';
 import { NodeToolbar } from '../toolbar/node-toolbar.model';
@@ -28,7 +28,7 @@ export class EditorViewSharedStateService {
           layoutOptions: boolean;
           fontSize: boolean;
         };
-        node: Signal<TuNode<NodeToolbar>>;
+        node: Signal<TNode<NodeToolbar>>;
       }
     >
   >({});
@@ -36,7 +36,7 @@ export class EditorViewSharedStateService {
   editorPortal = signal<EditorPortal | null>(null);
 
   addNode(
-    node: Signal<TuNode<NodeToolbar>>,
+    node: Signal<TNode<NodeToolbar>>,
     view: Editor,
     options: {
       layoutOptions: boolean;

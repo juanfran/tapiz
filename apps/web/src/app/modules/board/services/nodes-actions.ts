@@ -42,7 +42,9 @@ export class NodesActions {
     return nodeAdd;
   }
 
-  bulkAdd(nodes: { type: string; content: object; options?: Options }[]) {
+  bulkAdd<T extends TNode['type']>(
+    nodes: { type: T; content: ContentOfNode<T>; options?: Options }[],
+  ) {
     const actions = nodes.map(({ type, content, options }) =>
       this.add(type, content, options),
     );
@@ -58,7 +60,7 @@ export class NodesActions {
     },
     options?: { parent?: string; position?: number },
   ): NodePatch {
-    const nodePatch: NodePatch = {
+    const nodePatch = {
       op: 'patch' as const,
       data,
       parent: options?.parent,
@@ -67,7 +69,7 @@ export class NodesActions {
         data.id,
         options?.position,
       ),
-    };
+    } as NodePatch;
     return nodePatch;
   }
 

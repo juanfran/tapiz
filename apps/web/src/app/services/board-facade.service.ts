@@ -3,9 +3,9 @@ import { Injectable, computed, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   BoardSettings,
-  BoardTuNode,
+  BoardTNode,
   StateActions,
-  TuNode,
+  TNode,
   isTimer,
   isUserNode,
 } from '@tapiz/board-commons';
@@ -14,7 +14,7 @@ import { boardPageFeature } from '../modules/board/reducers/boardPage.reducer';
 import { addLog, addRawLog } from '../debug/debug';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-const isBoardSettings = (it: TuNode): it is TuNode<BoardSettings> => {
+const isBoardSettings = (it: TNode): it is TNode<BoardSettings> => {
   return it.type === 'settings';
 };
 
@@ -62,7 +62,7 @@ export class BoardFacade {
 
   settings = computed(() => {
     return this.nodes().find((it) => isBoardSettings(it)) satisfies
-      | TuNode<BoardSettings>
+      | TNode<BoardSettings>
       | undefined;
   });
 
@@ -87,7 +87,7 @@ export class BoardFacade {
     return this.board.getNode(id);
   }
 
-  setState(nodes: TuNode[]) {
+  setState(nodes: TNode[]) {
     this.board.update(() => {
       return nodes;
     });
@@ -109,10 +109,10 @@ export class BoardFacade {
     addRawLog('patchHistory');
   }
 
-  filterBoardNodes(nodes: TuNode[]): BoardTuNode[] {
+  filterBoardNodes(nodes: TNode[]): BoardTNode[] {
     return nodes.filter(
       (it) => !['user', 'settings', 'timer'].includes(it.type),
-    ) as BoardTuNode[];
+    ) as BoardTNode[];
   }
 
   undo() {

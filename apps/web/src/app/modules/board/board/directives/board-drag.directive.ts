@@ -4,8 +4,8 @@ import { BoardFacade } from '../../../../services/board-facade.service';
 import { Store } from '@ngrx/store';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import {
-  BoardTuNode,
-  isBoardTuNode,
+  BoardTNode,
+  isBoardTNode,
   isGroup,
   isPanel,
 } from '@tapiz/board-commons';
@@ -42,8 +42,8 @@ export class BoardDragDirective {
             node,
             this.#boardFacade
               .get()
-              .filter((itNode): itNode is BoardTuNode => {
-                if (!isBoardTuNode(itNode)) {
+              .filter((itNode): itNode is BoardTNode => {
+                if (!isBoardTNode(itNode)) {
                   return false;
                 }
 

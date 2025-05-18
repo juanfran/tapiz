@@ -1,4 +1,4 @@
-import { TuNode } from './node.model.js';
+import { BaseNode } from './node.model.js';
 import { Point } from './point.model.js';
 
 export interface User {
@@ -18,8 +18,4 @@ export interface BoardUserInfo {
   id: string;
 }
 
-export type UserNode = TuNode<User>;
-
-export function isUserNode(node: TuNode): node is UserNode {
-  return node.type === 'user';
-}
+export type UserNode = BaseNode<'user', User>;

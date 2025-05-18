@@ -1,3 +1,4 @@
+import { BaseNode } from './node.model.js';
 import { Point } from './point.model.js';
 
 export interface Token {
@@ -9,3 +10,5 @@ export interface Token {
   height: number;
   layer: number;
 }
+
+export type TokenNode = BaseNode<'token', Token, []>;

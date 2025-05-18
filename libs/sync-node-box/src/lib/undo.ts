@@ -1,11 +1,11 @@
-import { StateActions, TuNode } from '@tapiz/board-commons';
+import { StateActions, TNode } from '@tapiz/board-commons';
 import { SyncNodeBoxHistory } from './models.js';
 import { applyAction } from './apply-action.js';
 import { reverseAction } from './rever-action.js';
 export function undo(
-  nodes: TuNode[],
+  nodes: TNode[],
   history: SyncNodeBoxHistory,
-): [TuNode[], SyncNodeBoxHistory, StateActions[]] {
+): [TNode[], SyncNodeBoxHistory, StateActions[]] {
   history = { ...history };
 
   const actions = history.past.shift();

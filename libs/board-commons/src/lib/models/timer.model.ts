@@ -1,4 +1,4 @@
-import { TuNode } from './node.model.js';
+import { BaseNode } from './node.model.js';
 
 export interface Timer {
   startTime?: string;
@@ -6,6 +6,4 @@ export interface Timer {
   remainingTime?: number;
 }
 
-export function isTimer(node: TuNode): node is TuNode<Timer> {
-  return node.type === 'timer';
-}
+export type TimerNode = BaseNode<'timer', Timer, []>;

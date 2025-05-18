@@ -1,4 +1,4 @@
-import type { StateActions, TuNode } from '@tapiz/board-commons';
+import type { StateActions, TNode } from '@tapiz/board-commons';
 
 import { BehaviorSubject, distinctUntilChanged, shareReplay } from 'rxjs';
 import { applyAction } from './apply-action.js';
@@ -8,7 +8,7 @@ import { redo } from './redo.js';
 import { reverseAction } from './rever-action.js';
 
 export function syncNodeBox(options?: SyncNodeBoxOptions) {
-  const nodes = new BehaviorSubject<TuNode[]>([]);
+  const nodes = new BehaviorSubject<TNode[]>([]);
   let nodesHistory: SyncNodeBoxHistory = {
     past: [],
     future: [],
@@ -27,7 +27,7 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
     return nodes.value;
   }
 
-  function setState(newState: TuNode[]) {
+  function setState(newState: TNode[]) {
     nodes.next([...newState]);
   }
 
@@ -154,7 +154,7 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
     getNode: (id: string) => {
       return getState().find((it) => it.id === id);
     },
-    update: (fn: (state: TuNode[]) => TuNode[]) => {
+    update: (fn: (state: TNode[]) => TNode[]) => {
       const currentState = getState();
 
       setState(fn(currentState));

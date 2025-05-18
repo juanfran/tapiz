@@ -19,26 +19,4 @@ export interface Panel {
   unLocked?: boolean;
 }
 
-export interface PanelNode extends BaseNode<'panel', Panel> {}
-
-const panelNodeExampe: PanelNode = {
-  id: '1',
-  type: 'panel',
-  content: {
-    text: 'Hello World',
-    position: { x: 0, y: 0 },
-    layer: 1,
-    width: 100,
-    height: 100,
-    rotation: 0,
-    color: '#FFFFFF',
-    backgroundColor: '#000000',
-    borderColor: '#FF0000',
-    borderWidth: 2,
-    borderRadius: 5,
-    textAlign: 'center',
-    drawing: [],
-    unLocked: false,
-  },
-  children: [],
-};
+export type PanelNode = BaseNode<'panel', Panel>;

@@ -10,4 +10,4 @@ export interface Image {
   rotation: number;
 }
 
-export interface ImageNode extends BaseNode<'image', Image> {}
+export type ImageNode = BaseNode<'image', Image>;

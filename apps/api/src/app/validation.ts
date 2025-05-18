@@ -1,4 +1,4 @@
-import { StateActions, TuNode, Validators } from '@tapiz/board-commons';
+import { StateActions, TNode, Validators } from '@tapiz/board-commons';
 
 import { PERSONAL_TOKEN_VALIDATOR } from '@tapiz/board-commons/validators/token.validator.js';
 import { ESTIMATION_VALIDATORS } from '@tapiz/board-commons/validators/estimation.validator.js';
@@ -46,7 +46,7 @@ const validations = {
 
 export const validateAction = async (
   msg: StateActions,
-  nodes: TuNode[],
+  nodes: TNode[],
   userId: string,
   isAdmin: boolean,
   boardId: string,
@@ -72,7 +72,7 @@ export const validateAction = async (
     }
   };
 
-  let parentNode: TuNode | undefined;
+  let parentNode: TNode | undefined;
 
   if (msg.parent) {
     parentNode = nodes.find((it) => it.id === msg.parent);
@@ -227,7 +227,7 @@ export const validateAction = async (
 
 export const validation = async (
   msg: StateActions[],
-  state: TuNode[],
+  state: TNode[],
   userId: string,
   isAdmin: boolean,
   boardId: string,

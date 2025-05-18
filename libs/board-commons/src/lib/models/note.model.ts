@@ -22,4 +22,4 @@ export interface Note {
   textHidden?: boolean;
 }
 
-export interface NoteNode extends BaseNode<'note', Note, []> {}
+export type NoteNode = BaseNode<'note', Note, []>;

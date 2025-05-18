@@ -13,7 +13,7 @@ import {
   DestroyRef,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Group, TuNode } from '@tapiz/board-commons';
+import { Group, TNode } from '@tapiz/board-commons';
 import { ResizeHandlerSingleComponent } from '@tapiz/ui/resize';
 import { hostBinding } from 'ngxtension/host-binding';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -73,7 +73,7 @@ export class GroupComponent {
   );
   #userVotes = this.#store.selectSignal(boardPageFeature.selectShowUserVotes);
 
-  node = input.required<TuNode<Group>>();
+  node = input.required<TNode<Group>>();
 
   pasted = input.required<boolean>();
 

@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { RxState } from '@rx-angular/state';
-import { Drawing, Panel, TuNode } from '@tapiz/board-commons';
+import { Drawing, Panel, TNode } from '@tapiz/board-commons';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
@@ -99,7 +99,7 @@ export class PanelComponent implements OnInit {
   #hotkeysService = inject(HotkeysService);
   #nodesStore = inject(NodesStore);
 
-  node = input.required<TuNode<Panel>>();
+  node = input.required<TNode<Panel>>();
   mentions = this.#store.selectSignal(boardPageFeature.selectMentions);
 
   pasted = input.required<boolean>();
@@ -221,7 +221,7 @@ export class PanelComponent implements OnInit {
     return this.#el.nativeElement;
   }
 
-  #setCssVariables(panel: TuNode<Panel>) {
+  #setCssVariables(panel: TNode<Panel>) {
     if (panel.content.backgroundColor) {
       this.nativeElement.style.setProperty(
         '--backgroundColor',

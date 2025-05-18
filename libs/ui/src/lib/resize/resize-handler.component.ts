@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 
 import { MoveService } from '@tapiz/cdk/services/move.service';
-import { Resizable, ResizePosition, TuNode } from '@tapiz/board-commons';
+import { Resizable, ResizePosition, TNode } from '@tapiz/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ResizeService } from './resize.service';
 import { input } from '@angular/core';
@@ -92,7 +92,7 @@ export class ResizeHandlerComponent {
   private destroyRef = inject(DestroyRef);
   private resizeService = inject(ResizeService);
 
-  public node = input.required<TuNode<Resizable>>();
+  public node = input.required<TNode<Resizable>>();
 
   public scale = input(1);
 

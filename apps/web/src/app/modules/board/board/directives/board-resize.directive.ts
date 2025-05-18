@@ -7,7 +7,7 @@ import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { ResizeService } from '@tapiz/ui/resize';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { Resizable, TuNode } from '@tapiz/board-commons';
+import { Resizable, TNode } from '@tapiz/board-commons';
 import { filter, map, share } from 'rxjs';
 import {
   translate,
@@ -24,7 +24,7 @@ export class BoardResizeDirective {
   #store = inject(Store);
   #nodesActions = inject(NodesActions);
   #selectFocusNodes = this.#boardFacade.focusNodes;
-  #initialNodes: TuNode<Resizable>[] = [];
+  #initialNodes: TNode<Resizable>[] = [];
 
   constructor() {
     const onResize$ = this.#resizeService.onResize$.pipe(
@@ -52,7 +52,7 @@ export class BoardResizeDirective {
                 width: node.content.width,
                 height: node.content.height,
               },
-            } satisfies TuNode<Resizable>,
+            } satisfies TNode<Resizable>,
             op: 'patch',
           };
         });
@@ -166,7 +166,7 @@ export class BoardResizeDirective {
                 width: newWidth,
                 height: newHeight,
               },
-            } satisfies TuNode<Resizable>;
+            } satisfies TNode<Resizable>;
           });
         }),
       )

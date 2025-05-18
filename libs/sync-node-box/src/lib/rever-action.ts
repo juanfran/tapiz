@@ -1,9 +1,9 @@
-import type { TuNode, StateActions } from '@tapiz/board-commons';
+import type { TNode, StateActions } from '@tapiz/board-commons';
 
 import { diff } from './diff.js';
 
 export function reverseAction(
-  nodes: TuNode[],
+  nodes: TNode[],
   action: StateActions,
 ): StateActions | null {
   let node;

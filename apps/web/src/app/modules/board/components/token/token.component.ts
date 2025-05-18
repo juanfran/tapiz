@@ -11,7 +11,7 @@ import {
   signal,
   Injector,
 } from '@angular/core';
-import { Token, TuNode } from '@tapiz/board-commons';
+import { Token, TNode } from '@tapiz/board-commons';
 import { DynamicComponent } from '../node/dynamic-component';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
@@ -66,7 +66,7 @@ export class TokenComponent implements OnInit, DynamicComponent, Draggable {
   private injector = inject(Injector);
   private nodesActions = inject(NodesActions);
 
-  public node = input.required<TuNode<Token>>();
+  public node = input.required<TNode<Token>>();
   public pasted = input.required<boolean>();
   public focus = input.required<boolean>();
 

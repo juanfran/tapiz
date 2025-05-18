@@ -1,4 +1,4 @@
-import type { StateActions, TuNode } from '@tapiz/board-commons';
+import type { StateActions, TNode } from '@tapiz/board-commons';
 import { syncNodeBox } from './sync-node-box.js';
 
 describe('syncNodeBox', () => {
@@ -9,7 +9,7 @@ describe('syncNodeBox', () => {
 
   it('should apply add action', () => {
     const box = syncNodeBox();
-    const newNode: TuNode = { id: '1', type: 'test', content: {} };
+    const newNode: TNode = { id: '1', type: 'test', content: {} };
     const actions: StateActions[] = [{ op: 'add', data: newNode }];
     box.actions(actions);
     expect(box.get()).toEqual([newNode]);
@@ -17,10 +17,10 @@ describe('syncNodeBox', () => {
 
   it('add the same node twice', () => {
     const box = syncNodeBox();
-    const newNode: TuNode = { id: '1', type: 'test', content: {} };
+    const newNode: TNode = { id: '1', type: 'test', content: {} };
     const actions: StateActions[] = [{ op: 'add', data: newNode }];
 
-    const newNode2: TuNode = { id: '1', type: 'test2', content: {} };
+    const newNode2: TNode = { id: '1', type: 'test2', content: {} };
     const actions2: StateActions[] = [{ op: 'add', data: newNode2 }];
     box.actions(actions);
     box.actions(actions2);
@@ -30,14 +30,14 @@ describe('syncNodeBox', () => {
 
   it('should apply patch action', () => {
     const box = syncNodeBox();
-    const initialNode: TuNode = {
+    const initialNode: TNode = {
       id: '1',
       type: 'test',
       content: { title: 'title' },
     };
     box.actions([{ op: 'add', data: initialNode }]);
 
-    const patchedNode: TuNode = {
+    const patchedNode: TNode = {
       id: '1',
       type: 'test',
       content: { title: 'updated title' },
@@ -49,7 +49,7 @@ describe('syncNodeBox', () => {
 
   it('should apply remove action', () => {
     const box = syncNodeBox();
-    const initialNode: TuNode = { id: '1', type: 'test', content: {} };
+    const initialNode: TNode = { id: '1', type: 'test', content: {} };
     box.actions([{ op: 'add', data: initialNode }]);
 
     const actions: StateActions[] = [
@@ -61,7 +61,7 @@ describe('syncNodeBox', () => {
 
   it('should undo action add', () => {
     const box = syncNodeBox();
-    const newNode: TuNode = { id: '1', type: 'test', content: {} };
+    const newNode: TNode = { id: '1', type: 'test', content: {} };
     box.actions([{ op: 'add', data: newNode }], true);
 
     box.undo();
@@ -70,7 +70,7 @@ describe('syncNodeBox', () => {
 
   it('should redo action add', () => {
     const box = syncNodeBox();
-    const newNode: TuNode = { id: '1', type: 'test', content: {} };
+    const newNode: TNode = { id: '1', type: 'test', content: {} };
     box.actions([{ op: 'add', data: newNode }], true);
     box.undo();
 
@@ -80,7 +80,7 @@ describe('syncNodeBox', () => {
 
   it('should undo action remove', () => {
     const box = syncNodeBox();
-    const newNode: TuNode = {
+    const newNode: TNode = {
       id: '1',
       type: 'test',
       content: { title: 'The title' },
@@ -106,7 +106,7 @@ describe('syncNodeBox', () => {
 
   it('should redo action remove', () => {
     const box = syncNodeBox();
-    const newNode: TuNode = {
+    const newNode: TNode = {
       id: '1',
       type: 'test',
       content: { title: 'The title' },
@@ -133,7 +133,7 @@ describe('syncNodeBox', () => {
 
   it('should undo/redo action patch', () => {
     const box = syncNodeBox();
-    const newNode: TuNode = {
+    const newNode: TNode = {
       id: '1',
       type: 'test',
       content: {
@@ -210,14 +210,14 @@ describe('syncNodeBox', () => {
 
   it('should clear future history after a new action post-undo', () => {
     const box = syncNodeBox();
-    const node1: TuNode = { id: '1', type: 'test1', content: {} };
-    const node2: TuNode = { id: '2', type: 'test2', content: {} };
+    const node1: TNode = { id: '1', type: 'test1', content: {} };
+    const node2: TNode = { id: '2', type: 'test2', content: {} };
 
     box.actions([{ op: 'add', data: node1 }], true);
     box.actions([{ op: 'add', data: node2 }], true);
     box.undo(); // Go back to just node1
 
-    const node3: TuNode = { id: '3', type: 'test3', content: {} };
+    const node3: TNode = { id: '3', type: 'test3', content: {} };
     box.actions([{ op: 'add', data: node3 }], true);
 
     // After performing a new action, redo should not bring back node2
@@ -240,8 +240,8 @@ describe('syncNodeBox', () => {
       ];
     });
 
-    const addNode: TuNode = { id: 'new-1', type: 'test3', content: {} };
-    const patchNode: TuNode = {
+    const addNode: TNode = { id: 'new-1', type: 'test3', content: {} };
+    const patchNode: TNode = {
       ...children[1],
       content: {
         title: 'content children 2 update',
@@ -283,11 +283,11 @@ describe('syncNodeBox', () => {
 
   describe('change position', () => {
     let box = syncNodeBox();
-    const node1: TuNode = { id: '1', type: 'note', content: {} };
-    const node2: TuNode = { id: '2', type: 'note', content: {} };
-    const node3: TuNode = { id: '3', type: 'group', content: {} };
-    const node4: TuNode = { id: '4', type: 'panel', content: {} };
-    const node5: TuNode = { id: '5', type: 'panel', content: {} };
+    const node1: TNode = { id: '1', type: 'note', content: {} };
+    const node2: TNode = { id: '2', type: 'note', content: {} };
+    const node3: TNode = { id: '3', type: 'group', content: {} };
+    const node4: TNode = { id: '4', type: 'panel', content: {} };
+    const node5: TNode = { id: '5', type: 'panel', content: {} };
 
     beforeEach(() => {
       box = syncNodeBox();
@@ -303,7 +303,7 @@ describe('syncNodeBox', () => {
     });
 
     it('add specific position and undo/redo', () => {
-      const node6: TuNode = { id: '6', type: 'note', content: {} };
+      const node6: TNode = { id: '6', type: 'note', content: {} };
       box.actions([{ op: 'add', data: node6, position: 2 }], true);
       expect(box.get()).toEqual([node4, node5, node6, node3, node2, node1]);
 
@@ -348,7 +348,7 @@ describe('syncNodeBox', () => {
     });
 
     it('invalid position', () => {
-      const node6: TuNode = { id: '6', type: 'note', content: {} };
+      const node6: TNode = { id: '6', type: 'note', content: {} };
 
       box.actions([{ op: 'add', data: node6, position: 100 }], true);
       expect(box.get()).toEqual([node4, node5, node3, node2, node1, node6]);

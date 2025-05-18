@@ -1,4 +1,4 @@
-import { isBoardTuNodeFull, Point, TuNode } from '@tapiz/board-commons';
+import { isBoardTNodeFull, Point, TNode } from '@tapiz/board-commons';
 import {
   applyToPoint,
   compose,
@@ -13,11 +13,11 @@ export function insideNode<T>(
     width: number;
     height: number;
   },
-  nodes: TuNode[],
-): TuNode<T> | undefined {
+  nodes: TNode[],
+): TNode<T> | undefined {
   const node = nodes
     .filter((it) => {
-      return isBoardTuNodeFull(it);
+      return isBoardTNodeFull(it);
     })
     .find((it) => {
       const transform = compose(
@@ -54,5 +54,5 @@ export function insideNode<T>(
       });
     });
 
-  return node as TuNode<T> | undefined;
+  return node as TNode<T> | undefined;
 }

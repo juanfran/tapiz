@@ -1,5 +1,5 @@
 import { Injectable, computed, inject } from '@angular/core';
-import { Drawing, isNote, isPanel, TuNode } from '@tapiz/board-commons';
+import { Drawing, isNote, isPanel, TNode } from '@tapiz/board-commons';
 import { rxState } from '@rx-angular/state';
 import { filter, map, skip } from 'rxjs';
 import { rxActions } from '@rx-angular/state/actions';
@@ -33,7 +33,7 @@ export class DrawingStore {
   nodes = computed(() => {
     return this.#boardFacade
       .nodes()
-      .filter((node) => isNote(node) || isPanel(node)) satisfies TuNode<{
+      .filter((node) => isNote(node) || isPanel(node)) satisfies TNode<{
       drawing: Drawing[];
     }>[];
   });

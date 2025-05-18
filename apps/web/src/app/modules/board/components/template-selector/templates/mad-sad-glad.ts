@@ -1,7 +1,7 @@
-import { TuNode } from '@tapiz/board-commons';
+import { TNode } from '@tapiz/board-commons';
 import { TemplaNode } from '../template-node.model';
 
-export function getTemplate(): TuNode<TemplaNode>[] {
+export function getTemplate(): TNode<TemplaNode>[] {
   return [
     {
       id: '',

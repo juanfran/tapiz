@@ -4,7 +4,7 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { BoardTuNode, StateActions } from '@tapiz/board-commons';
+import { BoardTNode, StateActions } from '@tapiz/board-commons';
 import { BoardActions } from '../../actions/board.actions';
 import { NodesActions } from '../../services/nodes-actions';
 import { getNodeSize } from '../../../../shared/node-size';
@@ -272,7 +272,7 @@ export class BoardNodesAlignComponent {
   }
 
   #getNodes() {
-    const nodes = this.#focusNodes() as BoardTuNode[] | undefined;
+    const nodes = this.#focusNodes() as BoardTNode[] | undefined;
 
     if (!nodes) {
       return [];

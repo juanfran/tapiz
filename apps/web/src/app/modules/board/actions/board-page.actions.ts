@@ -6,7 +6,7 @@ import {
   CocomaterialTag,
   CocomaterialApiListVectors,
   NodeAdd,
-  TuNode,
+  TNode,
   BoardUserInfo,
 } from '@tapiz/board-commons';
 import { Emoji } from 'emoji-picker-element/shared';
@@ -62,7 +62,7 @@ export const BoardPageActions = createActionGroup({
     'Set board privacy': props<{ isPublic: boolean }>(),
     'Toggle show votes': props<{ userId: string }>(),
     'Stop highlight': emptyProps(),
-    'Node snapshot': props<{ prev: TuNode; curr: TuNode }>(),
+    'Node snapshot': props<{ prev: TNode; curr: TNode }>(),
     'Lock board': props<{ lock: boolean }>(),
     'Refetch board': emptyProps(),
     'Select nodes': props<{ ids: string[] }>(),

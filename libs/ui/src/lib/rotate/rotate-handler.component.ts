@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 
 import { MoveService } from '@tapiz/cdk/services/move.service';
-import { Rotatable, TuNode } from '@tapiz/board-commons';
+import { Rotatable, TNode } from '@tapiz/board-commons';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filterNil } from 'ngxtension/filter-nil';
 import { RotateService } from './rotate.service';
@@ -38,7 +38,7 @@ export class RotateHandlerComponent {
   private rotateService = inject(RotateService);
   private el = inject(ElementRef);
 
-  public node = input.required<TuNode<Rotatable>>();
+  public node = input.required<TNode<Rotatable>>();
 
   public get nodeType() {
     return this.node().type;

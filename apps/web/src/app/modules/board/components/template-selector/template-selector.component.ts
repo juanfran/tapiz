@@ -7,7 +7,7 @@ import {
 import { NgOptimizedImage } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
-import { NodeAdd, TuNode } from '@tapiz/board-commons';
+import { NodeAdd, TNode } from '@tapiz/board-commons';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { TemplaNode } from './template-node.model';
 import { NodesActions } from '../../services/nodes-actions';
@@ -17,7 +17,7 @@ interface Template {
   image: string;
   width: number;
   height: number;
-  load: () => Promise<{ getTemplate: () => TuNode<TemplaNode>[] }>;
+  load: () => Promise<{ getTemplate: () => TNode<TemplaNode>[] }>;
 }
 
 @Component({
@@ -89,7 +89,7 @@ export class TemplateSelectorComponent {
     },
   ];
 
-  getSize(nodes: TuNode<TemplaNode>[]) {
+  getSize(nodes: TNode<TemplaNode>[]) {
     const sortedX = nodes.toSorted((prev, curr) => {
       return prev.content.position.x - curr.content.position.x;
     });
@@ -141,7 +141,7 @@ export class TemplateSelectorComponent {
     const heightTemplate =
       -(templateSizeY / 2 - documentHeight / 2) / this.userZoom();
 
-    const parsedTemplateNodes: TuNode<TemplaNode>[] = templateNodes.map(
+    const parsedTemplateNodes: TNode<TemplaNode>[] = templateNodes.map(
       (node) => {
         return {
           ...node,

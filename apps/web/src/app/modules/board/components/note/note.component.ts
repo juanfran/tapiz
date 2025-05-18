@@ -12,7 +12,7 @@ import {
   afterNextRender,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Drawing, Note, Panel, TuNode, isPanel } from '@tapiz/board-commons';
+import { Drawing, Note, Panel, TNode, isPanel } from '@tapiz/board-commons';
 import { contrast, lighter } from '@tapiz/cdk/utils/colors';
 import { insideNode } from '@tapiz/cdk/utils/inside-node';
 import { DrawingDirective, DrawingStore } from '../drawing';
@@ -93,7 +93,7 @@ export class NoteComponent {
   );
   #userVotes = this.#store.selectSignal(boardPageFeature.selectShowUserVotes);
 
-  node = input.required<TuNode<Note>>();
+  node = input.required<TNode<Note>>();
 
   pasted = input.required<boolean>();
 
@@ -378,7 +378,7 @@ export class NoteComponent {
     return this.userId() === this.node().content.ownerId;
   }
 
-  findColor(position: Point, panels: TuNode<Panel>[], defaultColor: string) {
+  findColor(position: Point, panels: TNode<Panel>[], defaultColor: string) {
     const width = this.node().content.width;
     const height = this.node().content.height;
 

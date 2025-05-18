@@ -9,7 +9,7 @@ import {
   inject,
   output,
 } from '@angular/core';
-import { Point, Resizable, Rotatable, TuNode } from '@tapiz/board-commons';
+import { Point, Resizable, Rotatable, TNode } from '@tapiz/board-commons';
 import { MultiDragService } from '@tapiz/cdk/services/multi-drag.service';
 import { ResizeHandlerComponent } from '@tapiz/ui/resize';
 import { RotateHandlerComponent } from '@tapiz/ui/rotate';
@@ -72,7 +72,7 @@ export class NodeSpaceComponent implements AfterViewInit {
   showOutline = input(false);
 
   node = input.required<
-    TuNode<{
+    TNode<{
       position: Point;
     }>
   >();
@@ -107,11 +107,11 @@ export class NodeSpaceComponent implements AfterViewInit {
     return this.drag.nativeElement;
   }
 
-  isResizable(node: TuNode<unknown>): node is TuNode<Resizable> {
+  isResizable(node: TNode<unknown>): node is TNode<Resizable> {
     return this.resize();
   }
 
-  isRotable(node: TuNode<unknown>): node is TuNode<Rotatable> {
+  isRotable(node: TNode<unknown>): node is TNode<Rotatable> {
     return this.rotate();
   }
 

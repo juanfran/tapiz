@@ -1,6 +1,6 @@
-import { TuNode } from '@tapiz/board-commons';
+import { TNode } from '@tapiz/board-commons';
 
-export function diff(node1: TuNode, node2: TuNode) {
+export function diff(node1: TNode, node2: TNode) {
   const diffResult: Record<string, unknown> = {};
 
   Object.entries(node1.content).forEach(([key, value]) => {
