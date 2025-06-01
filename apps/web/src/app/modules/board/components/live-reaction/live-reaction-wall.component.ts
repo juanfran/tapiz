@@ -33,11 +33,11 @@ import {
       <div
         [@fadeInOut]
         class="emoji"
-        [style.left.px]="emoji.position.x"
-        [style.top.px]="emoji.position.y">
+        [style.left.px]="emoji.position.x - 100"
+        [style.top.px]="emoji.position.y - 100">
         <img
-          width="100"
-          height="100"
+          width="200"
+          height="200"
           [src]="emoji.url" />
       </div>
     }

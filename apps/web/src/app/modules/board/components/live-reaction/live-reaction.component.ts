@@ -158,8 +158,8 @@ export class LiveReactionComponent {
         }
 
         this.#liveReactionStore.broadcast(this.selected(), {
-          x: data.position.x - 50,
-          y: data.position.y - 50,
+          x: data.position.x,
+          y: data.position.y,
         });
 
         this.reactionSelected.emit(this.selected());
