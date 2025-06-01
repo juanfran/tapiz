@@ -8,6 +8,8 @@ import {
   animate,
 } from '@angular/animations';
 
+const EMOJI_SIZE = 200 as const;
+
 @Component({
   selector: 'tapiz-live-reaction-wall',
   imports: [],
@@ -33,20 +35,24 @@ import {
       <div
         [@fadeInOut]
         class="emoji"
-        [style.left.px]="emoji.position.x - 100"
-        [style.top.px]="emoji.position.y - 100">
+        [style.left.px]="emoji.position.x - EMOJI_SIZE / 2"
+        [style.top.px]="emoji.position.y - EMOJI_SIZE / 2">
         <img
-          width="200"
-          height="200"
+          [width]="EMOJI_SIZE"
+          [height]="EMOJI_SIZE"
           [src]="emoji.url" />
       </div>
     }
   `,
+  host: {
+    '[style.--emoji-size]': `'${EMOJI_SIZE}px'`,
+  },
   styleUrls: ['./live-reaction-wall.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LiveReactionWallComponent {
   #liveReactionStore = inject(LiveReactionStore);
+  EMOJI_SIZE = EMOJI_SIZE;
 
   emojis = this.#liveReactionStore.emojis;
 }

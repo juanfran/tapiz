@@ -5,7 +5,7 @@
 .emoji {
   position: absolute;
   z-index: var(--board-highlight-node-layer);
-  inline-size: 200px;
-  block-size: 200px;
+  inline-size: var(--emoji-size);
+  block-size: var(--emoji-size);
   pointer-events: none;
 }
