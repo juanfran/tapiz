@@ -3,6 +3,7 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/web/src",
+  "tags": ["scope:web"],
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:browser-esbuild",
@@ -67,7 +68,8 @@
       "defaultConfiguration": "development",
       "options": {
         "proxyConfig": "apps/web/proxy.conf.json"
-      }
+      },
+      "continuous": true
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
@@ -75,6 +77,5 @@
         "buildTarget": "web:build"
       }
     }
-  },
-  "tags": ["scope:web"]
+  }
 }

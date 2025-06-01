@@ -70,7 +70,10 @@ export default [
       files: ['**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts'],
       rules: {
         ...config.rules,
-        '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none' }],
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          { caughtErrors: 'none' },
+        ],
         'no-multiple-empty-lines': [2, { max: 1 }],
         quotes: ['error', 'single', { avoidEscape: true }],
         'no-extra-semi': 'error',
@@ -84,5 +87,12 @@ export default [
       'no-extra-semi': 'error',
     },
   })),
-  { ignores: ['**/environment*.ts', '**/eslint.config.js'] },
+  {
+    ignores: [
+      '**/environment*.ts',
+      '**/eslint.config.js',
+      '**/vite.config.*.timestamp*',
+      '**/vitest.config.*.timestamp*',
+    ],
+  },
 ];
