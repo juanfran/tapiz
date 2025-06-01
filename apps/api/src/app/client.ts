@@ -8,7 +8,7 @@ import { Server } from './server.js';
 import { type Socket } from 'socket.io';
 import db from './db/index.js';
 import { validation } from './validation.js';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import * as R from 'remeda';
 
 const subSchema = z.object({

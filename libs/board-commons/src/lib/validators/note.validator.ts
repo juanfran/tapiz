@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 import type { NodeValidator } from '../models/node.model.js';
 import {
@@ -20,8 +20,8 @@ const note = z.object({
     z.object({
       unicode: z.string().max(255),
       position: z.object({
-        x: z.number().safe(),
-        y: z.number().safe(),
+        x: z.number(),
+        y: z.number(),
       }),
     }),
   ),
@@ -31,8 +31,8 @@ const note = z.object({
       size: z.number().positive().safe(),
       points: z.array(
         z.object({
-          x: z.number().safe(),
-          y: z.number().safe(),
+          x: z.number(),
+          y: z.number(),
         }),
       ),
     }),

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import type { NodeValidator } from '../models/node.model.js';
 
 const comment = z.object({

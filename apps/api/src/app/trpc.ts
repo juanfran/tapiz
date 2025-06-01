@@ -1,7 +1,7 @@
 import { TRPCError, initTRPC } from '@trpc/server';
 import type { AuthContext } from './auth.context.js';
 import db from './db/index.js';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 const t = initTRPC.create();
 

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import {
   CommonBoardValidation,
   SizeValidator,
@@ -8,7 +8,7 @@ const text = z.object({
   ...CommonBoardValidation,
   ...SizeValidator,
   text: z.string(),
-  rotation: z.number().safe(),
+  rotation: z.number(),
 });
 
 export const patchText = text.partial();

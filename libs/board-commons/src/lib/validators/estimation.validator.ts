@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { NodeValidator } from '../models/node.model.js';
 import { EstimationResult } from '../models/estimation.model.js';
 import { CommonBoardValidation } from './common-board-validation.js';

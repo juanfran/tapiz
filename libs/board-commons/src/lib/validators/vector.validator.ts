@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import {
   CommonBoardValidation,
   SizeValidator,
@@ -8,7 +8,7 @@ const vector = z.object({
   ...CommonBoardValidation,
   ...SizeValidator,
   url: z.string().max(1000),
-  rotation: z.number().safe(),
+  rotation: z.number(),
 });
 
 export const patchVector = vector.partial();

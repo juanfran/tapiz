@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import {
   CommonBoardValidation,
   SizeValidator,
@@ -13,7 +13,7 @@ const panel = z.object({
   borderWidth: z.number().nonnegative().safe().nullable(),
   borderRadius: z.number().nonnegative().safe().nullable(),
   color: z.string().length(7).regex(/^#/).nullable(),
-  rotation: z.number().safe(),
+  rotation: z.number(),
   textAlign: z.enum(['start', 'center', 'end']).nullable(),
   drawing: z.array(
     z.object({
@@ -21,8 +21,8 @@ const panel = z.object({
       size: z.number().positive().safe(),
       points: z.array(
         z.object({
-          x: z.number().safe(),
-          y: z.number().safe(),
+          x: z.number(),
+          y: z.number(),
         }),
       ),
     }),

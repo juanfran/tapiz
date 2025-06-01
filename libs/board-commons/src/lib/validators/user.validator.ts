@@ -1,19 +1,19 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import { StateActions, TuNode } from '../models/node.model.js';
 
 const user = z.object({
   visible: z.boolean(),
   cursor: z.object({
-    x: z.number().safe(),
-    y: z.number().safe(),
+    x: z.number(),
+    y: z.number(),
   }),
   position: z
     .object({
-      x: z.number().safe(),
-      y: z.number().safe(),
+      x: z.number(),
+      y: z.number(),
     })
     .optional(),
-  zoom: z.number().safe(),
+  zoom: z.number(),
 });
 
 const patchUser = user.partial();

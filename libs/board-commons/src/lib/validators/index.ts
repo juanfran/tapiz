@@ -1,3 +1,5 @@
+// Avoid import in web, TODO: split into separate lib
+
 import * as changeBoardNameValidators from './change-board-name.validator.js';
 import * as panelValidators from './panel.validator.js';
 import * as groupValidators from './group.validator.js';

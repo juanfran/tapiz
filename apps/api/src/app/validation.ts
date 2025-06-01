@@ -1,4 +1,5 @@
-import { StateActions, TuNode, Validators } from '@tapiz/board-commons';
+import { StateActions, TuNode } from '@tapiz/board-commons';
+import { Validators } from '@tapiz/board-commons/validators/index.js';
 
 import { PERSONAL_TOKEN_VALIDATOR } from '@tapiz/board-commons/validators/token.validator.js';
 import { ESTIMATION_VALIDATORS } from '@tapiz/board-commons/validators/estimation.validator.js';

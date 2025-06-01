@@ -1,11 +1,11 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export const PositionValidation = {
-  x: z.number().safe(),
-  y: z.number().safe(),
+  x: z.number(),
+  y: z.number(),
 };
 
-export const LayerValidator = z.number().safe();
+export const LayerValidator = z.number();
 
 export const CommonBoardValidation = {
   position: z.object(PositionValidation),
@@ -13,6 +13,6 @@ export const CommonBoardValidation = {
 };
 
 export const SizeValidator = {
-  width: z.number().safe(),
-  height: z.number().safe(),
+  width: z.number(),
+  height: z.number(),
 };
