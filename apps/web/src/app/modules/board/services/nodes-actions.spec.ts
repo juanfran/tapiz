@@ -1,9 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import {
-  provideExperimentalZonelessChangeDetection,
-  signal,
-} from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TuNode } from '@tapiz/board-commons';
 import { vi } from 'vitest';
 import { NodesActions } from './nodes-actions';
@@ -30,7 +27,7 @@ describe('NodesActions', () => {
 
     TestBed.configureTestingModule({
       providers: [
-        provideExperimentalZonelessChangeDetection(),
+        provideZonelessChangeDetection(),
         NodesActions,
         { provide: BoardFacade, useValue: boardFacadeStoreMock },
       ],

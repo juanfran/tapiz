@@ -1,7 +1,8 @@
 import {
   enableProdMode,
   importProvidersFrom,
-  provideExperimentalZonelessChangeDetection,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection,
 } from '@angular/core';
 
 import { environment } from './environments/environment';
@@ -61,7 +62,8 @@ bootstrapApplication(AppComponent, {
 
     provideHttpClient(withInterceptors([authInterceptor])),
     provideRouter(APP_ROUTES, withComponentInputBinding()),
-    provideExperimentalZonelessChangeDetection(),
+    provideZonelessChangeDetection(),
+    provideBrowserGlobalErrorListeners(),
     {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: { appearance: 'outline', subscriptSizing: 'dynamic' },

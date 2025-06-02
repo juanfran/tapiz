@@ -99,13 +99,13 @@ export class SpaceFormComponent {
   teamId = signal('');
 
   boardsResource = resource({
-    request: () => ({ id: this.teamId() }),
-    loader: ({ request }) => {
-      if (!request.id) {
+    params: () => ({ id: this.teamId() }),
+    loader: ({ params }) => {
+      if (!params.id) {
         return Promise.resolve([]);
       }
 
-      return this.boardApiService.fetchAllTeamBoards(request.id);
+      return this.boardApiService.fetchAllTeamBoards(params.id);
     },
   });
 
