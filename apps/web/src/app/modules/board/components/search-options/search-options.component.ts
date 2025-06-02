@@ -2,7 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  afterRender,
+  afterEveryRender,
   computed,
   inject,
   signal,
@@ -11,7 +11,6 @@ import {
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import {
-  MAT_AUTOCOMPLETE_SCROLL_STRATEGY_FACTORY_PROVIDER,
   MatAutocompleteModule,
   MatAutocompleteSelectedEvent,
 } from '@angular/material/autocomplete';
@@ -39,7 +38,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     MatAutocompleteModule,
     MatOptionModule,
   ],
-  providers: [MAT_AUTOCOMPLETE_SCROLL_STRATEGY_FACTORY_PROVIDER],
 })
 export class SearchOptionsComponent {
   searchInput = viewChild.required<ElementRef<HTMLInputElement>>('search');
@@ -145,7 +143,7 @@ export class SearchOptionsComponent {
   >(this.searchableNodes());
 
   constructor() {
-    afterRender(() => {
+    afterEveryRender(() => {
       this.searchInput().nativeElement.focus();
     });
 
