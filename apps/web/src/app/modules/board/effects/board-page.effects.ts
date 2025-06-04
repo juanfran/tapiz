@@ -260,7 +260,9 @@ export class BoardPageEffects {
         ofType(BoardPageActions.mentionUser),
         concatLatestFrom(() => [
           this.store.select(boardPageFeature.selectBoardId),
+          this.store.select(boardPageFeature.selectUserId),
         ]),
+        filter(([{ userId }, , currentUserId]) => userId !== currentUserId),
         switchMap(([{ userId, nodeId }, boardId]) => {
           return this.boardApiService.mentionBoardUser(boardId, userId, nodeId);
         }),

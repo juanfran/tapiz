@@ -14,7 +14,6 @@ import {
 } from '@angular/core';
 import { computePosition, Placement } from '@floating-ui/dom';
 import { popupState } from './popup.state';
-import { patchState } from '@ngrx/signals';
 import { TemplatePortal } from '@angular/cdk/portal';
 @Component({
   selector: 'tapiz-popup',
@@ -37,27 +36,24 @@ export class PopupComponent implements OnDestroy {
   @ViewChild('popupTemplate')
   set popupTemplate(templateRef: TemplateRef<unknown>) {
     const portal = new TemplatePortal(templateRef, this.#viewContainerRef);
-    patchState(popupState, { portal });
-  }
 
+    popupState.next({
+      portal,
+    });
+  }
   popup = viewChild<ElementRef>('popup');
   #viewContainerRef = inject(ViewContainerRef);
-
   elRef = input<Element | undefined>();
   customPosition = input<{ x: number; y: number } | undefined>();
   placement = input<Placement | undefined>();
-
   position = signal({ x: 0, y: 0 });
-
   constructor() {
     effect(() => {
       const elRef = this.elRef();
       const popup = this.popup();
-
       if (!elRef || !popup) {
         return;
       }
-
       computePosition(elRef, popup.nativeElement, {
         placement: this.placement(),
       }).then(({ x, y }) => {
@@ -65,8 +61,9 @@ export class PopupComponent implements OnDestroy {
       });
     });
   }
-
   ngOnDestroy() {
-    patchState(popupState, { portal: null });
+    popupState.next({
+      portal: null,
+    });
   }
 }

@@ -11,6 +11,7 @@ import {
 import db from '../db/index.js';
 import { checkBoardAccess, revokeBoardAccess } from '../global.js';
 import { triggerBoard, triggerTeam, triggerUser } from '../subscriptor.js';
+import { sendMentionNotificationEmail } from '../mailer.js';
 
 export const boardRouter = router({
   create: protectedProcedure
@@ -239,12 +240,19 @@ export const boardRouter = router({
   mentionBoardUser: boardMemberProcedure
     .input(
       z.object({
-        boardId: z.string().uuid(),
+        boardId: z.uuid(),
         nodeId: z.string().optional(),
         userId: z.string(),
       }),
     )
     .mutation(async (req) => {
+      if (req.ctx.user.sub === req.input.userId) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'You cannot mention yourself.',
+        });
+      }
+
       await db.user.mentionUser(
         req.input.boardId,
         req.input.userId,
@@ -252,6 +260,19 @@ export const boardRouter = router({
       );
 
       triggerUser(req.input.userId);
+
+      const mentionedUser = await db.user.getUser(req.input.userId);
+      const board = await db.board.getBoardBasic(req.input.boardId);
+
+      if (mentionedUser && board) {
+        sendMentionNotificationEmail(
+          mentionedUser.email,
+          board.id,
+          board.name,
+          req.ctx.user.name,
+          req.input.nodeId,
+        );
+      }
 
       return {
         success: true,
