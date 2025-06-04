@@ -1,8 +1,10 @@
 import { TemplatePortal } from '@angular/cdk/portal';
-import { signalState } from '@ngrx/signals';
+import { BehaviorSubject } from 'rxjs';
 
 type PortalState = {
   portal: TemplatePortal<unknown> | null;
 };
 
-export const popupState = signalState<PortalState>({ portal: null });
+export const popupState = new BehaviorSubject<PortalState>({
+  portal: null,
+});

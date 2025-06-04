@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { PortalModule } from '@angular/cdk/portal';
 import { popupState } from './popup.state';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'tapiz-popup-portal',
@@ -15,5 +17,8 @@ import { popupState } from './popup.state';
   imports: [PortalModule],
 })
 export class PopupPortalComponent {
-  selectedPortal = popupState.portal;
+  selectedPortal = toSignal(
+    popupState.asObservable().pipe(map((state) => state.portal)),
+    { initialValue: null },
+  );
 }

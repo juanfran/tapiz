@@ -15,6 +15,7 @@ import {
   getSpaceBoards,
 } from '../db/team-db.js';
 import { Space } from '@tapiz/board-commons';
+import { sendInvitationEmail } from '../mailer.js';
 
 export const teamRouter = router({
   new: protectedProcedure
@@ -98,6 +99,12 @@ export const teamRouter = router({
         },
         req.input.role,
       );
+
+      const team = await db.team.getTeam(req.input.teamId);
+
+      if (invitation && team) {
+        sendInvitationEmail(req.input.email, team.name, req.ctx.user.name);
+      }
 
       return invitation;
     }),
