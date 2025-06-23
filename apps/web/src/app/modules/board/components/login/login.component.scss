@@ -54,6 +54,7 @@
 .button-inner {
   display: flex;
   align-items: center;
+  color: var(--primary);
 
   & .google-icon {
     margin-right: 0.75rem;
