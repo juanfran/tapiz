@@ -6,7 +6,7 @@ import FastifyMultipart, {
   MultipartFile,
   MultipartValue,
 } from '@fastify/multipart';
-import { createContext } from './auth.context.js';
+import { createAuthContext } from './app.context.js';
 import { FastifyRequest } from 'fastify/types/request.js';
 import fastifyStatics from '@fastify/static';
 import { unlink, existsSync, mkdirSync } from 'fs';
@@ -35,7 +35,7 @@ async function checkAccess(
   req: FastifyRequest,
   res: FastifyReply,
 ): Promise<CheckAccessResult> {
-  const context = await createContext({ req, res });
+  const context = await createAuthContext({ req, res });
 
   if (!context.user) {
     return { success: false, code: 401, error: 'Unauthorized' };

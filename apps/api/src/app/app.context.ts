@@ -2,11 +2,18 @@ import { inferAsyncReturnType } from '@trpc/server';
 import { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { getUser } from './db/user-db.js';
 import { lucia, validateSession } from './auth.js';
+import { FastifyInstance } from 'fastify';
 
-export async function createContext({ req, res }: CreateFastifyContextOptions) {
+// // prevent angular build errors
+import '@fastify/rate-limit';
+import '@fastify/cookie';
+
+export async function createAuthContext({
+  req,
+  res,
+}: CreateFastifyContextOptions) {
   async function getUserFromHeader() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cookies = (req as any).cookies;
+    const cookies = req.cookies;
 
     const sessionId = cookies[lucia.sessionCookieName];
 
@@ -18,13 +25,10 @@ export async function createContext({ req, res }: CreateFastifyContextOptions) {
       }
 
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const resAny = res as any;
-
         if (session && session.fresh) {
           const sessionCookie = lucia.createSessionCookie(session.id);
 
-          resAny.setCookie(
+          res.setCookie(
             sessionCookie.name,
             sessionCookie.value,
             sessionCookie.attributes,
@@ -33,7 +37,7 @@ export async function createContext({ req, res }: CreateFastifyContextOptions) {
 
         if (!session) {
           const sessionCookie = lucia.createBlankSessionCookie();
-          resAny.setCookie(
+          res.setCookie(
             sessionCookie.name,
             sessionCookie.value,
             sessionCookie.attributes,
@@ -68,4 +72,20 @@ export async function createContext({ req, res }: CreateFastifyContextOptions) {
     correlationId: req.headers['correlation-id'] as string,
   };
 }
-export type AuthContext = inferAsyncReturnType<typeof createContext>;
+
+export async function createAppContext(
+  app: FastifyInstance,
+  rateLimits: Record<string, ReturnType<FastifyInstance['createRateLimit']>>,
+  { req, res }: CreateFastifyContextOptions,
+) {
+  const authContext = await createAuthContext({ req, res });
+
+  return {
+    req,
+    res,
+    app,
+    rateLimits,
+    ...authContext,
+  };
+}
+export type AppContext = inferAsyncReturnType<typeof createAppContext>;

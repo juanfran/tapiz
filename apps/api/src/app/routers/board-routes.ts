@@ -12,6 +12,7 @@ import db from '../db/index.js';
 import { checkBoardAccess, revokeBoardAccess } from '../global.js';
 import { triggerBoard, triggerTeam, triggerUser } from '../subscriptor.js';
 import { sendMentionNotificationEmail } from '../mailer.js';
+import { rateLimitedMiddleware } from '../rate-limited.js';
 
 export const boardRouter = router({
   create: protectedProcedure
@@ -238,6 +239,7 @@ export const boardRouter = router({
       return db.board.getUsersToMention(req.input.boardId);
     }),
   mentionBoardUser: boardMemberProcedure
+    .use(rateLimitedMiddleware('mentionBoardUser'))
     .input(
       z.object({
         boardId: z.uuid(),

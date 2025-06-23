@@ -1,5 +1,5 @@
 import Fastify from 'fastify';
-import { createContext } from './auth.context.js';
+import { createAppContext } from './app.context.js';
 import { AppRouter, appRouter } from './routers/index.js';
 import fastifyCookie from '@fastify/cookie';
 import cors from '@fastify/cors';
@@ -13,7 +13,7 @@ import {
 } from '@trpc/server/adapters/fastify';
 import { Server } from './server.js';
 import { setServer } from './global.js';
-import { getAuthUrl } from './auth.js';
+import { getAuthUrl, lucia } from './auth.js';
 import { googleCallback } from './routers/auth-routes.js';
 import { fileUpload } from './file-upload.js';
 
@@ -25,7 +25,17 @@ const fastify = Fastify({
 await fastify.register(import('@fastify/rate-limit'), {
   max: 150,
   timeWindow: '1 minute',
+  keyGenerator: (req) => {
+    return req.cookies[lucia.sessionCookieName] || req.ip;
+  },
 });
+
+const rateLimits = {
+  mentionBoardUser: fastify.createRateLimit({
+    max: 50,
+    timeWindow: '1 minute',
+  }),
+};
 
 fastify.register(fileUpload);
 
@@ -38,9 +48,13 @@ fastify.register(fastifyTRPCPlugin, {
   prefix: '/api/trpc',
   trpcOptions: {
     router: appRouter,
-    createContext,
+    createContext: ({ req, res }) => {
+      return createAppContext(fastify, rateLimits, {
+        req,
+        res,
+      });
+    },
     onError({ path, error }) {
-      // report to error monitoring
       console.error(`Error in tRPC handler on path '${path}':`, error);
     },
   } satisfies FastifyTRPCPluginOptions<AppRouter>['trpcOptions'],

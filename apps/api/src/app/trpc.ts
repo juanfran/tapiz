@@ -1,5 +1,5 @@
 import { TRPCError, initTRPC } from '@trpc/server';
-import type { AuthContext } from './auth.context.js';
+import type { AppContext } from './app.context.js';
 import db from './db/index.js';
 import { z } from 'zod/v4';
 
@@ -8,7 +8,7 @@ const t = initTRPC.create();
 export const router = t.router;
 export const publicProcedure = t.procedure;
 
-export const tAuth = initTRPC.context<AuthContext>().create();
+export const tAuth = initTRPC.context<AppContext>().create();
 
 const isAuthed = tAuth.middleware((opts) => {
   const { ctx } = opts;
