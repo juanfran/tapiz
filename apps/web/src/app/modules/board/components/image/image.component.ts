@@ -7,7 +7,6 @@ import {
   computed,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { RxState } from '@rx-angular/state';
 import { Image, TuNode } from '@tapiz/board-commons';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { NodeSpaceComponent } from '../node-space';
@@ -32,7 +31,7 @@ import { ConfigService } from '../../../../services/config.service';
   `,
   styleUrls: ['./image.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState, HotkeysService],
+  providers: [HotkeysService],
   imports: [NodeSpaceComponent],
 
   host: {

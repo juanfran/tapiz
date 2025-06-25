@@ -13,9 +13,11 @@ import { MatIconModule } from '@angular/material/icon';
   template: `<div
     class="menu"
     [style.transform]="position()"
-    (clickOutside)="contextMenuStore.actions.close()"
-    [class.open]="contextMenuStore.open() && contextMenuStore.items().length">
-    @for (item of contextMenuStore.items(); track $index) {
+    (clickOutside)="contextMenuStore.close()"
+    [class.open]="
+      contextMenuStore.state.open() && contextMenuStore.state.items().length
+    ">
+    @for (item of contextMenuStore.state.items(); track $index) {
       <button
         class="item"
         (click)="action($event, item)">
@@ -37,13 +39,13 @@ export class ContextMenuComponent {
   contextMenuStore = inject(ContextMenuStore);
 
   position = computed(() => {
-    const { x, y } = this.contextMenuStore.position() ?? { x: 0, y: 0 };
+    const { x, y } = this.contextMenuStore.state.position() ?? { x: 0, y: 0 };
 
     return `translate(${x}px, ${y}px)`;
   });
 
-  public action(event: MouseEvent, item: ContextMenuItem) {
+  action(event: MouseEvent, item: ContextMenuItem) {
     item.action(event);
-    this.contextMenuStore.actions.close();
+    this.contextMenuStore.close();
   }
 }

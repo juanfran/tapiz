@@ -17,7 +17,6 @@ import {
   effect,
   computed,
 } from '@angular/core';
-import { RxState } from '@rx-angular/state';
 import { BoardTuNode } from '@tapiz/board-commons';
 import { take } from 'rxjs';
 import { Store } from '@ngrx/store';
@@ -36,7 +35,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   template: ' <ng-container #nodeHost></ng-container>',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [],
-  providers: [RxState, NodeStore],
+  providers: [NodeStore],
   host: {
     '[class.highlight]': 'highlight()',
     '[style.width.px]': 'size().width',

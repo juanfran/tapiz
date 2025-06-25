@@ -65,7 +65,7 @@ import { appFeature } from '../../../+state/app.reducer';
 import { SubscriptionService } from '../../../services/subscription.service';
 import { DrawingStore } from '../components/drawing/drawing.store';
 import { DrawingOptionsComponent } from '../components/drawing-options';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { CommentsComponent } from '../components/comments/comments.component';
 import { NodesActions } from '../services/nodes-actions';
 import { ConfigService } from '../../../services/config.service';
@@ -203,6 +203,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   dots = viewChild.required<ElementRef<HTMLElement>>('dots');
   #boardFacade = inject(BoardFacade);
   timer = this.#boardFacade.timer;
+  contextMenuOpen$ = toObservable(this.contextMenuStore.state.open);
 
   @HostListener('dblclick', ['$event'])
   public dblclick(event: MouseEvent) {
@@ -259,7 +260,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     });
 
     rxEffect(
-      this.contextMenuStore.open$.pipe(
+      this.contextMenuOpen$.pipe(
         pairwise(),
         filter(([prev, curr]) => prev !== curr),
         map(([, curr]) => {

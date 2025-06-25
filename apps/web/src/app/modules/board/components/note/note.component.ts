@@ -439,12 +439,12 @@ export class NoteComponent {
   }
 
   setDrawing(newLine: Drawing) {
-    this.#drawingStore.actions.setDrawing({
-      id: this.node().id,
-      type: 'note',
-      drawing: [...this.node().content.drawing, newLine],
-      history: true,
-    });
+    this.#drawingStore.setDrawing(
+      this.node().id,
+      'note',
+      [...this.node().content.drawing, newLine],
+      true,
+    );
   }
 
   openComments() {
@@ -452,7 +452,7 @@ export class NoteComponent {
   }
 
   onMention(userId: string) {
-    this.#nodesStore.actions.mentionUser({ userId, nodeId: this.node().id });
+    this.#nodesStore.mentionUser(userId, this.node().id);
   }
 
   #voteEvent(event: MouseEvent) {

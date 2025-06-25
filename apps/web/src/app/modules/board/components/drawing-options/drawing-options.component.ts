@@ -28,24 +28,21 @@ export class DrawingOptionsComponent {
 
     this.form.valueChanges.subscribe((value) => {
       if (this.form.valid && value.color && value.size) {
-        this.#drawingStore.actions.setDrawingParams({
-          color: value.color,
-          size: value.size,
-        });
+        this.#drawingStore.setDrawingParams(value.color, value.size);
       }
     });
   }
 
   clean() {
-    this.#drawingStore.actions.cleanDrawing();
+    this.#drawingStore.cleanDrawing();
   }
 
   undo() {
-    this.#drawingStore.actions.undoDrawing();
+    this.#drawingStore.undoDrawing();
   }
 
   redo() {
-    this.#drawingStore.actions.redoDrawing();
+    this.#drawingStore.redoDrawing();
   }
 
   updateColor(color: string | undefined) {

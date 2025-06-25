@@ -6,7 +6,6 @@ import {
   signal,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { RxState } from '@rx-angular/state';
 import { homeFeature } from '../../+state/home.feature';
 import { HomeActions } from '../../+state/home.actions';
 import { BoardListComponent } from '../board-list/board-list.component';
@@ -32,7 +31,6 @@ import { SortBoard } from '@tapiz/board-commons';
     EmptyBoardsComponent,
     InfiniteScrollBoardsComponent,
   ],
-  providers: [RxState],
   template: `
     @if (team(); as team) {
       <tapiz-infinite-scroll-boards (scrolled)="onScroll()">

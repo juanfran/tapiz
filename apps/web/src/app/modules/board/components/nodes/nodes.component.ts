@@ -66,8 +66,6 @@ export class NodesComponent {
         };
       });
 
-    this.#nodesStore.actions.deleteNodes({
-      nodes,
-    });
+    this.#nodesStore.deleteNodes(nodes);
   }
 }

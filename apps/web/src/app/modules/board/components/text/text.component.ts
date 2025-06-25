@@ -171,6 +171,6 @@ export class TextComponent implements OnInit {
   }
 
   onMention(userId: string) {
-    this.#nodesStore.actions.mentionUser({ userId, nodeId: this.node().id });
+    this.#nodesStore.mentionUser(userId, this.node().id);
   }
 }

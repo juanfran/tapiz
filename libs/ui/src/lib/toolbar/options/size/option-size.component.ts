@@ -83,7 +83,11 @@ export class OptionSizeComponent {
         return;
       }
 
-      this.editor().chain().focus().setFontSize(String(value)).run();
+      this.editor()
+        .chain()
+        .focus()
+        .setFontSize(value + 'px')
+        .run();
     });
 
     this.#toolbarEditorService.events$

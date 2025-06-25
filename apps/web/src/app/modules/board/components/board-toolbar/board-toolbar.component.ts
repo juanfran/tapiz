@@ -362,10 +362,10 @@ export class BoardToolbarComponent {
   draw() {
     if (this.popup() !== 'draw') {
       this.popupOpen('draw');
-      this.#drawingStore.actions.readyToDraw();
+      this.#drawingStore.readyToDraw();
     } else {
       this.popupOpen('');
-      this.#drawingStore.actions.finishDrawing();
+      this.#drawingStore.finishDrawing();
     }
   }
 
@@ -567,7 +567,7 @@ export class BoardToolbarComponent {
     }
 
     if (this.#drawingStore.drawing()) {
-      this.#drawingStore.actions.finishDrawing();
+      this.#drawingStore.finishDrawing();
     }
   }
 

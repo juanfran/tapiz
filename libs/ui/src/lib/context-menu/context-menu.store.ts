@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-import { rxState } from '@rx-angular/state';
-import { rxActions } from '@rx-angular/state/actions';
-import { map } from 'rxjs';
+import { patchState, signalState } from '@ngrx/signals';
 
 interface ContextMenuState {
   open: boolean;
@@ -32,40 +30,35 @@ export interface ContextMenuOptions {
   providedIn: 'root',
 })
 export class ContextMenuStore {
-  actions = rxActions<{
-    close: void;
-    open: { position: { x: number; y: number }; items: ContextMenuItem[] };
-  }>();
+  state = signalState<ContextMenuState>(initialState);
 
-  #state = rxState<ContextMenuState>(({ set, connect }) => {
-    set(initialState);
+  open({
+    position,
+    items,
+  }: {
+    position: { x: number; y: number };
+    items: ContextMenuItem[];
+  }) {
+    patchState(this.state, () => {
+      return {
+        open: true,
+        position,
+        items,
+      };
+    });
+  }
 
-    connect(
-      this.actions.open$.pipe(
-        map(({ position, items }) => {
-          return {
-            open: true,
-            position,
-            items,
-          };
-        }),
-      ),
-    );
+  close() {
+    patchState(this.state, () => {
+      return {
+        open: false,
+        position: null,
+        items: [],
+      };
+    });
+  }
 
-    connect(
-      this.actions.close$.pipe(
-        map(() => {
-          return {
-            open: false,
-            position: null,
-            items: [],
-          };
-        }),
-      ),
-    );
-  });
-
-  public config(options: ContextMenuOptions) {
+  config(options: ContextMenuOptions) {
     const { element, items } = options;
 
     let lastMouseDownPosition: { x: number; y: number } | null = null;
@@ -115,12 +108,7 @@ export class ContextMenuStore {
         y: event.clientY,
       };
 
-      this.actions.open({ position: { x, y }, items: items() });
+      this.open({ position: { x, y }, items: items() });
     });
   }
-
-  readonly open = this.#state.signal('open');
-  readonly open$ = this.#state.select('open');
-  readonly position = this.#state.signal('position');
-  readonly items = this.#state.signal('items');
 }

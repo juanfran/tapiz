@@ -11,7 +11,6 @@ import {
   computed,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { RxState } from '@rx-angular/state';
 import { Drawing, Panel, TuNode } from '@tapiz/board-commons';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
@@ -73,7 +72,7 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
   `,
   styleUrls: ['./panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [RxState, HotkeysService],
+  providers: [HotkeysService],
   imports: [
     NodeSpaceComponent,
     EditorViewComponent,
@@ -169,12 +168,12 @@ export class PanelComponent implements OnInit {
   }
 
   setDrawing(newLine: Drawing) {
-    this.#drawingStore.actions.setDrawing({
-      id: this.node().id,
-      type: 'panel',
-      drawing: [...this.node().content.drawing, newLine],
-      history: true,
-    });
+    this.#drawingStore.setDrawing(
+      this.node().id,
+      'panel',
+      [...this.node().content.drawing, newLine],
+      true,
+    );
   }
 
   ngOnInit() {
@@ -214,7 +213,7 @@ export class PanelComponent implements OnInit {
   }
 
   onMention(userId: string) {
-    this.#nodesStore.actions.mentionUser({ userId, nodeId: this.node().id });
+    this.#nodesStore.mentionUser(userId, this.node().id);
   }
 
   get nativeElement(): HTMLElement {

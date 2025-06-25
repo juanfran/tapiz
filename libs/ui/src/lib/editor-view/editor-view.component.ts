@@ -1,3 +1,6 @@
+import { BulletList, OrderedList, ListItem } from '@tiptap/extension-list';
+import { UndoRedo } from '@tiptap/extensions';
+import { TextStyleKit } from '@tiptap/extension-text-style';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -13,34 +16,26 @@ import {
 } from '@angular/core';
 
 import { Editor } from '@tiptap/core';
-import { TextStyle } from '@tiptap/extension-text-style';
 import { TextAlign } from '@tiptap/extension-text-align';
 import { Link } from '@tiptap/extension-link';
-import { FontFamily } from '@tiptap/extension-font-family';
-import { History } from '@tiptap/extension-history';
 import { EditorViewSharedStateService } from './editor-view-shared-state.service';
 import { BubbleMenu } from './bubble-menu';
 import { TuNode } from '@tapiz/board-commons';
 import { Heading } from '@tiptap/extension-heading';
 import { Paragraph } from '@tiptap/extension-paragraph';
-import { BulletList } from '@tiptap/extension-bullet-list';
-import { OrderedList } from '@tiptap/extension-ordered-list';
 import { Strike } from '@tiptap/extension-strike';
 import { Italic } from '@tiptap/extension-italic';
 import { Bold } from '@tiptap/extension-bold';
 import { Document } from '@tiptap/extension-document';
 import { Text } from '@tiptap/extension-text';
-import { ListItem } from '@tiptap/extension-list-item';
 import { Mention, MentionNodeAttrs } from '@tiptap/extension-mention';
 import { output } from '@angular/core';
 import { input } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { Subject, sampleTime } from 'rxjs';
-import { FontSize } from './font-size-plugin';
 import { PopupComponent } from '../popup/popup.component';
 import { normalize } from '@tapiz/utils/normalize';
 import { explicitEffect } from 'ngxtension/explicit-effect';
-import Color from '@tiptap/extension-color';
 
 @Component({
   selector: 'tapiz-editor-view',
@@ -199,8 +194,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
         Heading.configure({
           levels: [1, 2, 3],
         }),
-        TextStyle,
-        Color,
+        TextStyleKit,
         // CustomDefaultColorPlugin(this.defaultTextColor()),
         TextAlign.configure({
           types: ['heading', 'paragraph'],
@@ -208,11 +202,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
         Link.configure({
           openOnClick: true,
         }),
-        FontFamily.configure({
-          types: ['textStyle'],
-        }),
-        FontSize,
-        History.configure(),
+        UndoRedo.configure(),
         BubbleMenu.configure({
           element: this.linkMenu.nativeElement,
           shouldShow: ({ editor, nodeDom }) => {

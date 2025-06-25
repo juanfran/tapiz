@@ -85,7 +85,7 @@ export class BoardContextMenuComponent implements OnInit {
               icon: 'content_copy',
               help: 'Ctrl + C',
               action: () => {
-                this.nodesStore.actions.copyNodes({ nodes: currentNodes });
+                this.nodesStore.copyNodes(currentNodes);
               },
             },
             {
@@ -93,14 +93,14 @@ export class BoardContextMenuComponent implements OnInit {
               icon: 'delete',
               help: 'Supr',
               action: () => {
-                this.nodesStore.actions.deleteNodes({
-                  nodes: currentNodes.map((it) => {
+                this.nodesStore.deleteNodes(
+                  currentNodes.map((it) => {
                     return {
                       id: it.id,
                       type: it.type,
                     };
                   }),
-                });
+                );
               },
             },
             {
