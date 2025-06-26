@@ -1,6 +1,8 @@
 /* BUTTONS */
 .mat-mdc-unelevated-button.mat-primary,
 .mat-mdc-raised-button.mat-primary {
+  --mat-button-filled-container-color: var(--brand);
+  --mat-button-protected-container-color: var(--brand);
   --mdc-filled-button-container-color: var(--brand);
   --mdc-protected-button-container-color: var(--brand);
   &:hover {
@@ -57,6 +59,7 @@ button.mdc-button {
 }
 
 :root {
+  --mat-button-filled-container-color: var(--brand);
   --mdc-outlined-text-field-focus-outline-color: var(--brand);
   --mdc-outlined-text-field-caret-color: var(--brand);
   --mdc-outlined-text-field-focus-label-text-color: var(--brand);
