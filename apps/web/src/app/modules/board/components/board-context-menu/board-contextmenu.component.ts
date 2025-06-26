@@ -54,6 +54,7 @@ export class BoardContextMenuComponent implements OnInit {
   private activeToolbarOption = this.store.selectSignal(
     boardPageFeature.selectPopupOpen,
   );
+  private isAdmin = this.store.selectSignal(boardPageFeature.selectIsAdmin);
 
   public readonly boardMode = this.store.selectSignal(
     boardPageFeature.selectBoardMode,
@@ -290,7 +291,10 @@ export class BoardContextMenuComponent implements OnInit {
                 },
               );
 
-              if (note.content.ownerId === this.boardFacade.currentUser()?.id) {
+              if (
+                note.content.ownerId === this.boardFacade.currentUser()?.id ||
+                this.isAdmin()
+              ) {
                 let textHidden = note.content.textHidden;
 
                 textHidden ??= !this.boardFacade.currentUser()?.visible;
