@@ -198,6 +198,10 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     return this.readonly() && !this.isAdmin();
   });
 
+  anonymousMode = computed(() => {
+    return this.#boardFacade.settings()?.content.anonymousMode;
+  });
+
   workLayer = viewChild.required<ElementRef<HTMLElement>>('workLayer');
 
   dots = viewChild.required<ElementRef<HTMLElement>>('dots');
