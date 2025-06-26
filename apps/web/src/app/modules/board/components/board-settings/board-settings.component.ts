@@ -55,9 +55,9 @@ import { BoardFacade } from '../../../../services/board-facade.service';
           <span class="label-text">Anonymous mode</span>
         </mat-checkbox>
         <span class="help"
-          >When this option is enabled, notes created will not display an
-          author. Additionally, the list and cursor indicating connected users
-          will be hidden.</span
+          >When this option is enabled, notes created will not store an author
+          and all notes will be public. Additionally, the list and cursor
+          indicating connected users will be hidden.</span
         >
       </div>
 
