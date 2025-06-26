@@ -211,7 +211,7 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
 
   @HostListener('dblclick', ['$event'])
   public dblclick(event: MouseEvent) {
-    if (this.readonly()) {
+    if (this.isReadonlyUser()) {
       return;
     }
 
