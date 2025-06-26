@@ -19,7 +19,7 @@
     "regenerate": "nx run api:regenerate",
     "generate": "drizzle-kit generate:pg",
     "studio": "pnpm exec drizzle-kit studio",
-    "lint": "nx run-many --all --target=lint --parallel",
+    "lint": "nx run-many --all --target=lint --parallel --verbose",
     "format": "nx format:write --libs-and-apps",
     "demo": "nx run api:demo",
     "prepare": "husky",
