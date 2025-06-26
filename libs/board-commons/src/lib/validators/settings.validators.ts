@@ -4,6 +4,7 @@ import { NodeValidator } from '../models/node.model.js';
 export const settingsValidator = z.object({
   readOnly: z.boolean().default(false),
   anonymousMode: z.boolean().default(false),
+  hideNoteAuthor: z.boolean().default(false),
 });
 
 export const SETTINGS_VALIDATOR: NodeValidator = {

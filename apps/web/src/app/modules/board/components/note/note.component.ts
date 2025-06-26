@@ -92,6 +92,17 @@ export class NoteComponent {
     boardPageFeature.selectUserHighlight,
   );
   #userVotes = this.#store.selectSignal(boardPageFeature.selectShowUserVotes);
+  #currentUserId = this.#store.selectSignal(boardPageFeature.selectUserId);
+  showNoteAuthor = computed(() => {
+    const noteUserId = this.node().content.ownerId;
+    const currentUserId = this.#currentUserId();
+
+    if (noteUserId === currentUserId) {
+      return true;
+    }
+
+    return !(this.#boardFacade.settings()?.content.hideNoteAuthor ?? false);
+  });
 
   node = input.required<TuNode<Note>>();
 

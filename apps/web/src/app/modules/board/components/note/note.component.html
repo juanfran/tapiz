@@ -46,11 +46,14 @@
         class="rich-text"
         [innerHTML]="node().content.text | safeHtml"></div>
     }
-    <div
-      class="name"
-      [title]="username()">
-      {{ username() }}
-    </div>
+
+    @if (showNoteAuthor()) {
+      <div
+        class="name"
+        [title]="username()">
+        {{ username() }}
+      </div>
+    }
     @for (emoji of node().content.emojis; track emoji) {
       <div
         class="emoji"

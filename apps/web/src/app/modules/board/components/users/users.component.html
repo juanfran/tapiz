@@ -7,7 +7,7 @@
             class="user me"
             [cdkMenuTriggerFor]="menu"
             [cdkMenuPosition]="menuPosition"
-            [cdkMenuTriggerData]="{ user: currentUser() }">
+            [cdkMenuTriggerData]="{ user: currentUser(), highlight: true }">
             <p class="username">
               <span
                 class="name"
@@ -35,7 +35,10 @@
           @for (user of users(); track user.id) {
             <button
               [cdkMenuTriggerFor]="menu"
-              [cdkMenuTriggerData]="{ user: user }"
+              [cdkMenuTriggerData]="{
+                user: user,
+                highlight: !hideNoteAuthor(),
+              }"
               [cdkMenuPosition]="menuPosition"
               [class.offline]="!user.connected"
               [class.active]="user.id === userHighlight()"
@@ -74,7 +77,8 @@
 
 <ng-template
   #menu
-  let-user="user">
+  let-user="user"
+  let-highlight="highlight">
   <div
     class="menu"
     cdkMenu>
@@ -97,12 +101,14 @@
         Go to user
       </button>
     }
-    <button
-      cdkMenuItem
-      class="menu-item"
-      (cdkMenuItemTriggered)="toggleUserHighlight(user.id)">
-      Highlight
-    </button>
+    @if (highlight) {
+      <button
+        cdkMenuItem
+        class="menu-item"
+        (cdkMenuItemTriggered)="toggleUserHighlight(user.id)">
+        Highlight
+      </button>
+    }
     <button
       cdkMenuItem
       class="menu-item"

@@ -51,6 +51,18 @@ import { BoardFacade } from '../../../../services/board-facade.service';
       <div class="field">
         <mat-checkbox
           color="primary"
+          formControlName="hideNoteAuthor">
+          <span class="label-text">Hide note author</span>
+        </mat-checkbox>
+        <span class="help"
+          >The note author will be stored but will not be displayed to other
+          users. Additionally, users can't highlight other users' notes.</span
+        >
+      </div>
+
+      <div class="field">
+        <mat-checkbox
+          color="primary"
           formControlName="anonymousMode">
           <span class="label-text">Anonymous mode</span>
         </mat-checkbox>
@@ -86,6 +98,7 @@ export class BoardSettingsComponent {
   form = new FormGroup({
     readOnly: new FormControl(false),
     anonymousMode: new FormControl(false),
+    hideNoteAuthor: new FormControl(false),
   });
 
   constructor() {

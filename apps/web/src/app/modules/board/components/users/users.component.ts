@@ -76,6 +76,9 @@ export class UsersComponent {
   currentUser = computed(() => {
     return this.#users()?.find((user) => user.id === this.userId());
   });
+  hideNoteAuthor = computed(
+    () => !!this.#boardFacade.settings()?.content.hideNoteAuthor,
+  );
 
   userPicture = computed(() => {
     const boardUsers = this.#boardUsers();
