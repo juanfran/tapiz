@@ -23,7 +23,7 @@
   --accent--ui: #efefef;
 
   --brand: var(--grey-90);
-  --brand-light: hsl(244, 61%, 85%);
+  --brand-light: var(--grey-30);
 
   /* ACCENT */
   --accent-aquamarine: #92d1b2;
@@ -55,5 +55,5 @@
   --grey-90: #1e254b;
 
   /* BLUR BG */
-  --blur-bg: rgba(216,220,229,.5);
+  --blur-bg: rgba(216, 220, 229, 0.5);
 }
