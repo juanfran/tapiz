@@ -15,6 +15,7 @@ import { Store } from '@ngrx/store';
 import { Drawing, Note, Panel, TuNode, isPanel } from '@tapiz/board-commons';
 import { contrast, lighter } from '@tapiz/cdk/utils/colors';
 import { insideNode } from '@tapiz/cdk/utils/inside-node';
+import { PortalComponent } from '@tapiz/ui/portal';
 import { DrawingDirective, DrawingStore } from '../drawing';
 import { HistoryService } from '../../services/history.service';
 import { MatIconModule } from '@angular/material/icon';
@@ -37,6 +38,7 @@ import { defaultNoteColor } from '.';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardPageActions } from '../../actions/board-page.actions';
+import { NodeToolbarComponent } from '../node-toolbar/node-toolbar.component';
 
 @Component({
   selector: 'tapiz-note',
@@ -50,6 +52,8 @@ import { BoardPageActions } from '../../actions/board-page.actions';
     SafeHtmlPipe,
     EditorViewComponent,
     EditorPortalComponent,
+    PortalComponent,
+    NodeToolbarComponent,
   ],
   host: {
     '[class.drawing]': 'drawing()',

@@ -67,27 +67,6 @@ import { MatSliderModule } from '@angular/material/slider';
     </div>
 
     <div class="field">
-      <label class="input-layout"> Text aligment </label>
-
-      <div class="buttons">
-        <button
-          [class.active]="node().content.textAlign === 'start'"
-          (click)="updateNodeValue('start', 'textAlign')">
-          <mat-icon>vertical_align_top</mat-icon>
-        </button>
-        <button
-          [class.active]="node().content.textAlign === 'center'"
-          (click)="updateNodeValue('center', 'textAlign')">
-          <mat-icon>vertical_align_center</mat-icon>
-        </button>
-        <button
-          [class.active]="node().content.textAlign === 'end'"
-          (click)="updateNodeValue('end', 'textAlign')">
-          <mat-icon>vertical_align_bottom</mat-icon>
-        </button>
-      </div>
-    </div>
-    <div class="field">
       <label class="color-picker-layout">
         Note color
 

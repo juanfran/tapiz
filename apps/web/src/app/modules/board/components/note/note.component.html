@@ -32,8 +32,6 @@
           [class.readonly]="!edit()"
           [defaultTextColor]="defaultTextColor()"
           #editorView="editorView"
-          [node]="node()"
-          [toolbar]="edit()"
           [content]="initialText()"
           [focus]="edit()"
           [mentions]="mentions()"
@@ -41,6 +39,14 @@
           (mentioned)="onMention($event)"
           (contentChange)="setText($event)" />
       </tapiz-editor-portal>
+
+      @if (editorView.editor(); as editor) {
+        <tapiz-portal name="node-toolbar">
+          <tapiz-node-toolbar
+            [node]="node()"
+            [editor]="editor" />
+        </tapiz-portal>
+      }
     } @else {
       <div
         class="rich-text"

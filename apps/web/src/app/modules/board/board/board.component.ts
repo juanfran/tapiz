@@ -56,7 +56,6 @@ import { BoardContextMenuComponent } from '../components/board-context-menu/boar
 import { HistoryService } from '../services/history.service';
 import { MoveService } from '@tapiz/cdk/services/move.service';
 import { RotateService } from '@tapiz/ui/rotate/rotate.service';
-import { NodeToolbarComponent } from '../components/node-toolbar/node-toolbar.component';
 import { WsService } from '../../ws/services/ws.service';
 import { FollowUserComponent } from '../../../shared/follow-user/follow-user.component';
 import { StopHighlightComponent } from '../../../shared/stop-highlight/stop-highlight';
@@ -75,7 +74,6 @@ import { filterNil } from 'ngxtension/filter-nil';
 import { ZoomControlComponent } from '../components/zoom-control/zoom-control.component';
 import { BoardNodesAlignComponent } from '../components/board-nodes-align/board-nodes-align.component';
 import { LiveReactionWallComponent } from '../components/live-reaction/live-reaction-wall.component';
-import { BoardEditorPortalComponent } from '../components/board-editor-portal/board-editor-portal.component';
 import { BoardShourtcutsDirective } from '../directives/board-shortcuts.directive';
 import { PopupPortalComponent } from '@tapiz/ui/popup/popup-portal.component';
 import { NotesVisibilityComponent } from '../components/notes-visibility/notes-visibility.component';
@@ -84,6 +82,7 @@ import { BoardDragDirective } from './directives/board-drag.directive';
 import { BoardHeaderOptionsComponent } from '../components/board-header-options/board-header-options.component';
 import { BoardResizeDirective } from './directives/board-resize.directive';
 import { TimerComponent } from '../components/timer/timer.component';
+import { PortalTargetComponent } from '@tapiz/ui/portal';
 
 @Component({
   selector: 'tapiz-board',
@@ -109,18 +108,17 @@ import { TimerComponent } from '../components/timer/timer.component';
     NodesComponent,
     ContextMenuComponent,
     BoardContextMenuComponent,
-    NodeToolbarComponent,
     CommentsComponent,
     DemoIntroComponent,
     ZoomControlComponent,
     BoardNodesAlignComponent,
     LiveReactionWallComponent,
-    BoardEditorPortalComponent,
     PopupPortalComponent,
     NotesVisibilityComponent,
     NoteHeightCalculatorComponent,
     BoardHeaderOptionsComponent,
     TimerComponent,
+    PortalTargetComponent,
   ],
   hostDirectives: [
     CopyPasteDirective,

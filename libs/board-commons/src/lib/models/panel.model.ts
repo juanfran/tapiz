@@ -14,7 +14,6 @@ export interface Panel {
   borderColor?: string | null;
   borderWidth?: number | null;
   borderRadius?: number | null;
-  textAlign?: 'start' | 'center' | 'end';
   drawing: Drawing[];
   unLocked?: boolean;
 }

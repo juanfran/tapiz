@@ -85,7 +85,7 @@
       @defer (on immediate) {
         <tapiz-nodes />
         <tapiz-live-reaction-wall />
-        <tapiz-board-editor-portal />
+        <tapiz-portal-target name="editor-portal" />
       }
     }
   </div>
@@ -103,7 +103,7 @@
       <tapiz-context-menu />
     }
     <tapiz-board-context-menu />
-    <tapiz-node-toolbar />
+    <tapiz-portal-target name="node-toolbar" />
     <tapiz-comments />
     @if (!isReadonlyUser() && boardMode() === 0 && !this.anonymousMode()) {
       <tapiz-notes-visibility />

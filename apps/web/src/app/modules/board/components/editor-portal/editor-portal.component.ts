@@ -1,40 +1,39 @@
-import { DomPortal } from '@angular/cdk/portal';
 import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  OnDestroy,
   afterNextRender,
   computed,
   inject,
   input,
   signal,
-  viewChild,
 } from '@angular/core';
-import { BoardTuNode, Point } from '@tapiz/board-commons';
-import { explicitEffect } from 'ngxtension/explicit-effect';
-import { EditorViewSharedStateService } from '@tapiz/ui/editor-view';
+import { BoardTuNode } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
+import { PortalComponent } from '@tapiz/ui/portal';
 
 @Component({
   selector: 'tapiz-editor-portal',
-  imports: [],
+  imports: [PortalComponent],
   template: `
-    <div #domPortalContent>
-      <ng-content></ng-content>
-    </div>
+    <tapiz-portal name="editor-portal">
+      <div
+        class="portal"
+        [style.inline-size.px]="rect().width"
+        [style.block-size.px]="rect().height"
+        [style.left.px]="rect().position.x"
+        [style.top.px]="rect().position.y">
+        <ng-content></ng-content>
+      </div>
+    </tapiz-portal>
   `,
   styleUrl: './editor-portal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditorPortalComponent implements OnDestroy {
-  #editorViewSharedStateService = inject(EditorViewSharedStateService);
+export class EditorPortalComponent {
   #elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   #store = inject(Store);
-
-  domPortalContent =
-    viewChild.required<ElementRef<HTMLElement>>('domPortalContent');
   node = input.required<BoardTuNode>();
 
   #width = computed(() => this.node().content.width);
@@ -43,49 +42,37 @@ export class EditorPortalComponent implements OnDestroy {
   #ready = signal(false);
   #zoom = this.#store.selectSignal(boardPageFeature.selectZoom);
 
+  rect = computed(() => {
+    const { left, top } = this.#getDiff();
+
+    const width = this.#width();
+    const height = this.#height();
+    const position = this.#position();
+
+    if (!width || !height || !position || !this.#ready()) {
+      return {
+        width: 0,
+        height: 0,
+        position: {
+          x: 0,
+          y: 0,
+        },
+      };
+    }
+
+    return {
+      width: width - left * 2,
+      height: height - top * 2,
+      position: {
+        x: position.x + left,
+        y: position.y + top,
+      },
+    };
+  });
+
   constructor() {
     afterNextRender(() => {
       this.#ready.set(true);
-    });
-
-    explicitEffect(
-      [this.#ready, this.#width, this.#height, this.#position],
-      ([ready, width, height, position]) => {
-        if (!ready || !width || !height) {
-          return;
-        }
-
-        this.#refreshPortal({
-          width,
-          height,
-          position,
-        });
-      },
-    );
-  }
-
-  #refreshPortal(node: { width: number; height: number; position: Point }) {
-    const { left, top } = this.#getDiff();
-
-    let portal = this.#editorViewSharedStateService.editorPortal()?.portal;
-    const attached =
-      this.#editorViewSharedStateService.editorPortal()?.attached || false;
-
-    if (!portal) {
-      portal = new DomPortal(this.domPortalContent());
-    }
-
-    this.#editorViewSharedStateService.editorPortal.set({
-      portal,
-      node: {
-        width: node.width - left * 2,
-        height: node.height - top * 2,
-        position: {
-          x: node.position.x + left,
-          y: node.position.y + top,
-        },
-      },
-      attached,
     });
   }
 
@@ -105,9 +92,5 @@ export class EditorPortalComponent implements OnDestroy {
       top:
         (position.top - wrapperElm.getBoundingClientRect().top) / this.#zoom(),
     };
-  }
-
-  ngOnDestroy() {
-    this.#editorViewSharedStateService.editorPortal.set(null);
   }
 }

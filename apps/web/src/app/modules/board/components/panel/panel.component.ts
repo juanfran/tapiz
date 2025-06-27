@@ -28,6 +28,8 @@ import { EditorPortalComponent } from '../editor-portal/editor-portal.component'
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { NodesStore } from '../../services/nodes.store';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
+import { PortalComponent } from '@tapiz/ui/portal';
+import { NodeToolbarComponent } from '../node-toolbar/node-toolbar.component';
 
 @Component({
   selector: 'tapiz-panel',
@@ -49,8 +51,6 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
               <tapiz-editor-view
                 #editorView="editorView"
                 [class.readonly]="!edit()"
-                [node]="node()"
-                [toolbar]="edit()"
                 [layoutToolbarOptions]="true"
                 [content]="initialText()"
                 [focus]="edit()"
@@ -59,6 +59,16 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
                 (mentioned)="onMention($event)"
                 (contentChange)="setText($event)" />
             </tapiz-editor-portal>
+
+            @if (editorView.editor(); as editor) {
+              <tapiz-portal name="node-toolbar">
+                <tapiz-node-toolbar
+                  [node]="node()"
+                  [layoutOptions]="true"
+                  [fontSize]="true"
+                  [editor]="editor" />
+              </tapiz-portal>
+            }
           }
         </div>
 
@@ -79,6 +89,8 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
     SafeHtmlPipe,
     DrawingDirective,
     EditorPortalComponent,
+    PortalComponent,
+    NodeToolbarComponent,
   ],
   host: {
     '[class.focus]': 'focus()',
@@ -255,15 +267,6 @@ export class PanelComponent implements OnInit {
       );
     } else {
       this.nativeElement.style.removeProperty('--borderRadius');
-    }
-
-    if (panel.content.textAlign) {
-      this.nativeElement.style.setProperty(
-        '--textAlign',
-        panel.content.textAlign,
-      );
-    } else {
-      this.nativeElement.style.removeProperty('--textAlign');
     }
   }
 }

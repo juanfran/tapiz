@@ -14,7 +14,6 @@ const panel = z.object({
   borderRadius: z.number().nonnegative().safe().nullable(),
   color: z.string().length(7).regex(/^#/).nullable(),
   rotation: z.number(),
-  textAlign: z.enum(['start', 'center', 'end']).nullable(),
   drawing: z.array(
     z.object({
       color: z.string(),

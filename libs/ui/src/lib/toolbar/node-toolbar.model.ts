@@ -3,6 +3,5 @@ export interface NodeToolbar {
   borderColor?: string;
   borderWidth?: number;
   borderRadius?: number;
-  textAlign?: 'start' | 'center' | 'end';
   color?: string;
 }
