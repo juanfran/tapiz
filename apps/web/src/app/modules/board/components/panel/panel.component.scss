@@ -3,7 +3,6 @@
   --borderColor: #e8e9ea;
   --borderWidth: 1px;
   --borderRadius: 0;
-  --textAlign: "start" display: block;
   position: absolute;
   inline-size: 100%;
   block-size: 100%;
@@ -42,7 +41,6 @@
   inline-size: 100%;
   block-size: 100%;
   display: flex;
-  align-items: var(--textAlign);
 }
 
 canvas {

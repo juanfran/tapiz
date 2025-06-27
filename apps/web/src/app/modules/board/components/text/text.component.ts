@@ -22,6 +22,8 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 import { switchMap } from 'rxjs';
 import { NodesStore } from '../../services/nodes.store';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
+import { PortalComponent } from '@tapiz/ui/portal';
+import { NodeToolbarComponent } from '../node-toolbar/node-toolbar.component';
 
 @Component({
   selector: 'tapiz-text',
@@ -42,8 +44,6 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
           <tapiz-editor-view
             [class.readonly]="!edit()"
             #editorView="editorView"
-            [node]="node()"
-            [toolbar]="edit()"
             [content]="initialText()"
             [focus]="edit()"
             [fontSize]="true"
@@ -51,6 +51,14 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
             (mentioned)="onMention($event)"
             (contentChange)="setText($event)" />
         </tapiz-editor-portal>
+
+        @if (editorView.editor(); as editor) {
+          <tapiz-portal name="node-toolbar">
+            <tapiz-node-toolbar
+              [node]="node()"
+              [editor]="editor" />
+          </tapiz-portal>
+        }
       }
     </tapiz-node-space>
   `,
@@ -62,6 +70,8 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
     EditorViewComponent,
     SafeHtmlPipe,
     EditorPortalComponent,
+    PortalComponent,
+    NodeToolbarComponent,
   ],
 
   host: {

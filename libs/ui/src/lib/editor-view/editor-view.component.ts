@@ -7,10 +7,8 @@ import {
   Component,
   ElementRef,
   OnDestroy,
-  ViewChild,
   WritableSignal,
   effect,
-  inject,
   signal,
   viewChild,
 } from '@angular/core';
@@ -18,9 +16,7 @@ import {
 import { Editor } from '@tiptap/core';
 import { TextAlign } from '@tiptap/extension-text-align';
 import { Link } from '@tiptap/extension-link';
-import { EditorViewSharedStateService } from './editor-view-shared-state.service';
 import { BubbleMenu } from './bubble-menu';
-import { TuNode } from '@tapiz/board-commons';
 import { Heading } from '@tiptap/extension-heading';
 import { Paragraph } from '@tiptap/extension-paragraph';
 import { Strike } from '@tiptap/extension-strike';
@@ -31,7 +27,7 @@ import { Text } from '@tiptap/extension-text';
 import { Mention, MentionNodeAttrs } from '@tiptap/extension-mention';
 import { output } from '@angular/core';
 import { input } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, sampleTime } from 'rxjs';
 import { PopupComponent } from '../popup/popup.component';
 import { normalize } from '@tapiz/utils/normalize';
@@ -81,12 +77,9 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
   },
 })
 export class EditorViewComponent implements OnDestroy, AfterViewInit {
-  #editorViewSharedStateService = inject(EditorViewSharedStateService);
   content = input('');
-  node = input.required<TuNode>();
   layoutToolbarOptions = input<boolean>(false);
   fontSize = input<boolean>(false);
-  toolbar = input<boolean>(false);
   contentChange = output<string>();
   focus = input<boolean>(false);
   customClass = input('');
@@ -96,11 +89,11 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
   suggestedMentions = signal<{ id: string; name: string }[]>([]);
   mentioned = output<string>();
 
-  @ViewChild('text') text!: ElementRef<HTMLElement>;
-  @ViewChild('editor') editor!: ElementRef<HTMLElement>;
-  @ViewChild('linkMenu') linkMenu!: ElementRef<HTMLElement>;
+  text = viewChild.required<ElementRef<HTMLElement>>('text');
+  editorRef = viewChild.required<ElementRef<HTMLElement>>('editor');
+  linkMenu = viewChild.required<ElementRef<HTMLElement>>('linkMenu');
 
-  #editor: WritableSignal<Editor | null> = signal(null);
+  editor: WritableSignal<Editor | null> = signal(null);
   suggestionElement = signal<null | Element>(null);
 
   mentionIndex = signal(0);
@@ -111,32 +104,19 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
   linkUrl = signal('');
 
   constructor() {
-    explicitEffect(
-      [this.focus, this.#editorViewSharedStateService.editorPortal],
-      ([focus, editorPortal]) => {
-        if (focus && editorPortal?.attached) {
-          this.#editor()?.view.focus();
-        }
-      },
-    );
+    explicitEffect([this.focus], ([focus]) => {
+      if (focus) {
+        this.editor()?.view.focus();
+      }
+    });
 
     effect(() => {
-      const instance = this.#editor();
+      const instance = this.editor();
 
       if (instance) {
         instance.commands.setContent(this.content());
       }
     });
-
-    toObservable(this.toolbar)
-      .pipe(takeUntilDestroyed())
-      .subscribe((value) => {
-        if (value) {
-          this.#showToolbar();
-        } else {
-          this.#hideToolbar();
-        }
-      });
 
     this.#contentChange$
       .pipe(takeUntilDestroyed(), sampleTime(300))
@@ -175,7 +155,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
     });
 
     const editor = new Editor({
-      element: this.editor.nativeElement,
+      element: this.editorRef().nativeElement,
       editorProps: {
         attributes: {
           class: this.customClass(),
@@ -195,7 +175,6 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
           levels: [1, 2, 3],
         }),
         TextStyleKit,
-        // CustomDefaultColorPlugin(this.defaultTextColor()),
         TextAlign.configure({
           types: ['heading', 'paragraph'],
         }),
@@ -204,12 +183,9 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
         }),
         UndoRedo.configure(),
         BubbleMenu.configure({
-          element: this.linkMenu.nativeElement,
+          element: this.linkMenu().nativeElement,
           shouldShow: ({ editor, nodeDom }) => {
-            if (
-              (nodeDom?.tagName !== 'A' && !nodeDom?.closest('a')) ||
-              !this.toolbar()
-            ) {
+            if (nodeDom?.tagName !== 'A' && !nodeDom?.closest('a')) {
               return false;
             }
 
@@ -298,52 +274,17 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
       },
     });
 
-    this.#editor.set(editor);
-
-    if (this.toolbar()) {
-      this.#showToolbar();
-    }
+    this.editor.set(editor);
   }
 
   setTextSize(size: number) {
-    this.#editor()?.view.dom.style.setProperty(
+    this.editor()?.view.dom.style.setProperty(
       '--text-editor-font-size',
       `${size}px`,
     );
   }
 
   ngOnDestroy(): void {
-    this.#editor()?.destroy();
-
-    const nodeId = this.node()?.id;
-
-    if (nodeId) {
-      this.#editorViewSharedStateService.removeNode(nodeId);
-    }
-  }
-
-  #showToolbar() {
-    const node = this.node();
-    const instance = this.#editor();
-
-    if (!node || !instance) {
-      return;
-    }
-
-    this.#editorViewSharedStateService.addNode(this.node, instance, {
-      layoutOptions: this.layoutToolbarOptions(),
-      fontSize: this.fontSize(),
-      defaultTextColor: this.defaultTextColor() ?? '',
-    });
-  }
-
-  #hideToolbar() {
-    const nodeId = this.node()?.id;
-
-    if (nodeId) {
-      this.#editor()?.commands.blur();
-      this.#editor()?.commands.setTextSelection(0);
-      this.#editorViewSharedStateService.removeNode(nodeId);
-    }
+    this.editor()?.destroy();
   }
 }
