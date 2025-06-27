@@ -2,8 +2,8 @@
 @use "colors.scss";
 @use "open-props/style";
 @use "@angular/cdk/overlay-prebuilt.css";
-@use "@angular/material/prebuilt-themes/deeppurple-amber.css";
 @use "@simonwep/pickr/dist/themes/monolith.min.css";
+@use "@angular/material/prebuilt-themes/deeppurple-amber.css";
 @include meta.load-css("override-material.scss");
 @include meta.load-css("override-color-picker.scss");
 @include meta.load-css("fonts.scss");

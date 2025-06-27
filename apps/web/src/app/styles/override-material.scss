@@ -54,8 +54,10 @@ button.mdc-button {
 }
 
 .mat-mdc-checkbox.mat-primary {
+  --mat-checkbox-selected-icon-color: var(--brand);
   --mdc-checkbox-selected-focus-icon-color: var(--brand);
   --mdc-checkbox-selected-focus-state-layer-color: var(--grey-70);
+  --mat-checkbox-selected-focus-icon-color: var(--brand);
 }
 
 :root {
@@ -69,6 +71,10 @@ button.mdc-button {
   --mdc-slider-focus-handle-color: var(--brand);
   --mdc-slider-inactive-track-color: var(--grey-70);
   --mdc-slider-active-track-color: var(--brand);
+  --mat-slider-handle-color: var(--brand);
+  --mat-slider-inactive-track-color: var(--grey-70);
+  --mat-slider-active-track-color: var(--brand);
+  --mat-slider-focus-handle-color: var(--brand);
   --mat-sliderfocus-state-layer-color: rgba(30, 37, 75, 0.12);
 }
 
