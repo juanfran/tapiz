@@ -127,7 +127,7 @@ export const userRouter = router({
             authError = true;
           }
         } else if (invitation.boardId) {
-          const admins = await db.board.getAllBoardAdmins(invitation.boardId);
+          const admins = await db.board.getBoardAdmins(invitation.boardId);
 
           const isAdmin = admins.includes(req.ctx.user.sub);
 

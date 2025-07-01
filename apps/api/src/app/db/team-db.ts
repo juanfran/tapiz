@@ -266,3 +266,20 @@ export async function getSpace(spaceId: string) {
     await db.select().from(schema.spaces).where(eq(schema.spaces.id, spaceId))
   ).at(0);
 }
+
+export async function haveAccessTeam(
+  teamId: string,
+  userId: string,
+): Promise<boolean> {
+  const team = await db
+    .select()
+    .from(schema.teamMembers)
+    .where(
+      and(
+        eq(schema.teamMembers.teamId, teamId),
+        eq(schema.teamMembers.accountId, userId),
+      ),
+    );
+
+  return team.length > 0;
+}

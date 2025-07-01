@@ -180,7 +180,7 @@ export class HomeComponent {
     this.#store.dispatch(HomeActions.initHome());
 
     this.#subscriptionService
-      .userMessages()
+      .subUser()
       .pipe(takeUntilDestroyed())
       .subscribe(() => {
         this.#store.dispatch(HomeActions.userEvent());

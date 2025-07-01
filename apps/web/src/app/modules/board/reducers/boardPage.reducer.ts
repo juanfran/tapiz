@@ -490,7 +490,18 @@ const reducer = createReducer(
   on(BoardPageActions.setBoardUsers, (state, { users }): BoardPageState => {
     return {
       ...state,
-      boardUsers: users,
+      isAdmin: users.some(
+        (it) => it.role === 'admin' && it.id === state.userId,
+      ),
+      boardUsers: users.toSorted((a, b) => {
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      }),
     };
   }),
   on(
@@ -502,6 +513,26 @@ const reducer = createReducer(
       };
     },
   ),
+  on(BoardPageActions.deleteMember, (state, { userId }): BoardPageState => {
+    return {
+      ...state,
+      boardUsers: state.boardUsers.filter((user) => user.id !== userId),
+    };
+  }),
+  on(BoardPageActions.changeRole, (state, { userId, role }): BoardPageState => {
+    return {
+      ...state,
+      boardUsers: state.boardUsers.map((user) => {
+        if (user.id === userId) {
+          return {
+            ...user,
+            role,
+          };
+        }
+        return user;
+      }),
+    };
+  }),
 );
 
 export const boardPageFeature = createFeature({

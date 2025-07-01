@@ -245,7 +245,11 @@ export class BoardEffects {
 
   public joinBoardUsers$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(BoardPageActions.joinBoard, BoardPageActions.newUserJoined),
+      ofType(
+        BoardPageActions.joinBoard,
+        BoardPageActions.newUserJoined,
+        BoardPageActions.userRoleChanged,
+      ),
       concatLatestFrom(() => [
         this.store.select(boardPageFeature.selectBoardId),
       ]),

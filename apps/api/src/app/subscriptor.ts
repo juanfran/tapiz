@@ -1,6 +1,10 @@
 import { getServer } from './global.js';
+import {
+  UserWsEvents,
+  WsEvents,
+} from '@tapiz/board-commons/models/ws-events.model.js';
 
-function send(prefix: string, triggerId: string, correlationId: string) {
+export function sendEvent(event: WsEvents, correlationId: string) {
   const server = getServer();
   if (!server) {
     return;
@@ -12,31 +16,21 @@ function send(prefix: string, triggerId: string, correlationId: string) {
 
   if (currentUserClient) {
     server.io
-      .to(`sub:${prefix}:${triggerId}`)
+      .to(event.room)
       .except(currentUserClient?.socket.id)
-      .emit(`sub:refresh:${prefix}`, triggerId);
+      .emit(event.room, event);
   } else {
-    server.io
-      .to(`sub:${prefix}:${triggerId}`)
-      .emit(`sub:refresh:${prefix}`, triggerId);
+    server.io.to(event.room).emit(event.room, event);
   }
 }
 
-export const triggerBoard = (boardId: string, correlationId: string) => {
-  send('board', boardId, correlationId);
-};
-
-export const triggerTeam = (teamId: string, correlationId: string) => {
-  send('team', teamId, correlationId);
-};
-
-export const triggerUser = (userId: string) => {
+export const sendUserEvent = (event: UserWsEvents) => {
   const server = getServer();
   if (!server) {
     return;
   }
 
-  const currentUserClient = server.clients.find((it) => it.id === userId);
+  const currentUserClient = server.clients.find((it) => it.id === event.userId);
 
-  currentUserClient?.socket.emit('sub:refresh:user');
+  currentUserClient?.socket.emit('user', event);
 };

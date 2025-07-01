@@ -83,6 +83,7 @@ import { BoardHeaderOptionsComponent } from '../components/board-header-options/
 import { BoardResizeDirective } from './directives/board-resize.directive';
 import { TimerComponent } from '../components/timer/timer.component';
 import { PortalTargetComponent } from '@tapiz/ui/portal';
+import type { WsEvents } from '@tapiz/board-commons/models/ws-events.model';
 
 @Component({
   selector: 'tapiz-board',
@@ -327,9 +328,22 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     const boardId = this.route.snapshot.paramMap.get('id');
 
     if (boardId) {
-      this.subscriptionService
-        .watchBoardIds([boardId])
-        .pipe(takeUntilDestroyed())
+      const boardSub = this.subscriptionService.sub<WsEvents>('board', boardId);
+
+      boardSub
+        .pipe(
+          filter((event) => event.event === 'changeRoleBoard'),
+          takeUntilDestroyed(),
+        )
+        .subscribe(() => {
+          this.store.dispatch(BoardPageActions.userRoleChanged());
+        });
+
+      boardSub
+        .pipe(
+          filter((event) => event.event !== 'changeRoleBoard'),
+          takeUntilDestroyed(),
+        )
         .subscribe(() => {
           this.store.dispatch(BoardPageActions.refetchBoard());
         });

@@ -81,5 +81,11 @@ export const BoardPageActions = createActionGroup({
     'Mention user': props<{ userId: string; nodeId?: string }>(),
     'New user joined': emptyProps(),
     'Set drag enabled': props<{ dragEnabled: boolean }>(),
+    'User role changed': emptyProps(),
+    'Delete member': props<{ userId: string }>(),
+    'Change role': props<{
+      userId: string;
+      role: BoardUser['role'];
+    }>(),
   },
 });
