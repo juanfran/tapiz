@@ -14,8 +14,6 @@ export const rateLimitedMiddleware = (
 
     const limit = await checkRateLimit(ctx.req);
 
-    console.log(limit);
-
     if (!limit.isAllowed && limit.isExceeded) {
       throw new TRPCError({
         code: 'TOO_MANY_REQUESTS',

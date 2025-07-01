@@ -133,4 +133,16 @@ export class BoardApiService {
   fetchAllTeamBoards(teamId: Team['id']) {
     return this.trpc.board.allTeamBoards.query({ teamId });
   }
+
+  changeRole(
+    boardId: BoardUser['id'],
+    userId: BoardUser['id'],
+    role: BoardUser['role'],
+  ) {
+    return from(this.trpc.board.changeRole.mutate({ boardId, userId, role }));
+  }
+
+  deleteMember(boardId: BoardUser['id'], userId: BoardUser['id']) {
+    return from(this.trpc.board.deleteMember.mutate({ boardId, userId }));
+  }
 }

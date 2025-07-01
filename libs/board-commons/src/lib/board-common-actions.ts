@@ -7,4 +7,6 @@ export const BoardCommonActions = {
   setState: `${ActionType} Set state`,
   stateAction: `${ActionType} State action`,
   batchNodeActions: `${ActionType} Batch node actions`,
+  deleteMember: `${ActionType} Delete member`,
+  changeRole: `${ActionType} Change role`,
 };

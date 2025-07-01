@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { ConfigService } from './config.service';
-import { BehaviorSubject, Subject, debounceTime, filter, map } from 'rxjs';
-import { isDeepEqual } from 'remeda';
+import { Observable } from 'rxjs';
 import { WsService } from '../modules/ws/services/ws.service';
+import { UserWsEvents } from '@tapiz/board-commons/models/ws-events.model';
 
 @Injectable({
   providedIn: 'root',
@@ -10,98 +10,52 @@ import { WsService } from '../modules/ws/services/ws.service';
 export class SubscriptionService {
   #configService = inject(ConfigService);
   #wsService = inject(WsService);
-  #boardIds = new BehaviorSubject<string[]>([]);
-  #boardsSubject = new Subject<string>();
-  #teamIds = new BehaviorSubject<string[]>([]);
-  #teamSubject = new Subject<string>();
-  #userSubject = new Subject<void>();
+  #socket!: ReturnType<WsService['getSocket']>;
 
   constructor() {
     if (this.#configService.config.DEMO) {
       return;
     }
 
-    const socket = this.#wsService.getSocket();
+    this.#socket = this.#wsService.getSocket();
+  }
 
-    this.#boardIds
-      .pipe(
-        debounceTime(100),
-        map((ids, index) => {
-          return {
-            ids,
-            index,
-          };
-        }),
-        filter((it) => {
-          return it.ids.length > 0 || it.index > 0;
-        }),
-      )
-      .subscribe(({ ids }) => {
-        socket.emit('sub', {
-          type: 'board',
-          ids,
-        });
+  subUser(): Observable<UserWsEvents> {
+    return new Observable<UserWsEvents>((subscriber) => {
+      if (this.#configService.config.DEMO) {
+        return;
+      }
+
+      this.#socket.on('user', (data) => {
+        subscriber.next(data);
       });
 
-    this.#teamIds
-      .pipe(
-        map((ids, index) => {
-          return {
-            ids,
-            index,
-          };
-        }),
-        filter((it) => {
-          return it.ids.length > 0 || it.index > 0;
-        }),
-      )
-      .subscribe(({ ids }) => {
-        socket.emit('sub', {
-          type: 'team',
-          ids,
-        });
+      return () => {
+        this.#socket.off('user');
+      };
+    });
+  }
+
+  sub<T>(type: 'team' | 'board', id: string): Observable<T> {
+    const subName = `${type}:${id}`;
+
+    return new Observable<T>((subscriber) => {
+      if (this.#configService.config.DEMO) {
+        return;
+      }
+
+      this.#socket.emit('sub', {
+        type,
+        id,
       });
 
-    socket.on('sub:refresh:board', (id: string) => {
-      this.#boardsSubject.next(id);
+      this.#socket.on(subName, (data) => {
+        subscriber.next(data);
+      });
+
+      return () => {
+        this.#socket.off(subName);
+      };
     });
-
-    socket.on('sub:refresh:team', (id: string) => {
-      this.#teamSubject.next(id);
-    });
-
-    socket.on('sub:refresh:user', () => {
-      this.#userSubject.next();
-    });
-  }
-
-  boardMessages() {
-    return this.#boardsSubject.asObservable();
-  }
-
-  teamMessages() {
-    return this.#teamSubject.asObservable();
-  }
-
-  userMessages() {
-    return this.#userSubject.asObservable();
-  }
-
-  watchBoardIds(ids: string[]) {
-    if (!isDeepEqual(ids, this.#boardIds.getValue())) {
-      this.#boardIds.next(ids);
-    }
-
-    return this.boardMessages();
-  }
-
-  watchTeamIds(ids: string[]) {
-    const currentIds = this.#teamIds.getValue();
-
-    if (!isDeepEqual(ids, currentIds)) {
-      this.#teamIds.next(ids);
-    }
-
-    return this.teamMessages();
   }
 }

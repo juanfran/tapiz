@@ -1,11 +1,9 @@
-import { ModalHeaderComponent } from '../../../../shared/modal-header/modal-header.component';
 import { trackByProp } from '../../../../shared/track-by-prop';
 import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
-  OnChanges,
-  SimpleChanges,
+  computed,
   ViewChild,
 } from '@angular/core';
 import {
@@ -16,7 +14,6 @@ import {
   Validators,
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -29,8 +26,7 @@ import { input } from '@angular/core';
   selector: 'tapiz-members',
 
   template: `
-    <tapiz-modal-header [title]="title()"></tapiz-modal-header>
-    @if (editable()) {
+    @if (editable() && canInvite()) {
       <form
         class="invite-by-email"
         [formGroup]="form"
@@ -66,42 +62,22 @@ import { input } from '@angular/core';
       </form>
     }
     @if (invitations().length || members().length) {
-      <mat-dialog-content class="members()">
-        @if (invitations().length) {
-          <div class="members-list invitations()">
-            @for (
-              invitation of invitations();
-              track trackByInvitationId($index, invitation)
-            ) {
-              <div class="member">
-                <ng-container
-                  *ngTemplateOutlet="
-                    memberTpl;
-                    context: {
-                      member: {
-                        id: invitation.id,
-                        name: invitation.email,
-                        role: invitation.role,
-                      },
-                    }
-                  ">
-                </ng-container>
-              </div>
-            }
-          </div>
-        }
-        <div class="members-list">
-          @for (member of members(); track trackByMemberId($index, member)) {
+      @if (invitations().length) {
+        <div class="members-list invitations()">
+          @for (
+            invitation of invitations();
+            track trackByInvitationId($index, invitation)
+          ) {
             <div class="member">
               <ng-container
                 *ngTemplateOutlet="
                   memberTpl;
                   context: {
+                    isPending: true,
                     member: {
-                      id: member.id,
-                      name: member.name,
-                      email: member.email,
-                      role: member.role,
+                      id: invitation.id,
+                      name: invitation.email,
+                      role: invitation.role,
                     },
                   }
                 ">
@@ -109,46 +85,66 @@ import { input } from '@angular/core';
             </div>
           }
         </div>
-        <ng-template
-          #memberTpl
-          let-member="member">
-          <div class="user-info">
-            <div class="name">
-              {{ member.name }}
-              @if (!member.email) {
-                <span class="pending"> (Pending) </span>
-              }
-            </div>
-            @if (member.email) {
-              <div class="email">
-                {{ member.email }}
-              </div>
+      }
+      <div class="members-list">
+        @for (member of members(); track trackByMemberId($index, member)) {
+          <div class="member">
+            <ng-container
+              *ngTemplateOutlet="
+                memberTpl;
+                context: {
+                  isPending: false,
+                  member: {
+                    id: member.id,
+                    name: member.name,
+                    email: member.email,
+                    role: member.role,
+                  },
+                }
+              ">
+            </ng-container>
+          </div>
+        }
+      </div>
+      <ng-template
+        #memberTpl
+        let-member="member"
+        let-isPending="isPending">
+        <div class="user-info">
+          <div class="name">
+            {{ member.name }}
+            @if (isPending) {
+              <span class="pending"> (Pending) </span>
             }
           </div>
-          @if (!(member.role === 'admin' && lastAdmin) || !member.email) {
-            <mat-form-field
-              class="role-select"
-              placeholder="role">
-              <mat-label>Role</mat-label>
-              <mat-select
-                [disabled]="!editable()"
-                [value]="member.role"
-                (valueChange)="onRoleChange($event, member.id, !member.email)">
-                <mat-option value="member">Member</mat-option>
-                <mat-option value="admin">Admin</mat-option>
-              </mat-select>
-            </mat-form-field>
-            @if (editable()) {
-              <button
-                title="Delete member"
-                tuIconButton
-                (click)="onDeleteMember(member.id, !member.email)">
-                <mat-icon>close</mat-icon>
-              </button>
-            }
+          @if (member.email) {
+            <div class="email">
+              {{ member.email }}
+            </div>
           }
-        </ng-template>
-      </mat-dialog-content>
+        </div>
+
+        <mat-form-field
+          class="role-select"
+          placeholder="role">
+          <mat-label>Role</mat-label>
+          <mat-select
+            [disabled]="!editable() || (lastAdmin() && member.role === 'admin')"
+            [value]="member.role"
+            (valueChange)="onRoleChange($event, member.id, isPending)">
+            <mat-option value="member">Member</mat-option>
+            <mat-option value="admin">Admin</mat-option>
+          </mat-select>
+        </mat-form-field>
+        @if (editable() && canDelete() && member.id !== currentUserId()) {
+          <button
+            title="Delete member"
+            tuIconButton
+            (click)="onDeleteMember(member.id, isPending)">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </ng-template>
     }
   `,
   styleUrls: ['./members.component.scss'],
@@ -162,11 +158,9 @@ import { input } from '@angular/core';
     MatButtonModule,
     MatIconModule,
     MatSelectModule,
-    MatDialogModule,
-    ModalHeaderComponent,
   ],
 })
-export class MembersComponent implements OnChanges {
+export class MembersComponent {
   @ViewChild(FormGroupDirective)
   formDirective!: FormGroupDirective;
 
@@ -184,13 +178,14 @@ export class MembersComponent implements OnChanges {
     }),
   });
 
-  title = input.required<string>();
-
   members = input<Member[]>([]);
 
   invitations = input<Invitation[]>([]);
 
   editable = input<boolean>(true);
+  canInvite = input<boolean>(true);
+  canDelete = input<boolean>(true);
+  currentUserId = input.required<string>();
 
   closeDialog = output<void>();
 
@@ -210,7 +205,11 @@ export class MembersComponent implements OnChanges {
     role: Member['role'];
   }>();
 
-  lastAdmin = false;
+  lastAdmin = computed(() => {
+    const admins = this.members().filter((member) => member.role === 'admin');
+
+    return admins.length === 1;
+  });
 
   submit() {
     const emails = (this.form.value.emails ?? '')
@@ -254,15 +253,6 @@ export class MembersComponent implements OnChanges {
       this.deletedInvitation.emit(id);
     } else {
       this.deletedMember.emit(id);
-    }
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    // check if there is only one admin
-    if (changes['members']) {
-      const admins = this.members().filter((member) => member.role === 'admin');
-
-      this.lastAdmin = admins.length === 1;
     }
   }
 }

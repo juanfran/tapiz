@@ -73,7 +73,8 @@ export async function haveAccess(boardId: string, userId: string) {
 
   const boardUser = await getBoardUser(boardId, userId);
 
-  if (boardUser?.role === 'admin' && !board?.teamId) {
+  // event if the user is not team member, they can access the board if they are an admin
+  if (boardUser?.role === 'admin') {
     return true;
   }
 
@@ -304,28 +305,6 @@ export async function getUsersBoardsByTeam(
   }));
 }
 
-export async function getAllBoardAdmins(boardId: string) {
-  const board = await getBoard(boardId);
-
-  if (!board) {
-    return [];
-  }
-
-  let teamAdmins: string[] = [];
-
-  if (board.teamId) {
-    teamAdmins = (await team.getTeamAdmins(board.teamId)).map(
-      (it) => it.accountId,
-    );
-  }
-
-  const boardAdmins = await getBoardAdmins(boardId);
-
-  const admins = [...teamAdmins, ...boardAdmins];
-
-  return admins;
-}
-
 export async function createBoard(
   name = 'New board',
   ownerId: string,
@@ -436,7 +415,7 @@ export async function rename(id: string, name: string) {
 export async function changeRole(
   boardId: string,
   userId: string,
-  role: 'admin' | 'member',
+  role: 'admin' | 'member' | 'guest',
 ) {
   return db
     .update(schema.acountsToBoards)

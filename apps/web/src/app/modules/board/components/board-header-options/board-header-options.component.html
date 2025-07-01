@@ -48,7 +48,9 @@
 }
 
 @if (boardMode() === 0 && !isDemo && showUsers() && users().length > 0) {
-  <button class="user-count">
+  <button
+    class="user-count"
+    (click)="openUserList()">
     <mat-icon svgIcon="user"></mat-icon>
     <span class="user-hover">{{ users().length + 1 }} Users</span>
   </button>

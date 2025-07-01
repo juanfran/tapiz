@@ -1,30 +1,38 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { Invitation, Member } from '@tapiz/board-commons';
 import { MembersComponent } from '../members/members.component';
 import { Store } from '@ngrx/store';
 import { HomeActions } from '../../+state/home.actions';
 import { homeFeature } from '../../+state/home.feature';
 import { appFeature } from '../../../../+state/app.reducer';
+import { ModalHeaderComponent } from '../../../../shared/modal-header/modal-header.component';
 
 @Component({
   selector: 'tapiz-team-members',
   template: `
-    <tapiz-members
-      title="Team members"
-      [invitations]="invitations()"
-      [members]="members()"
-      [editable]="data.isAdmin"
-      (invited)="onInvited($event)"
-      (deletedInvitation)="onDeleteInvitation($event)"
-      (deletedMember)="onDeleteMember($event)"
-      (roleInvitationChanged)="onRoleInvitationChanged($event)"
-      (roleMemberChanged)="onRoleMemberChanged($event)"
-      (closeDialog)="onCloseDialog()"></tapiz-members>
+    <tapiz-modal-header title="Team members"></tapiz-modal-header>
+    <mat-dialog-content>
+      <tapiz-members
+        [invitations]="invitations()"
+        [members]="members()"
+        [editable]="data.isAdmin"
+        [currentUserId]="currentUserId()"
+        (invited)="onInvited($event)"
+        (deletedInvitation)="onDeleteInvitation($event)"
+        (deletedMember)="onDeleteMember($event)"
+        (roleInvitationChanged)="onRoleInvitationChanged($event)"
+        (roleMemberChanged)="onRoleMemberChanged($event)"
+        (closeDialog)="onCloseDialog()"></tapiz-members>
+    </mat-dialog-content>
   `,
   styleUrls: ['./team-members.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MembersComponent],
+  imports: [MembersComponent, ModalHeaderComponent, MatDialogModule],
 })
 export class TeamMembersComponent {
   data = inject<{

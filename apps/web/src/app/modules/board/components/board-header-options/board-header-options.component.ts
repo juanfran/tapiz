@@ -16,6 +16,7 @@ import { computed } from '@angular/core';
 import { ConfigService } from '../../../../services/config.service';
 import { MatButtonModule } from '@angular/material/button';
 import { BoardFacade } from '../../../../services/board-facade.service';
+import { BoardMembersComponent } from '../board-members/board-members.component';
 
 @Component({
   selector: 'tapiz-board-header-options',
@@ -98,6 +99,13 @@ export class BoardHeaderOptionsComponent {
 
   settings() {
     this.#dialog.open(BoardSettingsComponent, {
+      width: '600px',
+      autoFocus: 'dialog',
+    });
+  }
+
+  openUserList() {
+    this.#dialog.open(BoardMembersComponent, {
       width: '600px',
       autoFocus: 'dialog',
     });

@@ -10,9 +10,10 @@ import {
 } from '../trpc.js';
 import db from '../db/index.js';
 import { checkBoardAccess, revokeBoardAccess } from '../global.js';
-import { triggerBoard, triggerTeam, triggerUser } from '../subscriptor.js';
+import { sendEvent, sendUserEvent } from '../subscriptor.js';
 import { sendMentionNotificationEmail } from '../mailer.js';
 import { rateLimitedMiddleware } from '../rate-limited.js';
+import { getBoardAdmins } from '../db/board-db.js';
 
 export const boardRouter = router({
   create: protectedProcedure
@@ -54,7 +55,18 @@ export const boardRouter = router({
       );
 
       if (team?.id) {
-        triggerTeam(team?.id, req.ctx.correlationId);
+        sendEvent(
+          {
+            room: `team:${team.id}`,
+            event: 'newBoard',
+            content: {
+              boardId: newBoard.id,
+              name: newBoard.name,
+              teamId: team.id,
+            },
+          },
+          req.ctx.correlationId,
+        );
       }
 
       return {
@@ -63,13 +75,23 @@ export const boardRouter = router({
       };
     }),
   delete: boardAdminProcedure.mutation(async (req) => {
-    const owners = await db.board.getAllBoardAdmins(req.input.boardId);
+    const owners = await db.board.getBoardAdmins(req.input.boardId);
 
     if (owners.includes(req.ctx.user.sub)) {
       await db.board.deleteBoard(req.input.boardId);
 
       revokeBoardAccess(req.input.boardId);
-      triggerBoard(req.input.boardId, req.ctx.correlationId);
+
+      sendEvent(
+        {
+          room: `board:${req.input.boardId}`,
+          event: 'deleteBoard',
+          content: {
+            boardId: req.input.boardId,
+          },
+        },
+        req.ctx.correlationId,
+      );
 
       return {
         success: true,
@@ -141,7 +163,16 @@ export const boardRouter = router({
     .mutation(async (req) => {
       await db.board.rename(req.input.boardId, req.input.name);
 
-      triggerBoard(req.input.boardId, req.ctx.correlationId);
+      sendEvent(
+        {
+          room: `board:${req.input.boardId}`,
+          event: 'renameBoard',
+          content: {
+            name: req.input.name,
+          },
+        },
+        req.ctx.correlationId,
+      );
 
       return {
         success: true,
@@ -222,7 +253,16 @@ export const boardRouter = router({
       await db.board.transferBoard(req.input.boardId, req.input.teamId ?? null);
 
       if (!req.input.teamId) {
-        triggerBoard(req.input.boardId, req.ctx.correlationId);
+        sendEvent(
+          {
+            room: `board:${req.input.boardId}`,
+            event: 'transferBoard',
+            content: {
+              teamId: req.input.teamId,
+            },
+          },
+          req.ctx.correlationId,
+        );
       }
 
       return {
@@ -261,7 +301,15 @@ export const boardRouter = router({
         req.input.nodeId,
       );
 
-      triggerUser(req.input.userId);
+      sendUserEvent({
+        userId: req.input.userId,
+        event: 'mentionUser',
+        content: {
+          userId: req.input.userId,
+          boardId: req.input.boardId,
+          nodeId: req.input.nodeId,
+        },
+      });
 
       const mentionedUser = await db.user.getUser(req.input.userId);
       const board = await db.board.getBoardBasic(req.input.boardId);
@@ -288,5 +336,83 @@ export const boardRouter = router({
     )
     .query(async (req) => {
       return db.board.getAllTeamBoards(req.input.teamId);
+    }),
+  changeRole: boardAdminProcedure
+    .input(
+      z.object({
+        boardId: z.uuid(),
+        userId: z.string().max(256),
+        role: z.enum(['admin', 'member', 'guest']),
+      }),
+    )
+    .mutation(async (req) => {
+      if (req.input.role !== 'admin') {
+        const boardAdmins = await getBoardAdmins(req.input.boardId);
+
+        const admins = boardAdmins.filter(
+          (member) => member !== req.input.userId,
+        );
+
+        if (!admins.length) {
+          throw new TRPCError({ code: 'CONFLICT' });
+        }
+      }
+
+      await db.board.changeRole(
+        req.input.boardId,
+        req.input.userId,
+        req.input.role,
+      );
+
+      sendEvent(
+        {
+          room: `board:${req.input.boardId}`,
+          event: 'changeRoleBoard',
+          content: {
+            userId: req.input.userId,
+            role: req.input.role,
+          },
+        },
+        req.ctx.correlationId,
+      );
+
+      return {
+        success: true,
+      };
+    }),
+  deleteMember: boardAdminProcedure
+    .input(
+      z.object({
+        boardId: z.uuid(),
+        userId: z.string().max(256),
+      }),
+    )
+    .mutation(async (req) => {
+      const boardAdmins = await getBoardAdmins(req.input.boardId);
+
+      const admins = boardAdmins.filter(
+        (member) => member !== req.input.userId,
+      );
+
+      if (!admins.length) {
+        throw new TRPCError({ code: 'CONFLICT' });
+      }
+
+      await db.board.deleteMember(req.input.boardId, req.input.userId);
+
+      sendEvent(
+        {
+          room: `board:${req.input.boardId}`,
+          event: 'deleteBoardMember',
+          content: {
+            userId: req.input.userId,
+          },
+        },
+        req.ctx.correlationId,
+      );
+
+      return {
+        success: true,
+      };
     }),
 });

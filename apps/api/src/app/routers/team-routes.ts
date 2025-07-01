@@ -8,7 +8,7 @@ import {
 } from '../trpc.js';
 import db from '../db/index.js';
 import { checkTeamBoardsAccess, revokeBoardAccess } from '../global.js';
-import { triggerTeam, triggerUser } from '../subscriptor.js';
+import { sendEvent, sendUserEvent } from '../subscriptor.js';
 import {
   addBoardsToSpace,
   createSpace,
@@ -88,7 +88,14 @@ export const teamRouter = router({
           throw new TRPCError({ code: 'CONFLICT' });
         }
 
-        triggerUser(invitedUser.id);
+        sendUserEvent({
+          event: 'newInvitation',
+          userId: invitedUser.id,
+          content: {
+            teamId: req.input.teamId,
+            role: req.input.role,
+          },
+        });
       }
 
       const invitation = await db.user.inviteByEmail(
@@ -119,7 +126,16 @@ export const teamRouter = router({
 
       await db.team.deleteTeam(req.input.teamId);
 
-      triggerTeam(req.input.teamId, req.ctx.correlationId);
+      sendEvent(
+        {
+          room: `team:${req.input.teamId}`,
+          event: 'deleteTeam',
+          content: {
+            teamId: req.input.teamId,
+          },
+        },
+        req.ctx.correlationId,
+      );
 
       return {
         success: true,
@@ -128,12 +144,24 @@ export const teamRouter = router({
   changeRole: teamAdminProcedure
     .input(
       z.object({
-        teamId: z.string().uuid(),
+        teamId: z.uuid(),
         userId: z.string().max(256),
         role: z.enum(['admin', 'member']),
       }),
     )
     .mutation(async (req) => {
+      if (req.input.role !== 'admin') {
+        // check if there is at least one admin left
+        const teamMembers = await db.team.getTeamMembers(req.input.teamId);
+        const admins = teamMembers.filter(
+          (member) => member.role === 'admin' && member.id !== req.input.userId,
+        );
+
+        if (!admins.length) {
+          throw new TRPCError({ code: 'CONFLICT' });
+        }
+      }
+
       await db.team.changeRole(
         req.input.teamId,
         req.input.userId,
@@ -141,7 +169,17 @@ export const teamRouter = router({
       );
 
       checkTeamBoardsAccess(req.input.teamId);
-      triggerTeam(req.input.teamId, req.ctx.correlationId);
+      sendEvent(
+        {
+          room: `team:${req.input.teamId}`,
+          event: 'changeRoleTeam',
+          content: {
+            userId: req.input.userId,
+            role: req.input.role,
+          },
+        },
+        req.ctx.correlationId,
+      );
 
       return {
         success: true,
@@ -167,7 +205,16 @@ export const teamRouter = router({
       await db.team.deleteMember(req.input.teamId, req.input.memberId);
 
       checkTeamBoardsAccess(req.input.teamId);
-      triggerTeam(req.input.teamId, req.ctx.correlationId);
+      sendEvent(
+        {
+          room: `team:${req.input.teamId}`,
+          event: 'deleteMember',
+          content: {
+            userId: req.input.memberId,
+          },
+        },
+        req.ctx.correlationId,
+      );
 
       return {
         success: true,
@@ -198,7 +245,16 @@ export const teamRouter = router({
     .mutation(async (req) => {
       await db.team.renameTeam(req.input.teamId, req.input.name);
 
-      triggerTeam(req.input.teamId, req.ctx.correlationId);
+      sendEvent(
+        {
+          room: `team:${req.input.teamId}`,
+          event: 'renameTeam',
+          content: {
+            name: req.input.name,
+          },
+        },
+        req.ctx.correlationId,
+      );
 
       return {
         success: true,
@@ -285,7 +341,17 @@ export const teamRouter = router({
         await addBoardsToSpace(space.id, req.input.boards);
       }
 
-      triggerTeam(req.input.teamId, req.ctx.correlationId);
+      sendEvent(
+        {
+          room: `team:${req.input.teamId}`,
+          event: 'createSpace',
+          content: {
+            spaceId: space.id,
+            name: space.name,
+          },
+        },
+        req.ctx.correlationId,
+      );
 
       const boards = await getSpaceBoards(space.id);
 
@@ -328,7 +394,17 @@ export const teamRouter = router({
         await addBoardsToSpace(req.input.spaceId, req.input.boards);
       }
 
-      triggerTeam(space.teamId, req.ctx.correlationId);
+      sendEvent(
+        {
+          room: `team:${space.teamId}`,
+          event: 'updateSpace',
+          content: {
+            spaceId: req.input.spaceId,
+            name: req.input.name,
+          },
+        },
+        req.ctx.correlationId,
+      );
 
       const boards = await getSpaceBoards(space.id);
 
@@ -361,7 +437,16 @@ export const teamRouter = router({
         throw new TRPCError({ code: 'UNAUTHORIZED' });
       }
 
-      triggerTeam(space.teamId, req.ctx.correlationId);
+      sendEvent(
+        {
+          room: `team:${space.teamId}`,
+          event: 'deleteSpace',
+          content: {
+            spaceId: req.input.spaceId,
+          },
+        },
+        req.ctx.correlationId,
+      );
 
       return await db.team.deleteSpace(req.input.spaceId);
     }),

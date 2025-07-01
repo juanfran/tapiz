@@ -193,6 +193,24 @@ describe('Api - teams', () => {
         expect(team?.teamMember?.role).toEqual('admin');
       });
 
+      it('admin to member error because last admin', async () => {
+        const caller = await getUserCaller(2);
+
+        const resultCreateTeam = await caller.team.new({
+          name: randProductName(),
+        });
+
+        const result = await errorCall(() => {
+          return caller.team.changeRole({
+            userId: getAuth(2).sub,
+            teamId: resultCreateTeam.id,
+            role: 'member',
+          });
+        });
+
+        expect(result?.code).toEqual('CONFLICT');
+      });
+
       it('delete member', async () => {
         const caller = await getUserCaller(1);
 

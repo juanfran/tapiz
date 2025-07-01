@@ -103,7 +103,7 @@ const boardAdminCheck = boardCheck.unstable_pipe(async (opts) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const inputs = opts.rawInput as any;
 
-  const admins = await db.board.getAllBoardAdmins(inputs.boardId);
+  const admins = await db.board.getBoardAdmins(inputs.boardId);
 
   if (!admins.includes(opts.ctx.user.sub)) {
     throw new TRPCError({ code: 'UNAUTHORIZED' });

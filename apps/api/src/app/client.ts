@@ -10,10 +10,12 @@ import db from './db/index.js';
 import { validation } from './validation.js';
 import { z } from 'zod/v4';
 import * as R from 'remeda';
+import { haveAccess } from './db/board-db.js';
+import { haveAccessTeam } from './db/team-db.js';
 
 const subSchema = z.object({
   type: z.union([z.literal('board'), z.literal('team')]),
-  ids: z.string().array(),
+  id: z.string(),
 });
 
 export class Client {
@@ -49,29 +51,30 @@ export class Client {
     //   this.socket.conn.close();
     // }, 10000);
   }
-
-  categorySubscription(prefix: string, ids: string[]) {
-    const toUnsubscribe = Array.from(this.socket.rooms).filter((it) => {
-      return it.startsWith(prefix) && !ids.includes(`${prefix}${it}`);
-    });
-
-    toUnsubscribe.forEach((it) => {
-      this.socket.leave(it);
-    });
-
-    this.socket.join(ids.map((it) => `${prefix}${it}`));
-  }
-
-  subscriptorMessage(message: { type: 'board' | 'team'; ids: string[] }) {
+  async subscriptorMessage(message: { type: 'board' | 'team'; id: string }) {
     try {
       const messageResult = subSchema.parse(message);
 
-      const { type, ids } = messageResult;
+      const { type, id } = messageResult;
 
       if (type === 'board') {
-        this.categorySubscription('sub:board:', ids);
+        const validUser = await haveAccess(id, this.id);
+
+        if (validUser) {
+          this.socket.join(`board:${id}`);
+        } else {
+          this.unauthorizedClose();
+          return;
+        }
       } else if (type === 'team') {
-        this.categorySubscription('sub:team:', ids);
+        const validUser = await haveAccessTeam(id, this.id);
+
+        if (validUser) {
+          this.socket.join(`team:${id}`);
+        } else {
+          this.unauthorizedClose();
+          return;
+        }
       }
     } catch {
       this.socket.disconnect();
@@ -311,7 +314,7 @@ export class Client {
       return;
     }
 
-    const admins = await db.board.getAllBoardAdmins(this.boardId);
+    const admins = await db.board.getBoardAdmins(this.boardId);
 
     this.isAdmin = admins.includes(this.id);
   }
