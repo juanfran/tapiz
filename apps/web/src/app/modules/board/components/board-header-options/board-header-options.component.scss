@@ -126,6 +126,7 @@
       width: 200%;
       padding: 0 16px;
       opacity: 1;
+      white-space: nowrap;
 
       &::after {
         content: "";
