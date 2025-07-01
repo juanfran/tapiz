@@ -30,7 +30,7 @@ import { input } from '@angular/core';
 
   template: `
     <tapiz-modal-header [title]="title()"></tapiz-modal-header>
-    @if (editable()) {
+    @if (editable() && canInvite()) {
       <form
         class="invite-by-email"
         [formGroup]="form"
@@ -78,6 +78,7 @@ import { input } from '@angular/core';
                   *ngTemplateOutlet="
                     memberTpl;
                     context: {
+                      isPending: true,
                       member: {
                         id: invitation.id,
                         name: invitation.email,
@@ -97,6 +98,7 @@ import { input } from '@angular/core';
                 *ngTemplateOutlet="
                   memberTpl;
                   context: {
+                    isPending: false,
                     member: {
                       id: member.id,
                       name: member.name,
@@ -111,11 +113,12 @@ import { input } from '@angular/core';
         </div>
         <ng-template
           #memberTpl
-          let-member="member">
+          let-member="member"
+          let-isPending="isPending">
           <div class="user-info">
             <div class="name">
               {{ member.name }}
-              @if (!member.email) {
+              @if (isPending) {
                 <span class="pending"> (Pending) </span>
               }
             </div>
@@ -125,7 +128,7 @@ import { input } from '@angular/core';
               </div>
             }
           </div>
-          @if (!(member.role === 'admin' && lastAdmin) || !member.email) {
+          @if (!(member.role === 'admin' && lastAdmin) || isPending) {
             <mat-form-field
               class="role-select"
               placeholder="role">
@@ -133,7 +136,7 @@ import { input } from '@angular/core';
               <mat-select
                 [disabled]="!editable()"
                 [value]="member.role"
-                (valueChange)="onRoleChange($event, member.id, !member.email)">
+                (valueChange)="onRoleChange($event, member.id, isPending)">
                 <mat-option value="member">Member</mat-option>
                 <mat-option value="admin">Admin</mat-option>
               </mat-select>
@@ -142,7 +145,7 @@ import { input } from '@angular/core';
               <button
                 title="Delete member"
                 tuIconButton
-                (click)="onDeleteMember(member.id, !member.email)">
+                (click)="onDeleteMember(member.id, isPending)">
                 <mat-icon>close</mat-icon>
               </button>
             }
@@ -191,6 +194,7 @@ export class MembersComponent implements OnChanges {
   invitations = input<Invitation[]>([]);
 
   editable = input<boolean>(true);
+  canInvite = input<boolean>(true);
 
   closeDialog = output<void>();
 
