@@ -37,7 +37,7 @@ export const teamRouter = router({
 
       return invitations;
     }),
-  members: teamAdminProcedure
+  members: teamMemberProcedure
     .input(
       z.object({
         teamId: z.string().uuid(),

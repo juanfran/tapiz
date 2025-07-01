@@ -40,18 +40,18 @@ import { SpaceFormComponent } from '../space-form/space-form.component';
         <mat-icon>group_work</mat-icon>
         <span>Create space</span>
       </button>
+      <button
+        mat-menu-item
+        (click)="openMembers()">
+        <mat-icon>person_add</mat-icon>
+        <span>Members</span>
+      </button>
       @if (team().teamMember.role === 'admin') {
         <button
           mat-menu-item
           (click)="rename()">
           <mat-icon>edit</mat-icon>
           <span>Rename</span>
-        </button>
-        <button
-          mat-menu-item
-          (click)="openMembers()">
-          <mat-icon>person_add</mat-icon>
-          <span>Members</span>
         </button>
         <button
           mat-menu-item
@@ -125,6 +125,7 @@ export class TeamMenuComponent {
       data: {
         title: 'Team members',
         teamId: this.team().id,
+        isAdmin: this.team().teamMember.role === 'admin',
       },
     });
   }

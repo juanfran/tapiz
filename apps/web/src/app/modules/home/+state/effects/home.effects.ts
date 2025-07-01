@@ -309,9 +309,6 @@ export const fetchTeamMembers$ = createEffect(
           filterNil(),
         );
       }),
-      filter(([, team]) => {
-        return team.teamMember.role === 'admin';
-      }),
       switchMap(([, team]) => {
         return teamApiService.teamMembers(team.id).pipe(
           map((members) => {

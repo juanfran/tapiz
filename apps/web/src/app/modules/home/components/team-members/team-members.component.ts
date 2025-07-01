@@ -14,6 +14,7 @@ import { appFeature } from '../../../../+state/app.reducer';
       title="Team members"
       [invitations]="invitations()"
       [members]="members()"
+      [editable]="data.isAdmin"
       (invited)="onInvited($event)"
       (deletedInvitation)="onDeleteInvitation($event)"
       (deletedMember)="onDeleteMember($event)"
@@ -29,6 +30,7 @@ export class TeamMembersComponent {
   data = inject<{
     teamId: string;
     title: string;
+    isAdmin: boolean;
   }>(MAT_DIALOG_DATA);
   dialogRef = inject(MatDialogRef);
   store = inject(Store);

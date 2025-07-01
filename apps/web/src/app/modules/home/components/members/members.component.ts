@@ -30,42 +30,43 @@ import { input } from '@angular/core';
 
   template: `
     <tapiz-modal-header [title]="title()"></tapiz-modal-header>
-    <form
-      class="invite-by-email"
-      [formGroup]="form"
-      (submit)="submit()">
-      <h2 class="invite-title">Invite by email</h2>
-      <div class="row-emails">
-        <mat-form-field class="emails">
-          <input
-            formControlName="emails"
-            placeholder="Emails, separated by commas"
-            matInput
-            type="text" />
-        </mat-form-field>
+    @if (editable()) {
+      <form
+        class="invite-by-email"
+        [formGroup]="form"
+        (submit)="submit()">
+        <h2 class="invite-title">Invite by email</h2>
+        <div class="row-emails">
+          <mat-form-field class="emails">
+            <input
+              formControlName="emails"
+              placeholder="Emails, separated by commas"
+              matInput
+              type="text" />
+          </mat-form-field>
 
-        <mat-form-field [hideRequiredMarker]="true">
-          <mat-label>Role</mat-label>
-          <mat-select formControlName="role">
-            <mat-option value="member">Member</mat-option>
-            <mat-option value="admin">Admin</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-      <div class="actions">
-        <button
-          [disabled]="!form.valid"
-          class="submit"
-          type="submit"
-          mat-raised-button
-          color="primary">
-          Send invites
-        </button>
-      </div>
-    </form>
+          <mat-form-field [hideRequiredMarker]="true">
+            <mat-label>Role</mat-label>
+            <mat-select formControlName="role">
+              <mat-option value="member">Member</mat-option>
+              <mat-option value="admin">Admin</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="actions">
+          <button
+            [disabled]="!form.valid"
+            class="submit"
+            type="submit"
+            mat-raised-button
+            color="primary">
+            Send invites
+          </button>
+        </div>
+      </form>
+    }
     @if (invitations().length || members().length) {
       <mat-dialog-content class="members()">
-        <h2>Members</h2>
         @if (invitations().length) {
           <div class="members-list invitations()">
             @for (
@@ -130,18 +131,21 @@ import { input } from '@angular/core';
               placeholder="role">
               <mat-label>Role</mat-label>
               <mat-select
+                [disabled]="!editable()"
                 [value]="member.role"
                 (valueChange)="onRoleChange($event, member.id, !member.email)">
                 <mat-option value="member">Member</mat-option>
                 <mat-option value="admin">Admin</mat-option>
               </mat-select>
             </mat-form-field>
-            <button
-              title="Delete member"
-              tuIconButton
-              (click)="onDeleteMember(member.id, !member.email)">
-              <mat-icon>close</mat-icon>
-            </button>
+            @if (editable()) {
+              <button
+                title="Delete member"
+                tuIconButton
+                (click)="onDeleteMember(member.id, !member.email)">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
           }
         </ng-template>
       </mat-dialog-content>
@@ -164,12 +168,12 @@ import { input } from '@angular/core';
 })
 export class MembersComponent implements OnChanges {
   @ViewChild(FormGroupDirective)
-  public formDirective!: FormGroupDirective;
+  formDirective!: FormGroupDirective;
 
-  public trackByMemberId = trackByProp<Member>('id');
-  public trackByInvitationId = trackByProp<Invitation>('id');
+  trackByMemberId = trackByProp<Member>('id');
+  trackByInvitationId = trackByProp<Invitation>('id');
 
-  public form = new FormGroup({
+  form = new FormGroup({
     emails: new FormControl('', {
       nonNullable: true,
       validators: Validators.required,
@@ -180,33 +184,35 @@ export class MembersComponent implements OnChanges {
     }),
   });
 
-  public title = input.required<string>();
+  title = input.required<string>();
 
-  public members = input<Member[]>([]);
+  members = input<Member[]>([]);
 
-  public invitations = input<Invitation[]>([]);
+  invitations = input<Invitation[]>([]);
 
-  public closeDialog = output<void>();
+  editable = input<boolean>(true);
 
-  public invited = output<Required<Pick<Invitation, 'email' | 'role'>>[]>();
+  closeDialog = output<void>();
 
-  public deletedInvitation = output<string>();
+  invited = output<Required<Pick<Invitation, 'email' | 'role'>>[]>();
 
-  public deletedMember = output<string>();
+  deletedInvitation = output<string>();
 
-  public roleInvitationChanged = output<{
+  deletedMember = output<string>();
+
+  roleInvitationChanged = output<{
     id: string;
     role: Invitation['role'];
   }>();
 
-  public roleMemberChanged = output<{
+  roleMemberChanged = output<{
     id: string;
     role: Member['role'];
   }>();
 
-  public lastAdmin = false;
+  lastAdmin = false;
 
-  public submit() {
+  submit() {
     const emails = (this.form.value.emails ?? '')
       .split(',')
       .map((email: string) => email.trim())
@@ -235,11 +241,7 @@ export class MembersComponent implements OnChanges {
     this.formDirective.resetForm();
   }
 
-  public onRoleChange(
-    role: Invitation['role'],
-    id: string,
-    isInvitation: boolean,
-  ) {
+  onRoleChange(role: Invitation['role'], id: string, isInvitation: boolean) {
     if (isInvitation) {
       this.roleInvitationChanged.emit({ id, role });
     } else {
@@ -247,7 +249,7 @@ export class MembersComponent implements OnChanges {
     }
   }
 
-  public onDeleteMember(id: string, isInvitation: boolean) {
+  onDeleteMember(id: string, isInvitation: boolean) {
     if (isInvitation) {
       this.deletedInvitation.emit(id);
     } else {
@@ -255,7 +257,7 @@ export class MembersComponent implements OnChanges {
     }
   }
 
-  public ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges) {
     // check if there is only one admin
     if (changes['members']) {
       const admins = this.members().filter((member) => member.role === 'admin');
