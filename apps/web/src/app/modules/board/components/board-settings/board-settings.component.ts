@@ -1,4 +1,5 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -14,6 +15,7 @@ import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
 import { v4 } from 'uuid';
 import { BoardFacade } from '../../../../services/board-facade.service';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 
 @Component({
   selector: 'tapiz-board-settings',
@@ -73,14 +75,16 @@ import { BoardFacade } from '../../../../services/board-facade.service';
         >
       </div>
 
-      <div class="form-actions">
-        <button
-          type="submit"
-          color="primary"
-          mat-flat-button>
-          Save
-        </button>
-      </div>
+      @if (isAdmin()) {
+        <div class="form-actions">
+          <button
+            type="submit"
+            color="primary"
+            mat-flat-button>
+            Save
+          </button>
+        </div>
+      }
     </form>
   `,
   styleUrl: './board-settings.component.scss',
@@ -95,6 +99,8 @@ export class BoardSettingsComponent {
     return this.#boardFacade.nodes().find((it) => it.type === 'settings');
   });
 
+  isAdmin = this.#store.selectSignal(boardPageFeature.selectIsAdmin);
+
   form = new FormGroup({
     readOnly: new FormControl(false),
     anonymousMode: new FormControl(false),
@@ -107,6 +113,12 @@ export class BoardSettingsComponent {
 
       if (settings) {
         this.form.patchValue(settings.content);
+      }
+    });
+
+    afterNextRender(() => {
+      if (!this.isAdmin()) {
+        this.form.disable();
       }
     });
   }
