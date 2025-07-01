@@ -714,6 +714,7 @@ export async function getBoards(
       result.boards.public &&
       result.accounts_boards?.role !== 'admin'
     ) {
+      // If the board is public and the user is not an admin or team member, they are a guest
       role = 'guest';
     }
 
