@@ -75,6 +75,18 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
         >
       </div>
 
+      <div class="field">
+        <mat-checkbox
+          color="primary"
+          formControlName="allowPublicPosts">
+          <span class="label-text">Allow public posts</span>
+        </mat-checkbox>
+        <span class="help"
+          >When enabled, any user can make their posts public, not just admins
+          and post owners.</span
+        >
+      </div>
+
       @if (isAdmin()) {
         <div class="form-actions">
           <button
@@ -105,6 +117,7 @@ export class BoardSettingsComponent {
     readOnly: new FormControl(false),
     anonymousMode: new FormControl(false),
     hideNoteAuthor: new FormControl(false),
+    allowPublicPosts: new FormControl(false),
   });
 
   constructor() {

@@ -5,6 +5,7 @@ export const settingsValidator = z.object({
   readOnly: z.boolean().default(false),
   anonymousMode: z.boolean().default(false),
   hideNoteAuthor: z.boolean().default(false),
+  allowPublicPosts: z.boolean().default(false),
 });
 
 export const SETTINGS_VALIDATOR: NodeValidator = {

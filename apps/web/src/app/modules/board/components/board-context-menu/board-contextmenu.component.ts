@@ -291,13 +291,19 @@ export class BoardContextMenuComponent implements OnInit {
                 },
               );
 
+              const allowPublicPosts =
+                this.boardFacade.settings()?.content.allowPublicPosts ?? false;
+
               if (
                 note.content.ownerId === this.boardFacade.currentUser()?.id ||
-                this.isAdmin()
+                this.isAdmin() ||
+                allowPublicPosts
               ) {
                 let textHidden = note.content.textHidden;
 
-                textHidden ??= !this.boardFacade.currentUser()?.visible;
+                textHidden ??= !this.boardFacade
+                  .users()
+                  ?.find((user) => user.id === note.content.ownerId)?.visible;
 
                 actions.push({
                   label: textHidden ? 'Make text public' : 'Make text private',
