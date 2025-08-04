@@ -28,9 +28,10 @@ export class BoardPageEffects {
   #boardApiService = inject(BoardApiService);
   #route = inject(ActivatedRoute);
   #boardFacade = inject(BoardFacade);
-  initBoardCocomaterialTags$ = createEffect(() => {
+
+  fetchCocomaterialTags$ = createEffect(() => {
     return this.#actions$.pipe(
-      ofType(BoardPageActions.initBoard),
+      ofType(BoardPageActions.fetchVectors),
       concatLatestFrom(() => [
         this.#store.select(boardPageFeature.selectCocomaterial),
       ]),
