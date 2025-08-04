@@ -9,6 +9,7 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { FormsModule } from '@angular/forms';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import { BoardPageActions } from '../../actions/board-page.actions';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
@@ -65,6 +66,7 @@ import { ConfigService } from '../../../../services/config.service';
         <button
           color="primary"
           [cdkCopyToClipboard]="url"
+          (cdkCopyToClipboardCopied)="onCopyUrl()"
           mat-flat-button>
           Copy url
         </button>
@@ -97,6 +99,7 @@ import { ConfigService } from '../../../../services/config.service';
 export class ShareBoardComponent {
   #store = inject(Store);
   #configService = inject(ConfigService);
+  #snackBar = inject(MatSnackBar);
   #zoom = this.#store.selectSignal(boardPageFeature.selectZoom);
   #position = this.#store.selectSignal(boardPageFeature.selectPosition);
   #isPublic = this.#store.selectSignal(boardPageFeature.selectIsPublic);
@@ -129,6 +132,14 @@ export class ShareBoardComponent {
     } else {
       this.url = this.getUrl();
     }
+  }
+
+  onCopyUrl() {
+    this.#snackBar.open('URL copied to clipboard!', 'Close', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+    });
   }
 
   getUrl() {
