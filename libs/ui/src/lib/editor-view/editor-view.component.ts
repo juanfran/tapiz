@@ -88,6 +88,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
   mentions = input<{ id: string; name: string }[]>([]);
   suggestedMentions = signal<{ id: string; name: string }[]>([]);
   mentioned = output<string>();
+  editorBlur = output<void>();
 
   text = viewChild.required<ElementRef<HTMLElement>>('text');
   editorRef = viewChild.required<ElementRef<HTMLElement>>('editor');
@@ -258,6 +259,9 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
         }),
       ],
       content: node.innerHTML,
+      onBlur: () => {
+        this.editorBlur.emit();
+      },
       onUpdate: ({ editor }) => {
         this.#contentChange$.next(editor.getHTML());
       },

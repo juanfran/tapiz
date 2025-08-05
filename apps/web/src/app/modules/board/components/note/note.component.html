@@ -37,7 +37,8 @@
           [mentions]="mentions()"
           customClass="note-rich-text"
           (mentioned)="onMention($event)"
-          (contentChange)="setText($event)" />
+          (contentChange)="setText($event)"
+          (editorBlur)="onEditorBlur()" />
       </tapiz-editor-portal>
 
       @if (editorView.editor(); as editor) {
