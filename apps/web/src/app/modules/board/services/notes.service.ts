@@ -16,6 +16,7 @@ export class NotesService {
   #settings = this.#boardFacade.settings;
   #nodesActions = inject(NodesActions);
   #lastColor = '';
+  #defaultSIZE = 300;
 
   getNew(data: Pick<Note, 'ownerId' | 'position' | 'layer'>): Note {
     return {
@@ -23,9 +24,13 @@ export class NotesService {
       votes: [],
       emojis: [],
       drawing: [],
-      width: 300,
-      height: 300,
+      width: this.#defaultSIZE,
+      height: this.#defaultSIZE,
       ...data,
+      position: {
+        x: data.position.x - this.#defaultSIZE / 2,
+        y: data.position.y - this.#defaultSIZE / 2,
+      },
     };
   }
 

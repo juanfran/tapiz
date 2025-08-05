@@ -534,6 +534,8 @@ export class BoardToolbarComponent {
   }
 
   tokenSelected(token: Pick<Token, 'backgroundColor' | 'color' | 'text'>) {
+    const tokenSize = 100;
+
     this.toolbarSubscription = this.#zoneService
       .select()
       .subscribe(({ position }) => {
@@ -544,9 +546,12 @@ export class BoardToolbarComponent {
         const tokenContent: Token = {
           ...token,
           layer: this.boardMode(),
-          position,
-          width: 100,
-          height: 100,
+          width: tokenSize,
+          height: tokenSize,
+          position: {
+            x: position.x - tokenSize / 2,
+            y: position.y - tokenSize / 2,
+          },
         };
 
         this.#store.dispatch(

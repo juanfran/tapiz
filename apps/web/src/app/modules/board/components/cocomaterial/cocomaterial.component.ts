@@ -36,6 +36,8 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { BoardMoveService } from '../../services/board-move.service';
 
+const DEFAULT_SIZE = 150;
+
 @Component({
   selector: 'tapiz-cocomaterial',
   imports: [
@@ -190,9 +192,12 @@ export class CocomaterialComponent {
           actions: [
             this.#nodesActions.add(vector.svg ? 'vector' : 'image', {
               url: vector.svg ?? vector.gif ?? '',
-              width: 150,
-              height: 150,
-              position: data.position,
+              width: DEFAULT_SIZE,
+              height: DEFAULT_SIZE,
+              position: {
+                x: data.position.x - DEFAULT_SIZE / 2,
+                y: data.position.y - DEFAULT_SIZE / 2,
+              },
               rotation: 0,
               layer: data.layer,
             }),
