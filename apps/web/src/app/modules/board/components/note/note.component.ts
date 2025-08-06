@@ -604,10 +604,6 @@ export class NoteComponent {
     }
   }
 
-  onEditorBlur() {
-    this.edit.set(false);
-  }
-
   onDrop() {
     const nativeElement: HTMLElement = this.#el.nativeElement;
 

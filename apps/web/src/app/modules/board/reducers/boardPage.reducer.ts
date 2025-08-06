@@ -307,6 +307,7 @@ const reducer = createReducer(
     state.searching = false;
     state.nodeSelection = true;
     state.addToBoardInProcess = false;
+    state.focusId = [];
 
     return state;
   }),
