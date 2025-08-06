@@ -70,14 +70,12 @@ export class CocomaterialComponent {
   filteredTags!: Signal<CocomaterialTag[]>;
 
   allTags = this.#cocomaterialStore.tags;
-  vectors = computed(() => this.#cocomaterialStore.vectors()?.results ?? []);
+  vectors = computed(() => this.#cocomaterialStore.vectors() ?? []);
   selected = signal<CocomaterialApiVector | null>(null);
 
   separatorKeysCodes: number[] = [ENTER, COMMA];
 
   constructor() {
-    this.#cocomaterialStore.initialLoad();
-
     const search = this.form.get('search');
 
     if (search) {
@@ -93,9 +91,13 @@ export class CocomaterialComponent {
       });
     }
 
-    explicitEffect([this.tags], ([tags]) => {
-      this.#cocomaterialStore.fetchVectors(tags.map((tag) => tag.slug));
-    });
+    explicitEffect(
+      [this.tags],
+      ([tags]) => {
+        this.#cocomaterialStore.setFilteredTags(tags.map((tag) => tag.slug));
+      },
+      { defer: true },
+    );
 
     explicitEffect([this.selected], ([selected]) => {
       this.#store.dispatch(
@@ -179,9 +181,7 @@ export class CocomaterialComponent {
   }
 
   onScroll() {
-    const tags = this.tags().map((tag) => tag.slug);
-
-    this.#cocomaterialStore.nextPage(tags);
+    this.#cocomaterialStore.setPage(this.#cocomaterialStore.page() + 1);
   }
 
   #addVectorToBoard(data: { layer: number; position: Point }) {

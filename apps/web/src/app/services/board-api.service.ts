@@ -8,7 +8,7 @@ import {
   SortBoard,
   Team,
 } from '@tapiz/board-commons';
-import { Observable, from, map } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import { APIConfigService } from './api-config.service';
 
 @Injectable({
@@ -96,28 +96,29 @@ export class BoardApiService {
     );
   }
 
-  getCocomaterialVectors(page = 1, page_size = 40, tags: string[] = []) {
-    return this.http
-      .get<CocomaterialApiListVectors>('https://cocomaterial.com/api/vectors', {
-        params: {
-          page,
-          page_size,
-          tags,
-        },
-      })
-      .pipe(
-        map((result) => {
-          return {
-            ...result,
-            results: result.results.map((vector) => {
-              return {
-                ...vector,
-                svgContent: '',
-              };
-            }),
-          };
-        }),
-      );
+  async getCocomaterialVectors(
+    page = 1,
+    page_size = 40,
+    tags: string[] = [],
+  ): Promise<CocomaterialApiListVectors> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      page_size: page_size.toString(),
+      ...(tags.length ? { tags: tags.join(',') } : {}),
+    });
+
+    const response = await fetch(
+      `https://cocomaterial.com/api/vectors?${params.toString()}`,
+    );
+    const result: CocomaterialApiListVectors = await response.json();
+
+    return {
+      ...result,
+      results: result.results.map((vector) => ({
+        ...vector,
+        svgContent: '',
+      })),
+    };
   }
 
   getBoardMentions(boardId: BoardUser['id']) {

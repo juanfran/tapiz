@@ -1,59 +1,71 @@
-import { inject } from '@angular/core';
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { inject, resource } from '@angular/core';
 import {
-  CocomaterialApiListVectors,
-  CocomaterialTag,
-} from '@tapiz/board-commons';
+  patchState,
+  signalStore,
+  withHooks,
+  withMethods,
+  withProps,
+  withState,
+} from '@ngrx/signals';
+import { CocomaterialApiVector, CocomaterialTag } from '@tapiz/board-commons';
 import { BoardApiService } from '../../../../services/board-api.service';
 
 export interface CocoMaterialState {
   page: number;
   tags: CocomaterialTag[];
-  vectors: CocomaterialApiListVectors | null;
+  filteredTags: string[];
+  vectors: CocomaterialApiVector[] | null;
 }
 
 const initialState: CocoMaterialState = {
   page: 1,
   tags: [],
+  filteredTags: [],
   vectors: null,
 };
 
 export const CocomaterialStore = signalStore(
   withState(initialState),
-  withMethods((store, boardApiService = inject(BoardApiService)) => ({
-    initialLoad() {
+  withProps((store) => {
+    const boardApiService = inject(BoardApiService);
+    return {
+      _vectors: resource({
+        params: () => ({
+          page: store.page(),
+          tags: store.filteredTags(),
+        }),
+        loader: ({ params }) => {
+          const { page, tags } = params;
+          return boardApiService
+            .getCocomaterialVectors(page, 60, tags)
+            .then((response) => {
+              if (page === 1) {
+                patchState(store, { vectors: response.results });
+              } else {
+                patchState(store, {
+                  vectors: [...(store.vectors() || []), ...response.results],
+                });
+              }
+            });
+        },
+      }),
+    };
+  }),
+  withMethods((store) => ({
+    setFilteredTags(tags: string[]) {
+      patchState(store, { filteredTags: tags, page: 1 });
+    },
+    setPage(page: number) {
+      patchState(store, { page });
+    },
+  })),
+  withHooks((store, boardApiService = inject(BoardApiService)) => ({
+    onInit() {
       if (!store.tags().length) {
         boardApiService.getCocomaterialTags().subscribe((tags) => {
           patchState(store, { tags });
         });
       }
-    },
-    fetchVectors(tags: string[] = []) {
-      boardApiService
-        .getCocomaterialVectors(1, 60, tags)
-        .subscribe((vectors) => {
-          patchState(store, {
-            page: 1,
-            vectors,
-          });
-        });
-    },
-    nextPage(tags: string[] = []) {
-      const nextPage = store.page() + 1;
-      boardApiService
-        .getCocomaterialVectors(nextPage, 60, tags)
-        .subscribe((vectors) => {
-          patchState(store, {
-            page: nextPage,
-            vectors: {
-              ...vectors,
-              results: [
-                ...(store.vectors()?.results || []),
-                ...vectors.results,
-              ],
-            },
-          });
-        });
     },
   })),
 );
