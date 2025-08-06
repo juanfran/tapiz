@@ -10,6 +10,10 @@
   }
 }
 
+.mat-mdc-outlined-button.mat-primary {
+  --mat-button-outlined-label-text-color: var(--brand);
+}
+
 button.mdc-button {
   border-radius: var(--radius-6);
   padding: var(--size-4);
