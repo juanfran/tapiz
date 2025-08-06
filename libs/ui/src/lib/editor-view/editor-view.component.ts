@@ -27,8 +27,6 @@ import { Text } from '@tiptap/extension-text';
 import { Mention, MentionNodeAttrs } from '@tiptap/extension-mention';
 import { output } from '@angular/core';
 import { input } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Subject, sampleTime } from 'rxjs';
 import { PopupComponent } from '../popup/popup.component';
 import { normalize } from '@tapiz/utils/normalize';
 import { explicitEffect } from 'ngxtension/explicit-effect';
@@ -100,8 +98,6 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
   mentionIndex = signal(0);
   mentionCommand: null | ((props: MentionNodeAttrs) => void) = null;
 
-  #contentChange$ = new Subject<string>();
-
   linkUrl = signal('');
 
   constructor() {
@@ -118,12 +114,6 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
         instance.commands.setContent(this.content());
       }
     });
-
-    this.#contentChange$
-      .pipe(takeUntilDestroyed(), sampleTime(300))
-      .subscribe((html) => {
-        this.contentChange.emit(html);
-      });
   }
 
   ngAfterViewInit() {
@@ -263,7 +253,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
         this.editorBlur.emit();
       },
       onUpdate: ({ editor }) => {
-        this.#contentChange$.next(editor.getHTML());
+        this.contentChange.emit(editor.getHTML());
       },
       onCreate: ({ editor }) => {
         if (this.focus()) {
