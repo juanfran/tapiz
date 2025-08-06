@@ -7,5 +7,5 @@ export interface DynamicComponent {
   node: Signal<TuNode>;
   pasted: Signal<boolean>;
   focus: Signal<boolean>;
-  zIndex?: number;
+  zIndex?: Signal<number>;
 }

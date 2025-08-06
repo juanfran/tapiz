@@ -108,6 +108,10 @@ export class NoteComponent {
     return !(this.#boardFacade.settings()?.content.hideNoteAuthor ?? false);
   });
 
+  zIndex = computed(() => {
+    return this.edit() ? 2 : 1;
+  });
+
   node = input.required<TuNode<Note>>();
 
   pasted = input.required<boolean>();

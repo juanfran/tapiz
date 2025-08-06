@@ -7,6 +7,7 @@ import {
   ViewChild,
   computed,
   inject,
+  signal,
 } from '@angular/core';
 import { PollBoard, PollBoardNode } from '@tapiz/board-commons';
 import { encrypt } from '@tapiz/utils/crypto';
@@ -129,7 +130,7 @@ export class PollBoardComponent implements AfterViewInit {
     return this.drag.nativeElement;
   }
 
-  zIndex = 6;
+  zIndex = signal(6);
 
   updateNode(content: Partial<PollBoard>) {
     this.#store.dispatch(

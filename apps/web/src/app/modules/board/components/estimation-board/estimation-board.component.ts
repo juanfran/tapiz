@@ -110,7 +110,7 @@ export class EstimationBoardComponent implements AfterViewInit, OnInit {
     return this.drag.nativeElement;
   }
 
-  zIndex = 6;
+  zIndex = signal(6);
 
   ngAfterViewInit() {
     this.#multiDragService.register({

@@ -11,7 +11,6 @@ import {
   Type,
   HostListener,
   ComponentRef,
-  HostBinding,
   signal,
   Injector,
   effect,
@@ -41,23 +40,21 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     '[style.width.px]': 'size().width',
     '[style.height.px]': 'size().height',
     '[style.transform]': 'transform()',
+    '[style.zIndex]': 'cmp?.instance?.zIndex?.() ?? 1',
+    '[attr.data-id]': 'node().id',
+    '[attr.class]': 'layer',
   },
 })
 export class NodeComponent implements OnInit {
-  readonly #nodeStore = inject(NodeStore);
-  private el = inject(ElementRef<HTMLElement>);
-  private store = inject(Store);
-  private cmp?: ComponentRef<DynamicComponent>;
-  private injector = inject(Injector);
+  #nodeStore = inject(NodeStore);
+  #el = inject(ElementRef<HTMLElement>);
+  #store = inject(Store);
+  #injector = inject(Injector);
+  cmp?: ComponentRef<DynamicComponent>;
 
-  @HostBinding('class') get layer() {
+  get layer() {
     return `layer-${this.node().content.layer}`;
   }
-
-  @HostBinding('attr.data-id') get id() {
-    return this.node().id;
-  }
-
   node = input.required<BoardTuNode>();
 
   position = computed(() => {
@@ -88,19 +85,19 @@ export class NodeComponent implements OnInit {
     return toCSS(compose(translate(point.x, point.y), rotateDEG(rotation)));
   });
 
-  focusId = this.store.selectSignal(boardPageFeature.selectFocusId);
+  focusId = this.#store.selectSignal(boardPageFeature.selectFocusId);
 
   focus = computed(() => {
     return this.focusId().includes(this.node().id);
   });
 
   @ViewChild('nodeHost', { read: ViewContainerRef })
-  public nodeHost!: ViewContainerRef;
+  nodeHost!: ViewContainerRef;
 
   // default focus, some components may override this with this.#nodesStore.setFocusNode
   @HostListener('mousedown', ['$event'])
-  public mousedown(event: MouseEvent) {
-    this.store.dispatch(
+  mousedown(event: MouseEvent) {
+    this.#store.dispatch(
       BoardPageActions.setFocusId({
         focusId: this.node().id,
         ctrlKey: event.ctrlKey,
@@ -108,14 +105,14 @@ export class NodeComponent implements OnInit {
     );
   }
 
-  public highlight = this.#nodeStore.highlight;
+  highlight = this.#nodeStore.highlight;
 
-  public get nativeElement() {
-    return this.el.nativeElement;
+  get nativeElement() {
+    return this.#el.nativeElement;
   }
 
   constructor() {
-    this.store
+    this.#store
       .select(boardPageFeature.selectBoardMode)
       .pipe(takeUntilDestroyed())
       .subscribe((layer) => {
@@ -125,7 +122,7 @@ export class NodeComponent implements OnInit {
       });
   }
 
-  public ngOnInit() {
+  ngOnInit() {
     loadNode(this.node().type).then((node) => {
       this.loadComponent(node.component);
     });
@@ -146,7 +143,7 @@ export class NodeComponent implements OnInit {
   }
 
   private loadComponent(component: Type<DynamicComponent>) {
-    this.store
+    this.#store
       .select(boardPageFeature.selectAdditionalContext)
       .pipe(take(1))
       .subscribe((context) => {
@@ -162,10 +159,6 @@ export class NodeComponent implements OnInit {
           node: this.node(),
           focus: this.focus(),
         });
-
-        const zIndex = this.cmp.instance.zIndex ?? 1;
-
-        this.nativeElement.style.setProperty('--z-index-node', zIndex);
       });
 
     effect(
@@ -176,7 +169,7 @@ export class NodeComponent implements OnInit {
 
         this.cmp.setInput('node', this.node());
       },
-      { injector: this.injector },
+      { injector: this.#injector },
     );
 
     effect(
@@ -187,7 +180,7 @@ export class NodeComponent implements OnInit {
 
         this.cmp.setInput('focus', this.focus());
       },
-      { injector: this.injector },
+      { injector: this.#injector },
     );
   }
 }
