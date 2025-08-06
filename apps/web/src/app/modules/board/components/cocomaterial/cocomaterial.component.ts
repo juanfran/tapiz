@@ -35,6 +35,7 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { explicitEffect } from 'ngxtension/explicit-effect';
 import { BoardMoveService } from '../../services/board-move.service';
+import { CocomaterialStore } from './cocomaterial.store';
 
 const DEFAULT_SIZE = 150;
 
@@ -51,6 +52,7 @@ const DEFAULT_SIZE = 150;
     MatPaginatorModule,
     InfiniteScrollDirective,
   ],
+  providers: [CocomaterialStore],
   templateUrl: './cocomaterial.component.html',
   styleUrls: ['./cocomaterial.component.scss'],
 })
@@ -58,6 +60,7 @@ export class CocomaterialComponent {
   #store = inject(Store);
   #boardMoveService = inject(BoardMoveService);
   #nodesActions = inject(NodesActions);
+  #cocomaterialStore = inject(CocomaterialStore);
   tagInput = viewChild.required<ElementRef<HTMLInputElement>>('tagInput');
   cocomaterialSelected = output<CocomaterialApiVector | null>();
 
@@ -66,14 +69,15 @@ export class CocomaterialComponent {
   tags = signal<CocomaterialTag[]>([]);
   filteredTags!: Signal<CocomaterialTag[]>;
 
-  cocomaterial = this.#store.selectSignal(boardPageFeature.selectCocomaterial);
-  allTags = computed(() => this.cocomaterial().tags);
-  vectors = computed(() => this.cocomaterial().vectors?.results ?? []);
+  allTags = this.#cocomaterialStore.tags;
+  vectors = computed(() => this.#cocomaterialStore.vectors()?.results ?? []);
   selected = signal<CocomaterialApiVector | null>(null);
 
   separatorKeysCodes: number[] = [ENTER, COMMA];
 
   constructor() {
+    this.#cocomaterialStore.initialLoad();
+
     const search = this.form.get('search');
 
     if (search) {
@@ -90,9 +94,7 @@ export class CocomaterialComponent {
     }
 
     explicitEffect([this.tags], ([tags]) => {
-      const tagSlugs = tags.map((tag) => tag.slug);
-
-      this.#store.dispatch(BoardPageActions.fetchVectors({ tags: tagSlugs }));
+      this.#cocomaterialStore.fetchVectors(tags.map((tag) => tag.slug));
     });
 
     explicitEffect([this.selected], ([selected]) => {
@@ -179,7 +181,7 @@ export class CocomaterialComponent {
   onScroll() {
     const tags = this.tags().map((tag) => tag.slug);
 
-    this.#store.dispatch(BoardPageActions.nextVectorsPage({ tags }));
+    this.#cocomaterialStore.nextPage(tags);
   }
 
   #addVectorToBoard(data: { layer: number; position: Point }) {

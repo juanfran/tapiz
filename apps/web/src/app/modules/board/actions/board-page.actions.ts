@@ -3,8 +3,6 @@ import {
   Point,
   User,
   BoardUser,
-  CocomaterialTag,
-  CocomaterialApiListVectors,
   NodeAdd,
   TuNode,
   BoardUserInfo,
@@ -46,13 +44,6 @@ export const BoardPageActions = createActionGroup({
     'Ready to vote': emptyProps(),
     'Board not found': props<{ id: BoardUser['id'] }>(),
     'Select emoji': props<{ emoji: Emoji }>(),
-    'Fetch cocomaterial tags success': props<{ tags: CocomaterialTag[] }>(),
-    'Fetch vectors': props<{ tags: string[] }>(),
-    'Fetch vectors success': props<{
-      vectors: CocomaterialApiListVectors;
-      page: number;
-    }>(),
-    'Next vectors page': props<{ tags: string[] }>(),
     'Ready to search': emptyProps(),
     'Go to node': props<{ nodeId: string }>(),
     'Paste nodes': props<{ nodes: NodeAdd['data'][]; history: boolean }>(),

@@ -1,11 +1,5 @@
 import { createFeature, createReducer, createSelector, on } from '@ngrx/store';
-import {
-  Point,
-  User,
-  CocomaterialTag,
-  CocomaterialApiListVectors,
-  BoardUserInfo,
-} from '@tapiz/board-commons';
+import { Point, User, BoardUserInfo } from '@tapiz/board-commons';
 import { wsOpen } from '../../ws/ws.actions';
 import { BoardActions } from '../actions/board.actions';
 import { BoardPageActions } from '../actions/board-page.actions';
@@ -34,11 +28,6 @@ export interface BoardPageState {
   voting: boolean;
   emoji: Emoji | null;
   dragEnabled: boolean;
-  cocomaterial: {
-    page: number;
-    tags: CocomaterialTag[];
-    vectors: CocomaterialApiListVectors | null;
-  };
   searching: boolean;
   additionalContext: Record<string, unknown>;
   follow: string;
@@ -79,11 +68,6 @@ const initialPageState: BoardPageState = {
   userId: '',
   emoji: null,
   dragEnabled: true,
-  cocomaterial: {
-    page: 1,
-    tags: [],
-    vectors: null,
-  },
   searching: false,
   additionalContext: {},
   follow: '',
@@ -329,48 +313,6 @@ const reducer = createReducer(
       emoji,
     };
   }),
-  on(
-    BoardPageActions.fetchCocomaterialTagsSuccess,
-    (state, { tags }): BoardPageState => {
-      return {
-        ...state,
-        cocomaterial: {
-          ...state.cocomaterial,
-          tags,
-        },
-      };
-    },
-  ),
-  on(
-    BoardPageActions.fetchVectorsSuccess,
-    (state, { vectors, page }): BoardPageState => {
-      state = {
-        ...state,
-      };
-
-      if (page === 1) {
-        state.cocomaterial = {
-          ...state.cocomaterial,
-          vectors,
-        };
-      } else if (state.cocomaterial.vectors) {
-        state.cocomaterial = {
-          ...state.cocomaterial,
-          vectors: {
-            ...vectors,
-            results: [
-              ...state.cocomaterial.vectors.results,
-              ...vectors.results,
-            ],
-          },
-        };
-      }
-
-      state.cocomaterial.page = page;
-
-      return state;
-    },
-  ),
   on(BoardPageActions.readyToSearch, (state): BoardPageState => {
     return {
       ...state,
