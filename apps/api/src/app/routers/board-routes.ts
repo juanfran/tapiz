@@ -181,9 +181,9 @@ export const boardRouter = router({
   boards: protectedProcedure
     .input(
       z.object({
-        teamId: z.string().uuid().optional(),
-        spaceId: z.string().uuid().optional(),
-        starred: z.boolean().optional().default(false),
+        teamId: z.uuid().optional(),
+        spaceId: z.uuid().optional(),
+        starred: z.boolean().optional(),
         offset: z.number().int().optional().default(0),
         limit: z.number().int().optional().default(10),
         sortBy: z
