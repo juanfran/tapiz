@@ -105,7 +105,7 @@ export class BoardContextMenuComponent implements OnInit {
               },
             },
             {
-              label: 'Move forward',
+              label: 'Bring to Front',
               icon: 'vertical_align_top',
               action: () => {
                 const actions = this.nodesActions.bulkPatch(
@@ -132,7 +132,7 @@ export class BoardContextMenuComponent implements OnInit {
               },
             },
             {
-              label: 'Move backward',
+              label: 'Send to Back',
               icon: 'vertical_align_bottom',
               action: () => {
                 const actions = this.nodesActions
