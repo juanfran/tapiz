@@ -16,6 +16,11 @@ import { BoardActions } from '../../actions/board.actions';
 import { v4 } from 'uuid';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
+import { ColorPickerComponent } from '@tapiz/ui/color-picker';
+import { MatLabel } from '@angular/material/select';
+
+export const defaultBackgroundColor = '#f7f6f7';
+export const defaultDotsColor = '#bfc6d7';
 
 @Component({
   selector: 'tapiz-board-settings',
@@ -25,6 +30,8 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
     ReactiveFormsModule,
     MatButtonModule,
     MatCheckboxModule,
+    ColorPickerComponent,
+    MatLabel,
   ],
   template: `
     <h1 class="title">
@@ -87,6 +94,46 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
         >
       </div>
 
+      <div class="field">
+        <div class="color-picker-field">
+          <tapiz-color-picker
+            [disabled]="!isAdmin()"
+            [color]="form.value.backgroundColor"
+            mode="RGBA"
+            (changed)="updateBackgroundColor($event)" />
+
+          <mat-label>
+            <span
+              [class.disabled]="!isAdmin()"
+              class="label-text"
+              >Background color</span
+            >
+          </mat-label>
+        </div>
+        <span class="help">The background color of the board.</span>
+      </div>
+
+      <div class="field">
+        <div class="color-picker-field">
+          <tapiz-color-picker
+            [disabled]="!isAdmin()"
+            [color]="form.value.dotsColor"
+            mode="RGBA"
+            (changed)="updateDotsColor($event)" />
+
+          <mat-label>
+            <span
+              class="label-text"
+              [class.disabled]="!isAdmin()"
+              >Background dots color</span
+            >
+          </mat-label>
+        </div>
+        <span class="help"
+          >The color of the dots that will be displayed on the board.
+        </span>
+      </div>
+
       @if (isAdmin()) {
         <div class="form-actions">
           <button
@@ -118,6 +165,10 @@ export class BoardSettingsComponent {
     anonymousMode: new FormControl(false),
     hideNoteAuthor: new FormControl(false),
     allowPublicPosts: new FormControl(false),
+    backgroundColor: new FormControl(defaultBackgroundColor, {
+      nonNullable: true,
+    }),
+    dotsColor: new FormControl(defaultDotsColor, { nonNullable: true }),
   });
 
   constructor() {
@@ -174,5 +225,15 @@ export class BoardSettingsComponent {
     }
 
     this.#dialogRef.close();
+  }
+
+  updateBackgroundColor(color: string | undefined) {
+    this.form
+      .get('backgroundColor')
+      ?.patchValue(color ?? defaultBackgroundColor);
+  }
+
+  updateDotsColor(color: string | undefined) {
+    this.form.get('dotsColor')?.patchValue(color ?? defaultDotsColor);
   }
 }

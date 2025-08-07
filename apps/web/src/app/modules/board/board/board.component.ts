@@ -84,6 +84,10 @@ import { BoardResizeDirective } from './directives/board-resize.directive';
 import { TimerComponent } from '../components/timer/timer.component';
 import { PortalTargetComponent } from '@tapiz/ui/portal';
 import type { WsEvents } from '@tapiz/board-commons/models/ws-events.model';
+import {
+  defaultBackgroundColor,
+  defaultDotsColor,
+} from '../components/board-settings/board-settings.component';
 
 @Component({
   selector: 'tapiz-board',
@@ -191,6 +195,16 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   );
   public readonly readonly = computed(() => {
     return this.boardFacade.settings()?.content.readOnly ?? false;
+  });
+  public readonly backgroundColor = computed(() => {
+    return (
+      this.boardFacade.settings()?.content.backgroundColor ??
+      defaultBackgroundColor
+    );
+  });
+
+  public readonly dotsColor = computed(() => {
+    return this.boardFacade.settings()?.content.dotsColor ?? defaultDotsColor;
   });
 
   public readonly isReadonlyUser = computed(() => {

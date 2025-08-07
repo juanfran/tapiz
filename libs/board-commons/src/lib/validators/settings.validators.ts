@@ -1,11 +1,22 @@
 import { z } from 'zod/v4';
 import { NodeValidator } from '../models/node.model.js';
+import colorString from 'color-string';
+
+export function colorValidator(val: string) {
+  try {
+    return colorString.get(val) !== null;
+  } catch {
+    return false;
+  }
+}
 
 export const settingsValidator = z.object({
   readOnly: z.boolean().default(false),
   anonymousMode: z.boolean().default(false),
   hideNoteAuthor: z.boolean().default(false),
   allowPublicPosts: z.boolean().default(false),
+  backgroundColor: z.string().refine(colorValidator).optional(),
+  dotsColor: z.string().refine(colorValidator).optional(),
 });
 
 export const SETTINGS_VALIDATOR: NodeValidator = {
