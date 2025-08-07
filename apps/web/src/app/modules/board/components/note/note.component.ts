@@ -247,6 +247,8 @@ export class NoteComponent {
   color = computed(() => {
     const panels = this.#boardFacade.nodes().filter(isPanel);
 
+    panels.reverse();
+
     const position = this.node().content.position;
     const defaultColor = this.node().content.color ?? defaultNoteColor;
     return this.findColor(position, panels, defaultColor);
