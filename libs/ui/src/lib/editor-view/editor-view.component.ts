@@ -77,7 +77,6 @@ import { explicitEffect } from 'ngxtension/explicit-effect';
 export class EditorViewComponent implements OnDestroy, AfterViewInit {
   content = input('');
   layoutToolbarOptions = input<boolean>(false);
-  fontSize = input<boolean>(false);
   contentChange = output<string>();
   focus = input<boolean>(false);
   customClass = input('');

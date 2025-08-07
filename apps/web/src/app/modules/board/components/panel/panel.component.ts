@@ -55,7 +55,6 @@ import { NodeToolbarComponent } from '../node-toolbar/node-toolbar.component';
                 [content]="initialText()"
                 [focus]="edit()"
                 [mentions]="mentions()"
-                [fontSize]="true"
                 (mentioned)="onMention($event)"
                 (contentChange)="setText($event)" />
             </tapiz-editor-portal>

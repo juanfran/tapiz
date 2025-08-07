@@ -46,7 +46,6 @@ import { NodeToolbarComponent } from '../node-toolbar/node-toolbar.component';
             #editorView="editorView"
             [content]="initialText()"
             [focus]="edit()"
-            [fontSize]="true"
             [mentions]="mentions()"
             (mentioned)="onMention($event)"
             (contentChange)="setText($event)" />
@@ -56,6 +55,7 @@ import { NodeToolbarComponent } from '../node-toolbar/node-toolbar.component';
           <tapiz-portal name="node-toolbar">
             <tapiz-node-toolbar
               [node]="node()"
+              [fontSize]="true"
               [editor]="editor" />
           </tapiz-portal>
         }
