@@ -67,6 +67,21 @@ export class NodesActions {
     return nodePatch;
   }
 
+  /**
+   * Creates a batch of patch operations for multiple nodes while preserving their original order.
+   *
+   * This method processes an array of nodes and their options to generate NodePatch operations
+   * that can be applied in bulk. The nodes are sorted to maintain their current order in the
+   * board before creating the patch operations.
+   *
+   * @example
+   * ```typescript
+   * const patches = nodesActions.bulkPatch([
+   *   { node: updatedNode1, options: { parent: 'group1' } },
+   *   { node: updatedNode2, options: { position: 2 } }
+   * ]);
+   * ```
+   */
   bulkPatch(nodes: { node: TuNode; options?: Options }[]): NodePatch[] {
     const storeNodes = this.#boardFacade.nodes();
 

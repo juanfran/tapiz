@@ -7,6 +7,7 @@ import { ZoneService } from '../components/zone/zone.service';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { BoardActions } from '../actions/board.actions';
 import { NodePatch } from '@tapiz/board-commons';
+import { NodesStore } from '../services/nodes.store';
 
 @Directive({
   selector: '[tapizBoardShourtcuts]',
@@ -17,6 +18,7 @@ export class BoardShourtcutsDirective {
   #layer = this.#store.selectSignal(boardPageFeature.selectBoardMode);
   #selectedNodesIds = this.#store.selectSignal(boardPageFeature.selectFocusId);
   #boardFacade = inject(BoardFacade);
+  #nodesStore = inject(NodesStore);
 
   @HostListener('document:keydown.control.z', ['$event']) undoAction(
     e: KeyboardEvent,
@@ -119,5 +121,32 @@ export class BoardShourtcutsDirective {
         actions,
       }),
     );
+  }
+
+  @HostListener('document:keydown', ['$event']) sendToBack(e: KeyboardEvent) {
+    if (!e.ctrlKey) {
+      return;
+    }
+    if (e.repeat || isInputField()) return;
+
+    const selectedNodes = this.#boardFacade
+      .nodes()
+      .filter((node) => this.#selectedNodesIds().includes(node.id));
+
+    if (!selectedNodes.length) return;
+
+    if (e.shiftKey) {
+      if (e.code === 'BracketLeft') {
+        this.#nodesStore.sendToBack(selectedNodes);
+      } else if (e.code === 'BracketRight') {
+        this.#nodesStore.bringToFront(selectedNodes);
+      }
+    } else {
+      if (e.code === 'BracketRight') {
+        this.#nodesStore.bringForward(selectedNodes);
+      } else if (e.code === 'BracketLeft') {
+        this.#nodesStore.sendBackward(selectedNodes);
+      }
+    }
   }
 }

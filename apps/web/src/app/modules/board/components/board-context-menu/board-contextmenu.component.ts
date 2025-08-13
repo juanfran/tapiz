@@ -107,57 +107,33 @@ export class BoardContextMenuComponent implements OnInit {
             {
               label: 'Bring to Front',
               icon: 'vertical_align_top',
+              help: 'Ctrl + Shift + ]',
               action: () => {
-                const actions = this.nodesActions.bulkPatch(
-                  currentNodes.map((it) => {
-                    return {
-                      node: {
-                        id: it.id,
-                        type: it.type,
-                        content: {},
-                      },
-                      options: {
-                        position: -1,
-                      },
-                    };
-                  }),
-                );
-
-                this.store.dispatch(
-                  BoardActions.batchNodeActions({
-                    history: true,
-                    actions,
-                  }),
-                );
+                this.nodesStore.bringToFront(currentNodes);
+              },
+            },
+            {
+              label: 'Bring Forward',
+              icon: 'arrow_upward',
+              help: 'Ctrl + ]',
+              action: () => {
+                this.nodesStore.bringForward(currentNodes);
               },
             },
             {
               label: 'Send to Back',
               icon: 'vertical_align_bottom',
+              help: 'Ctrl + Shift + [',
               action: () => {
-                const actions = this.nodesActions
-                  .bulkPatch(
-                    currentNodes.map((it) => {
-                      return {
-                        node: {
-                          id: it.id,
-                          type: it.type,
-                          content: {},
-                        },
-                        options: {
-                          position: 0,
-                        },
-                      };
-                    }),
-                  )
-                  .toReversed();
-
-                this.store.dispatch(
-                  BoardActions.batchNodeActions({
-                    history: true,
-                    actions,
-                  }),
-                );
+                this.nodesStore.sendToBack(currentNodes);
+              },
+            },
+            {
+              label: 'Send Backward',
+              help: 'Ctrl + [',
+              icon: 'arrow_downward',
+              action: () => {
+                this.nodesStore.sendBackward(currentNodes);
               },
             },
           ];
