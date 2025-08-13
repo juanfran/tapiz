@@ -292,7 +292,7 @@ const reducer = createReducer(
     state.nodeSelection = true;
     state.addToBoardInProcess = false;
 
-    if (popup !== 'draw') {
+    if (popup && popup !== 'draw') {
       state.focusId = [];
     }
 
