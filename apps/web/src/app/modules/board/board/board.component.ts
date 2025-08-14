@@ -88,6 +88,7 @@ import {
   defaultBackgroundColor,
   defaultDotsColor,
 } from '../components/board-settings/board-settings.component';
+import { SetBoardCenterComponent } from '../components/set-board-center/set-board-center.component';
 
 @Component({
   selector: 'tapiz-board',
@@ -124,6 +125,7 @@ import {
     BoardHeaderOptionsComponent,
     TimerComponent,
     PortalTargetComponent,
+    SetBoardCenterComponent,
   ],
   hostDirectives: [
     CopyPasteDirective,

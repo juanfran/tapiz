@@ -13,6 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
+import { BoardPageActions } from '../../actions/board-page.actions';
 import { v4 } from 'uuid';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
@@ -134,6 +135,31 @@ export const defaultDotsColor = '#bfc6d7';
         </span>
       </div>
 
+      <div class="field action-field">
+        <div class="action-field-content">
+          <mat-label>
+            <span
+              class="label-text"
+              [class.disabled]="!isAdmin()"
+              >Set board center</span
+            >
+          </mat-label>
+
+          <button
+            type="button"
+            [disabled]="!isAdmin()"
+            mat-flat-button
+            color="primary"
+            (click)="setInitialPosition()">
+            Set center
+          </button>
+        </div>
+
+        <span class="help"
+          >This will set the starting position of the board for new users.</span
+        >
+      </div>
+
       @if (isAdmin()) {
         <div class="form-actions">
           <button
@@ -235,5 +261,14 @@ export class BoardSettingsComponent {
 
   updateDotsColor(color: string | undefined) {
     this.form.get('dotsColor')?.patchValue(color ?? defaultDotsColor);
+  }
+
+  setInitialPosition() {
+    this.#store.dispatch(
+      BoardPageActions.setShowSetBoardCenter({
+        show: true,
+      }),
+    );
+    this.#dialogRef.close();
   }
 }

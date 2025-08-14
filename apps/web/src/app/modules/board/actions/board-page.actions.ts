@@ -78,5 +78,6 @@ export const BoardPageActions = createActionGroup({
       userId: string;
       role: BoardUser['role'];
     }>(),
+    'Set show set board center': props<{ show: boolean }>(),
   },
 });

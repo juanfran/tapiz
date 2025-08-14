@@ -7,6 +7,7 @@ import {
   filter,
   map,
   switchMap,
+  take,
   tap,
   withLatestFrom,
 } from 'rxjs';
@@ -16,9 +17,10 @@ import { boardPageFeature } from '../reducers/boardPage.reducer';
 import { filterNil } from '../../../commons/operators/filter-nil';
 import { ActivatedRoute } from '@angular/router';
 import { BoardFacade } from '../../../services/board-facade.service';
-import { isBoardTuNode } from '@tapiz/board-commons';
+import { isBoardTuNode, isSettings } from '@tapiz/board-commons';
 import { getNodeSize } from '../../../shared/node-size';
 import { getRouterSelectors } from '@ngrx/router-store';
+import { BoardActions } from '../actions/board.actions';
 export const { selectQueryParam } = getRouterSelectors();
 
 @Injectable()
@@ -96,6 +98,9 @@ export class BoardPageEffects {
   restoreUserView$ = createEffect(() => {
     return this.#actions$.pipe(
       ofType(BoardPageActions.fetchBoardSuccess),
+      switchMap(() => {
+        return this.#actions$.pipe(ofType(BoardActions.setState)).pipe(take(1));
+      }),
       withLatestFrom(
         this.#store.select(boardPageFeature.selectBoardId),
         this.#store.select(selectQueryParam('nodeId')),
@@ -112,6 +117,15 @@ export class BoardPageEffects {
 
           zoom = lastUserViewParse.zoom;
           position = lastUserViewParse.position;
+        } else {
+          const settings = this.#boardFacade
+            .nodes()
+            .find((it) => isSettings(it));
+
+          if (settings?.content?.boardCenter) {
+            position = settings.content.boardCenter;
+            zoom = settings.content.boardCenter.zoom;
+          }
         }
 
         if (params['position']) {
