@@ -88,7 +88,7 @@ export class NodeSpaceComponent implements AfterViewInit {
   drag!: ElementRef<HTMLElement>;
 
   get preventDrag() {
-    return !this.enabled();
+    return !this.enabled() || !this.draggable();
   }
 
   get position() {

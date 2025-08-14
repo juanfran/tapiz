@@ -8,6 +8,7 @@ import * as textValidators from './text.validator.js';
 import * as vectorValidators from './vector.validator.js';
 import * as userValidators from './user.validator.js';
 import * as stateActionValidators from './state-action.validator.js';
+import * as arrowValidators from './arrow.validator.js';
 
 export const Validators = {
   ...changeBoardNameValidators,
@@ -18,4 +19,5 @@ export const Validators = {
   ...vectorValidators,
   ...userValidators,
   ...stateActionValidators,
+  ...arrowValidators,
 };

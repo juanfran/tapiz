@@ -37,6 +37,7 @@ export class BoardZoomService {
           if (
             target.tagName.toUpperCase() !== 'TAPIZ-BOARD' &&
             !target.closest('tapiz-nodes') &&
+            !target.closest('tapiz-arrows-wrapper') &&
             !target.closest('tapiz-board-editor-portal')
           ) {
             return false;
