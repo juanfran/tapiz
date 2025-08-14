@@ -22,7 +22,7 @@ import { authInterceptor } from './app/commons/api-rest-interceptor/api-rest-int
 import { provideEffects } from '@ngrx/effects';
 import * as appEffects from './app/+state/app.effects';
 import { debugMetaReducers } from './app/debug/meta-reducer';
-import { Eye, EyeClosed, LucideAngularModule } from 'lucide-angular';
+import { Eye, EyeClosed, MoveRight, LucideAngularModule } from 'lucide-angular';
 
 export function prefersReducedMotion(): boolean {
   const mediaQueryList = window.matchMedia('(prefers-reduced-motion)');
@@ -69,6 +69,8 @@ bootstrapApplication(AppComponent, {
       useValue: { appearance: 'outline', subscriptSizing: 'dynamic' },
     },
     environment.providers,
-    importProvidersFrom(LucideAngularModule.pick({ EyeClosed, Eye })),
+    importProvidersFrom(
+      LucideAngularModule.pick({ EyeClosed, Eye, MoveRight }),
+    ),
   ],
 }).catch((err) => console.error(err));

@@ -20,6 +20,7 @@ const validations = {
     image: Validators.newImage,
     vector: Validators.newVector,
     text: Validators.newText,
+    arrow: Validators.newArrow,
   },
   patch: {
     panel: Validators.patchPanel,
@@ -27,6 +28,7 @@ const validations = {
     image: Validators.patchImage,
     vector: Validators.patchVector,
     text: Validators.patchText,
+    arrow: Validators.patchArrow,
   },
   newValidators: [
     {

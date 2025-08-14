@@ -21,6 +21,10 @@ import { RxFor } from '@rx-angular/template/for';
     <tapiz-node
       *rxFor="let node of nodes(); trackBy: 'id'"
       [node]="node" />
+
+    @if (tmpNode(); as tmpNode) {
+      <tapiz-node [node]="tmpNode" />
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NodeComponent, RxFor],
@@ -35,6 +39,12 @@ export class NodesComponent {
 
   nodes = computed(() => {
     return this.#boardFacade.filterBoardNodes(this.#boardFacade.nodes());
+  });
+
+  tmpNode = computed(() => {
+    const tmp = this.#boardFacade.tmpNode();
+
+    return tmp?.type === 'arrow' ? null : tmp;
   });
 
   constructor() {
@@ -55,7 +65,7 @@ export class NodesComponent {
   }
 
   #onDeletePress() {
-    const nodes = this.nodesComponents()
+    const componentNodes = this.nodesComponents()
       .filter((it) => {
         return it.focus() && !it.preventDelete?.();
       })
@@ -66,6 +76,16 @@ export class NodesComponent {
         };
       });
 
-    this.#nodesStore.deleteNodes(nodes);
+    const arrowNodes = this.#boardFacade
+      .focusNodes()
+      .filter((node) => node.type === 'arrow')
+      .map((node) => {
+        return {
+          type: node.type,
+          id: node.id,
+        };
+      });
+
+    this.#nodesStore.deleteNodes([...componentNodes, ...arrowNodes]);
   }
 }

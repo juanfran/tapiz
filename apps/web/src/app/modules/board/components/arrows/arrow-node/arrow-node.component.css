@@ -1,0 +1,39 @@
+:host {
+  display: block;
+  position: absolute;
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: none;
+}
+
+tapiz-node-space {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: none;
+}
+
+.connector {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  pointer-events: none;
+}
+
+.endpoint {
+  block-size: 14px;
+  border: 2px solid var(--primary-color);
+  border-radius: 50%;
+  background: var(--white);
+  cursor: grab;
+  inline-size: 14px;
+  padding: 0;
+  pointer-events: auto;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: var(--board-highlight-node-layer);
+}
+
+.endpoint:active {
+  cursor: grabbing;
+}
