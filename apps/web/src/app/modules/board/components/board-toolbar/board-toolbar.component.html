@@ -40,6 +40,11 @@
           [ngTemplateOutlet]="extrasButton"
           [ngTemplateOutletContext]="{ icon: 'estimation' }"></ng-container>
       }
+      @case ('arrow') {
+        <ng-container
+          [ngTemplateOutlet]="extrasButton"
+          [ngTemplateOutletContext]="{ icon: 'arrow' }"></ng-container>
+      }
       @default {
         <ng-container [ngTemplateOutlet]="extrasButton"></ng-container>
       }
