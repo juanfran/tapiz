@@ -137,21 +137,13 @@ export const defaultDotsColor = '#bfc6d7';
 
       <div class="field action-field">
         <div class="action-field-content">
-          <mat-label>
-            <span
-              class="label-text"
-              [class.disabled]="!isAdmin()"
-              >Set board center</span
-            >
-          </mat-label>
-
           <button
             type="button"
             [disabled]="!isAdmin()"
             mat-flat-button
             color="primary"
             (click)="setInitialPosition()">
-            Set center
+            Set board starting view
           </button>
         </div>
 

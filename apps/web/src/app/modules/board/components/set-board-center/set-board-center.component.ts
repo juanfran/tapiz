@@ -11,6 +11,7 @@ import { BoardPageActions } from '../../actions/board-page.actions';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardActions } from '../estimation/estimation.component';
 import { v4 } from 'uuid';
+import { BoardSettings } from '@tapiz/board-commons';
 
 @Component({
   selector: 'tapiz-set-board-center',
@@ -26,7 +27,7 @@ import { v4 } from 'uuid';
           color="primary"
           (click)="setInitialPosition()"
           mat-flat-button>
-          Set new center
+          Set new starting view
         </button>
         <button
           type="button"
@@ -65,6 +66,15 @@ export class SetBoardCenterComponent {
   setInitialPosition() {
     const settings = this.#settings();
     if (settings) {
+      const settingsContent: BoardSettings = {
+        ...settings.content,
+        boardStartingView: {
+          x: this.#position().x,
+          y: this.#position().y,
+          zoom: this.#zoom(),
+        },
+      };
+
       this.#store.dispatch(
         BoardActions.batchNodeActions({
           history: false,
@@ -73,14 +83,7 @@ export class SetBoardCenterComponent {
               data: {
                 type: 'settings',
                 id: settings.id,
-                content: {
-                  ...settings.content,
-                  boardCenter: {
-                    x: this.#position().x,
-                    y: this.#position().y,
-                    zoom: this.#zoom(),
-                  },
-                },
+                content: settingsContent,
               },
               op: 'patch',
             },
@@ -88,6 +91,14 @@ export class SetBoardCenterComponent {
         }),
       );
     } else {
+      const settingsContent: BoardSettings = {
+        boardStartingView: {
+          x: this.#position().x,
+          y: this.#position().y,
+          zoom: this.#zoom(),
+        },
+      };
+
       this.#store.dispatch(
         BoardActions.batchNodeActions({
           history: false,
@@ -96,13 +107,7 @@ export class SetBoardCenterComponent {
               data: {
                 type: 'settings',
                 id: v4(),
-                content: {
-                  boardCenter: {
-                    x: this.#position().x,
-                    y: this.#position().y,
-                    zoom: this.#zoom(),
-                  },
-                },
+                content: settingsContent,
               },
               op: 'add',
             },

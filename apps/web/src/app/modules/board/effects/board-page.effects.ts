@@ -122,9 +122,9 @@ export class BoardPageEffects {
             .nodes()
             .find((it) => isSettings(it));
 
-          if (settings?.content?.boardCenter) {
-            position = settings.content.boardCenter;
-            zoom = settings.content.boardCenter.zoom;
+          if (settings?.content?.boardStartingView) {
+            position = settings.content.boardStartingView;
+            zoom = settings.content.boardStartingView.zoom;
           }
         }
 

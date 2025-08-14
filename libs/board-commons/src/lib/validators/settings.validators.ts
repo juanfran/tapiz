@@ -17,7 +17,7 @@ export const settingsValidator = z.object({
   allowPublicPosts: z.boolean().default(false),
   backgroundColor: z.string().refine(colorValidator).optional(),
   dotsColor: z.string().refine(colorValidator).optional(),
-  boardCenter: z
+  boardStartingView: z
     .object({
       x: z.number(),
       y: z.number(),
