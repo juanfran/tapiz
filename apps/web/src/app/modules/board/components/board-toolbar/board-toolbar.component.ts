@@ -223,10 +223,6 @@ export class BoardToolbarComponent {
     }
 
     this.popupOpen('tools');
-
-    this.toolbarSubscription = this.#zoneService.select().subscribe(() => {
-      this.popupOpen('');
-    });
   }
 
   toolsEvent(event: string) {
