@@ -40,6 +40,7 @@ export interface BoardPageState {
   dragInProgress: boolean;
   boardUsers: BoardUserInfo[];
   mentions: { id: User['id']; name: User['name'] }[];
+  showSetBoardCenter: boolean;
 }
 
 const initialPageState: BoardPageState = {
@@ -80,6 +81,7 @@ const initialPageState: BoardPageState = {
   dragInProgress: false,
   boardUsers: [],
   mentions: [],
+  showSetBoardCenter: false,
 };
 
 const reducer = createReducer(
@@ -479,6 +481,15 @@ const reducer = createReducer(
       }),
     };
   }),
+  on(
+    BoardPageActions.setShowSetBoardCenter,
+    (state, { show }): BoardPageState => {
+      return {
+        ...state,
+        showSetBoardCenter: show,
+      };
+    },
+  ),
 );
 
 export const boardPageFeature = createFeature({
