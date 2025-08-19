@@ -89,7 +89,6 @@ import {
   defaultDotsColor,
 } from '../components/board-settings/board-settings.component';
 import { SetBoardCenterComponent } from '../components/set-board-center/set-board-center.component';
-import { ArrowConnectorComponent } from '../components/arrow-connector/arrow-connector.component';
 
 @Component({
   selector: 'tapiz-board',
@@ -127,7 +126,6 @@ import { ArrowConnectorComponent } from '../components/arrow-connector/arrow-con
     TimerComponent,
     PortalTargetComponent,
     SetBoardCenterComponent,
-    ArrowConnectorComponent,
   ],
   hostDirectives: [
     CopyPasteDirective,

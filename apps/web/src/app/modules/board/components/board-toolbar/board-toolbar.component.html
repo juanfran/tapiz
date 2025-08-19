@@ -13,37 +13,58 @@
       @case ('note') {
         <ng-container
           [ngTemplateOutlet]="extrasButton"
-          [ngTemplateOutletContext]="{ icon: 'note' }"></ng-container>
+          [ngTemplateOutletContext]="{
+            icon: 'note',
+            popupName: 'note',
+          }"></ng-container>
       }
       @case ('panel') {
         <ng-container
           [ngTemplateOutlet]="extrasButton"
-          [ngTemplateOutletContext]="{ icon: 'panel' }"></ng-container>
+          [ngTemplateOutletContext]="{
+            icon: 'panel',
+            popupName: 'panel',
+          }"></ng-container>
       }
       @case ('text') {
         <ng-container
           [ngTemplateOutlet]="extrasButton"
-          [ngTemplateOutletContext]="{ icon: 'text' }"></ng-container>
+          [ngTemplateOutletContext]="{
+            icon: 'text',
+            popupName: 'text',
+          }"></ng-container>
       }
       @case ('image') {
         <ng-container
           [ngTemplateOutlet]="extrasButton"
-          [ngTemplateOutletContext]="{ icon: 'image' }"></ng-container>
+          [ngTemplateOutletContext]="{
+            icon: 'image',
+            popupName: 'image',
+          }"></ng-container>
       }
       @case ('poll') {
         <ng-container
           [ngTemplateOutlet]="extrasButton"
-          [ngTemplateOutletContext]="{ icon: 'poll' }"></ng-container>
+          [ngTemplateOutletContext]="{
+            icon: 'poll',
+            popupName: 'poll',
+          }"></ng-container>
       }
       @case ('estimation') {
         <ng-container
           [ngTemplateOutlet]="extrasButton"
-          [ngTemplateOutletContext]="{ icon: 'estimation' }"></ng-container>
+          [ngTemplateOutletContext]="{
+            icon: 'estimation',
+            popupName: 'estimation',
+          }"></ng-container>
       }
       @case ('arrow') {
         <ng-container
           [ngTemplateOutlet]="extrasButton"
-          [ngTemplateOutletContext]="{ icon: 'arrow' }"></ng-container>
+          [ngTemplateOutletContext]="{
+            icon: 'move-right',
+            popupName: 'arrow',
+          }"></ng-container>
       }
       @default {
         <ng-container [ngTemplateOutlet]="extrasButton"></ng-container>
@@ -174,12 +195,13 @@
 
 <ng-template
   #extrasButton
-  let-icon="icon">
+  let-icon="icon"
+  let-popupName="popupName">
   <tapiz-board-toolbar-button
     [icon]="icon || 'add_simple'"
     tooltip="Tools"
     label="Tools"
-    [active]="popup() === (icon ? icon : 'tools')"
+    [active]="popup() === (popupName ? popupName : 'tools')"
     (clicked)="tools()">
   </tapiz-board-toolbar-button>
 </ng-template>
@@ -303,3 +325,5 @@
     (clicked)="search()">
   </tapiz-board-toolbar-button>
 </ng-template>
+
+<tapiz-arrow-toolbar />

@@ -49,6 +49,7 @@ import { defaultNoteColor } from '../note';
 import { NgTemplateOutlet } from '@angular/common';
 import { BoardToolbardButtonComponent } from './components/board-toolboard-button.component';
 import { LucideAngularModule, Pin, PinOff } from 'lucide-angular';
+import { ArrowToolbarComponent } from '../arrow-toolbar/arrow-toolbar.component';
 
 export class AppModule {}
 @Component({
@@ -70,6 +71,7 @@ export class AppModule {}
     NgTemplateOutlet,
     BoardToolbardButtonComponent,
     LucideAngularModule,
+    ArrowToolbarComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [HotkeysService],
@@ -248,6 +250,9 @@ export class BoardToolbarComponent {
         break;
       case 'selectedTimer':
         this.timer();
+        break;
+      case 'selectedArrow':
+        this.popupOpen('arrow');
         break;
     }
   }

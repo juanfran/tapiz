@@ -51,6 +51,7 @@ export class AppComponent {
     'add_simple',
     'note',
     'clock',
+    'move-right',
   ];
 
   constructor() {
