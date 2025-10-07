@@ -31,6 +31,7 @@ import {
   findAttachment,
 } from '../arrow-utils';
 import { MatButton } from '@angular/material/button';
+import { ZoneService } from '../../zone/zone.service';
 interface DraftState {
   start: ArrowEndpoints['start'];
   startPoint: Point;
@@ -55,6 +56,7 @@ export class ArrowToolbarComponent {
   #destroyRef = inject(DestroyRef);
   #boardFacade = inject(BoardFacade);
   #nodesActions = inject(NodesActions);
+  #zoneService = inject(ZoneService);
 
   #zoom = this.#store.selectSignal(boardPageFeature.selectZoom);
   #position = this.#store.selectSignal(boardPageFeature.selectPosition);
@@ -143,6 +145,23 @@ export class ArrowToolbarComponent {
   }
 
   #listenPointer() {
+    let started: any = null;
+
+    this.#zoneService.selectArea('invisible').subscribe((zone) => {
+      console.log('Selected zone:', zone);
+
+      if (!zone) {
+        return;
+      }
+
+      if (!started) {
+        started = this.#beginDraft(zone.position);
+      }
+      if (started) {
+        this.#updateDraft(zone.position);
+      }
+    });
+
     fromEvent<MouseEvent>(document, 'mousedown')
       .pipe(
         takeUntilDestroyed(this.#destroyRef),
@@ -183,8 +202,7 @@ export class ArrowToolbarComponent {
       .subscribe();
   }
 
-  #beginDraft(event: MouseEvent) {
-    const point = this.#toBoardPoint(event);
+  #beginDraft(point: Point) {
     const start = findAttachment(point, this.attachableNodes());
 
     this.#draft = {
@@ -210,21 +228,15 @@ export class ArrowToolbarComponent {
       end: start,
     });
 
-    event.preventDefault();
-    event.stopPropagation();
-
     return true;
   }
 
-  #updateDraft(event: MouseEvent) {
+  #updateDraft(position: Point) {
     if (!this.#draft) {
       return;
     }
 
-    const end = findAttachment(
-      this.#toBoardPoint(event),
-      this.attachableNodes(),
-    );
+    const end = findAttachment(position, this.attachableNodes());
 
     this.#preview({
       start: this.#draft.start,

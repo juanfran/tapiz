@@ -11,13 +11,14 @@ import {
   Observable,
   startWith,
   Subscription,
+  tap,
 } from 'rxjs';
 import { BoardPageActions } from '../../actions/board-page.actions';
 import { BoardFacade } from '../../../../services/board-facade.service';
 
 interface SelectAction {
   userId: string;
-  style: 'select' | 'group' | 'panel';
+  style: 'select' | 'group' | 'panel' | 'invisible';
   position: { x: number; y: number };
   size: { width: number; height: number };
   relativeRect: DOMRect;
@@ -168,6 +169,7 @@ export class ZoneService {
         )
         .subscribe((result) => {
           this.#areaSelector.set(result);
+          subscriber.next(result);
         });
 
       return () => {
