@@ -112,7 +112,7 @@ export class ArrowToolbarComponent {
 
   constructor() {
     this.#listenPointer();
-    this.#listenCancel();
+    // this.#listenCancel();
 
     effect(
       () => {
@@ -191,18 +191,18 @@ export class ArrowToolbarComponent {
     //   .subscribe();
   }
 
-  #listenCancel() {
-    fromEvent<KeyboardEvent>(document, 'keydown')
-      .pipe(
-        takeUntilDestroyed(this.#destroyRef),
-        filter((event) => event.key === 'Escape'),
-        tap((event) => {
-          event.preventDefault();
-          this.#cancelDraft();
-        }),
-      )
-      .subscribe();
-  }
+  // #listenCancel() {
+  //   fromEvent<KeyboardEvent>(document, 'keydown')
+  //     .pipe(
+  //       takeUntilDestroyed(this.#destroyRef),
+  //       filter((event) => event.key === 'Escape'),
+  //       tap((event) => {
+  //         event.preventDefault();
+  //         this.#cancelDraft();
+  //       }),
+  //     )
+  //     .subscribe();
+  // }
 
   #beginDraft(point: Point) {
     const start = findAttachment(point, this.attachableNodes());
@@ -215,15 +215,6 @@ export class ArrowToolbarComponent {
         dragEnabled: this.#dragEnabled(),
       },
     };
-
-    this.#store.dispatch(
-      BoardPageActions.setBoardCursor({ cursor: 'crosshair' }),
-    );
-    this.#store.dispatch(BoardPageActions.setNodeSelection({ enabled: false }));
-    this.#store.dispatch(
-      BoardPageActions.setDragEnabled({ dragEnabled: false }),
-    );
-    this.#store.dispatch(BoardPageActions.setMoveEnabled({ enabled: false }));
 
     this.#preview({
       start,
