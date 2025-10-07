@@ -5,14 +5,23 @@ import {
 } from './common-board-validation.js';
 
 const arrow = z.object({
-  x: z.number(),
-  y: z.number(),
-  rotation: z.number(),
-  color: z.string().max(50),
-  thickness: z.number().min(1).max(20),
-  headSize: z.number().min(1).max(50),
+  layer: CommonBoardValidation.layer,
+  position: CommonBoardValidation.position,
+  start: z.object({
+    x: z.number(),
+    y: z.number(),
+  }),
+  end: z.object({
+    x: z.number(),
+    y: z.number(),
+  }),
+  color: z.string().length(7).regex(/^#/).nullable().optional(),
+  strokeStyle: z.enum(['solid', 'dashed', 'dotted']).optional(),
+  arrowType: z.enum(['sharp', 'curved', 'elbow']).optional(),
 });
 
 export const patchArrow = arrow.partial();
 
 export const newArrow = arrow;
+
+export type Arrow = z.infer<typeof newArrow>;

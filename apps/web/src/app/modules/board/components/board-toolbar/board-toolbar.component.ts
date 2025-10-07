@@ -49,7 +49,7 @@ import { defaultNoteColor } from '../note';
 import { NgTemplateOutlet } from '@angular/common';
 import { BoardToolbardButtonComponent } from './components/board-toolboard-button.component';
 import { LucideAngularModule, Pin, PinOff } from 'lucide-angular';
-import { ArrowToolbarComponent } from '../arrow-toolbar/arrow-toolbar.component';
+import { ArrowToolbarComponent } from '../arrows/arrow-toolbar/arrow-toolbar.component';
 
 export class AppModule {}
 @Component({

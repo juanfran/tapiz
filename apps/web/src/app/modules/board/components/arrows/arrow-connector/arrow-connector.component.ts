@@ -1,8 +1,6 @@
 import { Component, computed, input, signal } from '@angular/core';
+import { Arrow } from '@tapiz/board-commons/validators/arrow.validator';
 
-type Point = { x: number; y: number };
-type StrokeStyle = 'solid' | 'dashed' | 'dotted';
-type ArrowType = 'sharp' | 'curved' | 'elbow';
 type HeadPos = 'start' | 'end';
 
 // <tapiz-arrow-connector
@@ -52,11 +50,11 @@ type HeadPos = 'start' | 'end';
   `,
 })
 export class ArrowConnectorComponent {
-  readonly start = input<Point>({ x: 0, y: 0 });
-  readonly end = input<Point>({ x: 100, y: 50 });
-  readonly color = input<string>('black');
-  readonly strokeStyle = input<StrokeStyle>('solid');
-  readonly arrowType = input<ArrowType>('sharp');
+  readonly start = input<Arrow['start']>({ x: 0, y: 0 });
+  readonly end = input<Arrow['end']>({ x: 100, y: 50 });
+  readonly color = input<Arrow['color']>('black');
+  readonly strokeStyle = input<Arrow['strokeStyle']>('solid');
+  readonly arrowType = input<Arrow['arrowType']>('sharp');
   readonly heads = input<HeadPos[]>(['end']);
 
   protected readonly strokeWidth = 2;

@@ -326,4 +326,6 @@
   </tapiz-board-toolbar-button>
 </ng-template>
 
-<tapiz-arrow-toolbar />
+@if (popup() === 'arrow') {
+  <tapiz-arrow-toolbar />
+}
