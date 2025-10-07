@@ -80,7 +80,11 @@ export class ZoneService {
     );
   }
 
-  selectArea(style: SelectAction['style'] = 'select', cursor = 'crosshair') {
+  selectArea(
+    style: SelectAction['style'] = 'select',
+    cursor = 'crosshair',
+    live = false,
+  ) {
     const originalMoveEnabled = this.selectMoveEnabled();
 
     this.#setMovement(false);
@@ -169,7 +173,10 @@ export class ZoneService {
         )
         .subscribe((result) => {
           this.#areaSelector.set(result);
-          subscriber.next(result);
+
+          if (live) {
+            subscriber.next(result);
+          }
         });
 
       return () => {

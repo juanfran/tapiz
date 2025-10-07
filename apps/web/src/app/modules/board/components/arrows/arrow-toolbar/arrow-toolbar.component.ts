@@ -147,46 +147,48 @@ export class ArrowToolbarComponent {
   #listenPointer() {
     let started: any = null;
 
-    this.#zoneService.selectArea('invisible').subscribe((zone) => {
-      console.log('Selected zone:', zone);
+    this.#zoneService
+      .selectArea('invisible', 'crosshair', true)
+      .subscribe((zone) => {
+        console.log('Selected zone:', zone);
 
-      if (!zone) {
-        return;
-      }
+        if (!zone) {
+          return;
+        }
 
-      if (!started) {
-        started = this.#beginDraft(zone.position);
-      }
-      if (started) {
-        this.#updateDraft(zone.position);
-      }
-    });
+        if (!started) {
+          started = this.#beginDraft(zone.position);
+        }
+        if (started) {
+          this.#updateDraft(zone.position);
+        }
+      });
 
-    fromEvent<MouseEvent>(document, 'mousedown')
-      .pipe(
-        takeUntilDestroyed(this.#destroyRef),
-        filter((event) => event.button === 0),
-        filter((event) => !event.shiftKey && !event.metaKey && !event.altKey),
-        filter((event) => this.#isInsideBoard(event)),
-        switchMap((downEvent) => {
-          const started = this.#beginDraft(downEvent);
+    // fromEvent<MouseEvent>(document, 'mousedown')
+    //   .pipe(
+    //     takeUntilDestroyed(this.#destroyRef),
+    //     filter((event) => event.button === 0),
+    //     filter((event) => !event.shiftKey && !event.metaKey && !event.altKey),
+    //     filter((event) => this.#isInsideBoard(event)),
+    //     switchMap((downEvent) => {
+    //       const started = this.#beginDraft(downEvent);
 
-          if (!started) {
-            return EMPTY;
-          }
+    //       if (!started) {
+    //         return EMPTY;
+    //       }
 
-          return fromEvent<MouseEvent>(document, 'mousemove').pipe(
-            tap((moveEvent) => this.#updateDraft(moveEvent)),
-            takeUntil(
-              fromEvent<MouseEvent>(document, 'mouseup').pipe(
-                take(1),
-                tap((upEvent) => this.#completeDraft(upEvent)),
-              ),
-            ),
-          );
-        }),
-      )
-      .subscribe();
+    //       return fromEvent<MouseEvent>(document, 'mousemove').pipe(
+    //         tap((moveEvent) => this.#updateDraft(moveEvent)),
+    //         takeUntil(
+    //           fromEvent<MouseEvent>(document, 'mouseup').pipe(
+    //             take(1),
+    //             tap((upEvent) => this.#completeDraft(upEvent)),
+    //           ),
+    //         ),
+    //       );
+    //     }),
+    //   )
+    //   .subscribe();
   }
 
   #listenCancel() {
