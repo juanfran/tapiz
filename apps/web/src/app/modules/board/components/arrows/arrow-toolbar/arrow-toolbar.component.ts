@@ -1,51 +1,353 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
+  DestroyRef,
+  effect,
   inject,
+  signal,
+  computed,
 } from '@angular/core';
-
-import type { ArrowNode } from '@tapiz/board-commons/models/arrow.model';
+import { CommonModule } from '@angular/common';
+import { fromEvent, EMPTY } from 'rxjs';
+import { filter, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
+import {
+  ArrowHead,
+  ArrowNode,
+  BoardTuNode,
+  Point,
+  isBoardTuNode,
+} from '@tapiz/board-commons';
 import { boardPageFeature } from '../../../reducers/boardPage.reducer';
+import { BoardPageActions } from '../../../actions/board-page.actions';
 import { BoardFacade } from '../../../../../services/board-facade.service';
-import { v4 } from 'uuid';
+import { BoardActions } from '../../../actions/board.actions';
+import { NodesActions } from '../../../services/nodes-actions';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  ARROW_PADDING,
+  ArrowEndpoints,
+  buildArrowContent,
+  findAttachment,
+} from '../arrow-utils';
+import { MatButton } from '@angular/material/button';
+interface DraftState {
+  start: ArrowEndpoints['start'];
+  startPoint: Point;
+  prev: {
+    moveEnabled: boolean;
+    dragEnabled: boolean;
+  };
+}
+
+const TMP_ARROW_ID = '__tmp-arrow__';
 
 @Component({
   selector: 'tapiz-arrow-toolbar',
-  template: `
-    <div class="wrapper">
-      <p><button (click)="onTestClick()">test</button></p>
-    </div>
-  `,
+  standalone: true,
+  imports: [CommonModule, MatButton],
+  templateUrl: './arrow-toolbar.component.html',
   styleUrl: './arrow-toolbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [],
 })
 export class ArrowToolbarComponent {
   #store = inject(Store);
-  #popupOpen = this.#store.selectSignal(boardPageFeature.selectPopupOpen);
+  #destroyRef = inject(DestroyRef);
   #boardFacade = inject(BoardFacade);
-  open = computed(() => {
-    console.log('open', this.#popupOpen() === 'arrow');
-    return this.#popupOpen() === 'arrow';
+  #nodesActions = inject(NodesActions);
+
+  #zoom = this.#store.selectSignal(boardPageFeature.selectZoom);
+  #position = this.#store.selectSignal(boardPageFeature.selectPosition);
+  #boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
+  #dragEnabled = this.#store.selectSignal(boardPageFeature.selectDragEnabled);
+  #moveEnabled = this.#store.selectSignal(boardPageFeature.selectMoveEnabled);
+
+  color = signal('#1c1c1c');
+  strokeStyle = signal<'solid' | 'dashed' | 'dotted'>('solid');
+  arrowType = signal<'sharp' | 'curved' | 'elbow'>('sharp');
+  startHead = signal(false);
+  endHead = signal(true);
+
+  strokeOptions: { key: ArrowNode['strokeStyle']; label: string }[] = [
+    { key: 'solid', label: 'Solid' },
+    { key: 'dashed', label: 'Dashed' },
+    { key: 'dotted', label: 'Dotted' },
+  ];
+
+  typeOptions: { key: ArrowNode['arrowType']; label: string }[] = [
+    { key: 'sharp', label: 'Straight' },
+    { key: 'curved', label: 'Curved' },
+    { key: 'elbow', label: 'Elbow' },
+  ];
+
+  heads = computed<ArrowHead[]>(() => {
+    const heads: ArrowHead[] = [];
+
+    if (this.startHead()) {
+      heads.push('start');
+    }
+
+    if (this.endHead()) {
+      heads.push('end');
+    }
+
+    if (!heads.length) {
+      heads.push('end');
+    }
+
+    return heads;
   });
 
-  onTestClick() {
-    const arrow: ArrowNode = {
-      color: 'black',
-      strokeStyle: 'solid',
-      arrowType: 'sharp',
-      start: { x: 100, y: 100 },
-      end: { x: 200, y: 200 },
-      layer: 0,
-      position: { x: 100, y: 100 },
+  attachableNodes = computed(() => {
+    return this.#boardFacade
+      .filterBoardNodes(this.#boardFacade.nodes())
+      .filter((node): node is BoardTuNode => {
+        return node.type !== 'arrow' && isBoardTuNode(node);
+      });
+  });
+
+  #draft: DraftState | null = null;
+
+  constructor() {
+    this.#listenPointer();
+    this.#listenCancel();
+
+    effect(
+      () => {
+        this.#cancelDraft();
+      },
+      { allowSignalWrites: true },
+    );
+  }
+
+  onColorChange(value: string) {
+    if (value.startsWith('#')) {
+      this.color.set(value);
+    }
+  }
+
+  selectStroke(style: ArrowNode['strokeStyle']) {
+    this.strokeStyle.set(style);
+  }
+
+  selectType(type: ArrowNode['arrowType']) {
+    this.arrowType.set(type);
+  }
+
+  toggleHead(head: ArrowHead) {
+    if (head === 'start') {
+      this.startHead.update((current) => !current);
+    } else {
+      this.endHead.update((current) => !current);
+    }
+  }
+
+  #listenPointer() {
+    fromEvent<MouseEvent>(document, 'mousedown')
+      .pipe(
+        takeUntilDestroyed(this.#destroyRef),
+        filter((event) => event.button === 0),
+        filter((event) => !event.shiftKey && !event.metaKey && !event.altKey),
+        filter((event) => this.#isInsideBoard(event)),
+        switchMap((downEvent) => {
+          const started = this.#beginDraft(downEvent);
+
+          if (!started) {
+            return EMPTY;
+          }
+
+          return fromEvent<MouseEvent>(document, 'mousemove').pipe(
+            tap((moveEvent) => this.#updateDraft(moveEvent)),
+            takeUntil(
+              fromEvent<MouseEvent>(document, 'mouseup').pipe(
+                take(1),
+                tap((upEvent) => this.#completeDraft(upEvent)),
+              ),
+            ),
+          );
+        }),
+      )
+      .subscribe();
+  }
+
+  #listenCancel() {
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(
+        takeUntilDestroyed(this.#destroyRef),
+        filter((event) => event.key === 'Escape'),
+        tap((event) => {
+          event.preventDefault();
+          this.#cancelDraft();
+        }),
+      )
+      .subscribe();
+  }
+
+  #beginDraft(event: MouseEvent) {
+    const point = this.#toBoardPoint(event);
+    const start = findAttachment(point, this.attachableNodes());
+
+    this.#draft = {
+      start,
+      startPoint: start.anchor,
+      prev: {
+        moveEnabled: this.#moveEnabled(),
+        dragEnabled: this.#dragEnabled(),
+      },
     };
 
-    this.#boardFacade.tmpNode.set({
-      type: 'arrow',
-      id: v4(),
-      content: arrow,
+    this.#store.dispatch(
+      BoardPageActions.setBoardCursor({ cursor: 'crosshair' }),
+    );
+    this.#store.dispatch(BoardPageActions.setNodeSelection({ enabled: false }));
+    this.#store.dispatch(
+      BoardPageActions.setDragEnabled({ dragEnabled: false }),
+    );
+    this.#store.dispatch(BoardPageActions.setMoveEnabled({ enabled: false }));
+
+    this.#preview({
+      start,
+      end: start,
     });
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    return true;
+  }
+
+  #updateDraft(event: MouseEvent) {
+    if (!this.#draft) {
+      return;
+    }
+
+    const end = findAttachment(
+      this.#toBoardPoint(event),
+      this.attachableNodes(),
+    );
+
+    this.#preview({
+      start: this.#draft.start,
+      end,
+    });
+  }
+
+  #completeDraft(event: MouseEvent) {
+    if (!this.#draft) {
+      return;
+    }
+
+    const end = findAttachment(
+      this.#toBoardPoint(event),
+      this.attachableNodes(),
+    );
+
+    const endpoints: ArrowEndpoints = {
+      start: this.#draft.start,
+      end,
+    };
+
+    this.#preview(endpoints);
+    this.#commit(endpoints);
+    this.#resetDraft();
+  }
+
+  #cancelDraft() {
+    if (!this.#draft) {
+      this.#boardFacade.tmpNode.set(null);
+      return;
+    }
+
+    this.#resetDraft();
+  }
+
+  #commit(endpoints: ArrowEndpoints) {
+    const length = Math.hypot(
+      endpoints.end.anchor.x - endpoints.start.anchor.x,
+      endpoints.end.anchor.y - endpoints.start.anchor.y,
+    );
+
+    if (length < ARROW_PADDING / 2) {
+      return;
+    }
+
+    const content = buildArrowContent(this.#currentConfig(), endpoints);
+    const action = this.#nodesActions.add<ArrowNode>('arrow', content);
+
+    this.#store.dispatch(
+      BoardActions.batchNodeActions({
+        history: true,
+        actions: [action],
+      }),
+    );
+  }
+
+  #resetDraft() {
+    const prev = this.#draft?.prev;
+
+    if (prev) {
+      this.#store.dispatch(
+        BoardPageActions.setDragEnabled({ dragEnabled: prev.dragEnabled }),
+      );
+      this.#store.dispatch(
+        BoardPageActions.setMoveEnabled({ enabled: prev.moveEnabled }),
+      );
+    }
+
+    this.#store.dispatch(BoardPageActions.setNodeSelection({ enabled: true }));
+    this.#store.dispatch(
+      BoardPageActions.setBoardCursor({ cursor: 'default' }),
+    );
+    this.#boardFacade.tmpNode.set(null);
+    this.#draft = null;
+  }
+
+  #preview(endpoints: ArrowEndpoints) {
+    const content = buildArrowContent(this.#currentConfig(), endpoints);
+
+    this.#boardFacade.tmpNode.set({
+      id: TMP_ARROW_ID,
+      type: 'arrow',
+      content,
+    });
+  }
+
+  #currentConfig() {
+    const heads = this.heads();
+
+    return {
+      color: this.color(),
+      strokeStyle: this.strokeStyle(),
+      arrowType: this.arrowType(),
+      heads,
+      layer: this.#boardMode(),
+    };
+  }
+
+  #isInsideBoard(event: MouseEvent) {
+    const workLayer = document.querySelector<HTMLElement>('.work-layer');
+
+    if (!workLayer) {
+      return false;
+    }
+
+    const rect = workLayer.getBoundingClientRect();
+
+    return (
+      event.clientX >= rect.left &&
+      event.clientX <= rect.right &&
+      event.clientY >= rect.top &&
+      event.clientY <= rect.bottom
+    );
+  }
+
+  #toBoardPoint(event: MouseEvent): Point {
+    const zoom = this.#zoom();
+    const position = this.#position();
+
+    return {
+      x: (-position.x + event.clientX) / zoom,
+      y: (-position.y + event.clientY) / zoom,
+    };
   }
 }

@@ -113,7 +113,7 @@ export class BoardFacade {
 
   filterBoardNodes(nodes: TuNode[]): BoardTuNode[] {
     return nodes.filter(
-      (it) => !['user', 'settings', 'timer'].includes(it.type),
+      (it) => !['user', 'settings', 'timer', 'arrow'].includes(it.type),
     ) as BoardTuNode[];
   }
 

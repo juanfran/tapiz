@@ -10,6 +10,52 @@
   border-radius: var(--radius-3);
   padding: var(--spacing-4);
   box-shadow: 0 0 15px 3px rgba(66, 62, 82, 0.1);
-  gap: var(--size-2);
+  gap: var(--spacing-3);
   margin-inline-start: var(--spacing-2);
+  max-inline-size: 260px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--size-2);
+}
+
+label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary-color);
+}
+
+.color-picker {
+  inline-size: 100%;
+  block-size: 2rem;
+  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-2);
+  padding: 0;
+  background: transparent;
+}
+
+.button-group {
+  display: flex;
+  gap: var(--size-2);
+}
+
+.note {
+  color: var(--neutral-500);
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--neutral-600);
+  margin: 0;
+}
+
+.active {
+  background: var(--primary-color) !important;
+  color: var(--white) !important;
 }

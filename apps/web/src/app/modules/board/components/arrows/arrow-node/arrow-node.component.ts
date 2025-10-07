@@ -1,56 +1,63 @@
 import {
-  Component,
   ChangeDetectionStrategy,
-  ElementRef,
-  inject,
-  viewChild,
+  Component,
   computed,
 } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Image, TuNode } from '@tapiz/board-commons';
-import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
-import { NodeSpaceComponent } from '../../node-space';
-import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { input } from '@angular/core';
-import { ConfigService } from '../../../../../services/config.service';
-import { ArrowNode } from '@tapiz/board-commons/models/arrow.model';
+import {
+  ArrowHead,
+  ArrowNode,
+  TuNode,
+} from '@tapiz/board-commons';
+import { NodeSpaceComponent } from '../../node-space';
 import { ArrowConnectorComponent } from '../arrow-connector/arrow-connector.component';
 
 @Component({
   selector: 'tapiz-arrow-node',
   template: `
-    <tapiz-arrow-connector
-      [start]="node().content.start"
-      [end]="node().content.end"
-      [color]="node().content.color"
-      [strokeStyle]="node().content.strokeStyle"
-      [arrowType]="node().content.arrowType"
-      [heads]="['start', 'end']" />
-
-    <!-- <tapiz-node-space
+    <tapiz-node-space
       [node]="node()"
       [showOutline]="focus()"
-      [rotate]="true"
-      [resize]="true">
-      <p>Arrow Node</p>
-    </tapiz-node-space> -->
+      [resize]="false"
+      [rotate]="false"
+      [draggable]="draggable()"
+      [cursor]="draggable() ? 'grab' : 'default'">
+      <tapiz-arrow-connector
+        class="connector"
+        [start]="start()"
+        [end]="end()"
+        [color]="color()"
+        [strokeStyle]="strokeStyle()"
+        [arrowType]="arrowType()"
+        [heads]="heads()" />
+    </tapiz-node-space>
   `,
   styleUrls: ['./arrow-node.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [HotkeysService],
   imports: [NodeSpaceComponent, ArrowConnectorComponent],
-
   host: {
     '[class.focus]': 'focus()',
   },
 })
 export class ArrowNodeComponent {
-  #store = inject(Store);
-  #configService = inject(ConfigService);
-
-  imageRef = viewChild.required<ElementRef>('image');
-
   node = input.required<TuNode<ArrowNode>>();
   pasted = input.required<boolean>();
   focus = input.required<boolean>();
+
+  start = computed(() => this.node().content.start);
+  end = computed(() => this.node().content.end);
+  color = computed(() => this.node().content.color ?? '#1c1c1c');
+  strokeStyle = computed(
+    () => this.node().content.strokeStyle ?? 'solid',
+  );
+  arrowType = computed(() => this.node().content.arrowType ?? 'sharp');
+  heads = computed<ArrowHead[]>(() => {
+    return this.node().content.heads ?? ['end'];
+  });
+
+  draggable = computed(() => {
+    const content = this.node().content;
+
+    return !content.startAttachment && !content.endAttachment;
+  });
 }

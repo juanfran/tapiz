@@ -4,22 +4,42 @@ import {
   computed,
   inject,
 } from '@angular/core';
-
-import type { ArrowNode } from '@tapiz/board-commons/models/arrow.model';
-import { Store } from '@ngrx/store';
-import { boardPageFeature } from '../../../reducers/boardPage.reducer';
+import { RxFor } from '@rx-angular/template/for';
+import { BoardTuNode, isBoardTuNode } from '@tapiz/board-commons';
 import { BoardFacade } from '../../../../../services/board-facade.service';
-import { v4 } from 'uuid';
+import { NodeComponent } from '../../node/node.component';
 
 @Component({
   selector: 'tapiz-arrows-wrapper',
-  template: ` <div class="wrapper"></div> `,
+  standalone: true,
+  template: `
+    <tapiz-node
+      *rxFor="let node of arrows(); trackBy: 'id'"
+      [node]="node" />
+
+    @if (tmpArrow(); as tmp) {
+      <tapiz-node [node]="tmp" />
+    }
+  `,
   styleUrl: './arrows-wrapper.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [],
+  imports: [NodeComponent, RxFor],
 })
 export class ArrowsWrapperComponent {
-  #store = inject(Store);
-
   #boardFacade = inject(BoardFacade);
+
+  arrows = computed(() =>
+    this.#boardFacade
+      .nodes()
+      .filter(
+        (node): node is BoardTuNode =>
+          node.type === 'arrow' && isBoardTuNode(node),
+      ),
+  );
+
+  tmpArrow = computed(() => {
+    const tmp = this.#boardFacade.tmpNode();
+
+    return tmp?.type === 'arrow' ? tmp : null;
+  });
 }
