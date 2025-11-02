@@ -1,14 +1,6 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 import { input } from '@angular/core';
-import {
-  ArrowHead,
-  ArrowNode,
-  TuNode,
-} from '@tapiz/board-commons';
+import { ArrowHead, ArrowNode, TuNode } from '@tapiz/board-commons';
 import { NodeSpaceComponent } from '../../node-space';
 import { ArrowConnectorComponent } from '../arrow-connector/arrow-connector.component';
 
@@ -18,8 +10,8 @@ import { ArrowConnectorComponent } from '../arrow-connector/arrow-connector.comp
     <tapiz-node-space
       [node]="node()"
       [showOutline]="focus()"
-      [resize]="false"
-      [rotate]="false"
+      [resize]="true"
+      [rotate]="true"
       [draggable]="draggable()"
       [cursor]="draggable() ? 'grab' : 'default'">
       <tapiz-arrow-connector
@@ -47,9 +39,7 @@ export class ArrowNodeComponent {
   start = computed(() => this.node().content.start);
   end = computed(() => this.node().content.end);
   color = computed(() => this.node().content.color ?? '#1c1c1c');
-  strokeStyle = computed(
-    () => this.node().content.strokeStyle ?? 'solid',
-  );
+  strokeStyle = computed(() => this.node().content.strokeStyle ?? 'solid');
   arrowType = computed(() => this.node().content.arrowType ?? 'sharp');
   heads = computed<ArrowHead[]>(() => {
     return this.node().content.heads ?? ['end'];

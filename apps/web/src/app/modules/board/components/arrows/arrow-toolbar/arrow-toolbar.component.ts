@@ -2,14 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
-  effect,
   inject,
   signal,
   computed,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { fromEvent, EMPTY } from 'rxjs';
-import { filter, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import {
   ArrowHead,
@@ -19,7 +15,6 @@ import {
   isBoardTuNode,
 } from '@tapiz/board-commons';
 import { boardPageFeature } from '../../../reducers/boardPage.reducer';
-import { BoardPageActions } from '../../../actions/board-page.actions';
 import { BoardFacade } from '../../../../../services/board-facade.service';
 import { BoardActions } from '../../../actions/board.actions';
 import { NodesActions } from '../../../services/nodes-actions';
@@ -32,13 +27,13 @@ import {
 } from '../arrow-utils';
 import { MatButton } from '@angular/material/button';
 import { ZoneService } from '../../zone/zone.service';
+import { tap, takeLast, share, fromEvent, filter, Subscription } from 'rxjs';
+import { BoardPageActions } from '../../../actions/board-page.actions';
+
 interface DraftState {
   start: ArrowEndpoints['start'];
   startPoint: Point;
-  prev: {
-    moveEnabled: boolean;
-    dragEnabled: boolean;
-  };
+  initialPosition: Point;
 }
 
 const TMP_ARROW_ID = '__tmp-arrow__';
@@ -46,8 +41,78 @@ const TMP_ARROW_ID = '__tmp-arrow__';
 @Component({
   selector: 'tapiz-arrow-toolbar',
   standalone: true,
-  imports: [CommonModule, MatButton],
-  templateUrl: './arrow-toolbar.component.html',
+  imports: [MatButton],
+  template: `
+    <div class="wrapper">
+      <div class="field">
+        <label>Color</label>
+        <input
+          type="color"
+          class="color-picker"
+          [value]="color()"
+          (input)="onColorChange($any($event.target).value)" />
+      </div>
+
+      <div class="field">
+        <label>Stroke</label>
+        <div class="button-group">
+          @for (option of strokeOptions; track option.key) {
+            <button
+              mat-stroked-button
+              color="primary"
+              type="button"
+              [class.active]="strokeStyle() === option.key"
+              (click)="selectStroke(option.key)">
+              {{ option.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Shape</label>
+        <div class="button-group">
+          @for (option of typeOptions; track option.key) {
+            <button
+              type="button"
+              mat-stroked-button
+              color="primary"
+              [class.active]="arrowType() === option.key"
+              (click)="selectType(option.key)">
+              {{ option.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Arrowheads</label>
+        <div class="button-group">
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            [class.active]="startHead()"
+            (click)="toggleHead('start')">
+            Start
+          </button>
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            [class.active]="endHead()"
+            (click)="toggleHead('end')">
+            End
+          </button>
+        </div>
+        <p class="note">Toggle endpoints to add arrowheads.</p>
+      </div>
+
+      <p class="hint">
+        Click and drag on the board to draw an arrow. Press Esc to cancel.
+      </p>
+    </div>
+  `,
   styleUrl: './arrow-toolbar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -58,11 +123,8 @@ export class ArrowToolbarComponent {
   #nodesActions = inject(NodesActions);
   #zoneService = inject(ZoneService);
 
-  #zoom = this.#store.selectSignal(boardPageFeature.selectZoom);
-  #position = this.#store.selectSignal(boardPageFeature.selectPosition);
   #boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
-  #dragEnabled = this.#store.selectSignal(boardPageFeature.selectDragEnabled);
-  #moveEnabled = this.#store.selectSignal(boardPageFeature.selectMoveEnabled);
+  #selectAreaSubscription: Subscription | null = null;
 
   color = signal('#1c1c1c');
   strokeStyle = signal<'solid' | 'dashed' | 'dotted'>('solid');
@@ -112,14 +174,7 @@ export class ArrowToolbarComponent {
 
   constructor() {
     this.#listenPointer();
-    // this.#listenCancel();
-
-    effect(
-      () => {
-        this.#cancelDraft();
-      },
-      { allowSignalWrites: true },
-    );
+    this.#listenCancel();
   }
 
   onColorChange(value: string) {
@@ -145,64 +200,50 @@ export class ArrowToolbarComponent {
   }
 
   #listenPointer() {
-    let started: any = null;
+    let started = false;
 
-    this.#zoneService
+    const selectArea$ = this.#zoneService
       .selectArea('invisible', 'crosshair', true)
-      .subscribe((zone) => {
-        console.log('Selected zone:', zone);
+      .pipe(share());
 
-        if (!zone) {
-          return;
-        }
+    this.#selectAreaSubscription = selectArea$
+      .pipe(
+        tap((zone) => {
+          if (!zone) {
+            return;
+          }
 
-        if (!started) {
-          started = this.#beginDraft(zone.position);
-        }
-        if (started) {
-          this.#updateDraft(zone.position);
-        }
-      });
+          if (!started) {
+            started = this.#beginDraft(zone.position);
+          }
 
-    // fromEvent<MouseEvent>(document, 'mousedown')
-    //   .pipe(
-    //     takeUntilDestroyed(this.#destroyRef),
-    //     filter((event) => event.button === 0),
-    //     filter((event) => !event.shiftKey && !event.metaKey && !event.altKey),
-    //     filter((event) => this.#isInsideBoard(event)),
-    //     switchMap((downEvent) => {
-    //       const started = this.#beginDraft(downEvent);
+          if (started && this.#draft) {
+            this.#updateDraft(zone.mousePosition);
+          }
+        }),
+      )
+      .subscribe();
 
-    //       if (!started) {
-    //         return EMPTY;
-    //       }
-
-    //       return fromEvent<MouseEvent>(document, 'mousemove').pipe(
-    //         tap((moveEvent) => this.#updateDraft(moveEvent)),
-    //         takeUntil(
-    //           fromEvent<MouseEvent>(document, 'mouseup').pipe(
-    //             take(1),
-    //             tap((upEvent) => this.#completeDraft(upEvent)),
-    //           ),
-    //         ),
-    //       );
-    //     }),
-    //   )
-    //   .subscribe();
+    selectArea$.pipe(takeLast(1)).subscribe((zone) => {
+      if (started && zone) {
+        this.#completeDraft(zone.mousePosition);
+        started = false;
+      }
+    });
   }
 
-  // #listenCancel() {
-  //   fromEvent<KeyboardEvent>(document, 'keydown')
-  //     .pipe(
-  //       takeUntilDestroyed(this.#destroyRef),
-  //       filter((event) => event.key === 'Escape'),
-  //       tap((event) => {
-  //         event.preventDefault();
-  //         this.#cancelDraft();
-  //       }),
-  //     )
-  //     .subscribe();
-  // }
+  #listenCancel() {
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(
+        takeUntilDestroyed(this.#destroyRef),
+        filter((event) => event.key === 'Escape'),
+        tap((event) => {
+          event.preventDefault();
+          this.#cancelDraft();
+        }),
+      )
+      .subscribe();
+  }
 
   #beginDraft(point: Point) {
     const start = findAttachment(point, this.attachableNodes());
@@ -210,10 +251,7 @@ export class ArrowToolbarComponent {
     this.#draft = {
       start,
       startPoint: start.anchor,
-      prev: {
-        moveEnabled: this.#moveEnabled(),
-        dragEnabled: this.#dragEnabled(),
-      },
+      initialPosition: point,
     };
 
     this.#preview({
@@ -237,15 +275,12 @@ export class ArrowToolbarComponent {
     });
   }
 
-  #completeDraft(event: MouseEvent) {
+  #completeDraft(position: Point) {
     if (!this.#draft) {
       return;
     }
 
-    const end = findAttachment(
-      this.#toBoardPoint(event),
-      this.attachableNodes(),
-    );
+    const end = findAttachment(position, this.attachableNodes());
 
     const endpoints: ArrowEndpoints = {
       start: this.#draft.start,
@@ -254,16 +289,23 @@ export class ArrowToolbarComponent {
 
     this.#preview(endpoints);
     this.#commit(endpoints);
-    this.#resetDraft();
+
+    this.#cancelDraft();
   }
 
   #cancelDraft() {
     if (!this.#draft) {
-      this.#boardFacade.tmpNode.set(null);
       return;
     }
 
-    this.#resetDraft();
+    if (this.#selectAreaSubscription) {
+      this.#selectAreaSubscription.unsubscribe();
+      this.#selectAreaSubscription = null;
+    }
+
+    this.#boardFacade.tmpNode.set(null);
+    this.#draft = null;
+    this.#store.dispatch(BoardPageActions.setPopupOpen({ popup: '' }));
   }
 
   #commit(endpoints: ArrowEndpoints) {
@@ -287,26 +329,6 @@ export class ArrowToolbarComponent {
     );
   }
 
-  #resetDraft() {
-    const prev = this.#draft?.prev;
-
-    if (prev) {
-      this.#store.dispatch(
-        BoardPageActions.setDragEnabled({ dragEnabled: prev.dragEnabled }),
-      );
-      this.#store.dispatch(
-        BoardPageActions.setMoveEnabled({ enabled: prev.moveEnabled }),
-      );
-    }
-
-    this.#store.dispatch(BoardPageActions.setNodeSelection({ enabled: true }));
-    this.#store.dispatch(
-      BoardPageActions.setBoardCursor({ cursor: 'default' }),
-    );
-    this.#boardFacade.tmpNode.set(null);
-    this.#draft = null;
-  }
-
   #preview(endpoints: ArrowEndpoints) {
     const content = buildArrowContent(this.#currentConfig(), endpoints);
 
@@ -326,33 +348,6 @@ export class ArrowToolbarComponent {
       arrowType: this.arrowType(),
       heads,
       layer: this.#boardMode(),
-    };
-  }
-
-  #isInsideBoard(event: MouseEvent) {
-    const workLayer = document.querySelector<HTMLElement>('.work-layer');
-
-    if (!workLayer) {
-      return false;
-    }
-
-    const rect = workLayer.getBoundingClientRect();
-
-    return (
-      event.clientX >= rect.left &&
-      event.clientX <= rect.right &&
-      event.clientY >= rect.top &&
-      event.clientY <= rect.bottom
-    );
-  }
-
-  #toBoardPoint(event: MouseEvent): Point {
-    const zoom = this.#zoom();
-    const position = this.#position();
-
-    return {
-      x: (-position.x + event.clientX) / zoom,
-      y: (-position.y + event.clientY) / zoom,
     };
   }
 }

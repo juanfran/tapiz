@@ -10,7 +10,6 @@ import { getNodeSize } from '../../../../shared/node-size';
 
 export const ARROW_PADDING = 10;
 const ATTACH_THRESHOLD = 24;
-const EPSILON = 0.5;
 
 type AttachmentCandidate = {
   attachment?: ArrowAttachment;
@@ -38,7 +37,7 @@ export interface ArrowEndpoints {
   end: AttachmentCandidate;
 }
 
-export function computeArrowGeometry(
+function computeArrowGeometry(
   start: Point,
   end: Point,
   padding = ARROW_PADDING,
@@ -108,7 +107,7 @@ function endpointsHasCustomHeads(heads: ArrowHead[]) {
   return true;
 }
 
-export function isPointNearNode(
+function isPointNearNode(
   point: Point,
   node: TuNode,
 ): AttachmentCandidate | null {
@@ -168,69 +167,6 @@ export function findAttachment(
   };
 }
 
-export function resolveAttachment(
-  attachment: ArrowAttachment | undefined,
-  nodeMap: Map<string, TuNode>,
-): Point | null {
-  if (!attachment) {
-    return null;
-  }
-
-  const node = nodeMap.get(attachment.nodeId);
-
-  if (!node || !isBoardTuNode(node)) {
-    return null;
-  }
-
-  const position = node.content.position;
-
-  return {
-    x: position.x + attachment.offset.x,
-    y: position.y + attachment.offset.y,
-  };
-}
-
-export function normalizeArrowFromAttachments(
-  arrow: ArrowNode,
-  boardNodes: TuNode[],
-): ArrowNode | null {
-  const nodeMap = new Map(boardNodes.map((node) => [node.id, node]));
-
-  const start =
-    resolveAttachment(arrow.startAttachment, nodeMap) ??
-    absoluteFromArrow(arrow, 'start');
-  const end =
-    resolveAttachment(arrow.endAttachment, nodeMap) ??
-    absoluteFromArrow(arrow, 'end');
-
-  const {
-    position,
-    start: startLocal,
-    end: endLocal,
-    width,
-    height,
-  } = computeArrowGeometry(start, end);
-
-  if (
-    equalsPoint(position, arrow.position) &&
-    equalsPoint(startLocal, arrow.start) &&
-    equalsPoint(endLocal, arrow.end) &&
-    approxEquals(width, arrow.width) &&
-    approxEquals(height, arrow.height)
-  ) {
-    return null;
-  }
-
-  return {
-    ...arrow,
-    position,
-    start: startLocal,
-    end: endLocal,
-    width,
-    height,
-  };
-}
-
 export function absoluteFromArrow(
   arrow: ArrowNode,
   which: 'start' | 'end',
@@ -245,12 +181,4 @@ export function absoluteFromArrow(
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
-}
-
-function equalsPoint(a: Point, b: Point) {
-  return approxEquals(a.x, b.x) && approxEquals(a.y, b.y);
-}
-
-function approxEquals(a: number, b: number) {
-  return Math.abs(a - b) < EPSILON;
 }

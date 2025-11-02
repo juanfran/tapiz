@@ -15,11 +15,13 @@ import {
 } from 'rxjs';
 import { BoardPageActions } from '../../actions/board-page.actions';
 import { BoardFacade } from '../../../../services/board-facade.service';
+import { Point } from '@tapiz/board-commons';
 
-interface SelectAction {
+export interface SelectAction {
   userId: string;
   style: 'select' | 'group' | 'panel' | 'invisible';
-  position: { x: number; y: number };
+  position: Point;
+  mousePosition: Point;
   size: { width: number; height: number };
   relativeRect: DOMRect;
   layer: number;
@@ -119,34 +121,38 @@ export class ZoneService {
 
             return this.#boardMoveService.mouseMove$.pipe(
               takeUntil(this.#boardMoveService.mouseUp$),
-              map((mouseMoveEvent) => {
-                return {
-                  width: (mouseMoveEvent.x - mouseDownEvent.clientX) / zoom,
-                  height: (mouseMoveEvent.y - mouseDownEvent.clientY) / zoom,
-                };
-              }),
-              map((size) => {
+              map((event) => {
+                let width = (event.x - mouseDownEvent.clientX) / zoom;
+                let height = (event.y - mouseDownEvent.clientY) / zoom;
                 const finalPosition = {
                   x: (-position.x + mouseDownEvent.clientX) / zoom,
                   y: (-position.y + mouseDownEvent.clientY) / zoom,
                 };
+                const mousePosition = {
+                  x: (-position.x + event.x) / zoom,
+                  y: (-position.y + event.y) / zoom,
+                };
 
-                if (size.width < 0) {
-                  size.width = -size.width;
-                  finalPosition.x -= size.width;
+                if (width < 0) {
+                  width = -width;
+                  finalPosition.x -= width;
                 }
 
-                if (size.height < 0) {
-                  size.height = -size.height;
-                  finalPosition.y -= size.height;
+                if (height < 0) {
+                  height = -height;
+                  finalPosition.y -= height;
                 }
 
                 return {
                   userId,
                   style,
                   layer,
-                  size,
+                  size: {
+                    width,
+                    height,
+                  },
                   position: finalPosition,
+                  mousePosition,
                   relativeRect:
                     zoneDom?.getBoundingClientRect() ?? new DOMRect(),
                 };
@@ -155,6 +161,10 @@ export class ZoneService {
                 userId,
                 style,
                 position: {
+                  x: (-position.x + mouseDownEvent.clientX) / zoom,
+                  y: (-position.y + mouseDownEvent.clientY) / zoom,
+                },
+                mousePosition: {
                   x: (-position.x + mouseDownEvent.clientX) / zoom,
                   y: (-position.y + mouseDownEvent.clientY) / zoom,
                 },
