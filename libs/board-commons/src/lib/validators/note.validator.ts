@@ -5,6 +5,7 @@ import {
   CommonBoardValidation,
   SizeValidator,
 } from './common-board-validation.js';
+import { colorSchema, nullableOptionalColorSchema } from './color.validator.js';
 
 const note = z.object({
   ...CommonBoardValidation,
@@ -27,7 +28,7 @@ const note = z.object({
   ),
   drawing: z.array(
     z.object({
-      color: z.string(),
+      color: colorSchema,
       size: z.number().positive().safe(),
       points: z.array(
         z.object({
@@ -40,7 +41,7 @@ const note = z.object({
   ownerId: z.string().max(255),
   width: z.number().positive(),
   height: z.number().positive(),
-  color: z.string().length(7).regex(/^#/).nullable().optional(),
+  color: nullableOptionalColorSchema,
   textHidden: z.boolean().nullable().optional(),
 });
 

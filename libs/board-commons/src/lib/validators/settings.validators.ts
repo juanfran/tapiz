@@ -1,14 +1,6 @@
 import { z } from 'zod/v4';
 import { NodeValidator } from '../models/node.model.js';
-import colorString from 'color-string';
-
-export function colorValidator(val: string) {
-  try {
-    return colorString.get(val) !== null;
-  } catch {
-    return false;
-  }
-}
+import { colorValidator } from './color.validator.js';
 
 export const settingsValidator = z.object({
   readOnly: z.boolean().default(false),
