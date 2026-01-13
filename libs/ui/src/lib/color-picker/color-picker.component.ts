@@ -28,10 +28,15 @@ export class ColorPickerComponent implements OnDestroy {
 
   constructor() {
     afterNextRender(() => {
+      const container = document.querySelector('mat-dialog-container')
+        ? 'mat-dialog-container'
+        : 'body';
+
       this.pickr = Pickr.create({
         ...colorPickerConfig,
         el: this.#el.nativeElement,
         default: this.color() || '',
+        container,
         components: {
           preview: true,
           opacity: true,
