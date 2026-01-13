@@ -268,14 +268,7 @@ export class BoardContextMenuComponent implements OnInit {
                 },
               );
 
-              const allowPublicPosts =
-                this.boardFacade.settings()?.content.allowPublicPosts ?? false;
-
-              if (
-                note.content.ownerId === this.boardFacade.currentUser()?.id ||
-                this.isAdmin() ||
-                allowPublicPosts
-              ) {
+              if (this.nodesStore.canMakeNotePublic(note)) {
                 let textHidden = note.content.textHidden;
 
                 textHidden ??= !this.boardFacade
@@ -285,21 +278,9 @@ export class BoardContextMenuComponent implements OnInit {
                 actions.push({
                   label: textHidden ? 'Make text public' : 'Make text private',
                   icon: textHidden ? 'visibility' : 'visibility_off',
+                  help: 'Ctrl + H',
                   action: () => {
-                    this.store.dispatch(
-                      BoardActions.batchNodeActions({
-                        history: true,
-                        actions: [
-                          this.nodesActions.patch({
-                            type: 'note',
-                            id: note.id,
-                            content: {
-                              textHidden: !textHidden,
-                            },
-                          }),
-                        ],
-                      }),
-                    );
+                    this.nodesStore.toggleNoteTextVisibility(note);
                   },
                 });
               }

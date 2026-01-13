@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { TuNode, isBoardTuNode } from '@tapiz/board-commons';
+import { TuNode, isBoardTuNode, isNote, Note } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { BoardPageActions } from '../actions/board-page.actions';
@@ -7,6 +7,7 @@ import { NodesActions } from './nodes-actions';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { overlappingNodes } from '@tapiz/cdk/utils/overlapping-nodes';
 import { getNodeSize } from '../../../shared/node-size';
+import { boardPageFeature } from '../reducers/boardPage.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -210,5 +211,53 @@ export class NodesStore {
 
         return;
       });
+  }
+
+  toggleNoteTextVisibility(note: TuNode): void {
+    if (!isNote(note)) {
+      return;
+    }
+
+    // Check permissions
+    if (!this.canMakeNotePublic(note)) {
+      return;
+    }
+
+    let textHidden = note.content.textHidden;
+    textHidden ??= !this.#boardFacade
+      .users()
+      ?.find((user) => user.id === note.content.ownerId)?.visible;
+
+    this.#store.dispatch(
+      BoardActions.batchNodeActions({
+        history: true,
+        actions: [
+          this.#nodesActions.patch({
+            type: 'note',
+            id: note.id,
+            content: {
+              textHidden: !textHidden,
+            },
+          }),
+        ],
+      }),
+    );
+  }
+
+  canMakeNotePublic(note: TuNode<Note>): boolean {
+    const allowPublicPosts =
+      this.#boardFacade.settings()?.content.allowPublicPosts ?? false;
+    const isAdmin = this.#store.selectSignal(boardPageFeature.selectIsAdmin)();
+    const currentUserId = this.#boardFacade.currentUser()?.id;
+
+    if (
+      note.content.ownerId !== currentUserId &&
+      !isAdmin &&
+      !allowPublicPosts
+    ) {
+      return false;
+    }
+
+    return true;
   }
 }

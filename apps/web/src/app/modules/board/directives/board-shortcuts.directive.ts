@@ -8,7 +8,7 @@ import { boardPageFeature } from '../reducers/boardPage.reducer';
 import { ZoneService } from '../components/zone/zone.service';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { BoardActions } from '../actions/board.actions';
-import { NodePatch } from '@tapiz/board-commons';
+import { NodePatch, isNote } from '@tapiz/board-commons';
 import { NodesStore } from '../services/nodes.store';
 
 @Directive({
@@ -182,6 +182,34 @@ export class BoardShourtcutsDirective {
             this.#nodesStore.sendBackward(selectedNodes);
           }
         }
+      });
+
+    // Toggle text visibility (Ctrl+H)
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(
+        takeUntilDestroyed(),
+        filter(
+          (e) =>
+            e.ctrlKey &&
+            e.key === 'h' &&
+            !e.repeat &&
+            !isInputField() &&
+            this.#selectedNodesIds().length === 1,
+        ),
+      )
+      .subscribe((e) => {
+        e.preventDefault();
+
+        const selectedNodes = this.#boardFacade
+          .nodes()
+          .filter((node) => this.#selectedNodesIds().includes(node.id));
+
+        if (!selectedNodes.length) return;
+
+        const note = selectedNodes[0];
+        if (!isNote(note)) return;
+
+        this.#nodesStore.toggleNoteTextVisibility(note);
       });
   }
 }
