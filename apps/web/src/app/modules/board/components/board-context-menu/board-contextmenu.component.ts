@@ -233,7 +233,7 @@ export class BoardContextMenuComponent implements OnInit {
                           hsva: true,
                           cmyk: true,
                           input: true,
-                          clear: true,
+                          clear: false,
                           save: false,
                         },
                       },
@@ -259,8 +259,9 @@ export class BoardContextMenuComponent implements OnInit {
                           actions: [patchNote],
                         }),
                       );
+                    });
 
-                      pickr.hide();
+                    pickr.on('hide', () => {
                       pickr.destroy();
                     });
                   },
