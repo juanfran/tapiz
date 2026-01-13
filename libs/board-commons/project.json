@@ -3,7 +3,6 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/board-commons/src",
   "projectType": "library",
-  "targets": {
-  },
+  "targets": {},
   "tags": ["type:util"]
 }

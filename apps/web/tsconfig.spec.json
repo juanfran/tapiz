@@ -9,6 +9,7 @@
       "node",
       "vitest"
     ],
+    "moduleResolution": "bundler"
   },
   "files": ["src/test-setup.ts"],
   "include": [

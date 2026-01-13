@@ -8,19 +8,22 @@
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "bundler",
+    "module": "preserve"
   },
   "files": [],
   "include": [],
   "references": [
     {
-      "path": "./tsconfig.lib.json",
-    },
+      "path": "./tsconfig.lib.json"
+    }
   ],
   "extends": "../../tsconfig.base.json",
   "angularCompilerOptions": {
+    "typeCheckHostBindings": true,
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
-    "strictTemplates": true,
-  },
+    "strictTemplates": true
+  }
 }

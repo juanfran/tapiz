@@ -21,9 +21,12 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
-    "emitDecoratorMetadata": false
+    "emitDecoratorMetadata": false,
+    "moduleResolution": "bundler",
+    "module": "preserve"
   },
   "angularCompilerOptions": {
+    "typeCheckHostBindings": true,
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,

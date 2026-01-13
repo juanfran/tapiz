@@ -45,7 +45,8 @@
     border-color: var(--brand);
   }
 
-  &.voting, &.voting .title {
+  &.voting,
+  &.voting .title {
     cursor: crosshair;
   }
 }

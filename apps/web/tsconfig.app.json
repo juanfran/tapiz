@@ -4,7 +4,8 @@
     "outDir": "../../dist/out-tsc",
     "types": [],
     "useDefineForClassFields": false,
-    "strict": true
+    "strict": true,
+    "moduleResolution": "bundler"
   },
   "files": ["src/main.ts", "src/polyfills.ts", "src/types/index.d.ts"],
   "include": ["src/**/*.d.ts"],

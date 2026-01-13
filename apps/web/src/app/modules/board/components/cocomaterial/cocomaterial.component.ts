@@ -8,7 +8,7 @@ import {
   signal,
   output,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -42,7 +42,6 @@ const DEFAULT_SIZE = 150;
 @Component({
   selector: 'tapiz-cocomaterial',
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatInputModule,
     MatButtonModule,

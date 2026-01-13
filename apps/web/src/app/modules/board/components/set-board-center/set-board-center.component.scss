@@ -16,10 +16,9 @@
   padding: 10px;
   mask:
     conic-gradient(#000 0 0) content-box,
-    conic-gradient(at var(--s) var(--s),#0000 75%,#000 0)
-    0 0/calc(100% - var(--s)) calc(100% - var(--s));
+    conic-gradient(at var(--s) var(--s), #0000 75%, #000 0) 0 0 /
+      calc(100% - var(--s)) calc(100% - var(--s));
 }
-
 
 .actions-wrapper {
   display: flex;

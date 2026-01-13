@@ -5,15 +5,15 @@
   top: 50px;
   z-index: var(--board-tools-layer);
   background: var(--primary-color-background);
-  border-radius:  var(--radius-2);
+  border-radius: var(--radius-2);
   display: flex;
   padding: var(--spacing-1) var(--spacing-2);
   justify-content: space-between;
   gap: var(--spacing-2);
 }
 
-
-.align-left, .align-center {
+.align-left,
+.align-center {
   transform: rotate(90deg);
 }
 

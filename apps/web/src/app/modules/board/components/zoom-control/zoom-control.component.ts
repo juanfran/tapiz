@@ -2,10 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  HostListener,
   inject,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
+import { filter, fromEvent } from 'rxjs';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardPageActions } from '../../actions/board-page.actions';
 import { BoardFacade } from '../../../../services/board-facade.service';
@@ -40,22 +41,42 @@ export class ZoomControlComponent {
     return `${Math.round(this.#zoom() * 100)}%`;
   });
 
-  @HostListener('document:keydown.z', ['$event']) zoomIn(e: KeyboardEvent) {
-    if (e.repeat || isInputField()) return;
+  constructor() {
+    // Zoom in (Z key)
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(
+        takeUntilDestroyed(),
+        filter(
+          (e) =>
+            e.key === 'z' &&
+            !e.altKey &&
+            !e.ctrlKey &&
+            !e.repeat &&
+            !isInputField(),
+        ),
+      )
+      .subscribe((e) => {
+        e.preventDefault();
+        this.increase();
+      });
 
-    e.preventDefault();
-
-    this.increase();
-  }
-
-  @HostListener('document:keydown.alt.z', ['$event']) zoomOut(
-    e: KeyboardEvent,
-  ) {
-    if (e.repeat || isInputField()) return;
-
-    e.preventDefault();
-
-    this.decrease();
+    // Zoom out (Alt+Z)
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(
+        takeUntilDestroyed(),
+        filter(
+          (e) =>
+            e.key === 'z' &&
+            e.altKey &&
+            !e.ctrlKey &&
+            !e.repeat &&
+            !isInputField(),
+        ),
+      )
+      .subscribe((e) => {
+        e.preventDefault();
+        this.decrease();
+      });
   }
 
   setNewZoom(zoom: number) {

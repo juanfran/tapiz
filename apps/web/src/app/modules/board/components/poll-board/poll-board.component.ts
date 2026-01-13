@@ -22,7 +22,7 @@ import { MatInputModule } from '@angular/material/input';
 import { PollConfigComponent } from './components/poll-config/poll-config.component';
 import { PollOptionsComponent } from './components/poll-options/poll-options.component';
 import { v4 } from 'uuid';
-import { CommonModule } from '@angular/common';
+
 import { PollResultsComponent } from './components/poll-results/poll-results.component';
 import { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 import { input } from '@angular/core';
@@ -41,7 +41,6 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
     PollConfigComponent,
     PollOptionsComponent,
     PollResultsComponent,
-    CommonModule,
   ],
 
   template: `

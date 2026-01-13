@@ -5,6 +5,5 @@
   "prefix": "lib",
   "tags": ["type:ui"],
   "projectType": "library",
-  "targets": {
-  }
+  "targets": {}
 }

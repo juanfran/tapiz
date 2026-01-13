@@ -4,15 +4,14 @@ import {
   CUSTOM_ELEMENTS_SCHEMA,
   inject,
   signal,
-  HostListener,
   computed,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
 import { BoardPageActions } from '../../actions/board-page.actions';
-import { switchMap, take } from 'rxjs/operators';
+import { switchMap, take, filter } from 'rxjs/operators';
 import { NotesService } from '../../services/notes.service';
-import { Subscription, zip } from 'rxjs';
+import { Subscription, zip, fromEvent } from 'rxjs';
 import 'emoji-picker-element';
 import { EmojiClickEvent } from 'emoji-picker-element/shared';
 import { CocomaterialComponent } from '../cocomaterial/cocomaterial.component';
@@ -122,45 +121,67 @@ export class BoardToolbarComponent {
     return withPin.includes(this.popup());
   });
 
-  @HostListener('document:keydown.alt', ['$event']) selectAreaShortcut(
-    e: KeyboardEvent,
-  ) {
-    if (isInputField() || e.repeat) return;
-
-    this.select();
-  }
-
-  @HostListener('document:keyup.alt') unselectAreaShortcut() {
-    if (isInputField()) return;
-
-    this.popupOpen('');
-  }
-
-  @HostListener('document:keydown.p') panelShortcut() {
-    if (isInputField()) return;
-
-    this.panel();
-  }
-
-  @HostListener('document:keydown.g') groupShortcut() {
-    if (isInputField()) return;
-
-    this.group();
-  }
-
-  @HostListener('document:keydown.t') textShortcut() {
-    if (isInputField()) return;
-
-    this.text();
-  }
-
-  @HostListener('document:keydown.i') imageShortcut() {
-    if (isInputField()) return;
-
-    this.togglePopup('image');
-  }
-
   constructor() {
+    // Select area (Alt key down)
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((e) => e.key === 'Alt' && !isInputField() && !e.repeat),
+      )
+      .subscribe(() => {
+        this.select();
+      });
+
+    // Unselect area (Alt key up)
+    fromEvent<KeyboardEvent>(document, 'keyup')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((e) => e.key === 'Alt' && !isInputField()),
+      )
+      .subscribe(() => {
+        this.popupOpen('');
+      });
+
+    // Panel (P key)
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((e) => e.key === 'p' && !isInputField()),
+      )
+      .subscribe(() => {
+        this.panel();
+      });
+
+    // Group (G key)
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((e) => e.key === 'g' && !isInputField()),
+      )
+      .subscribe(() => {
+        this.group();
+      });
+
+    // Text (T key)
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((e) => e.key === 't' && !isInputField()),
+      )
+      .subscribe(() => {
+        this.text();
+      });
+
+    // Image (I key)
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((e) => e.key === 'i' && !isInputField()),
+      )
+      .subscribe(() => {
+        this.togglePopup('image');
+      });
+
     toObservable(this.popup)
       .pipe(
         takeUntilDestroyed(),

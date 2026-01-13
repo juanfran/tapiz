@@ -9,6 +9,11 @@
     "esModuleInterop": true,
     "strict": true
   },
-  "exclude": [ "**/*.spec.ts", "**/*.test.ts", "**/test-setup.ts", "**/test-helpers.ts"],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/test-setup.ts",
+    "**/test-helpers.ts"
+  ],
   "include": ["**/*.ts"]
 }
