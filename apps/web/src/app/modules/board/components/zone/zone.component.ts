@@ -20,6 +20,7 @@ import { ZoneService } from './zone.service';
     '[class.group]': 'areaSelector()?.style === "group"',
     '[class.panel]': 'areaSelector()?.style === "panel"',
     '[class.select]': 'areaSelector()?.style === "select"',
+    '[class.invisible]': 'areaSelector()?.style === "invisible"',
   },
 })
 export class ZoneComponent {
