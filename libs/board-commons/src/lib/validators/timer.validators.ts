@@ -32,6 +32,17 @@ const TIMER_VALIDATOR: NodeValidator = {
 
     return {
       success: false,
+      error: validation.success
+        ? undefined
+        : {
+            issues: validation.error.issues.map((err) => ({
+              path: err.path.filter(
+                (p): p is string | number => typeof p !== 'symbol',
+              ),
+              message: err.message,
+              code: err.code,
+            })),
+          },
     };
   },
   patch: async (data) => {
@@ -49,6 +60,15 @@ const TIMER_VALIDATOR: NodeValidator = {
 
     return {
       success: false,
+      error: {
+        issues: validation.error.issues.map((err) => ({
+          path: err.path.filter(
+            (p): p is string | number => typeof p !== 'symbol',
+          ),
+          message: err.message,
+          code: err.code,
+        })),
+      },
     };
   },
   remove: async (data) => {

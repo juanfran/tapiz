@@ -98,6 +98,16 @@ export const validateAction = async (
           position: msg.position,
         };
       }
+
+      if (result.error) {
+        console.error('[Node Validation Failed]', {
+          nodeType: msg.data.type,
+          operation: 'add',
+          nodeId: msg.data.id,
+          userId,
+          errors: result.error.issues,
+        });
+      }
     } else if (msg.op === 'patch') {
       const node = findNode(msg.data.id, msg.parent);
 
@@ -122,6 +132,16 @@ export const validateAction = async (
           parent: msg.parent,
           position: msg.position,
         };
+      }
+
+      if (result.error) {
+        console.error('[Node Validation Failed]', {
+          nodeType: msg.data.type,
+          operation: 'patch',
+          nodeId: msg.data.id,
+          userId,
+          errors: result.error.issues,
+        });
       }
     } else if (msg.op === 'remove') {
       const node = findNode(msg.data.id, msg.parent);
@@ -183,6 +203,17 @@ export const validateAction = async (
           const validatorResult = validator.safeParse(msg.data.content);
 
           if (!validatorResult.success) {
+            console.error('[Node Validation Failed]', {
+              nodeType: msg.data.type,
+              operation: 'patch',
+              nodeId: msg.data.id,
+              userId,
+              errors: validatorResult.error.issues.map((err) => ({
+                path: err.path.join('.'),
+                message: err.message,
+                code: err.code,
+              })),
+            });
             return false;
           }
 
@@ -206,6 +237,17 @@ export const validateAction = async (
         const validatorResult = validator.safeParse(msg.data.content);
 
         if (!validatorResult.success) {
+          console.error('[Node Validation Failed]', {
+            nodeType: msg.data.type,
+            operation: 'add',
+            nodeId: msg.data.id,
+            userId,
+            errors: validatorResult.error.issues.map((err) => ({
+              path: err.path.join('.'),
+              message: err.message,
+              code: err.code,
+            })),
+          });
           return false;
         }
 
@@ -235,7 +277,23 @@ export const validation = async (
   privateId: string,
 ) => {
   if (Array.isArray(msg)) {
-    msg = msg.filter((it) => Validators.stateAction.safeParse(it).success);
+    msg = msg.filter((it) => {
+      const result = Validators.stateAction.safeParse(it);
+      if (!result.success) {
+        console.error('[Node Validation Failed]', {
+          nodeType: it?.data?.type || 'unknown',
+          operation: it?.op || 'unknown',
+          nodeId: it?.data?.id,
+          userId,
+          errors: result.error.issues.map((err) => ({
+            path: err.path.join('.'),
+            message: err.message,
+            code: err.code,
+          })),
+        });
+      }
+      return result.success;
+    });
 
     const actions = await Promise.all(
       msg.map((it) => {
