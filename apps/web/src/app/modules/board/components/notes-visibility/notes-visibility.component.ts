@@ -55,7 +55,7 @@ import { LucideAngularModule } from 'lucide-angular';
           [class.selected]="visible()"
           (cdkMenuItemTriggered)="setVisibility(true)">
           <p>Public</p>
-          <p>Yours notes will be visible to everyone</p>
+          <p>Your notes are visible to everyone</p>
         </button>
         <button
           cdkMenuItemRadio
@@ -63,7 +63,7 @@ import { LucideAngularModule } from 'lucide-angular';
           [class.selected]="!visible()"
           (cdkMenuItemTriggered)="setVisibility(false)">
           <p>Private</p>
-          <p>Yours notes will be visible only to you</p>
+          <p>Your notes are visible only to you</p>
         </button>
       </div>
     </ng-template>
