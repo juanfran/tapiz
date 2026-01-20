@@ -66,6 +66,24 @@ import { getNodeSize } from '../../../../shared/node-size';
           matTooltip="Align right">
           <mat-icon>vertical_align_bottom</mat-icon>
         </button>
+
+        <button
+          (click)="distributeHorizontalSpacing()"
+          mat-icon-button
+          aria-label="Distribute horizontal spacing"
+          matTooltip="Distribute horizontal spacing"
+          [disabled]="focusNodesIds().length < 3">
+          <mat-icon>view_week</mat-icon>
+        </button>
+
+        <button
+          (click)="distributeVerticalSpacing()"
+          mat-icon-button
+          aria-label="Distribute vertical spacing"
+          matTooltip="Distribute vertical spacing"
+          [disabled]="focusNodesIds().length < 3">
+          <mat-icon>view_agenda</mat-icon>
+        </button>
       </div>
     }
   `,
@@ -269,6 +287,124 @@ export class BoardNodesAlignComponent {
         );
       }
     });
+
+    this.store.dispatch(
+      BoardActions.batchNodeActions({
+        history: true,
+        actions: patchs,
+      }),
+    );
+  }
+
+  /**
+   * Distributes horizontal spacing evenly between selected nodes.
+   * Keeps the leftmost and rightmost nodes in place and spaces the middle nodes
+   * so that the gaps between all nodes are equal.
+   */
+  distributeHorizontalSpacing() {
+    const nodes = this.#getNodes();
+    // Need at least 3 nodes: two edge nodes stay fixed, middle nodes are repositioned
+    if (nodes.length < 3) return;
+
+    // Sort nodes from left to right based on their X position
+    const sorted = nodes.toSorted((a, b) => a.position.x - b.position.x);
+
+    const leftmost = sorted[0];
+    const rightmost = sorted[sorted.length - 1];
+
+    // Calculate the total distance from the left edge of leftmost to right edge of rightmost
+    const totalSpan =
+      rightmost.position.x + rightmost.width - leftmost.position.x;
+    // Sum up all node widths
+    const nodesWidth = sorted.reduce((sum, node) => sum + node.width, 0);
+    // The remaining space after accounting for all node widths
+    const totalSpacing = totalSpan - nodesWidth;
+    // Divide the available space equally among the gaps (n-1 gaps for n nodes)
+    const spacing = totalSpacing / (nodes.length - 1);
+
+    const patchs: StateActions[] = [];
+    // Start positioning from the right edge of the leftmost node plus one gap
+    let currentX = leftmost.position.x + leftmost.width + spacing;
+
+    // Only update middle nodes (skip first and last)
+    for (let i = 1; i < sorted.length - 1; i++) {
+      const node = sorted[i];
+      if (node.position.x !== currentX) {
+        patchs.push(
+          this.#nodesActions.patch({
+            type: node.type,
+            id: node.id,
+            content: {
+              position: {
+                ...node.position,
+                x: currentX,
+              },
+            },
+          }),
+        );
+      }
+      // Move to next position: current node width + gap
+      currentX += node.width + spacing;
+    }
+
+    this.store.dispatch(
+      BoardActions.batchNodeActions({
+        history: true,
+        actions: patchs,
+      }),
+    );
+  }
+
+  /**
+   * Distributes vertical spacing evenly between selected nodes.
+   * Keeps the topmost and bottommost nodes in place and spaces the middle nodes
+   * so that the gaps between all nodes are equal.
+   */
+  distributeVerticalSpacing() {
+    const nodes = this.#getNodes();
+    // Need at least 3 nodes: two edge nodes stay fixed, middle nodes are repositioned
+    if (nodes.length < 3) return;
+
+    // Sort nodes from top to bottom based on their Y position
+    const sorted = nodes.toSorted((a, b) => a.position.y - b.position.y);
+
+    const topmost = sorted[0];
+    const bottommost = sorted[sorted.length - 1];
+
+    // Calculate the total distance from the top edge of topmost to bottom edge of bottommost
+    const totalSpan =
+      bottommost.position.y + bottommost.height - topmost.position.y;
+    // Sum up all node heights
+    const nodesHeight = sorted.reduce((sum, node) => sum + node.height, 0);
+    // The remaining space after accounting for all node heights
+    const totalSpacing = totalSpan - nodesHeight;
+    // Divide the available space equally among the gaps (n-1 gaps for n nodes)
+    const spacing = totalSpacing / (nodes.length - 1);
+
+    const patchs: StateActions[] = [];
+    // Start positioning from the bottom edge of the topmost node plus one gap
+    let currentY = topmost.position.y + topmost.height + spacing;
+
+    // Only update middle nodes (skip first and last)
+    for (let i = 1; i < sorted.length - 1; i++) {
+      const node = sorted[i];
+      if (node.position.y !== currentY) {
+        patchs.push(
+          this.#nodesActions.patch({
+            type: node.type,
+            id: node.id,
+            content: {
+              position: {
+                ...node.position,
+                y: currentY,
+              },
+            },
+          }),
+        );
+      }
+      // Move to next position: current node height + gap
+      currentY += node.height + spacing;
+    }
 
     this.store.dispatch(
       BoardActions.batchNodeActions({
