@@ -7,15 +7,17 @@ import {
 import { Store } from '@ngrx/store';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BoardPageActions } from '../../actions/board-page.actions';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardActions } from '../estimation/estimation.component';
 import { v4 } from 'uuid';
-import { BoardSettings } from '@tapiz/board-commons';
+import { BoardSettings, isSettings } from '@tapiz/board-commons';
 
 @Component({
   selector: 'tapiz-set-board-center',
-  imports: [MatButtonModule],
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule],
   template: `@if (showSetBoardCenter()) {
     <div class="wrapper">
       <div class="center"></div>
@@ -29,6 +31,16 @@ import { BoardSettings } from '@tapiz/board-commons';
           mat-flat-button>
           Set new starting view
         </button>
+        @if (hasStartingView()) {
+          <button
+            class="go-to-starting-view"
+            type="button"
+            (click)="goToStartingView()"
+            mat-stroked-button>
+            <mat-icon>home</mat-icon>
+            Go to current starting view
+          </button>
+        }
         <button
           type="button"
           color="warn"
@@ -48,12 +60,17 @@ export class SetBoardCenterComponent {
   #zoom = this.#store.selectSignal(boardPageFeature.selectZoom);
   #position = this.#store.selectSignal(boardPageFeature.selectPosition);
   #settings = computed(() => {
-    return this.#boardFacade.nodes().find((it) => it.type === 'settings');
+    return this.#boardFacade.nodes().find((it) => isSettings(it));
   });
 
   showSetBoardCenter = this.#store.selectSignal(
     (state) => state.boardPage.showSetBoardCenter,
   );
+
+  hasStartingView = computed(() => {
+    const settings = this.#settings();
+    return !!settings?.content?.boardStartingView;
+  });
 
   cancel() {
     this.#store.dispatch(
@@ -61,6 +78,19 @@ export class SetBoardCenterComponent {
         show: false,
       }),
     );
+  }
+
+  goToStartingView() {
+    const settings = this.#settings();
+    if (settings?.content?.boardStartingView) {
+      const { x, y, zoom } = settings.content.boardStartingView;
+      this.#store.dispatch(
+        BoardPageActions.setUserView({
+          zoom,
+          position: { x, y },
+        }),
+      );
+    }
   }
 
   setInitialPosition() {
