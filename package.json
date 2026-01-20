@@ -26,7 +26,7 @@
     "serve-dist": "nx run api:serveDist"
   },
   "engines": {
-    "node": "^22.18.0",
+    "node": "^24.13.0",
     "pnpm": "^10.12.0"
   },
   "private": true,
