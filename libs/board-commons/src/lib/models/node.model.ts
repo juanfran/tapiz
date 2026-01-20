@@ -36,6 +36,13 @@ export interface BachStateActions {
 
 interface NodeValidatorError {
   success: false;
+  error?: {
+    issues: Array<{
+      path: (string | number)[];
+      message: string;
+      code: string;
+    }>;
+  };
 }
 
 export interface NodeConfig {

@@ -38,6 +38,15 @@ const POLL_VALIDATOR: NodeValidator = {
 
     return {
       success: false,
+      error: {
+        issues: validation.error.issues.map((err) => ({
+          path: err.path.filter(
+            (p): p is string | number => typeof p !== 'symbol',
+          ),
+          message: err.message,
+          code: err.code,
+        })),
+      },
     };
   },
   patch: async (data, state) => {
@@ -72,6 +81,15 @@ const POLL_VALIDATOR: NodeValidator = {
 
     return {
       success: false,
+      error: {
+        issues: validation.error.issues.map((err) => ({
+          path: err.path.filter(
+            (p): p is string | number => typeof p !== 'symbol',
+          ),
+          message: err.message,
+          code: err.code,
+        })),
+      },
     };
   },
   remove: async (data) => {
@@ -176,6 +194,15 @@ const POLL_ANSWER_VALIDATOR: NodeValidator = {
 
     return {
       success: false,
+      error: {
+        issues: validation.error.issues.map((err) => ({
+          path: err.path.filter(
+            (p): p is string | number => typeof p !== 'symbol',
+          ),
+          message: err.message,
+          code: err.code,
+        })),
+      },
     };
   },
   patch: async (data, state) => {
@@ -215,6 +242,15 @@ const POLL_ANSWER_VALIDATOR: NodeValidator = {
 
     return {
       success: false,
+      error: {
+        issues: validation.error.issues.map((err) => ({
+          path: err.path.filter(
+            (p): p is string | number => typeof p !== 'symbol',
+          ),
+          message: err.message,
+          code: err.code,
+        })),
+      },
     };
   },
   remove: async (data, state) => {
