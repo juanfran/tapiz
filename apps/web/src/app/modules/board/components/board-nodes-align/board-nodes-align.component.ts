@@ -4,6 +4,7 @@ import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BoardTuNode, StateActions } from '@tapiz/board-commons';
 import { BoardActions } from '../../actions/board.actions';
 import { NodesActions } from '../../services/nodes-actions';
@@ -11,28 +12,31 @@ import { getNodeSize } from '../../../../shared/node-size';
 
 @Component({
   selector: 'tapiz-board-nodes-align',
-  imports: [MatIconModule, MatButtonModule],
+  imports: [MatIconModule, MatButtonModule, MatTooltipModule],
   template: `
     @if (focusNodesIds().length > 1) {
       <div class="wrapper">
         <button
           (click)="alignTop()"
           mat-icon-button
-          aria-label="Align top">
+          aria-label="Align top"
+          matTooltip="Align top">
           <mat-icon>vertical_align_top</mat-icon>
         </button>
 
         <button
           (click)="alignCenter()"
           mat-icon-button
-          aria-label="Align center">
+          aria-label="Align center"
+          matTooltip="Align center">
           <mat-icon>vertical_align_center</mat-icon>
         </button>
 
         <button
           (click)="alignBottom()"
           mat-icon-button
-          aria-label="Align bottom">
+          aria-label="Align bottom"
+          matTooltip="Align bottom">
           <mat-icon>vertical_align_bottom</mat-icon>
         </button>
 
@@ -40,7 +44,8 @@ import { getNodeSize } from '../../../../shared/node-size';
           class="align-left"
           (click)="alignLeft()"
           mat-icon-button
-          aria-label="Align left">
+          aria-label="Align left"
+          matTooltip="Align left">
           <mat-icon>vertical_align_bottom</mat-icon>
         </button>
 
@@ -48,7 +53,8 @@ import { getNodeSize } from '../../../../shared/node-size';
           class="align-center"
           (click)="alignVerticalCenter()"
           mat-icon-button
-          aria-label="Align center">
+          aria-label="Align center"
+          matTooltip="Align vertical center">
           <mat-icon>vertical_align_center</mat-icon>
         </button>
 
@@ -56,7 +62,8 @@ import { getNodeSize } from '../../../../shared/node-size';
           class="align-right"
           (click)="alignRight()"
           mat-icon-button
-          aria-label="Align right">
+          aria-label="Align right"
+          matTooltip="Align right">
           <mat-icon>vertical_align_bottom</mat-icon>
         </button>
       </div>
