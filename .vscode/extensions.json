@@ -2,7 +2,7 @@
   "recommendations": [
     "angular.ng-template",
     "nrwl.angular-console",
-    "esbenp.prettier-vscode",
+    "prettier.prettier-vscode",
     "dbaeumer.vscode-eslint"
   ]
 }
