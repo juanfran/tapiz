@@ -21,7 +21,10 @@ export class Server {
 
   constructor(public io: WsServer) {}
 
-  public async connection(socket: Socket, cookies: Record<string, string>) {
+  public async connection(
+    socket: Socket,
+    cookies: Record<string, string | undefined>,
+  ) {
     const sessionId = cookies[lucia.sessionCookieName];
     if (sessionId) {
       const { session, user } = await validateSession(sessionId);

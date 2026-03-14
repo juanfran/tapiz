@@ -110,7 +110,7 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
       const instance = this.editor();
 
       if (instance) {
-        instance.commands.setContent(this.content());
+        instance.commands.setContent(this.content(), { emitUpdate: false });
       }
     });
   }
