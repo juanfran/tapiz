@@ -62,7 +62,7 @@ fastify.register(fastifyTRPCPlugin, {
 
 fastify.register(cors, {
   credentials: true,
-  origin: true,
+  origin: process.env['FRONTEND_URL'],
 });
 
 // https://github.com/ducktors/fastify-socket.io/issues/36

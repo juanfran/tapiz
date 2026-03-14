@@ -139,6 +139,7 @@ export class Server {
     db.board.updateBoard(boardId, this.state[boardId].get());
 
     delete this.state[boardId];
+    delete this.boardSettings[boardId];
 
     if (this.stateSubscriptions[boardId]) {
       this.stateSubscriptions[boardId].unsubscribe();
@@ -181,9 +182,7 @@ export class Server {
       });
     } else {
       board.update((state) => {
-        state.push(user);
-
-        return state;
+        return [...state, user];
       });
     }
   }

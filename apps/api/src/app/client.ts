@@ -45,11 +45,6 @@ export class Client {
     this.socket.on('leaveBoard', () => {
       this.close();
     });
-
-    // simulate disconnect
-    // setTimeout(() => {
-    //   this.socket.conn.close();
-    // }, 10000);
   }
   async subscriptorMessage(message: { type: 'board' | 'team'; id: string }) {
     try {

@@ -13,6 +13,8 @@ import { relations } from 'drizzle-orm';
 import { TuNode } from '@tapiz/board-commons';
 
 export const roleEnum = pgEnum('role', ['admin', 'member']);
+// Note: roleEnumWithGuest references the same DB enum 'role' which already includes 'guest'
+// Separating into two TS declarations preserves type safety for team roles (no 'guest')
 export const roleEnumWithGuest = pgEnum('role', ['admin', 'member', 'guest']);
 
 export const accounts = pgTable('accounts', {

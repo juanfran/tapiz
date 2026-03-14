@@ -53,11 +53,15 @@ export const getAuthUrl = async (reply: FastifyReply) => {
 
   url.searchParams.set('access_type', 'offline');
 
+  const isProduction = process.env['NODE_ENV'] === 'production';
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (reply as any).setCookie('state', state, {
     path: '/',
     httpOnly: true,
     maxAge: 60 * 10,
+    secure: isProduction,
+    sameSite: 'lax',
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,6 +69,8 @@ export const getAuthUrl = async (reply: FastifyReply) => {
     path: '/',
     httpOnly: true,
     maxAge: 60 * 10,
+    secure: isProduction,
+    sameSite: 'lax',
   });
 
   return url;
