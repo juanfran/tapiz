@@ -11,7 +11,7 @@ import db from './db/index.js';
 
 import { syncNodeBox } from '@tapiz/sync-node-box';
 import { Subscription, throttleTime } from 'rxjs';
-import { lucia, validateSession } from './auth.js';
+import { validateSession } from './auth.js';
 
 export class Server {
   public clients: Client[] = [];
@@ -21,16 +21,12 @@ export class Server {
 
   constructor(public io: WsServer) {}
 
-  public async connection(
-    socket: Socket,
-    cookies: Record<string, string | undefined>,
-  ) {
-    const sessionId = cookies[lucia.sessionCookieName];
-    if (sessionId) {
-      const { session, user } = await validateSession(sessionId);
+  public async connection(socket: Socket, cookieHeader: string) {
+    if (cookieHeader) {
+      const session = await validateSession(cookieHeader);
 
-      if (session && user) {
-        const dbUser = await db.user.getUser(user.id);
+      if (session?.user) {
+        const dbUser = await db.user.getUser(session.user.id);
 
         if (dbUser) {
           const client = new Client(

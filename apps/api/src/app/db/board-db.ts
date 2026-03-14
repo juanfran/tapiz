@@ -218,7 +218,7 @@ export async function getBoardUsers(boardId: string): Promise<BoardUserInfo[]> {
       role: schema.acountsToBoards.role,
       accounts: {
         name: schema.accounts.name,
-        picture: schema.accounts.picture,
+        image: schema.accounts.image,
       },
     })
     .from(schema.acountsToBoards)
@@ -234,7 +234,7 @@ export async function getBoardUsers(boardId: string): Promise<BoardUserInfo[]> {
       id: result.id,
       name: result.accounts.name,
       role: result.role,
-      picture: result.accounts.picture,
+      picture: result.accounts.image,
     }));
 }
 

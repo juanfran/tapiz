@@ -4,7 +4,6 @@ import { AppRouter, appRouter } from './routers/index.js';
 import fastifyCookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import fastifyIO from 'fastify-socket.io';
-import { parse } from 'cookie';
 import customParser from 'socket.io-msgpack-parser';
 
 import {
@@ -13,8 +12,8 @@ import {
 } from '@trpc/server/adapters/fastify';
 import { Server } from './server.js';
 import { setServer } from './global.js';
-import { getAuthUrl, lucia } from './auth.js';
-import { googleCallback } from './routers/auth-routes.js';
+import { getAuth } from './auth.js';
+import { toNodeHandler } from 'better-auth/node';
 import { fileUpload } from './file-upload.js';
 
 const fastify = Fastify({
@@ -26,7 +25,7 @@ await fastify.register(import('@fastify/rate-limit'), {
   max: 150,
   timeWindow: '1 minute',
   keyGenerator: (req) => {
-    return req.cookies[lucia.sessionCookieName] || req.ip;
+    return req.cookies['better-auth.session_token'] || req.ip;
   },
 });
 
@@ -94,17 +93,24 @@ fastify.register(async function (fastify) {
         setServer(server);
       }
 
-      server.connection(socket, parse(socket.request.headers.cookie ?? ''));
+      server.connection(socket, socket.request.headers.cookie ?? '');
     });
   });
+});
 
-  fastify.get('/api/auth', async (req, rep) => {
-    const authUrl = await getAuthUrl(rep);
+// Better Auth handles all /api/auth/* routes (OAuth flows, session management)
+fastify.register(async function (fastify) {
+  fastify.addContentTypeParser(
+    'application/json',
+    { parseAs: 'buffer' },
+    (_req, body, done) => {
+      done(null, body);
+    },
+  );
 
-    return rep.redirect(authUrl.href);
+  fastify.all('/api/auth/*', (req, reply) => {
+    return toNodeHandler(getAuth())(req.raw, reply.raw);
   });
-
-  fastify.register(googleCallback);
 });
 
 const host = process.env['API_HOST'];

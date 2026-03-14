@@ -2,6 +2,7 @@ import {
   pgTable,
   json,
   varchar,
+  text,
   uuid,
   timestamp,
   primaryKey,
@@ -17,20 +18,61 @@ export const roleEnum = pgEnum('role', ['admin', 'member']);
 // Separating into two TS declarations preserves type safety for team roles (no 'guest')
 export const roleEnumWithGuest = pgEnum('role', ['admin', 'member', 'guest']);
 
+// accounts serves as the Better Auth 'user' table (all FK relationships preserved)
 export const accounts = pgTable('accounts', {
   id: varchar('id', { length: 256 }).primaryKey(),
   name: varchar('name', { length: 256 }).notNull(),
   email: varchar('email', { length: 320 }).notNull().unique(),
-  picture: varchar('picture'),
+  // 'picture' is the DB column name; Better Auth maps this as 'image'
+  image: varchar('picture'),
   googleId: varchar('google_id').unique(),
+  // Better Auth required fields
+  emailVerified: boolean('email_verified').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
+// account_session serves as the Better Auth 'session' table
 export const accountsToSession = pgTable('account_session', {
-  id: varchar('id').primaryKey(),
+  id: text('id').primaryKey(),
   expiresAt: timestamp('expires_at').notNull(),
+  token: text('token').notNull().unique(),
+  createdAt: timestamp('created_at').notNull(),
+  updatedAt: timestamp('updated_at').notNull(),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
   userId: varchar('user_id')
     .notNull()
-    .references(() => accounts.id),
+    .references(() => accounts.id, { onDelete: 'cascade' }),
+});
+
+// Better Auth OAuth account linking table (stores provider credentials per user)
+export const oauthAccounts = pgTable('oauth_accounts', {
+  id: text('id').primaryKey(),
+  accountId: text('account_id').notNull(),
+  providerId: text('provider_id').notNull(),
+  userId: varchar('user_id')
+    .notNull()
+    .references(() => accounts.id, { onDelete: 'cascade' }),
+  accessToken: text('access_token'),
+  refreshToken: text('refresh_token'),
+  idToken: text('id_token'),
+  accessTokenExpiresAt: timestamp('access_token_expires_at'),
+  refreshTokenExpiresAt: timestamp('refresh_token_expires_at'),
+  scope: text('scope'),
+  password: text('password'),
+  createdAt: timestamp('created_at').notNull(),
+  updatedAt: timestamp('updated_at').notNull(),
+});
+
+// Better Auth verification table (email OTP, magic links, etc.)
+export const verification = pgTable('verification', {
+  id: text('id').primaryKey(),
+  identifier: text('identifier').notNull(),
+  value: text('value').notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at'),
+  updatedAt: timestamp('updated_at'),
 });
 
 export const usersRelations = relations(accounts, ({ many }) => ({

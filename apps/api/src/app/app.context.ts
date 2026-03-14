@@ -1,54 +1,29 @@
 import { inferAsyncReturnType } from '@trpc/server';
 import { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { getUser } from './db/user-db.js';
-import { lucia, validateSession } from './auth.js';
+import { validateSession } from './auth.js';
 import { FastifyInstance } from 'fastify';
 
 // // prevent angular build errors
 import '@fastify/rate-limit';
 import '@fastify/cookie';
 
-export async function createAuthContext({
-  req,
-  res,
-}: CreateFastifyContextOptions) {
+export async function createAuthContext({ req }: CreateFastifyContextOptions) {
   async function getUserFromHeader() {
-    const cookies = req.cookies;
+    const cookieHeader = req.headers.cookie ?? '';
 
-    const sessionId = cookies[lucia.sessionCookieName];
+    if (!cookieHeader) {
+      return null;
+    }
 
-    if (sessionId) {
-      const { session, user } = await validateSession(sessionId);
+    try {
+      const session = await validateSession(cookieHeader);
 
-      if (!user) {
+      if (!session?.user) {
         return null;
       }
 
-      try {
-        if (session && session.fresh) {
-          const sessionCookie = lucia.createSessionCookie(session.id);
-
-          res.setCookie(
-            sessionCookie.name,
-            sessionCookie.value,
-            sessionCookie.attributes,
-          );
-        }
-
-        if (!session) {
-          const sessionCookie = lucia.createBlankSessionCookie();
-          res.setCookie(
-            sessionCookie.name,
-            sessionCookie.value,
-            sessionCookie.attributes,
-          );
-        }
-      } catch (err) {
-        console.error('Error setting session cookie', err);
-        return null;
-      }
-
-      const dbUser = await getUser(user.id);
+      const dbUser = await getUser(session.user.id);
 
       if (!dbUser) {
         return null;
@@ -58,11 +33,12 @@ export async function createAuthContext({
         sub: dbUser.id,
         name: dbUser.name,
         email: dbUser.email,
-        picture: dbUser.picture,
+        picture: dbUser.image,
       };
+    } catch (err) {
+      console.error('Error validating session', err);
+      return null;
     }
-
-    return null;
   }
 
   const user = await getUserFromHeader();

@@ -57,6 +57,13 @@
       "when": 1731514196823,
       "tag": "0007_fixed_korath",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1773449755142,
+      "tag": "0008_dashing_riptide",
+      "breakpoints": true
     }
   ]
 }

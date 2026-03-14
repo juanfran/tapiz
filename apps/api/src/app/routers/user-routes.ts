@@ -3,11 +3,14 @@ import { z } from 'zod/v4';
 import { protectedProcedure, publicProcedure, router } from '../trpc.js';
 import db from '../db/index.js';
 import { getUserInvitationsByEmail } from '../db/user-db.js';
-import { lucia } from '../auth.js';
+import { getAuth } from '../auth.js';
 
 export const userRouter = router({
   removeAccount: protectedProcedure.mutation(async (req) => {
-    await lucia.invalidateUserSessions(req.ctx.user.sub);
+    await getAuth().api.revokeUserSessions({
+      body: { userId: req.ctx.user.sub },
+      headers: new Headers({}),
+    });
 
     let teams = await db.team.getUserTeams(req.ctx.user.sub);
 
@@ -151,7 +154,10 @@ export const userRouter = router({
     const mayLogout: { user?: { sub: string } } = req.ctx;
 
     if (mayLogout.user) {
-      await lucia.invalidateUserSessions(mayLogout.user.sub);
+      await getAuth().api.revokeUserSessions({
+        body: { userId: mayLogout.user.sub },
+        headers: new Headers({}),
+      });
     }
 
     return {

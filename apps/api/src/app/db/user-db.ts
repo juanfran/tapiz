@@ -43,35 +43,15 @@ export async function deleteAccount(userId: string): Promise<unknown> {
   return db.delete(schema.accounts).where(eq(schema.accounts.id, userId));
 }
 
-export async function createUser(
-  userId: string,
-  name: string,
-  email: string,
-  picture: string,
-  googleId: string,
-) {
-  const insertedUser = await db
-    .insert(schema.accounts)
-    .values({ id: userId, name, email, picture, googleId })
-    .onConflictDoUpdate({
-      target: schema.accounts.id,
-      set: {
-        name,
-      },
-    });
-
-  return insertedUser;
-}
-
 export async function updateUser(
   userId: string,
   name: string,
   email: string,
-  picture: string,
+  image: string,
 ) {
   return db
     .update(schema.accounts)
-    .set({ name, picture, email })
+    .set({ name, image, email })
     .where(eq(schema.accounts.id, userId));
 }
 
