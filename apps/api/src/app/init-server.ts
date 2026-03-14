@@ -68,9 +68,7 @@ fastify.register(cors, {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 fastify.register(fastifyIO as any, {
   connectionStateRecovery: {
-    // the backup duration of the sessions and the packets
     maxDisconnectionDuration: 2 * 60 * 1000,
-    // whether to skip middlewares upon successful recovery
     skipMiddlewares: true,
   },
   cors: {
@@ -79,6 +77,12 @@ fastify.register(fastifyIO as any, {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   },
   parser: customParser,
+  // Tuned for high-concurrency boards: detect dead connections faster
+  // while keeping overhead low for many simultaneous users
+  pingTimeout: 15000,
+  pingInterval: 10000,
+  // Allow large board state payloads (default is 1MB)
+  maxHttpBufferSize: 5 * 1024 * 1024,
 });
 
 fastify.register(async function (fastify) {

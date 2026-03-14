@@ -173,25 +173,24 @@ export class Client {
     }
 
     this.server.setState(this.boardId, (state) => {
-      state = state.map((node) => {
-        if (node.type !== 'user') {
-          return node;
-        }
+      const userIdx = state.findIndex(
+        (node) => node.type === 'user' && node.id === this.id,
+      );
 
-        if (node.id === this.id) {
-          return {
-            ...node,
-            content: {
-              ...node.content,
-              connected: false,
-            },
-          };
-        }
+      if (userIdx === -1) {
+        return state;
+      }
 
-        return node;
-      });
+      const updated = [...state];
+      updated[userIdx] = {
+        ...updated[userIdx],
+        content: {
+          ...updated[userIdx].content,
+          connected: false,
+        },
+      };
 
-      return state;
+      return updated;
     });
 
     const action: StateActions = {

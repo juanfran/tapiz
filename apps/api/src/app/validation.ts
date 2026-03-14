@@ -28,22 +28,20 @@ const validations = {
     vector: Validators.patchVector,
     text: Validators.patchText,
   },
-  newValidators: [
-    {
-      type: 'token',
-      validator: PERSONAL_TOKEN_VALIDATOR,
-    },
-    {
-      type: 'settings',
-      validator: SETTINGS_VALIDATOR,
-    },
+};
+
+// Pre-built Map for O(1) validator lookup — avoids linear array scan on every message
+const newValidatorsMap = new Map(
+  [
+    { type: 'token', validator: PERSONAL_TOKEN_VALIDATOR },
+    { type: 'settings', validator: SETTINGS_VALIDATOR },
     ...ESTIMATION_VALIDATORS,
     ...POLL_VALIDATORS,
     ...COMMENTS_VALIDATORS,
     ...NOTE_VALIDATORS,
     ...TIMER_VALIDATORS,
-  ],
-};
+  ].map((v) => [v.type, v.validator]),
+);
 
 export const validateAction = async (
   msg: StateActions,
@@ -55,9 +53,7 @@ export const validateAction = async (
 ): Promise<StateActions | false> => {
   const customValidators = msg.data.type in validations.custom;
 
-  const validatorConfig = validations.newValidators.find(
-    (it) => it.type === msg.data.type,
-  );
+  const validatorConfig = newValidatorsMap.get(msg.data.type);
 
   const findNode = (id: string, parentId?: string) => {
     if (parentId) {
@@ -81,7 +77,7 @@ export const validateAction = async (
 
   if (validatorConfig) {
     if (msg.op === 'add') {
-      const result = await validatorConfig.validator.add(msg.data, {
+      const result = await validatorConfig.add(msg.data, {
         userId,
         nodes: nodes,
         isAdmin,
@@ -115,7 +111,7 @@ export const validateAction = async (
         return false;
       }
 
-      const result = await validatorConfig.validator.patch(msg.data, {
+      const result = await validatorConfig.patch(msg.data, {
         userId,
         nodes,
         node,
@@ -150,7 +146,7 @@ export const validateAction = async (
         return false;
       }
 
-      const result = await validatorConfig.validator.remove(msg.data, {
+      const result = await validatorConfig.remove(msg.data, {
         userId,
         nodes,
         node,
