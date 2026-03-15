@@ -41,16 +41,19 @@ declare global {
   }
 }
 
-Cypress.Commands.add('loginWithCredentials', (email: string, password: string) => {
-  cy.request({
-    method: 'POST',
-    url: `${Cypress.env('API_URL')}/api/auth/sign-in/email`,
-    body: { email, password },
-    failOnStatusCode: false,
-  }).then((response) => {
-    expect(response.status, 'Login succeeded').to.be.oneOf([200, 201]);
-  });
-});
+Cypress.Commands.add(
+  'loginWithCredentials',
+  (email: string, password: string) => {
+    cy.request({
+      method: 'POST',
+      url: `${Cypress.env('API_URL')}/api/auth/sign-in/email`,
+      body: { email, password },
+      failOnStatusCode: false,
+    }).then((response) => {
+      expect(response.status, 'Login succeeded').to.be.oneOf([200, 201]);
+    });
+  },
+);
 
 Cypress.Commands.add('createBoard', (name = `E2E Board ${Date.now()}`) => {
   return cy
@@ -66,9 +69,15 @@ Cypress.Commands.add('createBoard', (name = `E2E Board ${Date.now()}`) => {
 });
 
 Cypress.Commands.add('waitForBoard', () => {
-  // The board canvas element appears once the WebSocket has connected
+  // The board's inner .container div has [class.loading]="!loaded()" with display:none
+  // tapiz-board itself never gets .loading — must check the inner container
   cy.get('tapiz-board', { timeout: 15000 }).should('exist');
-  cy.get('.board-loaded, tapiz-nodes', { timeout: 15000 }).should('exist');
+  cy.get('tapiz-board .container:not(.loading)', { timeout: 20000 }).should(
+    'exist',
+  );
+  // Wait for the deferred toolbar block to render (Angular @defer on idle)
+  cy.get('tapiz-board-toolbar', { timeout: 15000 }).should('exist');
+  cy.get('tapiz-nodes', { timeout: 15000 }).should('exist');
 });
 
 Cypress.Commands.add('activateNoteMode', () => {
@@ -82,12 +91,24 @@ Cypress.Commands.add('placeNoteAt', (x: number, y: number) => {
 Cypress.Commands.add('dragNoteToCanvas', (targetX: number, targetY: number) => {
   cy.get('tapiz-sticky-note-pad .pad-wrapper')
     .trigger('mousedown', { button: 0, force: true })
-    .trigger('mousemove', { clientX: targetX - 20, clientY: targetY - 20, force: true })
+    .trigger('mousemove', {
+      clientX: targetX - 20,
+      clientY: targetY - 20,
+      force: true,
+    })
     .then(() => {
       // Move significantly to trigger drag (> dragThreshold=8px)
       cy.get('tapiz-board')
-        .trigger('mousemove', { clientX: targetX, clientY: targetY, force: true })
-        .trigger('mouseup', { clientX: targetX, clientY: targetY, force: true });
+        .trigger('mousemove', {
+          clientX: targetX,
+          clientY: targetY,
+          force: true,
+        })
+        .trigger('mouseup', {
+          clientX: targetX,
+          clientY: targetY,
+          force: true,
+        });
     });
 });
 

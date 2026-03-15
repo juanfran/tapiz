@@ -13,7 +13,7 @@
 
 describe('Board Toolbar', () => {
   beforeEach(() => {
-    cy.visit('/demo');
+    cy.visit('/board/demo');
     cy.waitForBoard();
   });
 
@@ -36,8 +36,10 @@ describe('Board Toolbar', () => {
 
     it('T activates text mode', () => {
       cy.get('body').type('t');
-      cy.get('tapiz-board-toolbar [icon="text"].active, tapiz-board-toolbar-button.active[icon="text"]')
-        .should('exist');
+      // extrasButton uses dynamic [icon] binding (no HTML attribute) — match by static tooltip attribute
+      cy.get('tapiz-board-toolbar-button[tooltip="Tools"].active').should(
+        'exist',
+      );
     });
 
     it('P activates panel mode', () => {
@@ -60,7 +62,8 @@ describe('Board Toolbar', () => {
 
   context('Tools popup', () => {
     it('opens tools popup and shows all tool options', () => {
-      cy.get('tapiz-board-toolbar-button[icon="add_simple"]').click();
+      // extrasButton uses dynamic [icon] binding — use static tooltip attribute instead
+      cy.get('tapiz-board-toolbar-button[tooltip="Tools"]').click();
       cy.get('tapiz-tools').should('be.visible');
       cy.get('tapiz-tools').within(() => {
         cy.contains('Note').should('exist');
@@ -74,7 +77,7 @@ describe('Board Toolbar', () => {
     });
 
     it('selecting Note from tools popup activates note mode', () => {
-      cy.get('tapiz-board-toolbar-button[icon="add_simple"]').click();
+      cy.get('tapiz-board-toolbar-button[tooltip="Tools"]').click();
       cy.get('tapiz-tools').contains('Note').click();
       cy.get('tapiz-sticky-note-pad').should('have.class', 'active');
     });

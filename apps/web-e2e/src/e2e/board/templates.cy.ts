@@ -10,16 +10,17 @@
 
 describe('Template Selector', () => {
   beforeEach(() => {
-    cy.visit('/demo');
+    cy.visit('/board/demo');
     cy.waitForBoard();
-    // Switch to edit/presentation mode where templates are available
-    // The templates button appears in boardMode === 1
-    // In demo mode we may need to toggle the mode
+    // Templates are only accessible in boardMode=1 (edit mode)
+    cy.get('.change-edit', { timeout: 5000 }).click();
+    cy.get('tapiz-board-toolbar-button[icon="templates"]', {
+      timeout: 5000,
+    }).should('exist');
   });
 
   it('opens template selector from toolbar', () => {
-    // Templates button is visible in boardMode=1
-    cy.get('tapiz-board-toolbar-button[icon="templates"]', { timeout: 5000 })
+    cy.get('tapiz-board-toolbar-button[icon="templates"]')
       .should('be.visible')
       .click();
     cy.get('tapiz-template-selector').should('be.visible');
@@ -63,7 +64,10 @@ describe('Template Selector', () => {
   it('loads Aggregate Design Canvas template onto the board', () => {
     cy.get('tapiz-board-toolbar-button[icon="templates"]').click();
     cy.get('tapiz-template-selector').within(() => {
-      cy.contains('Aggregate Design Canvas (DDD)').click();
+      // scrollIntoView in case the item is partially off-screen in the list
+      cy.contains('Aggregate Design Canvas (DDD)')
+        .scrollIntoView()
+        .click({ force: true });
     });
 
     cy.get('tapiz-node', { timeout: 10000 }).should('have.length.at.least', 8);

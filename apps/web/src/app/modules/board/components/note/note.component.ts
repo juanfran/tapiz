@@ -63,7 +63,7 @@ import { NodeToolbarComponent } from '../node-toolbar/node-toolbar.component';
     '[class.active-layer]': 'activeLayer()',
     '[class.drop-animation]': 'dropAnimation()',
     '[class.drag-animation]': 'dragAnimation()',
-    '[style.--custom-fg]': '"#000"',
+    '[style.--custom-fg]': 'contrastColor()',
     '[style.--custom-light]': 'lightColor()',
     '[style.--custom-main]': 'color()',
     '[style.--contrast-color]': 'contrastColor()',

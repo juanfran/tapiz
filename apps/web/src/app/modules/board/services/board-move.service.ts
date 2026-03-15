@@ -1,5 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { fromEvent, animationFrameScheduler, Observable, Subject } from 'rxjs';
+import {
+  fromEvent,
+  merge,
+  animationFrameScheduler,
+  Observable,
+  Subject,
+} from 'rxjs';
 import {
   map,
   pairwise,
@@ -15,6 +21,15 @@ import { Point } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
 import { boardPageFeature } from '../reducers/boardPage.reducer';
 
+function touchToMouse(touch: Touch, type: string): MouseEvent {
+  return new MouseEvent(type, {
+    clientX: touch.clientX,
+    clientY: touch.clientY,
+    button: 0,
+    bubbles: true,
+  });
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -28,7 +43,16 @@ export class BoardMoveService {
   public currentMouseDownWatch$?: Subject<void>;
 
   public listen(workLayer: HTMLElement) {
-    this.mouseDown$ = fromEvent<MouseEvent>(workLayer, 'mousedown').pipe(
+    const mouseDown = fromEvent<MouseEvent>(workLayer, 'mousedown');
+    const touchStart = fromEvent<TouchEvent>(workLayer, 'touchstart').pipe(
+      filter((e) => e.touches.length === 1),
+      map((e) => {
+        e.preventDefault();
+        return touchToMouse(e.touches[0], 'mousedown');
+      }),
+    );
+
+    this.mouseDown$ = merge(mouseDown, touchStart).pipe(
       filter((e) => {
         const targetElement = e.target as HTMLElement;
         if (targetElement.tagName.toLowerCase() === 'tapiz-board') {
@@ -49,9 +73,25 @@ export class BoardMoveService {
       share(),
     );
 
-    this.mouseUp$ = fromEvent<MouseEvent>(window, 'mouseup');
+    const mouseUp = fromEvent<MouseEvent>(window, 'mouseup');
+    const touchEnd = fromEvent<TouchEvent>(window, 'touchend').pipe(
+      map((e) => {
+        const touch = e.changedTouches[0];
+        return touchToMouse(touch, 'mouseup');
+      }),
+    );
+    this.mouseUp$ = merge(mouseUp, touchEnd);
 
-    this.mouseMove$ = fromEvent<MouseEvent>(workLayer, 'mousemove').pipe(
+    const mouseMove = fromEvent<MouseEvent>(workLayer, 'mousemove');
+    const touchMove = fromEvent<TouchEvent>(workLayer, 'touchmove').pipe(
+      filter((e) => e.touches.length === 1),
+      map((e) => {
+        e.preventDefault();
+        return touchToMouse(e.touches[0], 'mousemove');
+      }),
+    );
+
+    this.mouseMove$ = merge(mouseMove, touchMove).pipe(
       throttleTime(0, animationFrameScheduler),
       map((mouseMove) => {
         return {

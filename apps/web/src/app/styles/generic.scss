@@ -60,7 +60,12 @@ blockquote {
 }
 
 a {
-  color: #000;
+  color: var(--brand, #000);
+  text-decoration: underline;
+
+  &:hover {
+    text-decoration: none;
+  }
 }
 
 /* HEADINGS */
@@ -162,6 +167,17 @@ button {
   background: none;
   border: 0;
   cursor: pointer;
+}
+
+/* Focus indicators — WCAG 2.1 Level AA (2.4.7 Focus Visible) */
+:focus-visible {
+  outline: 2px solid var(--brand, #000);
+  outline-offset: 2px;
+}
+
+/* Remove default outline only when :focus-visible is supported */
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 main {

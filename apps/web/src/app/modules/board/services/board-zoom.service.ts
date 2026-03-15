@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { fromEvent, Observable } from 'rxjs';
+import { fromEvent, merge, Observable, Subject } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -23,10 +23,15 @@ export class BoardZoomService {
     point: Point;
   }>;
 
+  #pinchZoom$ = new Subject<{ zoom: number; point: Point }>();
+  #lastPinchDistance = 0;
+
   constructor() {
     const maxZoom = 2.5;
     const minZoom = 0.1;
     const stepZoom = 0.075;
+
+    this.#setupPinchZoom();
 
     const wheel$ = fromEvent<WheelEvent>(window, 'wheel').pipe(
       share(),
@@ -51,7 +56,7 @@ export class BoardZoomService {
       }),
     );
 
-    this.zoom$ = wheel$.pipe(
+    const wheelZoom$ = wheel$.pipe(
       map((event) => {
         return {
           zoom: Math.sign(event.deltaY),
@@ -61,6 +66,9 @@ export class BoardZoomService {
           },
         };
       }),
+    );
+
+    this.zoom$ = merge(wheelZoom$, this.#pinchZoom$).pipe(
       withLatestFrom(this.store.select(boardPageFeature.selectZoom)),
       map(([zoomEvent, zoom]) => {
         if (zoomEvent.zoom > 0) {
@@ -111,6 +119,45 @@ export class BoardZoomService {
           zoomEvent.zoom,
         ];
       }),
+    );
+  }
+
+  #setupPinchZoom() {
+    fromEvent<TouchEvent>(window, 'touchstart', { passive: false }).subscribe(
+      (e) => {
+        if (e.touches.length === 2) {
+          this.#lastPinchDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY,
+          );
+        }
+      },
+    );
+
+    fromEvent<TouchEvent>(window, 'touchmove', { passive: false }).subscribe(
+      (e) => {
+        if (e.touches.length !== 2) return;
+
+        e.preventDefault();
+
+        const distance = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY,
+        );
+
+        const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+        const delta = this.#lastPinchDistance - distance;
+        this.#lastPinchDistance = distance;
+
+        if (Math.abs(delta) > 1) {
+          this.#pinchZoom$.next({
+            zoom: Math.sign(delta),
+            point: { x: centerX, y: centerY },
+          });
+        }
+      },
     );
   }
 }

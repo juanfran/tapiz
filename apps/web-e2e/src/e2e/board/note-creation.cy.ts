@@ -11,7 +11,7 @@
 
 describe('Sticky Note Creation', () => {
   beforeEach(() => {
-    cy.visit('/demo');
+    cy.visit('/board/demo');
     cy.waitForBoard();
   });
 
@@ -43,21 +43,16 @@ describe('Sticky Note Creation', () => {
   });
 
   it('places a note using N key + board click', () => {
-    cy.get('tapiz-note').then(($notes) => {
-      const before = $notes.length;
-      cy.get('body').type('n');
-      cy.get('tapiz-board').click(600, 400);
-      cy.get('tapiz-note').should('have.length.at.least', before + 1);
-    });
+    // Demo board starts empty — no need to count existing notes
+    cy.get('body').type('n');
+    cy.get('tapiz-board').click(720, 450);
+    cy.get('tapiz-note').should('have.length.at.least', 1);
   });
 
   it('creates a note via drag-from-pad (tear-off UX)', () => {
-    cy.get('tapiz-note').then(($notes) => {
-      const before = $notes.length;
-      // Drag from the pad widget to the center of the board
-      cy.dragNoteToCanvas(720, 450);
-      cy.get('tapiz-note').should('have.length.at.least', before + 1);
-    });
+    // Demo board starts empty — drag from pad to canvas
+    cy.dragNoteToCanvas(720, 450);
+    cy.get('tapiz-note').should('have.length.at.least', 1);
   });
 
   it('shows ghost note indicator during drag', () => {
@@ -98,14 +93,16 @@ describe('Sticky Note Creation', () => {
 
   it('creates multiple notes in pinned mode', () => {
     cy.get('tapiz-sticky-note-pad').click();
-    // Pin the popup
+    // Pin the popup so it stays open after each note placement
     cy.get('.toolbar-pinned button').click();
 
-    // Place 3 notes
-    cy.get('tapiz-board').click(500, 400);
-    cy.get('tapiz-board').click(700, 400);
-    cy.get('tapiz-board').click(900, 400);
-
+    // Use x > 600 to avoid clicking inside the note color-picker popup (~530px wide)
+    // Wait for each note to appear before placing the next (allows re-subscription)
+    cy.get('tapiz-board').click(700, 550);
+    cy.get('tapiz-note').should('have.length.at.least', 1);
+    cy.get('tapiz-board').click(900, 550);
+    cy.get('tapiz-note').should('have.length.at.least', 2);
+    cy.get('tapiz-board').click(1100, 550);
     cy.get('tapiz-note').should('have.length.at.least', 3);
   });
 });

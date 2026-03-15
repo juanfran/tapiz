@@ -9,15 +9,23 @@
  *  5. Swimlane interactions (adding notes to specific areas)
  */
 
+/** Helper: switch to board edit mode (boardMode=1) where templates are available */
+function enterEditMode() {
+  cy.get('.change-edit', { timeout: 5000 }).click();
+  cy.get('tapiz-board-toolbar-button[icon="templates"]', {
+    timeout: 5000,
+  }).should('exist');
+}
+
 describe('DDD Training Workflows', () => {
   beforeEach(() => {
-    cy.visit('/demo');
+    cy.visit('/board/demo');
     cy.waitForBoard();
   });
 
   context('Event Storming', () => {
     it('loads the Event Storming template', () => {
-      // In boardMode=1 (edit), templates are accessible
+      enterEditMode();
       cy.get('tapiz-board-toolbar-button[icon="templates"]').click();
       cy.get('tapiz-template-selector').within(() => {
         cy.contains('Event Storming (DDD)').should('be.visible').click();
@@ -33,6 +41,7 @@ describe('DDD Training Workflows', () => {
 
     it('supports placing domain events (orange notes) in the Events swimlane', () => {
       // Load Event Storming template
+      enterEditMode();
       cy.get('tapiz-board-toolbar-button[icon="templates"]').click();
       cy.contains('Event Storming (DDD)').click();
       cy.get('tapiz-panel', { timeout: 10000 }).should(
@@ -40,7 +49,8 @@ describe('DDD Training Workflows', () => {
         6,
       );
 
-      // Switch to normal mode and add an orange note
+      // Return to normal mode and add an orange note
+      cy.get('.change-close').click();
       cy.get('tapiz-sticky-note-pad').click();
 
       // Select orange color
@@ -61,6 +71,7 @@ describe('DDD Training Workflows', () => {
 
   context('Bounded Context Canvas', () => {
     it('loads the Bounded Context Canvas', () => {
+      enterEditMode();
       cy.get('tapiz-board-toolbar-button[icon="templates"]').click();
       cy.contains('Bounded Context Canvas (DDD)').click();
 
@@ -71,6 +82,7 @@ describe('DDD Training Workflows', () => {
     });
 
     it('allows adding terms to the Ubiquitous Language section', () => {
+      enterEditMode();
       cy.get('tapiz-board-toolbar-button[icon="templates"]').click();
       cy.contains('Bounded Context Canvas (DDD)').click();
       cy.get('tapiz-panel', { timeout: 10000 }).should(
@@ -78,7 +90,8 @@ describe('DDD Training Workflows', () => {
         5,
       );
 
-      // Add a purple note (ubiquitous language term)
+      // Return to normal mode and add a purple note (ubiquitous language term)
+      cy.get('.change-close').click();
       cy.get('tapiz-sticky-note-pad').click();
       cy.get('tapiz-board').click(400, 550);
       cy.get('tapiz-note').its('length').should('be.gte', 4);
@@ -87,8 +100,11 @@ describe('DDD Training Workflows', () => {
 
   context('Aggregate Design Canvas', () => {
     it('loads the Aggregate Design Canvas', () => {
+      enterEditMode();
       cy.get('tapiz-board-toolbar-button[icon="templates"]').click();
-      cy.contains('Aggregate Design Canvas (DDD)').click();
+      cy.contains('Aggregate Design Canvas (DDD)')
+        .scrollIntoView()
+        .click({ force: true });
 
       cy.get('tapiz-panel', { timeout: 10000 }).should(
         'have.length.at.least',
@@ -98,8 +114,11 @@ describe('DDD Training Workflows', () => {
     });
 
     it('displays commands (blue notes), domain events (orange notes), and invariants (red notes)', () => {
+      enterEditMode();
       cy.get('tapiz-board-toolbar-button[icon="templates"]').click();
-      cy.contains('Aggregate Design Canvas (DDD)').click();
+      cy.contains('Aggregate Design Canvas (DDD)')
+        .scrollIntoView()
+        .click({ force: true });
 
       // Blue command notes
       cy.get('tapiz-note').should('have.length.at.least', 6);
@@ -108,7 +127,7 @@ describe('DDD Training Workflows', () => {
 
   context('DDD Note Color Workflow', () => {
     it('allows selecting all DDD semantic colors for notes', () => {
-      // Open note color picker
+      // Open note color picker (available in normal mode)
       cy.get('tapiz-sticky-note-pad').click();
       cy.get('tapiz-notes').should('be.visible');
 

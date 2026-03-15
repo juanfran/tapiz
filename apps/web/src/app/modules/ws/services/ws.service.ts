@@ -66,22 +66,26 @@ export class WsService {
         return;
       }
 
+      this.#globalStore.setWsConnectionLost(true);
+
       if (reason === 'io server disconnect') {
         this.#notificationService.open({
-          message: 'Connection lost',
+          message: 'Connection lost. Reconnecting…',
           action: 'Close',
           type: 'error',
-          durantion: 3000,
         });
 
-        this.#router.navigate(['/']);
+        this.#socket.connect();
         return;
       }
 
-      this.#globalStore.setWsConnectionLost(true);
+      this.#notificationService.open({
+        message: 'Connection interrupted. Reconnecting…',
+        action: 'Close',
+        type: 'error',
+      });
 
-      console.log('WS disconnect');
-      console.log({ reason, details });
+      console.log('WS disconnect', { reason, details });
     });
 
     this.#socket.on(
