@@ -1,7 +1,9 @@
 mod auth;
 mod board_crdt;
 mod db;
+mod metrics;
 mod presence;
+mod rate_limit;
 mod viewport;
 mod ws;
 mod yjs;
@@ -9,6 +11,7 @@ mod yjs;
 use axum::{Router, routing::get};
 use sqlx::postgres::PgPoolOptions;
 use std::sync::Arc;
+use std::sync::atomic::AtomicU64;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
@@ -19,6 +22,8 @@ pub struct AppState {
     pub presence: Arc<presence::PresenceManager>,
     pub spatial: Arc<viewport::SpatialManager>,
     pub node_api_url: String,
+    pub active_connections: AtomicU64,
+    pub max_connections_per_board: usize,
 }
 
 #[tokio::main]
@@ -33,6 +38,10 @@ async fn main() {
     let port = std::env::var("REALTIME_PORT").unwrap_or_else(|_| "4000".into());
     let frontend_url =
         std::env::var("FRONTEND_URL").unwrap_or_else(|_| "http://localhost:4200".into());
+    let max_conns_per_board: usize = std::env::var("MAX_CONNECTIONS_PER_BOARD")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(100);
 
     let pool = PgPoolOptions::new()
         .max_connections(100)
@@ -58,6 +67,8 @@ async fn main() {
         presence: presence_mgr,
         spatial,
         node_api_url: api_url,
+        active_connections: AtomicU64::new(0),
+        max_connections_per_board: max_conns_per_board,
     });
 
     let cors = CorsLayer::new()
@@ -68,6 +79,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/health", get(health))
+        .route("/metrics", get(metrics::metrics_handler))
         .route("/ws/yjs/{board_id}", get(ws::yjs_handler))
         .route("/ws/presence/{board_id}", get(ws::presence_handler))
         .route(
@@ -76,7 +88,7 @@ async fn main() {
         )
         .layer(cors)
         .layer(TraceLayer::new_for_http())
-        .with_state(state);
+        .with_state(state.clone());
 
     let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{port}"))
         .await
@@ -84,7 +96,40 @@ async fn main() {
 
     tracing::info!("tapiz-realtime listening on :{port}");
 
-    axum::serve(listener, app).await.expect("Server error");
+    // Graceful shutdown: persist all dirty rooms on SIGTERM/SIGINT
+    let shutdown_state = Arc::clone(&state);
+    let server = axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal(shutdown_state));
+
+    server.await.expect("Server error");
+}
+
+async fn shutdown_signal(state: Arc<AppState>) {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("Failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("Failed to install SIGTERM handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+
+    tracing::info!("Shutdown signal received, persisting dirty rooms...");
+    state.rooms.persist_dirty(&state.db).await;
+    tracing::info!("All rooms persisted. Shutting down.");
 }
 
 async fn health() -> axum::Json<serde_json::Value> {

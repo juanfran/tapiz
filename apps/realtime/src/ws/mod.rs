@@ -7,11 +7,13 @@ use axum::{
 use futures::{SinkExt, StreamExt};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use std::sync::atomic::Ordering;
 use tokio::time::{Duration, interval};
 
-use crate::{AppState, auth, presence, viewport};
+use crate::{AppState, auth, presence, rate_limit, viewport};
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(30);
+const MAX_MESSAGE_SIZE: usize = 512 * 1024; // 512 KB
 
 // --- Viewport Query REST Endpoint ---
 
@@ -98,9 +100,24 @@ pub async fn yjs_handler(
         return (axum::http::StatusCode::FORBIDDEN, "No board access").into_response();
     }
 
+    // Check connection limit per board
+    let current_board_conns = state.presence.connection_count(&board_id);
+    if current_board_conns >= state.max_connections_per_board {
+        tracing::warn!(
+            "Board {board_id} at connection limit ({current_board_conns}/{})",
+            state.max_connections_per_board
+        );
+        return (
+            axum::http::StatusCode::SERVICE_UNAVAILABLE,
+            "Board connection limit reached",
+        )
+            .into_response();
+    }
+
     tracing::info!("Yjs WS connect: user={} board={board_id}", user.id);
 
-    ws.on_upgrade(move |socket| handle_yjs_socket(socket, board_id, user, state))
+    ws.max_message_size(MAX_MESSAGE_SIZE)
+        .on_upgrade(move |socket| handle_yjs_socket(socket, board_id, user, state))
         .into_response()
 }
 
@@ -110,12 +127,14 @@ async fn handle_yjs_socket(
     user: auth::SessionUser,
     state: Arc<AppState>,
 ) {
+    state.active_connections.fetch_add(1, Ordering::Relaxed);
     let (mut sink, mut stream) = socket.split();
 
     // Send initial state
     let sv = state.rooms.get_state_vector(&board_id, &state.db).await;
     if let Err(e) = sink.send(Message::Binary(sv.into())).await {
         tracing::warn!("Failed to send initial state: {e}");
+        state.active_connections.fetch_sub(1, Ordering::Relaxed);
         return;
     }
 
@@ -126,11 +145,18 @@ async fn handle_yjs_socket(
     let state_recv = Arc::clone(&state);
     let user_id = user.id.clone();
 
-    // Receive task: client → server
+    // Receive task: client → server (with rate limiting)
     let recv_task = tokio::spawn(async move {
+        let mut limiter = rate_limit::yjs_limiter();
+
         while let Some(msg) = stream.next().await {
             match msg {
                 Ok(Message::Binary(data)) => {
+                    if !limiter.check() {
+                        tracing::debug!("Rate limited Yjs update from {user_id}");
+                        continue;
+                    }
+
                     if let Err(e) = state_recv
                         .rooms
                         .apply_update(&board_id_recv, &data, &state_recv.db)
@@ -139,16 +165,14 @@ async fn handle_yjs_socket(
                         tracing::warn!("Yjs update error from {user_id}: {e}");
                     }
                 }
-                Ok(Message::Ping(_)) => {
-                    // Handled by axum automatically
-                }
+                Ok(Message::Ping(_)) => {}
                 Ok(Message::Close(_)) | Err(_) => break,
                 _ => {}
             }
         }
     });
 
-    // Send task: server → client (broadcasts from other users)
+    // Send task: server → client
     let send_task = tokio::spawn(async move {
         let mut heartbeat = interval(HEARTBEAT_INTERVAL);
 
@@ -181,6 +205,7 @@ async fn handle_yjs_socket(
         _ = send_task => {}
     }
 
+    state.active_connections.fetch_sub(1, Ordering::Relaxed);
     tracing::info!("Yjs WS disconnect: user={} board={board_id}", user.id);
 }
 
@@ -203,7 +228,8 @@ pub async fn presence_handler(
 
     tracing::info!("Presence WS connect: user={} board={board_id}", user.name);
 
-    ws.on_upgrade(move |socket| handle_presence_socket(socket, board_id, user, state))
+    ws.max_message_size(64 * 1024) // 64 KB for presence
+        .on_upgrade(move |socket| handle_presence_socket(socket, board_id, user, state))
         .into_response()
 }
 
@@ -213,6 +239,7 @@ async fn handle_presence_socket(
     user: auth::SessionUser,
     state: Arc<AppState>,
 ) {
+    state.active_connections.fetch_add(1, Ordering::Relaxed);
     let (mut sink, mut stream) = socket.split();
 
     // Register presence
@@ -224,6 +251,7 @@ async fn handle_presence_socket(
         .unwrap_or_default();
     if sink.send(Message::Text(state_msg.into())).await.is_err() {
         state.presence.leave(&board_id, &user.id);
+        state.active_connections.fetch_sub(1, Ordering::Relaxed);
         return;
     }
 
@@ -234,11 +262,17 @@ async fn handle_presence_socket(
     let state_recv = Arc::clone(&state);
     let user_id_recv = user.id.clone();
 
-    // Receive task: client cursor/viewport updates
+    // Receive task: client cursor/viewport updates (with rate limiting)
     let recv_task = tokio::spawn(async move {
+        let mut limiter = rate_limit::presence_limiter();
+
         while let Some(msg) = stream.next().await {
             match msg {
                 Ok(Message::Text(text)) => {
+                    if !limiter.check() {
+                        continue;
+                    }
+
                     if let Ok(msg) = serde_json::from_str::<presence::PresenceMessage>(&text) {
                         match msg {
                             presence::PresenceMessage::CursorUpdate { cursor } => {
@@ -265,7 +299,7 @@ async fn handle_presence_socket(
         }
     });
 
-    // Send task: broadcast presence changes to client
+    // Send task: broadcast presence changes
     let send_task = tokio::spawn(async move {
         let mut heartbeat = interval(HEARTBEAT_INTERVAL);
 
@@ -298,7 +332,7 @@ async fn handle_presence_socket(
         _ = send_task => {}
     }
 
-    // Cleanup on disconnect
     state.presence.leave(&board_id, &user.id);
+    state.active_connections.fetch_sub(1, Ordering::Relaxed);
     tracing::info!("Presence WS disconnect: user={} board={board_id}", user.name);
 }

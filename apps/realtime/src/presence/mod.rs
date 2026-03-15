@@ -168,6 +168,14 @@ impl PresenceManager {
         board.tx.subscribe()
     }
 
+    /// Get the number of connected users on a board.
+    pub fn connection_count(&self, board_id: &str) -> usize {
+        self.boards
+            .get(board_id)
+            .map(|b| b.users.len())
+            .unwrap_or(0)
+    }
+
     /// Remove stale users (no heartbeat received).
     pub fn cleanup_stale(&self) {
         let now = Instant::now();
