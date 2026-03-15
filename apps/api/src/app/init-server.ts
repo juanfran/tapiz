@@ -10,6 +10,7 @@ import {
   fastifyTRPCPlugin,
   FastifyTRPCPluginOptions,
 } from '@trpc/server/adapters/fastify';
+import { fastifyConnectPlugin } from '@connectrpc/connect-fastify';
 import { Server } from './server.js';
 import { setServer } from './global.js';
 import { getAuth } from './auth.js';
@@ -19,6 +20,8 @@ import { WebSocketServer } from 'ws';
 import { setupWSConnection } from './yjs-server.js';
 import { validateSession } from './auth.js';
 import { haveAccess } from './db/board-db.js';
+import { registerBoardService } from './connect/board.service.js';
+import { authInterceptor } from './connect/auth.interceptor.js';
 
 const fastify = Fastify({
   logger: false,
@@ -66,6 +69,15 @@ fastify.register(fastifyTRPCPlugin, {
 fastify.register(cors, {
   credentials: true,
   origin: process.env['FRONTEND_URL'],
+});
+
+// gRPC-Web via Connect Protocol — replaces tRPC for new clients
+await fastify.register(fastifyConnectPlugin, {
+  routes: (router) => {
+    registerBoardService(router);
+  },
+  prefix: '/connect',
+  interceptors: [authInterceptor],
 });
 
 // https://github.com/ducktors/fastify-socket.io/issues/36

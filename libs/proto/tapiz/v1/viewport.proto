@@ -1,0 +1,22 @@
+syntax = "proto3";
+package tapiz.v1;
+
+import "tapiz/v1/node.proto";
+
+message Viewport {
+  Point center = 1;
+  double width = 2;
+  double height = 3;
+  double zoom = 4;
+}
+
+message ViewportSyncRequest {
+  string board_id = 1;
+  Viewport viewport = 2;
+}
+
+message ViewportSyncResponse {
+  repeated TuNode nodes = 1;
+  repeated SpatialMeta offscreen_index = 2;
+  int64 version = 3;
+}

@@ -1,0 +1,11 @@
+syntax = "proto3";
+package tapiz.v1;
+
+message SuccessResponse {
+  bool success = 1;
+}
+
+message PaginationRequest {
+  int32 offset = 1;
+  int32 limit = 2;
+}

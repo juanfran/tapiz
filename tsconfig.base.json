@@ -30,7 +30,8 @@
       "@tapiz/cdk/*": ["libs/cdk/src/lib/*"],
       "@tapiz/sync-node-box": ["libs/sync-node-box/src/index.ts"],
       "@tapiz/ui/*": ["libs/ui/src/lib/*"],
-      "@tapiz/utils/*": ["libs/utils/src/lib/*"]
+      "@tapiz/utils/*": ["libs/utils/src/lib/*"],
+      "@tapiz/proto/*": ["libs/proto/gen/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -1,0 +1,46 @@
+syntax = "proto3";
+package tapiz.v1;
+
+import "google/protobuf/struct.proto";
+
+message Point {
+  double x = 1;
+  double y = 2;
+}
+
+message BoundingBox {
+  Point top_left = 1;
+  Point bottom_right = 2;
+}
+
+message TuNode {
+  string id = 1;
+  string type = 2;
+  google.protobuf.Struct content = 3;
+  repeated TuNode children = 4;
+}
+
+message SpatialMeta {
+  string node_id = 1;
+  BoundingBox bounds = 2;
+  int32 layer = 3;
+}
+
+enum ActionOp {
+  ACTION_OP_UNSPECIFIED = 0;
+  ACTION_OP_ADD = 1;
+  ACTION_OP_PATCH = 2;
+  ACTION_OP_REMOVE = 3;
+}
+
+message StateAction {
+  ActionOp op = 1;
+  TuNode data = 2;
+  optional string parent = 3;
+  optional int32 position = 4;
+}
+
+message BatchStateActions {
+  repeated StateAction actions = 1;
+  bool history = 2;
+}

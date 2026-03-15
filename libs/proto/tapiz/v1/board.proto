@@ -1,0 +1,230 @@
+syntax = "proto3";
+package tapiz.v1;
+
+import "tapiz/v1/common.proto";
+import "tapiz/v1/node.proto";
+import "tapiz/v1/viewport.proto";
+
+enum SortBoard {
+  SORT_BOARD_UNSPECIFIED = 0;
+  SORT_BOARD_CREATED_AT_DESC = 1;
+  SORT_BOARD_CREATED_AT_ASC = 2;
+  SORT_BOARD_LAST_ACCESS_DESC = 3;
+  SORT_BOARD_LAST_ACCESS_ASC = 4;
+  SORT_BOARD_NAME_DESC = 5;
+  SORT_BOARD_NAME_ASC = 6;
+}
+
+enum BoardRole {
+  BOARD_ROLE_UNSPECIFIED = 0;
+  BOARD_ROLE_ADMIN = 1;
+  BOARD_ROLE_MEMBER = 2;
+  BOARD_ROLE_GUEST = 3;
+}
+
+message BoardUser {
+  string id = 1;
+  string name = 2;
+  BoardRole role = 3;
+  bool starred = 4;
+  string created_at = 5;
+  string last_accessed_at = 6;
+  bool is_admin = 7;
+  optional string team_id = 8;
+  bool is_public = 9;
+}
+
+message BoardMember {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  string picture = 4;
+  BoardRole role = 5;
+}
+
+// --- Requests ---
+
+message CreateBoardRequest {
+  string name = 1;
+  optional string team_id = 2;
+}
+
+message CreateBoardResponse {
+  string id = 1;
+  string name = 2;
+}
+
+message DeleteBoardRequest {
+  string board_id = 1;
+}
+
+message DeleteBoardResponse {
+  bool success = 1;
+}
+
+message GetBoardRequest {
+  string board_id = 1;
+}
+
+message GetBoardResponse {
+  BoardUser board = 1;
+}
+
+message ListBoardsRequest {
+  optional string team_id = 1;
+  optional string space_id = 2;
+  optional bool starred = 3;
+  PaginationRequest pagination = 4;
+  SortBoard sort_by = 5;
+}
+
+message ListBoardsResponse {
+  repeated BoardUser boards = 1;
+  int32 total = 2;
+}
+
+message RenameBoardRequest {
+  string board_id = 1;
+  string name = 2;
+}
+
+message RenameBoardResponse {
+  bool success = 1;
+}
+
+message DuplicateBoardRequest {
+  string board_id = 1;
+}
+
+message DuplicateBoardResponse {
+  BoardUser board = 1;
+}
+
+message ChangeBoardPrivacyRequest {
+  string board_id = 1;
+  bool is_public = 2;
+}
+
+message ChangeBoardPrivacyResponse {
+  bool success = 1;
+}
+
+message TransferBoardRequest {
+  string board_id = 1;
+  optional string team_id = 2;
+}
+
+message TransferBoardResponse {
+  bool success = 1;
+}
+
+message GetBoardUsersRequest {
+  string board_id = 1;
+}
+
+message GetBoardUsersResponse {
+  repeated BoardMember users = 1;
+}
+
+message ChangeBoardRoleRequest {
+  string board_id = 1;
+  string user_id = 2;
+  BoardRole role = 3;
+}
+
+message ChangeBoardRoleResponse {
+  bool success = 1;
+}
+
+message DeleteBoardMemberRequest {
+  string board_id = 1;
+  string user_id = 2;
+}
+
+message DeleteBoardMemberResponse {
+  bool success = 1;
+}
+
+message LeaveBoardRequest {
+  string board_id = 1;
+}
+
+message LeaveBoardResponse {
+  bool success = 1;
+}
+
+message AddStarRequest {
+  string board_id = 1;
+}
+
+message AddStarResponse {
+  bool success = 1;
+}
+
+message RemoveStarRequest {
+  string board_id = 1;
+}
+
+message RemoveStarResponse {
+  bool success = 1;
+}
+
+message GetNodeRequest {
+  string board_id = 1;
+  string node_id = 2;
+}
+
+message GetNodeResponse {
+  TuNode node = 1;
+}
+
+message SubscribeBoardEventsRequest {
+  string board_id = 1;
+  string correlation_id = 2;
+}
+
+message SubscribeBoardEventsResponse {
+  string event_type = 1;
+  oneof payload {
+    BoardRenamed board_renamed = 10;
+    BoardDeleted board_deleted = 11;
+    BoardRoleChanged board_role_changed = 12;
+    BoardMemberDeleted board_member_deleted = 13;
+  }
+}
+
+message BoardRenamed { string name = 1; }
+message BoardDeleted { string board_id = 1; }
+message BoardRoleChanged { string user_id = 1; string role = 2; }
+message BoardMemberDeleted { string user_id = 1; }
+
+message SyncViewportNodesRequest {
+  string board_id = 1;
+  Viewport viewport = 2;
+}
+
+message SyncViewportNodesResponse {
+  repeated TuNode nodes = 1;
+  repeated SpatialMeta offscreen_index = 2;
+  int64 version = 3;
+}
+
+service BoardService {
+  rpc CreateBoard(CreateBoardRequest) returns (CreateBoardResponse);
+  rpc DeleteBoard(DeleteBoardRequest) returns (DeleteBoardResponse);
+  rpc GetBoard(GetBoardRequest) returns (GetBoardResponse);
+  rpc ListBoards(ListBoardsRequest) returns (ListBoardsResponse);
+  rpc DuplicateBoard(DuplicateBoardRequest) returns (DuplicateBoardResponse);
+  rpc RenameBoard(RenameBoardRequest) returns (RenameBoardResponse);
+  rpc ChangeBoardPrivacy(ChangeBoardPrivacyRequest) returns (ChangeBoardPrivacyResponse);
+  rpc TransferBoard(TransferBoardRequest) returns (TransferBoardResponse);
+  rpc GetBoardUsers(GetBoardUsersRequest) returns (GetBoardUsersResponse);
+  rpc ChangeBoardRole(ChangeBoardRoleRequest) returns (ChangeBoardRoleResponse);
+  rpc DeleteBoardMember(DeleteBoardMemberRequest) returns (DeleteBoardMemberResponse);
+  rpc LeaveBoard(LeaveBoardRequest) returns (LeaveBoardResponse);
+  rpc AddStar(AddStarRequest) returns (AddStarResponse);
+  rpc RemoveStar(RemoveStarRequest) returns (RemoveStarResponse);
+  rpc GetNode(GetNodeRequest) returns (GetNodeResponse);
+  rpc SubscribeBoardEvents(SubscribeBoardEventsRequest) returns (stream SubscribeBoardEventsResponse);
+  rpc SyncViewportNodes(SyncViewportNodesRequest) returns (stream SyncViewportNodesResponse);
+}
