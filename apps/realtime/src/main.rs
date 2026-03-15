@@ -1,4 +1,5 @@
 mod auth;
+mod board_crdt;
 mod db;
 mod presence;
 mod viewport;
@@ -16,6 +17,7 @@ pub struct AppState {
     pub db: sqlx::PgPool,
     pub rooms: Arc<yjs::RoomManager>,
     pub presence: Arc<presence::PresenceManager>,
+    pub spatial: Arc<viewport::SpatialManager>,
     pub node_api_url: String,
 }
 
@@ -44,6 +46,7 @@ async fn main() {
 
     let rooms = Arc::new(yjs::RoomManager::new());
     let presence_mgr = Arc::new(presence::PresenceManager::new());
+    let spatial = Arc::new(viewport::SpatialManager::new());
 
     // Spawn background tasks
     yjs::spawn_background_tasks(Arc::clone(&rooms), pool.clone());
@@ -53,6 +56,7 @@ async fn main() {
         db: pool,
         rooms,
         presence: presence_mgr,
+        spatial,
         node_api_url: api_url,
     });
 
