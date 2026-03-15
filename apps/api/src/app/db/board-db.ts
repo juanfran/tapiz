@@ -98,12 +98,8 @@ export async function setBoardPrivacy(boardId: string, isPublic: boolean) {
 }
 
 export async function getBoardAdmins(boardId: string) {
-  const ids = new Set<string>();
-
-  const boards = await db
-    .select({
-      accountId: schema.acountsToBoards.accountId,
-    })
+  const boardAdminRows = await db
+    .select({ accountId: schema.acountsToBoards.accountId })
     .from(schema.acountsToBoards)
     .where(
       and(
@@ -112,23 +108,30 @@ export async function getBoardAdmins(boardId: string) {
       ),
     );
 
-  boards.forEach((board) => {
-    ids.add(board.accountId);
-  });
-
-  const resultTeam = await db
+  const boardRow = await db
     .select({ teamId: schema.boards.teamId })
     .from(schema.boards)
-    .where(eq(schema.boards.id, boardId));
+    .where(eq(schema.boards.id, boardId))
+    .limit(1);
 
-  const teamId = resultTeam.at(0)?.teamId;
+  const teamId = boardRow.at(0)?.teamId;
+
+  const ids = new Set(boardAdminRows.map((r) => r.accountId));
 
   if (teamId) {
-    const teamAdmins = await team.getTeamAdmins(teamId);
+    const teamAdminRows = await db
+      .select({ accountId: schema.teamMembers.accountId })
+      .from(schema.teamMembers)
+      .where(
+        and(
+          eq(schema.teamMembers.teamId, teamId),
+          eq(schema.teamMembers.role, 'admin'),
+        ),
+      );
 
-    teamAdmins.forEach((team) => {
-      ids.add(team.accountId);
-    });
+    for (const row of teamAdminRows) {
+      ids.add(row.accountId);
+    }
   }
 
   return Array.from(ids);
@@ -311,21 +314,20 @@ export async function createBoard(
   board: TuNode[],
   teamId: string | null,
 ) {
-  const result = await db
-    .insert(schema.boards)
-    .values({ name, board, teamId })
-    .returning();
+  return db.transaction(async (tx) => {
+    const result = await tx
+      .insert(schema.boards)
+      .values({ name, board, teamId })
+      .returning();
 
-  await db
-    .insert(schema.acountsToBoards)
-    .values({
+    await tx.insert(schema.acountsToBoards).values({
       accountId: ownerId,
       boardId: result[0].id,
       role: 'admin',
-    })
-    .returning();
+    });
 
-  return result[0];
+    return result[0];
+  });
 }
 
 export async function getBoardFiles(boardId: string) {
@@ -350,9 +352,23 @@ export async function getFile(fileName: string) {
 }
 
 export async function deleteBoard(boardId: string) {
-  deleteBoardFiles(boardId);
+  return db.transaction(async (tx) => {
+    await tx
+      .delete(schema.acountsToBoards)
+      .where(eq(schema.acountsToBoards.boardId, boardId));
 
-  return db.delete(schema.boards).where(eq(schema.boards.id, boardId));
+    await tx
+      .delete(schema.starreds)
+      .where(eq(schema.starreds.boardId, boardId));
+
+    await tx
+      .delete(schema.boardFiles)
+      .where(eq(schema.boardFiles.boardId, boardId));
+
+    await tx.delete(schema.boards).where(eq(schema.boards.id, boardId));
+
+    deleteBoardFiles(boardId);
+  });
 }
 
 export async function deleteUserBoards(userId: string) {

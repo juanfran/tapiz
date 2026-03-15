@@ -38,11 +38,39 @@ interface YjsDoc {
   persistTimeout: ReturnType<typeof setTimeout> | null;
 }
 
+const MAX_CACHED_DOCS = 200;
+const DOC_IDLE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
 const docs = new Map<string, YjsDoc>();
+const lastAccess = new Map<string, number>();
+
+function evictIdleDocs(): void {
+  const now = Date.now();
+  for (const [boardId, yjsDoc] of docs) {
+    if (yjsDoc.conns.size > 0) continue;
+    const lastTime = lastAccess.get(boardId) ?? 0;
+    if (now - lastTime > DOC_IDLE_TTL_MS) {
+      const state = Y.encodeStateAsUpdate(yjsDoc.doc);
+      db.board.updateBoardYjs(boardId, Buffer.from(state)).catch(console.error);
+      if (yjsDoc.persistTimeout) clearTimeout(yjsDoc.persistTimeout);
+      yjsDoc.doc.destroy();
+      docs.delete(boardId);
+      lastAccess.delete(boardId);
+    }
+  }
+}
+
+setInterval(evictIdleDocs, 60_000);
 
 function getYDoc(boardId: string): YjsDoc {
+  lastAccess.set(boardId, Date.now());
   const existing = docs.get(boardId);
   if (existing) return existing;
+
+  // Evict least-recently-used docs if over capacity
+  if (docs.size >= MAX_CACHED_DOCS) {
+    evictIdleDocs();
+  }
 
   const doc = new Y.Doc();
   const awareness = new awarenessProtocol.Awareness(doc);
@@ -229,6 +257,11 @@ export async function setupWSConnection(
     closeConn(yjsDoc, conn);
   });
 
+  conn.on('pong', () => {
+    (conn as WebSocket & { isAlive?: boolean }).isAlive = true;
+  });
+  (conn as WebSocket & { isAlive?: boolean }).isAlive = true;
+
   // Send initial sync step 1
   {
     const encoder = encoding.createEncoder();
@@ -289,3 +322,19 @@ function nodeToYMap(node: TuNode): Y.Map<unknown> {
 
   return yNode;
 }
+
+// Heartbeat: detect dead WebSocket connections
+setInterval(() => {
+  for (const yjsDoc of docs.values()) {
+    yjsDoc.conns.forEach((_, conn) => {
+      const ws = conn as WebSocket & { isAlive?: boolean };
+      if (ws.isAlive === false) {
+        closeConn(yjsDoc, conn);
+        conn.terminate();
+        return;
+      }
+      ws.isAlive = false;
+      conn.ping();
+    });
+  }
+}, 30_000);

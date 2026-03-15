@@ -7,6 +7,12 @@ if (!process.env['GOOGLE_CLIENT_ID'] || !process.env['GOOGLE_CLIENT_SECRET']) {
   throw new Error('Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET');
 }
 
+if (!process.env['BETTER_AUTH_SECRET']) {
+  throw new Error(
+    'Missing BETTER_AUTH_SECRET — required for session encryption',
+  );
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let _auth: any;
 

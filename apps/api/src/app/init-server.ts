@@ -144,6 +144,26 @@ fastify.addHook('onSend', async (_request, reply) => {
   reply.header('X-Frame-Options', 'DENY');
   reply.header('X-XSS-Protection', '1; mode=block');
   reply.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+  reply.header(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "script-src 'self'",
+      "style-src 'self' 'unsafe-inline'",
+      `connect-src 'self' ${process.env['FRONTEND_URL'] ?? ''} wss:`,
+      "img-src 'self' data: https:",
+      "font-src 'self'",
+      "frame-ancestors 'none'",
+    ].join('; '),
+  );
+  reply.header(
+    'Strict-Transport-Security',
+    'max-age=31536000; includeSubDomains',
+  );
+  reply.header(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=()',
+  );
 });
 
 const host = process.env['API_HOST'];

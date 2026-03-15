@@ -15,10 +15,14 @@ function getConnection() {
 function initDbClient() {
   const connection = getConnection();
 
+  const poolSize = parseInt(process.env['DB_POOL_SIZE'] ?? '50', 10);
+
   psqlClient = postgres(connection, {
-    max: 20,
+    max: poolSize,
     idle_timeout: 30,
     connect_timeout: 10,
+    max_lifetime: 60 * 30,
+    onnotice: () => {},
   });
 
   db = drizzle(psqlClient);

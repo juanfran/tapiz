@@ -25,7 +25,7 @@ const isAuthed = tAuth.middleware((opts) => {
 
 const teamCheck = isAuthed.unstable_pipe(async (opts) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const inputs = opts.rawInput as any;
+  const inputs = (await opts.getRawInput()) as any;
 
   if (!inputs.teamId) {
     throw new TRPCError({ code: 'NOT_FOUND' });
@@ -47,7 +47,7 @@ const teamCheck = isAuthed.unstable_pipe(async (opts) => {
 
 const teamAdminCheck = teamCheck.unstable_pipe(async (opts) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const inputs = opts.rawInput as any;
+  const inputs = (await opts.getRawInput()) as any;
 
   const userTeam = await db.team.getUserTeam(inputs.teamId, opts.ctx.user.sub);
 
@@ -65,7 +65,7 @@ const teamAdminCheck = teamCheck.unstable_pipe(async (opts) => {
 
 const teamMemberCheck = teamCheck.unstable_pipe(async (opts) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const inputs = opts.rawInput as any;
+  const inputs = (await opts.getRawInput()) as any;
 
   const userTeam = await db.team.getUserTeam(inputs.teamId, opts.ctx.user.sub);
 
@@ -83,7 +83,7 @@ const teamMemberCheck = teamCheck.unstable_pipe(async (opts) => {
 
 const boardCheck = isAuthed.unstable_pipe(async (opts) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const inputs = opts.rawInput as any;
+  const inputs = (await opts.getRawInput()) as any;
 
   const board = await db.board.getBoard(inputs.boardId);
 
@@ -101,7 +101,7 @@ const boardCheck = isAuthed.unstable_pipe(async (opts) => {
 
 const boardAdminCheck = boardCheck.unstable_pipe(async (opts) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const inputs = opts.rawInput as any;
+  const inputs = (await opts.getRawInput()) as any;
 
   const admins = await db.board.getBoardAdmins(inputs.boardId);
 
@@ -116,7 +116,7 @@ const boardAdminCheck = boardCheck.unstable_pipe(async (opts) => {
 
 const boardMemberCheck = boardCheck.unstable_pipe(async (opts) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const inputs = opts.rawInput as any;
+  const inputs = (await opts.getRawInput()) as any;
 
   const haveAccess = await db.board.haveAccess(
     inputs.boardId,

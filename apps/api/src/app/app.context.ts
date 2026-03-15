@@ -1,14 +1,18 @@
 import { inferAsyncReturnType } from '@trpc/server';
-import { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
 import { getUser } from './db/user-db.js';
 import { validateSession } from './auth.js';
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 
 // // prevent angular build errors
 import '@fastify/rate-limit';
 import '@fastify/cookie';
 
-export async function createAuthContext({ req }: CreateFastifyContextOptions) {
+interface ContextOptions {
+  req: FastifyRequest;
+  res: FastifyReply;
+}
+
+export async function createAuthContext({ req }: ContextOptions) {
   async function getUserFromHeader() {
     const cookieHeader = req.headers.cookie ?? '';
 
@@ -52,7 +56,7 @@ export async function createAuthContext({ req }: CreateFastifyContextOptions) {
 export async function createAppContext(
   app: FastifyInstance,
   rateLimits: Record<string, ReturnType<FastifyInstance['createRateLimit']>>,
-  { req, res }: CreateFastifyContextOptions,
+  { req, res }: ContextOptions,
 ) {
   const authContext = await createAuthContext({ req, res });
 

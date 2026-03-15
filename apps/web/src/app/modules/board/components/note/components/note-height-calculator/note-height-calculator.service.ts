@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import DOMPurify from 'dompurify';
 
 export interface NoteHeightState {
   width: number;
@@ -42,7 +43,7 @@ export class NoteHeightCalculatorService {
     div.id = 'textDivCalculator';
     textDiv.classList.add('rich-text', 'note-rich-text');
 
-    textDiv.innerHTML = state.text;
+    textDiv.innerHTML = DOMPurify.sanitize(state.text);
 
     div.appendChild(textDiv);
 

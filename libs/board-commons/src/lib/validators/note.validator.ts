@@ -11,33 +11,41 @@ const note = z.object({
   ...CommonBoardValidation,
   ...SizeValidator,
   text: z.string(),
-  votes: z.array(
-    z.object({
-      userId: z.string().max(255),
-      vote: z.number().int().min(0),
-    }),
-  ),
-  emojis: z.array(
-    z.object({
-      unicode: z.string().max(255),
-      position: z.object({
-        x: z.number(),
-        y: z.number(),
+  votes: z
+    .array(
+      z.object({
+        userId: z.string().max(255),
+        vote: z.number().int().min(0),
       }),
-    }),
-  ),
-  drawing: z.array(
-    z.object({
-      color: colorSchema,
-      size: z.number().positive().safe(),
-      points: z.array(
-        z.object({
+    )
+    .max(500),
+  emojis: z
+    .array(
+      z.object({
+        unicode: z.string().max(255),
+        position: z.object({
           x: z.number(),
           y: z.number(),
         }),
-      ),
-    }),
-  ),
+      }),
+    )
+    .max(200),
+  drawing: z
+    .array(
+      z.object({
+        color: colorSchema,
+        size: z.number().positive().safe(),
+        points: z
+          .array(
+            z.object({
+              x: z.number(),
+              y: z.number(),
+            }),
+          )
+          .max(10000),
+      }),
+    )
+    .max(100),
   ownerId: z.string().max(255),
   width: z.number().positive(),
   height: z.number().positive(),

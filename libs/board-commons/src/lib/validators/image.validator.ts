@@ -7,7 +7,12 @@ import {
 const image = z.object({
   ...CommonBoardValidation,
   ...SizeValidator,
-  url: z.string().max(2000),
+  url: z
+    .string()
+    .max(2000)
+    .refine((val) => /^https?:\/\//i.test(val), {
+      message: 'URL must use http or https protocol',
+    }),
   rotation: z.number(),
 });
 
