@@ -31,7 +31,7 @@
 hr {
   height: 2px;
   border: 0;
-  border-top: 1px solid #c4c1e3ff;
+  border-top: 1px solid var(--toolbar-border);
   font-size: 0;
   inline-size: 28px;
   margin-block: var(--spacing-1);

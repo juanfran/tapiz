@@ -14,14 +14,14 @@ body {
   @include typography.font-body;
 
   .mat-raised-button.mat-primary {
-    background: #736bdb;
+    background: var(--purple);
   }
 }
 
 html,
 body {
-  background-color: var(--white);
-  color: var(--color-black);
+  background-color: var(--light);
+  color: var(--primary);
   font-family:
     "Inter",
     -apple-system,
@@ -125,7 +125,7 @@ code {
 }
 
 pre {
-  background-color: #f6f6f6;
+  background-color: var(--grey-10);
   direction: ltr;
   font-size: 1rem;
   hyphens: none;

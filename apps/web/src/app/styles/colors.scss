@@ -56,4 +56,93 @@
 
   /* BLUR BG */
   --blur-bg: rgba(216, 220, 229, 0.5);
+
+  /* Board */
+  --board-bg: var(--color-light-1);
+  --board-dot: rgba(0, 0, 0, 0.15);
+  --toolbar-bg: var(--white);
+  --toolbar-border: var(--grey-20);
+
+  /* Dialog / Overlay */
+  --dialog-bg: var(--white);
+  --dialog-text: var(--primary);
+}
+
+/* Dark Mode — activated by OS preference or [data-theme="dark"] on <html> */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: hsl(0, 0%, 93%);
+    --secondary: hsl(240, 20%, 60%);
+    --tertiary: hsl(230, 15%, 18%);
+    --light: hsl(230, 15%, 12%);
+    --white: hsl(230, 15%, 12%);
+    --black: hsl(0, 0%, 93%);
+    --color-light-1: hsl(230, 15%, 10%);
+    --color-black: hsl(0, 0%, 93%);
+    --accent--ui: hsl(230, 15%, 22%);
+    --accent--alt: hsl(230, 15%, 14%);
+
+    --brand: var(--grey-30);
+    --brand-light: var(--grey-70);
+
+    --grey-10: hsl(230, 10%, 15%);
+    --grey-20: hsl(230, 10%, 20%);
+    --grey-30: hsl(230, 10%, 30%);
+    --grey-40: hsl(230, 10%, 40%);
+    --grey-50: hsl(230, 10%, 50%);
+    --grey-60: hsl(230, 10%, 60%);
+    --grey-70: hsl(230, 10%, 70%);
+    --grey-80: hsl(230, 10%, 80%);
+    --grey-90: hsl(230, 10%, 90%);
+
+    --blur-bg: rgba(20, 22, 30, 0.6);
+
+    --board-bg: hsl(230, 15%, 10%);
+    --board-dot: rgba(255, 255, 255, 0.12);
+    --toolbar-bg: hsl(230, 15%, 14%);
+    --toolbar-border: hsl(230, 10%, 22%);
+
+    --dialog-bg: hsl(230, 15%, 16%);
+    --dialog-text: hsl(0, 0%, 93%);
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --primary: hsl(0, 0%, 93%);
+  --secondary: hsl(240, 20%, 60%);
+  --tertiary: hsl(230, 15%, 18%);
+  --light: hsl(230, 15%, 12%);
+  --white: hsl(230, 15%, 12%);
+  --black: hsl(0, 0%, 93%);
+  --color-light-1: hsl(230, 15%, 10%);
+  --color-black: hsl(0, 0%, 93%);
+  --accent--ui: hsl(230, 15%, 22%);
+  --accent--alt: hsl(230, 15%, 14%);
+
+  --brand: var(--grey-30);
+  --brand-light: var(--grey-70);
+
+  --grey-10: hsl(230, 10%, 15%);
+  --grey-20: hsl(230, 10%, 20%);
+  --grey-30: hsl(230, 10%, 30%);
+  --grey-40: hsl(230, 10%, 40%);
+  --grey-50: hsl(230, 10%, 50%);
+  --grey-60: hsl(230, 10%, 60%);
+  --grey-70: hsl(230, 10%, 70%);
+  --grey-80: hsl(230, 10%, 80%);
+  --grey-90: hsl(230, 10%, 90%);
+
+  --blur-bg: rgba(20, 22, 30, 0.6);
+
+  --board-bg: hsl(230, 15%, 10%);
+  --board-dot: rgba(255, 255, 255, 0.12);
+  --toolbar-bg: hsl(230, 15%, 14%);
+  --toolbar-border: hsl(230, 10%, 22%);
+
+  --dialog-bg: hsl(230, 15%, 16%);
+  --dialog-text: hsl(0, 0%, 93%);
+
+  color-scheme: dark;
 }

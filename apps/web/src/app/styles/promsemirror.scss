@@ -35,7 +35,7 @@
 
 .ProseMirror::selection,
 .rich-text::selection {
-  background: #ead9f4;
+  background: var(--accent-purple-light);
 }
 
 .note-rich-text {

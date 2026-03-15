@@ -1,5 +1,5 @@
 :host {
-  background-color: var(--color-light-1);
+  background-color: var(--board-bg, var(--color-light-1));
   display: block;
   height: 100vh;
   overflow: hidden;
