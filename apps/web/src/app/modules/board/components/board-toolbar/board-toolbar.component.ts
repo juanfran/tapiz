@@ -48,6 +48,10 @@ import { defaultNoteColor } from '../note';
 import { NgTemplateOutlet } from '@angular/common';
 import { BoardToolbardButtonComponent } from './components/board-toolboard-button.component';
 import { LucideAngularModule, Pin, PinOff } from 'lucide-angular';
+import {
+  StickyNotePadComponent,
+  NoteDragEvent,
+} from '../sticky-note-pad/sticky-note-pad.component';
 
 export class AppModule {}
 @Component({
@@ -69,6 +73,7 @@ export class AppModule {}
     NgTemplateOutlet,
     BoardToolbardButtonComponent,
     LucideAngularModule,
+    StickyNotePadComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [HotkeysService],
@@ -180,6 +185,16 @@ export class BoardToolbarComponent {
       )
       .subscribe(() => {
         this.togglePopup('image');
+      });
+
+    // Note (N key)
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((e) => e.key === 'n' && !isInputField() && !e.repeat),
+      )
+      .subscribe(() => {
+        this.note();
       });
 
     toObservable(this.popup)
@@ -296,6 +311,22 @@ export class BoardToolbarComponent {
     this.popupOpen('note');
 
     createNote();
+  }
+
+  /** Called when user drags from the sticky note pad and drops on the board. */
+  noteDropped(event: NoteDragEvent) {
+    const zoom = this.#store.selectSignal(boardPageFeature.selectZoom)();
+    const position = this.#store.selectSignal(
+      boardPageFeature.selectPosition,
+    )();
+    const userId = this.#store.selectSignal(boardPageFeature.selectUserId)();
+
+    const boardPosition = {
+      x: (-position.x + event.clientX) / zoom,
+      y: (-position.y + event.clientY) / zoom,
+    };
+
+    this.#notesService.createNote(userId, boardPosition, this.noteColor());
   }
 
   select() {

@@ -49,3 +49,12 @@ hr {
   justify-items: end;
   padding-block-end: var(--spacing-2);
 }
+
+.sticky-pad-slot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-block: var(--spacing-2);
+  padding-inline: 4px;
+  min-height: 68px;
+}

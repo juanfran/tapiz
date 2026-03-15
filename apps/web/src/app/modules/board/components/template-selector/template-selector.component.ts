@@ -87,6 +87,33 @@ export class TemplateSelectorComponent {
         return import('./templates/starfish');
       },
     },
+    {
+      title: 'Event Storming (DDD)',
+      image: 'assets/templates/event-storming.webp',
+      width: 300,
+      height: 160,
+      load: () => {
+        return import('./templates/event-storming');
+      },
+    },
+    {
+      title: 'Bounded Context Canvas (DDD)',
+      image: 'assets/templates/bounded-context-canvas.webp',
+      width: 300,
+      height: 200,
+      load: () => {
+        return import('./templates/bounded-context-canvas');
+      },
+    },
+    {
+      title: 'Aggregate Design Canvas (DDD)',
+      image: 'assets/templates/aggregate-design-canvas.webp',
+      width: 300,
+      height: 200,
+      load: () => {
+        return import('./templates/aggregate-design-canvas');
+      },
+    },
   ];
 
   getSize(nodes: TuNode<TemplaNode>[]) {

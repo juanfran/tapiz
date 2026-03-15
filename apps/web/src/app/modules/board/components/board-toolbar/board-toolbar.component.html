@@ -9,6 +9,16 @@
     <ng-container [ngTemplateOutlet]="selectButton"></ng-container>
     <hr />
 
+    <!-- Sticky note pad: click to activate click-to-place, drag to drop -->
+    <div class="sticky-pad-slot">
+      <tapiz-sticky-note-pad
+        [color]="noteColor()"
+        [active]="popup() === 'note'"
+        (clicked)="note()"
+        (dropped)="noteDropped($event)" />
+    </div>
+    <hr />
+
     @switch (popup()) {
       @case ('note') {
         <ng-container
