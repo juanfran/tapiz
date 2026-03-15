@@ -70,6 +70,10 @@ async fn main() {
         .route("/health", get(health))
         .route("/ws/yjs/{board_id}", get(ws::yjs_handler))
         .route("/ws/presence/{board_id}", get(ws::presence_handler))
+        .route(
+            "/api/board/{board_id}/viewport-query",
+            axum::routing::post(ws::viewport_query_handler),
+        )
         .layer(cors)
         .layer(TraceLayer::new_for_http())
         .with_state(state);

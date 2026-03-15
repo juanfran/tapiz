@@ -2,15 +2,84 @@ use axum::{
     extract::{Path, State, WebSocketUpgrade, ws::{Message, WebSocket}},
     http::HeaderMap,
     response::IntoResponse,
+    Json,
 };
 use futures::{SinkExt, StreamExt};
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::time::{Duration, interval};
 
-use crate::{AppState, auth, presence};
+use crate::{AppState, auth, presence, viewport};
 
 const HEARTBEAT_INTERVAL: Duration = Duration::from_secs(30);
 
+// --- Viewport Query REST Endpoint ---
+
+#[derive(Deserialize)]
+pub struct ViewportQueryRequest {
+    pub center_x: f64,
+    pub center_y: f64,
+    pub width: f64,
+    pub height: f64,
+    pub zoom: f64,
+}
+
+#[derive(Serialize)]
+pub struct ViewportQueryResponse {
+    pub hot: Vec<String>,
+    pub warm: Vec<String>,
+    pub total_indexed: usize,
+}
+
+pub async fn viewport_query_handler(
+    Path(board_id): Path<String>,
+    State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
+    Json(req): Json<ViewportQueryRequest>,
+) -> impl IntoResponse {
+    let user = match auth::validate_session(&headers, &state.db).await {
+        Some(u) => u,
+        None => {
+            return (
+                axum::http::StatusCode::UNAUTHORIZED,
+                Json(serde_json::json!({"error": "Unauthorized"})),
+            )
+                .into_response()
+        }
+    };
+
+    if !auth::check_board_access(&state.db, &board_id, &user.id).await {
+        return (
+            axum::http::StatusCode::FORBIDDEN,
+            Json(serde_json::json!({"error": "No board access"})),
+        )
+            .into_response();
+    }
+
+    let vp = viewport::Viewport {
+        center: viewport::Point {
+            x: req.center_x,
+            y: req.center_y,
+        },
+        width: req.width,
+        height: req.height,
+        zoom: req.zoom,
+    };
+
+    let idx = state.spatial.get_or_create(&board_id);
+    let idx = idx.read().await;
+
+    let hot: Vec<String> = idx.query_hot(&vp).iter().map(|e| e.node_id.clone()).collect();
+    let warm: Vec<String> = idx.query_warm(&vp).iter().map(|e| e.node_id.clone()).collect();
+    let total_indexed = idx.node_count();
+
+    Json(ViewportQueryResponse {
+        hot,
+        warm,
+        total_indexed,
+    })
+    .into_response()
+}
 
 // --- Yjs WebSocket Handler ---
 
@@ -70,9 +139,8 @@ async fn handle_yjs_socket(
                         tracing::warn!("Yjs update error from {user_id}: {e}");
                     }
                 }
-                Ok(Message::Ping(data)) => {
+                Ok(Message::Ping(_)) => {
                     // Handled by axum automatically
-                    let _ = data;
                 }
                 Ok(Message::Close(_)) | Err(_) => break,
                 _ => {}
@@ -108,7 +176,6 @@ async fn handle_yjs_socket(
         }
     });
 
-    // Wait for either task to finish
     tokio::select! {
         _ = recv_task => {}
         _ = send_task => {}
