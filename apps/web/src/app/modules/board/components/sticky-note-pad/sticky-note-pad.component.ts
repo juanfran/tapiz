@@ -1,12 +1,15 @@
 import {
   Component,
   ChangeDetectionStrategy,
+  inject,
   input,
   output,
   signal,
   OnDestroy,
   computed,
+  NgZone,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 
 export interface NoteDragEvent {
   clientX: number;
@@ -22,15 +25,9 @@ export interface NoteDragEvent {
       [title]="'Sticky Notes (N) — click to place, drag to drop'"
       (mousedown)="onMouseDown($event)">
       <div class="pad-stack">
-        <div
-          class="pad-layer layer-3"
-          [style.background]="layerColor3()"></div>
-        <div
-          class="pad-layer layer-2"
-          [style.background]="layerColor2()"></div>
-        <div
-          class="pad-layer layer-1"
-          [style.background]="color()"></div>
+        <div class="pad-layer layer-3" [style.background]="layerColor3()"></div>
+        <div class="pad-layer layer-2" [style.background]="layerColor2()"></div>
+        <div class="pad-layer layer-1" [style.background]="color()"></div>
       </div>
       <span class="pad-key">N</span>
     </div>
@@ -53,13 +50,16 @@ export interface NoteDragEvent {
   },
 })
 export class StickyNotePadComponent implements OnDestroy {
+  readonly #document = inject(DOCUMENT);
+  readonly #zone = inject(NgZone);
+
   color = input<string>('#fbb980');
   active = input<boolean>(false);
 
-  /** Emitted when user drags the pad onto the board – provides screen coords */
+  /** Emitted when user drags (threshold exceeded) — board boundary check is done by parent */
   dropped = output<NoteDragEvent>();
 
-  /** Emitted when user just clicks (no significant drag) */
+  /** Emitted when user just clicks without dragging */
   clicked = output<void>();
 
   readonly ghostSize = 140;
@@ -76,7 +76,6 @@ export class StickyNotePadComponent implements OnDestroy {
   private readonly mouseMoveHandler = (e: MouseEvent) => this.#onMouseMove(e);
   private readonly mouseUpHandler = (e: MouseEvent) => this.#onMouseUp(e);
 
-  // Slightly darkened variants for the "layers" beneath the top note
   layerColor2 = computed(() => this.#darken(this.color(), 12));
   layerColor3 = computed(() => this.#darken(this.color(), 22));
 
@@ -89,8 +88,11 @@ export class StickyNotePadComponent implements OnDestroy {
     this.startY = event.clientY;
     this.dragStarted = false;
 
-    document.addEventListener('mousemove', this.mouseMoveHandler);
-    document.addEventListener('mouseup', this.mouseUpHandler);
+    // Run mouse tracking outside Angular zone to avoid triggering CD on every mousemove
+    this.#zone.runOutsideAngular(() => {
+      this.#document.addEventListener('mousemove', this.mouseMoveHandler);
+      this.#document.addEventListener('mouseup', this.mouseUpHandler);
+    });
   }
 
   #onMouseMove(event: MouseEvent) {
@@ -99,56 +101,51 @@ export class StickyNotePadComponent implements OnDestroy {
 
     if (!this.dragStarted && Math.hypot(dx, dy) > this.dragThreshold) {
       this.dragStarted = true;
-      this.dragging.set(true);
+      // Re-enter zone for the signal updates that affect the template
+      this.#zone.run(() => this.dragging.set(true));
     }
 
     if (this.dragStarted) {
-      this.ghostX.set(event.clientX - this.ghostSize / 2);
-      this.ghostY.set(event.clientY - this.ghostSize / 2);
+      // Update ghost position inside zone so Angular detects the change
+      this.#zone.run(() => {
+        this.ghostX.set(event.clientX - this.ghostSize / 2);
+        this.ghostY.set(event.clientY - this.ghostSize / 2);
+      });
     }
   }
 
   #onMouseUp(event: MouseEvent) {
-    document.removeEventListener('mousemove', this.mouseMoveHandler);
-    document.removeEventListener('mouseup', this.mouseUpHandler);
+    this.#document.removeEventListener('mousemove', this.mouseMoveHandler);
+    this.#document.removeEventListener('mouseup', this.mouseUpHandler);
 
-    if (this.dragStarted && this.dragging()) {
-      this.dragging.set(false);
-
-      // Only emit drop if the cursor ended up on the board canvas
-      const boardEl = document.querySelector(
-        'tapiz-board',
-      ) as HTMLElement | null;
-      if (boardEl) {
-        const rect = boardEl.getBoundingClientRect();
-        const insideBoard =
-          event.clientX >= rect.left &&
-          event.clientX <= rect.right &&
-          event.clientY >= rect.top &&
-          event.clientY <= rect.bottom;
-
-        if (insideBoard) {
-          this.dropped.emit({ clientX: event.clientX, clientY: event.clientY });
-          return;
-        }
+    this.#zone.run(() => {
+      if (this.dragStarted && this.dragging()) {
+        this.dragging.set(false);
+        // Always emit — the parent (BoardToolbarComponent) decides whether
+        // the coordinates land on the board canvas.
+        this.dropped.emit({ clientX: event.clientX, clientY: event.clientY });
+      } else if (!this.dragStarted) {
+        this.clicked.emit();
       }
-    } else if (!this.dragStarted) {
-      // Simple click — activate click-to-place mode
-      this.clicked.emit();
-    }
 
-    this.dragging.set(false);
+      this.dragging.set(false);
+    });
   }
 
   ngOnDestroy() {
-    document.removeEventListener('mousemove', this.mouseMoveHandler);
-    document.removeEventListener('mouseup', this.mouseUpHandler);
+    this.#document.removeEventListener('mousemove', this.mouseMoveHandler);
+    this.#document.removeEventListener('mouseup', this.mouseUpHandler);
   }
 
+  /** Darken a 3- or 6-digit hex color string by reducing each channel by `amount`. */
   #darken(hex: string, amount: number): string {
-    // Parse hex color and darken by reducing each channel
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    if (!result) return hex;
+    // Normalise 3-char shorthand (#abc → #aabbcc)
+    const normalized = hex.replace(
+      /^#([a-f\d])([a-f\d])([a-f\d])$/i,
+      (_, r, g, b) => `#${r}${r}${g}${g}${b}${b}`,
+    );
+    const result = /^#([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(normalized);
+    if (!result) return hex; // graceful fallback for CSS vars / rgb() strings
     const r = Math.max(0, parseInt(result[1], 16) - amount);
     const g = Math.max(0, parseInt(result[2], 16) - amount);
     const b = Math.max(0, parseInt(result[3], 16) - amount);

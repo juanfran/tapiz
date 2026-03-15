@@ -53,7 +53,6 @@ import {
   NoteDragEvent,
 } from '../sticky-note-pad/sticky-note-pad.component';
 
-export class AppModule {}
 @Component({
   selector: 'tapiz-board-toolbar',
   templateUrl: './board-toolbar.component.html',
@@ -313,8 +312,19 @@ export class BoardToolbarComponent {
     createNote();
   }
 
-  /** Called when user drags from the sticky note pad and drops on the board. */
+  /** Called when user drags from the sticky note pad. Creates a note if the drop lands on the board canvas. */
   noteDropped(event: NoteDragEvent) {
+    const boardEl = document.querySelector('tapiz-board') as HTMLElement | null;
+    if (boardEl) {
+      const rect = boardEl.getBoundingClientRect();
+      const insideBoard =
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom;
+      if (!insideBoard) return;
+    }
+
     const zoom = this.#store.selectSignal(boardPageFeature.selectZoom)();
     const position = this.#store.selectSignal(
       boardPageFeature.selectPosition,
@@ -672,7 +682,7 @@ export class BoardToolbarComponent {
   togglePinned() {
     this.#store.dispatch(
       BoardPageActions.setPopupPinned({
-        pinned: this.pinned() ? false : true,
+        pinned: !this.pinned(),
       }),
     );
   }
