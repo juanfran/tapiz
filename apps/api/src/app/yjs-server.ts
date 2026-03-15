@@ -11,6 +11,26 @@ import type { TuNode } from '@tapiz/board-commons';
 const messageSync = 0;
 const messageAwareness = 1;
 
+// Rate limiting: max messages per second per connection
+const WS_RATE_LIMIT = 60;
+const WS_RATE_WINDOW_MS = 1000;
+const connRateLimits = new WeakMap<
+  WebSocket,
+  { count: number; windowStart: number }
+>();
+
+function isRateLimited(conn: WebSocket): boolean {
+  const now = Date.now();
+  let state = connRateLimits.get(conn);
+  if (!state || now - state.windowStart > WS_RATE_WINDOW_MS) {
+    state = { count: 1, windowStart: now };
+    connRateLimits.set(conn, state);
+    return false;
+  }
+  state.count++;
+  return state.count > WS_RATE_LIMIT;
+}
+
 interface YjsDoc {
   doc: Y.Doc;
   awareness: awarenessProtocol.Awareness;
@@ -145,6 +165,7 @@ function messageListener(
   yjsDoc: YjsDoc,
   message: Uint8Array,
 ): void {
+  if (isRateLimited(conn)) return;
   try {
     const decoder = decoding.createDecoder(message);
     const messageType = decoding.readVarUint(decoder);

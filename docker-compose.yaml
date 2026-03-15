@@ -12,6 +12,11 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - '${POSTGRES_PORT_HOST}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     restart: always
@@ -19,7 +24,8 @@ services:
       context: .
       dockerfile: ./apps/api/Dockerfile.api
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     env_file:
       - .env
     ports:
@@ -28,6 +34,12 @@ services:
       - NODE_ENV=production
     volumes:
       - ./uploads:/home/tapiz/uploads
+    healthcheck:
+      test: ['CMD', 'node', '-e', "fetch('http://localhost:${API_PORT}/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   web:
     restart: always
@@ -38,7 +50,8 @@ services:
         - API_URL=${API_URL}
         - WS_URL=${WS_URL}
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     ports:
       - '${FRONTEND_PORT}:80'
     env_file:
