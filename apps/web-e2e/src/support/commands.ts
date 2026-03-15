@@ -37,6 +37,12 @@ declare global {
        * Drag from the sticky note pad to the given canvas coordinates.
        */
       dragNoteToCanvas(targetX: number, targetY: number): Chainable<void>;
+
+      /**
+       * Zoom out so all board nodes fit within the viewport.
+       * Dispatches wheel events on the board to zoom out.
+       */
+      zoomToFit(steps?: number): Chainable<void>;
     }
   }
 }
@@ -110,6 +116,23 @@ Cypress.Commands.add('dragNoteToCanvas', (targetX: number, targetY: number) => {
           force: true,
         });
     });
+});
+
+Cypress.Commands.add('zoomToFit', (steps = 15) => {
+  cy.get('tapiz-board').then(($board) => {
+    for (let i = 0; i < steps; i++) {
+      $board[0].dispatchEvent(
+        new WheelEvent('wheel', {
+          deltaY: 100,
+          clientX: 500,
+          clientY: 330,
+          bubbles: true,
+        }),
+      );
+    }
+  });
+  // Allow rendering to settle after zoom
+  cy.wait(300);
 });
 
 export {};

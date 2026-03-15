@@ -51,6 +51,20 @@
           "extractLicenses": false,
           "sourceMap": true,
           "namedChunks": true
+        },
+        "demo": {
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true,
+          "fileReplacements": [
+            {
+              "replace": "apps/web/src/environments/environment.ts",
+              "with": "apps/web/src/environments/environment.e2e.ts"
+            }
+          ]
         }
       },
       "defaultConfiguration": "production"
@@ -63,11 +77,16 @@
         },
         "development": {
           "buildTarget": "web:build:development"
+        },
+        "demo": {
+          "buildTarget": "web:build:demo"
         }
       },
       "defaultConfiguration": "development",
       "options": {
-        "proxyConfig": "apps/web/proxy.conf.json"
+        "buildTarget": "web:build:development",
+        "proxyConfig": "apps/web/proxy.conf.json",
+        "port": 4200
       },
       "continuous": true
     },

@@ -5,14 +5,20 @@ import {
   viewChildren,
   computed,
 } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { NodeComponent } from '../node/node.component';
 import { NodesStore } from '../../services/nodes.store';
 import { BoardFacade } from '../../../../services/board-facade.service';
+import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, merge } from 'rxjs';
 import { HotkeysService } from '@tapiz/cdk/services/hostkeys.service';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 import { RxFor } from '@rx-angular/template/for';
+import type { BoardTuNode } from '@tapiz/board-commons';
+
+const DEFAULT_NODE_SIZE = 300;
+const VIEWPORT_BUFFER = 200;
 
 @Component({
   selector: 'tapiz-nodes',
@@ -30,12 +36,51 @@ export class NodesComponent {
   #boardFacade = inject(BoardFacade);
   #nodesStore = inject(NodesStore);
   #hotkeysService = inject(HotkeysService);
+  #store = inject(Store);
+
+  #zoom = this.#store.selectSignal(boardPageFeature.selectZoom);
+  #position = this.#store.selectSignal(boardPageFeature.selectPosition);
+  #focusIds = this.#store.selectSignal(boardPageFeature.selectFocusId);
 
   nodesComponents = viewChildren<NodeComponent>(NodeComponent);
 
   nodes = computed(() => {
-    return this.#boardFacade.filterBoardNodes(this.#boardFacade.nodes());
+    const allNodes = this.#boardFacade.filterBoardNodes(
+      this.#boardFacade.nodes(),
+    );
+    return this.#filterByViewport(allNodes);
   });
+
+  #filterByViewport(nodes: BoardTuNode[]): BoardTuNode[] {
+    const zoom = this.#zoom();
+    const position = this.#position();
+    const focusIds = this.#focusIds();
+
+    const viewLeft = -position.x / zoom - VIEWPORT_BUFFER / zoom;
+    const viewTop = -position.y / zoom - VIEWPORT_BUFFER / zoom;
+    const viewRight =
+      (window.innerWidth - position.x) / zoom + VIEWPORT_BUFFER / zoom;
+    const viewBottom =
+      (window.innerHeight - position.y) / zoom + VIEWPORT_BUFFER / zoom;
+
+    return nodes.filter((node) => {
+      if (focusIds.includes(node.id)) {
+        return true;
+      }
+
+      const nx = node.content.position.x;
+      const ny = node.content.position.y;
+      const nw = node.content.width ?? DEFAULT_NODE_SIZE;
+      const nh = node.content.height ?? DEFAULT_NODE_SIZE;
+
+      return (
+        nx + nw > viewLeft &&
+        nx < viewRight &&
+        ny + nh > viewTop &&
+        ny < viewBottom
+      );
+    });
+  }
 
   constructor() {
     merge(

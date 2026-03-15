@@ -31,6 +31,9 @@ describe('DDD Training Workflows', () => {
         cy.contains('Event Storming (DDD)').should('be.visible').click();
       });
 
+      // Zoom out so all template nodes are within the viewport
+      cy.zoomToFit();
+
       // Expect multiple panels (swimlanes) and pre-seeded notes
       cy.get('tapiz-panel', { timeout: 10000 }).should(
         'have.length.at.least',
@@ -44,6 +47,10 @@ describe('DDD Training Workflows', () => {
       enterEditMode();
       cy.get('tapiz-board-toolbar-button[icon="templates"]').click();
       cy.contains('Event Storming (DDD)').click();
+
+      // Zoom out so all template nodes are within the viewport
+      cy.zoomToFit();
+
       cy.get('tapiz-panel', { timeout: 10000 }).should(
         'have.length.at.least',
         6,

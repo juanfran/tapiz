@@ -10,7 +10,7 @@
       "executor": "@nx/cypress:cypress",
       "options": {
         "cypressConfig": "apps/web-e2e/cypress.config.ts",
-        "devServerTarget": "web:serve:development",
+        "devServerTarget": "web:serve:demo",
         "testingType": "e2e"
       },
       "configurations": {
@@ -18,7 +18,7 @@
           "devServerTarget": "web:serve:production"
         },
         "ci": {
-          "devServerTarget": "web:serve:development",
+          "devServerTarget": "web:serve:demo",
           "browser": "chrome",
           "headless": true
         }
@@ -28,7 +28,7 @@
       "executor": "@nx/cypress:cypress",
       "options": {
         "cypressConfig": "apps/web-e2e/cypress.config.ts",
-        "devServerTarget": "web:serve:development",
+        "devServerTarget": "web:serve:demo",
         "testingType": "e2e",
         "watch": true
       }

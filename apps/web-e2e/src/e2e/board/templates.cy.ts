@@ -80,6 +80,9 @@ describe('Template Selector', () => {
       cy.contains('Stop, Start, Continue').click();
     });
 
+    // Template is wider than viewport — zoom out to see all nodes
+    cy.zoomToFit();
+
     cy.get('tapiz-node', { timeout: 10000 }).should('have.length.at.least', 4);
   });
 
