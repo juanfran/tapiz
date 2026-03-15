@@ -10,7 +10,7 @@ import { Client } from './client.js';
 import db from './db/index.js';
 
 import { syncNodeBox } from '@tapiz/sync-node-box';
-import { Subscription, throttleTime } from 'rxjs';
+import { Subscription, debounceTime, map, distinctUntilChanged } from 'rxjs';
 import { validateSession } from './auth.js';
 
 export class Server {
@@ -113,7 +113,13 @@ export class Server {
       );
       this.stateSubscriptions[boardId] = this.state[boardId]
         .sync()
-        .pipe(throttleTime(2000))
+        .pipe(
+          debounceTime(2000),
+          map((state) => this.stripEphemeralData(state)),
+          distinctUntilChanged(
+            (a, b) => JSON.stringify(a) === JSON.stringify(b),
+          ),
+        )
         .subscribe((state) => {
           db.board.updateBoard(boardId, state);
         });
@@ -135,7 +141,10 @@ export class Server {
   }
 
   public emptyBoard(boardId: string) {
-    db.board.updateBoard(boardId, this.state[boardId].get());
+    db.board.updateBoard(
+      boardId,
+      this.stripEphemeralData(this.state[boardId].get()),
+    );
 
     delete this.state[boardId];
     delete this.boardSettings[boardId];
@@ -212,6 +221,20 @@ export class Server {
 
   public updateBoardName(boardId: string, name: string) {
     db.board.updateBoardName(boardId, name);
+  }
+
+  private stripEphemeralData(state: TuNode[]): TuNode[] {
+    return state
+      .filter((node) => node.type !== 'user')
+      .map((node) => {
+        if (node.children) {
+          return {
+            ...node,
+            children: node.children.filter((child) => child.type !== 'user'),
+          };
+        }
+        return node;
+      });
   }
 
   private updateBoard(boardId: string, state: TuNode[]) {
