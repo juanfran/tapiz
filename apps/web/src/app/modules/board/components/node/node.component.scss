@@ -1,6 +1,18 @@
+@keyframes nodeEnter {
+  from {
+    opacity: 0;
+    scale: 0.8;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
 :host {
   display: flex;
   transform-origin: left top 0;
+  animation: nodeEnter 0.15s ease-out;
 
   &.highlight {
     z-index: var(--board-highlight-node-layer);

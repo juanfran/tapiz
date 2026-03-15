@@ -90,6 +90,10 @@ export class BoardHeaderOptionsComponent {
     );
   }
 
+  exportPng() {
+    this.#exportService.exportAsPng();
+  }
+
   share() {
     this.#dialog.open(ShareBoardComponent, {
       width: '600px',

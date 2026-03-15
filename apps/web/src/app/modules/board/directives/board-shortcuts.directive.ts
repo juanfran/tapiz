@@ -2,6 +2,7 @@ import { Directive, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { filter, fromEvent } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
 import { BoardPageActions } from '../actions/board-page.actions';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 import { boardPageFeature } from '../reducers/boardPage.reducer';
@@ -10,6 +11,7 @@ import { BoardFacade } from '../../../services/board-facade.service';
 import { BoardActions } from '../actions/board.actions';
 import { NodePatch, isNote } from '@tapiz/board-commons';
 import { NodesStore } from '../services/nodes.store';
+import { KeyboardHelpDialogComponent } from '../components/keyboard-help/keyboard-help-dialog.component';
 
 @Directive({
   selector: '[tapizBoardShourtcuts]',
@@ -21,8 +23,19 @@ export class BoardShourtcutsDirective {
   #selectedNodesIds = this.#store.selectSignal(boardPageFeature.selectFocusId);
   #boardFacade = inject(BoardFacade);
   #nodesStore = inject(NodesStore);
+  #dialog = inject(MatDialog);
 
   constructor() {
+    // Help modal (?)
+    fromEvent<KeyboardEvent>(document, 'keydown')
+      .pipe(
+        takeUntilDestroyed(),
+        filter((e) => e.key === '?' && !e.repeat && !isInputField()),
+      )
+      .subscribe(() => {
+        this.#dialog.open(KeyboardHelpDialogComponent);
+      });
+
     // Undo (Ctrl+Z)
     fromEvent<KeyboardEvent>(document, 'keydown')
       .pipe(

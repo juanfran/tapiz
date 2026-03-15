@@ -16,11 +16,18 @@
     <mat-icon svgIcon="share"></mat-icon>
   </button>
   <button
-    title="Download"
-    aria-label="Download"
+    title="Download JSON"
+    aria-label="Download JSON"
     class="button-action"
     (click)="export()">
     <mat-icon svgIcon="download"></mat-icon>
+  </button>
+  <button
+    title="Export as PNG"
+    aria-label="Export as PNG"
+    class="button-action"
+    (click)="exportPng()">
+    <mat-icon>image</mat-icon>
   </button>
 }
 
