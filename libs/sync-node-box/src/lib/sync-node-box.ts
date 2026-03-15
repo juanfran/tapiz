@@ -28,7 +28,7 @@ export function syncNodeBox(options?: SyncNodeBoxOptions) {
   }
 
   function setState(newState: TuNode[]) {
-    nodes.next([...newState]);
+    nodes.next(newState);
   }
 
   function log(content: object | string, tag: string) {

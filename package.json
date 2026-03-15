@@ -102,6 +102,7 @@
     "emoji-picker-element": "^1.21.3",
     "fastify": "5.8.2",
     "fastify-socket.io": "^5.1.0",
+    "immer": "^11.1.4",
     "jsdom": "^24.0.0",
     "lib0": "^0.2.117",
     "lucide-angular": "^0.577.0",

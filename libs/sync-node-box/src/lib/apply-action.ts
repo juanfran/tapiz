@@ -26,26 +26,26 @@ export function applyAction(nodes: TuNode[], action: StateActions) {
   } else if (action.op === 'remove') {
     nodes = nodes.filter((it) => action.data.id !== it.id);
   } else if (action.op === 'patch') {
-    nodes = nodes.map((it) => {
-      if (action.data.id === it.id) {
-        return {
-          ...it,
-          content: {
-            ...it.content,
-            ...action.data.content,
-          },
-        };
-      }
-      return it;
-    });
+    const targetIndex = nodes.findIndex((it) => it.id === action.data.id);
 
-    if (ignoreNodes.includes(action.data.type)) {
+    if (targetIndex === -1) {
       return nodes;
     }
 
-    const from = nodes.findIndex((it) => it.id === action.data.id);
+    // Shallow-copy only the changed node, reuse all others
+    const target = nodes[targetIndex];
+    const patched = {
+      ...target,
+      content: {
+        ...target.content,
+        ...action.data.content,
+      },
+    };
 
-    if (from === -1) {
+    nodes = nodes.slice();
+    nodes[targetIndex] = patched;
+
+    if (ignoreNodes.includes(action.data.type)) {
       return nodes;
     }
 
@@ -54,7 +54,7 @@ export function applyAction(nodes: TuNode[], action: StateActions) {
       action.position < nodes.length &&
       action.position >= 0
     ) {
-      arrayMove(nodes, from, action.position);
+      arrayMove(nodes, targetIndex, action.position);
     }
   }
 

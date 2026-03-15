@@ -361,3 +361,60 @@ describe('syncNodeBox', () => {
     });
   });
 });
+
+describe('applyAction performance', () => {
+  it('patch auf 500 Nodes in unter 5ms', () => {
+    const box = syncNodeBox();
+    const nodes: TuNode[] = Array.from({ length: 500 }, (_, i) => ({
+      id: `node-${i}`,
+      type: 'note',
+      content: { text: `Note ${i}`, position: { x: i * 10, y: i * 10 } },
+    }));
+
+    box.update(() => nodes);
+
+    const start = performance.now();
+    for (let i = 0; i < 100; i++) {
+      box.actions([
+        {
+          op: 'patch',
+          data: {
+            id: `node-${i % 500}`,
+            type: 'note',
+            content: { text: `Updated ${i}` },
+          },
+        },
+      ]);
+    }
+    const elapsed = performance.now() - start;
+
+    expect(elapsed).toBeLessThan(50); // 100 patches in <50ms
+  });
+
+  it('patch ändert nur das betroffene Node-Objekt', () => {
+    const box = syncNodeBox();
+    const nodes: TuNode[] = [
+      { id: '1', type: 'note', content: { text: 'a' } },
+      { id: '2', type: 'note', content: { text: 'b' } },
+      { id: '3', type: 'note', content: { text: 'c' } },
+    ];
+
+    box.update(() => nodes);
+    const before = box.get();
+
+    box.actions([
+      { op: 'patch', data: { id: '2', type: 'note', content: { text: 'B' } } },
+    ]);
+
+    const after = box.get();
+
+    // Neues Array
+    expect(after).not.toBe(before);
+    // Unveränderte Nodes behalten ihre Referenz
+    expect(after[0]).toBe(before[0]);
+    expect(after[2]).toBe(before[2]);
+    // Geändertes Node hat neue Referenz
+    expect(after[1]).not.toBe(before[1]);
+    expect(after[1].content).toEqual({ text: 'b', ...{ text: 'B' } });
+  });
+});

@@ -64,6 +64,13 @@
       "when": 1773449755142,
       "tag": "0008_dashing_riptide",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1742068800000,
+      "tag": "0009_performance_indexes",
+      "breakpoints": true
     }
   ]
 }

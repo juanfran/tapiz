@@ -221,6 +221,9 @@ importers:
       fastify-socket.io:
         specifier: ^5.1.0
         version: 5.1.0(fastify@5.8.2)(socket.io@4.7.5(bufferutil@4.0.8)(utf-8-validate@6.0.6))
+      immer:
+        specifier: ^11.1.4
+        version: 11.1.4
       jsdom:
         specifier: ^24.0.0
         version: 24.1.0(bufferutil@4.0.8)(utf-8-validate@6.0.6)
@@ -7827,6 +7830,9 @@ packages:
     resolution: {integrity: sha512-6TDAlDPZxUFCv+fuOkIoXT/V/f3Qbq8e37p+YOiYrUv3v9cc3/6x78VdfPgFVaB9dZYeLUfKgHRebpkm/oP2VQ==}
     engines: {node: '>=0.10.0'}
     hasBin: true
+
+  immer@11.1.4:
+    resolution: {integrity: sha512-XREFCPo6ksxVzP4E0ekD5aMdf8WMwmdNaz6vuvxgI40UaEiu6q3p8X52aU6GdyvLY3XXX/8R7JOTXStz/nBbRw==}
 
   immutable@5.1.5:
     resolution: {integrity: sha512-t7xcm2siw+hlUM68I+UEOK+z84RzmN59as9DZ7P1l0994DKUWV7UXBMQZVxaoMSRQ+PBZbHCOoBt7a2wxOMt+A==}
@@ -19859,6 +19865,8 @@ snapshots:
 
   image-size@0.5.5:
     optional: true
+
+  immer@11.1.4: {}
 
   immutable@5.1.5: {}
 
