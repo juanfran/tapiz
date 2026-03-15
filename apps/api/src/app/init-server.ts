@@ -15,6 +15,10 @@ import { setServer } from './global.js';
 import { getAuth } from './auth.js';
 import { toNodeHandler } from 'better-auth/node';
 import { fileUpload } from './file-upload.js';
+import { WebSocketServer } from 'ws';
+import { setupWSConnection } from './yjs-server.js';
+import { validateSession } from './auth.js';
+import { haveAccess } from './db/board-db.js';
 
 const fastify = Fastify({
   logger: false,
@@ -119,6 +123,9 @@ fastify.register(async function (fastify) {
 
 const host = process.env['API_HOST'];
 
+// Yjs WebSocket server on /yjs/:boardId
+const yjsWss = new WebSocketServer({ noServer: true });
+
 export function startApiServer() {
   fastify.listen(
     {
@@ -129,6 +136,49 @@ export function startApiServer() {
       if (err) throw err;
 
       console.log(`http://localhost:${process.env['API_PORT']}`);
+
+      // Attach Yjs WebSocket upgrade handler to the underlying HTTP server
+      const httpServer = fastify.server;
+      httpServer.on('upgrade', async (request, socket, head) => {
+        const url = new URL(
+          request.url ?? '',
+          `http://${request.headers.host}`,
+        );
+
+        if (!url.pathname.startsWith('/yjs/')) {
+          return; // Let Socket.io handle other upgrades
+        }
+
+        const boardId = url.pathname.slice('/yjs/'.length);
+
+        if (!boardId || boardId.length < 36) {
+          socket.destroy();
+          return;
+        }
+
+        // Authenticate via cookie
+        const cookie = request.headers.cookie ?? '';
+        try {
+          const session = await validateSession(cookie);
+          if (!session?.user) {
+            socket.destroy();
+            return;
+          }
+
+          const hasAccess = await haveAccess(boardId, session.user.id);
+          if (!hasAccess) {
+            socket.destroy();
+            return;
+          }
+
+          yjsWss.handleUpgrade(request, socket, head, (ws) => {
+            yjsWss.emit('connection', ws, request);
+            setupWSConnection(ws, request, boardId);
+          });
+        } catch {
+          socket.destroy();
+        }
+      });
     },
   );
 }

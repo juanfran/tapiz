@@ -83,6 +83,7 @@ export const boards = pgTable('boards', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: varchar('name', { length: 256 }).notNull(),
   board: json('board').$type<TuNode[]>().notNull(),
+  useYjs: boolean('use_yjs').notNull().default(false),
   createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
   teamId: uuid('team_id').references(() => teams.id, { onDelete: 'cascade' }),
   public: boolean('public').notNull().default(false),

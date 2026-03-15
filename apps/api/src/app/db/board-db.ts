@@ -439,6 +439,25 @@ export async function deleteMember(boardId: string, userId: string) {
     );
 }
 
+export async function updateBoardYjs(
+  boardId: string,
+  state: Buffer,
+): Promise<void> {
+  await db.execute(
+    sql`UPDATE boards SET board_yjs = ${state}, use_yjs = true WHERE id = ${boardId}`,
+  );
+}
+
+export async function getBoardYjs(boardId: string): Promise<Buffer | null> {
+  const result = await db.execute(
+    sql`SELECT board_yjs FROM boards WHERE id = ${boardId}`,
+  );
+
+  const row = (result as unknown as { rows: Array<{ board_yjs?: Buffer }> })
+    .rows?.[0];
+  return row?.board_yjs ?? null;
+}
+
 export async function updateBoardName(boardId: string, name: string) {
   return db
     .update(schema.boards)
