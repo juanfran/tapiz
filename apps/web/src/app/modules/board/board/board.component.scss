@@ -121,6 +121,36 @@ tapiz-header {
   }
 }
 
+/* LOD (Level of Detail) — reduce rendering cost at low zoom levels */
+:host {
+  &.lod-1 {
+    ::ng-deep tapiz-node {
+      content-visibility: auto;
+
+      tapiz-editor-view,
+      .rich-text,
+      .ProseMirror {
+        visibility: hidden;
+      }
+
+      box-shadow: none !important;
+    }
+  }
+
+  &.lod-2 {
+    ::ng-deep tapiz-node {
+      content-visibility: auto;
+
+      > * {
+        visibility: hidden;
+      }
+
+      box-shadow: none !important;
+      border-radius: 4px;
+    }
+  }
+}
+
 .column-buttons {
   pointer-events: none;
   align-items: center;

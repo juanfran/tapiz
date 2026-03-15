@@ -138,6 +138,9 @@ import { SetBoardCenterComponent } from '../components/set-board-center/set-boar
     '[class.readonly]': 'isReadonlyUser()',
     '[class.edit-mode]': 'boardMode() === 1',
     '[class.following-user]': 'followUser()',
+    '[class.lod-0]': 'userZoom() > 0.5',
+    '[class.lod-1]': 'userZoom() <= 0.5 && userZoom() > 0.2',
+    '[class.lod-2]': 'userZoom() <= 0.2',
   },
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
