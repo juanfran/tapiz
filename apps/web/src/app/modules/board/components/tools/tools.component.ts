@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'tapiz-tools',
-  imports: [MatButtonModule, MatIconModule],
+  imports: [MatButtonModule, MatIconModule, LucideAngularModule],
   templateUrl: './tools.component.html',
   styleUrl: './tools.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,5 +39,9 @@ export class ToolsComponent {
 
   selectedTimer() {
     this.selectedTool.emit('selectedTimer');
+  }
+
+  selectedArrow() {
+    this.selectedTool.emit('selectedArrow');
   }
 }

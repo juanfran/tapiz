@@ -50,6 +50,7 @@ import { Point, StateActions } from '@tapiz/board-commons';
 import { boardPageFeature } from '../reducers/boardPage.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NodesComponent } from '../components/nodes/nodes.component';
+import { ArrowsWrapperComponent } from '../components/arrows/arrows-wrapper/arrows-wrapper.component';
 import { ContextMenuComponent } from '@tapiz/ui/context-menu/context-menu.component';
 import { ContextMenuStore } from '@tapiz/ui/context-menu/context-menu.store';
 import { BoardContextMenuComponent } from '../components/board-context-menu/board-contextmenu.component';
@@ -111,6 +112,7 @@ import { SetBoardCenterComponent } from '../components/set-board-center/set-boar
     MatDialogModule,
     StopHighlightComponent,
     MatProgressBarModule,
+    ArrowsWrapperComponent,
     NodesComponent,
     ContextMenuComponent,
     BoardContextMenuComponent,

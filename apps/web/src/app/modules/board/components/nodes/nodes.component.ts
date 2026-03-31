@@ -21,6 +21,10 @@ import { RxFor } from '@rx-angular/template/for';
     <tapiz-node
       *rxFor="let node of nodes(); trackBy: 'id'"
       [node]="node" />
+
+    @if (tmpNode(); as tmpNode) {
+      <tapiz-node [node]="tmpNode" />
+    }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NodeComponent, RxFor],
@@ -36,6 +40,8 @@ export class NodesComponent {
   nodes = computed(() => {
     return this.#boardFacade.filterBoardNodes(this.#boardFacade.nodes());
   });
+
+  tmpNode = this.#boardFacade.tmpNode;
 
   constructor() {
     merge(

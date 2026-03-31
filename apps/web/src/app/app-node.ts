@@ -8,6 +8,7 @@ import { POLL_BOARD_CONFIG } from './modules/board/components/poll-board';
 import { PERSONAL_TOKEN_CONFIG } from './modules/board/components/token/register';
 import { NOTE_CONFIG } from './modules/board/components/note';
 import { GROUP_CONFIG } from './modules/board/components/group';
+import { ARROW_NODE_CONFIG } from './modules/board/components/arrows/arrow-node/register';
 
 registerNode('token', PERSONAL_TOKEN_CONFIG);
 registerNode('estimation', ESTIMATION_BOARD_CONFIG);
@@ -18,3 +19,4 @@ registerNode('panel', PANEL_CONFIG);
 registerNode('poll', POLL_BOARD_CONFIG);
 registerNode('note', NOTE_CONFIG);
 registerNode('group', GROUP_CONFIG);
+registerNode('arrow', ARROW_NODE_CONFIG);

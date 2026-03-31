@@ -1,4 +1,4 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { Store } from '@ngrx/store';
 import {
@@ -42,6 +42,8 @@ export class BoardFacade {
   currentUser = computed(() => {
     return this.users()?.find((user) => user.id === this.userId());
   });
+
+  tmpNode = signal<BoardTuNode | null>(null);
 
   cursors = computed(() => {
     return this.usersNodes()
@@ -111,7 +113,7 @@ export class BoardFacade {
 
   filterBoardNodes(nodes: TuNode[]): BoardTuNode[] {
     return nodes.filter(
-      (it) => !['user', 'settings', 'timer'].includes(it.type),
+      (it) => !['user', 'settings', 'timer', 'arrow'].includes(it.type),
     ) as BoardTuNode[];
   }
 
