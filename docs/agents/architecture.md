@@ -6,6 +6,7 @@ Tapiz uses Nx to coordinate the web app, API, and shared libraries. Treat packag
 
 - `apps/web` contains the Angular client and board experience.
 - `apps/api` contains the Fastify/TRPC backend and server-side validation.
+- `apps/preview-worker` is an optional standalone Node process that renders board thumbnails with headless Chromium (Puppeteer). It polls the API and is not required for the app to run.
 - `libs/board-commons` contains shared board models and validators used by both client and API.
 - `libs/ui`, `libs/cdk`, `libs/sync-node-box`, and `libs/utils` provide reusable UI, interaction, sync, and utility behavior.
 - `drizzle` contains database schema and migrations.

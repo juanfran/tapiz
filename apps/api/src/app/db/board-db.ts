@@ -41,6 +41,7 @@ export async function getBoardBasic(boardId: string) {
       createdAt: schema.boards.createdAt,
       teamId: schema.boards.teamId,
       public: schema.boards.public,
+      previewUpdatedAt: schema.boards.previewUpdatedAt,
     })
     .from(schema.boards)
     .where(eq(schema.boards.id, boardId));
@@ -148,6 +149,7 @@ export async function getBoardUser(
         teamName: schema.teams.name,
         role: schema.acountsToBoards.role,
         public: schema.boards.public,
+        previewUpdatedAt: schema.boards.previewUpdatedAt,
       },
       starreds: schema.starreds,
       accounts_boards: {
@@ -267,6 +269,7 @@ export async function getUsersBoardsByTeam(
         teamId: schema.boards.teamId,
         role: schema.acountsToBoards.role,
         public: schema.boards.public,
+        previewUpdatedAt: schema.boards.previewUpdatedAt,
       },
       starreds: schema.starreds,
       accounts_boards: {
@@ -405,6 +408,38 @@ export async function updateBoard(id: string, board: TuNode[]) {
   return db
     .update(schema.boards)
     .set({ board })
+    .where(eq(schema.boards.id, id));
+}
+
+export async function markPreviewDirty(id: string) {
+  return db
+    .update(schema.boards)
+    .set({ previewDirty: true })
+    .where(eq(schema.boards.id, id));
+}
+
+export async function getNextDirtyBoardId() {
+  const results = await db
+    .select({ id: schema.boards.id })
+    .from(schema.boards)
+    .where(eq(schema.boards.previewDirty, true))
+    .orderBy(sql`${schema.boards.previewUpdatedAt} asc nulls first`)
+    .limit(1);
+
+  return results.at(0)?.id;
+}
+
+export async function markPreviewGenerated(id: string, generated: boolean) {
+  if (generated) {
+    return db
+      .update(schema.boards)
+      .set({ previewDirty: false, previewUpdatedAt: sql`now()` })
+      .where(eq(schema.boards.id, id));
+  }
+
+  return db
+    .update(schema.boards)
+    .set({ previewDirty: false })
     .where(eq(schema.boards.id, id));
 }
 
@@ -623,6 +658,7 @@ export async function getBoards(
         createdAt: schema.boards.createdAt,
         teamId: schema.boards.teamId,
         public: schema.boards.public,
+        previewUpdatedAt: schema.boards.previewUpdatedAt,
       },
       starreds: schema.starreds,
       accounts_boards: {

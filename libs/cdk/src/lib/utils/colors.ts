@@ -31,6 +31,42 @@ export function contrast(color1: string, color2: string) {
   return 0;
 }
 
+const tokenPalette = [
+  '#FF7F7F',
+  '#7FAAFF',
+  '#FFFF7F',
+  '#7FFF7F',
+  '#FFBF7F',
+  '#BF7FBF',
+  '#7FBFBF',
+  '#FF7FAA',
+  '#FFAA7F',
+  '#AABF7F',
+  '#BF7F7F',
+  '#7F7FAA',
+  '#BFBFAA',
+  '#FFAAFF',
+  '#AA7F7F',
+  '#AAFFBF',
+  '#7FAABF',
+  '#FFBFBE',
+] as const;
+
+export const TokenColors = tokenPalette.map((backgroundColor) => {
+  const color =
+    contrast(backgroundColor, '#ffffff') > 2 ? '#ffffff' : '#000000';
+  return { backgroundColor, color };
+});
+
+export function tokenColorForId(id: string) {
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = hash * 31 + id.charCodeAt(i);
+    hash = hash % Number.MAX_SAFE_INTEGER;
+  }
+  return TokenColors[Math.abs(hash) % TokenColors.length];
+}
+
 export function lighter(hex: string, percentage: number) {
   const colorRGB = hexToRgb(hex);
 

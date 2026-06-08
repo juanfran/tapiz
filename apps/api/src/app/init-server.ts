@@ -16,6 +16,7 @@ import { setServer } from './global.js';
 import { getAuthUrl, lucia } from './auth.js';
 import { googleCallback } from './routers/auth-routes.js';
 import { fileUpload } from './file-upload.js';
+import { registerPreviewRoutes } from './preview-routes.js';
 
 const fastify = Fastify({
   logger: false,
@@ -105,6 +106,7 @@ fastify.register(async function (fastify) {
   });
 
   fastify.register(googleCallback);
+  fastify.register(registerPreviewRoutes);
 });
 
 const host = process.env['API_HOST'];

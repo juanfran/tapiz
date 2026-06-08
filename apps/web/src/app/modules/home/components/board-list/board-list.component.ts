@@ -14,11 +14,11 @@ import { HomeActions } from '../../+state/home.actions';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmComponent } from '../../../../shared/confirm-action/confirm-actions.component';
 import { filter } from 'rxjs';
-import { BoardIdToColorDirective } from '../../../../shared/board-id-to-color.directive';
 import { RenameBoardComponent } from '../rename-board/rename-board.component';
 import { MatSelectModule } from '@angular/material/select';
 import { TransferBoardComponent } from '../transfer-board/transfer-board.component';
 import { input } from '@angular/core';
+import { ConfigService } from '../../../../services/config.service';
 
 @Component({
   selector: 'tapiz-board-list',
@@ -27,7 +27,6 @@ import { input } from '@angular/core';
     CdkMenu,
     CdkMenuItem,
     MatIconModule,
-    BoardIdToColorDirective,
     RouterModule,
     MatDialogModule,
     MatSelectModule,
@@ -56,7 +55,8 @@ import { input } from '@angular/core';
           <div
             (click)="goBoard(board)"
             class="board-bg"
-            [tapizBoardIdToColor]="board.id">
+            [class.board-bg--placeholder]="!board.previewUpdatedAt"
+            [style.background-image]="previewBackground(board)">
             <a
               class="board-title"
               [routerLink]="['/board/', board.id]"
@@ -156,6 +156,7 @@ export class BoardListComponent {
   private router = inject(Router);
   private store = inject(Store);
   private dialog = inject(MatDialog);
+  private configService = inject(ConfigService);
 
   sortBy = input.required<SortBoard>();
   boards = input.required<BoardUser[]>();
@@ -164,6 +165,15 @@ export class BoardListComponent {
   sortByField(fieldName: string) {
     return (a: Record<string, string>, b: Record<string, string>) =>
       a[fieldName] > b[fieldName] ? 1 : -1;
+  }
+
+  previewBackground(board: BoardUser) {
+    if (!board.previewUpdatedAt) {
+      return null;
+    }
+    const cacheBust = encodeURIComponent(board.previewUpdatedAt);
+    const base = this.configService.config.API_URL.replace(/\/$/, '');
+    return `url('${base}/preview/boards/${board.id}/image?v=${cacheBust}')`;
   }
 
   goBoard(board: BoardUser) {

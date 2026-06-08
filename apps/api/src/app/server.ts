@@ -10,14 +10,22 @@ import { Client } from './client.js';
 import db from './db/index.js';
 
 import { syncNodeBox } from '@tapiz/sync-node-box';
-import { Subscription, throttleTime } from 'rxjs';
+import { Subject, Subscription, debounceTime, throttleTime } from 'rxjs';
 import { lucia, validateSession } from './auth.js';
+
+const PREVIEW_DIRTY_DEBOUNCE_MS = Number(
+  process.env['PREVIEW_DIRTY_DEBOUNCE_MS'] ?? 60_000,
+);
 
 export class Server {
   public clients: Client[] = [];
   private state: Record<string, ReturnType<typeof syncNodeBox>> = {};
   private stateSubscriptions: Record<string, Subscription> = {};
   private boardSettings: Record<string, BoardSettings> = {};
+  private previewDirty: Record<
+    string,
+    { subject: Subject<void>; subscription: Subscription }
+  > = {};
 
   constructor(public io: WsServer) {}
 
@@ -118,6 +126,14 @@ export class Server {
         .subscribe((state) => {
           db.board.updateBoard(boardId, state);
         });
+
+      const subject = new Subject<void>();
+      const subscription = subject
+        .pipe(debounceTime(PREVIEW_DIRTY_DEBOUNCE_MS))
+        .subscribe(() => {
+          db.board.markPreviewDirty(boardId);
+        });
+      this.previewDirty[boardId] = { subject, subscription };
     }
   }
 
@@ -143,6 +159,13 @@ export class Server {
     if (this.stateSubscriptions[boardId]) {
       this.stateSubscriptions[boardId].unsubscribe();
       delete this.stateSubscriptions[boardId];
+    }
+
+    const pending = this.previewDirty[boardId];
+    if (pending) {
+      pending.subscription.unsubscribe();
+      pending.subject.complete();
+      delete this.previewDirty[boardId];
     }
   }
 
@@ -207,6 +230,11 @@ export class Server {
       const settings = this.findBoardSettings(boardId);
 
       this.boardSettings[boardId] = settings;
+    }
+
+    const hasContentChange = actions.some((it) => it.data.type !== 'user');
+    if (hasContentChange) {
+      this.previewDirty[boardId]?.subject.next();
     }
 
     return newState;

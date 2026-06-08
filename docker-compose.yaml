@@ -44,5 +44,26 @@ services:
     env_file:
       - .env
 
+  # Optional board preview/thumbnail generator. Disabled by default; start it
+  # with: docker compose --env-file=.env --profile preview up -d
+  preview-worker:
+    profiles:
+      - preview
+    restart: always
+    build:
+      context: .
+      dockerfile: ./apps/preview-worker/Dockerfile.preview-worker
+    depends_on:
+      - api
+      - web
+    env_file:
+      - .env
+    environment:
+      # Reach the other containers over the compose network instead of localhost.
+      - API_URL=http://api:${API_PORT}/api
+      - FRONTEND_URL=http://web
+    volumes:
+      - ./uploads:/home/tapiz/uploads
+
 volumes:
   pgdata:

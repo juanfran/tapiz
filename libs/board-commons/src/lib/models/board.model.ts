@@ -7,6 +7,7 @@ export interface Board {
   createdAt: string;
   teamId: string | null;
   public: boolean;
+  previewUpdatedAt: string | null;
 }
 
 export interface BoardUser extends Omit<Board, 'board'> {

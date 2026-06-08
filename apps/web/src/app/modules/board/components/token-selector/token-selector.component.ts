@@ -4,10 +4,7 @@ import {
   inject,
   computed,
 } from '@angular/core';
-import {
-  BoardColors,
-  BoardIdToColorDirective,
-} from '../../../../shared/board-id-to-color.directive';
+import { TokenColors, tokenColorForId } from '@tapiz/cdk/utils/colors';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { output } from '@angular/core';
 import { ConfigService } from '../../../../services/config.service';
@@ -23,15 +20,11 @@ import { ConfigService } from '../../../../services/config.service';
           @for (user of users(); track user.id) {
             <button
               type="button"
-              [tapizBoardIdToColor]="user.id"
-              #tapizBoardIdToColor="tapizBoardIdToColor"
+              [style.background-color]="user.backgroundColor"
+              [style.color]="user.color"
               class="token"
               (click)="
-                selectUserToken(
-                  user.name,
-                  tapizBoardIdToColor.color(),
-                  tapizBoardIdToColor.backgroundColor()
-                )
+                selectUserToken(user.name, user.color, user.backgroundColor)
               ">
               {{ user.name }}
             </button>
@@ -56,7 +49,6 @@ import { ConfigService } from '../../../../services/config.service';
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BoardIdToColorDirective],
 })
 export class TokenSelectorComponent {
   selectToken = output<{
@@ -69,18 +61,23 @@ export class TokenSelectorComponent {
   #configService = inject(ConfigService);
 
   users = computed(() => {
-    return this.#boardFacade.users().map((user) => ({
-      id: user.id,
-      name: user.name
-        .split(' ')
-        .slice(0, 2)
-        .map((it) => it[0])
-        .join('')
-        .toUpperCase(),
-    }));
+    return this.#boardFacade.users().map((user) => {
+      const palette = tokenColorForId(user.id);
+      return {
+        id: user.id,
+        name: user.name
+          .split(' ')
+          .slice(0, 2)
+          .map((it) => it[0])
+          .join('')
+          .toUpperCase(),
+        backgroundColor: palette.backgroundColor,
+        color: palette.color,
+      };
+    });
   });
 
-  colors = BoardColors;
+  colors = TokenColors;
 
   get isDemo() {
     return !!this.#configService.config.DEMO;

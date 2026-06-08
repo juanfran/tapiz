@@ -46,7 +46,13 @@ import { HeaderComponent } from '../components/header/header.component';
 import { SearchOptionsComponent } from '../components/search-options/search-options.component';
 import { CopyPasteDirective } from '../directives/copy-paste.directive';
 import { TitleComponent } from '../../../shared/title/title.component';
-import { Point, StateActions } from '@tapiz/board-commons';
+import {
+  isBoardTuNode,
+  isSettings,
+  Point,
+  StateActions,
+  TuNode,
+} from '@tapiz/board-commons';
 import { boardPageFeature } from '../reducers/boardPage.reducer';
 import { MatDialogModule } from '@angular/material/dialog';
 import { NodesComponent } from '../components/nodes/nodes.component';
@@ -90,6 +96,7 @@ import {
   defaultDotsColor,
 } from '../components/board-settings/board-settings.component';
 import { SetBoardCenterComponent } from '../components/set-board-center/set-board-center.component';
+import { PreviewModeService } from '../services/preview-mode.service';
 
 @Component({
   selector: 'tapiz-board',
@@ -140,6 +147,7 @@ import { SetBoardCenterComponent } from '../components/set-board-center/set-boar
     '[class.readonly]': 'isReadonlyUser()',
     '[class.edit-mode]': 'boardMode() === 1',
     '[class.following-user]': 'followUser()',
+    '[class.preview-mode]': 'previewMode()',
   },
 })
 export class BoardComponent implements AfterViewInit, OnDestroy {
@@ -160,7 +168,9 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   private configService = inject(ConfigService);
   private fileUploadService = inject(FileUploadService);
   private destroyRef = inject(DestroyRef);
+  private previewModeService = inject(PreviewModeService);
   public readonly boardId$ = this.store.select(boardPageFeature.selectBoardId);
+  public readonly previewMode = this.previewModeService.enabled;
 
   smallScale = computed(() => this.calcPatterns().smallCalc);
   bigScale = computed(() => this.calcPatterns().bigCalc);
@@ -267,6 +277,14 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   });
 
   constructor() {
+    this.previewModeService.enabled.set(
+      this.route.snapshot.queryParamMap.get('preview') === '1',
+    );
+
+    if (this.previewMode()) {
+      return;
+    }
+
     if (sessionStorage.getItem('new-board')) {
       sessionStorage.removeItem('new-board');
       this.store.dispatch(BoardPageActions.changeBoardMode({ boardMode: 1 }));
@@ -561,10 +579,147 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
   }
 
   public ngAfterViewInit() {
+    if (this.previewMode()) {
+      void this.connectPreview();
+      return;
+    }
     this.connect();
   }
 
   public ngOnDestroy() {
     this.store.dispatch(BoardPageActions.closeBoard());
   }
+
+  private async connectPreview() {
+    const boardId = this.route.snapshot.paramMap.get('id');
+    if (!boardId) {
+      this.signalPreviewReady({ ok: false });
+      return;
+    }
+
+    let nodes: TuNode[] = [];
+    try {
+      const res = await fetch(`/api/preview/boards/${boardId}/snapshot`, {
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        this.signalPreviewReady({ ok: false });
+        return;
+      }
+      const payload = (await res.json()) as { board: TuNode[] };
+      nodes = payload.board ?? [];
+    } catch {
+      this.signalPreviewReady({ ok: false });
+      return;
+    }
+
+    const renderable = nodes.filter(
+      (it) => !['user', 'timer'].includes(it.type),
+    );
+
+    this.boardFacade.applyActions(
+      renderable.map((data) => ({ data, op: 'add' as const })),
+    );
+
+    this.store.dispatch(BoardPageActions.initBoard({ userId: 'preview' }));
+    this.store.dispatch(BoardPageActions.joinBoard({ boardId }));
+    this.store.dispatch(
+      BoardPageActions.fetchBoardSuccess({
+        name: '',
+        isAdmin: false,
+        isPublic: true,
+        privateId: '',
+        teamName: null,
+        teamId: null,
+      }),
+    );
+    this.store.dispatch(BoardPageActions.boardLoaded());
+
+    // Prefer the view the board owner explicitly chose; fall back to fitting
+    // the content bounding box when no starting view is set.
+    const startingView = nodes
+      .filter(isSettings)
+      .map((it) => it.content.boardStartingView)
+      .find((view) => view !== undefined);
+
+    if (startingView) {
+      this.applyPreviewView(startingView.zoom, {
+        x: startingView.x,
+        y: startingView.y,
+      });
+      return;
+    }
+
+    const bbox = computePreviewBoundingBox(renderable);
+    if (!bbox) {
+      this.signalPreviewReady({ ok: true, empty: true });
+      return;
+    }
+
+    const padding = 80;
+    const viewport = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+    const scale = Math.min(
+      viewport.width / (bbox.width + padding * 2),
+      viewport.height / (bbox.height + padding * 2),
+    );
+    const zoom = Math.max(0.05, Math.min(scale, 2));
+    const centerX = bbox.x + bbox.width / 2;
+    const centerY = bbox.y + bbox.height / 2;
+    this.applyPreviewView(zoom, {
+      x: Math.round(viewport.width / 2 - centerX * zoom),
+      y: Math.round(viewport.height / 2 - centerY * zoom),
+    });
+  }
+
+  private applyPreviewView(zoom: number, position: Point) {
+    requestAnimationFrame(() => {
+      this.store.dispatch(BoardPageActions.setUserView({ zoom, position }));
+
+      setTimeout(() => {
+        this.signalPreviewReady({ ok: true, empty: false });
+      }, 250);
+    });
+  }
+
+  private signalPreviewReady(payload: { ok: boolean; empty?: boolean }) {
+    (window as unknown as { __previewReady: unknown }).__previewReady = payload;
+  }
+}
+
+function computePreviewBoundingBox(nodes: TuNode[]) {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  const defaultSize = 200;
+
+  for (const node of nodes) {
+    if (!isBoardTuNode(node)) continue;
+    if (node.type === 'settings') continue;
+
+    const { position } = node.content;
+    const width =
+      typeof node.content.width === 'number' ? node.content.width : defaultSize;
+    const height =
+      typeof node.content.height === 'number'
+        ? node.content.height
+        : defaultSize;
+
+    minX = Math.min(minX, position.x);
+    minY = Math.min(minY, position.y);
+    maxX = Math.max(maxX, position.x + width);
+    maxY = Math.max(maxY, position.y + height);
+  }
+
+  if (!isFinite(minX)) return null;
+
+  return {
+    x: minX,
+    y: minY,
+    width: maxX - minX,
+    height: maxY - minY,
+  };
 }

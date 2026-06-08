@@ -21,6 +21,7 @@ import { isBoardTuNode, isSettings } from '@tapiz/board-commons';
 import { getNodeSize } from '../../../shared/node-size';
 import { getRouterSelectors } from '@ngrx/router-store';
 import { BoardActions } from '../actions/board.actions';
+import { PreviewModeService } from '../services/preview-mode.service';
 export const { selectQueryParam } = getRouterSelectors();
 
 @Injectable()
@@ -30,6 +31,7 @@ export class BoardPageEffects {
   #boardApiService = inject(BoardApiService);
   #route = inject(ActivatedRoute);
   #boardFacade = inject(BoardFacade);
+  #previewMode = inject(PreviewModeService);
 
   goToNode$ = createEffect(() => {
     return this.#actions$.pipe(
@@ -98,6 +100,7 @@ export class BoardPageEffects {
   restoreUserView$ = createEffect(() => {
     return this.#actions$.pipe(
       ofType(BoardPageActions.fetchBoardSuccess),
+      filter(() => !this.#previewMode.enabled()),
       switchMap(() => {
         return this.#actions$.pipe(ofType(BoardActions.setState)).pipe(take(1));
       }),
@@ -199,6 +202,7 @@ export class BoardPageEffects {
         BoardPageActions.fetchBoardSuccess,
         BoardPageActions.newUserJoined,
       ),
+      filter(() => !this.#previewMode.enabled()),
       concatLatestFrom(() => [
         this.#store.select(boardPageFeature.selectBoardId),
       ]),

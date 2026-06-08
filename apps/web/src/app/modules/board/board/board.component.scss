@@ -28,6 +28,34 @@
       box-sizing: border-box;
     }
   }
+
+  &.preview-mode {
+    tapiz-header,
+    tapiz-board-header-options,
+    tapiz-users,
+    tapiz-board-toolbar,
+    tapiz-drawing-options,
+    tapiz-search-options,
+    tapiz-timer,
+    tapiz-cursors,
+    tapiz-live-reaction-wall,
+    tapiz-context-menu,
+    tapiz-board-context-menu,
+    tapiz-comments,
+    tapiz-notes-visibility,
+    tapiz-zoom-control,
+    tapiz-board-nodes-align,
+    tapiz-set-board-center,
+    tapiz-popup-portal,
+    tapiz-portal-target,
+    tapiz-follow-user,
+    tapiz-stop-highlight,
+    tapiz-demo-intro,
+    .loading-bar,
+    .column-buttons {
+      display: none !important;
+    }
+  }
 }
 
 .work-layer {

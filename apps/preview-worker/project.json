@@ -1,0 +1,47 @@
+{
+  "name": "preview-worker",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/preview-worker/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/esbuild:esbuild",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "platform": "node",
+        "outputPath": "dist/apps/preview-worker",
+        "format": ["esm"],
+        "bundle": true,
+        "main": "apps/preview-worker/src/main.ts",
+        "generatePackageJson": true,
+        "tsConfig": "apps/preview-worker/tsconfig.json",
+        "esbuildOptions": {
+          "sourcemap": true,
+          "outExtension": {
+            ".js": ".js"
+          }
+        }
+      },
+      "configurations": {
+        "development": {},
+        "production": {
+          "esbuildOptions": {
+            "sourcemap": false,
+            "outExtension": {
+              ".js": ".js"
+            }
+          }
+        }
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "pnpm exec tsx apps/preview-worker/src/main.ts"
+      }
+    }
+  },
+  "tags": ["scope:server"]
+}

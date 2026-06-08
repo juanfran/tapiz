@@ -136,6 +136,25 @@ export async function fileUpload(fastify: FastifyInstance) {
       return res.sendFile(req.params.filename);
     },
   });
+
+  fastify.route<{
+    Params: {
+      boardId: string;
+    };
+  }>({
+    method: 'GET',
+    url: '/api/preview/boards/:boardId/image',
+    handler: async (req, res) => {
+      const access = await checkAccess(req.params.boardId, req, res);
+
+      if (!access.success) {
+        res.code(404);
+        return { error: 'File not found' };
+      }
+
+      return res.sendFile(`previews/${req.params.boardId}.webp`);
+    },
+  });
 }
 
 export async function deleteBoardFiles(boardId: string) {
@@ -146,4 +165,11 @@ export async function deleteBoardFiles(boardId: string) {
       console.log(err);
     });
   }
+
+  // Generated lazily by the preview worker and not tracked in boardFiles,
+  // so it may not exist; ignore a missing-file error.
+  unlink(
+    path.join(uploadFolder, 'previews', `${boardId}.webp`),
+    () => undefined,
+  );
 }

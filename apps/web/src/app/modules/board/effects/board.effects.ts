@@ -37,6 +37,7 @@ import {
 } from '../components/live-reaction/live-reaction.store';
 import { selectQueryParam } from '../../../router.selectors';
 import { filterNil } from 'ngxtension/filter-nil';
+import { PreviewModeService } from '../services/preview-mode.service';
 
 @Injectable()
 export class BoardEffects {
@@ -49,6 +50,7 @@ export class BoardEffects {
   private nodesActions = inject(NodesActions);
   private configService = inject(ConfigService);
   private liveReactionStore = inject(LiveReactionStore);
+  private previewMode = inject(PreviewModeService);
   public initBoard$ = createEffect(
     () => {
       return this.actions$.pipe(
@@ -186,6 +188,7 @@ export class BoardEffects {
   public refetchBoard$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BoardPageActions.refetchBoard),
+      filter(() => !this.previewMode.enabled()),
       concatLatestFrom(() => this.store.select(boardPageFeature.selectBoardId)),
       switchMap(([, boardId]) => {
         return this.boardApiService.getBoard(boardId).pipe(
@@ -208,6 +211,7 @@ export class BoardEffects {
     return this.actions$.pipe(
       ofType(BoardPageActions.joinBoard),
       filter(() => !this.configService.config.DEMO),
+      filter(() => !this.previewMode.enabled()),
       switchMap((action) => {
         return this.boardApiService.getBoard(action.boardId).pipe(
           map((board) => {
@@ -254,6 +258,7 @@ export class BoardEffects {
         this.store.select(boardPageFeature.selectBoardId),
       ]),
       filter(() => !this.configService.config.DEMO),
+      filter(() => !this.previewMode.enabled()),
       switchMap(([, boardId]) => {
         return this.boardApiService.getBoardUseres(boardId).pipe(
           map((boardUsers) => {
@@ -269,6 +274,7 @@ export class BoardEffects {
   public fetchBoardSuccess$ = createEffect(() => {
     return this.actions$.pipe(
       ofType(BoardPageActions.fetchBoardSuccess),
+      filter(() => !this.previewMode.enabled()),
       switchMap(() => {
         if (this.configService.config.DEMO) {
           return of(true);
@@ -363,6 +369,7 @@ export class BoardEffects {
     () => {
       return this.actions$.pipe(
         ofType(BoardPageActions.closeBoard),
+        filter(() => !this.previewMode.enabled()),
         tap(() => {
           this.wsService.leaveBoard();
         }),

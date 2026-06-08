@@ -42,6 +42,8 @@ export const boards = pgTable('boards', {
   createdAt: timestamp('created_at', { mode: 'string' }).notNull().defaultNow(),
   teamId: uuid('team_id').references(() => teams.id, { onDelete: 'cascade' }),
   public: boolean('public').notNull().default(false),
+  previewUpdatedAt: timestamp('preview_updated_at', { mode: 'string' }),
+  previewDirty: boolean('preview_dirty').notNull().default(false),
 });
 
 export const acountsToBoards = pgTable(
