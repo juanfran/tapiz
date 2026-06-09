@@ -78,13 +78,13 @@ form {
   gap: var(--spacing-3);
 }
 
-label {
+.description-field {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
+}
 
-  span {
-    color: var(--grey-70);
-    font-size: var(--font-size-0);
-  }
+.field-label {
+  color: var(--grey-70);
+  font-size: var(--font-size-0);
 }

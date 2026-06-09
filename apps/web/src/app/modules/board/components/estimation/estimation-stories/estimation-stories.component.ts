@@ -87,10 +87,16 @@ export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
                   formControlName="title"
                   type="text" />
               </mat-form-field>
-              <label>
-                <span>Description</span>
-                <tapiz-rich-text-editor formControlName="description" />
-              </label>
+              <div class="description-field">
+                <span
+                  [id]="'story-description-' + i"
+                  class="field-label">
+                  Description
+                </span>
+                <tapiz-rich-text-editor
+                  [attr.aria-labelledby]="'story-description-' + i"
+                  formControlName="description" />
+              </div>
             </div>
           </section>
         }
