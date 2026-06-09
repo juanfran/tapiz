@@ -7,11 +7,93 @@ import {
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { NodePatch, Timer } from '@tapiz/board-commons';
-import { BoardActions } from '../estimation/estimation.component';
+import { BoardActions } from '../../actions/board.actions';
 import { Store } from '@ngrx/store';
 import { MatIconModule } from '@angular/material/icon';
 import { interval } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
+
+export function getTimerRemainingSeconds(timer: Timer, now = new Date()) {
+  const remainingTime = timer.remainingTime ?? 0;
+
+  if (remainingTime <= 0) {
+    return 0;
+  }
+
+  if (!timer.active || !timer.startTime) {
+    return remainingTime;
+  }
+
+  const startTime = new Date(timer.startTime).getTime();
+
+  if (Number.isNaN(startTime)) {
+    return remainingTime;
+  }
+
+  const elapsed = Math.max((now.getTime() - startTime) / 1000, 0);
+
+  return Math.max(remainingTime - elapsed, 0);
+}
+
+export function getWholeTimerRemainingSeconds(timer: Timer, now = new Date()) {
+  return Math.ceil(getTimerRemainingSeconds(timer, now));
+}
+
+export function isTimerRunning(timer: Timer, now = new Date()) {
+  return !!timer.active && getTimerRemainingSeconds(timer, now) > 0;
+}
+
+export function formatTimerTime(remainingSeconds: number) {
+  const wholeRemainingSeconds = Math.ceil(Math.max(remainingSeconds, 0));
+
+  if (wholeRemainingSeconds <= 0) {
+    return '00:00';
+  }
+
+  const minutes = Math.floor(wholeRemainingSeconds / 60)
+    .toString()
+    .padStart(2, '0');
+  const seconds = (wholeRemainingSeconds % 60).toString().padStart(2, '0');
+
+  return `${minutes}:${seconds}`;
+}
+
+export function buildTimerActivePatch(
+  timer: Timer,
+  active: boolean,
+  now = new Date(),
+): Timer {
+  const remainingTime = getWholeTimerRemainingSeconds(timer, now);
+  const shouldRun = active && remainingTime > 0;
+  const patch: Timer = {
+    active: shouldRun,
+    remainingTime,
+  };
+
+  if (shouldRun) {
+    patch.startTime = now.toISOString();
+  }
+
+  return patch;
+}
+
+export function buildTimerIncreasePatch(
+  timer: Timer,
+  seconds: number,
+  now = new Date(),
+): Timer {
+  const active = isTimerRunning(timer, now);
+  const patch: Timer = {
+    active,
+    remainingTime: getWholeTimerRemainingSeconds(timer, now) + seconds,
+  };
+
+  if (active) {
+    patch.startTime = now.toISOString();
+  }
+
+  return patch;
+}
 
 @Component({
   selector: 'tapiz-timer',
@@ -54,6 +136,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
     <div class="header">
       <button
         type="button"
+        aria-label="Close timer"
         (click)="close()">
         <mat-icon>close</mat-icon>
       </button>
@@ -66,36 +149,37 @@ import { toSignal } from '@angular/core/rxjs-interop';
         (click)="increaseTime(60)"
         type="button"
         mat-button>
-        1:00
+        +1:00
       </button>
       <button
         (click)="increaseTime(60 * 5)"
         type="button"
         mat-button>
-        5:00
+        +5:00
       </button>
       <button
         (click)="increaseTime(60 * 10)"
         type="button"
         mat-button>
-        10:00
+        +10:00
       </button>
     </div>
 
     <div class="timer-controls">
-      @if (timer().active) {
+      @if (isRunning()) {
         <button
           (click)="setActive(false)"
           type="button"
           color="primary"
           mat-flat-button>
-          Stop
+          Pause
         </button>
       } @else {
         <button
           (click)="setActive(true)"
           type="button"
           color="primary"
+          [disabled]="!canStart()"
           mat-flat-button>
           Start
         </button>
@@ -117,57 +201,32 @@ export class TimerComponent {
 
   currentDateTime = toSignal(interval(1000));
 
-  #remainingSeconds = computed(() => {
-    const timer = this.timer();
+  #remainingSeconds = computed(() =>
+    getTimerRemainingSeconds(this.timer(), this.#getNow()),
+  );
 
-    if (!timer.remainingTime) {
-      return 0;
-    }
+  #wholeRemainingSeconds = computed(() =>
+    getWholeTimerRemainingSeconds(this.timer(), this.#getNow()),
+  );
 
-    if (!timer.active || !timer.startTime) {
-      return timer.remainingTime;
-    }
+  isRunning = computed(() => isTimerRunning(this.timer(), this.#getNow()));
 
-    let currentTime = this.currentDateTime();
+  canStart = computed(() => this.#wholeRemainingSeconds() > 0);
 
-    // get the latest time
-    currentTime = new Date().getTime() / 1000;
-
-    const startTime = new Date(timer.startTime).getTime() / 1000;
-    const elapsed = currentTime - startTime;
-
-    return timer.remainingTime - elapsed;
-  });
-
-  currentTime = computed(() => {
-    const remainingSeconds = this.#remainingSeconds();
-
-    if (remainingSeconds <= 0) {
-      return '00:00';
-    }
-
-    const minutes = Math.floor(remainingSeconds / 60)
-      .toString()
-      .padStart(2, '0');
-    const seconds = Math.floor(remainingSeconds % 60)
-      .toString()
-      .padStart(2, '0');
-
-    return `${minutes}:${seconds}`;
-  });
+  currentTime = computed(() => formatTimerTime(this.#remainingSeconds()));
 
   setActive(active: boolean) {
-    this.#send({
-      active,
-      startTime: new Date().toISOString(),
-      remainingTime: this.#remainingSeconds(),
-    });
+    this.#send(buildTimerActivePatch(this.timer(), active));
   }
 
   increaseTime(seconds: number) {
-    this.#send({
-      remainingTime: this.#remainingSeconds() + seconds,
-    });
+    this.#send(buildTimerIncreasePatch(this.timer(), seconds));
+  }
+
+  #getNow() {
+    this.currentDateTime();
+
+    return new Date();
   }
 
   reset() {
