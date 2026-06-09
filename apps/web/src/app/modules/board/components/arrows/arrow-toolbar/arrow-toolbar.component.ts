@@ -385,12 +385,12 @@ export class ArrowToolbarComponent {
     };
 
     this.#preview(endpoints);
-    this.#commit(endpoints);
+    const committed = this.#commit(endpoints);
 
-    this.#cancelDraft();
+    this.#cancelDraft({ closePopup: !committed });
   }
 
-  #cancelDraft() {
+  #cancelDraft(options = { closePopup: true }) {
     if (!this.#draft) {
       return;
     }
@@ -402,7 +402,10 @@ export class ArrowToolbarComponent {
 
     this.#boardFacade.tmpNode.set(null);
     this.#draft = null;
-    this.#store.dispatch(BoardPageActions.setPopupOpen({ popup: '' }));
+
+    if (options.closePopup) {
+      this.#store.dispatch(BoardPageActions.setPopupOpen({ popup: '' }));
+    }
   }
 
   #commit(endpoints: ArrowEndpoints) {
@@ -412,7 +415,7 @@ export class ArrowToolbarComponent {
     );
 
     if (length < ARROW_PADDING / 2) {
-      return;
+      return false;
     }
 
     const content = buildArrowContent(this.#currentConfig(), endpoints);
@@ -424,6 +427,8 @@ export class ArrowToolbarComponent {
         actions: [action],
       }),
     );
+
+    return true;
   }
 
   #preview(endpoints: ArrowEndpoints) {
