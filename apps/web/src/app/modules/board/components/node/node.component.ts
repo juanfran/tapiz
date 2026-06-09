@@ -40,7 +40,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     '[style.width.px]': 'size().width',
     '[style.height.px]': 'size().height',
     '[style.transform]': 'transform()',
-    '[style.zIndex]': 'cmp?.instance?.zIndex?.() ?? 1',
+    '[style.--node-z-index]': 'cmp?.instance?.zIndex?.() ?? 1',
     '[attr.data-id]': 'node().id',
     '[attr.class]': 'layer',
   },

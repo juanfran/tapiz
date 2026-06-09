@@ -1,6 +1,7 @@
 :host {
   display: flex;
   transform-origin: left top 0;
+  z-index: var(--node-z-index, 1);
 
   &.highlight {
     z-index: var(--board-highlight-node-layer);
