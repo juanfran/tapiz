@@ -18,10 +18,11 @@ import { input } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { boardPageFeature } from '../../../reducers/boardPage.reducer';
 import { BoardFacade } from '../../../../../services/board-facade.service';
+import { SafeHtmlPipe } from '@tapiz/cdk/pipes/safe-html';
 
 @Component({
   selector: 'tapiz-estimation-workspace',
-  imports: [MatButtonModule, MatIconModule],
+  imports: [MatButtonModule, MatIconModule, SafeHtmlPipe],
   template: `
     <div class="nav">
       @if (stories().length > 1) {
@@ -49,7 +50,9 @@ import { BoardFacade } from '../../../../../services/board-facade.service';
       <div class="current-story">
         <h2>{{ story.title }}</h2>
         @if (story.description) {
-          <p>{{ story.description }}</p>
+          <div
+            class="description rich-text"
+            [innerHTML]="story.description | safeHtml"></div>
         }
       </div>
       <div class="users">

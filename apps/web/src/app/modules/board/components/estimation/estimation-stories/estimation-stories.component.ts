@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  OnInit,
+  viewChild,
+  viewChildren,
+} from '@angular/core';
 
 import {
   FormArray,
@@ -15,6 +22,7 @@ import { EstimationStory } from '@tapiz/board-commons';
 import { v4 } from 'uuid';
 import { output } from '@angular/core';
 import { input } from '@angular/core';
+import { RichTextEditorComponent } from '@tapiz/ui/rich-text-editor';
 
 export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
 
@@ -26,50 +34,67 @@ export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
     MatInputModule,
     MatFormFieldModule,
     MatIconModule,
+    RichTextEditorComponent,
   ],
   template: `
     <form
       (ngSubmit)="save()"
       [formGroup]="form">
-      @for (story of stories; track story; let i = $index) {
-        <div class="story">
-          <ng-container [formGroup]="story">
+      <div class="stories-header">
+        <div>
+          <h2>Stories</h2>
+          <p>
+            {{ stories.length }}
+            {{ stories.length === 1 ? 'story' : 'stories' }}
+          </p>
+        </div>
+        <button
+          type="button"
+          (click)="addEmptyStory()"
+          mat-stroked-button
+          color="primary">
+          <mat-icon>add</mat-icon>
+          Add story
+        </button>
+      </div>
+
+      <div
+        #storiesList
+        board-noscroll
+        class="stories-list">
+        @for (story of stories; track story; let i = $index) {
+          <section
+            #storyItem
+            class="story"
+            [formGroup]="story">
+            <div class="story-header">
+              <h3>Story {{ i + 1 }}</h3>
+              <button
+                type="button"
+                (click)="deleteStory(i)"
+                mat-icon-button
+                color="warn"
+                aria-label="Delete story">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
             <div class="fields">
               <mat-form-field>
                 <mat-label>Story title</mat-label>
                 <input
+                  #storyTitle
                   matInput
                   formControlName="title"
                   type="text" />
               </mat-form-field>
-              <mat-form-field>
-                <mat-label>Description</mat-label>
-                <textarea
-                  matInput
-                  formControlName="description"></textarea>
-              </mat-form-field>
+              <label>
+                <span>Description</span>
+                <tapiz-rich-text-editor formControlName="description" />
+              </label>
             </div>
-            <button
-              type="button"
-              (click)="deleteStory(i)"
-              mat-mini-fab
-              color="warn"
-              aria-label="Delete story">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </ng-container>
-        </div>
-      }
-
-      <button
-        class="add-story"
-        type="button"
-        (click)="add()"
-        mat-mini-fab
-        color="primary"
-        aria-label="Add story">
-        <mat-icon>add</mat-icon>
-      </button>
+          </section>
+        }
+      </div>
 
       <div class="actions">
         @if (showCancel()) {
@@ -95,6 +120,11 @@ export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EstimationStoriesComponent implements OnInit {
+  private storyItems = viewChildren<ElementRef<HTMLElement>>('storyItem');
+  private storyTitleInputs =
+    viewChildren<ElementRef<HTMLInputElement>>('storyTitle');
+  private storiesList = viewChild<ElementRef<HTMLElement>>('storiesList');
+
   estimationStories = input.required<EstimationStory[]>();
 
   showCancel = input(false);
@@ -134,6 +164,11 @@ export class EstimationStoriesComponent implements OnInit {
     stories.removeAt(index);
   }
 
+  addEmptyStory() {
+    this.add();
+    this.scrollToStory(this.stories.length - 1);
+  }
+
   add(
     data: EstimationStory = {
       id: v4(),
@@ -160,11 +195,41 @@ export class EstimationStoriesComponent implements OnInit {
   save() {
     if (!this.form.valid) {
       this.form.markAllAsTouched();
+      this.focusFirstInvalidStory();
       return;
     }
 
     const stories: EstimationStory[] = this.form.getRawValue().stories;
 
     this.addStory.emit(stories);
+  }
+
+  private focusFirstInvalidStory() {
+    const firstInvalidIndex = this.stories.findIndex((story) => {
+      return story.invalid;
+    });
+
+    if (firstInvalidIndex < 0) {
+      return;
+    }
+
+    this.scrollToStory(firstInvalidIndex);
+  }
+
+  private scrollToStory(index: number) {
+    window.setTimeout(() => {
+      const list = this.storiesList()?.nativeElement;
+      const story = this.storyItems().at(index);
+      const title = this.storyTitleInputs().at(index);
+
+      if (list && story) {
+        list.scrollTo({
+          top: story.nativeElement.offsetTop - list.offsetTop,
+          behavior: 'smooth',
+        });
+      }
+
+      title?.nativeElement.focus();
+    });
   }
 }
