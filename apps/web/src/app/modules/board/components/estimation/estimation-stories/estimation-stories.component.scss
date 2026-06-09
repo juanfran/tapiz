@@ -1,32 +1,90 @@
 :host {
-  --form-size: 450px;
+  display: block;
 }
 
 form {
   display: flex;
   flex-direction: column;
+  max-block-size: min(720px, calc(100vh - 180px));
+  min-block-size: 0;
+  overflow: hidden;
+}
+
+.stories-header {
+  align-items: center;
+  border-block-end: 1px solid var(--grey-30);
+  display: flex;
   gap: var(--spacing-4);
+  justify-content: space-between;
+  padding-block-end: var(--spacing-3);
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  h2 {
+    font-size: var(--font-size-4);
+  }
+
+  p {
+    color: var(--grey-70);
+    font-size: var(--font-size-0);
+  }
+}
+
+.stories-list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  min-block-size: 0;
+  overflow-y: auto;
+  padding: var(--spacing-3) var(--spacing-2) var(--spacing-3) 0;
+  scroll-padding-block: var(--spacing-3);
 }
 
 .story {
+  border: 1px solid var(--grey-30);
+  border-radius: var(--radius-2);
   display: flex;
-  gap: var(--spacing-4);
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+}
+
+.story-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+
+  h3 {
+    font-size: var(--font-size-2);
+    margin: 0;
+  }
 }
 
 .actions {
+  border-block-start: 1px solid var(--grey-30);
   display: flex;
   gap: var(--spacing-4);
+  justify-content: flex-end;
+  padding-block-start: var(--spacing-3);
 }
 
 .fields {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-4);
-  inline-size: var(--form-size);
-  border-block-end: 1px solid var(--accent);
-  padding-block-end: var(--spacing-4);
+  gap: var(--spacing-3);
 }
 
-.add-story {
-  margin-inline-start: calc(var(--form-size) / 2 - 16px);
+label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+
+  span {
+    color: var(--grey-70);
+    font-size: var(--font-size-0);
+  }
 }
