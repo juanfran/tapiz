@@ -192,6 +192,19 @@ function isPointNearNode(
     return null;
   }
 
+  if (node.type === 'panel' && isInsideLocalRect(localPoint, width, height)) {
+    const distanceToBorder = Math.min(
+      localPoint.x,
+      width - localPoint.x,
+      localPoint.y,
+      height - localPoint.y,
+    );
+
+    if (distanceToBorder > ATTACH_THRESHOLD) {
+      return null;
+    }
+  }
+
   const localAnchor = closestPointOnLocalRectBorder(localPoint, width, height);
 
   return {
@@ -207,12 +220,24 @@ export function findAttachment(
   point: Point,
   nodes: TuNode[],
 ): AttachmentCandidate {
+  const panelCandidates: AttachmentCandidate[] = [];
+
   for (const node of nodes) {
     const candidate = isPointNearNode(point, node);
 
-    if (candidate) {
+    if (!candidate) {
+      continue;
+    }
+
+    if (node.type === 'panel') {
+      panelCandidates.push(candidate);
+    } else {
       return candidate;
     }
+  }
+
+  if (panelCandidates.length) {
+    return panelCandidates[0];
   }
 
   return {
@@ -372,6 +397,10 @@ function closestPointOnLocalRectBorder(
   ];
 
   return distances.toSorted((a, b) => a.distance - b.distance)[0].point;
+}
+
+function isInsideLocalRect(point: Point, width: number, height: number) {
+  return point.x >= 0 && point.x <= width && point.y >= 0 && point.y <= height;
 }
 
 function rotationRadians(node: TuNode<{ rotation?: number }>) {

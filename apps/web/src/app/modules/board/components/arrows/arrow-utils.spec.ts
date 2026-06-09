@@ -112,6 +112,76 @@ describe('arrow-utils', () => {
     expect(attachment.attachment?.offset).toEqual({ x: 50, y: 80 });
   });
 
+  it('does not snap empty panel interior points to the panel border', () => {
+    const panel: TuNode = {
+      id: 'panel-1',
+      type: 'panel',
+      content: {
+        position: { x: 0, y: 0 },
+        width: 300,
+        height: 200,
+        layer: 1,
+      },
+    };
+
+    const attachment = findAttachment({ x: 150, y: 100 }, [panel]);
+
+    expect(attachment.anchor).toEqual({ x: 150, y: 100 });
+    expect(attachment.attachment).toBeUndefined();
+  });
+
+  it('snaps points near a panel border to the panel', () => {
+    const panel: TuNode = {
+      id: 'panel-1',
+      type: 'panel',
+      content: {
+        position: { x: 0, y: 0 },
+        width: 300,
+        height: 200,
+        layer: 1,
+      },
+    };
+
+    const attachment = findAttachment({ x: 150, y: 10 }, [panel]);
+
+    expect(attachment.anchor).toEqual({ x: 150, y: 0 });
+    expect(attachment.attachment).toEqual({
+      nodeId: panel.id,
+      offset: { x: 150, y: 0 },
+    });
+  });
+
+  it('prefers a note over its containing panel when snapping arrows', () => {
+    const panel: TuNode = {
+      id: 'panel-1',
+      type: 'panel',
+      content: {
+        position: { x: 0, y: 0 },
+        width: 300,
+        height: 200,
+        layer: 1,
+      },
+    };
+    const note: TuNode = {
+      id: 'note-1',
+      type: 'note',
+      content: {
+        position: { x: 50, y: 5 },
+        width: 100,
+        height: 80,
+        layer: 1,
+      },
+    };
+
+    const attachment = findAttachment({ x: 100, y: 20 }, [panel, note]);
+
+    expect(attachment.anchor).toEqual({ x: 100, y: 5 });
+    expect(attachment.attachment).toEqual({
+      nodeId: note.id,
+      offset: { x: 50, y: 0 },
+    });
+  });
+
   it('uses the attached node side as the curved endpoint tangent', () => {
     const source: TuNode = {
       id: 'source',
