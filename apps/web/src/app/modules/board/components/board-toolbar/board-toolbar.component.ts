@@ -49,6 +49,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { BoardToolbardButtonComponent } from './components/board-toolboard-button.component';
 import { LucideAngularModule, Pin, PinOff } from 'lucide-angular';
 import { ArrowToolbarComponent } from '../arrows/arrow-toolbar/arrow-toolbar.component';
+import { PingStore } from '../ping/ping.store';
 
 export class AppModule {}
 @Component({
@@ -83,6 +84,7 @@ export class BoardToolbarComponent {
   #hotkeysService = inject(HotkeysService);
   #zoneService = inject(ZoneService);
   #fileUploadService = inject(FileUploadService);
+  #pingStore = inject(PingStore);
 
   icons = {
     pin: Pin,
@@ -513,6 +515,22 @@ export class BoardToolbarComponent {
     }
 
     this.popupOpen('token');
+  }
+
+  ping() {
+    if (this.popup() === 'ping') {
+      this.popupOpen('');
+      return;
+    }
+
+    this.popupOpen('ping');
+
+    this.toolbarSubscription = this.#zoneService
+      .select('crosshair')
+      .subscribe(({ position }) => {
+        this.#pingStore.broadcast(position);
+        this.popupOpen('');
+      });
   }
 
   timer() {

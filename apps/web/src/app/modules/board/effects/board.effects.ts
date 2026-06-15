@@ -35,6 +35,7 @@ import {
   EmojiMessage,
   LiveReactionStore,
 } from '../components/live-reaction/live-reaction.store';
+import { PingMessage, PingStore } from '../components/ping/ping.store';
 import { selectQueryParam } from '../../../router.selectors';
 import { filterNil } from 'ngxtension/filter-nil';
 
@@ -49,6 +50,7 @@ export class BoardEffects {
   private nodesActions = inject(NodesActions);
   private configService = inject(ConfigService);
   private liveReactionStore = inject(LiveReactionStore);
+  private pingStore = inject(PingStore);
   public initBoard$ = createEffect(
     () => {
       return this.actions$.pipe(
@@ -371,13 +373,17 @@ export class BoardEffects {
     { dispatch: false },
   );
 
-  public broadCastEmojis$ = createEffect(
+  public broadCastEphemeralBoardEvents$ = createEffect(
     () => {
       return this.actions$.pipe(
         ofType(BoardCommonActions.broadcast),
-        tap((message: EmojiMessage) => {
+        tap((message: EmojiMessage | PingMessage) => {
           if (message.data.type === 'emoji') {
             this.liveReactionStore.add(message.data.url, message.data.position);
+          }
+
+          if (message.data.type === 'ping') {
+            this.pingStore.add(message.data.position);
           }
         }),
       );

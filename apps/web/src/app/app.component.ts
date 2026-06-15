@@ -37,6 +37,7 @@ export class AppComponent {
     'heart',
     'image',
     'panel',
+    'ping',
     'poll',
     'search',
     'text',

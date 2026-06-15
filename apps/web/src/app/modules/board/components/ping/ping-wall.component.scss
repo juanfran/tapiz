@@ -1,0 +1,76 @@
+:host {
+  display: contents;
+  pointer-events: none;
+}
+
+.ping,
+.ping-arrow {
+  pointer-events: none;
+  position: fixed;
+  z-index: var(--board-highlight-node-layer);
+}
+
+.ping {
+  block-size: 200px;
+  inline-size: 200px;
+  transform: translate(-50%, -50%);
+
+  &::before,
+  &::after,
+  span {
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
+    content: "";
+    inset: 0;
+    opacity: 0;
+    position: absolute;
+  }
+
+  &::before {
+    animation: ping-pulse 1.8s ease-out infinite;
+  }
+
+  &::after {
+    animation: ping-pulse 1.8s ease-out 0.45s infinite;
+  }
+
+  span {
+    animation: ping-pulse 1.8s ease-out 0.9s infinite;
+  }
+}
+
+.ping-arrow {
+  align-items: center;
+  background: var(--primary-color-button-bg);
+  block-size: 44px;
+  border-radius: 50%;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 20%);
+  display: flex;
+  inline-size: 44px;
+  justify-content: center;
+
+  span {
+    background: var(--white);
+    block-size: 18px;
+    clip-path: polygon(100% 50%, 0 0, 0 100%);
+    inline-size: 22px;
+    margin-inline-start: 3px;
+  }
+}
+
+@keyframes ping-pulse {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.2);
+  }
+
+  70% {
+    opacity: 0;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
