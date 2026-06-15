@@ -82,6 +82,7 @@
   @if (boardMode() === 0) {
     <ng-container [ngTemplateOutlet]="emojiButton"></ng-container>
     <ng-container [ngTemplateOutlet]="liveReactionButton"></ng-container>
+    <ng-container [ngTemplateOutlet]="pingButton"></ng-container>
   }
 
   <ng-container [ngTemplateOutlet]="drawButton"></ng-container>
@@ -273,6 +274,16 @@
     label="Live Reactions"
     [active]="popup() === 'live-reaction'"
     (clicked)="togglePopup('live-reaction')">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #pingButton>
+  <tapiz-board-toolbar-button
+    icon="ping"
+    tooltip="Ping"
+    label="Ping"
+    [active]="popup() === 'ping'"
+    (clicked)="ping()">
   </tapiz-board-toolbar-button>
 </ng-template>
 

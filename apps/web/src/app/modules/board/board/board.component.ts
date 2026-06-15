@@ -90,6 +90,7 @@ import {
   defaultDotsColor,
 } from '../components/board-settings/board-settings.component';
 import { SetBoardCenterComponent } from '../components/set-board-center/set-board-center.component';
+import { PingWallComponent } from '../components/ping/ping-wall.component';
 
 @Component({
   selector: 'tapiz-board',
@@ -128,6 +129,7 @@ import { SetBoardCenterComponent } from '../components/set-board-center/set-boar
     TimerComponent,
     PortalTargetComponent,
     SetBoardCenterComponent,
+    PingWallComponent,
   ],
   hostDirectives: [
     CopyPasteDirective,
