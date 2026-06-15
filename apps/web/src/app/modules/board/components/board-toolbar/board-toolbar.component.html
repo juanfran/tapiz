@@ -74,6 +74,7 @@
 
   @if (boardMode() === 0) {
     <ng-container [ngTemplateOutlet]="voteButton"></ng-container>
+    <ng-container [ngTemplateOutlet]="topVotedButton"></ng-container>
   }
 
   <ng-container [ngTemplateOutlet]="tokenButton"></ng-container>
@@ -151,6 +152,9 @@
           }
           @case ('live-reaction') {
             <tapiz-live-reaction (reactionSelected)="reactionSelected()" />
+          }
+          @case ('top-voted') {
+            <tapiz-top-voted />
           }
           @case ('image') {
             <tapiz-add-image
@@ -234,6 +238,16 @@
     label="Vote"
     [active]="popup() === 'vote'"
     (clicked)="vote()">
+  </tapiz-board-toolbar-button>
+</ng-template>
+
+<ng-template #topVotedButton>
+  <tapiz-board-toolbar-button
+    icon="top-voted"
+    tooltip="Top voted"
+    label="Top voted"
+    [active]="popup() === 'top-voted'"
+    (clicked)="togglePopup('top-voted')">
   </tapiz-board-toolbar-button>
 </ng-template>
 

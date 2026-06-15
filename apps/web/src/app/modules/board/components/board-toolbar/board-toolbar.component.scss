@@ -22,10 +22,14 @@
   padding: var(--size-2);
   transition: background 0.5s ease;
   backdrop-filter: blur(90px);
+  transform: translateY(-50%);
 }
 
 .toolbar-container {
+  display: flex;
+  max-block-size: calc(100vh - 2rem);
   padding-inline-start: var(--spacing-2);
+  transform: translateY(-50%);
 }
 
 hr {
@@ -43,6 +47,8 @@ hr {
   border-radius: var(--radius-3);
   padding: var(--spacing-4);
   box-shadow: 0 0 15px 3px rgba(66, 62, 82, 0.1);
+  max-block-size: inherit;
+  overflow-y: auto;
 }
 
 .toolbar-pinned {
