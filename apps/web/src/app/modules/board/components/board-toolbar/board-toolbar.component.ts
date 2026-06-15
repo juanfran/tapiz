@@ -50,6 +50,7 @@ import { BoardToolbardButtonComponent } from './components/board-toolboard-butto
 import { LucideAngularModule, Pin, PinOff } from 'lucide-angular';
 import { ArrowToolbarComponent } from '../arrows/arrow-toolbar/arrow-toolbar.component';
 import { PingStore } from '../ping/ping.store';
+import { TopVotedComponent } from '../top-voted/top-voted.component';
 
 export class AppModule {}
 @Component({
@@ -68,6 +69,7 @@ export class AppModule {}
     CocomaterialComponent,
     NotesComponent,
     ToolsComponent,
+    TopVotedComponent,
     NgTemplateOutlet,
     BoardToolbardButtonComponent,
     LucideAngularModule,
@@ -105,6 +107,7 @@ export class BoardToolbarComponent {
       'templates',
       'cocomaterial',
       'live-reaction',
+      'top-voted',
       'image',
     ];
 
@@ -119,6 +122,7 @@ export class BoardToolbarComponent {
       'templates',
       'cocomaterial',
       'live-reaction',
+      'top-voted',
       'image',
     ];
 

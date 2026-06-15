@@ -42,6 +42,7 @@ export class AppComponent {
     'search',
     'text',
     'token',
+    'top-voted',
     'voting',
     'google',
     'user',

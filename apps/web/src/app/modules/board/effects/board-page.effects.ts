@@ -67,6 +67,10 @@ export class BoardPageEffects {
   goToNoteResetPopup$ = createEffect(() => {
     return this.#actions$.pipe(
       ofType(BoardPageActions.goToNode),
+      concatLatestFrom(() => [
+        this.#store.select(boardPageFeature.selectPopupPinned),
+      ]),
+      filter(([, popupPinned]) => !popupPinned),
       map(() => {
         return BoardPageActions.setPopupOpen({
           popup: '',

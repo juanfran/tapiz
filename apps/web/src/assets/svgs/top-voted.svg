@@ -1,0 +1,9 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 24 24">
+  <path d="M4 19h16v2H4z" />
+  <path d="M6 10h3v7H6z" />
+  <path d="M11 4h3v13h-3z" />
+  <path d="M16 7h3v10h-3z" />
+  <path d="m12.5 1.5.9 1.8 2 .3-1.5 1.4.4 2-1.8-.9-1.8.9.4-2-1.5-1.4 2-.3z" />
+</svg>
