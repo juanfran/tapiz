@@ -2,6 +2,17 @@ import { describe, expect, it } from 'vitest';
 import source from './estimation-stories.component.ts?raw';
 
 describe('EstimationStoriesComponent rich text editor markup', () => {
+  it('keeps Add story in the footer actions near Save', () => {
+    expect(source).toMatch(
+      /<div class="actions">[\s\S]*?Add story[\s\S]*?Save[\s\S]*?<\/div>/,
+    );
+  });
+
+  it('has a header close button', () => {
+    expect(source).toContain('aria-label="Close stories"');
+    expect(source).toContain('<mat-icon>close</mat-icon>');
+  });
+
   it('keeps the rich text editor outside native labels', () => {
     expect(source).not.toMatch(
       /<label\b[^>]*>[\s\S]*?<tapiz-rich-text-editor\b[\s\S]*?<\/label>/,

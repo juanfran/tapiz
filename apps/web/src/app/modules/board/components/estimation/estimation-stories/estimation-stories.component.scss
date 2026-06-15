@@ -72,6 +72,10 @@ form {
   padding-block-start: var(--spacing-3);
 }
 
+.add-story-action {
+  margin-inline-end: auto;
+}
+
 .fields {
   display: flex;
   flex-direction: column;

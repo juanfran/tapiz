@@ -50,11 +50,10 @@ export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
         </div>
         <button
           type="button"
-          (click)="addEmptyStory()"
-          mat-stroked-button
-          color="primary">
-          <mat-icon>add</mat-icon>
-          Add story
+          (click)="closeConfig.emit()"
+          mat-icon-button
+          aria-label="Close stories">
+          <mat-icon>close</mat-icon>
         </button>
       </div>
 
@@ -103,6 +102,15 @@ export { BoardActions } from '@tapiz/board-commons/actions/board.actions';
       </div>
 
       <div class="actions">
+        <button
+          class="add-story-action"
+          type="button"
+          (click)="addEmptyStory()"
+          mat-stroked-button
+          color="primary">
+          <mat-icon>add</mat-icon>
+          Add story
+        </button>
         @if (showCancel()) {
           <button
             type="button"
