@@ -11,12 +11,11 @@ import { TuNode } from '@tapiz/board-commons';
 import { input } from '@angular/core';
 import { OptionFormatComponent } from './options/format/option-format.component';
 import { OptionFontComponent } from './options/font/option-font.component';
-import { OptionSizeComponent } from './options/size/option-size.component';
 import { OptionAlignComponent } from './options/align/option-align.component';
 import { OptionListComponent } from './options/list/option-list.component';
 import { ToolbarEditorService } from './toolbar-editor.service';
 import { OptionLayoutComponent } from './options/layout/option-layout.component';
-import { OptionHeadingComponent } from './options/heading/option-heading.component';
+import { OptionTypographyComponent } from './options/typography/option-typography.component';
 
 @Component({
   selector: 'tapiz-toolbar',
@@ -26,8 +25,7 @@ import { OptionHeadingComponent } from './options/heading/option-heading.compone
       [editor]="editor()"
       [defaultTextColor]="defaultTextColor()" />
     @if (fontSize()) {
-      <tapiz-toolbar-option-size [editor]="editor()" />
-      <tapiz-toolbar-option-heading [editor]="editor()" />
+      <tapiz-toolbar-option-typography [editor]="editor()" />
     }
     <tapiz-toolbar-option-align [editor]="editor()" />
     <tapiz-toolbar-option-list [editor]="editor()" />
@@ -41,12 +39,10 @@ import { OptionHeadingComponent } from './options/heading/option-heading.compone
   imports: [
     OptionFormatComponent,
     OptionFontComponent,
-    OptionSizeComponent,
-    OptionHeadingComponent,
+    OptionTypographyComponent,
     OptionAlignComponent,
     OptionListComponent,
     OptionLayoutComponent,
-    OptionHeadingComponent,
   ],
   providers: [ToolbarEditorService],
 })
