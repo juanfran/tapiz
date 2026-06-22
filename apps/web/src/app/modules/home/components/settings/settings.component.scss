@@ -1,0 +1,128 @@
+:host {
+  display: block;
+  min-block-size: 100%;
+  background: var(--grey-10);
+}
+
+.settings-page {
+  max-inline-size: 960px;
+  margin: 0 auto;
+  padding: var(--spacing-8);
+}
+
+header {
+  margin-block-end: var(--spacing-6);
+
+  h1 {
+    font-size: 2rem;
+    margin: 0;
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+section {
+  background: var(--white);
+  border: 1px solid var(--grey-30);
+  border-radius: 8px;
+  padding: var(--spacing-6);
+}
+
+.section-header {
+  margin-block-end: var(--spacing-6);
+
+  h2 {
+    font-size: var(--font-size-20);
+    margin: 0;
+  }
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) 300px;
+  gap: var(--spacing-8);
+  align-items: start;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-5);
+
+  label {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    gap: var(--spacing-4);
+    font-size: var(--font-size-14);
+  }
+}
+
+.reset {
+  align-self: flex-start;
+  margin-block-start: var(--spacing-2);
+}
+
+.note-preview {
+  aspect-ratio: 1;
+  border: 2px solid rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--spacing-5);
+
+  p {
+    font-size: 2rem;
+    line-height: 1.1;
+    margin: 0;
+  }
+
+  span {
+    align-self: flex-start;
+    font-family:
+      "Inter",
+      -apple-system,
+      system-ui,
+      sans-serif;
+    font-size: var(--font-size-14);
+    font-style: normal;
+    font-weight: 500;
+    max-inline-size: 100%;
+    opacity: 0.7;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.actions {
+  align-items: center;
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+}
+
+.saved {
+  color: var(--brand);
+  font-size: var(--font-size-14);
+}
+
+@media (max-width: 760px) {
+  .settings-page {
+    padding: var(--spacing-4);
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .note-preview {
+    max-inline-size: 300px;
+  }
+}

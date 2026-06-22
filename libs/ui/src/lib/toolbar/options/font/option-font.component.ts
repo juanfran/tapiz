@@ -13,6 +13,10 @@ import { ToolbarEditorService } from '../../toolbar-editor.service';
 import { ColorPickerComponent } from '../../../color-picker';
 import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import {
+  defaultNoteFontFamily,
+  noteFontFamilyOptions,
+} from '@tapiz/board-commons';
 
 @Component({
   selector: 'tapiz-toolbar-option-font',
@@ -44,34 +48,11 @@ export class OptionFontComponent {
   editor = input.required<Editor>();
   defaultTextColor = input('#000000');
 
-  options = [
-    {
-      name: 'Default',
-      value: '"Inter", -apple-system, system-ui, sans-serif',
-    },
-    {
-      name: 'Sans',
-      value:
-        'system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;',
-    },
-    {
-      name: 'Serif',
-      value: 'ui-serif, serif',
-    },
-    {
-      name: 'Mono',
-      value:
-        'Dank Mono, Operator Mono, Inconsolata, Fira Mono, ui-monospace, SF Mono, Monaco, Droid Sans Mono, Source Code Pro, Cascadia Code, Menlo, Consolas, DejaVu Sans Mono, monospace',
-    },
-    {
-      name: 'Handwriting',
-      value: 'Caveat, cursive',
-    },
-  ];
+  options = noteFontFamilyOptions;
 
   color = signal<string | null>(null);
 
-  #defaultFontFamily = this.options[0].value;
+  #defaultFontFamily = defaultNoteFontFamily;
   fontFamilyValue = signal<string>(this.#defaultFontFamily);
 
   #toolbarEditorService = inject(ToolbarEditorService);

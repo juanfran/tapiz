@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { from } from 'rxjs';
 import { APIConfigService } from './api-config.service';
+import { UserSettings } from '@tapiz/board-commons';
 
 @Injectable({
   providedIn: 'root',
@@ -29,6 +30,14 @@ export class UserApiService {
 
   user() {
     return from(this.trpc.user.user.query());
+  }
+
+  settings() {
+    return from(this.trpc.user.settings.query());
+  }
+
+  updateSettings(settings: UserSettings) {
+    return from(this.trpc.user.updateSettings.mutate(settings));
   }
 
   notifications(offset = 0) {

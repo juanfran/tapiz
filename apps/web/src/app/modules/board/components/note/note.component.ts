@@ -12,7 +12,15 @@ import {
   afterNextRender,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Drawing, Note, Panel, TuNode, isPanel } from '@tapiz/board-commons';
+import {
+  Drawing,
+  Note,
+  Panel,
+  TuNode,
+  defaultNoteFontFamily,
+  defaultUserSettings,
+  isPanel,
+} from '@tapiz/board-commons';
 import { contrast, lighter } from '@tapiz/cdk/utils/colors';
 import { insideNode } from '@tapiz/cdk/utils/inside-node';
 import { PortalComponent } from '@tapiz/ui/portal';
@@ -39,6 +47,7 @@ import { BoardFacade } from '../../../../services/board-facade.service';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardPageActions } from '../../actions/board-page.actions';
 import { NodeToolbarComponent } from '../node-toolbar/node-toolbar.component';
+import { appFeature } from '../../../../+state/app.reducer';
 
 @Component({
   selector: 'tapiz-note',
@@ -83,6 +92,7 @@ export class NoteComponent {
   #hotkeysService = inject(HotkeysService);
   #boardFacade = inject(BoardFacade);
   #zoom = this.#store.selectSignal(boardPageFeature.selectZoom);
+  #appUser = this.#store.selectSignal(appFeature.selectUser);
   dropAnimation = signal(false);
   dragAnimation = signal(false);
   noteHeightCalculatorService = inject(NoteHeightCalculatorService);
@@ -142,7 +152,36 @@ export class NoteComponent {
       return null;
     }
 
-    return this.contrast() > 2 ? '#ffffff' : '#000000';
+    return (
+      this.#appUser()?.settings.noteDefaults.textColor ??
+      (this.contrast() > 2 ? '#ffffff' : '#000000')
+    );
+  });
+
+  defaultBold = computed(() => {
+    return (
+      !this.node().content.text.length &&
+      (this.#appUser()?.settings.noteDefaults.bold ??
+        defaultUserSettings.noteDefaults.bold)
+    );
+  });
+
+  defaultItalic = computed(() => {
+    return (
+      !this.node().content.text.length &&
+      (this.#appUser()?.settings.noteDefaults.italic ??
+        defaultUserSettings.noteDefaults.italic)
+    );
+  });
+
+  defaultFontFamily = computed(() => {
+    if (this.node().content.text.length) {
+      return null;
+    }
+
+    return (
+      this.#appUser()?.settings.noteDefaults.fontFamily ?? defaultNoteFontFamily
+    );
   });
 
   generateRandomRotation() {

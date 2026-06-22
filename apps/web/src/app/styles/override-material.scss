@@ -57,11 +57,17 @@ button.mdc-button {
   --mdc-snackbar-container-color: var(--error);
 }
 
-.mat-mdc-checkbox.mat-primary {
+.mat-mdc-checkbox {
   --mat-checkbox-selected-icon-color: var(--brand);
-  --mdc-checkbox-selected-focus-icon-color: var(--brand);
-  --mdc-checkbox-selected-focus-state-layer-color: var(--grey-70);
   --mat-checkbox-selected-focus-icon-color: var(--brand);
+  --mat-checkbox-selected-hover-icon-color: var(--brand);
+  --mat-checkbox-selected-checkmark-color: var(--white);
+  --mat-checkbox-selected-focus-state-layer-color: var(--brand);
+  --mat-checkbox-selected-hover-state-layer-color: var(--brand);
+  --mat-checkbox-selected-pressed-state-layer-color: var(--brand);
+  --mat-checkbox-unselected-focus-state-layer-color: var(--grey-70);
+  --mat-checkbox-unselected-hover-state-layer-color: var(--grey-70);
+  --mat-checkbox-unselected-pressed-state-layer-color: var(--grey-70);
 }
 
 :root {

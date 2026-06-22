@@ -1,7 +1,12 @@
 import { eq, and, or, desc, sql } from 'drizzle-orm';
 import { db } from './init-db.js';
 import * as schema from '../schema.js';
-import { Invitation, Role, UserInvitation } from '@tapiz/board-commons';
+import {
+  Invitation,
+  Role,
+  UserInvitation,
+  UserSettings,
+} from '@tapiz/board-commons';
 
 export async function getUser(id: string) {
   const users = await db
@@ -41,6 +46,19 @@ export async function getUserByEmail(email: string) {
 
 export async function deleteAccount(userId: string): Promise<unknown> {
   return db.delete(schema.accounts).where(eq(schema.accounts.id, userId));
+}
+
+export async function updateUserSettings(
+  userId: string,
+  settings: UserSettings,
+) {
+  const users = await db
+    .update(schema.accounts)
+    .set({ settings })
+    .where(eq(schema.accounts.id, userId))
+    .returning({ settings: schema.accounts.settings });
+
+  return users.at(0)?.settings;
 }
 
 export async function createUser(

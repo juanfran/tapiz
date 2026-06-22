@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Note, Point, User } from '@tapiz/board-commons';
+import { Note, Point, User, defaultUserSettings } from '@tapiz/board-commons';
 import { BoardActions } from '../actions/board.actions';
 import { BoardFacade } from '../../../services/board-facade.service';
 import { NodesActions } from '../services/nodes-actions';
 import { boardPageFeature } from '../reducers/boardPage.reducer';
+import { appFeature } from '../../../+state/app.reducer';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +13,7 @@ import { boardPageFeature } from '../reducers/boardPage.reducer';
 export class NotesService {
   #store = inject(Store);
   #boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
+  #user = this.#store.selectSignal(appFeature.selectUser);
   #boardFacade = inject(BoardFacade);
   #settings = this.#boardFacade.settings;
   #nodesActions = inject(NodesActions);
@@ -40,6 +42,8 @@ export class NotesService {
     }
 
     const anonymousMode = this.#settings()?.content.anonymousMode ?? false;
+    const noteDefaults =
+      this.#user()?.settings.noteDefaults ?? defaultUserSettings.noteDefaults;
 
     const note = this.getNew({
       ownerId: anonymousMode ? '' : userId,
@@ -47,9 +51,7 @@ export class NotesService {
       position,
     });
 
-    if (this.#lastColor) {
-      note.color = this.#lastColor;
-    }
+    note.color = this.#lastColor || noteDefaults.backgroundColor;
 
     const action = this.#nodesActions.add<Note>('note', note);
 

@@ -7,7 +7,10 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { lighter } from '@tapiz/cdk/utils/colors';
-import { ColorPickerComponent } from '@tapiz/ui/color-picker';
+import {
+  ColorPickerComponent,
+  colorPickerSwatches,
+} from '@tapiz/ui/color-picker';
 import { defaultNoteColor } from '../note';
 
 @Component({
@@ -60,27 +63,10 @@ export class NotesComponent {
   customColor = signal<string>(localStorage.getItem('customColor') ?? '');
   colorPickerComponent = viewChild<ColorPickerComponent>('picker');
 
-  notes = [
-    { color: '#a6caf4' },
-    { color: '#88e7e3' },
-    { color: '#92d1b2' },
-    { color: '#badea7' },
-    { color: '#a8d672' },
-    { color: '#cfd45f' },
-    { color: '#f7d44c' },
-    { color: '#f4dd8c' },
-    { color: '#fedeb2' },
-    { color: '#fbb980' },
-    { color: '#ffa4ac' },
-    { color: '#ffb8bf' },
-    { color: '#d6b4ea' },
-    { color: '#ecc5f0' },
-    { color: '#b5b5b5' },
-    { color: '#000000' },
-  ].map((note) => {
+  notes = colorPickerSwatches.map((color) => {
     return {
-      ...note,
-      lightColor: lighter(note.color, 70),
+      color,
+      lightColor: lighter(color, 70),
     };
   });
 

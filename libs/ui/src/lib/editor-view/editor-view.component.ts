@@ -30,6 +30,7 @@ import { input } from '@angular/core';
 import { PopupComponent } from '../popup/popup.component';
 import { normalize } from '@tapiz/utils/normalize';
 import { explicitEffect } from 'ngxtension/explicit-effect';
+import { defaultNoteFontFamily } from '@tapiz/board-commons';
 
 @Component({
   selector: 'tapiz-editor-view',
@@ -81,6 +82,9 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
   focus = input<boolean>(false);
   customClass = input('');
   defaultTextColor = input<string | null>(null);
+  defaultFontFamily = input<string | null>(null);
+  defaultBold = input(false);
+  defaultItalic = input(false);
   popupComponent = viewChild(PopupComponent);
   mentions = input<{ id: string; name: string }[]>([]);
   suggestedMentions = signal<{ id: string; name: string }[]>([]);
@@ -260,10 +264,26 @@ export class EditorViewComponent implements OnDestroy, AfterViewInit {
         }
 
         const defaultTextColor = this.defaultTextColor();
+        const defaultFontFamily = this.defaultFontFamily();
+        const chain = editor.chain();
 
         if (defaultTextColor) {
-          editor.chain().setColor(defaultTextColor).run();
+          chain.setColor(defaultTextColor);
         }
+
+        if (defaultFontFamily && defaultFontFamily !== defaultNoteFontFamily) {
+          chain.setFontFamily(defaultFontFamily);
+        }
+
+        if (this.defaultBold()) {
+          chain.toggleBold();
+        }
+
+        if (this.defaultItalic()) {
+          chain.toggleItalic();
+        }
+
+        chain.run();
       },
     });
 

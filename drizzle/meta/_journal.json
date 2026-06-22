@@ -57,6 +57,13 @@
       "when": 1731514196823,
       "tag": "0007_fixed_korath",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1782121596868,
+      "tag": "0008_first_naoko",
+      "breakpoints": true
     }
   ]
 }
