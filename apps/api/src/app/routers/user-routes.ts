@@ -4,6 +4,8 @@ import { protectedProcedure, publicProcedure, router } from '../trpc.js';
 import db from '../db/index.js';
 import { getUserInvitationsByEmail } from '../db/user-db.js';
 import { lucia } from '../auth.js';
+import { userSettingsValidator } from '@tapiz/board-commons/validators/user-settings.validator.js';
+import { withDefaultUserSettings } from '@tapiz/board-commons';
 
 export const userRouter = router({
   removeAccount: protectedProcedure.mutation(async (req) => {
@@ -69,12 +71,31 @@ export const userRouter = router({
     };
   }),
   user: protectedProcedure.query(async (req) => {
+    const user = await db.user.getUser(req.ctx.user.sub);
+
     return {
       name: req.ctx.user.name,
       id: req.ctx.user.sub,
       picture: req.ctx.user.picture ?? '',
+      settings: withDefaultUserSettings(user?.settings),
     };
   }),
+  settings: protectedProcedure.query(async (req) => {
+    const user = await db.user.getUser(req.ctx.user.sub);
+
+    return withDefaultUserSettings(user?.settings);
+  }),
+  updateSettings: protectedProcedure
+    .input(userSettingsValidator)
+    .mutation(async (req) => {
+      const settings = withDefaultUserSettings(req.input);
+      const savedSettings = await db.user.updateUserSettings(
+        req.ctx.user.sub,
+        settings,
+      );
+
+      return withDefaultUserSettings(savedSettings);
+    }),
   invites: protectedProcedure.query(async (req) => {
     const email = req.ctx.user.email;
 

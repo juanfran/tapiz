@@ -31,6 +31,9 @@
         <tapiz-editor-view
           [class.readonly]="!edit()"
           [defaultTextColor]="defaultTextColor()"
+          [defaultFontFamily]="defaultFontFamily()"
+          [defaultBold]="defaultBold()"
+          [defaultItalic]="defaultItalic()"
           #editorView="editorView"
           [content]="initialText()"
           [focus]="edit()"

@@ -9,8 +9,8 @@ import {
   unique,
   pgEnum,
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
-import { TuNode } from '@tapiz/board-commons';
+import { relations, sql } from 'drizzle-orm';
+import { TuNode, UserSettings } from '@tapiz/board-commons';
 
 export const roleEnum = pgEnum('role', ['admin', 'member']);
 export const roleEnumWithGuest = pgEnum('role', ['admin', 'member', 'guest']);
@@ -21,6 +21,12 @@ export const accounts = pgTable('accounts', {
   email: varchar('email', { length: 320 }).notNull().unique(),
   picture: varchar('picture'),
   googleId: varchar('google_id').unique(),
+  settings: json('settings')
+    .$type<UserSettings>()
+    .notNull()
+    .default(
+      sql`'{"noteDefaults":{"backgroundColor":"#fbb980","textColor":"#000000","fontFamily":"\"Inter\", -apple-system, system-ui, sans-serif","bold":false,"italic":false}}'::json`,
+    ),
 });
 
 export const accountsToSession = pgTable('account_session', {

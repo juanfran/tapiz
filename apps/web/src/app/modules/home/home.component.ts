@@ -83,6 +83,12 @@ import { injectQueryParams } from 'ngxtension/inject-query-params';
         <mat-menu #menu="matMenu">
           <button
             mat-menu-item
+            routerLink="/settings">
+            <mat-icon>settings</mat-icon>
+            <span>Settings</span>
+          </button>
+          <button
+            mat-menu-item
             (click)="deleteAccount()">
             <mat-icon>person_remove</mat-icon>
             <span>Delete account</span>

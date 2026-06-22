@@ -4,7 +4,7 @@ import { BehaviorSubject, take } from 'rxjs';
 import { AppActions } from '../+state/app.actions';
 import { filterNil } from 'ngxtension/filter-nil';
 import { appFeature } from '../+state/app.reducer';
-import { AuthUserModel } from '@tapiz/board-commons';
+import { AuthUserModel, withDefaultUserSettings } from '@tapiz/board-commons';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +17,13 @@ export class AuthService {
     const user = localStorage.getItem('user');
 
     if (user) {
-      this.store.dispatch(AppActions.setUser({ user: JSON.parse(user) }));
+      const parsedUser = JSON.parse(user) as AuthUserModel;
+      const normalizedUser = {
+        ...parsedUser,
+        settings: withDefaultUserSettings(parsedUser.settings),
+      };
+
+      this.store.dispatch(AppActions.setUser({ user: normalizedUser }));
 
       this.store
         .select(appFeature.selectUser)

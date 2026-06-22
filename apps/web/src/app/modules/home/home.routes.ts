@@ -7,6 +7,7 @@ import { homeFeature } from './+state/home.feature';
 import { AllBoardsComponent } from './components/all-boards/all-boards.component';
 import { TeamComponent } from './components/team/team.component';
 import { StarredComponent } from './components/starred/starred.component';
+import { SettingsComponent } from './components/settings/settings.component';
 
 export const homesRoutes: Route[] = [
   {
@@ -21,6 +22,10 @@ export const homesRoutes: Route[] = [
       {
         path: 'starred',
         component: StarredComponent,
+      },
+      {
+        path: 'settings',
+        component: SettingsComponent,
       },
       {
         path: '',

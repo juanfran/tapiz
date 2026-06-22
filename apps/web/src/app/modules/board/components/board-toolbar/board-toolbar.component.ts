@@ -5,6 +5,7 @@ import {
   inject,
   signal,
   computed,
+  effect,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { BoardActions } from '../../actions/board.actions';
@@ -29,6 +30,7 @@ import {
   PollBoard,
   Text,
   Timer,
+  defaultUserSettings,
 } from '@tapiz/board-commons';
 import { DrawingStore } from '../drawing/drawing.store';
 import { TemplateSelectorComponent } from '../template-selector/template-selector.component';
@@ -44,13 +46,13 @@ import { LiveReactionComponent } from '../live-reaction/live-reaction.component'
 import { NotesComponent } from '../notes/notes.component';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 import { ToolsComponent } from '../tools/tools.component';
-import { defaultNoteColor } from '../note';
 import { NgTemplateOutlet } from '@angular/common';
 import { BoardToolbardButtonComponent } from './components/board-toolboard-button.component';
 import { LucideAngularModule, Pin, PinOff } from 'lucide-angular';
 import { ArrowToolbarComponent } from '../arrows/arrow-toolbar/arrow-toolbar.component';
 import { PingStore } from '../ping/ping.store';
 import { TopVotedComponent } from '../top-voted/top-voted.component';
+import { appFeature } from '../../../../+state/app.reducer';
 
 export class AppModule {}
 @Component({
@@ -95,9 +97,11 @@ export class BoardToolbarComponent {
 
   toolbarSubscription?: Subscription;
   boardMode = this.#store.selectSignal(boardPageFeature.selectBoardMode);
+  user = this.#store.selectSignal(appFeature.selectUser);
   popup = this.#store.selectSignal(boardPageFeature.selectPopupOpen);
   pinned = this.#store.selectSignal(boardPageFeature.selectPopupPinned);
-  noteColor = signal<string>(defaultNoteColor);
+  noteColor = signal<string>('');
+  #noteColorInitialized = false;
   showPopup = computed(() => {
     const withPopup = [
       'token',
@@ -130,6 +134,17 @@ export class BoardToolbarComponent {
   });
 
   constructor() {
+    effect(() => {
+      const preferredColor =
+        this.user()?.settings.noteDefaults.backgroundColor ??
+        defaultUserSettings.noteDefaults.backgroundColor;
+
+      if (!this.#noteColorInitialized) {
+        this.noteColor.set(preferredColor);
+        this.#noteColorInitialized = true;
+      }
+    });
+
     // Select area (Alt key down)
     fromEvent<KeyboardEvent>(document, 'keydown')
       .pipe(
