@@ -64,6 +64,13 @@
       "when": 1782121596868,
       "tag": "0008_first_naoko",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1782382334981,
+      "tag": "0009_lonely_the_twelve",
+      "breakpoints": true
     }
   ]
 }

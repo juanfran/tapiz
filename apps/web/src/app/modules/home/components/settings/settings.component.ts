@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   signal,
@@ -113,6 +114,52 @@ import { AuthService } from '../../../../services/auth.service';
           </div>
         </section>
 
+        <section>
+          <div class="section-header">
+            <h2>API token</h2>
+          </div>
+
+          <div class="api-token">
+            <div class="api-token-status">
+              @if (generatedApiToken()) {
+                <span>New token</span>
+                <code>{{ generatedApiToken() }}</code>
+              } @else if (apiTokenLoading()) {
+                <span>Checking token</span>
+              } @else if (apiTokenExists()) {
+                <span>Token generated</span>
+                <small>The token is hidden after reload.</small>
+              } @else {
+                <span>No token</span>
+              }
+
+              @if (tokenCopied()) {
+                <small>Copied</small>
+              }
+            </div>
+
+            <div class="api-token-actions">
+              @if (generatedApiToken()) {
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="copyGeneratedToken()">
+                  <mat-icon>content_copy</mat-icon>
+                  Copy
+                </button>
+              }
+
+              <button
+                mat-stroked-button
+                type="button"
+                (click)="generateApiToken()">
+                <mat-icon>{{ apiTokenExists() ? 'sync' : 'add' }}</mat-icon>
+                {{ apiTokenExists() ? 'Regenerate' : 'Generate token' }}
+              </button>
+            </div>
+          </div>
+        </section>
+
         <div class="actions">
           @if (saved()) {
             <span class="saved">Saved</span>
@@ -148,6 +195,17 @@ export class SettingsComponent {
 
   user = this.#store.selectSignal(appFeature.selectUser);
   saved = signal(false);
+  apiTokenLoading = signal(true);
+  apiTokenInfo = signal<{ hasToken: boolean; createdAt: string | null } | null>(
+    null,
+  );
+  generatedApiToken = signal<string | null>(null);
+  tokenCopied = signal(false);
+  apiTokenExists = computed(() => {
+    return (
+      (this.apiTokenInfo()?.hasToken ?? false) || !!this.generatedApiToken()
+    );
+  });
   fontFamilyOptions = noteFontFamilyOptions;
   #formInitialized = false;
 
@@ -176,6 +234,11 @@ export class SettingsComponent {
   });
 
   constructor() {
+    this.#userApiService.apiToken().subscribe((apiTokenInfo) => {
+      this.apiTokenInfo.set(apiTokenInfo);
+      this.apiTokenLoading.set(false);
+    });
+
     effect(() => {
       const user = this.user();
 
@@ -205,6 +268,29 @@ export class SettingsComponent {
   resetNoteDefaults() {
     this.form.controls.noteDefaults.setValue(defaultUserSettings.noteDefaults);
     this.saved.set(false);
+  }
+
+  generateApiToken() {
+    this.#userApiService.generateApiToken().subscribe((apiToken) => {
+      this.apiTokenInfo.set({
+        hasToken: true,
+        createdAt: apiToken.createdAt ?? null,
+      });
+      this.generatedApiToken.set(apiToken.token);
+      this.tokenCopied.set(false);
+    });
+  }
+
+  copyGeneratedToken() {
+    const token = this.generatedApiToken();
+
+    if (!token) {
+      return;
+    }
+
+    void navigator.clipboard.writeText(token).then(() => {
+      this.tokenCopied.set(true);
+    });
   }
 
   save() {
