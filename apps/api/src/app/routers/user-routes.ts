@@ -6,6 +6,7 @@ import { getUserInvitationsByEmail } from '../db/user-db.js';
 import { lucia } from '../auth.js';
 import { userSettingsValidator } from '@tapiz/board-commons/validators/user-settings.validator.js';
 import { withDefaultUserSettings } from '@tapiz/board-commons';
+import { generateApiToken, hashApiToken } from '../api-token.js';
 
 export const userRouter = router({
   removeAccount: protectedProcedure.mutation(async (req) => {
@@ -96,6 +97,23 @@ export const userRouter = router({
 
       return withDefaultUserSettings(savedSettings);
     }),
+  apiToken: protectedProcedure.query(async (req) => {
+    const tokenInfo = await db.user.getUserApiTokenInfo(req.ctx.user.sub);
+
+    return tokenInfo ?? { hasToken: false, createdAt: null };
+  }),
+  generateApiToken: protectedProcedure.mutation(async (req) => {
+    const token = generateApiToken();
+    const createdAt = await db.user.updateUserApiToken(
+      req.ctx.user.sub,
+      hashApiToken(token),
+    );
+
+    return {
+      token,
+      createdAt,
+    };
+  }),
   invites: protectedProcedure.query(async (req) => {
     const email = req.ctx.user.email;
 

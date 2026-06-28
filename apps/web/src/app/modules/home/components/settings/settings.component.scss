@@ -113,6 +113,49 @@ section {
   font-size: var(--font-size-14);
 }
 
+.api-token {
+  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.api-token-status {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  min-inline-size: 0;
+
+  span {
+    font-size: var(--font-size-14);
+    font-weight: 500;
+  }
+
+  small {
+    color: var(--brand);
+    font-size: var(--font-size-12);
+  }
+
+  code {
+    background: var(--grey-20);
+    border: 1px solid var(--grey-30);
+    border-radius: 6px;
+    font-size: var(--font-size-14);
+    inline-size: 100%;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    padding: var(--spacing-3);
+  }
+}
+
+.api-token-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  justify-content: flex-start;
+}
+
 @media (max-width: 760px) {
   .settings-page {
     padding: var(--spacing-4);

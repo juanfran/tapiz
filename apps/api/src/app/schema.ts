@@ -21,6 +21,8 @@ export const accounts = pgTable('accounts', {
   email: varchar('email', { length: 320 }).notNull().unique(),
   picture: varchar('picture'),
   googleId: varchar('google_id').unique(),
+  apiTokenHash: varchar('api_token_hash', { length: 64 }).unique(),
+  apiTokenCreatedAt: timestamp('api_token_created_at', { mode: 'string' }),
   settings: json('settings')
     .$type<UserSettings>()
     .notNull()

@@ -40,6 +40,14 @@ export class UserApiService {
     return from(this.trpc.user.updateSettings.mutate(settings));
   }
 
+  apiToken() {
+    return from(this.trpc.user.apiToken.query());
+  }
+
+  generateApiToken() {
+    return from(this.trpc.user.generateApiToken.mutate());
+  }
+
   notifications(offset = 0) {
     return from(this.trpc.user.notifications.query({ offset }));
   }

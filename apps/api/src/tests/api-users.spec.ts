@@ -1,7 +1,10 @@
 import { lucia } from '../app/auth';
+import { API_TOKEN_PREFIX, hashApiToken } from '../app/api-token';
+import { createAuthContext } from '../app/app.context';
 import db from '../app/db';
 import { startDB } from '../app/db/init-db';
 import { createMultipleUsers, getAuth, getUserCaller } from './test-helpers';
+import { vi } from 'vitest';
 
 describe('user', () => {
   beforeAll(async () => {
@@ -43,6 +46,65 @@ describe('user', () => {
 
     expect(team).toBeFalsy();
     expect(board).toBeFalsy();
+  });
+
+  it('generates and regenerates an api token for bearer auth', async () => {
+    const caller = await getUserCaller(9);
+    const tokenInfo = await caller.user.apiToken();
+
+    expect(tokenInfo.hasToken).toEqual(false);
+
+    const firstToken = await caller.user.generateApiToken();
+
+    expect(firstToken.token.startsWith(API_TOKEN_PREFIX)).toEqual(true);
+
+    const storedUser = await db.user.getUserByApiTokenHash(
+      hashApiToken(firstToken.token),
+    );
+
+    expect(storedUser?.id).toEqual(getAuth(9).sub);
+    expect(storedUser?.apiTokenHash).not.toEqual(firstToken.token);
+
+    const firstContext = await createAuthContext({
+      req: {
+        cookies: {},
+        headers: {
+          authorization: `Bearer ${firstToken.token}`,
+        },
+      },
+      res: {
+        setCookie: vi.fn(),
+      },
+    } as Parameters<typeof createAuthContext>[0]);
+
+    expect(firstContext.user?.sub).toEqual(getAuth(9).sub);
+
+    const secondToken = await caller.user.generateApiToken();
+    const oldTokenContext = await createAuthContext({
+      req: {
+        cookies: {},
+        headers: {
+          authorization: `Bearer ${firstToken.token}`,
+        },
+      },
+      res: {
+        setCookie: vi.fn(),
+      },
+    } as Parameters<typeof createAuthContext>[0]);
+    const newTokenContext = await createAuthContext({
+      req: {
+        cookies: {},
+        headers: {
+          authorization: `Bearer ${secondToken.token}`,
+        },
+      },
+      res: {
+        setCookie: vi.fn(),
+      },
+    } as Parameters<typeof createAuthContext>[0]);
+
+    expect(oldTokenContext.user).toBeNull();
+    expect(newTokenContext.user?.sub).toEqual(getAuth(9).sub);
   });
 
   it('delete account should transfer ownership', async () => {

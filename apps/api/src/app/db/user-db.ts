@@ -44,6 +44,15 @@ export async function getUserByEmail(email: string) {
   return users.at(0);
 }
 
+export async function getUserByApiTokenHash(apiTokenHash: string) {
+  const users = await db
+    .select()
+    .from(schema.accounts)
+    .where(eq(schema.accounts.apiTokenHash, apiTokenHash));
+
+  return users.at(0);
+}
+
 export async function deleteAccount(userId: string): Promise<unknown> {
   return db.delete(schema.accounts).where(eq(schema.accounts.id, userId));
 }
@@ -59,6 +68,42 @@ export async function updateUserSettings(
     .returning({ settings: schema.accounts.settings });
 
   return users.at(0)?.settings;
+}
+
+export async function getUserApiTokenInfo(userId: string) {
+  const users = await db
+    .select({
+      apiTokenHash: schema.accounts.apiTokenHash,
+      apiTokenCreatedAt: schema.accounts.apiTokenCreatedAt,
+    })
+    .from(schema.accounts)
+    .where(eq(schema.accounts.id, userId));
+
+  const user = users.at(0);
+
+  if (!user) {
+    return null;
+  }
+
+  return {
+    hasToken: !!user.apiTokenHash,
+    createdAt: user.apiTokenCreatedAt,
+  };
+}
+
+export async function updateUserApiToken(userId: string, apiTokenHash: string) {
+  const users = await db
+    .update(schema.accounts)
+    .set({
+      apiTokenHash,
+      apiTokenCreatedAt: sql`now()`,
+    })
+    .where(eq(schema.accounts.id, userId))
+    .returning({
+      apiTokenCreatedAt: schema.accounts.apiTokenCreatedAt,
+    });
+
+  return users.at(0)?.apiTokenCreatedAt;
 }
 
 export async function createUser(

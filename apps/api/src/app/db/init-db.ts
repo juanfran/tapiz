@@ -43,7 +43,7 @@ async function dbMigrate() {
 export async function startDB() {
   const run = async () => {
     try {
-      dbMigrate();
+      await dbMigrate();
       initDbClient();
     } catch (e) {
       console.log('Error connecting to DB, retrying in 2 seconds');
