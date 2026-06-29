@@ -30,7 +30,7 @@ type CocomaterialNodeInput = {
     x: number;
     y: number;
   };
-  layer: number;
+  layer: 0 | 1;
   rotation: number;
   kind?: 'vector' | 'image';
 };
@@ -96,11 +96,38 @@ const cocomaterialNodeSchema = z.object({
   center: cocomaterialPositionSchema.describe(
     'Board position for the center of the asset',
   ),
-  layer: z.number().default(1).describe('Board layer'),
+  layer: z
+    .union([z.literal(0), z.literal(1)])
+    .default(1)
+    .describe(
+      'Board layer: 0 for participant content, 1 for edit/template content',
+    ),
   rotation: z.number().default(0).describe('Node rotation in degrees'),
 });
 
 const COCOMATERIAL_API_URL = 'https://cocomaterial.com/api';
+
+export const TAPIZ_MCP_INSTRUCTIONS = [
+  'Tapiz is an infinite collaborative board. Read the board before editing existing content.',
+  'Use board coordinates in content.position, not browser screen coordinates. Do not use content.layer as z-index: Tapiz uses layer 0 for participant board content such as notes/text and layer 1 for edit/template content such as panels. Do not invent arbitrary layers such as layer 2; validation only accepts layers 0 and 1, and board-mode tools like area selection are designed around those supported layer roles.',
+  'Visual depth/z-index comes from node order in the board array: later sibling nodes render above earlier sibling nodes. To put an element in front of or behind another element, move it in the array with apply_board_actions position/order rather than changing content.layer.',
+  'Use apply_board_actions for multi-node edits so related changes are validated and persisted as one realtime batch.',
+  'Choose node types deliberately: notes are editable/votable sticky content; panels are visual lanes/backgrounds; groups are movable/votable clusters; text is standalone labels/instructions; arrows connect nodes; vectors/images are visual assets; polls, estimation, timers, comments, settings, and users are specialized workflow/runtime nodes.',
+  'For post-it workflows such as retrospectives, design lanes around the real default note size of 300x300. Make lanes wide/tall enough for multiple 300x300 notes, leave real empty space in each lane, reserve a header band inside panels, and do not place notes over panel labels or instructions.',
+  'Do not set panel content.color for lanes that contain notes unless you intentionally want to recolor every note inside that panel. Tapiz notes inside a panel use the panel color instead of their own note color.',
+  'Note text renders black and notes can show an author/footer area, so use light high-contrast note colors and make notes tall enough that content is not hidden by footer UI.',
+  'For compact labels in text or panel nodes, avoid raw h1/h2/h3 rich-text tags because Tapiz canvas heading styles render very large. Use paragraph/span markup with explicit font-size and line-height.',
+  'After creating a layout, verify it in the web app with Playwright or a browser: check visible text, bounding boxes, layering, and console warnings.',
+].join(' ');
+
+const BOARD_NODE_TYPE_GUIDANCE =
+  'Node type guidance: note = editable/votable sticky idea card and requires text, votes, emojis, drawing, ownerId, width, height, color, position, and layer on add; use layer 0 for participant notes; user-created notes default to about 300x300, so lane layouts should reserve space for multiple 300x300 notes; use light high-contrast note colors because note text is black, and give notes enough height for content plus footer/author UI. panel = visual background/lane/frame below notes; use layer 1 for template/edit panels; reserve a header band and keep notes below it; avoid panel content.color for lanes containing notes because it overrides note colors inside the panel. group = movable/votable semantic cluster, not a decorative column; text = standalone label/instructions; arrow = connector with local endpoints and optional node-local attachments; vector/image = external visual asset; poll/estimation/timer/comment/settings/user = specialized workflow or runtime nodes to preserve unless explicitly requested.';
+
+const BOARD_RICH_TEXT_GUIDANCE =
+  'Rich text caution: raw h1/h2/h3 tags use large canvas template styles. For compact MCP-created text or panel labels, use p/span markup with explicit font-size and line-height, then verify in the browser.';
+
+const BOARD_BATCH_EDIT_GUIDANCE =
+  'For multi-node layouts, prefer apply_board_actions over repeated single-node calls. Use board coordinates and explicit width/height. Do not create arbitrary foreground layers such as layer 2; place participant notes/text on layer 0 and edit/template panels on layer 1. Unsupported layers are rejected by validation. For visual stacking, use board array order: later sibling nodes render above earlier sibling nodes, so place panels before notes and move nodes in the array when you need a different depth. For lanes, make panels wide and tall enough for the seed notes plus at least a few empty 300x300 post-it slots, and leave visible gaps between note cards.';
 
 class McpSocket {
   constructor(private server: Server) {}
@@ -284,8 +311,7 @@ function createTapizMcpServer(boardServer: Server, user: McpUser) {
       version: '0.1.0',
     },
     {
-      instructions:
-        'Use get_board before editing when node IDs or positions are unknown. Use apply_board_actions for multi-node changes so related edits are processed together through Tapiz validation.',
+      instructions: TAPIZ_MCP_INSTRUCTIONS,
     },
   );
   const registerTool = <TArgs extends Record<string, unknown>>(
@@ -309,7 +335,7 @@ function createTapizMcpServer(boardServer: Server, user: McpUser) {
     {
       title: 'Get board',
       description:
-        'Read the current Tapiz board nodes for a board the API token can access.',
+        'Read the current Tapiz board nodes for a board the API token can access. Call this before editing so you preserve existing content, runtime nodes, positions, layers, and parent/child relationships.',
       inputSchema: z.object({
         boardId: boardIdSchema.describe('Tapiz board UUID'),
       }),
@@ -355,8 +381,11 @@ function createTapizMcpServer(boardServer: Server, user: McpUser) {
     'add_node',
     {
       title: 'Add node',
-      description:
+      description: [
         'Add one Tapiz board node as the authenticated user. The node content must match the Tapiz schema for its type.',
+        BOARD_NODE_TYPE_GUIDANCE,
+        BOARD_RICH_TEXT_GUIDANCE,
+      ].join(' '),
       inputSchema: z.object({
         boardId: boardIdSchema.describe('Tapiz board UUID'),
         node: nodeSchema.describe('Node to add'),
@@ -410,8 +439,10 @@ function createTapizMcpServer(boardServer: Server, user: McpUser) {
     'patch_node',
     {
       title: 'Patch node',
-      description:
-        'Patch one existing Tapiz board node as the authenticated user. Only include changed content fields.',
+      description: [
+        'Patch one existing Tapiz board node as the authenticated user. Only include changed content fields and preserve fields you are not intentionally changing.',
+        BOARD_RICH_TEXT_GUIDANCE,
+      ].join(' '),
       inputSchema: z.object({
         boardId: boardIdSchema.describe('Tapiz board UUID'),
         id: z.string().min(1).max(255).describe('Node ID to patch'),
@@ -472,7 +503,7 @@ function createTapizMcpServer(boardServer: Server, user: McpUser) {
     {
       title: 'Remove node',
       description:
-        'Remove one existing Tapiz board node as the authenticated user.',
+        'Remove one existing Tapiz board node as the authenticated user. Preserve user, settings, timer, poll, estimation, and other workflow/runtime nodes unless the user explicitly asked to remove them.',
       inputSchema: z.object({
         boardId: boardIdSchema.describe('Tapiz board UUID'),
         id: z.string().min(1).max(255).describe('Node ID to remove'),
@@ -520,8 +551,12 @@ function createTapizMcpServer(boardServer: Server, user: McpUser) {
     'apply_board_actions',
     {
       title: 'Apply board actions',
-      description:
+      description: [
         'Apply multiple Tapiz board add, patch, and remove actions as one authenticated realtime edit batch.',
+        BOARD_BATCH_EDIT_GUIDANCE,
+        BOARD_NODE_TYPE_GUIDANCE,
+        BOARD_RICH_TEXT_GUIDANCE,
+      ].join(' '),
       inputSchema: z.object({
         boardId: boardIdSchema.describe('Tapiz board UUID'),
         actions: z
@@ -555,7 +590,7 @@ function createTapizMcpServer(boardServer: Server, user: McpUser) {
     {
       title: 'Get user settings',
       description:
-        'Read the authenticated Tapiz user settings, including default note styling useful for creating notes.',
+        'Read the authenticated Tapiz user settings, including default note styling useful for creating note nodes with the current user as ownerId.',
       inputSchema: z.object({}),
       annotations: {
         title: 'Get user settings',
@@ -662,7 +697,7 @@ function createTapizMcpServer(boardServer: Server, user: McpUser) {
     {
       title: 'Add Cocomaterial asset',
       description:
-        'Add a selected Cocomaterial asset to a Tapiz board as a vector or image node.',
+        'Add a selected Cocomaterial asset to a Tapiz board as a vector or image node. Use visual assets sparingly for decoration or context; keep editable meeting content in notes, panels, groups, or text nodes.',
       inputSchema: cocomaterialNodeSchema,
       annotations: {
         title: 'Add Cocomaterial asset',

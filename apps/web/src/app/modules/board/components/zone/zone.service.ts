@@ -14,7 +14,7 @@ import {
 } from 'rxjs';
 import { BoardPageActions } from '../../actions/board-page.actions';
 import { BoardFacade } from '../../../../services/board-facade.service';
-import { Point } from '@tapiz/board-commons';
+import { BoardTuNode, isBoardTuNode, Point } from '@tapiz/board-commons';
 
 export interface SelectAction {
   userId: string;
@@ -226,19 +226,32 @@ export class ZoneService {
       })
       .map((el) => {
         const node = boardNodes.find(
-          (node) =>
-            node.id === el.dataset['id'] &&
-            'layer' in node.content &&
-            node.content.layer === area.layer,
+          (node): node is BoardTuNode =>
+            node.id === el.dataset['id'] && isBoardTuNode(node),
         );
 
-        if (node) {
+        if (
+          node &&
+          this.#isSelectableInBoardMode(node.content.layer, area.layer)
+        ) {
           return node.id;
         }
 
         return null;
       })
       .filter((it): it is string => !!it);
+  }
+
+  #isSelectableInBoardMode(nodeLayer: number, boardMode: number) {
+    if (boardMode === 0) {
+      return nodeLayer !== 1;
+    }
+
+    if (boardMode === 1) {
+      return nodeLayer !== 0;
+    }
+
+    return true;
   }
 
   #isInside(

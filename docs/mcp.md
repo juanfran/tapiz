@@ -145,12 +145,84 @@ Create a fun retrospective:
 3. Call `search_cocomaterial_vectors` for relevant assets.
 4. Call `apply_board_actions` to create notes, groups, labels, and layout.
 5. Call `add_cocomaterial_asset` for decorations.
+6. Open the board in a browser and verify the actual rendered result. Rich text
+   can render much larger than its node box if you use raw heading tags.
 
 Group all notes in a board:
 
 1. Call `get_board`.
 2. Infer categories from existing note text.
 3. Call `apply_board_actions` with group additions and note patches that move notes into the relevant group positions.
+
+## MCP Board-Building Guidance
+
+Use the same mental model as the web app: nodes are persisted user-facing
+objects on an infinite canvas, and MCP writes go through normal realtime
+validation.
+
+- Always call `get_board` before editing an existing board. Preserve existing
+  user, settings, timer, poll, estimation, and content nodes unless the user
+  asked to replace them.
+- Use `apply_board_actions` for multi-node changes. A full layout should arrive
+  as one batch so ordering, layers, parent/child relationships, and validation
+  are handled together.
+- Use board coordinates for `content.position`; do not use browser screen
+  coordinates. Keep related nodes near the current viewport unless the user asks
+  for a large template.
+- Do not use `content.layer` as z-index. Tapiz uses layer `0` for participant
+  board content such as notes/text and layer `1` for edit/template content such
+  as panels. Do not invent arbitrary layers such as `2`: validation accepts only
+  layers `0` and `1`, and board-mode interactions such as area selection are
+  designed around those roles.
+- Visual depth/z-index comes from node order in the board array. Later sibling
+  nodes render above earlier sibling nodes. To put an element in front of or
+  behind another element, move it in the array with `apply_board_actions`
+  `position`/ordering rather than changing `content.layer`. For example, put
+  lane panels earlier than the notes that should appear on top of them.
+- Prefer explicit `width` and `height`. Resize text boxes and notes based on the
+  rendered content you expect, not just the number of characters.
+- For retrospective/post-it layouts, design around Tapiz's real default note
+  size: `300x300`. Make lanes wide and tall enough for multiple `300x300` notes,
+  leave room for at least a few additional notes per lane, reserve a header band
+  inside each panel, and keep notes below panel labels/instructions.
+- Do not set `panel.content.color` on lanes that contain notes unless you
+  intentionally want every note inside that panel to use the panel color. Tapiz
+  notes inside a panel use the panel `color` instead of their own note `color`.
+- Note text renders black and notes may expose footer/author UI, so use light
+  high-contrast note colors and make notes tall enough that the content does not
+  collide with footer text.
+- Verify in the web app with Playwright after MCP writes. Check at least the
+  visible text, bounding boxes, and a screenshot. If the browser redirects to
+  login locally, create a real local session for verification instead of relying
+  only on `get_board`.
+- Rich text supports HTML, but raw `h1`, `h2`, and `h3` tags are styled for
+  canvas templates and can become huge. For compact MCP-created labels, use
+  paragraph/span markup with explicit `font-size` and `line-height`, then verify
+  that the text fits in its node.
+
+## Node Type Tradeoffs
+
+Use the narrowest node type that matches the user workflow:
+
+| Node type             | Best use                                                                     | Advantages                                                                                                                                                         | Disadvantages and cautions                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `note`                | Retrospective ideas, brainstorm items, voting targets, discussion cards.     | Designed for editable sticky-note content; supports votes, emojis, comments, drawing, note visibility, author display, and user defaults from `get_user_settings`. | Requires full content on add: `text`, `votes`, `emojis`, `drawing`, `ownerId`, `width`, `height`, `color`, `position`, and layer `0` for participant notes. User-created notes default to about `300x300`; use that when reserving lane space. Text renders black, so use light high-contrast colors. Make notes tall enough for content plus footer/author UI. Avoid using notes as large static headers. |
+| `panel`               | Background areas, columns, frames, template sections, visual grouping zones. | Resizable, rotatable, can have background, border, radius, text, and drawing. Good for labeled lanes behind notes.                                                 | Use layer `1` for template/edit panels. Panel rich text uses canvas-scale heading styles. Use explicit inline font sizes for compact labels. Reserve a header band and leave empty lane space for future notes. Avoid `content.color` for lanes with notes because it overrides note colors inside the panel.                                                                                              |
+| `group`               | Movable clusters of related nodes or voted note groups.                      | Supports a title and votes, and works with board grouping interactions.                                                                                            | It is a semantic cluster, not a decorative column. Use panels for static lanes; use groups when users should move or vote on the cluster.                                                                                                                                                                                                                                                                  |
+| `text`                | Standalone titles, instructions, legends, and labels.                        | Lightweight rich-text node without a frame. Good for instructions above a layout.                                                                                  | Raw heading tags can render very large. Give text nodes explicit dimensions and use inline font sizes for predictable MCP output.                                                                                                                                                                                                                                                                          |
+| `arrow`               | Connectors between flow steps, dependencies, or annotations.                 | Supports straight/curved/elbow lines, stroke styles, widths, arrowheads, and node attachments.                                                                     | Endpoints are local to the arrow box, while attachments store node-local offsets. Use the geometry guidance before creating attached arrows.                                                                                                                                                                                                                                                               |
+| `vector`              | Cocomaterial SVG decorations or icons.                                       | Scales cleanly and stores only a URL plus dimensions. `add_cocomaterial_asset` handles centered placement.                                                         | External URL availability affects rendering. Avoid decorative vectors when they distract from editable board content.                                                                                                                                                                                                                                                                                      |
+| `image`               | Uploaded or external bitmap references.                                      | Good for screenshots, diagrams, and non-SVG assets.                                                                                                                | External URLs can fail or load slowly. Prefer vectors for simple illustrations and avoid images for text-heavy content.                                                                                                                                                                                                                                                                                    |
+| `token`               | Small personal markers, status chips, or labels created from the toolbar.    | Compact, colorable, and useful as movable markers.                                                                                                                 | Not a replacement for notes; no rich content, votes, or comments.                                                                                                                                                                                                                                                                                                                                          |
+| `poll`                | Structured voting with fixed options.                                        | Enforces one vote per user and supports anonymous/public modes.                                                                                                    | Poll title/options/mode are intentionally hard to change after creation. Use only when the board needs a real poll, not casual note voting.                                                                                                                                                                                                                                                                |
+| `estimation`          | Planning poker style estimation boards.                                      | Specialized workflow for stories, scales, and result collection.                                                                                                   | Requires related config/result nodes and app workflow knowledge. Do not create for ordinary retrospectives.                                                                                                                                                                                                                                                                                                |
+| `timer`               | A single shared board timer.                                                 | Useful for facilitated activities such as silent writing.                                                                                                          | Only one timer node with id `timer` is allowed. Avoid adding one unless the user requested timed facilitation.                                                                                                                                                                                                                                                                                             |
+| `comment`             | Threaded discussion attached to a note.                                      | Keeps discussion with the note.                                                                                                                                    | Must be a child of a `note`; do not add as a top-level node.                                                                                                                                                                                                                                                                                                                                               |
+| `settings` and `user` | Board/user runtime state.                                                    | Needed by the app for visibility, cursor, and settings behavior.                                                                                                   | Do not create or remove these for layout work. Preserve them when editing boards.                                                                                                                                                                                                                                                                                                                          |
+
+For node schema details, read the validators in
+`libs/board-commons/src/lib/validators` and the API validation registry in
+`apps/api/src/app/validation.ts`.
 
 ## Validation
 

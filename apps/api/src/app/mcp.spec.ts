@@ -6,6 +6,7 @@ import db from './db/index.js';
 import {
   applyBoardActionsAsMcpUser,
   createCocomaterialNodeAction,
+  TAPIZ_MCP_INSTRUCTIONS,
 } from './mcp.js';
 import { Server } from './server.js';
 import {
@@ -25,6 +26,36 @@ describe('mcp', () => {
     for (let i = 0; i < usersTest.length; i++) {
       await db.board.deleteUserBoards(getAuth(i).sub);
     }
+  });
+
+  it('exposes board-building guidance in server instructions', () => {
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain('apply_board_actions');
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain('notes are editable/votable');
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain('panels are visual lanes');
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain(
+      'Do not use content.layer as z-index',
+    );
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain(
+      'Do not invent arbitrary layers such as layer 2',
+    );
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain(
+      'validation only accepts layers 0 and 1',
+    );
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain('area selection');
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain(
+      'Visual depth/z-index comes from node order in the board array',
+    );
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain(
+      'later sibling nodes render above earlier sibling nodes',
+    );
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain('300x300');
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain('leave real empty space');
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain(
+      'panel color instead of their own note color',
+    );
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain('high-contrast note colors');
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain('avoid raw h1/h2/h3');
+    expect(TAPIZ_MCP_INSTRUCTIONS).toContain('verify it in the web app');
   });
 
   it('applies board actions through a realtime client', async () => {
@@ -112,7 +143,7 @@ describe('mcp', () => {
         x: 300,
         y: 200,
       },
-      layer: 3,
+      layer: 1,
       rotation: 0,
     });
 
@@ -129,7 +160,7 @@ describe('mcp', () => {
             x: 225,
             y: 150,
           },
-          layer: 3,
+          layer: 1,
           rotation: 0,
         },
       },
