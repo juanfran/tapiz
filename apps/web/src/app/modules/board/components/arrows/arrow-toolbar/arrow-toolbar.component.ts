@@ -450,7 +450,7 @@ export class ArrowToolbarComponent {
       strokeWidth: this.strokeWidthValue(),
       arrowType: this.arrowTypeValue(),
       heads,
-      layer: this.#boardMode(),
+      layer: boardModeToLayer(this.#boardMode()),
     };
   }
 
@@ -474,6 +474,10 @@ export class ArrowToolbarComponent {
       }),
     );
   }
+}
+
+function boardModeToLayer(boardMode: number): ArrowNode['layer'] {
+  return boardMode === 1 ? 1 : 0;
 }
 
 type ArrowBoardNode = TuNode<ArrowNode, 'arrow'>;

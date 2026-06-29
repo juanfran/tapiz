@@ -19,6 +19,13 @@ For a basic node creation checklist, see [docs/create-node.md](../create-node.md
 - If an endpoint or handle stores an offset relative to a node, keep that offset in node-local coordinates and transform it when rendering or snapping.
 - For arrows and similar visual connectors, keep the visible SVG path, hit path, markers, and persisted endpoints in sync.
 - Prefer small pure helpers for geometry and path construction, then render those results in Angular.
+- When creating boards through MCP, follow the node type tradeoffs and browser
+  verification workflow in [Tapiz MCP Server](../mcp.md). In particular, raw
+  rich-text heading tags can render far larger than compact text/panel nodes.
+- `content.layer` is not visual z-index. Use supported layer roles only
+  (`0` participant content, `1` edit/template content). Visual stacking comes
+  from node order in the board array: later sibling nodes render above earlier
+  sibling nodes.
 
 For the arrow-specific details learned from the current implementation, see [Board Geometry And Arrows](board-geometry-and-arrows.md).
 

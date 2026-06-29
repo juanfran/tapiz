@@ -28,3 +28,7 @@ pnpm start:api
 ```
 
 Tapiz should now be accessible at `http://localhost:4300/`.
+
+## MCP Server
+
+The API exposes a Streamable HTTP MCP server for realtime board automation. See [Tapiz MCP Server](mcp.md) for architecture, token setup, tool behavior, and local connection examples.
