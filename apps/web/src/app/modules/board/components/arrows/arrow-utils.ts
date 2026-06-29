@@ -31,7 +31,7 @@ export interface ArrowCreationConfig {
   strokeWidth: ArrowStrokeWidth;
   arrowType: NonNullable<ArrowNode['arrowType']>;
   heads: ArrowHead[];
-  layer: number;
+  layer: ArrowNode['layer'];
 }
 
 export interface ArrowEndpoints {

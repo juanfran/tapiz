@@ -5,7 +5,7 @@ export const PositionValidation = {
   y: z.number(),
 };
 
-export const LayerValidator = z.number();
+export const LayerValidator = z.union([z.literal(0), z.literal(1)]);
 
 export const CommonBoardValidation = {
   position: z.object(PositionValidation),

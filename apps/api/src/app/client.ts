@@ -88,18 +88,16 @@ export class Client {
 
     messages = (messages as unknown[]).filter((message) => !!message);
 
-    try {
-      this.processMsg(messages);
-    } catch (e) {
+    void this.processMsg(messages).catch((e) => {
       console.error(e);
-    }
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  processMsg(messages: any) {
+  async processMsg(messages: any): Promise<StateActions[]> {
     if (messages.length) {
       if ('action' in messages[0] && messages[0].action === 'join') {
-        this.join(messages[0]);
+        await this.join(messages[0]);
       } else {
         const [broadcast, stateActions] = R.partition(
           messages,
@@ -109,27 +107,31 @@ export class Client {
         );
 
         if (!this.boardId) {
-          return;
+          return [];
         }
 
         if (broadcast.length) {
           this.socket.to(this.boardId).emit('board', broadcast);
         }
 
-        this.parseStateActionMessage(stateActions as unknown as StateActions[]);
+        return this.parseStateActionMessage(
+          stateActions as unknown as StateActions[],
+        );
       }
     }
+
+    return [];
   }
 
   async parseStateActionMessage(messages: StateActions[]) {
     if (!this.boardId) {
-      return;
+      return [];
     }
 
     const state = this.server.getBoard(this.boardId);
 
     if (!state) {
-      return;
+      return [];
     }
 
     const validationResult = await validation(
@@ -142,10 +144,10 @@ export class Client {
     );
 
     if (!validationResult.length) {
-      return;
+      return [];
     }
 
-    this.updateSendAllStateActions(validationResult);
+    return this.updateSendAllStateActions(validationResult);
   }
 
   unauthorizedClose(disconnect = true) {
@@ -226,7 +228,7 @@ export class Client {
 
   private updateSendAllStateActions(actions: StateActions[]) {
     if (!this.boardId) {
-      return;
+      return [];
     }
 
     const settings = this.server.getBoardSettings(this.boardId);
@@ -235,11 +237,17 @@ export class Client {
     }
 
     if (!actions.length) {
-      return;
+      return [];
     }
 
     this.updateStateWithActions(actions);
     this.sendAll(this.boardId, this.getStateAction(actions));
+
+    return actions;
+  }
+
+  async joinBoard(boardId: string) {
+    await this.join({ boardId });
   }
 
   private async join(message: { boardId: string }) {
@@ -291,7 +299,7 @@ export class Client {
 
       user.content.visible = userInBoard?.content.visible ?? false;
 
-      this.refreshIsAdmin();
+      await this.refreshIsAdmin();
       this.privateId = boardUser.privateId;
 
       const userAction: StateActions = {
