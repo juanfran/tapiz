@@ -16,6 +16,7 @@ import { setServer } from './global.js';
 import { getAuthUrl, lucia } from './auth.js';
 import { googleCallback } from './routers/auth-routes.js';
 import { fileUpload } from './file-upload.js';
+import { registerTapizMcp } from './mcp.js';
 
 const fastify = Fastify({
   logger: false,
@@ -85,16 +86,30 @@ fastify.register(fastifyIO as any, {
 fastify.register(async function (fastify) {
   let server: Server | null = null;
 
+  registerTapizMcp(fastify, () => {
+    if (!server) {
+      server = new Server(fastify.io);
+      setServer(server);
+    }
+
+    return server;
+  });
+
   fastify.ready((err) => {
     if (err) throw err;
 
-    fastify.io.on('connection', (socket) => {
-      if (!server) {
-        server = new Server(fastify.io);
-        setServer(server);
-      }
+    if (!server) {
+      server = new Server(fastify.io);
+      setServer(server);
+    }
 
-      server.connection(socket, parse(socket.request.headers.cookie ?? ''));
+    const boardServer = server;
+
+    fastify.io.on('connection', (socket) => {
+      boardServer.connection(
+        socket,
+        parse(socket.request.headers.cookie ?? ''),
+      );
     });
   });
 
