@@ -248,7 +248,7 @@ export class SettingsComponent {
 
       const settings = withDefaultUserSettings(user.settings);
 
-      this.form.setValue(settings);
+      this.form.controls.noteDefaults.setValue(settings.noteDefaults);
       this.#formInitialized = true;
     });
   }
@@ -294,15 +294,18 @@ export class SettingsComponent {
   }
 
   save() {
-    const settings: UserSettings = this.form.getRawValue();
+    const currentUser = this.user();
+
+    if (!currentUser) {
+      return;
+    }
+
+    const settings: UserSettings = {
+      ...withDefaultUserSettings(currentUser.settings),
+      noteDefaults: this.form.controls.noteDefaults.getRawValue(),
+    };
 
     this.#userApiService.updateSettings(settings).subscribe((savedSettings) => {
-      const currentUser = this.user();
-
-      if (!currentUser) {
-        return;
-      }
-
       const user: AuthUserModel = {
         ...currentUser,
         settings: savedSettings,

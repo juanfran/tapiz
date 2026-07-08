@@ -62,10 +62,9 @@
 
   &:hover {
     .username {
+      inline-size: auto;
       opacity: 1;
-      width: auto;
-      height: auto;
-      transition: opacity 0.1s ease;
+      padding-inline: var(--size-2);
     }
   }
 
@@ -74,28 +73,25 @@
   }
 
   .username {
-    display: flex;
-    gap: 0.5rem;
-    color: var(--grey-90);
     align-items: center;
-    height: 24px;
-    margin-bottom: 0;
-    transition: color 0.5s ease;
-    justify-content: flex-end;
-    opacity: 0;
-    inline-size: 300px;
-    text-align: right;
-    pointer-events: none;
-    padding: var(--size-4) var(--size-2);
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: var(--radius-4);
-    width: max-content;
     backdrop-filter: blur(2px);
-    width: 0;
-    height: 0;
-    transition: opacity 0.1s ease;
+    background: rgba(255, 255, 255, 0.78);
+    border-radius: var(--radius-4);
+    block-size: 32px;
+    color: var(--grey-90);
+    display: flex;
+    gap: var(--spacing-2);
+    inline-size: 0;
+    justify-content: flex-end;
+    margin-bottom: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    transition: opacity 120ms ease;
+    white-space: nowrap;
 
     .name {
+      max-inline-size: 220px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;

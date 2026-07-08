@@ -55,9 +55,7 @@
   @defer {
     <tapiz-header />
     <tapiz-board-header-options [allowSwitchMode]="!isReadonlyUser()" />
-    @if (!isDemo) {
-      <tapiz-users />
-    }
+    <tapiz-users />
     @if (!isReadonlyUser()) {
       <tapiz-board-toolbar />
     }

@@ -6,17 +6,24 @@ import {
   map,
   share,
   startWith,
+  tap,
   withLatestFrom,
 } from 'rxjs/operators';
 import { Point } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
 import { boardPageFeature } from '../reducers/boardPage.reducer';
+import {
+  isBoardWheelTarget,
+  isLikelyTrackpadPinchEvent,
+} from './board-wheel.utils';
+import { BoardWheelInputService } from './board-wheel-input.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BoardZoomService {
   private store = inject(Store);
+  #wheelInput = inject(BoardWheelInputService);
   public zoomMove$!: Observable<[Point, number]>;
   public zoom$!: Observable<{
     zoom: number;
@@ -27,35 +34,28 @@ export class BoardZoomService {
     const maxZoom = 2.5;
     const minZoom = 0.1;
     const stepZoom = 0.075;
+    const pinchZoomFactor = 0.999;
 
-    const wheel$ = fromEvent<WheelEvent>(window, 'wheel').pipe(
+    const wheel$ = fromEvent<WheelEvent>(window, 'wheel', {
+      passive: false,
+    }).pipe(
       share(),
       filter((event) => {
-        const target = event.target as HTMLElement | undefined;
-
-        if (target) {
-          if (
-            target.tagName.toUpperCase() !== 'TAPIZ-BOARD' &&
-            !target.closest('tapiz-nodes') &&
-            !target.closest('tapiz-arrows-wrapper') &&
-            !target.closest('tapiz-board-editor-portal')
-          ) {
-            return false;
-          }
-
-          if (target.closest('[board-noscroll]')) {
-            return false;
-          }
-        }
-
-        return true;
+        return (
+          isBoardWheelTarget(event.target) &&
+          this.#wheelInput.isZoomEvent(event)
+        );
+      }),
+      tap((event) => {
+        event.preventDefault();
       }),
     );
 
     this.zoom$ = wheel$.pipe(
       map((event) => {
         return {
-          zoom: Math.sign(event.deltaY),
+          deltaY: event.deltaY,
+          isPinch: isLikelyTrackpadPinchEvent(event),
           point: {
             x: event.clientX,
             y: event.clientY,
@@ -63,17 +63,24 @@ export class BoardZoomService {
         };
       }),
       withLatestFrom(this.store.select(boardPageFeature.selectZoom)),
-      map(([zoomEvent, zoom]) => {
-        if (zoomEvent.zoom > 0) {
+      map(([zoomEvent, currentZoom]) => {
+        if (zoomEvent.isPinch) {
           return {
             point: zoomEvent.point,
-            zoom: zoom - stepZoom,
+            zoom: currentZoom * pinchZoomFactor ** zoomEvent.deltaY,
+          };
+        }
+
+        if (zoomEvent.deltaY > 0) {
+          return {
+            point: zoomEvent.point,
+            zoom: currentZoom - stepZoom,
           };
         }
 
         return {
           point: zoomEvent.point,
-          zoom: zoom + stepZoom,
+          zoom: currentZoom + stepZoom,
         };
       }),
       map((zoomEvent) => {

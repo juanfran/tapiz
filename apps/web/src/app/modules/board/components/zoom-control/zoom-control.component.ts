@@ -4,32 +4,53 @@ import {
   computed,
   inject,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { filter, fromEvent } from 'rxjs';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardPageActions } from '../../actions/board-page.actions';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { isInputField } from '@tapiz/cdk/utils/is-input-field';
 
+function isBoardZoomShortcut(event: KeyboardEvent) {
+  return !event.ctrlKey && !event.metaKey && !isInputField();
+}
+
+export function isZoomInShortcut(event: KeyboardEvent) {
+  return (
+    !event.altKey &&
+    isBoardZoomShortcut(event) &&
+    (event.key === '+' || event.code === 'NumpadAdd')
+  );
+}
+
+export function isZoomOutShortcut(event: KeyboardEvent) {
+  return (
+    !event.altKey &&
+    isBoardZoomShortcut(event) &&
+    (event.key === '-' || event.code === 'NumpadSubtract')
+  );
+}
+
 @Component({
   selector: 'tapiz-zoom-control',
   imports: [],
   template: `<button
-      title="Zoom out"
+      title="Zoom out (-)"
       (click)="decrease()"
       type="button">
       -
     </button>
     <span class="percentage">{{ zoomPercentage() }}</span>
     <button
-      title="Zoom in"
+      title="Zoom in (+)"
       (click)="increase()"
       type="button">
       +
     </button>`,
   styleUrl: './zoom-control.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:keydown)': 'onDocumentKeydown($event)',
+  },
 })
 export class ZoomControlComponent {
   #store = inject(Store);
@@ -41,42 +62,25 @@ export class ZoomControlComponent {
     return `${Math.round(this.#zoom() * 100)}%`;
   });
 
-  constructor() {
-    // Zoom in (Z key)
-    fromEvent<KeyboardEvent>(document, 'keydown')
-      .pipe(
-        takeUntilDestroyed(),
-        filter(
-          (e) =>
-            e.key === 'z' &&
-            !e.altKey &&
-            !e.ctrlKey &&
-            !e.repeat &&
-            !isInputField(),
-        ),
-      )
-      .subscribe((e) => {
-        e.preventDefault();
-        this.increase();
-      });
+  onDocumentKeydown(event: KeyboardEvent) {
+    const zoomInWithZ =
+      event.key === 'z' &&
+      !event.altKey &&
+      !event.repeat &&
+      isBoardZoomShortcut(event);
+    const zoomOutWithAltZ =
+      event.key === 'z' &&
+      event.altKey &&
+      !event.repeat &&
+      isBoardZoomShortcut(event);
 
-    // Zoom out (Alt+Z)
-    fromEvent<KeyboardEvent>(document, 'keydown')
-      .pipe(
-        takeUntilDestroyed(),
-        filter(
-          (e) =>
-            e.key === 'z' &&
-            e.altKey &&
-            !e.ctrlKey &&
-            !e.repeat &&
-            !isInputField(),
-        ),
-      )
-      .subscribe((e) => {
-        e.preventDefault();
-        this.decrease();
-      });
+    if (zoomInWithZ || isZoomInShortcut(event)) {
+      event.preventDefault();
+      this.increase();
+    } else if (zoomOutWithAltZ || isZoomOutShortcut(event)) {
+      event.preventDefault();
+      this.decrease();
+    }
   }
 
   setNewZoom(zoom: number) {

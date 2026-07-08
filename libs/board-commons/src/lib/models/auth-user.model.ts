@@ -41,11 +41,17 @@ export interface UserNoteDefaults {
   italic: boolean;
 }
 
+export const wheelInputModeValues = ['auto', 'mouse', 'trackpad'] as const;
+
+export type WheelInputMode = (typeof wheelInputModeValues)[number];
+
 export interface UserSettings {
   noteDefaults: UserNoteDefaults;
+  wheelInputMode: WheelInputMode;
 }
 
 export const defaultUserSettings: UserSettings = {
+  wheelInputMode: 'auto',
   noteDefaults: {
     backgroundColor: '#fbb980',
     textColor: '#000000',

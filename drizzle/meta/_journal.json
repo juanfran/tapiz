@@ -71,6 +71,13 @@
       "when": 1782382334981,
       "tag": "0009_lonely_the_twelve",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1783709158294,
+      "tag": "0010_bored_killmonger",
+      "breakpoints": true
     }
   ]
 }

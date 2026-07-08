@@ -27,7 +27,7 @@ export const accounts = pgTable('accounts', {
     .$type<UserSettings>()
     .notNull()
     .default(
-      sql`'{"noteDefaults":{"backgroundColor":"#fbb980","textColor":"#000000","fontFamily":"\"Inter\", -apple-system, system-ui, sans-serif","bold":false,"italic":false}}'::json`,
+      sql`'{"wheelInputMode":"auto","noteDefaults":{"backgroundColor":"#fbb980","textColor":"#000000","fontFamily":"\\"Inter\\", -apple-system, system-ui, sans-serif","bold":false,"italic":false}}'::json`,
     ),
 });
 
