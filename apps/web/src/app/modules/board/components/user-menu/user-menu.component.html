@@ -1,0 +1,93 @@
+<button
+  class="user-trigger"
+  type="button"
+  [matMenuTriggerFor]="userMenu"
+  [attr.aria-label]="'Open user menu for ' + user().name">
+  <span class="username">
+    <span class="name">{{ user().name }}</span>
+    <span class="myself">(me)</span>
+  </span>
+  @if (picture()) {
+    <img
+      class="avatar"
+      [ngSrc]="picture()"
+      referrerpolicy="no-referrer"
+      width="48"
+      height="48"
+      [alt]="user().name" />
+  } @else {
+    <mat-icon
+      class="no-picture"
+      svgIcon="user"></mat-icon>
+  }
+</button>
+
+<mat-menu
+  #userMenu="matMenu"
+  class="board-user-menu"
+  xPosition="before">
+  <div
+    class="profile"
+    (click)="$event.stopPropagation()">
+    @if (picture()) {
+      <img
+        class="profile-avatar"
+        [ngSrc]="picture()"
+        referrerpolicy="no-referrer"
+        width="36"
+        height="36"
+        alt="" />
+    } @else {
+      <mat-icon
+        class="profile-avatar no-picture"
+        svgIcon="user"></mat-icon>
+    }
+    <span>
+      <strong>{{ user().name }}</strong>
+      <small>User settings</small>
+    </span>
+  </div>
+
+  <mat-divider />
+
+  <div
+    class="menu-label"
+    (click)="$event.stopPropagation()">
+    Board navigation
+  </div>
+  @for (option of wheelInputOptions; track option.value) {
+    <button
+      mat-menu-item
+      class="wheel-option"
+      type="button"
+      role="menuitemradio"
+      [attr.aria-checked]="currentMode() === option.value"
+      [disabled]="savingMode() !== null"
+      (click)="selectWheelInputMode(option.value)">
+      <mat-icon>{{ option.icon }}</mat-icon>
+      <span class="option-copy">
+        <strong>{{ option.label }}</strong>
+        <small>{{ option.description }}</small>
+      </span>
+    </button>
+  }
+
+  <mat-divider />
+
+  @if (!isDemo) {
+    <button
+      mat-menu-item
+      type="button"
+      (click)="toggleUserHighlight()">
+      <mat-icon>highlight</mat-icon>
+      <span>Highlight my notes</span>
+    </button>
+  }
+  <button
+    mat-menu-item
+    type="button"
+    (click)="showVotes()">
+    <mat-icon>visibility</mat-icon>
+    <span>Show my votes</span>
+  </button>
+</mat-menu>

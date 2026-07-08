@@ -12,9 +12,10 @@ describe('SettingsComponent', () => {
   let apiToken: ReturnType<typeof vi.fn>;
   let generateApiToken: ReturnType<typeof vi.fn>;
   let updateSettings: ReturnType<typeof vi.fn>;
+  let user: ReturnType<typeof signal<AuthUserModel | null>>;
 
   beforeEach(() => {
-    const user = signal<AuthUserModel | null>({
+    user = signal<AuthUserModel | null>({
       id: 'user-1',
       name: 'Ada',
       picture: '',
@@ -77,5 +78,31 @@ describe('SettingsComponent', () => {
     expect(updateSettings).not.toHaveBeenCalled();
     expect(component.apiTokenExists()).toEqual(true);
     expect(component.generatedApiToken()).toEqual('tapiz_pat_generated');
+  });
+
+  it('preserves board navigation settings when saving note defaults', () => {
+    const currentUser = user();
+
+    if (!currentUser) {
+      throw new Error('Expected an authenticated user');
+    }
+
+    user.set({
+      ...currentUser,
+      settings: {
+        ...defaultUserSettings,
+        wheelInputMode: 'trackpad',
+      },
+    });
+    const component = TestBed.runInInjectionContext(
+      () => new SettingsComponent(),
+    );
+
+    component.save();
+
+    expect(updateSettings).toHaveBeenCalledWith({
+      ...defaultUserSettings,
+      wheelInputMode: 'trackpad',
+    });
   });
 });

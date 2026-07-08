@@ -12,6 +12,8 @@ import { CdkMenu, CdkMenuItem, CdkMenuTrigger } from '@angular/cdk/menu';
 import { boardPageFeature } from '../../reducers/boardPage.reducer';
 import { BoardFacade } from '../../../../services/board-facade.service';
 import { MatIconModule } from '@angular/material/icon';
+import { UserMenuComponent } from '../user-menu/user-menu.component';
+import { ConfigService } from '../../../../services/config.service';
 
 @Component({
   selector: 'tapiz-users',
@@ -24,11 +26,13 @@ import { MatIconModule } from '@angular/material/icon';
     CdkMenuItem,
     MatIconModule,
     NgOptimizedImage,
+    UserMenuComponent,
   ],
 })
 export class UsersComponent {
   #store = inject(Store);
   #boardFacade = inject(BoardFacade);
+  #configService = inject(ConfigService);
   #boardUsers = this.#store.selectSignal(boardPageFeature.selectBoardUsers);
   #users = this.#boardFacade.users;
   #settings = this.#boardFacade.settings;
@@ -74,7 +78,20 @@ export class UsersComponent {
   );
   isFollowing = this.#store.selectSignal(boardPageFeature.selectFollow);
   currentUser = computed(() => {
-    return this.#users()?.find((user) => user.id === this.userId());
+    const userId = this.userId();
+    const currentUser = this.#users()?.find((user) => user.id === userId);
+
+    if (currentUser || !this.#configService.config.DEMO) {
+      return currentUser;
+    }
+
+    return {
+      id: userId || 'demo-user',
+      name: 'Demo user',
+      visible: true,
+      connected: true,
+      cursor: null,
+    } satisfies User;
   });
   hideNoteAuthor = computed(
     () => !!this.#boardFacade.settings()?.content.hideNoteAuthor,

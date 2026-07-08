@@ -15,7 +15,6 @@ import { rxEffect } from 'ngxtension/rx-effect';
 import {
   animationFrameScheduler,
   combineLatest,
-  fromEvent,
   merge,
   Subject,
 } from 'rxjs';
@@ -398,15 +397,6 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
       this.wsService.send([action]);
     };
 
-    fromEvent<MouseEvent>(this.el.nativeElement, 'wheel', { passive: false })
-      .pipe(
-        filter((event: MouseEvent) => event.ctrlKey),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((event: MouseEvent) => {
-        event.preventDefault();
-      });
-
     this.store
       .select(boardPageFeature.selectCurrentBoardCursor)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -460,6 +450,9 @@ export class BoardComponent implements AfterViewInit, OnDestroy {
     const userView$ = merge(
       this.boardZoomService.zoomMove$,
       this.boardMoveService.boardMove$.pipe(
+        withLatestFrom(this.store.select(boardPageFeature.selectZoom)),
+      ),
+      this.boardMoveService.wheelMove$.pipe(
         withLatestFrom(this.store.select(boardPageFeature.selectZoom)),
       ),
     ).pipe(

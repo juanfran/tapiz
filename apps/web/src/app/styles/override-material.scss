@@ -135,3 +135,14 @@ button.mdc-button {
     }
   }
 }
+
+.board-user-menu.mat-mdc-menu-panel {
+  --mat-menu-container-shape: 12px;
+
+  inline-size: min(320px, calc(100vw - 32px));
+  max-inline-size: none;
+
+  .mat-mdc-menu-content {
+    padding-block: var(--spacing-2);
+  }
+}

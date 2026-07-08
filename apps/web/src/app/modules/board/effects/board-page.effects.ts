@@ -21,6 +21,7 @@ import { isBoardTuNode, isSettings } from '@tapiz/board-commons';
 import { getNodeSize } from '../../../shared/node-size';
 import { getRouterSelectors } from '@ngrx/router-store';
 import { BoardActions } from '../actions/board.actions';
+import { ConfigService } from '../../../services/config.service';
 export const { selectQueryParam } = getRouterSelectors();
 
 @Injectable()
@@ -30,6 +31,7 @@ export class BoardPageEffects {
   #boardApiService = inject(BoardApiService);
   #route = inject(ActivatedRoute);
   #boardFacade = inject(BoardFacade);
+  #configService = inject(ConfigService);
 
   goToNode$ = createEffect(() => {
     return this.#actions$.pipe(
@@ -203,6 +205,7 @@ export class BoardPageEffects {
         BoardPageActions.fetchBoardSuccess,
         BoardPageActions.newUserJoined,
       ),
+      filter(() => !this.#configService.config.DEMO),
       concatLatestFrom(() => [
         this.#store.select(boardPageFeature.selectBoardId),
       ]),

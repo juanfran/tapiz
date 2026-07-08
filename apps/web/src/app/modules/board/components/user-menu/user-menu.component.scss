@@ -1,0 +1,135 @@
+:host {
+  display: block;
+  margin-bottom: 0.5rem;
+  max-inline-size: 100%;
+}
+
+.user-trigger {
+  align-items: center;
+  color: var(--primary-color);
+  display: flex;
+  font-size: 1rem;
+  block-size: 48px;
+  max-inline-size: 100%;
+  padding: 0;
+
+  &:hover,
+  &[aria-expanded="true"] {
+    .username {
+      inline-size: auto;
+      opacity: 1;
+      padding-inline: var(--size-2);
+    }
+  }
+}
+
+.username {
+  align-items: center;
+  backdrop-filter: blur(2px);
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: var(--radius-4);
+  block-size: 32px;
+  color: var(--grey-90);
+  display: flex;
+  gap: var(--spacing-2);
+  inline-size: 0;
+  justify-content: flex-end;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+  white-space: nowrap;
+
+  .name {
+    max-inline-size: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.avatar,
+.profile-avatar,
+.no-picture {
+  border-radius: var(--radius-round);
+  flex-shrink: 0;
+}
+
+.no-picture {
+  background: var(--grey-20);
+  block-size: 48px;
+  fill: var(--primary-color);
+  inline-size: 48px;
+  padding: 10px;
+}
+
+.profile {
+  align-items: center;
+  display: flex;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+
+  .profile-avatar {
+    block-size: 36px;
+    inline-size: 36px;
+
+    &.no-picture {
+      padding: 7px;
+    }
+  }
+
+  span {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+  }
+
+  strong {
+    color: var(--grey-90);
+    font-size: var(--font-size-14);
+    max-inline-size: 210px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    color: var(--grey-60);
+    font-size: var(--font-size-12);
+  }
+}
+
+.menu-label {
+  color: var(--grey-70);
+  font-size: var(--font-size-12);
+  font-weight: 600;
+  padding: var(--spacing-3) var(--spacing-4) var(--spacing-1);
+}
+
+.wheel-option {
+  min-block-size: 60px;
+
+  &[aria-checked="true"] {
+    background: var(--grey-20);
+  }
+
+  .option-copy {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    line-height: 1.25;
+    min-inline-size: 0;
+    padding-block: var(--spacing-2);
+  }
+
+  strong {
+    color: var(--grey-90);
+    font-size: var(--font-size-14);
+    font-weight: 600;
+  }
+
+  small {
+    color: var(--grey-70);
+    font-size: var(--font-size-12);
+    white-space: normal;
+  }
+}

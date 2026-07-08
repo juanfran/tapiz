@@ -10,21 +10,26 @@ import {
   filter,
   withLatestFrom,
   take,
+  tap,
 } from 'rxjs/operators';
 import { Point } from '@tapiz/board-commons';
 import { Store } from '@ngrx/store';
 import { boardPageFeature } from '../reducers/boardPage.reducer';
+import { isBoardWheelTarget } from './board-wheel.utils';
+import { BoardWheelInputService } from './board-wheel-input.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BoardMoveService {
   private store = inject(Store);
+  #wheelInput = inject(BoardWheelInputService);
   public move$!: Observable<Point>;
   public mouseMove$!: Observable<Point>;
   public mouseDown$!: Observable<MouseEvent>;
   public mouseUp$!: Observable<MouseEvent>;
   public boardMove$!: Observable<Point>;
+  public wheelMove$!: Observable<Point>;
   public currentMouseDownWatch$?: Subject<void>;
 
   public listen(workLayer: HTMLElement) {
@@ -84,6 +89,27 @@ export class BoardMoveService {
         return {
           x: position.x - moveDiff.x,
           y: position.y - moveDiff.y,
+        } satisfies Point;
+      }),
+    );
+
+    this.wheelMove$ = fromEvent<WheelEvent>(workLayer, 'wheel', {
+      passive: false,
+    }).pipe(
+      filter((event) => {
+        return (
+          isBoardWheelTarget(event.target) &&
+          !this.#wheelInput.isZoomEvent(event)
+        );
+      }),
+      tap((event) => {
+        event.preventDefault();
+      }),
+      withLatestFrom(this.store.select(boardPageFeature.selectPosition)),
+      map(([event, position]) => {
+        return {
+          x: position.x - event.deltaX,
+          y: position.y - event.deltaY,
         } satisfies Point;
       }),
     );
