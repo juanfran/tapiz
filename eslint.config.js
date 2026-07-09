@@ -89,6 +89,8 @@ export default [
   })),
   {
     ignores: [
+      '**/.astro/**',
+      '**/dist/**',
       '**/environment*.ts',
       '**/eslint.config.js',
       '**/vite.config.*.timestamp*',
