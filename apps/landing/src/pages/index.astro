@@ -1,0 +1,346 @@
+---
+import ProductMedia from '../components/ProductMedia.astro';
+import Layout from '../layouts/Layout.astro';
+import '../styles/landing.css';
+
+const github = 'https://github.com/juanfran/tapiz';
+const demo = 'https://tapiz.pages.dev/board/demo';
+const install = 'https://github.com/juanfran/tapiz/blob/main/docs/INSTALL.md';
+const license = 'https://github.com/juanfran/tapiz/blob/main/LICENSE.md';
+const mcp = 'https://github.com/juanfran/tapiz/blob/main/docs/mcp.md';
+
+const facts = ['Open source', 'Self-hosted', 'Real-time', 'Docker install', 'AGPL-3.0'];
+
+const toolGroups = [
+	{
+		title: 'Think in public',
+		body: 'Move from loose ideas to a shared map without breaking the conversation.',
+		tools: ['Sticky notes', 'Rich text', 'Drawing', 'Images'],
+		className: 'tool-cluster tool-cluster--wide',
+	},
+	{
+		title: 'Build the room',
+		body: 'Give every activity a place, a boundary, and a clear path through the board.',
+		tools: ['Templates', 'Panels', 'Groups', 'Arrows'],
+		className: 'tool-cluster tool-cluster--compact tool-cluster--pattern',
+	},
+	{
+		title: 'Hold attention',
+		body: 'Keep remote sessions active with lightweight signals that stay on the canvas.',
+		tools: ['Timer', 'Pings', 'Reactions', 'Comments'],
+		className: 'tool-cluster tool-cluster--compact tool-cluster--tint',
+	},
+	{
+		title: 'Reach a decision',
+		body: 'Collect input, make agreement visible, and keep the outcome beside the work.',
+		tools: ['Voting', 'Top voted', 'Polls', 'Estimation'],
+		className: 'tool-cluster tool-cluster--wide tool-cluster--media',
+	},
+];
+
+const useCases = [
+	['Retrospectives', 'Collect feedback, find themes, vote, and leave with the next actions in view.'],
+	['Brainstorming', 'Let everyone add, connect, and develop ideas at the same time.'],
+	['Agile planning', 'Estimate work and keep the reasoning beside the decision.'],
+	['Workshops', 'Guide a remote or hybrid group without jumping between apps.'],
+	['Team knowledge', 'Keep useful context organized by board, team, and space.'],
+];
+---
+
+<Layout
+	title="Tapiz - Self-Hosted Collaborative Whiteboard for Teams"
+	description="Tapiz is an open-source, self-hosted collaborative whiteboard for real-time workshops, retrospectives, planning, voting, polling, and team decisions."
+>
+	<a class="skip-link" href="#main-content">Skip to content</a>
+
+	<header class="site-header">
+		<div class="wrap nav-wrap">
+			<a class="brand" href="#top" aria-label="Tapiz home">
+				<img src="/tapiz-logo.svg" alt="" width="92" height="43" />
+			</a>
+
+			<nav class="desktop-nav" aria-label="Primary navigation">
+				<a href="#tour">Product</a>
+				<a href="#features">Tools</a>
+				<a href="#self-host">Self-host</a>
+				<a href={github}>GitHub</a>
+			</nav>
+
+			<a class="button button--small header-cta" href={demo}>Try the demo</a>
+
+			<details class="mobile-nav">
+				<summary>Menu</summary>
+				<nav aria-label="Mobile navigation">
+					<a href="#tour">Product</a>
+					<a href="#features">Tools</a>
+					<a href="#self-host">Self-host</a>
+					<a href={github}>GitHub</a>
+					<a href={demo}>Try the demo</a>
+				</nav>
+			</details>
+		</div>
+	</header>
+
+	<main id="main-content">
+		<section id="top" class="hero">
+			<div class="wrap hero-layout">
+				<div class="hero-copy">
+					<h1>Self-hosted whiteboard.</h1>
+					<p>Run real-time workshops, planning, and decisions with open-source software hosted on your infrastructure.</p>
+					<div class="actions">
+						<a class="button" href={demo}>Try the demo <span aria-hidden="true">↗</span></a>
+						<a class="text-link" href={github}>View on GitHub <span aria-hidden="true">↗</span></a>
+					</div>
+				</div>
+
+				<figure class="hero-media">
+					<div class="hero-media-shell">
+						<img
+							src="/images/tapiz-launch-retro.webp"
+							alt="A Tapiz retrospective board moving from problems to proposals and actions."
+							width="1600"
+							height="900"
+							fetchpriority="high"
+							decoding="async"
+						/>
+					</div>
+					<figcaption>A live retrospective, from problems to actions.</figcaption>
+				</figure>
+			</div>
+		</section>
+
+		<section class="facts" aria-label="Tapiz key facts">
+			<div class="wrap fact-list">
+				{facts.map((fact) => <span>{fact}</span>)}
+			</div>
+		</section>
+
+		<section id="tour" class="tour section-space">
+			<div class="wrap tour-layout">
+				<div class="tour-copy" data-reveal>
+					<h2>Watch a session take shape.</h2>
+					<p>The 45-second product tour follows one real workflow from individual notes to grouped themes, voting, and a clear next action.</p>
+				</div>
+
+				<ProductMedia
+					class="tour-media"
+					src="/images/tapiz-product-tour.webp"
+					alt="A Tapiz retrospective moving from team signals to experiments and committed actions."
+					width={1920}
+					height={1080}
+				/>
+			</div>
+		</section>
+
+		<section id="features" class="tools-section section-space">
+			<div class="wrap">
+				<div class="tools-heading" data-reveal>
+					<h2>The whole session stays on one canvas.</h2>
+					<p>Prepare the room, gather ideas, guide attention, and decide together with tools built into the board.</p>
+				</div>
+
+				<div class="tool-grid" data-stagger>
+					{toolGroups.map((group) => (
+						<article class={group.className}>
+							<div class="tool-cluster-copy">
+								<h3>{group.title}</h3>
+								<p>{group.body}</p>
+							</div>
+							<ul aria-label={`${group.title} tools`}>
+								{group.tools.map((tool) => <li>{tool}</li>)}
+							</ul>
+						</article>
+					))}
+				</div>
+
+				<div class="feature-proof">
+					<div class="feature-proof-copy" data-reveal>
+						<h3>From team input to one experiment.</h3>
+						<p>Notes capture what the team noticed. Votes rank the ideas. The poll and written outcome make the final choice clear.</p>
+					</div>
+
+					<ProductMedia
+						class="feature-media"
+						src="/images/tapiz-facilitation.webp"
+						alt="A Tapiz decision board with live reactions, votes, and an open team poll."
+						width={1600}
+						height={900}
+					/>
+				</div>
+			</div>
+		</section>
+
+		<section class="workflows section-space">
+			<div class="wrap workflow-layout">
+				<div class="workflow-sticky" data-reveal>
+					<h2>Use the format the conversation needs.</h2>
+					<p>Start from a template or a blank canvas. Tapiz stays flexible when the meeting changes direction.</p>
+				</div>
+
+				<div class="case-list" data-stagger>
+					{useCases.map(([title, body]) => (
+						<article class="case">
+							<h3>{title}</h3>
+							<p>{body}</p>
+						</article>
+					))}
+				</div>
+			</div>
+		</section>
+
+		<section id="self-host" class="self-host-section section-space">
+			<div class="wrap self-host-layout">
+				<div class="self-host-copy" data-reveal>
+					<h2>Your board. Your infrastructure.</h2>
+					<p>Run Tapiz with Docker and PostgreSQL, keep uploads where you choose, and inspect every part of the codebase.</p>
+					<a class="button" href={install}>Read the install guide <span aria-hidden="true">↗</span></a>
+				</div>
+
+				<div class="install-command" data-reveal aria-label="Tapiz Docker start command">
+					<span>Start Tapiz</span>
+					<code>docker compose up -d</code>
+					<p>Docker setup, PostgreSQL-backed data, and Google OAuth support.</p>
+				</div>
+			</div>
+
+			<div class="wrap ownership-grid" data-stagger>
+				<div>
+					<strong>Your data</strong>
+					<span>Choose where boards, app data, and uploads live.</span>
+				</div>
+				<div>
+					<strong>Your deployment</strong>
+					<span>Run Tapiz in the environment that fits your team.</span>
+				</div>
+				<div>
+					<strong>Your codebase</strong>
+					<span>Inspect, adapt, and contribute to the project.</span>
+				</div>
+			</div>
+		</section>
+
+		<section class="mcp-section section-space">
+			<div class="wrap mcp-layout">
+				<div class="mcp-copy" data-reveal>
+					<h2>Agents can work on the board, too.</h2>
+					<p>Tapiz includes an MCP server so compatible clients can inspect and edit boards through the same real-time path as connected users.</p>
+					<a class="text-link" href={mcp}>Read the MCP notes <span aria-hidden="true">↗</span></a>
+				</div>
+
+				<div class="mcp-capabilities" data-stagger aria-label="Tapiz MCP capabilities">
+					<span>Read boards</span>
+					<span>Add and edit nodes</span>
+					<span>Apply board actions</span>
+					<span>Search Cocomaterial</span>
+				</div>
+			</div>
+		</section>
+
+		<section class="final-section">
+			<div class="wrap final-layout" data-reveal>
+				<h2>Give the next meeting somewhere to land.</h2>
+				<div>
+					<p>Open a board in the browser. Self-host it when your team is ready.</p>
+					<div class="actions">
+						<a class="button" href={demo}>Try the demo <span aria-hidden="true">↗</span></a>
+						<a class="text-link" href={github}>View on GitHub <span aria-hidden="true">↗</span></a>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<footer>
+		<div class="wrap footer-wrap">
+			<div>
+				<a class="brand" href="#top" aria-label="Tapiz home">
+					<img src="/tapiz-logo.svg" alt="" width="80" height="37" />
+				</a>
+				<p>An open-source, self-hosted collaborative whiteboard for teams.</p>
+			</div>
+			<nav aria-label="Footer navigation">
+				<a href={github}>GitHub</a>
+				<a href={demo}>Live demo</a>
+				<a href={install}>Install guide</a>
+				<a href={license}>License</a>
+			</nav>
+		</div>
+	</footer>
+</Layout>
+
+<script>
+	import { inView, scroll, stagger } from 'motion';
+	import { animate } from 'motion/mini';
+
+	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	if (!prefersReducedMotion) {
+		const cleanups: Array<() => void> = [];
+		const heroItems = document.querySelectorAll('.hero-copy > *');
+		const heroMedia = document.querySelector<HTMLElement>('.hero-media');
+
+		animate(
+			heroItems,
+			{ opacity: [0, 1], transform: ['translateY(24px)', 'translateY(0px)'] },
+			{ duration: 0.7, delay: stagger(0.08), ease: [0.16, 1, 0.3, 1] },
+		);
+
+		if (heroMedia) {
+			animate(
+				heroMedia,
+				{ opacity: [0, 1], transform: ['translateY(22px) rotate(1.5deg)', 'translateY(0px) rotate(0deg)'] },
+				{ duration: 0.9, delay: 0.14, ease: [0.16, 1, 0.3, 1] },
+			);
+
+			const heroSection = document.querySelector<HTMLElement>('.hero');
+			const heroMediaShell = document.querySelector<HTMLElement>('.hero-media-shell');
+
+			if (heroSection && heroMediaShell) {
+				const parallax = animate(
+					heroMediaShell,
+					{ transform: ['translateY(0px)', 'translateY(-42px)'] },
+					{ ease: 'linear' },
+				);
+				cleanups.push(scroll(parallax, { target: heroSection, offset: ['start start', 'end start'] }));
+			}
+		}
+
+		document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((element) => {
+			element.style.opacity = '0';
+			cleanups.push(
+				inView(
+					element,
+					() => {
+						animate(
+							element,
+							{ opacity: [0, 1], transform: ['translateY(28px)', 'translateY(0px)'] },
+							{ duration: 0.7, ease: [0.16, 1, 0.3, 1] },
+						);
+					},
+					{ amount: 0.22 },
+				),
+			);
+		});
+
+		document.querySelectorAll<HTMLElement>('[data-stagger]').forEach((container) => {
+			const children = Array.from(container.children) as HTMLElement[];
+			children.forEach((child) => (child.style.opacity = '0'));
+
+			cleanups.push(
+				inView(
+					container,
+					() => {
+						animate(
+							children,
+							{ opacity: [0, 1], transform: ['translateY(24px)', 'translateY(0px)'] },
+							{ duration: 0.62, delay: stagger(0.07), ease: [0.16, 1, 0.3, 1] },
+						);
+					},
+					{ amount: 0.15 },
+				),
+			);
+		});
+
+		window.addEventListener('pagehide', () => cleanups.forEach((cleanup) => cleanup()), { once: true });
+	}
+</script>

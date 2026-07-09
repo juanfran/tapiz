@@ -1,0 +1,62 @@
+---
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const {
+	title = 'Tapiz - Self-Hosted Collaborative Whiteboard for Teams',
+	description = 'Tapiz is an open-source, self-hosted collaborative whiteboard for retrospectives, brainstorming, planning, polls, estimation, and real-time team workshops.',
+} = Astro.props;
+
+const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site) : undefined;
+const socialImage = Astro.site
+	? new URL('/images/tapiz-launch-retro.webp', Astro.site).toString()
+	: '/images/tapiz-launch-retro.webp';
+const structuredData = {
+	'@context': 'https://schema.org',
+	'@type': 'SoftwareApplication',
+	name: 'Tapiz',
+	applicationCategory: 'BusinessApplication',
+	operatingSystem: 'Web',
+	description,
+	image: socialImage,
+	url: 'https://github.com/juanfran/tapiz',
+	license: 'https://github.com/juanfran/tapiz/blob/main/LICENSE.md',
+	softwareHelp: 'https://github.com/juanfran/tapiz/blob/main/docs/INSTALL.md',
+};
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" type="image/x-icon" sizes="any" href="/favicon.ico" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+		<meta name="generator" content={Astro.generator} />
+		<meta name="robots" content="index, follow" />
+		<meta name="color-scheme" content="light dark" />
+		<meta name="theme-color" content="#f8f8fc" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#171b35" media="(prefers-color-scheme: dark)" />
+		<meta name="description" content={description} />
+		{canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Tapiz" />
+		<meta property="og:title" content="Tapiz - Self-Hosted Collaborative Whiteboard" />
+		<meta property="og:description" content="Run real-time whiteboard sessions, retrospectives, polls, estimation, and planning workshops on infrastructure you control." />
+		<meta property="og:image" content={socialImage} />
+		<meta property="og:image:alt" content="Tapiz launch retrospective with notes, votes, reactions, and next actions." />
+		{canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="Tapiz - Self-Hosted Collaborative Whiteboard" />
+		<meta name="twitter:description" content="Run real-time team workshops on infrastructure you control." />
+		<meta name="twitter:image" content={socialImage} />
+		<script type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
+		<title>{title}</title>
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
