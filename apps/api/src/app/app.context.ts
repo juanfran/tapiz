@@ -1,9 +1,9 @@
 import { inferAsyncReturnType } from '@trpc/server';
 import { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
-import { getUser, getUserByApiTokenHash } from './db/user-db.js';
+import { getUser } from './db/user-db.js';
 import { lucia, validateSession } from './auth.js';
 import { FastifyInstance } from 'fastify';
-import { hashApiToken, isApiToken } from './api-token.js';
+import { authenticateApiToken } from './authenticate-api-token.js';
 
 // // prevent angular build errors
 import '@fastify/rate-limit';
@@ -71,19 +71,7 @@ export async function createAuthContext({
   }
 
   async function getUserFromApiToken() {
-    const authorization = req.headers.authorization;
-
-    if (!authorization?.startsWith('Bearer ')) {
-      return null;
-    }
-
-    const token = authorization.slice('Bearer '.length).trim();
-
-    if (!isApiToken(token)) {
-      return null;
-    }
-
-    const dbUser = await getUserByApiTokenHash(hashApiToken(token));
+    const dbUser = await authenticateApiToken(req.headers.authorization);
 
     return toAuthUser(dbUser);
   }
