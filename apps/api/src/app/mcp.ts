@@ -15,7 +15,7 @@ import {
 import { Client } from './client.js';
 import type { Server } from './server.js';
 import db from './db/index.js';
-import { hashApiToken, isApiToken } from './api-token.js';
+import { authenticateApiToken } from './authenticate-api-token.js';
 
 type McpUser = {
   id: string;
@@ -165,29 +165,6 @@ function textResult(content: unknown) {
         text: JSON.stringify(content, null, 2),
       },
     ],
-  };
-}
-
-async function authenticateApiToken(
-  authorization: string | undefined,
-): Promise<McpUser | null> {
-  const match = authorization?.match(/^Bearer\s+(.+)$/i);
-  const token = match?.[1];
-
-  if (!token || !isApiToken(token)) {
-    return null;
-  }
-
-  const user = await db.user.getUserByApiTokenHash(hashApiToken(token));
-
-  if (!user) {
-    return null;
-  }
-
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
   };
 }
 

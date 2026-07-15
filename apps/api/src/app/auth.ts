@@ -116,6 +116,12 @@ export async function validateSession(sessionId: string) {
   return lucia.validateSession(sessionId);
 }
 
+export async function createUserSessionCookie(userId: string) {
+  const session = await lucia.createSession(userId, {});
+
+  return lucia.createSessionCookie(session.id);
+}
+
 declare module 'lucia' {
   interface Register {
     Lucia: typeof lucia;

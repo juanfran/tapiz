@@ -13,10 +13,13 @@ import {
 } from '@trpc/server/adapters/fastify';
 import { Server } from './server.js';
 import { setServer } from './global.js';
-import { getAuthUrl, lucia } from './auth.js';
+import { createUserSessionCookie, getAuthUrl, lucia } from './auth.js';
 import { googleCallback } from './routers/auth-routes.js';
 import { fileUpload } from './file-upload.js';
 import { registerTapizMcp } from './mcp.js';
+import { registerAgentSessionRoute } from './agent-auth.js';
+import { authenticateApiToken } from './authenticate-api-token.js';
+import db from './db/index.js';
 
 const fastify = Fastify({
   logger: false,
@@ -120,6 +123,13 @@ fastify.register(async function (fastify) {
   });
 
   fastify.register(googleCallback);
+
+  registerAgentSessionRoute(fastify, {
+    environment: process.env,
+    authenticateApiToken,
+    haveBoardAccess: db.board.haveAccess,
+    createSessionCookie: createUserSessionCookie,
+  });
 });
 
 const host = process.env['API_HOST'];

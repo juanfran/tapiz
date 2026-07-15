@@ -1,5 +1,9 @@
 import { FastifyInstance } from 'fastify';
-import { getUserInfo, lucia, validateAuthorizationCode } from '../auth.js';
+import {
+  createUserSessionCookie,
+  getUserInfo,
+  validateAuthorizationCode,
+} from '../auth.js';
 import { getUserByGoogleId, updateUser } from '../db/user-db.js';
 import { generateId } from 'lucia';
 import db from '../db/index.js';
@@ -40,8 +44,7 @@ export async function googleCallback(fastify: FastifyInstance) {
         const user = await getUserByGoogleId(googleUser.sub);
         if (user) {
           try {
-            const session = await lucia.createSession(user.id, {});
-            const sessionCookie = lucia.createSessionCookie(session.id);
+            const sessionCookie = await createUserSessionCookie(user.id);
 
             rep.setCookie(sessionCookie.name, sessionCookie.value, {
               ...sessionCookie.attributes,
@@ -71,8 +74,7 @@ export async function googleCallback(fastify: FastifyInstance) {
             googleUser.sub,
           );
 
-          const session = await lucia.createSession(userId, {});
-          const sessionCookie = lucia.createSessionCookie(session.id);
+          const sessionCookie = await createUserSessionCookie(userId);
 
           rep.setCookie(sessionCookie.name, sessionCookie.value, {
             ...sessionCookie.attributes,

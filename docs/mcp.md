@@ -49,6 +49,11 @@ Authorization: Bearer tapiz_pat_...
 
 The API stores only the token hash. The MCP endpoint hashes incoming tokens and resolves the Tapiz user from `accounts.api_token_hash`.
 
+For local browser screenshots, the same token can be exchanged for a normal
+browser session through the development-only agent login endpoint. See
+[AI screenshot sessions](dev-guide.md#ai-screenshot-sessions). The token owner
+must already have access to the requested board.
+
 ## Tools
 
 ### Board Tools

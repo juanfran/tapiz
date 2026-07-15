@@ -28,6 +28,7 @@ Keep this root guide intentionally small. If new guidance only applies to one ar
 - [Angular And UI](docs/agents/angular-ui.md): Angular, signals, templates, and board UI conventions.
 - [Board Nodes](docs/agents/board-nodes.md): adding or changing board node behavior, validation, persistence, and geometry.
 - [Board Geometry And Arrows](docs/agents/board-geometry-and-arrows.md): coordinate transforms, snapping, arrow attachments, and SVG hit paths.
+- [Local AI Browser Login](docs/agents/local-ai-browser-login.md): development-only API-token exchange for board screenshots and its security boundaries.
 - [Testing](docs/agents/testing.md): project-specific test placement and focused validation commands.
 - [Workflow](docs/agents/workflow.md): formatting, commits, PR expectations, and local development habits.
 
