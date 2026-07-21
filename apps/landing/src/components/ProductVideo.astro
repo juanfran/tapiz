@@ -1,0 +1,42 @@
+---
+interface Props {
+	webmSrc: string;
+	mp4Src: string;
+	poster: string;
+	label: string;
+	width: number;
+	height: number;
+	describedBy?: string;
+	class?: string;
+}
+
+const {
+	webmSrc,
+	mp4Src,
+	poster,
+	label,
+	width,
+	height,
+	describedBy,
+	class: className = '',
+} = Astro.props;
+---
+
+<figure class:list={['product-media', className]} data-reveal>
+	<div class="product-media-frame">
+		<video
+			controls
+			playsinline
+			preload="none"
+			poster={poster}
+			width={width}
+			height={height}
+			aria-label={label}
+			aria-describedby={describedBy}
+		>
+			<source src={webmSrc} type="video/webm" />
+			<source src={mp4Src} type="video/mp4" />
+			<p>Your browser cannot play this video. <a href={mp4Src}>Open the Tapiz product tour</a>.</p>
+		</video>
+	</div>
+</figure>

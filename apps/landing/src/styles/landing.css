@@ -424,10 +424,16 @@ h3 {
   box-shadow: 0 24px 68px var(--shadow);
 }
 
-.product-media img {
+.product-media img,
+.product-media video {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.product-media video {
+  aspect-ratio: 16 / 9;
+  background: var(--surface);
 }
 
 .product-media figcaption {

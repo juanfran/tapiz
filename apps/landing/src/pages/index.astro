@@ -1,5 +1,6 @@
 ---
 import ProductMedia from '../components/ProductMedia.astro';
+import ProductVideo from '../components/ProductVideo.astro';
 import Layout from '../layouts/Layout.astro';
 import '../styles/landing.css';
 
@@ -119,15 +120,18 @@ const useCases = [
 			<div class="wrap tour-layout">
 				<div class="tour-copy" data-reveal>
 					<h2>Watch a session take shape.</h2>
-					<p>The 45-second product tour follows one real workflow from individual notes to grouped themes, voting, and a clear next action.</p>
+					<p id="tour-description">See a retrospective move from scattered notes to grouped feedback, reactions, a timed discussion, and the team's top-voted ideas.</p>
 				</div>
 
-				<ProductMedia
+				<ProductVideo
 					class="tour-media"
-					src="/images/tapiz-product-tour.webp"
-					alt="A Tapiz retrospective moving from team signals to experiments and committed actions."
-					width={1920}
-					height={1080}
+					webmSrc="/videos/tapiz-product-tour.webm"
+					mp4Src="/videos/tapiz-product-tour.mp4"
+					poster="/images/tapiz-product-tour-poster.webp"
+					label="Tapiz retrospective product tour"
+					describedBy="tour-description"
+					width={1280}
+					height={720}
 				/>
 			</div>
 		</section>
@@ -231,7 +235,7 @@ const useCases = [
 					<span>Read boards</span>
 					<span>Add and edit nodes</span>
 					<span>Apply board actions</span>
-					<span>Search Cocomaterial</span>
+					<span>Find and add illustrations</span>
 				</div>
 			</div>
 		</section>
