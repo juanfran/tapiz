@@ -35,21 +35,22 @@ async function dbMigrate() {
     migrationsFolder = '../../drizzle';
   }
 
-  await migrate(drizzle(migrationClient), { migrationsFolder });
-
-  return;
+  try {
+    await migrate(drizzle(migrationClient), { migrationsFolder });
+  } finally {
+    await migrationClient.end();
+  }
 }
 
 export async function startDB() {
-  const run = async () => {
+  for (;;) {
     try {
       await dbMigrate();
       initDbClient();
-    } catch (e) {
-      console.log('Error connecting to DB, retrying in 2 seconds');
-      setTimeout(run, 2000);
+      return;
+    } catch (error) {
+      console.error('Error connecting to DB, retrying in 2 seconds', error);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
-  };
-
-  await run();
+  }
 }

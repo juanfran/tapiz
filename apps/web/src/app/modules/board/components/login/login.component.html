@@ -20,16 +20,26 @@
   </p>
 
   <div class="login-buttons">
-    <button
-      mat-raised-button
-      class="google"
-      (click)="loginGoogle()">
-      <div class="button-inner">
-        <mat-icon
-          class="google-icon"
-          svgIcon="google"></mat-icon>
-        Sign in with Google
-      </div>
-    </button>
+    @if (providers().oidc) {
+      <button
+        mat-raised-button
+        class="oidc"
+        (click)="loginOidc()">
+        <div class="button-inner">Sign in with {{ providers().oidcLabel }}</div>
+      </button>
+    }
+    @if (providers().google) {
+      <button
+        mat-raised-button
+        class="google"
+        (click)="loginGoogle()">
+        <div class="button-inner">
+          <mat-icon
+            class="google-icon"
+            svgIcon="google"></mat-icon>
+          Sign in with Google
+        </div>
+      </button>
+    }
   </div>
 </div>

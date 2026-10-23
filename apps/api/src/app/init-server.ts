@@ -15,6 +15,9 @@ import { Server } from './server.js';
 import { setServer } from './global.js';
 import { createUserSessionCookie, getAuthUrl, lucia } from './auth.js';
 import { googleCallback } from './routers/auth-routes.js';
+import { oidcRoutes } from './routers/oidc-routes.js';
+import { googleEnabled, oidcEnabled } from './oidc.js';
+import { psqlClient } from './db/init-db.js';
 import { fileUpload } from './file-upload.js';
 import { registerTapizMcp } from './mcp.js';
 import { registerAgentSessionRoute } from './agent-auth.js';
@@ -116,13 +119,32 @@ fastify.register(async function (fastify) {
     });
   });
 
-  fastify.get('/api/auth', async (req, rep) => {
-    const authUrl = await getAuthUrl(rep);
-
-    return rep.redirect(authUrl.href);
+  fastify.get('/api/livez', async () => ({ status: 'ok' }));
+  fastify.get('/api/readyz', async (_req, rep) => {
+    try {
+      await psqlClient`select 1`;
+      return { status: 'ok' };
+    } catch {
+      return rep.status(503).send({ status: 'unavailable' });
+    }
   });
 
-  fastify.register(googleCallback);
+  fastify.get('/api/auth/providers', async () => ({
+    google: googleEnabled(),
+    oidc: oidcEnabled(),
+    oidcLabel: process.env['OIDC_DISPLAY_NAME'] || 'Single sign-on',
+  }));
+
+  if (googleEnabled()) {
+    fastify.get('/api/auth', async (req, rep) => {
+      const authUrl = await getAuthUrl(rep);
+
+      return rep.redirect(authUrl.href);
+    });
+    fastify.register(googleCallback);
+  }
+
+  if (oidcEnabled()) fastify.register(oidcRoutes);
 
   registerAgentSessionRoute(fastify, {
     environment: process.env,
