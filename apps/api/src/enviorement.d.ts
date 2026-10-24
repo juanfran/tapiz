@@ -12,8 +12,12 @@ declare global {
       API_HOST: string;
       API_PORT: string;
       FRONTEND_URL: string;
-      GOOGLE_CLIENT_ID: string;
-      GOOGLE_CLIENT_SECRET: string;
+      GOOGLE_CLIENT_ID?: string;
+      GOOGLE_CLIENT_SECRET?: string;
+      OIDC_ISSUER?: string;
+      OIDC_CLIENT_ID?: string;
+      OIDC_CLIENT_SECRET?: string;
+      OIDC_DISPLAY_NAME?: string;
       AI_AGENT_LOGIN_ENABLED?: string;
     }
   }

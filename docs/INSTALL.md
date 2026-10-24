@@ -27,6 +27,23 @@ Follow these steps to set up Tapiz using Docker:
    Make sure the redirect URL is set to `http://localhost:8000/api/auth/callback`.  
    Enter the `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` into the `.env` file under the appropriate fields.
 
+   Google is optional when OpenID Connect is configured. For Keycloak or another
+   OIDC provider, create a confidential web client with standard
+   authorization-code flow and register
+   `http://localhost:8000/api/auth/oidc/callback` as its redirect URI. The
+   redirect may be local HTTP for development, but `OIDC_ISSUER` must be an
+   HTTPS issuer URL (for Keycloak:
+   `https://idp.example.com/realms/<realm>`), plus `OIDC_CLIENT_ID`,
+   `OIDC_CLIENT_SECRET`, and optionally `OIDC_DISPLAY_NAME`.
+
+   Tapiz uses discovery, state, nonce and PKCE S256, and validates the ID
+   token with `openid-client`. Users are keyed by issuer and subject. A
+   verified email is required, but it is never used to link accounts: if the
+   email already belongs to another Tapiz account, login fails with HTTP 409.
+
+   Kubernetes probes: `/api/livez` checks the process and `/api/readyz` checks
+   PostgreSQL connectivity.
+
 4. **Build and Run the Docker Containers**  
    After configuring your environment variables, build and start the Docker containers by running:
 

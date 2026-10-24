@@ -17,6 +17,52 @@ export async function getUser(id: string) {
   return users.at(0);
 }
 
+export async function getUserByOidcIdentity(issuer: string, subject: string) {
+  const users = await db
+    .select({ account: schema.accounts })
+    .from(schema.oidcIdentities)
+    .innerJoin(
+      schema.accounts,
+      eq(schema.oidcIdentities.accountId, schema.accounts.id),
+    )
+    .where(
+      and(
+        eq(schema.oidcIdentities.issuer, issuer),
+        eq(schema.oidcIdentities.subject, subject),
+      ),
+    );
+
+  return users.at(0)?.account;
+}
+
+export async function createOidcUser(
+  issuer: string,
+  subject: string,
+  name: string,
+  email: string,
+  picture?: string,
+) {
+  const userId = crypto.randomUUID();
+
+  // Account and identity must be committed together. A duplicate email must
+  // fail rather than implicitly link to an existing Google/OIDC account.
+  await db.transaction(async (tx) => {
+    await tx.insert(schema.accounts).values({
+      id: userId,
+      name,
+      email,
+      picture,
+    });
+    await tx.insert(schema.oidcIdentities).values({
+      issuer,
+      subject,
+      accountId: userId,
+    });
+  });
+
+  return userId;
+}
+
 export async function getUserByGoogleId(id: string) {
   const users = await db
     .select()
