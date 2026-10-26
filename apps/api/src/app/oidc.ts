@@ -77,7 +77,12 @@ export function clearOidcCookies(reply: FastifyReply) {
 }
 
 export async function oidcIdentity(req: FastifyRequest) {
-  const query = req.query as { code?: string; state?: string; error?: string };
+  const query = req.query as {
+    code?: string;
+    state?: string;
+    iss?: string;
+    error?: string;
+  };
   const state = req.cookies['oidc_state'];
   const nonce = req.cookies['oidc_nonce'];
   const verifier = req.cookies['oidc_verifier'];
@@ -96,6 +101,7 @@ export async function oidcIdentity(req: FastifyRequest) {
   const callback = new URL(redirectUri());
   callback.searchParams.set('code', query.code);
   callback.searchParams.set('state', query.state);
+  if (query.iss) callback.searchParams.set('iss', query.iss);
   const tokens = await oidc.authorizationCodeGrant(config, callback, {
     expectedState: state,
     expectedNonce: nonce,

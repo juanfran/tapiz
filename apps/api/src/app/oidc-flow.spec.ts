@@ -61,13 +61,11 @@ describe('OIDC authorization-code exchange', () => {
       }),
     } as Awaited<ReturnType<typeof oidc.authorizationCodeGrant>>);
 
-    await expect(request('code=abc&state=expected-state', cookies)).resolves.toMatchObject({
-      issuer,
-      subject: 'subject-123',
-    });
+    await expect(request(`code=abc&state=expected-state&iss=${encodeURIComponent(issuer)}`, cookies))
+      .resolves.toMatchObject({ issuer, subject: 'subject-123' });
     expect(oidc.authorizationCodeGrant).toHaveBeenCalledWith(
       expect.anything(),
-      new URL('http://localhost:4305/api/auth/oidc/callback?code=abc&state=expected-state'),
+      new URL(`http://localhost:4305/api/auth/oidc/callback?code=abc&state=expected-state&iss=${encodeURIComponent(issuer)}`),
       {
         expectedState: 'expected-state',
         expectedNonce: 'expected-nonce',
