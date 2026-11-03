@@ -1,3 +1,5 @@
+// Load the JIT compiler before any partially compiled Angular testing modules.
+import '@angular/compiler';
 import '@analogjs/vitest-angular/setup-snapshots';
 
 import {
