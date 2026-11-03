@@ -36,14 +36,28 @@ function redirectUri() {
 }
 
 let configPromise: Promise<oidc.Configuration> | undefined;
+let configKey: string | undefined;
 function configuration() {
   const issuer = issuerUrl();
   const clientId = process.env['OIDC_CLIENT_ID'] ?? '';
+  const secret = process.env['OIDC_CLIENT_SECRET'];
+  const method = process.env['OIDC_TOKEN_ENDPOINT_AUTH_METHOD'] ?? 'client_secret_basic';
+  if (method !== 'client_secret_basic' && method !== 'client_secret_post') {
+    throw new Error('Unsupported OIDC token endpoint authentication method');
+  }
+  const key = JSON.stringify([issuer.href, clientId, secret, method]);
+  if (configKey !== key) {
+    configPromise = undefined;
+    configKey = key;
+  }
   return (configPromise ??= oidc
     .discovery(
       issuer,
       clientId,
-      process.env['OIDC_CLIENT_SECRET'],
+      secret,
+      secret ? (method === 'client_secret_post'
+        ? oidc.ClientSecretPost(secret)
+        : oidc.ClientSecretBasic(secret)) : undefined,
     )
     .catch((error: unknown) => {
       configPromise = undefined;
@@ -111,6 +125,18 @@ export async function oidcIdentity(req: FastifyRequest) {
   const claims = tokens.claims();
   if (!claims?.sub || claims.iss !== config.serverMetadata().issuer) {
     throw new Error('Missing or invalid OIDC identity');
+  }
+  // Providers may return requested profile/email claims only from UserInfo.
+  // Keep the issuer and subject from the validated ID token as the identity key.
+  if (typeof claims['email'] !== 'string' || claims['email_verified'] !== true) {
+    if (!tokens.access_token) {
+      throw new Error('A verified email claim is required');
+    }
+    const userInfo = await oidc.fetchUserInfo(config, tokens.access_token, claims.sub);
+    return identityFromClaims(
+      { ...claims, email: userInfo.email, email_verified: userInfo.email_verified },
+      config.serverMetadata().issuer,
+    );
   }
   return identityFromClaims(claims, config.serverMetadata().issuer);
 }
