@@ -29,6 +29,28 @@ pnpm start:api
 
 Tapiz should now be accessible at `http://localhost:4300/`.
 
+## Running Tests
+
+Web unit tests run in headless Chromium through Vitest browser mode. Install the
+browser after installing dependencies, and again after upgrading Playwright:
+
+```shell
+pnpm exec playwright install chromium
+pnpm exec nx test web -- --run
+```
+
+On Linux, use `pnpm exec playwright install --with-deps chromium` if browser
+system dependencies are missing. CI uses this command before running tests.
+
+To run one spec, pass its path relative to `apps/web`:
+
+```shell
+pnpm exec nx test web -- --run src/app/modules/board/services/board-zoom.service.spec.ts
+```
+
+To debug with a visible browser, add `--browser.headless=false`. Shared-library
+and API tests continue to run in Node. Run `pnpm test` for all non-API unit tests.
+
 ## MCP Server
 
 The API exposes a Streamable HTTP MCP server for realtime board automation. See [Tapiz MCP Server](mcp.md) for architecture, token setup, tool behavior, and local connection examples.
