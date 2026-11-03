@@ -8,6 +8,7 @@ import {
 import {
   createOidcUser,
   getUserByOidcIdentity,
+  refreshOidcUserEmail,
 } from '../db/user-db.js';
 
 function isUniqueViolation(error: unknown): boolean {
@@ -54,6 +55,10 @@ export async function oidcRoutes(fastify: FastifyInstance) {
         user ??= await getUserByOidcIdentity(identity.issuer, identity.subject);
         if (!user) throw new Error('OIDC account creation failed');
       }
+      // Refresh the verified email before issuing a session: invitation checks
+      // use the account email, not OIDC claims from the callback.
+      user = await refreshOidcUserEmail(identity.issuer, identity.subject, identity.email);
+      if (!user) throw new Error('OIDC identity no longer exists');
       const sessionCookie = await createUserSessionCookie(user.id);
       reply.setCookie(
         sessionCookie.name,
