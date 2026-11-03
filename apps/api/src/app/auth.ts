@@ -4,8 +4,11 @@ import { Lucia } from 'lucia';
 import { PostgresJsAdapter } from '@lucia-auth/adapter-postgresql';
 import postgres from 'postgres';
 
-if (!process.env['GOOGLE_CLIENT_ID'] || !process.env['GOOGLE_CLIENT_SECRET']) {
-  throw new Error('Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET');
+if (
+  (!process.env['GOOGLE_CLIENT_ID'] || !process.env['GOOGLE_CLIENT_SECRET']) &&
+  (!process.env['OIDC_ISSUER'] || !process.env['OIDC_CLIENT_ID'])
+) {
+  throw new Error('Configure either Google or OIDC authentication');
 }
 
 export let lucia: Lucia;
@@ -37,13 +40,17 @@ export const setPsqlClient = (psqlClient: postgres.Sql) => {
   });
 };
 
-const google = new Google(
-  process.env['GOOGLE_CLIENT_ID'],
-  process.env['GOOGLE_CLIENT_SECRET'],
-  `${process.env['API_URL']}/auth/callback`,
-);
+const google =
+  process.env['GOOGLE_CLIENT_ID'] && process.env['GOOGLE_CLIENT_SECRET']
+    ? new Google(
+        process.env['GOOGLE_CLIENT_ID'],
+        process.env['GOOGLE_CLIENT_SECRET'],
+        `${process.env['API_URL']}/auth/callback`,
+      )
+    : undefined;
 
 export const getAuthUrl = async (reply: FastifyReply) => {
+  if (!google) throw new Error('Google authentication is not configured');
   const state = generateState();
   const codeVerifier = generateCodeVerifier();
 
@@ -101,6 +108,7 @@ export async function validateAuthorizationCode(
   code: string,
   codeVerifier: string,
 ) {
+  if (!google) return undefined;
   try {
     const tokens = await google.validateAuthorizationCode(code, codeVerifier);
 

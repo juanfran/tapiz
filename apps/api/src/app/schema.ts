@@ -31,6 +31,21 @@ export const accounts = pgTable('accounts', {
     ),
 });
 
+// One subject is meaningful only within its issuer; never link identities by email.
+export const oidcIdentities = pgTable(
+  'oidc_identities',
+  {
+    issuer: varchar('issuer').notNull(),
+    subject: varchar('subject').notNull(),
+    accountId: varchar('account_id', { length: 256 })
+      .notNull()
+      .references(() => accounts.id, { onDelete: 'cascade' }),
+  },
+  (t) => ({
+    pk: primaryKey(t.issuer, t.subject),
+  }),
+);
+
 export const accountsToSession = pgTable('account_session', {
   id: varchar('id').primaryKey(),
   expiresAt: timestamp('expires_at').notNull(),

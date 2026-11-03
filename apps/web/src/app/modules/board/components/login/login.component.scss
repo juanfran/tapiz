@@ -63,6 +63,8 @@
 
 .login-buttons {
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--size-3);
   inline-size: 100%;
   margin-top: 30px;
 }

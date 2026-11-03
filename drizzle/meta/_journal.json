@@ -78,6 +78,13 @@
       "when": 1783709158294,
       "tag": "0010_bored_killmonger",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1792773736078,
+      "tag": "0011_youthful_vindicator",
+      "breakpoints": true
     }
   ]
 }
