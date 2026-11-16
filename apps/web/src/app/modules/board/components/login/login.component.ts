@@ -26,22 +26,18 @@ export interface AuthProviders {
 export class LoginComponent implements OnInit {
   private configService = inject(ConfigService);
 
-  providers = signal<AuthProviders>({
-    google: true,
-    oidc: false,
-    oidcLabel: 'Single sign-on',
-  });
+  providers = signal<AuthProviders | null>(null);
+  providersError = signal(false);
 
   async ngOnInit() {
     try {
       const response = await fetch(
         `${this.configService.config.API_URL}/auth/providers`,
       );
-      if (response.ok) {
-        this.providers.set((await response.json()) as AuthProviders);
-      }
+      if (!response.ok) throw new Error('Provider discovery failed');
+      this.providers.set((await response.json()) as AuthProviders);
     } catch {
-      // Keep the historical Google-only login when discovery is unavailable.
+      this.providersError.set(true);
     }
   }
 

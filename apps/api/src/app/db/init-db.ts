@@ -49,6 +49,14 @@ export async function startDB() {
       initDbClient();
       return;
     } catch (error) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 'P0001'
+      ) {
+        throw error;
+      }
       console.error('Error connecting to DB, retrying in 2 seconds', error);
       await new Promise((resolve) => setTimeout(resolve, 2000));
     }

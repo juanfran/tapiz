@@ -107,7 +107,7 @@ export async function getUserByEmail(email: string) {
   const users = await db
     .select()
     .from(schema.accounts)
-    .where(eq(schema.accounts.email, email));
+    .where(sql`lower(${schema.accounts.email}) = ${email.toLowerCase()}`);
 
   return users.at(0);
 }
@@ -183,7 +183,7 @@ export async function createUser(
 ) {
   const insertedUser = await db
     .insert(schema.accounts)
-    .values({ id: userId, name, email, picture, googleId })
+    .values({ id: userId, name, email: email.toLowerCase(), picture, googleId })
     .onConflictDoUpdate({
       target: schema.accounts.id,
       set: {
@@ -202,7 +202,7 @@ export async function updateUser(
 ) {
   return db
     .update(schema.accounts)
-    .set({ name, picture, email })
+    .set({ name, picture, email: email.toLowerCase() })
     .where(eq(schema.accounts.id, userId));
 }
 
@@ -244,7 +244,7 @@ export async function inviteByEmail(
   const invitation = await db
     .insert(schema.invitations)
     .values({
-      email,
+      email: email.toLowerCase(),
       inviterId,
       ...content,
       role,
@@ -287,36 +287,42 @@ export async function acceptInvitation(
   email: string,
   invitationId: string,
 ) {
-  const invitations = await db
-    .select()
-    .from(schema.invitations)
-    .where(
-      and(
-        eq(schema.invitations.id, invitationId),
-        or(
-          eq(schema.invitations.userId, userId),
-          eq(schema.invitations.email, email),
+  return db.transaction(async (tx) => {
+    const [invitation] = await tx
+      .delete(schema.invitations)
+      .where(
+        and(
+          eq(schema.invitations.id, invitationId),
+          or(
+            eq(schema.invitations.userId, userId),
+            sql`lower(${schema.invitations.email}) = ${email.toLowerCase()}`,
+          ),
         ),
-      ),
-    );
+      )
+      .returning();
 
-  if (!invitations.length) {
-    return;
-  }
-
-  const invitation = invitations[0];
-
-  if (invitation.teamId && invitation.role !== 'guest') {
-    await addTeamMember(userId, invitation.teamId, invitation.role);
-  } else if (invitation.boardId) {
-    await addBoardMember(userId, invitation.boardId, invitation.role);
-  }
-
-  await db
-    .delete(schema.invitations)
-    .where(eq(schema.invitations.id, invitationId));
-
-  return true;
+    if (!invitation) return;
+    if (invitation.teamId && invitation.role !== 'guest') {
+      await tx
+        .insert(schema.teamMembers)
+        .values({
+          accountId: userId,
+          teamId: invitation.teamId,
+          role: invitation.role,
+        })
+        .onConflictDoNothing();
+    } else if (invitation.boardId) {
+      await tx
+        .insert(schema.acountsToBoards)
+        .values({
+          accountId: userId,
+          boardId: invitation.boardId,
+          role: invitation.role,
+        })
+        .onConflictDoNothing();
+    }
+    return true;
+  });
 }
 
 export async function getUserInvitations(
@@ -344,7 +350,7 @@ export async function getUserInvitationsByEmail(
     .select()
     .from(schema.invitations)
     .leftJoin(schema.teams, eq(schema.invitations.teamId, schema.teams.id))
-    .where(eq(schema.invitations.email, email));
+    .where(sql`lower(${schema.invitations.email}) = ${email.toLowerCase()}`);
 
   return invitations.map((invitation) => {
     return {
