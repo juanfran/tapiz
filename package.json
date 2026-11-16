@@ -13,6 +13,8 @@
     "migrate": "nx run api:migrate",
     "test": "nx run-many --target=test --exclude='api' --parallel",
     "e2e:tests": "nx run test api",
+    "test:oidc-db": "TAPIZ_TEST_DATABASE=1 nx test api -- --run src/app/db/oidc-email.spec.ts src/app/db/email-migration.spec.ts",
+    "check:email-collisions": "tsx apps/api/src/app/db/check-email-collisions.ts",
     "start:docker": "docker compose --env-file=.env up -d",
     "stop:docker": "docker compose --env-file=.env down",
     "start:docker:clean": "docker compose --env-file=.env up -d --force-recreate --build",

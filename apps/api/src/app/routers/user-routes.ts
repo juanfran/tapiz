@@ -1,4 +1,5 @@
 import { TRPCError } from '@trpc/server';
+import { invitationMatchesEmail } from './invitation-email.js';
 import { z } from 'zod/v4';
 import { protectedProcedure, publicProcedure, router } from '../trpc.js';
 import db from '../db/index.js';
@@ -153,7 +154,7 @@ export const userRouter = router({
       if (
         invitation.inviterId !== req.ctx.user.sub &&
         invitation.userId !== req.ctx.user.sub &&
-        invitation.email !== req.ctx.user.email
+        !invitationMatchesEmail(invitation.email, req.ctx.user.email)
       ) {
         if (invitation.teamId) {
           const admins = await db.team.getTeamAdmins(invitation.teamId);

@@ -19,6 +19,16 @@ describe('OIDC identity claims', () => {
     });
   });
 
+  it('normalizes a verified email without changing the identity key', () => {
+    expect(
+      identityFromClaims({ ...claims, email: 'Person.X@Example.test' }, issuer),
+    ).toMatchObject({
+      issuer,
+      subject: 'subject-123',
+      email: 'person.x@example.test',
+    });
+  });
+
   it('rejects claims from a different issuer', () => {
     expect(() =>
       identityFromClaims(claims, 'https://other.example.test'),

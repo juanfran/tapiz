@@ -20,15 +20,22 @@
   </p>
 
   <div class="login-buttons">
-    @if (providers().oidc) {
+    @if (providersError()) {
+      <p role="alert">
+        Sign-in providers are unavailable. Please reload the page.
+      </p>
+    }
+    @if (providers()?.oidc) {
       <button
         mat-raised-button
         class="oidc"
         (click)="loginOidc()">
-        <div class="button-inner">Sign in with {{ providers().oidcLabel }}</div>
+        <div class="button-inner">
+          Sign in with {{ providers()?.oidcLabel }}
+        </div>
       </button>
     }
-    @if (providers().google) {
+    @if (providers()?.google) {
       <button
         mat-raised-button
         class="google"

@@ -29,11 +29,6 @@ export async function googleCallback(fastify: FastifyInstance) {
       );
 
       if (tokens) {
-        rep.setCookie('code', code, {
-          path: '/',
-          httpOnly: true,
-        });
-
         const googleUser = await getUserInfo(tokens.accessToken);
 
         if (!googleUser || !googleUser.email) {
@@ -42,48 +37,47 @@ export async function googleCallback(fastify: FastifyInstance) {
         }
 
         const user = await getUserByGoogleId(googleUser.sub);
-        if (user) {
-          try {
-            const sessionCookie = await createUserSessionCookie(user.id);
-
-            rep.setCookie(sessionCookie.name, sessionCookie.value, {
-              ...sessionCookie.attributes,
-            });
-          } catch (e) {
-            console.error(e);
+        const userId = user?.id ?? generateId(15);
+        try {
+          if (user) {
+            await updateUser(
+              userId,
+              googleUser.name,
+              googleUser.email,
+              googleUser.picture,
+            );
+          } else {
+            await db.user.createUser(
+              userId,
+              googleUser.name,
+              googleUser.email,
+              googleUser.picture,
+              googleUser.sub,
+            );
           }
-
-          await updateUser(
-            user.id,
-            googleUser.name,
-            googleUser.email,
-            googleUser.picture,
-          );
-
-          return rep.redirect(
-            process.env['FRONTEND_URL'] + '/login-redirect?status=success',
-          );
-        } else {
-          const userId = generateId(15);
-
-          await db.user.createUser(
-            userId,
-            googleUser.name,
-            googleUser.email,
-            googleUser.picture,
-            googleUser.sub,
-          );
-
-          const sessionCookie = await createUserSessionCookie(userId);
-
-          rep.setCookie(sessionCookie.name, sessionCookie.value, {
-            ...sessionCookie.attributes,
-          });
-
-          return rep.redirect(
-            process.env['FRONTEND_URL'] + '/login-redirect?status=success',
-          );
+        } catch (error) {
+          if (
+            typeof error === 'object' &&
+            error !== null &&
+            'code' in error &&
+            error.code === '23505'
+          ) {
+            return rep
+              .status(409)
+              .send('Account already exists; contact an administrator');
+          }
+          throw error;
         }
+
+        const sessionCookie = await createUserSessionCookie(userId);
+        rep.setCookie(
+          sessionCookie.name,
+          sessionCookie.value,
+          sessionCookie.attributes,
+        );
+        return rep.redirect(
+          process.env['FRONTEND_URL'] + '/login-redirect?status=success',
+        );
       }
     }
 

@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { createUserSessionCookie } from '../auth.js';
+import { logOidcError } from './oidc-error.js';
 import {
   clearOidcCookies,
   oidcAuthorizationUrl,
@@ -26,7 +27,7 @@ export async function oidcRoutes(fastify: FastifyInstance) {
       const url = await oidcAuthorizationUrl(reply);
       return reply.redirect(url.href);
     } catch (error) {
-      fastify.log.error(error);
+      logOidcError('OIDC provider unavailable', error);
       return reply.status(503).send('OIDC provider unavailable');
     }
   });
@@ -57,7 +58,11 @@ export async function oidcRoutes(fastify: FastifyInstance) {
       }
       // Refresh the verified email before issuing a session: invitation checks
       // use the account email, not OIDC claims from the callback.
-      user = await refreshOidcUserEmail(identity.issuer, identity.subject, identity.email);
+      user = await refreshOidcUserEmail(
+        identity.issuer,
+        identity.subject,
+        identity.email,
+      );
       if (!user) throw new Error('OIDC identity no longer exists');
       const sessionCookie = await createUserSessionCookie(user.id);
       reply.setCookie(
@@ -75,7 +80,7 @@ export async function oidcRoutes(fastify: FastifyInstance) {
           .status(409)
           .send('Account already exists; contact an administrator');
       }
-      fastify.log.error(error);
+      logOidcError('OIDC login failed', error);
       return reply.status(400).send('OIDC login failed');
     }
   });
