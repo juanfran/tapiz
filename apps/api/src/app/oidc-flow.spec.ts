@@ -250,6 +250,51 @@ describe('OIDC authorization-code exchange', () => {
     ).resolves.toMatchObject({ subject: 'subject-123' });
   });
 
+  it('uses OIDC_DISCOVERY_URL and requires its issuer to equal OIDC_ISSUER', async () => {
+    const claims = {
+      iss: issuer,
+      aud: 'test-client',
+      sub: 'subject-123',
+      email: 'person@example.test',
+      email_verified: true,
+    };
+    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
+      claims: () => claims,
+    } as Awaited<ReturnType<typeof oidc.authorizationCodeGrant>>);
+    try {
+      process.env['OIDC_DISCOVERY_URL'] =
+        'https://login.example.test/tenant/policy/v2.0/.well-known/openid-configuration';
+      await expect(
+        request('code=abc&state=expected-state', cookies),
+      ).resolves.toMatchObject({ issuer });
+      expect(oidc.discovery).toHaveBeenCalledWith(
+        new URL(process.env['OIDC_DISCOVERY_URL']),
+        'test-client',
+        'test-secret',
+        'basic-auth',
+        { execute: [oidc.enableNonRepudiationChecks], timeout: 10 },
+      );
+
+      process.env['OIDC_DISCOVERY_URL'] =
+        'https://other.example.test/.well-known/openid-configuration';
+      vi.mocked(oidc.discovery).mockResolvedValue({
+        serverMetadata: () => ({ issuer: 'https://other.example.test' }),
+      } as Awaited<ReturnType<typeof oidc.discovery>>);
+      await expect(
+        request('code=abc&state=expected-state', cookies),
+      ).rejects.toThrow('OIDC discovery issuer does not match OIDC_ISSUER');
+    } finally {
+      delete process.env['OIDC_DISCOVERY_URL'];
+    }
+  });
+
+  it('rejects an empty iss parameter before the token exchange', async () => {
+    await expect(
+      request('code=abc&state=expected-state&iss=', cookies),
+    ).rejects.toThrow('Invalid OIDC authorization response');
+    expect(oidc.authorizationCodeGrant).not.toHaveBeenCalled();
+  });
+
   it('rejects repeated callback parameters before the token exchange', async () => {
     for (const query of [
       { code: ['first', 'second'], state: 'expected-state' },
@@ -262,6 +307,38 @@ describe('OIDC authorization-code exchange', () => {
       ).rejects.toThrow('Invalid OIDC authorization response');
     }
     expect(oidc.authorizationCodeGrant).not.toHaveBeenCalled();
+  });
+
+  it('replaces an unusable ID token picture with the UserInfo picture', async () => {
+    process.env['OIDC_CLIENT_SECRET'] = 'picture-secret';
+    vi.mocked(oidc.discovery).mockResolvedValue({
+      serverMetadata: () => ({
+        issuer,
+        userinfo_endpoint: `${issuer}/userinfo`,
+      }),
+    } as Awaited<ReturnType<typeof oidc.discovery>>);
+    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
+      claims: () => ({
+        iss: issuer,
+        aud: 'test-client',
+        sub: 'subject-123',
+        email: 'person@example.test',
+        email_verified: true,
+        name: 'Token Name',
+        picture: 'data:image/png;base64,AAAA',
+      }),
+      access_token: 'access-token',
+    } as Awaited<ReturnType<typeof oidc.authorizationCodeGrant>>);
+    vi.mocked(oidc.fetchUserInfo).mockResolvedValue({
+      sub: 'subject-123',
+      picture: 'https://idp.example.test/avatar.png',
+    });
+    await expect(
+      request('code=abc&state=expected-state', cookies),
+    ).resolves.toMatchObject({
+      name: 'Token Name',
+      picture: 'https://idp.example.test/avatar.png',
+    });
   });
 
   it('fills a missing name and picture from UserInfo without replacing the ID token email', async () => {
@@ -335,6 +412,9 @@ describe('OIDC authorization-code exchange', () => {
       'ftp://example.test/api',
       'https://example.test/api?x=1',
       'https://example.test/api#x',
+      'https://example.test/api/',
+      'https://example.test/api?',
+      'https://example.test/api#',
     ]) {
       process.env['API_URL'] = apiUrl;
       expect(() => validateOidcConfiguration()).toThrow('API_URL');
@@ -350,6 +430,18 @@ describe('OIDC authorization-code exchange', () => {
     process.env['OIDC_TOKEN_ENDPOINT_AUTH_METHOD'] = 'client_secret_basic';
     process.env['OIDC_ISSUER'] = `${issuer}/.well-known/openid-configuration`;
     expect(() => validateOidcConfiguration()).toThrow('issuer identifier');
+    for (const tenant of ['common', 'organizations', 'consumers']) {
+      process.env['OIDC_ISSUER'] =
+        `https://login.microsoftonline.com/${tenant}/v2.0`;
+      expect(() => validateOidcConfiguration()).toThrow('tenant-specific');
+    }
+    process.env['OIDC_ISSUER'] =
+      'https://login.microsoftonline.com/0b0c7f1e-0000-4000-8000-000000000000/v2.0';
+    expect(() => validateOidcConfiguration()).not.toThrow();
+    process.env['OIDC_ISSUER'] = issuer;
+    process.env['OIDC_DISCOVERY_URL'] = 'https://idp.example.test/metadata';
+    expect(() => validateOidcConfiguration()).toThrow('OIDC_DISCOVERY_URL');
+    delete process.env['OIDC_DISCOVERY_URL'];
   });
 
   it('does not accept a rejected token exchange', async () => {

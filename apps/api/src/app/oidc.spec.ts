@@ -36,10 +36,17 @@ describe('OIDC identity claims', () => {
         issuer,
       ).picture,
     ).toBe('https://idp.example.test/a.png');
+    expect(
+      identityFromClaims(
+        { ...claims, picture: 'HTTPS://IDP.example.test/a.png' },
+        issuer,
+      ).picture,
+    ).toBe('https://idp.example.test/a.png');
     for (const picture of [
       'data:image/png;base64,AAAA',
       'javascript:alert(1)',
       'avatar.png',
+      'https:avatar.png',
       `https://idp.example.test/${'a'.repeat(2100)}`,
     ]) {
       expect(identityFromClaims({ ...claims, picture }, issuer).picture).toBe(

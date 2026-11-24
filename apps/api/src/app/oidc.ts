@@ -39,6 +39,7 @@ export function oidcEnabled() {
 export function validateOidcConfiguration() {
   if (process.env['OIDC_ISSUER'] || process.env['OIDC_CLIENT_ID']) {
     issuerUrl();
+    discoveryUrl();
     callbackUrl();
     clientAuthentication();
   }
@@ -60,30 +61,70 @@ function issuerUrl() {
     throw new Error('OIDC_ISSUER must use HTTPS');
   }
   // openid-client only compares the discovered issuer with the configured one
-  // when it resolves the well-known URL itself.
+  // when it resolves the well-known URL itself; OIDC_DISCOVERY_URL covers
+  // providers whose discovery document lives elsewhere.
   if (url.pathname.includes('/.well-known/') || url.search || url.hash) {
     throw new Error(
       'OIDC_ISSUER must be the issuer identifier, not a discovery document URL',
     );
   }
+  // Tenant-independent Entra ID endpoints issue tokens whose `iss` names the
+  // user's tenant, which can never match the configured issuer.
+  const [tenant] = url.pathname.split('/').filter(Boolean);
+  if (
+    url.hostname === 'login.microsoftonline.com' &&
+    ['common', 'organizations', 'consumers'].includes(tenant?.toLowerCase())
+  ) {
+    throw new Error(
+      'OIDC_ISSUER must be tenant-specific for Microsoft Entra ID',
+    );
+  }
   return url;
 }
 
-function callbackUrl() {
+/**
+ * Optional discovery document URL for providers that publish it outside
+ * `<issuer>/.well-known/openid-configuration` (for example Azure AD B2C with a
+ * custom domain). Its metadata issuer must then equal OIDC_ISSUER exactly.
+ */
+function discoveryUrl() {
+  const value = process.env['OIDC_DISCOVERY_URL'];
+  if (!value) return undefined;
   let url: URL;
   try {
-    url = new URL(process.env['API_URL'] ?? '');
+    url = new URL(value);
   } catch {
-    throw new Error('API_URL must be an absolute HTTP(S) URL');
+    throw new Error(
+      'OIDC_DISCOVERY_URL must be an HTTPS discovery document URL',
+    );
   }
-  if (
-    (url.protocol !== 'https:' && url.protocol !== 'http:') ||
-    url.search ||
-    url.hash
-  ) {
-    throw new Error('API_URL must be an absolute HTTP(S) URL');
+  if (url.protocol !== 'https:' || !url.pathname.includes('/.well-known/')) {
+    throw new Error(
+      'OIDC_DISCOVERY_URL must be an HTTPS discovery document URL',
+    );
   }
-  url.pathname = `${url.pathname.replace(/\/+$/, '')}/auth/oidc/callback`;
+  return url;
+}
+
+const apiUrlError =
+  'API_URL must be an absolute HTTP(S) URL without a trailing slash, query or fragment';
+
+function callbackUrl() {
+  // The web app also builds `${API_URL}/...` URLs, so a trailing slash,
+  // query or fragment would break more than the OIDC callback.
+  const value = process.env['API_URL'] ?? '';
+  if (value.endsWith('/') || value.includes('?') || value.includes('#')) {
+    throw new Error(apiUrlError);
+  }
+  let url: URL;
+  try {
+    url = new URL(`${value}/auth/oidc/callback`);
+  } catch {
+    throw new Error(apiUrlError);
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    throw new Error(apiUrlError);
+  }
   return url;
 }
 
@@ -128,17 +169,33 @@ let configPromise: Promise<oidc.Configuration> | undefined;
 let configKey: string | undefined;
 function configuration() {
   const issuer = issuerUrl();
+  const discovery = discoveryUrl();
   const clientId = process.env['OIDC_CLIENT_ID'] ?? '';
   const { method, secret, auth } = clientAuthentication();
-  const key = JSON.stringify([issuer.href, clientId, secret, method]);
+  const key = JSON.stringify([
+    issuer.href,
+    discovery?.href,
+    clientId,
+    secret,
+    method,
+  ]);
   if (configKey !== key) {
     configPromise = undefined;
     configKey = key;
   }
   return (configPromise ??= oidc
-    .discovery(issuer, clientId, secret, auth, {
+    .discovery(discovery ?? issuer, clientId, secret, auth, {
       execute: [oidc.enableNonRepudiationChecks],
       timeout: providerTimeoutSeconds,
+    })
+    .then((config) => {
+      if (
+        discovery &&
+        config.serverMetadata().issuer !== process.env['OIDC_ISSUER']
+      ) {
+        throw new Error('OIDC discovery issuer does not match OIDC_ISSUER');
+      }
+      return config;
     })
     .catch((error: unknown) => {
       configPromise = undefined;
@@ -224,6 +281,9 @@ export async function oidcIdentity(req: FastifyRequest) {
   }
   if (
     providerError ||
+    // RFC 9207: an `iss` parameter that is present must match; an empty one
+    // must not be treated as absent.
+    iss === '' ||
     !code ||
     !queryState ||
     !state ||
@@ -265,7 +325,8 @@ export async function oidcIdentity(req: FastifyRequest) {
   const emailInIdToken =
     typeof claims['email'] === 'string' && claims['email_verified'] === true;
   const profileInIdToken =
-    nonEmptyString(claims['name']) && nonEmptyString(claims['picture']);
+    nonEmptyString(claims['name']) &&
+    pictureUrl(claims['picture']) !== undefined;
   let userInfo: oidc.UserInfoResponse | undefined;
   if (!emailInIdToken) {
     if (!tokens.access_token) {
@@ -298,9 +359,7 @@ export async function oidcIdentity(req: FastifyRequest) {
       email: emailInIdToken ? claims['email'] : userInfo?.email,
       email_verified: emailInIdToken ? true : userInfo?.email_verified,
       name: nonEmptyString(claims['name']) ? claims['name'] : userInfo?.name,
-      picture: usablePicture(claims['picture'])
-        ? claims['picture']
-        : userInfo?.picture,
+      picture: pictureUrl(claims['picture']) ?? userInfo?.picture,
     },
     config.serverMetadata().issuer,
   );
@@ -310,14 +369,23 @@ function nonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0;
 }
 
-/** Only absolute HTTP(S) URLs render as avatars (`ngSrc` rejects others). */
-function usablePicture(value: unknown): value is string {
-  if (!nonEmptyString(value) || value.length > 2048) return false;
+/**
+ * Only absolute HTTP(S) URLs render as avatars (`ngSrc` rejects others). The
+ * normalised URL is stored, so forms like `https:avatar.png` cannot be read as
+ * relative by the browser.
+ */
+function pictureUrl(value: unknown): string | undefined {
+  if (
+    !nonEmptyString(value) ||
+    value.length > 2048 ||
+    !/^https?:\/\//i.test(value)
+  ) {
+    return undefined;
+  }
   try {
-    const url = new URL(value);
-    return url.protocol === 'https:' || url.protocol === 'http:';
+    return new URL(value).href;
   } catch {
-    return false;
+    return undefined;
   }
 }
 
@@ -352,6 +420,6 @@ export function identityFromClaims(
       typeof claims['name'] === 'string' && claims['name']
         ? claims['name'].slice(0, 256)
         : undefined,
-    picture: usablePicture(claims['picture']) ? claims['picture'] : undefined,
+    picture: pictureUrl(claims['picture']),
   };
 }

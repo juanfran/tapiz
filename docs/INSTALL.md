@@ -1,7 +1,8 @@
 ## Prerequisites
 
 - Docker installed on your system.
-- Google OAuth credentials (for authentication).
+- Credentials for at least one sign-in provider: Google OAuth or an OpenID
+  Connect provider.
 
 ## Installation & Configuration
 
@@ -36,8 +37,14 @@ Follow these steps to set up Tapiz using Docker:
    redirect may be local HTTP for development, but `OIDC_ISSUER` must be an
    HTTPS issuer URL (for Keycloak:
    `https://idp.example.com/realms/<realm>`; the issuer identifier itself, not
-   its `/.well-known/openid-configuration` URL), plus `OIDC_CLIENT_ID`,
-   `OIDC_CLIENT_SECRET`, and optionally `OIDC_DISPLAY_NAME`. Token endpoint
+   its `/.well-known/openid-configuration` URL; for Microsoft Entra ID use the
+   tenant-specific issuer, since `common`, `organizations` and `consumers` are
+   rejected), plus `OIDC_CLIENT_ID`,
+   `OIDC_CLIENT_SECRET`, and optionally `OIDC_DISPLAY_NAME`. If the provider
+   publishes its discovery document somewhere other than
+   `<issuer>/.well-known/openid-configuration` (for example Azure AD B2C with a
+   custom domain), also set `OIDC_DISCOVERY_URL`; its `issuer` must equal
+   `OIDC_ISSUER` exactly. `API_URL` must not end with a slash. Token endpoint
    client authentication defaults to `client_secret_basic` (the OIDC discovery
    default); set `OIDC_TOKEN_ENDPOINT_AUTH_METHOD=client_secret_post` only if
    the provider and registered client require POST authentication. Both

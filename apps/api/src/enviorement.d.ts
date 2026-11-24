@@ -15,6 +15,7 @@ declare global {
       GOOGLE_CLIENT_ID?: string;
       GOOGLE_CLIENT_SECRET?: string;
       OIDC_ISSUER?: string;
+      OIDC_DISCOVERY_URL?: string;
       OIDC_CLIENT_ID?: string;
       OIDC_CLIENT_SECRET?: string;
       OIDC_TOKEN_ENDPOINT_AUTH_METHOD?:
