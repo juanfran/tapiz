@@ -39,15 +39,21 @@ function heldTransaction(
   ) => Promise<unknown>,
 ) {
   let release!: () => void;
+  let started!: () => void;
   const gate = new Promise<void>((done) => {
     release = done;
   });
+  // Resolves once `before` ran, so the held locks are in place.
+  const ready = new Promise<void>((done) => {
+    started = done;
+  });
   const done = db.transaction(async (tx) => {
     await before(tx);
+    started();
     await gate;
     await after(tx);
   });
-  return { release, done };
+  return { release, ready, done };
 }
 
 const accountIds: string[] = [];
@@ -406,7 +412,7 @@ describe('account removal (PostgreSQL)', () => {
         }),
       async () => undefined,
     );
-    await pause(50);
+    await login.ready;
     const removing = removeAccount(leaving);
     await pause(100);
     login.release();
@@ -434,7 +440,7 @@ describe('account removal (PostgreSQL)', () => {
           .insert(teamMembers)
           .values({ teamId, accountId: invitee, role: 'member' }),
     );
-    await pause(50);
+    await accepting.ready;
     const removing = removeAccount(inviter);
     await pause(100);
     accepting.release();

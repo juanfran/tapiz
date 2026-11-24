@@ -25,6 +25,18 @@ async function warmPool() {
   );
 }
 
+/** Exactly one call succeeded and the other was refused for the admin rule. */
+function expectOneConflict(results: PromiseSettledResult<unknown>[]) {
+  expect(results.map((result) => result.status).sort()).toEqual([
+    'fulfilled',
+    'rejected',
+  ]);
+  const rejected = results.find(
+    (result): result is PromiseRejectedResult => result.status === 'rejected',
+  );
+  expect(rejected?.reason).toBeInstanceOf(AdminRequiredConflict);
+}
+
 const accountIds: string[] = [];
 const teamIds: string[] = [];
 const boardIds: string[] = [];
@@ -202,10 +214,7 @@ describe('team member removal (PostgreSQL)', () => {
       deleteMember(teamId, second),
     ]);
 
-    expect(results.map((result) => result.status).sort()).toEqual([
-      'fulfilled',
-      'rejected',
-    ]);
+    expectOneConflict(results);
     const roles = await db
       .select({ role: teamMembers.role })
       .from(teamMembers)
@@ -232,10 +241,7 @@ describe('team member removal (PostgreSQL)', () => {
       changeRole(teamId, second, 'member'),
     ]);
 
-    expect(results.map((result) => result.status).sort()).toEqual([
-      'fulfilled',
-      'rejected',
-    ]);
+    expectOneConflict(results);
     const roles = await db
       .select({ role: teamMembers.role })
       .from(teamMembers)
@@ -253,10 +259,7 @@ describe('team member removal (PostgreSQL)', () => {
       changeBoardRole(boardId, second, 'member'),
     ]);
 
-    expect(results.map((result) => result.status).sort()).toEqual([
-      'fulfilled',
-      'rejected',
-    ]);
+    expectOneConflict(results);
     expect(
       [
         await boardRole(boardId, first),
@@ -281,5 +284,22 @@ describe('team member removal (PostgreSQL)', () => {
     });
     boardIds.push(created.id);
     expect(await boardRole(created.id, admin)).toBe('admin');
+  });
+
+  it('counts team admins as admins of a team board', async () => {
+    const [teamAdmin, boardAdmin] = [await account(), await account()];
+    const teamId = await teamWith({
+      [teamAdmin]: 'admin',
+      [boardAdmin]: 'member',
+    });
+    const teamBoard = await board({ [boardAdmin]: 'admin' }, teamId);
+    const personalBoard = await board({ [boardAdmin]: 'admin' });
+
+    await changeBoardRole(teamBoard, boardAdmin, 'member');
+    expect(await boardRole(teamBoard, boardAdmin)).toBe('member');
+
+    await expect(
+      changeBoardRole(personalBoard, boardAdmin, 'member'),
+    ).rejects.toBeInstanceOf(AdminRequiredConflict);
   });
 });
