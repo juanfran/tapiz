@@ -2,7 +2,6 @@ const safeMessages = new Set([
   'Invalid OIDC authorization response',
   'Missing or invalid OIDC identity',
   'Unexpected OIDC authorized party',
-  'Unexpected OIDC audience',
   'OIDC_ISSUER must be the issuer identifier, not a discovery document URL',
   'Invalid OIDC issuer or subject',
   'A verified email claim is required',

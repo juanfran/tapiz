@@ -18,7 +18,11 @@ const jwk = {
   alg: 'RS256',
 };
 
-function token(signatureKey = privateKey, tokenNonce = nonce) {
+function token(
+  signatureKey = privateKey,
+  tokenNonce = nonce,
+  extraClaims: Record<string, unknown> = {},
+) {
   const encode = (value: object) =>
     Buffer.from(JSON.stringify(value)).toString('base64url');
   const header = encode({ alg: 'RS256', kid: 'test-key' });
@@ -31,6 +35,7 @@ function token(signatureKey = privateKey, tokenNonce = nonce) {
     email_verified: true,
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + 300,
+    ...extraClaims,
   });
   const body = `${header}.${claims}`;
   return `${body}.${sign('RSA-SHA256', Buffer.from(body), signatureKey).toString('base64url')}`;
@@ -42,6 +47,7 @@ function provider(
     tokenNonce?: string;
     wrongSignature?: boolean;
     wrongVerifier?: boolean;
+    claims?: Record<string, unknown>;
   } = {},
 ) {
   const requests: string[] = [];
@@ -96,6 +102,7 @@ function provider(
       id_token: token(
         options.wrongSignature ? otherKey : privateKey,
         options.tokenNonce,
+        options.claims,
       ),
     });
   };
@@ -151,5 +158,24 @@ describe('openid-client token validation boundary', () => {
         }),
       ).rejects.toThrow();
     }
+  });
+
+  it('accepts extra audiences only with an azp naming the client', async () => {
+    const grant = (claims: Record<string, unknown>) => {
+      const { config, callback } = provider({ claims });
+      return oidc.authorizationCodeGrant(config, callback, {
+        expectedState: state,
+        expectedNonce: nonce,
+        pkceCodeVerifier: verifier,
+        idTokenExpected: true,
+      });
+    };
+    await expect(
+      grant({ aud: [clientId, 'project-id'], azp: clientId }),
+    ).resolves.toBeDefined();
+    await expect(grant({ aud: [clientId, 'project-id'] })).rejects.toThrow();
+    await expect(
+      grant({ aud: [clientId, 'project-id'], azp: 'other-client' }),
+    ).rejects.toThrow();
   });
 });

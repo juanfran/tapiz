@@ -253,13 +253,10 @@ export async function oidcIdentity(req: FastifyRequest) {
     throw new Error('Missing or invalid OIDC identity');
   }
   const clientId = process.env['OIDC_CLIENT_ID'];
-  // openid-client accepts any audience list that includes Tapiz (checking
-  // `azp` only for several audiences). Tapiz trusts no other audience, so the
-  // token must be issued to it alone (OIDC Core 3.1.3.7, steps 3 to 5).
-  const audiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
-  if (audiences.length !== 1 || audiences[0] !== clientId) {
-    throw new Error('Unexpected OIDC audience');
-  }
+  // openid-client requires Tapiz in `aud` and, when `aud` lists other
+  // audiences (for example Zitadel's project ID), an `azp` equal to the Tapiz
+  // client. It skips `azp` for a single audience, so check it here too: a
+  // token whose authorized party is another client is never accepted.
   if (claims.azp !== undefined && claims.azp !== clientId) {
     throw new Error('Unexpected OIDC authorized party');
   }
