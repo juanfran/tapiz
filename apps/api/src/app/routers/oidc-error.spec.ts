@@ -218,4 +218,18 @@ describe('OIDC failure logging', () => {
       'OIDC login failed: OAUTH_UNSUPPORTED_OPERATION: Unsupported provider operation: unsupported `token_type` value',
     );
   });
+
+  it('keeps postgres.js connection codes without connection details', () => {
+    logOidcDatabaseError(
+      'OIDC login failed',
+      Object.assign(new Error('write CONNECT_TIMEOUT db.internal:5432'), {
+        code: 'CONNECT_TIMEOUT',
+      }),
+    );
+    const line = logged();
+    expect(line).toBe(
+      'OIDC login failed: database error (CONNECT_TIMEOUT): Database operation failed',
+    );
+    expect(line).not.toContain('db.internal');
+  });
 });

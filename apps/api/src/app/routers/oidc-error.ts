@@ -10,7 +10,10 @@ const safeMessages = new Set([
   'OIDC_ISSUER must use HTTPS',
   'OIDC is not configured',
   'Unsupported OIDC token endpoint authentication method',
-  'API_URL must be an absolute HTTP(S) URL',
+  'API_URL must be an absolute HTTP(S) URL without a trailing slash, query or fragment',
+  'OIDC_DISCOVERY_URL must be an HTTPS discovery document URL',
+  'OIDC discovery issuer does not match OIDC_ISSUER',
+  'OIDC_ISSUER must be tenant-specific for Microsoft Entra ID',
   'OIDC_CLIENT_SECRET must be empty when OIDC_TOKEN_ENDPOINT_AUTH_METHOD is none',
   'OIDC_CLIENT_SECRET is required unless OIDC_TOKEN_ENDPOINT_AUTH_METHOD is none',
 ]);
@@ -160,6 +163,13 @@ export function logOidcError(context: string, error: unknown) {
 }
 
 const sqlStatePattern = /^[0-9A-Z]{5}$/;
+// postgres.js connection failures.
+const databaseDriverCodes = new Set([
+  'CONNECT_TIMEOUT',
+  'CONNECTION_CLOSED',
+  'CONNECTION_DESTROYED',
+  'CONNECTION_ENDED',
+]);
 
 /**
  * Logs a failure after the provider exchange succeeded (account lookup,
@@ -174,7 +184,9 @@ export function logOidcDatabaseError(context: string, error: unknown) {
   const code =
     isPostgresError && rawCode && sqlStatePattern.test(rawCode)
       ? rawCode
-      : networkCode(error) ?? 'unknown';
+      : rawCode && databaseDriverCodes.has(rawCode)
+        ? rawCode
+        : networkCode(error) ?? 'unknown';
   const message =
     error instanceof Error && safeMessages.has(error.message)
       ? error.message
