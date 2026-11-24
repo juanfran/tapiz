@@ -138,11 +138,12 @@ export const teamRouter = router({
     .mutation(async (req) => {
       const boards = await db.board.getBoardsByTeam(req.input.teamId);
 
+      await db.team.deleteTeam(req.input.teamId);
+
+      // After the commit, so a join that started meanwhile is caught too.
       boards.forEach((board) => {
         revokeBoardAccess(board.id);
       });
-
-      await db.team.deleteTeam(req.input.teamId);
 
       sendEvent(
         {
