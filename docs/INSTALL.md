@@ -28,8 +28,9 @@ Follow these steps to set up Tapiz using Docker:
    Enter the `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` into the `.env` file under the appropriate fields.
 
    Google is optional when OpenID Connect is configured. For Keycloak or another
-   OIDC provider, create a confidential web client with standard
-   authorization-code flow and register
+   OIDC provider, create a web client with standard authorization-code flow
+   (confidential is recommended; a public client works if you leave
+   `OIDC_CLIENT_SECRET` empty, and PKCE still protects the code) and register
    `http://localhost:8000/api/auth/oidc/callback` as its redirect URI. The
    redirect may be local HTTP for development, but `OIDC_ISSUER` must be an
    HTTPS issuer URL (for Keycloak:
@@ -47,9 +48,15 @@ Follow these steps to set up Tapiz using Docker:
    `invalid_client` or `access_denied`) or the network error code, never tokens
    or secrets. If the ID token omits a verified email, Tapiz
    fetches UserInfo and checks its subject against the ID token. Users are
-   keyed by issuer and subject. A
-   verified email is required, but it is never used to link accounts: if the
-   email already belongs to another Tapiz account, login fails with HTTP 409.
+   keyed by issuer and subject, so changing `OIDC_ISSUER` (a new host or
+   realm) gives every user a new identity, and existing users then get HTTP 409
+   until their accounts are re-keyed in `oidc_identities`. A verified email is
+   required: the provider must send `email_verified` as the JSON boolean `true`
+   in the ID token or UserInfo (a string `"true"` or a missing claim is
+   rejected), so check that providers which omit it can be configured to send
+   it. Google logins likewise require a verified email. The email is never used
+   to link accounts: if it already belongs to another Tapiz account, login fails
+   with HTTP 409.
    Migration `0011_youthful_vindicator` creates `oidc_identities` and applies
    automatically at API startup. Migration `0012_case_insensitive_accounts_email`
    adds a unique index on `lower(accounts.email)`. Before upgrading an existing

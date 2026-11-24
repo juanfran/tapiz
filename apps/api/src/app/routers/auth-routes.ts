@@ -31,7 +31,13 @@ export async function googleCallback(fastify: FastifyInstance) {
       if (tokens) {
         const googleUser = await getUserInfo(tokens.accessToken);
 
-        if (!googleUser || !googleUser.email) {
+        // An unverified address must not claim an email: it would lock the
+        // real owner out of OIDC (409) and expose invitations sent to it.
+        if (
+          !googleUser ||
+          !googleUser.email ||
+          googleUser.email_verified !== true
+        ) {
           rep.status(400).send();
           return;
         }

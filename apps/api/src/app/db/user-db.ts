@@ -35,16 +35,21 @@ export async function getUserByOidcIdentity(issuer: string, subject: string) {
   return users.at(0)?.account;
 }
 
-export async function refreshOidcUserEmail(
+export async function refreshOidcUser(
   issuer: string,
   subject: string,
-  email: string,
+  profile: { email: string; name?: string; picture?: string },
 ) {
   // The verified issuer/subject remains the account key. Never link by email.
   // PostgreSQL enforces email uniqueness; a collision aborts the login.
+  // Name and picture are only refreshed when the provider sent them.
   const updated = await db
     .update(schema.accounts)
-    .set({ email })
+    .set({
+      email: profile.email,
+      ...(profile.name ? { name: profile.name } : {}),
+      ...(profile.picture ? { picture: profile.picture } : {}),
+    })
     .where(
       sql`${schema.accounts.id} = (
         select ${schema.oidcIdentities.accountId}

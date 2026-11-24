@@ -44,6 +44,7 @@ beforeEach(() => {
   vi.mocked(getUserInfo).mockResolvedValue({
     sub: 'google-sub',
     email: 'Person@Example.test',
+    email_verified: true,
     name: 'Person',
     picture: '',
   } as Awaited<ReturnType<typeof getUserInfo>>);
@@ -88,4 +89,24 @@ describe('Google callback with an OIDC email collision', () => {
     ).toBeUndefined();
     expect(createUserSessionCookie).not.toHaveBeenCalled();
   });
+});
+
+describe('Google callback email verification', () => {
+  it.each([false, undefined])(
+    'rejects email_verified=%s without creating an account or session',
+    async (emailVerified) => {
+      vi.mocked(getUserInfo).mockResolvedValue({
+        sub: 'google-sub',
+        email: 'victim@example.test',
+        email_verified: emailVerified,
+        name: 'Squatter',
+        picture: '',
+      } as Awaited<ReturnType<typeof getUserInfo>>);
+      const response = await callback();
+      expect(response.statusCode).toBe(400);
+      expect(db.user.createUser).not.toHaveBeenCalled();
+      expect(updateUser).not.toHaveBeenCalled();
+      expect(createUserSessionCookie).not.toHaveBeenCalled();
+    },
+  );
 });

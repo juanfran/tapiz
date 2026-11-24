@@ -11,19 +11,21 @@ import { createUserSessionCookie } from '../auth.js';
 import {
   createOidcUser,
   getUserByOidcIdentity,
-  refreshOidcUserEmail,
+  refreshOidcUser,
 } from '../db/user-db.js';
 
-vi.mock('../oidc.js', () => ({
+vi.mock('../oidc.js', async (importOriginal) => ({
   oidcAuthorizationUrl: vi.fn(),
   oidcIdentity: vi.fn(),
   clearOidcCookies: vi.fn(),
+  isStaleOidcCallback: (await importOriginal<typeof import('../oidc.js')>())
+    .isStaleOidcCallback,
 }));
 vi.mock('../auth.js', () => ({ createUserSessionCookie: vi.fn() }));
 vi.mock('../db/user-db.js', () => ({
   createOidcUser: vi.fn(),
   getUserByOidcIdentity: vi.fn(),
-  refreshOidcUserEmail: vi.fn(),
+  refreshOidcUser: vi.fn(),
 }));
 
 const identity = {
@@ -45,10 +47,10 @@ beforeEach(() => {
   vi.resetAllMocks();
   process.env['FRONTEND_URL'] = 'http://localhost:4300';
   vi.mocked(oidcIdentity).mockResolvedValue(identity);
-  vi.mocked(refreshOidcUserEmail).mockResolvedValue({
+  vi.mocked(refreshOidcUser).mockResolvedValue({
     id: 'user-1',
     email: identity.email,
-  } as Awaited<ReturnType<typeof refreshOidcUserEmail>>);
+  } as Awaited<ReturnType<typeof refreshOidcUser>>);
   vi.mocked(createUserSessionCookie).mockResolvedValue({
     name: 'session',
     value: 'session-id',
@@ -81,6 +83,45 @@ describe('OIDC callback', () => {
     await app.close();
   });
 
+  it('keeps the cookies of a newer login attempt when the state is stale', async () => {
+    vi.mocked(oidcIdentity).mockRejectedValue(
+      Object.assign(new Error('Invalid OIDC authorization response'), {
+        staleOidcState: true,
+      }),
+    );
+    const app = await server();
+    const response = await app.inject('/api/auth/oidc/callback?state=older');
+    expect(response.statusCode).toBe(400);
+    expect(clearOidcCookies).not.toHaveBeenCalled();
+    expect(createUserSessionCookie).not.toHaveBeenCalled();
+    await app.close();
+  });
+
+  it('uses the email as the display name when the provider sends no name', async () => {
+    vi.mocked(oidcIdentity).mockResolvedValue({ ...identity, name: undefined });
+    vi.mocked(getUserByOidcIdentity)
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ id: 'user-1' } as Awaited<
+        ReturnType<typeof getUserByOidcIdentity>
+      >);
+    const app = await server();
+    const response = await app.inject('/api/auth/oidc/callback');
+    expect(response.statusCode).toBe(302);
+    expect(createOidcUser).toHaveBeenCalledWith(
+      identity.issuer,
+      identity.subject,
+      identity.email,
+      identity.email,
+      undefined,
+    );
+    expect(refreshOidcUser).toHaveBeenCalledWith(
+      identity.issuer,
+      identity.subject,
+      { email: identity.email, name: undefined, picture: undefined },
+    );
+    await app.close();
+  });
+
   it('creates a new identity and issues a session', async () => {
     vi.mocked(getUserByOidcIdentity)
       .mockResolvedValueOnce(undefined)
@@ -110,9 +151,9 @@ describe('OIDC callback', () => {
         ReturnType<typeof getUserByOidcIdentity>
       >);
     vi.mocked(createOidcUser).mockRejectedValue({ code: '23505' });
-    vi.mocked(refreshOidcUserEmail).mockResolvedValue({
+    vi.mocked(refreshOidcUser).mockResolvedValue({
       id: 'winner',
-    } as Awaited<ReturnType<typeof refreshOidcUserEmail>>);
+    } as Awaited<ReturnType<typeof refreshOidcUser>>);
     const app = await server();
     const response = await app.inject('/api/auth/oidc/callback');
     expect(response.statusCode).toBe(302);
@@ -128,15 +169,14 @@ describe('OIDC callback', () => {
     const app = await server();
     const response = await app.inject('/api/auth/oidc/callback');
     expect(response.statusCode).toBe(302);
-    expect(refreshOidcUserEmail).toHaveBeenCalledWith(
+    expect(refreshOidcUser).toHaveBeenCalledWith(
       identity.issuer,
       identity.subject,
-      identity.email,
+      { email: identity.email, name: identity.name, picture: undefined },
     );
+    expect(clearOidcCookies).toHaveBeenCalled();
     expect(createUserSessionCookie).toHaveBeenCalledWith('user-1');
-    expect(
-      vi.mocked(refreshOidcUserEmail).mock.invocationCallOrder[0],
-    ).toBeLessThan(
+    expect(vi.mocked(refreshOidcUser).mock.invocationCallOrder[0]).toBeLessThan(
       vi.mocked(createUserSessionCookie).mock.invocationCallOrder[0],
     );
     await app.close();
@@ -147,7 +187,7 @@ describe('OIDC callback', () => {
       id: 'user-1',
       email: 'old@example.test',
     } as Awaited<ReturnType<typeof getUserByOidcIdentity>>);
-    vi.mocked(refreshOidcUserEmail).mockRejectedValue({ code: '23505' });
+    vi.mocked(refreshOidcUser).mockRejectedValue({ code: '23505' });
     const app = await server();
     const response = await app.inject('/api/auth/oidc/callback');
     expect(response.statusCode).toBe(409);

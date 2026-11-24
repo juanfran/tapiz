@@ -2,6 +2,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ResponseBodyError } from 'openid-client';
 import { logOidcError } from './oidc-error.js';
 
+// Mirrors oauth4webapi's error class, which is not a direct dependency.
+class OperationProcessingError extends Error {
+  code?: string;
+  constructor(message: string, options?: { code?: string; cause?: unknown }) {
+    super(message, { cause: options?.cause });
+    this.name = 'OperationProcessingError';
+    this.code = options?.code;
+  }
+}
+
 describe('OIDC failure logging', () => {
   let spy: ReturnType<typeof vi.spyOn>;
 
@@ -93,5 +103,45 @@ describe('OIDC failure logging', () => {
       }),
     );
     expect(logged()).toContain('RS256, PS256 or ES256');
+  });
+
+  it('names the failed check without logging claim values', () => {
+    const inner = new OperationProcessingError(
+      'unexpected ID Token "nonce" claim value',
+      {
+        code: 'OAUTH_JWT_CLAIM_COMPARISON_FAILED',
+        cause: { claims: { nonce: 'attacker-nonce', email: 'p@example.test' } },
+      },
+    );
+    const error = Object.assign(
+      new Error('unexpected JWT claim value encountered', { cause: inner }),
+      { code: 'OAUTH_JWT_CLAIM_COMPARISON_FAILED' },
+    );
+    logOidcError('OIDC login failed', error);
+    const line = logged();
+    expect(line).toBe(
+      'OIDC login failed: OAUTH_JWT_CLAIM_COMPARISON_FAILED: Provider request or validation failed: unexpected ID Token "nonce" claim value',
+    );
+    expect(line).not.toContain('attacker-nonce');
+    expect(line).not.toContain('p@example.test');
+  });
+
+  it('ignores library messages that could carry values', () => {
+    const inner = new OperationProcessingError(
+      'bad value https://idp.example/?token=secret',
+      { code: 'OAUTH_INVALID_RESPONSE' },
+    );
+    logOidcError(
+      'OIDC login failed',
+      Object.assign(
+        new Error('invalid response encountered', { cause: inner }),
+        {
+          code: 'OAUTH_INVALID_RESPONSE',
+        },
+      ),
+    );
+    expect(logged()).toBe(
+      'OIDC login failed: OAUTH_INVALID_RESPONSE: Provider request or validation failed',
+    );
   });
 });

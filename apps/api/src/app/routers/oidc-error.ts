@@ -25,6 +25,33 @@ function stringProperty(value: unknown, key: string): string | undefined {
   return undefined;
 }
 
+// oauth4webapi keeps values (claims, bodies, keys) in `cause` and uses fixed
+// messages such as `unexpected ID Token "nonce" claim value`. Only messages
+// made of these characters are logged, so no URL, email or token can pass.
+const libraryMessagePattern = /^[A-Za-z0-9 "()_.,-]{1,120}$/;
+const libraryErrorNames = new Set([
+  'OperationProcessingError',
+  'UnsupportedOperationError',
+]);
+
+function libraryDetail(error: unknown): string | undefined {
+  let current: unknown = error;
+  for (let depth = 0; depth < 4 && current; depth++) {
+    if (
+      current instanceof Error &&
+      libraryErrorNames.has(current.name) &&
+      libraryMessagePattern.test(current.message)
+    ) {
+      return current.message;
+    }
+    current =
+      typeof current === 'object' && 'cause' in current
+        ? current.cause
+        : undefined;
+  }
+  return undefined;
+}
+
 function networkCode(error: unknown): string | undefined {
   let current: unknown = error;
   for (let depth = 0; depth < 4 && current; depth++) {
@@ -61,6 +88,8 @@ export function logOidcError(context: string, error: unknown) {
     error instanceof Error && safeMessages.has(error.message)
       ? error.message
       : 'Provider request or validation failed';
+  const detail = libraryDetail(error);
+  if (detail && !safeMessages.has(message)) message = `${message}: ${detail}`;
   if (code === 'OAUTH_UNSUPPORTED_OPERATION') {
     message =
       'Unsupported provider operation; ID tokens must be signed with an asymmetric algorithm (RS256, PS256 or ES256) published in the provider JWKS';
