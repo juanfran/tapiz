@@ -8,7 +8,6 @@ import {
   UserTeam,
 } from '@tapiz/board-commons';
 import { SetNonNullable } from 'type-fest';
-import { getUsersBoardsByTeam } from './board-db.js';
 
 export async function createTeam(
   name: string,
@@ -113,26 +112,46 @@ export async function deleteStarredBoardsByUser(
     );
 }
 
+/**
+ * Removes someone from a team (kicked or leaving). Their roles on the team's
+ * boards come from that membership, so they are removed too: otherwise a
+ * board admin role (for example on boards they created) would keep granting
+ * access. Board admins added explicitly without joining the team are not
+ * affected, because they are never team members.
+ */
 export async function deleteMember(teamId: string, userId: string) {
-  await db
-    .delete(schema.teamMembers)
-    .where(
-      and(
-        eq(schema.teamMembers.teamId, teamId),
-        eq(schema.teamMembers.accountId, userId),
-      ),
-    );
+  await db.transaction(async (tx) => {
+    await tx
+      .delete(schema.teamMembers)
+      .where(
+        and(
+          eq(schema.teamMembers.teamId, teamId),
+          eq(schema.teamMembers.accountId, userId),
+        ),
+      );
 
-  const boards = await getUsersBoardsByTeam(userId, teamId);
+    const teamBoards = tx
+      .select({ id: schema.boards.id })
+      .from(schema.boards)
+      .where(eq(schema.boards.teamId, teamId));
 
-  const ids = boards.map((it) => it.id);
-
-  if (ids.length) {
-    await deleteStarredBoardsByUser(
-      userId,
-      boards.map((it) => it.id),
-    );
-  }
+    await tx
+      .delete(schema.acountsToBoards)
+      .where(
+        and(
+          eq(schema.acountsToBoards.accountId, userId),
+          inArray(schema.acountsToBoards.boardId, teamBoards),
+        ),
+      );
+    await tx
+      .delete(schema.starreds)
+      .where(
+        and(
+          eq(schema.starreds.accountId, userId),
+          inArray(schema.starreds.boardId, teamBoards),
+        ),
+      );
+  });
 }
 
 export async function getTeamAdmins(teamId: string) {
