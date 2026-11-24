@@ -116,16 +116,22 @@ function callbackUrl() {
   if (value.endsWith('/') || value.includes('?') || value.includes('#')) {
     throw new Error(apiUrlError);
   }
-  let url: URL;
+  let base: URL;
   try {
-    url = new URL(`${value}/auth/oidc/callback`);
+    // Parse the base first: appending the path to a bare `http:` would turn
+    // `auth` into the host.
+    base = new URL(value);
   } catch {
     throw new Error(apiUrlError);
   }
-  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+  if (
+    (base.protocol !== 'https:' && base.protocol !== 'http:') ||
+    !base.hostname ||
+    !/^https?:\/\/[^/]/i.test(value)
+  ) {
     throw new Error(apiUrlError);
   }
-  return url;
+  return new URL(`${value}/auth/oidc/callback`);
 }
 
 function redirectUri() {
@@ -375,15 +381,13 @@ function nonEmptyString(value: unknown): value is string {
  * relative by the browser.
  */
 function pictureUrl(value: unknown): string | undefined {
-  if (
-    !nonEmptyString(value) ||
-    value.length > 2048 ||
-    !/^https?:\/\//i.test(value)
-  ) {
+  if (!nonEmptyString(value) || !/^https?:\/\//i.test(value)) {
     return undefined;
   }
   try {
-    return new URL(value).href;
+    // Limit the stored (normalised) form: percent-encoding can lengthen it.
+    const href = new URL(value).href;
+    return href.length <= 2048 ? href : undefined;
   } catch {
     return undefined;
   }

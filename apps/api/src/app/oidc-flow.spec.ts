@@ -415,6 +415,10 @@ describe('OIDC authorization-code exchange', () => {
       'https://example.test/api/',
       'https://example.test/api?',
       'https://example.test/api#',
+      'http:',
+      'https:',
+      'http:/api',
+      'https:example.test/api',
     ]) {
       process.env['API_URL'] = apiUrl;
       expect(() => validateOidcConfiguration()).toThrow('API_URL');
