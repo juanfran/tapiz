@@ -67,7 +67,7 @@ describe('OIDC failure logging', () => {
       }),
     );
     expect(logged()).toBe(
-      'OIDC login failed: unknown: Invalid OIDC authorization response',
+      'OIDC login failed: unknown (other_oauth_error): Invalid OIDC authorization response',
     );
   });
 
@@ -143,5 +143,21 @@ describe('OIDC failure logging', () => {
     expect(logged()).toBe(
       'OIDC login failed: OAUTH_INVALID_RESPONSE: Provider request or validation failed',
     );
+  });
+
+  it('never logs secret-shaped values in error, code or cause.code', () => {
+    logOidcError(
+      'OIDC login failed',
+      Object.assign(new Error('Invalid OIDC authorization response'), {
+        error: 'lowercasesecretvalue',
+        code: 'secret_code_value',
+        cause: { code: 'ESECRETVALUE' },
+      }),
+    );
+    const line = logged();
+    expect(line).toBe(
+      'OIDC login failed: unknown (other_oauth_error): Invalid OIDC authorization response',
+    );
+    expect(line).not.toMatch(/secret/i);
   });
 });

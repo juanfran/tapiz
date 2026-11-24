@@ -1,6 +1,7 @@
 const safeMessages = new Set([
   'Invalid OIDC authorization response',
   'Missing or invalid OIDC identity',
+  'Unexpected OIDC authorized party',
   'Invalid OIDC issuer or subject',
   'A verified email claim is required',
   'OIDC account creation failed',
@@ -8,14 +9,63 @@ const safeMessages = new Set([
   'OIDC_ISSUER must use HTTPS',
   'OIDC is not configured',
   'Unsupported OIDC token endpoint authentication method',
+  'API_URL must be an absolute HTTP(S) URL',
+  'OIDC_CLIENT_SECRET must be empty when OIDC_TOKEN_ENDPOINT_AUTH_METHOD is none',
+  'OIDC_CLIENT_SECRET is required unless OIDC_TOKEN_ENDPOINT_AUTH_METHOD is none',
 ]);
 
-const codePattern = /^[a-zA-Z0-9_-]{1,50}$/;
-// RFC 6749 error codes are fixed tokens such as `invalid_client`; unlike
-// `error_description`, they never carry provider- or user-supplied text.
-const oauthErrorPattern = /^[a-z_]{1,64}$/;
-// Node.js/undici network codes such as ECONNREFUSED or UND_ERR_CONNECT_TIMEOUT.
-const networkCodePattern = /^(E[A-Z0-9_]{2,30}|UND_ERR_[A-Z0-9_]{1,40})$/;
+// Only fixed, known values are logged. The callback's `error` parameter is
+// attacker-controlled and providers may echo arbitrary text, so anything
+// outside these lists is reduced to a category.
+// openid-client / oauth4webapi codes.
+const libraryCodePattern = /^OAUTH_[A-Z_]{1,48}$/;
+// RFC 6749, RFC 6750, OIDC Core and RFC 9449 error codes.
+const oauthErrors = new Set([
+  'invalid_request',
+  'invalid_client',
+  'invalid_grant',
+  'unauthorized_client',
+  'unsupported_grant_type',
+  'invalid_scope',
+  'access_denied',
+  'unsupported_response_type',
+  'server_error',
+  'temporarily_unavailable',
+  'interaction_required',
+  'login_required',
+  'account_selection_required',
+  'consent_required',
+  'invalid_request_uri',
+  'invalid_request_object',
+  'request_not_supported',
+  'request_uri_not_supported',
+  'registration_not_supported',
+  'invalid_token',
+  'insufficient_scope',
+  'invalid_dpop_proof',
+  'use_dpop_nonce',
+]);
+// Node.js/undici network and TLS failures worth telling apart.
+const networkCodes = new Set([
+  'ECONNREFUSED',
+  'ECONNRESET',
+  'ENOTFOUND',
+  'EAI_AGAIN',
+  'ETIMEDOUT',
+  'EHOSTUNREACH',
+  'ENETUNREACH',
+  'EPIPE',
+  'UND_ERR_CONNECT_TIMEOUT',
+  'UND_ERR_HEADERS_TIMEOUT',
+  'UND_ERR_BODY_TIMEOUT',
+  'UND_ERR_SOCKET',
+  'CERT_HAS_EXPIRED',
+  'DEPTH_ZERO_SELF_SIGNED_CERT',
+  'SELF_SIGNED_CERT_IN_CHAIN',
+  'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
+  'UNABLE_TO_GET_ISSUER_CERT_LOCALLY',
+  'ERR_TLS_CERT_ALTNAME_INVALID',
+]);
 
 function stringProperty(value: unknown, key: string): string | undefined {
   if (value && typeof value === 'object' && key in value) {
@@ -56,7 +106,7 @@ function networkCode(error: unknown): string | undefined {
   let current: unknown = error;
   for (let depth = 0; depth < 4 && current; depth++) {
     const code = stringProperty(current, 'code');
-    if (code && networkCodePattern.test(code)) return code;
+    if (code && networkCodes.has(code)) return code;
     current =
       typeof current === 'object' && 'cause' in current
         ? current.cause
@@ -67,12 +117,17 @@ function networkCode(error: unknown): string | undefined {
 
 export function logOidcError(context: string, error: unknown) {
   const rawCode = stringProperty(error, 'code');
-  const code = rawCode && codePattern.test(rawCode) ? rawCode : 'unknown';
+  const code =
+    rawCode && (libraryCodePattern.test(rawCode) || networkCodes.has(rawCode))
+      ? rawCode
+      : 'unknown';
 
   const details: string[] = [];
   const oauthError = stringProperty(error, 'error');
-  if (oauthError && oauthErrorPattern.test(oauthError)) {
-    details.push(oauthError);
+  if (oauthError) {
+    details.push(
+      oauthErrors.has(oauthError) ? oauthError : 'other_oauth_error',
+    );
   }
   const status =
     error && typeof error === 'object' && 'status' in error

@@ -63,41 +63,63 @@ async function startLogin() {
 }
 
 describe('OIDC authorization request', () => {
-  it('binds state, nonce and an S256 PKCE challenge to scoped cookies', async () => {
-    const { location, cookies } = await startLogin();
+  it('binds state, nonce and an S256 PKCE challenge to host-only cookies', async () => {
+    const { location, cookies, cleared } = await startLogin();
     expect(location.origin + location.pathname).toBe(`${issuer}/authorize`);
     expect(location.searchParams.get('redirect_uri')).toBe(
       'https://tapiz.example.test/api/auth/oidc/callback',
     );
     expect(location.searchParams.get('scope')).toBe('openid profile email');
     expect(location.searchParams.get('state')).toBe(
-      cookies['oidc_state'].value,
+      cookies['__Host-oidc_state'].value,
     );
     expect(location.searchParams.get('nonce')).toBe(
-      cookies['oidc_nonce'].value,
+      cookies['__Host-oidc_nonce'].value,
     );
     expect(location.searchParams.get('code_challenge_method')).toBe('S256');
     expect(location.searchParams.get('code_challenge')).toBe(
       createHash('sha256')
-        .update(cookies['oidc_verifier'].value)
+        .update(cookies['__Host-oidc_verifier'].value)
         .digest('base64url'),
     );
-    for (const name of ['oidc_state', 'oidc_nonce', 'oidc_verifier']) {
-      expect(cookies[name]).toMatchObject({
+    expect(Object.keys(cookies).sort()).toEqual([
+      '__Host-oidc_nonce',
+      '__Host-oidc_state',
+      '__Host-oidc_verifier',
+    ]);
+    for (const cookie of Object.values(cookies)) {
+      // Browsers only accept `__Host-` cookies that are Secure, host-only
+      // (no Domain) and on Path=/, so a sibling subdomain cannot plant them.
+      expect(cookie).toMatchObject({
         httpOnly: true,
         secure: true,
         sameSite: 'Lax',
-        path: '/api/auth/oidc/callback',
+        path: '/',
         maxAge: 600,
       });
-      expect(cookies[name].value.length).toBeGreaterThanOrEqual(43);
+      expect(cookie.domain).toBeUndefined();
+      expect(cookie.value.length).toBeGreaterThanOrEqual(43);
+    }
+    expect(cleared.map((cookie) => cookie.name).sort()).toEqual([
+      '__Host-oidc_nonce',
+      '__Host-oidc_state',
+      '__Host-oidc_verifier',
+    ]);
+    for (const cookie of cleared) {
+      expect(cookie).toMatchObject({ path: '/', secure: true });
     }
   });
 
-  it('scopes the cookies to the callback when the API has a path prefix', async () => {
-    vi.stubEnv('API_URL', 'https://example.test/tapiz/api');
+  it('scopes plain-HTTP development cookies to the callback path', async () => {
+    vi.stubEnv('API_URL', 'http://localhost:8000/tapiz/api');
     const { cookies, cleared } = await startLogin();
+    expect(Object.keys(cookies).sort()).toEqual([
+      'oidc_nonce',
+      'oidc_state',
+      'oidc_verifier',
+    ]);
     expect(cookies['oidc_state'].path).toBe('/tapiz/api/auth/oidc/callback');
+    expect(cookies['oidc_state'].secure).toBeFalsy();
     expect(cleared).toHaveLength(3);
     for (const cookie of cleared) {
       expect(cookie.path).toBe('/tapiz/api/auth/oidc/callback');
@@ -109,9 +131,9 @@ describe('OIDC authorization request', () => {
     const error = await oidcIdentity({
       query: { code: 'abc', state: 'older-state' },
       cookies: {
-        oidc_state: 'newer-state',
-        oidc_nonce: 'nonce',
-        oidc_verifier: 'verifier',
+        '__Host-oidc_state': 'newer-state',
+        '__Host-oidc_nonce': 'nonce',
+        '__Host-oidc_verifier': 'verifier',
       },
     } as unknown as Parameters<typeof oidcIdentity>[0]).catch((e) => e);
     expect(error).toMatchObject({
@@ -119,5 +141,20 @@ describe('OIDC authorization request', () => {
       staleOidcState: true,
     });
     expect(oidc.discovery).not.toHaveBeenCalled();
+  });
+
+  it('ignores unprefixed cookies on HTTPS', async () => {
+    const error = await oidcIdentity({
+      query: { code: 'abc', state: 'planted-state' },
+      cookies: {
+        oidc_state: 'planted-state',
+        oidc_nonce: 'planted-nonce',
+        oidc_verifier: 'planted-verifier',
+      },
+    } as unknown as Parameters<typeof oidcIdentity>[0]).catch((e) => e);
+    expect(error).toMatchObject({
+      message: 'Invalid OIDC authorization response',
+    });
+    expect(error).not.toHaveProperty('staleOidcState');
   });
 });

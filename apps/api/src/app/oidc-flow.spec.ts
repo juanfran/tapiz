@@ -8,6 +8,7 @@ vi.mock('openid-client', () => ({
   fetchUserInfo: vi.fn(),
   ClientSecretBasic: vi.fn(() => 'basic-auth'),
   ClientSecretPost: vi.fn(() => 'post-auth'),
+  None: vi.fn(() => 'none-auth'),
   enableNonRepudiationChecks: vi.fn(),
 }));
 
@@ -24,7 +25,7 @@ async function request(query: string, cookies: Record<string, string>) {
 beforeEach(() => {
   vi.resetAllMocks();
   delete process.env['OIDC_TOKEN_ENDPOINT_AUTH_METHOD'];
-  delete process.env['OIDC_CLIENT_SECRET'];
+  process.env['OIDC_CLIENT_SECRET'] = 'test-secret';
   process.env['OIDC_ISSUER'] = issuer;
   process.env['OIDC_CLIENT_ID'] = 'test-client';
   process.env['API_URL'] = 'http://localhost:4305/api';
@@ -134,7 +135,7 @@ describe('OIDC authorization-code exchange', () => {
   });
 
   it('configures Basic client authentication for a Basic-only provider', async () => {
-    process.env['OIDC_CLIENT_SECRET'] = 'test-secret';
+    process.env['OIDC_CLIENT_SECRET'] = 'basic-secret';
     vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
       claims: () => ({
         iss: issuer,
@@ -144,13 +145,13 @@ describe('OIDC authorization-code exchange', () => {
       }),
     } as Awaited<ReturnType<typeof oidc.authorizationCodeGrant>>);
     await request('code=abc&state=expected-state', cookies);
-    expect(oidc.ClientSecretBasic).toHaveBeenCalledWith('test-secret');
+    expect(oidc.ClientSecretBasic).toHaveBeenCalledWith('basic-secret');
     expect(oidc.discovery).toHaveBeenCalledWith(
       new URL(issuer),
       'test-client',
-      'test-secret',
+      'basic-secret',
       'basic-auth',
-      { execute: [oidc.enableNonRepudiationChecks] },
+      { execute: [oidc.enableNonRepudiationChecks], timeout: 10 },
     );
   });
 
@@ -172,8 +173,76 @@ describe('OIDC authorization-code exchange', () => {
       'test-client',
       'test-secret',
       'post-auth',
-      { execute: [oidc.enableNonRepudiationChecks] },
+      { execute: [oidc.enableNonRepudiationChecks], timeout: 10 },
     );
+  });
+
+  it('uses no client authentication only for an explicit public client', async () => {
+    process.env['OIDC_CLIENT_SECRET'] = '';
+    process.env['OIDC_TOKEN_ENDPOINT_AUTH_METHOD'] = 'none';
+    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
+      claims: () => ({
+        iss: issuer,
+        sub: 'subject-123',
+        email: 'person@example.test',
+        email_verified: true,
+      }),
+    } as Awaited<ReturnType<typeof oidc.authorizationCodeGrant>>);
+    await request('code=abc&state=expected-state', cookies);
+    expect(oidc.discovery).toHaveBeenCalledWith(
+      new URL(issuer),
+      'test-client',
+      undefined,
+      'none-auth',
+      { execute: [oidc.enableNonRepudiationChecks], timeout: 10 },
+    );
+  });
+
+  it('rejects a single-audience ID token issued to another client', async () => {
+    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
+      claims: () => ({
+        iss: issuer,
+        aud: 'test-client',
+        azp: 'other-client',
+        sub: 'subject-123',
+        email: 'person@example.test',
+        email_verified: true,
+      }),
+    } as Awaited<ReturnType<typeof oidc.authorizationCodeGrant>>);
+    await expect(
+      request('code=abc&state=expected-state', cookies),
+    ).rejects.toThrow('Unexpected OIDC authorized party');
+  });
+
+  it('accepts an authorized party matching the client', async () => {
+    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
+      claims: () => ({
+        iss: issuer,
+        aud: ['test-client'],
+        azp: 'test-client',
+        sub: 'subject-123',
+        email: 'person@example.test',
+        email_verified: true,
+      }),
+    } as Awaited<ReturnType<typeof oidc.authorizationCodeGrant>>);
+    await expect(
+      request('code=abc&state=expected-state', cookies),
+    ).resolves.toMatchObject({ subject: 'subject-123' });
+  });
+
+  it('rejects invalid client authentication and callback settings at startup', () => {
+    process.env['OIDC_CLIENT_SECRET'] = '';
+    expect(() => validateOidcConfiguration()).toThrow(
+      'OIDC_CLIENT_SECRET is required',
+    );
+    process.env['OIDC_CLIENT_SECRET'] = 'test-secret';
+    process.env['OIDC_TOKEN_ENDPOINT_AUTH_METHOD'] = 'none';
+    expect(() => validateOidcConfiguration()).toThrow('must be empty');
+    process.env['OIDC_TOKEN_ENDPOINT_AUTH_METHOD'] = 'client_secret_basic';
+    for (const apiUrl of ['', '/api', 'ftp://example.test/api']) {
+      process.env['API_URL'] = apiUrl;
+      expect(() => validateOidcConfiguration()).toThrow('API_URL');
+    }
   });
 
   it('rejects invalid configuration before contacting the provider', () => {

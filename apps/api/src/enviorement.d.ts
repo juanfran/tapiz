@@ -19,7 +19,8 @@ declare global {
       OIDC_CLIENT_SECRET?: string;
       OIDC_TOKEN_ENDPOINT_AUTH_METHOD?:
         | 'client_secret_basic'
-        | 'client_secret_post';
+        | 'client_secret_post'
+        | 'none';
       OIDC_DISPLAY_NAME?: string;
       AI_AGENT_LOGIN_ENABLED?: string;
     }
