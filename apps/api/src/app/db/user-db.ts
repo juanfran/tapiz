@@ -134,11 +134,16 @@ export async function getUserByApiTokenHash(apiTokenHash: string) {
  * - personal boards where it was the last admin get a new admin (a member if
  *   possible, otherwise a guest), so they stay manageable. Team boards are
  *   administered by the team admins and need no promotion.
+ * - boards of a deleted team that other people still use (for example
+ *   external board admins) become personal boards with an admin.
  * Other admins never change, and members are never promoted while an admin
- * remains. Returns the uploaded file names of the deleted boards so the caller
- * can remove them from disk once the transaction has committed.
+ * remains. Returns the deleted board ids and their uploaded file names, so
+ * the caller can drop realtime clients and remove the files from disk once
+ * the transaction has committed.
  */
-export async function removeAccount(userId: string): Promise<string[]> {
+export async function removeAccount(
+  userId: string,
+): Promise<{ boardIds: string[]; files: string[] }> {
   return db.transaction(async (tx) => {
     const deletedTeamIds: string[] = [];
     const deletedBoardIds: string[] = [];
@@ -197,10 +202,8 @@ export async function removeAccount(userId: string): Promise<string[]> {
       )
       .where(eq(schema.acountsToBoards.accountId, userId));
 
-    for (const membership of boardMemberships) {
-      if (membership.teamId) continue;
-
-      const others = await tx
+    const otherBoardMembers = (boardId: string) =>
+      tx
         .select({
           accountId: schema.acountsToBoards.accountId,
           role: schema.acountsToBoards.role,
@@ -208,7 +211,7 @@ export async function removeAccount(userId: string): Promise<string[]> {
         .from(schema.acountsToBoards)
         .where(
           and(
-            eq(schema.acountsToBoards.boardId, membership.boardId),
+            eq(schema.acountsToBoards.boardId, boardId),
             ne(schema.acountsToBoards.accountId, userId),
           ),
         )
@@ -217,34 +220,62 @@ export async function removeAccount(userId: string): Promise<string[]> {
           schema.acountsToBoards.accountId,
         );
 
+    // Gives a board without a team an admin: a member if possible (the most
+    // recently active one), otherwise a guest, so it stays manageable.
+    const ensureBoardAdmin = async (
+      boardId: string,
+      others: Awaited<ReturnType<typeof otherBoardMembers>>,
+    ) => {
+      if (others.some((other) => other.role === 'admin')) return;
+      const newAdmin =
+        others.find((other) => other.role === 'member') ?? others[0];
+      await tx
+        .update(schema.acountsToBoards)
+        .set({ role: 'admin' })
+        .where(
+          and(
+            eq(schema.acountsToBoards.boardId, boardId),
+            eq(schema.acountsToBoards.accountId, newAdmin.accountId),
+          ),
+        );
+    };
+
+    for (const membership of boardMemberships) {
+      if (membership.teamId) continue;
+
+      const others = await otherBoardMembers(membership.boardId);
+
       if (!others.length) {
         deletedBoardIds.push(membership.boardId);
-      } else if (
-        membership.role === 'admin' &&
-        !others.some((other) => other.role === 'admin')
-      ) {
-        const newAdmin =
-          others.find((other) => other.role === 'member') ?? others[0];
-        await tx
-          .update(schema.acountsToBoards)
-          .set({ role: 'admin' })
-          .where(
-            and(
-              eq(schema.acountsToBoards.boardId, membership.boardId),
-              eq(schema.acountsToBoards.accountId, newAdmin.accountId),
-            ),
-          );
+      } else if (membership.role === 'admin') {
+        await ensureBoardAdmin(membership.boardId, others);
       }
     }
 
-    // Boards of deleted teams are removed by the cascade; collect their files.
+    // Boards of a deleted team are removed with it, except those other
+    // people still use (for example external board admins): they become
+    // personal boards with an admin.
     const teamBoards = deletedTeamIds.length
       ? await tx
           .select({ id: schema.boards.id })
           .from(schema.boards)
           .where(inArray(schema.boards.teamId, deletedTeamIds))
       : [];
-    const boardIds = [...deletedBoardIds, ...teamBoards.map((it) => it.id)];
+    const cascadedBoardIds: string[] = [];
+    for (const board of teamBoards) {
+      const others = await otherBoardMembers(board.id);
+      if (!others.length) {
+        cascadedBoardIds.push(board.id);
+        continue;
+      }
+      await tx
+        .update(schema.boards)
+        .set({ teamId: null })
+        .where(eq(schema.boards.id, board.id));
+      await ensureBoardAdmin(board.id, others);
+    }
+
+    const boardIds = [...deletedBoardIds, ...cascadedBoardIds];
     const files = boardIds.length
       ? await tx
           .select({ name: schema.boardFiles.name })
@@ -264,7 +295,7 @@ export async function removeAccount(userId: string): Promise<string[]> {
     }
     await tx.delete(schema.accounts).where(eq(schema.accounts.id, userId));
 
-    return files.map((file) => file.name);
+    return { boardIds, files: files.map((file) => file.name) };
   });
 }
 

@@ -227,6 +227,24 @@ export const teamRouter = router({
       }),
     )
     .mutation(async (req) => {
+      const teamMembers = await db.team.getTeamMembers(req.input.teamId);
+      const leaving = teamMembers.find(
+        (member) => member.id === req.ctx.user.sub,
+      );
+      const others = teamMembers.filter(
+        (member) => member.id !== req.ctx.user.sub,
+      );
+
+      // Leaving revokes the member's roles on the team boards, so the last
+      // admin must hand over first, and the last member must delete the team.
+      if (
+        !others.length ||
+        (leaving?.role === 'admin' &&
+          !others.some((member) => member.role === 'admin'))
+      ) {
+        throw new TRPCError({ code: 'CONFLICT' });
+      }
+
       await db.team.deleteMember(req.input.teamId, req.ctx.user.sub);
 
       checkTeamBoardsAccess(req.input.teamId);

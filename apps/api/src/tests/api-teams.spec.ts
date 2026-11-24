@@ -300,6 +300,54 @@ describe('Api - teams', () => {
     });
   });
 
+  describe('leave team', () => {
+    let teamId: string;
+
+    beforeAll(async () => {
+      const admin = await getUserCaller(80);
+      teamId = (await admin.team.new({ name: randProductName() })).id;
+      const invite = await admin.team.invite({
+        email: getAuth(81).email,
+        teamId,
+        role: 'member',
+      });
+      await (
+        await getUserCaller(81)
+      ).user.acceptInvite({
+        inviteId: invite.id,
+      });
+    });
+
+    it('rejects the last admin leaving', async () => {
+      const result = await errorCall(async () =>
+        (await getUserCaller(80)).team.leave({ teamId }),
+      );
+
+      expect(result?.code).toBe('CONFLICT');
+      expect(
+        (await (await getUserCaller(80)).team.getAll()).map((it) => it.id),
+      ).toContain(teamId);
+    });
+
+    it('lets a member leave', async () => {
+      const caller = await getUserCaller(81);
+
+      await caller.team.leave({ teamId });
+
+      expect((await caller.team.getAll()).map((it) => it.id)).not.toContain(
+        teamId,
+      );
+    });
+
+    it('rejects the last member leaving', async () => {
+      const result = await errorCall(async () =>
+        (await getUserCaller(80)).team.leave({ teamId }),
+      );
+
+      expect(result?.code).toBe('CONFLICT');
+    });
+  });
+
   describe('team spaces', () => {
     let teamId: string;
     let boardId: string;

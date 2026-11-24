@@ -193,6 +193,12 @@ describe('account removal (PostgreSQL)', () => {
       [member]: 'member',
     });
 
+    // The guest was active more recently, so the role, not recency, decides.
+    await db
+      .update(acountsToBoards)
+      .set({ lastAccessedAt: new Date().toISOString() })
+      .where(eq(acountsToBoards.accountId, guest));
+
     await removeAccount(leaving);
 
     expect(await boardRoles(boardId)).toEqual({
@@ -220,9 +226,13 @@ describe('account removal (PostgreSQL)', () => {
       { boardId: personalBoard, name: 'personal-file.png' },
     ]);
 
-    const files = await removeAccount(leaving);
+    const removed = await removeAccount(leaving);
 
-    expect(files.sort()).toEqual(['personal-file.png', 'team-file.png']);
+    expect(removed.files.sort()).toEqual([
+      'personal-file.png',
+      'team-file.png',
+    ]);
+    expect(removed.boardIds.sort()).toEqual([personalBoard, teamBoard].sort());
     expect(await exists(teams, teamId)).toBe(false);
     expect(await exists(boards, teamBoard)).toBe(false);
     expect(await exists(boards, personalBoard)).toBe(false);
@@ -234,11 +244,46 @@ describe('account removal (PostgreSQL)', () => {
     // The team still owns this board even though nobody else joined it.
     const teamBoard = await board({ [leaving]: 'admin' }, teamId);
 
-    const files = await removeAccount(leaving);
+    const removed = await removeAccount(leaving);
 
-    expect(files).toEqual([]);
+    expect(removed).toEqual({ boardIds: [], files: [] });
     expect(await exists(boards, teamBoard)).toBe(true);
     expect(await boardRoles(teamBoard)).toEqual({});
+  });
+
+  it("keeps a deleted team's boards that other people use, as personal boards", async () => {
+    const [leaving, externalAdmin, externalMember] = [
+      await account(),
+      await account(),
+      await account(),
+    ];
+    const teamId = await team({ [leaving]: 'admin' });
+    const adminBoard = await board(
+      { [leaving]: 'admin', [externalAdmin]: 'admin' },
+      teamId,
+    );
+    const memberBoard = await board(
+      { [leaving]: 'admin', [externalMember]: 'member' },
+      teamId,
+    );
+    const unusedBoard = await board({ [leaving]: 'admin' }, teamId);
+
+    const removed = await removeAccount(leaving);
+
+    expect(removed.boardIds).toEqual([unusedBoard]);
+    expect(await exists(teams, teamId)).toBe(false);
+    expect(await exists(boards, unusedBoard)).toBe(false);
+    for (const boardId of [adminBoard, memberBoard]) {
+      const [row] = await db
+        .select({ teamId: boards.teamId })
+        .from(boards)
+        .where(eq(boards.id, boardId));
+      expect(row).toEqual({ teamId: null });
+    }
+    expect(await boardRoles(adminBoard)).toEqual({ [externalAdmin]: 'admin' });
+    expect(await boardRoles(memberBoard)).toEqual({
+      [externalMember]: 'admin',
+    });
   });
 
   it('handles more than ten boards', async () => {

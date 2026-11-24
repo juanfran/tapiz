@@ -29,7 +29,16 @@ export function checkTeamBoardsAccess(teamId: string) {
 export function revokeBoardAccess(boardId: string) {
   server?.clients
     .filter((client) => client.boardId === boardId)
-    .forEach(async (client) => {
-      client.unauthorizedClose(false);
+    .forEach((client) => {
+      client.revokeBoard();
+    });
+}
+
+/** Disconnects every socket of a user, for example after account deletion. */
+export function disconnectUser(userId: string) {
+  server?.clients
+    .filter((client) => client.id === userId)
+    .forEach((client) => {
+      client.unauthorizedClose();
     });
 }
