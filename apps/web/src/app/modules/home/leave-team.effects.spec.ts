@@ -41,7 +41,7 @@ describe('leaveTeam$', () => {
 
   it('explains a refused leave, reloads teams and keeps working', async () => {
     const { actions$, router, notifications, output } = run(() =>
-      throwError(() => new Error('CONFLICT')),
+      throwError(() => ({ data: { code: 'CONFLICT' } })),
     );
 
     actions$.next(HomeActions.leaveTeam({ id: 'team-1' }));
@@ -54,7 +54,26 @@ describe('leaveTeam$', () => {
     ]);
     expect(router.navigate).not.toHaveBeenCalled();
     expect(notifications.open).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'error' }),
+      expect.objectContaining({
+        type: 'error',
+        message: expect.stringContaining('make someone else an admin'),
+      }),
+    );
+  });
+
+  it('does not blame the admin rule for other failures', async () => {
+    const { actions$, notifications, output } = run(() =>
+      throwError(() => new Error('Network error')),
+    );
+
+    actions$.next(HomeActions.leaveTeam({ id: 'team-1' }));
+    actions$.complete();
+
+    expect(await output).toEqual([HomeActions.fetchTeams()]);
+    expect(notifications.open).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Could not leave the team. Please try again.',
+      }),
     );
   });
 });

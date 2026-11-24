@@ -15,7 +15,7 @@ import {
   disconnectUser,
   revokeBoardAccess,
 } from '../global.js';
-import { sendEvent } from '../subscriptor.js';
+import { sendEvent, sendUserEvent } from '../subscriptor.js';
 
 export const userRouter = router({
   removeAccount: protectedProcedure.mutation(async (req) => {
@@ -36,6 +36,12 @@ export const userRouter = router({
       // Same events as a manual role change, so open pages update.
       for (const promotion of removed.promotions) {
         if ('teamId' in promotion) {
+          // The web app listens to its own user events, not to team rooms.
+          sendUserEvent({
+            event: 'teamRoleChanged',
+            userId: promotion.userId,
+            content: { teamId: promotion.teamId, role: 'admin' },
+          });
           sendEvent(
             {
               room: `team:${promotion.teamId}`,

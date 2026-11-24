@@ -322,6 +322,15 @@ export async function createBoard(
   options: { requireTeamMember?: boolean } = {},
 ) {
   return db.transaction(async (tx) => {
+    // Lock the owner before the team, in the same order as account removal,
+    // so creating a board while the owner deletes their account can't
+    // deadlock: one waits for the other.
+    await tx
+      .select({ id: schema.accounts.id })
+      .from(schema.accounts)
+      .where(eq(schema.accounts.id, ownerId))
+      .for('share');
+
     if (teamId && options.requireTeamMember) {
       // Shares the team lock with deleteMember, so a concurrent removal from
       // the team either happens first (and this fails) or waits.
@@ -402,15 +411,57 @@ export async function deleteUserBoards(userId: string) {
   await Promise.all(boards.map((board) => deleteBoard(board.id)));
 }
 
+/**
+ * Leaves a board. The last admin (counting the team admins of a team board)
+ * cannot leave while other people still use it: AdminRequiredConflict. The
+ * check runs under a lock on the board, like role changes and account
+ * removal, so it sees a promotion made meanwhile.
+ */
 export async function leaveBoard(userId: string, boardId: string) {
-  return db
-    .delete(schema.acountsToBoards)
-    .where(
-      and(
-        eq(schema.acountsToBoards.accountId, userId),
-        eq(schema.acountsToBoards.boardId, boardId),
-      ),
-    );
+  return db.transaction(async (tx) => {
+    const [board] = await tx
+      .select({ teamId: schema.boards.teamId })
+      .from(schema.boards)
+      .where(eq(schema.boards.id, boardId))
+      .for('update');
+
+    const members = await tx
+      .select({
+        accountId: schema.acountsToBoards.accountId,
+        role: schema.acountsToBoards.role,
+      })
+      .from(schema.acountsToBoards)
+      .where(eq(schema.acountsToBoards.boardId, boardId));
+    const member = members.find((it) => it.accountId === userId);
+    const others = members.filter((it) => it.accountId !== userId);
+
+    if (member?.role === 'admin' && others.length) {
+      const teamAdmins = board?.teamId
+        ? await tx
+            .select({ accountId: schema.teamMembers.accountId })
+            .from(schema.teamMembers)
+            .where(
+              and(
+                eq(schema.teamMembers.teamId, board.teamId),
+                eq(schema.teamMembers.role, 'admin'),
+                ne(schema.teamMembers.accountId, userId),
+              ),
+            )
+        : [];
+      if (!others.some((it) => it.role === 'admin') && !teamAdmins.length) {
+        throw new AdminRequiredConflict();
+      }
+    }
+
+    await tx
+      .delete(schema.acountsToBoards)
+      .where(
+        and(
+          eq(schema.acountsToBoards.accountId, userId),
+          eq(schema.acountsToBoards.boardId, boardId),
+        ),
+      );
+  });
 }
 
 export async function joinBoard(

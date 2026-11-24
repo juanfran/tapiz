@@ -147,4 +147,14 @@ export type WsEvents =
   | DeleteSpace
   | NewTeamBoard;
 
-export type UserWsEvents = MentionUser | NewUserInvitation;
+/** The user became admin of a team (for example after an account removal). */
+export interface TeamRoleChanged {
+  event: 'teamRoleChanged';
+  userId: string;
+  content: {
+    teamId: string;
+    role: 'admin' | 'member';
+  };
+}
+
+export type UserWsEvents = MentionUser | NewUserInvitation | TeamRoleChanged;

@@ -113,4 +113,47 @@ describe('realtime board access', () => {
     expect(socket.leave).toHaveBeenCalledWith('board:old-board');
     expect(socket.leave).toHaveBeenCalledWith('team:team-1');
   });
+
+  it('does not finish a board join that was cancelled while checking access', async () => {
+    const { client, socket } = fakeClient();
+    client.boardId = undefined;
+    let grant!: (value: boolean) => void;
+    haveAccess.mockReturnValue(
+      new Promise<boolean>((done) => {
+        grant = done;
+      }),
+    );
+
+    const joining = (
+      client as unknown as { join(message: { boardId: string }) }
+    ).join({ boardId: '00000000-0000-4000-8000-000000000001' });
+    client.close();
+    grant(true);
+    await joining;
+
+    expect(client.boardId).toBeUndefined();
+    expect(socket.join).not.toHaveBeenCalled();
+  });
+
+  it('does not join an event room revalidated away while its check was pending', async () => {
+    const { client, socket } = fakeClient();
+    const on = (event: string) =>
+      socket.on.mock.calls.find(([name]) => name === event)?.[1] as (
+        message: unknown,
+      ) => Promise<void>;
+    let grant!: (value: boolean) => void;
+    haveAccess.mockReturnValueOnce(
+      new Promise<boolean>((done) => {
+        grant = done;
+      }),
+    );
+    haveAccess.mockResolvedValueOnce(false);
+
+    const subscribing = on('sub')({ type: 'board', id: 'board-2' });
+    await client.revalidateSubscriptions();
+    grant(true);
+    await subscribing;
+
+    expect(socket.join).not.toHaveBeenCalledWith('board:board-2');
+  });
 });

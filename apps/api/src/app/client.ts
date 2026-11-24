@@ -27,6 +27,8 @@ export class Client {
   // Event rooms joined through `sub`, independent of the active board.
   private boardSubscriptions = new Set<string>();
   private teamSubscriptions = new Set<string>();
+  // Bumped by close(), so a join still in progress knows it was cancelled.
+  private joinGeneration = 0;
 
   constructor(
     public socket: Socket,
@@ -58,23 +60,27 @@ export class Client {
 
       const { type, id } = messageResult;
 
+      // Registered before the check: a revalidation running meanwhile
+      // removes it, and then the room is not joined.
       if (type === 'board') {
+        this.boardSubscriptions.add(id);
         const validUser = await db.board.haveAccess(id, this.id);
 
-        if (validUser) {
+        if (validUser && this.boardSubscriptions.has(id)) {
           this.socket.join(`board:${id}`);
-          this.boardSubscriptions.add(id);
         } else {
+          this.boardSubscriptions.delete(id);
           this.unauthorizedClose();
           return;
         }
       } else if (type === 'team') {
+        this.teamSubscriptions.add(id);
         const validUser = await db.team.haveAccessTeam(id, this.id);
 
-        if (validUser) {
+        if (validUser && this.teamSubscriptions.has(id)) {
           this.socket.join(`team:${id}`);
-          this.teamSubscriptions.add(id);
         } else {
+          this.teamSubscriptions.delete(id);
           this.unauthorizedClose();
           return;
         }
@@ -189,14 +195,20 @@ export class Client {
    * active board) and leaves the ones the user no longer has access to.
    */
   async revalidateSubscriptions() {
+    // A room whose access cannot be verified is left as well.
+    const allowed = (check: Promise<boolean>) =>
+      check.catch((error: unknown) => {
+        console.error('Subscription access check failed', error);
+        return false;
+      });
     for (const boardId of [...this.boardSubscriptions]) {
-      if (!(await db.board.haveAccess(boardId, this.id))) {
+      if (!(await allowed(db.board.haveAccess(boardId, this.id)))) {
         this.boardSubscriptions.delete(boardId);
         void this.socket.leave(`board:${boardId}`);
       }
     }
     for (const teamId of [...this.teamSubscriptions]) {
-      if (!(await db.team.haveAccessTeam(teamId, this.id))) {
+      if (!(await allowed(db.team.haveAccessTeam(teamId, this.id)))) {
         this.teamSubscriptions.delete(teamId);
         void this.socket.leave(`team:${teamId}`);
       }
@@ -219,6 +231,8 @@ export class Client {
   }
 
   close() {
+    this.joinGeneration++;
+
     if (!this.boardId) {
       return;
     }
@@ -311,6 +325,11 @@ export class Client {
       return;
     }
 
+    const generation = ++this.joinGeneration;
+    // close() (a revocation, a leave or another join) cancels this join.
+    const cancelled = () =>
+      generation !== this.joinGeneration || this.boardId !== message.boardId;
+
     const haveAccess = await db.board.haveAccess(message.boardId, this.id);
 
     if (!haveAccess) {
@@ -318,16 +337,19 @@ export class Client {
       return;
     }
 
+    if (generation !== this.joinGeneration) return;
+
     this.teamId =
       (await db.board.getBoardBasic(message.boardId))?.teamId ?? undefined;
+
+    if (generation !== this.joinGeneration) return;
 
     this.boardId = message.boardId;
 
     try {
       await this.server.createBoard(message.boardId);
 
-      // Revoked or switched boards while the state was loading.
-      if (this.boardId !== message.boardId) {
+      if (cancelled()) {
         return;
       }
 
@@ -360,6 +382,18 @@ export class Client {
 
       await this.refreshIsAdmin();
       this.privateId = boardUser.privateId;
+
+      // Check access once more now that boardId/teamId are set: a revocation
+      // committed before this check is seen here, and one committed after it
+      // finds this client through its boardId/teamId and revokes it.
+      if (
+        cancelled() ||
+        !(await db.board.haveAccess(message.boardId, this.id))
+      ) {
+        if (!cancelled()) this.revokeBoard();
+        return;
+      }
+      if (cancelled()) return;
 
       const userAction: StateActions = {
         data: user,
