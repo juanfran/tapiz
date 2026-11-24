@@ -159,6 +159,27 @@ export async function removeAccount(userId: string): Promise<RemovedAccount> {
     const updatedTeamIds: string[] = [];
     const updatedBoardIds = new Set<string>();
 
+    // Delete the invitations the user sent or received before taking any
+    // lock: an invitation being accepted meanwhile holds its row and then
+    // needs the team or board, so cascading them later could deadlock.
+    await tx
+      .delete(schema.invitations)
+      .where(
+        or(
+          eq(schema.invitations.inviterId, userId),
+          eq(schema.invitations.userId, userId),
+        ),
+      );
+
+    // Lock the account first: a login inserting a session meanwhile then
+    // either finishes before (and its session is deleted below) or waits and
+    // fails, instead of making the final account delete fail on its FK.
+    await tx
+      .select({ id: schema.accounts.id })
+      .from(schema.accounts)
+      .where(eq(schema.accounts.id, userId))
+      .for('update');
+
     // Serialise with concurrent account removals, team membership changes and
     // uploads on the same teams and boards: lock them in a stable order before
     // reading any roles, so two last admins leaving at once cannot both skip

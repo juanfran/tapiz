@@ -226,6 +226,8 @@ export class Client {
     };
 
     this.sendAll(this.boardId, this.getStateAction([action]));
+    // Leave before counting, so the last socket releases the board's state.
+    this.socket.leave(this.boardId);
     const roomSize =
       this.server.io.of('/').adapter.rooms.get(this.boardId)?.size || 0;
 
@@ -233,7 +235,6 @@ export class Client {
       this.server.emptyBoard(this.boardId);
     }
 
-    this.socket.leave(this.boardId);
     this.boardId = undefined;
     this.teamId = undefined;
   }
