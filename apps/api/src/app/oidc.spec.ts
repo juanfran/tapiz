@@ -48,6 +48,8 @@ describe('OIDC identity claims', () => {
       'avatar.png',
       'https:avatar.png',
       `https://idp.example.test/${'a'.repeat(2100)}`,
+      // About 425 characters that percent-encode to more than 2048.
+      `https://idp.example.test/${'é'.repeat(400)}`,
     ]) {
       expect(identityFromClaims({ ...claims, picture }, issuer).picture).toBe(
         undefined,
