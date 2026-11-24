@@ -186,6 +186,17 @@ export class Client {
     })();
   }
 
+  /** Leaves a deleted team's event room; pending checks re-check and fail. */
+  revokeTeamSubscription(teamId: string) {
+    for (const pending of this.pendingSubscriptions) {
+      if (pending.type === 'team' && pending.id === teamId)
+        pending.stale = true;
+    }
+    if (this.teamSubscriptions.delete(teamId)) {
+      void this.socket.leave(`team:${teamId}`);
+    }
+  }
+
   private invalidatePendingSubscriptions(type?: 'board', id?: string) {
     for (const pending of this.pendingSubscriptions) {
       if (!type || (pending.type === type && pending.id === id)) {
@@ -542,7 +553,10 @@ export class Client {
       if (pending.stale) {
         pending.stale = false;
         if (!(await db.board.haveAccess(boardId, this.id))) {
-          this.socket.emit('error', 'unauthorized');
+          // Abandoned meanwhile: no error (the web would navigate home).
+          if (!pending.cancelled && !this.disconnected) {
+            this.socket.emit('error', 'unauthorized');
+          }
           return;
         }
         teamId = (await db.board.getBoardBasic(boardId))?.teamId ?? undefined;

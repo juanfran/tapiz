@@ -59,6 +59,11 @@ export function revalidateUserSubscriptions(userId: string) {
     });
 }
 
+/** Empties a deleted team's event room, including pending subscriptions. */
+export function revokeTeamSubscriptions(teamId: string) {
+  server?.clients.forEach((client) => client.revokeTeamSubscription(teamId));
+}
+
 /** Disconnects every socket of a user, for example after account deletion. */
 export function disconnectUser(userId: string) {
   server?.clients
