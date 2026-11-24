@@ -9,18 +9,25 @@ import { userSettingsValidator } from '@tapiz/board-commons/validators/user-sett
 import { withDefaultUserSettings } from '@tapiz/board-commons';
 import { generateApiToken, hashApiToken } from '../api-token.js';
 import { deleteUploadedFiles } from '../file-upload.js';
-import { disconnectUser, revokeBoardAccess } from '../global.js';
+import {
+  checkBoardAccess,
+  checkTeamBoardsAccess,
+  disconnectUser,
+  revokeBoardAccess,
+} from '../global.js';
 
 export const userRouter = router({
   removeAccount: protectedProcedure.mutation(async (req) => {
-    await lucia.invalidateUserSessions(req.ctx.user.sub);
-
+    // Sessions are deleted inside the same transaction.
     const removed = await db.user.removeAccount(req.ctx.user.sub);
     deleteUploadedFiles(removed.files);
     // Sockets are authenticated only when they connect, so close them now,
-    // and drop everyone else from the boards that no longer exist.
+    // drop everyone else from the boards that no longer exist, and refresh
+    // the cached admin rights of people promoted on the remaining ones.
     disconnectUser(req.ctx.user.sub);
     removed.boardIds.forEach((boardId) => revokeBoardAccess(boardId));
+    removed.updatedBoardIds.forEach((boardId) => checkBoardAccess(boardId));
+    removed.updatedTeamIds.forEach((teamId) => checkTeamBoardsAccess(teamId));
 
     return {
       success: true,

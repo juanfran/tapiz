@@ -7,15 +7,41 @@ import {
   teamMemberProcedure,
 } from '../trpc.js';
 import db from '../db/index.js';
-import { checkTeamBoardsAccess, revokeBoardAccess } from '../global.js';
+import {
+  checkTeamBoardsAccess,
+  revokeBoardAccess,
+  revokeTeamSubscription,
+} from '../global.js';
 import { sendEvent, sendUserEvent } from '../subscriptor.js';
 import {
   addBoardsToSpace,
   createSpace,
   getSpaceBoards,
+  TeamMemberRemovalConflict,
 } from '../db/team-db.js';
 import { Space } from '@tapiz/board-commons';
 import { sendInvitationEmail } from '../mailer.js';
+
+/**
+ * Removes a team member and drops the realtime access that came from the
+ * membership: open team boards are re-checked and the team room is left.
+ */
+async function removeTeamMember(teamId: string, userId: string) {
+  let removed: boolean;
+  try {
+    removed = await db.team.deleteMember(teamId, userId);
+  } catch (error) {
+    if (error instanceof TeamMemberRemovalConflict) {
+      throw new TRPCError({ code: 'CONFLICT' });
+    }
+    throw error;
+  }
+
+  if (removed) {
+    checkTeamBoardsAccess(teamId);
+    revokeTeamSubscription(teamId, userId);
+  }
+}
 
 export const teamRouter = router({
   new: protectedProcedure
@@ -202,9 +228,7 @@ export const teamRouter = router({
         throw new TRPCError({ code: 'CONFLICT' });
       }
 
-      await db.team.deleteMember(req.input.teamId, req.input.memberId);
-
-      checkTeamBoardsAccess(req.input.teamId);
+      await removeTeamMember(req.input.teamId, req.input.memberId);
       sendEvent(
         {
           room: `team:${req.input.teamId}`,
@@ -227,27 +251,9 @@ export const teamRouter = router({
       }),
     )
     .mutation(async (req) => {
-      const teamMembers = await db.team.getTeamMembers(req.input.teamId);
-      const leaving = teamMembers.find(
-        (member) => member.id === req.ctx.user.sub,
-      );
-      const others = teamMembers.filter(
-        (member) => member.id !== req.ctx.user.sub,
-      );
-
       // Leaving revokes the member's roles on the team boards, so the last
       // admin must hand over first, and the last member must delete the team.
-      if (
-        !others.length ||
-        (leaving?.role === 'admin' &&
-          !others.some((member) => member.role === 'admin'))
-      ) {
-        throw new TRPCError({ code: 'CONFLICT' });
-      }
-
-      await db.team.deleteMember(req.input.teamId, req.ctx.user.sub);
-
-      checkTeamBoardsAccess(req.input.teamId);
+      await removeTeamMember(req.input.teamId, req.ctx.user.sub);
 
       return {
         success: true,

@@ -54,6 +54,7 @@ describe('realtime board access', () => {
 
     expect(socket.emit).toHaveBeenCalledWith('error', 'unauthorized');
     expect(socket.leave).toHaveBeenCalledWith('board-1');
+    expect(socket.leave).toHaveBeenCalledWith('board:board-1');
     expect(client.boardId).toBeUndefined();
     expect(client.teamId).toBeUndefined();
     // Later state actions are ignored even if the client ignores the error.

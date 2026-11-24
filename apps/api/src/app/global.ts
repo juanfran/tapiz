@@ -34,6 +34,15 @@ export function revokeBoardAccess(boardId: string) {
     });
 }
 
+/** Stops a former team member's sockets from receiving the team's events. */
+export function revokeTeamSubscription(teamId: string, userId: string) {
+  server?.clients
+    .filter((client) => client.id === userId)
+    .forEach((client) => {
+      void client.socket.leave(`team:${teamId}`);
+    });
+}
+
 /** Disconnects every socket of a user, for example after account deletion. */
 export function disconnectUser(userId: string) {
   server?.clients

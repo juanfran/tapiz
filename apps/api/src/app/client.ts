@@ -182,6 +182,7 @@ export class Client {
    */
   revokeBoard() {
     this.socket.emit('error', 'unauthorized');
+    if (this.boardId) void this.socket.leave(`board:${this.boardId}`);
     this.close();
   }
 
