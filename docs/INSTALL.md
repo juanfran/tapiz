@@ -42,7 +42,10 @@ Follow these steps to set up Tapiz using Docker:
    the provider and registered client require POST authentication. Both
    secret methods require `OIDC_CLIENT_SECRET`; `none` requires it to be
    empty. The API refuses to start with an invalid combination, a non-HTTPS
-   issuer or an `API_URL` that is not an absolute HTTP(S) URL.
+   issuer or an `API_URL` that is not an absolute HTTP(S) URL. When upgrading
+   a public-client deployment that left `OIDC_CLIENT_SECRET` empty, add
+   `OIDC_TOKEN_ENDPOINT_AUTH_METHOD=none`; an empty secret no longer implies a
+   public client.
 
    Tapiz uses discovery, state, nonce and PKCE S256, and validates the ID
    token with `openid-client`, including its signature and, when present, that

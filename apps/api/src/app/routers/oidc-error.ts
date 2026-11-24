@@ -144,12 +144,39 @@ export function logOidcError(context: string, error: unknown) {
       ? error.message
       : 'Provider request or validation failed';
   const detail = libraryDetail(error);
-  if (detail && !safeMessages.has(message)) message = `${message}: ${detail}`;
   if (code === 'OAUTH_UNSUPPORTED_OPERATION') {
-    message =
-      'Unsupported provider operation; ID tokens must be signed with an asymmetric algorithm (RS256, PS256 or ES256) published in the provider JWKS';
+    // Without the library's detail the usual cause is an HS256-signed ID
+    // token; with it (for example a too-short RSA key), the detail is precise.
+    message = detail
+      ? `Unsupported provider operation: ${detail}`
+      : 'Unsupported provider operation; ID tokens must be signed with an asymmetric algorithm (RS256, PS256 or ES256) published in the provider JWKS';
+  } else if (detail && !safeMessages.has(message)) {
+    message = `${message}: ${detail}`;
   }
 
   const suffix = details.length ? ` (${details.join(', ')})` : '';
   console.error(`${context}: ${code}${suffix}: ${message}`);
+}
+
+const sqlStatePattern = /^[0-9A-Z]{5}$/;
+
+/**
+ * Logs a failure after the provider exchange succeeded (account lookup,
+ * creation, email refresh or session issuance), so operators look at the
+ * database rather than the identity provider. Only the SQLSTATE or a known
+ * network code is recorded; database messages can contain user data.
+ */
+export function logOidcDatabaseError(context: string, error: unknown) {
+  const rawCode = stringProperty(error, 'code');
+  const isPostgresError =
+    error instanceof Error && error.name === 'PostgresError';
+  const code =
+    isPostgresError && rawCode && sqlStatePattern.test(rawCode)
+      ? rawCode
+      : networkCode(error) ?? 'unknown';
+  const message =
+    error instanceof Error && safeMessages.has(error.message)
+      ? error.message
+      : 'Database operation failed';
+  console.error(`${context}: database error (${code}): ${message}`);
 }

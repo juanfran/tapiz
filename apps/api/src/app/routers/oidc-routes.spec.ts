@@ -122,6 +122,27 @@ describe('OIDC callback', () => {
     await app.close();
   });
 
+  it('logs failures after the provider exchange as database errors', async () => {
+    vi.mocked(getUserByOidcIdentity).mockRejectedValue(
+      Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:5432'), {
+        code: 'ECONNREFUSED',
+      }),
+    );
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      const app = await server();
+      const response = await app.inject('/api/auth/oidc/callback');
+      expect(response.statusCode).toBe(400);
+      expect(createUserSessionCookie).not.toHaveBeenCalled();
+      expect(spy).toHaveBeenCalledWith(
+        'OIDC login failed: database error (ECONNREFUSED): Database operation failed',
+      );
+      await app.close();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   it('creates a new identity and issues a session', async () => {
     vi.mocked(getUserByOidcIdentity)
       .mockResolvedValueOnce(undefined)

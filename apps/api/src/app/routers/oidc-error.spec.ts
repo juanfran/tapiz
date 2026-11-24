@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ResponseBodyError } from 'openid-client';
-import { logOidcError } from './oidc-error.js';
+import { logOidcDatabaseError, logOidcError } from './oidc-error.js';
 
 // Mirrors oauth4webapi's error class, which is not a direct dependency.
 class OperationProcessingError extends Error {
@@ -159,5 +159,48 @@ describe('OIDC failure logging', () => {
       'OIDC login failed: unknown (other_oauth_error): Invalid OIDC authorization response',
     );
     expect(line).not.toMatch(/secret/i);
+  });
+
+  it('keeps the library detail for unsupported keys instead of the HS256 hint', () => {
+    const inner = Object.assign(
+      new Error('unsupported RSASSA-PKCS1-v1_5 modulusLength'),
+      { name: 'UnsupportedOperationError' },
+    );
+    logOidcError(
+      'OIDC login failed',
+      Object.assign(new Error('unsupported operation', { cause: inner }), {
+        code: 'OAUTH_UNSUPPORTED_OPERATION',
+      }),
+    );
+    expect(logged()).toBe(
+      'OIDC login failed: OAUTH_UNSUPPORTED_OPERATION: Unsupported provider operation: unsupported RSASSA-PKCS1-v1_5 modulusLength',
+    );
+  });
+
+  it('labels database failures with the SQLSTATE but not the message', () => {
+    logOidcDatabaseError(
+      'OIDC login failed',
+      Object.assign(new Error('value "person@example.test" too long'), {
+        name: 'PostgresError',
+        code: '22001',
+      }),
+    );
+    const line = logged();
+    expect(line).toBe(
+      'OIDC login failed: database error (22001): Database operation failed',
+    );
+    expect(line).not.toContain('person@example.test');
+  });
+
+  it('labels an unreachable database by its network code', () => {
+    logOidcDatabaseError(
+      'OIDC login failed',
+      Object.assign(new Error('connect ECONNREFUSED 127.0.0.1:5432'), {
+        code: 'ECONNREFUSED',
+      }),
+    );
+    expect(logged()).toBe(
+      'OIDC login failed: database error (ECONNREFUSED): Database operation failed',
+    );
   });
 });
