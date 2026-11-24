@@ -6,8 +6,10 @@ import { changeRole, deleteMember, AdminRequiredConflict } from './team-db.js';
 import {
   changeRole as changeBoardRole,
   createBoard,
+  leaveBoard,
   NotTeamMemberError,
 } from './board-db.js';
+import { removeAccount } from './user-db.js';
 import { haveAccess } from './board-db.js';
 import {
   accounts,
@@ -301,5 +303,80 @@ describe('team member removal (PostgreSQL)', () => {
     await expect(
       changeBoardRole(personalBoard, boardAdmin, 'member'),
     ).rejects.toBeInstanceOf(AdminRequiredConflict);
+  });
+
+  it('refuses to let the last admin leave a shared board', async () => {
+    const [admin, member, secondAdmin] = [
+      await account(),
+      await account(),
+      await account(),
+    ];
+    const sharedBoard = await board({ [admin]: 'admin', [member]: 'member' });
+
+    await expect(leaveBoard(admin, sharedBoard)).rejects.toBeInstanceOf(
+      AdminRequiredConflict,
+    );
+
+    await db
+      .insert(acountsToBoards)
+      .values({ boardId: sharedBoard, accountId: secondAdmin, role: 'admin' });
+    await leaveBoard(admin, sharedBoard);
+    expect(await boardRole(sharedBoard, admin)).toBeUndefined();
+    await leaveBoard(member, sharedBoard);
+  });
+
+  it('keeps a board admin when a member leaves while the admin is removed', async () => {
+    const [admin, first, second] = [
+      await account(),
+      await account(),
+      await account(),
+    ];
+    const boardId = await board({
+      [admin]: 'admin',
+      [first]: 'member',
+      [second]: 'member',
+    });
+    accountIds.splice(accountIds.indexOf(admin), 1);
+
+    await warmPool();
+    const results = await Promise.allSettled([
+      removeAccount(admin),
+      leaveBoard(first, boardId),
+      leaveBoard(second, boardId),
+    ]);
+
+    expect(results[0].status).toBe('fulfilled');
+    // Either everyone left (and the board went with its last member), or
+    // the people still on it have an admin.
+    const remaining = await db
+      .select({ role: acountsToBoards.role })
+      .from(acountsToBoards)
+      .where(eq(acountsToBoards.boardId, boardId));
+    if (remaining.length) {
+      expect(remaining.map((row) => row.role)).toContain('admin');
+    } else {
+      expect(
+        await db.select().from(boards).where(eq(boards.id, boardId)),
+      ).toHaveLength(0);
+    }
+  });
+
+  it('creates a team board and removes its owner at the same time without a deadlock', async () => {
+    const [owner, admin] = [await account(), await account()];
+    const teamId = await teamWith({ [admin]: 'admin', [owner]: 'member' });
+    accountIds.splice(accountIds.indexOf(owner), 1);
+
+    await warmPool();
+    const [created, removed] = await Promise.allSettled([
+      createBoard('Racing', owner, [], teamId, { requireTeamMember: true }),
+      removeAccount(owner),
+    ]);
+
+    expect(removed.status).toBe('fulfilled');
+    if (created.status === 'fulfilled') {
+      boardIds.push(created.value.id);
+    } else {
+      expect(created.reason).not.toMatchObject({ code: '40P01' });
+    }
   });
 });

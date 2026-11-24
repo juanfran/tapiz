@@ -113,7 +113,9 @@ export const boardRouter = router({
       throw new TRPCError({ code: 'UNAUTHORIZED' });
     }
 
-    await db.board.leaveBoard(req.ctx.user.sub, req.input.boardId);
+    await asConflict(() =>
+      db.board.leaveBoard(req.ctx.user.sub, req.input.boardId),
+    );
 
     return {
       success: true,

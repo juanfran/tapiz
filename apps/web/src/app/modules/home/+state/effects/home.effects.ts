@@ -24,6 +24,16 @@ import { UserApiService } from '../../../../services/user-api.service';
 import { appFeature } from '../../../../+state/app.reducer';
 import { selectRouteParams } from '../../../../router.selectors';
 
+/** A tRPC error refused with CONFLICT (for example "an admin must remain"). */
+function isConflict(error: unknown) {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'data' in error &&
+    (error as { data?: { code?: string } }).data?.code === 'CONFLICT'
+  );
+}
+
 export const initHomeFeatchTeams$ = createEffect(
   (actions$ = inject(Actions), teamApiService = inject(TeamApiService)) => {
     return actions$.pipe(
@@ -31,8 +41,11 @@ export const initHomeFeatchTeams$ = createEffect(
         HomeActions.initHome,
         HomeActions.acceptInvitationSuccess,
         HomeActions.fetchTeams,
+        // For example a promotion to team admin.
+        HomeActions.userEvent,
       ),
-      exhaustMap(() => {
+      // The latest request wins, so a reload asked for during a fetch runs.
+      switchMap(() => {
         return teamApiService.fetchTeams();
       }),
       map((teams) => {
@@ -162,11 +175,27 @@ export const deleteBoard$ = createEffect(
 );
 
 export const leaveBoard$ = createEffect(
-  (actions$ = inject(Actions), boardApiService = inject(BoardApiService)) => {
+  (
+    actions$ = inject(Actions),
+    boardApiService = inject(BoardApiService),
+    notificationService = inject(NotificationService),
+  ) => {
     return actions$.pipe(
       ofType(HomeActions.leaveBoard),
       mergeMap((action) => {
-        return boardApiService.leaveBoard(action.id);
+        return boardApiService.leaveBoard(action.id).pipe(
+          // Keep the effect alive; the last admin cannot leave a shared board.
+          catchError((error: unknown) => {
+            notificationService.open({
+              message: isConflict(error)
+                ? 'You cannot leave this board: make someone else an admin first.'
+                : 'Could not leave the board. Please try again.',
+              action: 'Close',
+              type: 'error',
+            });
+            return of(null);
+          }),
+        );
       }),
     );
   },
@@ -540,12 +569,12 @@ export const leaveTeam$ = createEffect(
             router.navigate(['/']);
           }),
           map(() => null),
-          // The API refuses to let the last admin (or member) leave; the team
-          // was removed optimistically, so reload it and explain why.
-          catchError(() => {
+          // The team was removed optimistically: reload it and explain why.
+          catchError((error: unknown) => {
             notificationService.open({
-              message:
-                'You cannot leave this team: make someone else an admin first, or delete the team.',
+              message: isConflict(error)
+                ? 'You cannot leave this team: make someone else an admin first, or delete the team.'
+                : 'Could not leave the team. Please try again.',
               action: 'Close',
               type: 'error',
             });
