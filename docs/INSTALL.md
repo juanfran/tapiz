@@ -44,7 +44,9 @@ Follow these steps to set up Tapiz using Docker:
    publishes its discovery document somewhere other than
    `<issuer>/.well-known/openid-configuration` (for example Azure AD B2C with a
    custom domain), also set `OIDC_DISCOVERY_URL`; its `issuer` must equal
-   `OIDC_ISSUER` exactly. `API_URL` must not end with a slash. Token endpoint
+   `OIDC_ISSUER` exactly. For Azure AD B2C, use a policy that sends `email`
+   and `email_verified: true`; standard user flows send only an `emails` array,
+   so logins fail with a missing verified email. `API_URL` must not end with a slash. Token endpoint
    client authentication defaults to `client_secret_basic` (the OIDC discovery
    default); set `OIDC_TOKEN_ENDPOINT_AUTH_METHOD=client_secret_post` only if
    the provider and registered client require POST authentication. Both
