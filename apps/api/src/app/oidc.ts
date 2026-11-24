@@ -44,7 +44,7 @@ function redirectUri() {
 
 function tokenEndpointAuthMethod() {
   const method =
-    process.env['OIDC_TOKEN_ENDPOINT_AUTH_METHOD'] ?? 'client_secret_basic';
+    process.env['OIDC_TOKEN_ENDPOINT_AUTH_METHOD'] || 'client_secret_basic';
   if (method !== 'client_secret_basic' && method !== 'client_secret_post') {
     throw new Error('Unsupported OIDC token endpoint authentication method');
   }
@@ -125,7 +125,11 @@ export async function oidcIdentity(req: FastifyRequest) {
     !verifier ||
     query.state !== state
   ) {
-    throw new Error('Invalid OIDC authorization response');
+    // Keep the provider's error code (for example `access_denied`) for logs;
+    // the logger only records it when it is a plain OAuth error token.
+    throw Object.assign(new Error('Invalid OIDC authorization response'), {
+      error: query.error,
+    });
   }
   const config = await configuration();
   const callback = new URL(redirectUri());

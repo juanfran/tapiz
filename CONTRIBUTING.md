@@ -40,7 +40,7 @@ Common prefixes: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`
 
 ```bash
 pnpm test           # Unit & integration tests (Vitest)
-pnpm e2e:tests      # End-to-end tests (Cypress)
+pnpm e2e:tests      # API tests, including DB-backed specs (needs PostgreSQL)
 ```
 
 Make sure all tests pass before submitting a PR.

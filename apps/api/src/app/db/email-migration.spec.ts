@@ -2,10 +2,7 @@ import { readFile } from 'node:fs/promises';
 import postgres from 'postgres';
 import { describe, expect, it } from 'vitest';
 
-const run =
-  process.env['TAPIZ_TEST_DATABASE'] === '1' ? describe : describe.skip;
-
-run('case-insensitive email migration (PostgreSQL)', () => {
+describe('case-insensitive email migration (PostgreSQL)', () => {
   it('rejects legacy duplicates before creating the unique index', async () => {
     const connection = postgres({
       host: process.env['POSTGRES_HOST'],

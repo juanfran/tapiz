@@ -2,9 +2,17 @@ import Fastify from 'fastify';
 import fastifyCookie from '@fastify/cookie';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { oidcRoutes } from './oidc-routes.js';
-import { clearOidcCookies, oidcAuthorizationUrl, oidcIdentity } from '../oidc.js';
+import {
+  clearOidcCookies,
+  oidcAuthorizationUrl,
+  oidcIdentity,
+} from '../oidc.js';
 import { createUserSessionCookie } from '../auth.js';
-import { createOidcUser, getUserByOidcIdentity, refreshOidcUserEmail } from '../db/user-db.js';
+import {
+  createOidcUser,
+  getUserByOidcIdentity,
+  refreshOidcUserEmail,
+} from '../db/user-db.js';
 
 vi.mock('../oidc.js', () => ({
   oidcAuthorizationUrl: vi.fn(),
@@ -37,7 +45,10 @@ beforeEach(() => {
   vi.resetAllMocks();
   process.env['FRONTEND_URL'] = 'http://localhost:4300';
   vi.mocked(oidcIdentity).mockResolvedValue(identity);
-  vi.mocked(refreshOidcUserEmail).mockResolvedValue({ id: 'user-1', email: identity.email } as Awaited<ReturnType<typeof refreshOidcUserEmail>>);
+  vi.mocked(refreshOidcUserEmail).mockResolvedValue({
+    id: 'user-1',
+    email: identity.email,
+  } as Awaited<ReturnType<typeof refreshOidcUserEmail>>);
   vi.mocked(createUserSessionCookie).mockResolvedValue({
     name: 'session',
     value: 'session-id',
@@ -53,7 +64,9 @@ describe('OIDC callback', () => {
     const app = await server();
     const response = await app.inject('/api/auth/oidc');
     expect(response.statusCode).toBe(302);
-    expect(response.headers.location).toBe('https://idp.example.test/authorize');
+    expect(response.headers.location).toBe(
+      'https://idp.example.test/authorize',
+    );
     await app.close();
   });
 
@@ -71,23 +84,35 @@ describe('OIDC callback', () => {
   it('creates a new identity and issues a session', async () => {
     vi.mocked(getUserByOidcIdentity)
       .mockResolvedValueOnce(undefined)
-      .mockResolvedValueOnce({ id: 'user-1' } as Awaited<ReturnType<typeof getUserByOidcIdentity>>);
+      .mockResolvedValueOnce({ id: 'user-1' } as Awaited<
+        ReturnType<typeof getUserByOidcIdentity>
+      >);
     const app = await server();
     const response = await app.inject('/api/auth/oidc/callback');
     expect(createOidcUser).toHaveBeenCalledWith(
-      identity.issuer, identity.subject, identity.name, identity.email, undefined,
+      identity.issuer,
+      identity.subject,
+      identity.name,
+      identity.email,
+      undefined,
     );
     expect(response.statusCode).toBe(302);
-    expect(response.cookies).toContainEqual(expect.objectContaining({ name: 'session' }));
+    expect(response.cookies).toContainEqual(
+      expect.objectContaining({ name: 'session' }),
+    );
     await app.close();
   });
 
   it('accepts a concurrent registration only for the same issuer and subject', async () => {
     vi.mocked(getUserByOidcIdentity)
       .mockResolvedValueOnce(undefined)
-      .mockResolvedValueOnce({ id: 'winner' } as Awaited<ReturnType<typeof getUserByOidcIdentity>>);
+      .mockResolvedValueOnce({ id: 'winner' } as Awaited<
+        ReturnType<typeof getUserByOidcIdentity>
+      >);
     vi.mocked(createOidcUser).mockRejectedValue({ code: '23505' });
-    vi.mocked(refreshOidcUserEmail).mockResolvedValue({ id: 'winner' } as Awaited<ReturnType<typeof refreshOidcUserEmail>>);
+    vi.mocked(refreshOidcUserEmail).mockResolvedValue({
+      id: 'winner',
+    } as Awaited<ReturnType<typeof refreshOidcUserEmail>>);
     const app = await server();
     const response = await app.inject('/api/auth/oidc/callback');
     expect(response.statusCode).toBe(302);
@@ -96,18 +121,32 @@ describe('OIDC callback', () => {
   });
 
   it('refreshes an existing identity email before creating its session', async () => {
-    vi.mocked(getUserByOidcIdentity).mockResolvedValue({ id: 'user-1', email: 'old@example.test' } as Awaited<ReturnType<typeof getUserByOidcIdentity>>);
+    vi.mocked(getUserByOidcIdentity).mockResolvedValue({
+      id: 'user-1',
+      email: 'old@example.test',
+    } as Awaited<ReturnType<typeof getUserByOidcIdentity>>);
     const app = await server();
     const response = await app.inject('/api/auth/oidc/callback');
     expect(response.statusCode).toBe(302);
-    expect(refreshOidcUserEmail).toHaveBeenCalledWith(identity.issuer, identity.subject, identity.email);
+    expect(refreshOidcUserEmail).toHaveBeenCalledWith(
+      identity.issuer,
+      identity.subject,
+      identity.email,
+    );
     expect(createUserSessionCookie).toHaveBeenCalledWith('user-1');
-    expect(vi.mocked(refreshOidcUserEmail).mock.invocationCallOrder[0]).toBeLessThan(vi.mocked(createUserSessionCookie).mock.invocationCallOrder[0]);
+    expect(
+      vi.mocked(refreshOidcUserEmail).mock.invocationCallOrder[0],
+    ).toBeLessThan(
+      vi.mocked(createUserSessionCookie).mock.invocationCallOrder[0],
+    );
     await app.close();
   });
 
   it('rejects an email collision on an existing identity without issuing a session', async () => {
-    vi.mocked(getUserByOidcIdentity).mockResolvedValue({ id: 'user-1', email: 'old@example.test' } as Awaited<ReturnType<typeof getUserByOidcIdentity>>);
+    vi.mocked(getUserByOidcIdentity).mockResolvedValue({
+      id: 'user-1',
+      email: 'old@example.test',
+    } as Awaited<ReturnType<typeof getUserByOidcIdentity>>);
     vi.mocked(refreshOidcUserEmail).mockRejectedValue({ code: '23505' });
     const app = await server();
     const response = await app.inject('/api/auth/oidc/callback');
@@ -119,10 +158,19 @@ describe('OIDC callback', () => {
   it('rejects an email collision without linking an unrelated account', async () => {
     vi.mocked(getUserByOidcIdentity).mockResolvedValue(undefined);
     vi.mocked(createOidcUser).mockRejectedValue({ code: '23505' });
-    const app = await server();
-    const response = await app.inject('/api/auth/oidc/callback');
-    expect(response.statusCode).toBe(409);
-    expect(createUserSessionCookie).not.toHaveBeenCalled();
-    await app.close();
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      const app = await server();
+      const response = await app.inject('/api/auth/oidc/callback');
+      expect(response.statusCode).toBe(409);
+      expect(createUserSessionCookie).not.toHaveBeenCalled();
+      expect(spy).toHaveBeenCalledWith(
+        'OIDC login rejected: verified email already belongs to another account (409)',
+      );
+      expect(JSON.stringify(spy.mock.calls)).not.toContain(identity.email);
+      await app.close();
+    } finally {
+      spy.mockRestore();
+    }
   });
 });
