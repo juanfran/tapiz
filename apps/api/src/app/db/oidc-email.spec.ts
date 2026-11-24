@@ -29,236 +29,227 @@ async function createAccount(address: string) {
   return { id, sub };
 }
 
-// Use only a disposable database: this suite exercises real migrations and uniqueness constraints.
-describe.runIf(process.env['TAPIZ_TEST_DATABASE'] === '1')(
-  'OIDC email and identity constraints (PostgreSQL)',
-  () => {
-    beforeAll(async () => {
-      await startDB();
-    });
-    afterEach(async () => {
-      for (const id of createdIds.splice(0))
-        await db.delete(accounts).where(eq(accounts.id, id));
-    });
-    afterAll(async () => {
-      await psqlClient.end();
-    });
+// Runs against the configured POSTGRES_* database, like the other DB-backed
+// API specs; it only deletes the accounts it creates.
+describe('OIDC email and identity constraints (PostgreSQL)', () => {
+  beforeAll(async () => {
+    await startDB();
+  });
+  afterEach(async () => {
+    for (const id of createdIds.splice(0))
+      await db.delete(accounts).where(eq(accounts.id, id));
+  });
+  afterAll(async () => {
+    await psqlClient.end();
+  });
 
-    it('moves invitation access to the new verified email without changing issuer/subject', async () => {
-      const oldAddress = email('old');
-      const newAddress = email('new');
-      const { id, sub } = await createAccount(oldAddress);
-      const [{ id: teamId }] = await db
-        .insert(teams)
-        .values({ name: 'Invitation test' })
-        .returning({ id: teams.id });
-      try {
-        const [{ id: oldInvite }] = await db
-          .insert(invitations)
-          .values({ email: oldAddress, teamId, role: 'member', inviterId: id })
-          .returning({ id: invitations.id });
-        const [{ id: newInvite }] = await db
-          .insert(invitations)
-          .values({ email: newAddress, teamId, role: 'member', inviterId: id })
-          .returning({ id: invitations.id });
-        const user = await refreshOidcUserEmail(issuer, sub, newAddress);
-        expect(user).toMatchObject({ id, email: newAddress });
-        if (!user) throw new Error('OIDC account not found');
-        expect(await getUserByOidcIdentity(issuer, sub)).toMatchObject({
-          id,
-          email: newAddress,
-        });
-        expect(
-          (await getUserInvitationsByEmail(newAddress)).map((v) => v.id),
-        ).toContain(newInvite);
-        expect(
-          await acceptInvitation(id, user.email, oldInvite),
-        ).toBeUndefined();
-        expect(await acceptInvitation(id, user.email, newInvite)).toBe(true);
-        expect(
-          await db
-            .select()
-            .from(teamMembers)
-            .where(eq(teamMembers.accountId, id)),
-        ).toHaveLength(1);
-      } finally {
-        await db.delete(invitations).where(eq(invitations.teamId, teamId));
-        await db.delete(teams).where(eq(teams.id, teamId));
-      }
-    });
-
-    it('rolls back the losing account in simultaneous identity registrations', async () => {
-      const firstAddress = email('concurrent-first');
-      const secondAddress = email('concurrent-second');
-      const sub = subject();
-      const results = await Promise.allSettled([
-        createOidcUser(issuer, sub, 'First', firstAddress),
-        createOidcUser(issuer, sub, 'Second', secondAddress),
-      ]);
-      const successful = results.filter(
-        (result) => result.status === 'fulfilled',
-      );
-      const failed = results.filter((result) => result.status === 'rejected');
-      expect(successful).toHaveLength(1);
-      expect(failed).toHaveLength(1);
-      expect((failed[0] as PromiseRejectedResult).reason).toMatchObject({
-        code: '23505',
+  it('moves invitation access to the new verified email without changing issuer/subject', async () => {
+    const oldAddress = email('old');
+    const newAddress = email('new');
+    const { id, sub } = await createAccount(oldAddress);
+    const [{ id: teamId }] = await db
+      .insert(teams)
+      .values({ name: 'Invitation test' })
+      .returning({ id: teams.id });
+    try {
+      const [{ id: oldInvite }] = await db
+        .insert(invitations)
+        .values({ email: oldAddress, teamId, role: 'member', inviterId: id })
+        .returning({ id: invitations.id });
+      const [{ id: newInvite }] = await db
+        .insert(invitations)
+        .values({ email: newAddress, teamId, role: 'member', inviterId: id })
+        .returning({ id: invitations.id });
+      const user = await refreshOidcUserEmail(issuer, sub, newAddress);
+      expect(user).toMatchObject({ id, email: newAddress });
+      if (!user) throw new Error('OIDC account not found');
+      expect(await getUserByOidcIdentity(issuer, sub)).toMatchObject({
+        id,
+        email: newAddress,
       });
-      const winner = (successful[0] as PromiseFulfilledResult<string>).value;
-      createdIds.push(winner);
+      expect(
+        (await getUserInvitationsByEmail(newAddress)).map((v) => v.id),
+      ).toContain(newInvite);
+      expect(await acceptInvitation(id, user.email, oldInvite)).toBeUndefined();
+      expect(await acceptInvitation(id, user.email, newInvite)).toBe(true);
+      expect(
+        await db
+          .select()
+          .from(teamMembers)
+          .where(eq(teamMembers.accountId, id)),
+      ).toHaveLength(1);
+    } finally {
+      await db.delete(invitations).where(eq(invitations.teamId, teamId));
+      await db.delete(teams).where(eq(teams.id, teamId));
+    }
+  });
+
+  it('rolls back the losing account in simultaneous identity registrations', async () => {
+    const firstAddress = email('concurrent-first');
+    const secondAddress = email('concurrent-second');
+    const sub = subject();
+    const results = await Promise.allSettled([
+      createOidcUser(issuer, sub, 'First', firstAddress),
+      createOidcUser(issuer, sub, 'Second', secondAddress),
+    ]);
+    const successful = results.filter(
+      (result) => result.status === 'fulfilled',
+    );
+    const failed = results.filter((result) => result.status === 'rejected');
+    expect(successful).toHaveLength(1);
+    expect(failed).toHaveLength(1);
+    expect((failed[0] as PromiseRejectedResult).reason).toMatchObject({
+      code: '23505',
+    });
+    const winner = (successful[0] as PromiseFulfilledResult<string>).value;
+    createdIds.push(winner);
+    expect(
+      await db
+        .select()
+        .from(accounts)
+        .where(sql`${accounts.email} in (${firstAddress}, ${secondAddress})`),
+    ).toEqual([expect.objectContaining({ id: winner })]);
+    expect(
+      await db
+        .select()
+        .from(oidcIdentities)
+        .where(
+          and(
+            eq(oidcIdentities.issuer, issuer),
+            eq(oidcIdentities.subject, sub),
+          ),
+        ),
+    ).toEqual([expect.objectContaining({ accountId: winner })]);
+  });
+
+  it('rejects a first-login email collision without an orphan account', async () => {
+    const address = email('collision');
+    const existing = await createAccount(address);
+    const otherSubject = subject();
+    await expect(
+      createOidcUser(issuer, otherSubject, 'Other', address),
+    ).rejects.toMatchObject({ code: '23505' });
+    expect(
+      await db.select().from(accounts).where(eq(accounts.email, address)),
+    ).toEqual([expect.objectContaining({ id: existing.id })]);
+    expect(
+      await db
+        .select()
+        .from(oidcIdentities)
+        .where(eq(oidcIdentities.subject, otherSubject)),
+    ).toHaveLength(0);
+  });
+
+  it('matches mixed-case invitations and rejects duplicate email casing', async () => {
+    const address = email('mixed');
+    const mixed = address
+      .replace('mixed', 'MiXeD')
+      .replace('@example.test', '@Example.test');
+    const { id } = await createAccount(address);
+    const [{ id: teamId }] = await db
+      .insert(teams)
+      .values({ name: 'Mixed case' })
+      .returning({ id: teams.id });
+    try {
+      const invite = await db
+        .insert(invitations)
+        .values({ email: address, teamId, role: 'member', inviterId: id })
+        .returning({ id: invitations.id });
+      expect(await getUserInvitationsByEmail(mixed)).toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: invite[0].id })]),
+      );
+      expect(await acceptInvitation(id, mixed, invite[0].id)).toBe(true);
+      await expect(
+        createOidcUser(issuer, subject(), 'Duplicate', mixed),
+      ).rejects.toMatchObject({ code: '23505' });
       expect(
         await db
           .select()
           .from(accounts)
-          .where(sql`${accounts.email} in (${firstAddress}, ${secondAddress})`),
-      ).toEqual([expect.objectContaining({ id: winner })]);
-      expect(
-        await db
-          .select()
-          .from(oidcIdentities)
-          .where(
-            and(
-              eq(oidcIdentities.issuer, issuer),
-              eq(oidcIdentities.subject, sub),
-            ),
-          ),
-      ).toEqual([expect.objectContaining({ accountId: winner })]);
-    });
+          .where(sql`lower(${accounts.email}) = ${address}`),
+      ).toHaveLength(1);
+    } finally {
+      await db.delete(invitations).where(eq(invitations.teamId, teamId));
+      await db.delete(teams).where(eq(teams.id, teamId));
+    }
+  });
 
-    it('rejects a first-login email collision without an orphan account', async () => {
-      const address = email('collision');
-      const existing = await createAccount(address);
-      const otherSubject = subject();
-      await expect(
-        createOidcUser(issuer, otherSubject, 'Other', address),
-      ).rejects.toMatchObject({ code: '23505' });
-      expect(
-        await db.select().from(accounts).where(eq(accounts.email, address)),
-      ).toEqual([expect.objectContaining({ id: existing.id })]);
-      expect(
-        await db
-          .select()
-          .from(oidcIdentities)
-          .where(eq(oidcIdentities.subject, otherSubject)),
-      ).toHaveLength(0);
-    });
-
-    it('matches mixed-case invitations and rejects duplicate email casing', async () => {
-      const address = email('mixed');
-      const mixed = address
-        .replace('mixed', 'MiXeD')
-        .replace('@example.test', '@Example.test');
-      const { id } = await createAccount(address);
-      const [{ id: teamId }] = await db
-        .insert(teams)
-        .values({ name: 'Mixed case' })
-        .returning({ id: teams.id });
-      try {
-        const invite = await db
-          .insert(invitations)
-          .values({ email: address, teamId, role: 'member', inviterId: id })
-          .returning({ id: invitations.id });
-        expect(await getUserInvitationsByEmail(mixed)).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({ id: invite[0].id }),
-          ]),
-        );
-        expect(await acceptInvitation(id, mixed, invite[0].id)).toBe(true);
-        await expect(
-          createOidcUser(issuer, subject(), 'Duplicate', mixed),
-        ).rejects.toMatchObject({ code: '23505' });
-        expect(
-          await db
-            .select()
-            .from(accounts)
-            .where(sql`lower(${accounts.email}) = ${address}`),
-        ).toHaveLength(1);
-      } finally {
-        await db.delete(invitations).where(eq(invitations.teamId, teamId));
-        await db.delete(teams).where(eq(teams.id, teamId));
-      }
-    });
-
-    it('consumes duplicate case-variant invitations after membership already exists', async () => {
-      const address = email('duplicate-invite');
-      const { id } = await createAccount(address);
-      const [{ id: teamId }] = await db
-        .insert(teams)
-        .values({ name: 'Duplicate invites' })
-        .returning({ id: teams.id });
-      try {
-        const invitationIds = await db
-          .insert(invitations)
-          .values([
-            { email: address, teamId, role: 'member', inviterId: id },
-            {
-              email: address.toUpperCase(),
-              teamId,
-              role: 'member',
-              inviterId: id,
-            },
-          ])
-          .returning({ id: invitations.id });
-        expect(await acceptInvitation(id, address, invitationIds[0].id)).toBe(
-          true,
-        );
-        expect(await acceptInvitation(id, address, invitationIds[1].id)).toBe(
-          true,
-        );
-        expect(
-          await db
-            .select()
-            .from(teamMembers)
-            .where(
-              and(
-                eq(teamMembers.accountId, id),
-                eq(teamMembers.teamId, teamId),
-              ),
-            ),
-        ).toHaveLength(1);
-        expect(
-          await db
-            .select()
-            .from(invitations)
-            .where(eq(invitations.teamId, teamId)),
-        ).toHaveLength(0);
-      } finally {
-        await db.delete(invitations).where(eq(invitations.teamId, teamId));
-        await db.delete(teamMembers).where(eq(teamMembers.teamId, teamId));
-        await db.delete(teams).where(eq(teams.id, teamId));
-      }
-    });
-
-    it('rejects an email belonging to another account without changing either identity', async () => {
-      const firstAddress = email('first');
-      const secondAddress = email('second');
-      const first = await createAccount(firstAddress);
-      const second = await createAccount(secondAddress);
-      await expect(
-        refreshOidcUserEmail(issuer, first.sub, secondAddress),
-      ).rejects.toMatchObject({ code: '23505' });
-      expect(await getUserByOidcIdentity(issuer, first.sub)).toMatchObject({
-        id: first.id,
-        email: firstAddress,
-      });
-      expect(await getUserByOidcIdentity(issuer, second.sub)).toMatchObject({
-        id: second.id,
-        email: secondAddress,
-      });
-      expect(await db.select().from(oidcIdentities)).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            issuer,
-            subject: first.sub,
-            accountId: first.id,
-          }),
-          expect.objectContaining({
-            issuer,
-            subject: second.sub,
-            accountId: second.id,
-          }),
-        ]),
+  it('consumes duplicate case-variant invitations after membership already exists', async () => {
+    const address = email('duplicate-invite');
+    const { id } = await createAccount(address);
+    const [{ id: teamId }] = await db
+      .insert(teams)
+      .values({ name: 'Duplicate invites' })
+      .returning({ id: teams.id });
+    try {
+      const invitationIds = await db
+        .insert(invitations)
+        .values([
+          { email: address, teamId, role: 'member', inviterId: id },
+          {
+            email: address.toUpperCase(),
+            teamId,
+            role: 'member',
+            inviterId: id,
+          },
+        ])
+        .returning({ id: invitations.id });
+      expect(await acceptInvitation(id, address, invitationIds[0].id)).toBe(
+        true,
       );
+      expect(await acceptInvitation(id, address, invitationIds[1].id)).toBe(
+        true,
+      );
+      expect(
+        await db
+          .select()
+          .from(teamMembers)
+          .where(
+            and(eq(teamMembers.accountId, id), eq(teamMembers.teamId, teamId)),
+          ),
+      ).toHaveLength(1);
+      expect(
+        await db
+          .select()
+          .from(invitations)
+          .where(eq(invitations.teamId, teamId)),
+      ).toHaveLength(0);
+    } finally {
+      await db.delete(invitations).where(eq(invitations.teamId, teamId));
+      await db.delete(teamMembers).where(eq(teamMembers.teamId, teamId));
+      await db.delete(teams).where(eq(teams.id, teamId));
+    }
+  });
+
+  it('rejects an email belonging to another account without changing either identity', async () => {
+    const firstAddress = email('first');
+    const secondAddress = email('second');
+    const first = await createAccount(firstAddress);
+    const second = await createAccount(secondAddress);
+    await expect(
+      refreshOidcUserEmail(issuer, first.sub, secondAddress),
+    ).rejects.toMatchObject({ code: '23505' });
+    expect(await getUserByOidcIdentity(issuer, first.sub)).toMatchObject({
+      id: first.id,
+      email: firstAddress,
     });
-  },
-);
+    expect(await getUserByOidcIdentity(issuer, second.sub)).toMatchObject({
+      id: second.id,
+      email: secondAddress,
+    });
+    expect(await db.select().from(oidcIdentities)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          issuer,
+          subject: first.sub,
+          accountId: first.id,
+        }),
+        expect.objectContaining({
+          issuer,
+          subject: second.sub,
+          accountId: second.id,
+        }),
+      ]),
+    );
+  });
+});

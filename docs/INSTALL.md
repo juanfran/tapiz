@@ -40,7 +40,12 @@ Follow these steps to set up Tapiz using Docker:
    the provider and registered client require POST authentication.
 
    Tapiz uses discovery, state, nonce and PKCE S256, and validates the ID
-   token with `openid-client`. If the ID token omits a verified email, Tapiz
+   token with `openid-client`, including its signature. The provider must sign
+   ID tokens with an asymmetric algorithm (RS256, PS256 or ES256) whose keys are
+   published in its JWKS; HS256-signed ID tokens are rejected. Login failures
+   are written to the API log with the provider's OAuth error code (for example
+   `invalid_client` or `access_denied`) or the network error code, never tokens
+   or secrets. If the ID token omits a verified email, Tapiz
    fetches UserInfo and checks its subject against the ID token. Users are
    keyed by issuer and subject. A
    verified email is required, but it is never used to link accounts: if the
@@ -48,15 +53,24 @@ Follow these steps to set up Tapiz using Docker:
    Migration `0011_youthful_vindicator` creates `oidc_identities` and applies
    automatically at API startup. Migration `0012_case_insensitive_accounts_email`
    adds a unique index on `lower(accounts.email)`. Before upgrading an existing
-   installation, run `pnpm check:email-collisions` with the production database
-   connection variables in an approved environment. It reports conflicting
-   account IDs and emails without modifying data. Resolve any collisions after
+   installation, check for accounts whose emails differ only in case. From a
+   source checkout, run `pnpm check:email-collisions` with the production
+   database connection variables in an approved environment. With Docker
+   Compose, run the same read-only query in the database container:
+
+   ```bash
+   docker compose exec db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT lower(email) AS email, array_agg(id ORDER BY id) AS account_ids FROM accounts GROUP BY lower(email) HAVING count(*) > 1"'
+   ```
+
+   Both report conflicting account IDs and emails without modifying data. Resolve any collisions after
    verifying account ownership; otherwise the migration fails at startup with a
    specific error instead of retrying forever. On a 409, an administrator should
    verify ownership with both providers and resolve the conflicting account or
-   email before retrying; do not link by email alone. Database regression tests
-   use a disposable PostgreSQL database and run with `pnpm test:oidc-db` after
-   setting the `POSTGRES_*` variables; ordinary unit tests skip them.
+   email before retrying; do not link by email alone. The API log records the
+   409 without the email address. The OIDC database regression tests run with
+   the rest of the API tests (`pnpm e2e:tests`, or only those suites with
+   `pnpm test:oidc-db`) against the database in the `POSTGRES_*` variables, so
+   point them at a development or disposable PostgreSQL database.
 
    Kubernetes probes: `/api/livez` checks the process only after the server
    starts listening, and `/api/readyz` checks PostgreSQL connectivity. Startup

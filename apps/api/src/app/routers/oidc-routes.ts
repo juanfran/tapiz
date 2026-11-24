@@ -76,6 +76,11 @@ export async function oidcRoutes(fastify: FastifyInstance) {
     } catch (error) {
       clearOidcCookies(reply);
       if (isUniqueViolation(error)) {
+        // The email is personal data; administrators can find the collision
+        // with the documented case-insensitive email query.
+        console.error(
+          'OIDC login rejected: verified email already belongs to another account (409)',
+        );
         return reply
           .status(409)
           .send('Account already exists; contact an administrator');
