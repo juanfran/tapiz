@@ -1,4 +1,4 @@
-import { eq, and, or, desc, sql } from 'drizzle-orm';
+import { eq, and, or, desc, sql, ne, inArray } from 'drizzle-orm';
 import { db } from './init-db.js';
 import * as schema from '../schema.js';
 import {
@@ -126,8 +126,146 @@ export async function getUserByApiTokenHash(apiTokenHash: string) {
   return users.at(0);
 }
 
-export async function deleteAccount(userId: string): Promise<unknown> {
-  return db.delete(schema.accounts).where(eq(schema.accounts.id, userId));
+/**
+ * Deletes an account and settles what it leaves behind, in one transaction:
+ * - teams where it was the only member are deleted (with their boards);
+ * - teams where it was the last admin get a new admin;
+ * - personal boards where it was the only member are deleted;
+ * - personal boards where it was the last admin get a new admin (a member if
+ *   possible, otherwise a guest), so they stay manageable. Team boards are
+ *   administered by the team admins and need no promotion.
+ * Other admins never change, and members are never promoted while an admin
+ * remains. Returns the uploaded file names of the deleted boards so the caller
+ * can remove them from disk once the transaction has committed.
+ */
+export async function removeAccount(userId: string): Promise<string[]> {
+  return db.transaction(async (tx) => {
+    const deletedTeamIds: string[] = [];
+    const deletedBoardIds: string[] = [];
+
+    const teamMemberships = await tx
+      .select({
+        teamId: schema.teamMembers.teamId,
+        role: schema.teamMembers.role,
+      })
+      .from(schema.teamMembers)
+      .where(eq(schema.teamMembers.accountId, userId));
+
+    for (const membership of teamMemberships) {
+      const others = await tx
+        .select({
+          accountId: schema.teamMembers.accountId,
+          role: schema.teamMembers.role,
+        })
+        .from(schema.teamMembers)
+        .where(
+          and(
+            eq(schema.teamMembers.teamId, membership.teamId),
+            ne(schema.teamMembers.accountId, userId),
+          ),
+        )
+        .orderBy(schema.teamMembers.accountId);
+
+      if (!others.length) {
+        deletedTeamIds.push(membership.teamId);
+      } else if (
+        membership.role === 'admin' &&
+        !others.some((other) => other.role === 'admin')
+      ) {
+        await tx
+          .update(schema.teamMembers)
+          .set({ role: 'admin' })
+          .where(
+            and(
+              eq(schema.teamMembers.teamId, membership.teamId),
+              eq(schema.teamMembers.accountId, others[0].accountId),
+            ),
+          );
+      }
+    }
+
+    const boardMemberships = await tx
+      .select({
+        boardId: schema.acountsToBoards.boardId,
+        role: schema.acountsToBoards.role,
+        teamId: schema.boards.teamId,
+      })
+      .from(schema.acountsToBoards)
+      .innerJoin(
+        schema.boards,
+        eq(schema.boards.id, schema.acountsToBoards.boardId),
+      )
+      .where(eq(schema.acountsToBoards.accountId, userId));
+
+    for (const membership of boardMemberships) {
+      if (membership.teamId) continue;
+
+      const others = await tx
+        .select({
+          accountId: schema.acountsToBoards.accountId,
+          role: schema.acountsToBoards.role,
+        })
+        .from(schema.acountsToBoards)
+        .where(
+          and(
+            eq(schema.acountsToBoards.boardId, membership.boardId),
+            ne(schema.acountsToBoards.accountId, userId),
+          ),
+        )
+        .orderBy(
+          sql`${schema.acountsToBoards.lastAccessedAt} desc nulls last`,
+          schema.acountsToBoards.accountId,
+        );
+
+      if (!others.length) {
+        deletedBoardIds.push(membership.boardId);
+      } else if (
+        membership.role === 'admin' &&
+        !others.some((other) => other.role === 'admin')
+      ) {
+        const newAdmin =
+          others.find((other) => other.role === 'member') ?? others[0];
+        await tx
+          .update(schema.acountsToBoards)
+          .set({ role: 'admin' })
+          .where(
+            and(
+              eq(schema.acountsToBoards.boardId, membership.boardId),
+              eq(schema.acountsToBoards.accountId, newAdmin.accountId),
+            ),
+          );
+      }
+    }
+
+    // Boards of deleted teams are removed by the cascade; collect their files.
+    const teamBoards = deletedTeamIds.length
+      ? await tx
+          .select({ id: schema.boards.id })
+          .from(schema.boards)
+          .where(inArray(schema.boards.teamId, deletedTeamIds))
+      : [];
+    const boardIds = [...deletedBoardIds, ...teamBoards.map((it) => it.id)];
+    const files = boardIds.length
+      ? await tx
+          .select({ name: schema.boardFiles.name })
+          .from(schema.boardFiles)
+          .where(inArray(schema.boardFiles.boardId, boardIds))
+      : [];
+
+    if (deletedBoardIds.length) {
+      await tx
+        .delete(schema.boards)
+        .where(inArray(schema.boards.id, deletedBoardIds));
+    }
+    if (deletedTeamIds.length) {
+      await tx
+        .delete(schema.teams)
+        .where(inArray(schema.teams.id, deletedTeamIds));
+    }
+    await tx.delete(schema.accounts).where(eq(schema.accounts.id, userId));
+
+    return files.map((file) => file.name);
+  });
 }
 
 export async function updateUserSettings(
