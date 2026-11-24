@@ -112,15 +112,59 @@ export async function deleteStarredBoardsByUser(
     );
 }
 
+/** Removing this member would leave the team without an admin or empty. */
+export class TeamMemberRemovalConflict extends Error {
+  constructor() {
+    super('The team would be left without an admin');
+  }
+}
+
 /**
  * Removes someone from a team (kicked or leaving). Their roles on the team's
  * boards come from that membership, so they are removed too: otherwise a
  * board admin role (for example on boards they created) would keep granting
  * access. Board admins added explicitly without joining the team are not
- * affected, because they are never team members.
+ * affected, because they are never team members, and nothing happens when the
+ * user is not a member.
+ *
+ * Throws TeamMemberRemovalConflict when the last admin or the last member
+ * would leave; the check runs under a lock on the team, so concurrent
+ * removals cannot both pass it.
+ *
+ * Returns whether a membership was removed.
  */
-export async function deleteMember(teamId: string, userId: string) {
-  await db.transaction(async (tx) => {
+export async function deleteMember(
+  teamId: string,
+  userId: string,
+): Promise<boolean> {
+  return db.transaction(async (tx) => {
+    await tx
+      .select({ id: schema.teams.id })
+      .from(schema.teams)
+      .where(eq(schema.teams.id, teamId))
+      .for('update');
+
+    const members = await tx
+      .select({
+        accountId: schema.teamMembers.accountId,
+        role: schema.teamMembers.role,
+      })
+      .from(schema.teamMembers)
+      .where(eq(schema.teamMembers.teamId, teamId));
+    const member = members.find((it) => it.accountId === userId);
+
+    if (!member) {
+      return false;
+    }
+
+    const others = members.filter((it) => it.accountId !== userId);
+    if (
+      !others.length ||
+      (member.role === 'admin' && !others.some((it) => it.role === 'admin'))
+    ) {
+      throw new TeamMemberRemovalConflict();
+    }
+
     await tx
       .delete(schema.teamMembers)
       .where(
@@ -151,6 +195,8 @@ export async function deleteMember(teamId: string, userId: string) {
           inArray(schema.starreds.boardId, teamBoards),
         ),
       );
+
+    return true;
   });
 }
 

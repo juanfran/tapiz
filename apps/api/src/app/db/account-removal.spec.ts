@@ -5,6 +5,7 @@ import { db, psqlClient, startDB } from './init-db.js';
 import { removeAccount } from './user-db.js';
 import {
   accounts,
+  accountsToSession,
   acountsToBoards,
   boardFiles,
   boards,
@@ -246,7 +247,7 @@ describe('account removal (PostgreSQL)', () => {
 
     const removed = await removeAccount(leaving);
 
-    expect(removed).toEqual({ boardIds: [], files: [] });
+    expect(removed).toMatchObject({ boardIds: [], files: [] });
     expect(await exists(boards, teamBoard)).toBe(true);
     expect(await boardRoles(teamBoard)).toEqual({});
   });
@@ -307,6 +308,56 @@ describe('account removal (PostgreSQL)', () => {
 
     expect(
       await db.select().from(accounts).where(eq(accounts.id, leaving)),
+    ).toHaveLength(0);
+  });
+
+  it('keeps shared teams and boards manageable when two admins leave at once', async () => {
+    const [first, second, member] = [
+      await account(),
+      await account(),
+      await account(),
+    ];
+    const teamId = await team({
+      [first]: 'admin',
+      [second]: 'admin',
+      [member]: 'member',
+    });
+    const boardId = await board({
+      [first]: 'admin',
+      [second]: 'admin',
+      [member]: 'member',
+    });
+
+    const results = await Promise.all([
+      removeAccount(first),
+      removeAccount(second),
+    ]);
+
+    expect(await teamRoles(teamId)).toEqual({ [member]: 'admin' });
+    expect(await boardRoles(boardId)).toEqual({ [member]: 'admin' });
+    expect(results.flatMap((result) => result.updatedTeamIds)).toEqual([
+      teamId,
+    ]);
+    expect(results.flatMap((result) => result.updatedBoardIds)).toEqual([
+      boardId,
+    ]);
+  });
+
+  it('deletes the sessions in the same transaction', async () => {
+    const leaving = await account();
+    await db.insert(accountsToSession).values({
+      id: `session-${randomUUID()}`,
+      userId: leaving,
+      expiresAt: new Date(Date.now() + 60_000),
+    });
+
+    await removeAccount(leaving);
+
+    expect(
+      await db
+        .select()
+        .from(accountsToSession)
+        .where(eq(accountsToSession.userId, leaving)),
     ).toHaveLength(0);
   });
 });

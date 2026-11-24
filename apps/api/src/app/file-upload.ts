@@ -103,7 +103,13 @@ export async function fileUpload(fastify: FastifyInstance) {
         animated: true,
       }).toFile('./uploads/' + fileName);
 
-      await db.board.addFileToBoard(req.body.boardId.value, fileName);
+      try {
+        await db.board.addFileToBoard(req.body.boardId.value, fileName);
+      } catch (error) {
+        // For example the board was deleted meanwhile: don't leave the file.
+        unlink('./uploads/' + fileName, () => undefined);
+        throw error;
+      }
 
       return {
         url: fileName,

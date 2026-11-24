@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { and, eq, inArray } from 'drizzle-orm';
 import { db, psqlClient, startDB } from './init-db.js';
-import { deleteMember } from './team-db.js';
+import { deleteMember, TeamMemberRemovalConflict } from './team-db.js';
 import { haveAccess } from './board-db.js';
 import {
   accounts,
@@ -123,5 +123,80 @@ describe('team member removal (PostgreSQL)', () => {
           .where(eq(starreds.accountId, removed))
       ).map((row) => row.boardId),
     ).toEqual([otherBoard]);
+  });
+
+  async function teamWith(members: Record<string, 'admin' | 'member'>) {
+    const [{ id }] = await db
+      .insert(teams)
+      .values({ name: 'Team removal' })
+      .returning({ id: teams.id });
+    teamIds.push(id);
+    await db.insert(teamMembers).values(
+      Object.entries(members).map(([accountId, role]) => ({
+        teamId: id,
+        accountId,
+        role,
+      })),
+    );
+    return id;
+  }
+
+  it('does nothing for someone who is not a team member', async () => {
+    const [admin, external] = [await account(), await account()];
+    const teamId = await teamWith({ [admin]: 'admin' });
+    const teamBoard = await board({ [external]: 'admin' }, teamId);
+
+    expect(await deleteMember(teamId, external)).toBe(false);
+
+    expect(await boardRole(teamBoard, external)).toBe('admin');
+    expect(await haveAccess(teamBoard, external)).toBe(true);
+  });
+
+  it('rejects removing the last admin or the last member', async () => {
+    const [admin, member, alone] = [
+      await account(),
+      await account(),
+      await account(),
+    ];
+    const teamId = await teamWith({ [admin]: 'admin', [member]: 'member' });
+    const soloTeam = await teamWith({ [alone]: 'admin' });
+    const teamBoard = await board({ [admin]: 'admin' }, teamId);
+
+    await expect(deleteMember(teamId, admin)).rejects.toBeInstanceOf(
+      TeamMemberRemovalConflict,
+    );
+    await expect(deleteMember(soloTeam, alone)).rejects.toBeInstanceOf(
+      TeamMemberRemovalConflict,
+    );
+    expect(await boardRole(teamBoard, admin)).toBe('admin');
+    expect(await deleteMember(teamId, member)).toBe(true);
+  });
+
+  it('lets only one of two admins leave at the same time', async () => {
+    const [first, second, member] = [
+      await account(),
+      await account(),
+      await account(),
+    ];
+    const teamId = await teamWith({
+      [first]: 'admin',
+      [second]: 'admin',
+      [member]: 'member',
+    });
+
+    const results = await Promise.allSettled([
+      deleteMember(teamId, first),
+      deleteMember(teamId, second),
+    ]);
+
+    expect(results.map((result) => result.status).sort()).toEqual([
+      'fulfilled',
+      'rejected',
+    ]);
+    const roles = await db
+      .select({ role: teamMembers.role })
+      .from(teamMembers)
+      .where(eq(teamMembers.teamId, teamId));
+    expect(roles.map((row) => row.role).sort()).toEqual(['admin', 'member']);
   });
 });

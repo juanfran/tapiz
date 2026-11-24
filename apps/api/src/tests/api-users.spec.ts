@@ -1,8 +1,9 @@
-import { lucia } from '../app/auth';
 import { API_TOKEN_PREFIX, hashApiToken } from '../app/api-token';
 import { createAuthContext } from '../app/app.context';
 import db from '../app/db';
-import { startDB } from '../app/db/init-db';
+import { db as drizzle, startDB } from '../app/db/init-db';
+import { accountsToSession } from '../app/schema';
+import { eq } from 'drizzle-orm';
 import { createMultipleUsers, getAuth, getUserCaller } from './test-helpers';
 import { vi } from 'vitest';
 
@@ -20,7 +21,13 @@ describe('user', () => {
     const user = await db.user.getUser(getAuth(5).sub);
 
     expect(user).toBeFalsy();
-    expect(lucia.invalidateUserSessions).toBeCalled();
+    // Sessions are deleted in the same transaction as the account.
+    expect(
+      await drizzle
+        .select()
+        .from(accountsToSession)
+        .where(eq(accountsToSession.userId, getAuth(5).sub)),
+    ).toHaveLength(0);
   });
 
   it('delete account should delete empty team/board', async () => {

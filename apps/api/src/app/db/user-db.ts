@@ -141,12 +141,55 @@ export async function getUserByApiTokenHash(apiTokenHash: string) {
  * the caller can drop realtime clients and remove the files from disk once
  * the transaction has committed.
  */
-export async function removeAccount(
-  userId: string,
-): Promise<{ boardIds: string[]; files: string[] }> {
+export interface RemovedAccount {
+  /** Boards deleted with the account. */
+  boardIds: string[];
+  /** Uploaded files of the deleted boards. */
+  files: string[];
+  /** Teams whose admin changed. */
+  updatedTeamIds: string[];
+  /** Kept boards whose admin or team changed. */
+  updatedBoardIds: string[];
+}
+
+export async function removeAccount(userId: string): Promise<RemovedAccount> {
   return db.transaction(async (tx) => {
     const deletedTeamIds: string[] = [];
     const deletedBoardIds: string[] = [];
+    const updatedTeamIds: string[] = [];
+    const updatedBoardIds = new Set<string>();
+
+    // Serialise with concurrent account removals, team membership changes and
+    // uploads on the same teams and boards: lock them in a stable order before
+    // reading any roles, so two last admins leaving at once cannot both skip
+    // the promotion.
+    const userTeamIds = tx
+      .select({ id: schema.teamMembers.teamId })
+      .from(schema.teamMembers)
+      .where(eq(schema.teamMembers.accountId, userId));
+    await tx
+      .select({ id: schema.teams.id })
+      .from(schema.teams)
+      .where(inArray(schema.teams.id, userTeamIds))
+      .orderBy(schema.teams.id)
+      .for('update');
+    await tx
+      .select({ id: schema.boards.id })
+      .from(schema.boards)
+      .where(
+        or(
+          inArray(
+            schema.boards.id,
+            tx
+              .select({ id: schema.acountsToBoards.boardId })
+              .from(schema.acountsToBoards)
+              .where(eq(schema.acountsToBoards.accountId, userId)),
+          ),
+          inArray(schema.boards.teamId, userTeamIds),
+        ),
+      )
+      .orderBy(schema.boards.id)
+      .for('update');
 
     const teamMemberships = await tx
       .select({
@@ -186,6 +229,7 @@ export async function removeAccount(
               eq(schema.teamMembers.accountId, others[0].accountId),
             ),
           );
+        updatedTeamIds.push(membership.teamId);
       }
     }
 
@@ -227,6 +271,7 @@ export async function removeAccount(
       others: Awaited<ReturnType<typeof otherBoardMembers>>,
     ) => {
       if (others.some((other) => other.role === 'admin')) return;
+      updatedBoardIds.add(boardId);
       const newAdmin =
         others.find((other) => other.role === 'member') ?? others[0];
       await tx
@@ -272,6 +317,7 @@ export async function removeAccount(
         .update(schema.boards)
         .set({ teamId: null })
         .where(eq(schema.boards.id, board.id));
+      updatedBoardIds.add(board.id);
       await ensureBoardAdmin(board.id, others);
     }
 
@@ -293,9 +339,21 @@ export async function removeAccount(
         .delete(schema.teams)
         .where(inArray(schema.teams.id, deletedTeamIds));
     }
+    // Sessions go in the same transaction: a failed removal keeps the user
+    // signed in, and no session created meanwhile can block the delete.
+    await tx
+      .delete(schema.accountsToSession)
+      .where(eq(schema.accountsToSession.userId, userId));
     await tx.delete(schema.accounts).where(eq(schema.accounts.id, userId));
 
-    return { boardIds, files: files.map((file) => file.name) };
+    return {
+      boardIds,
+      files: files.map((file) => file.name),
+      updatedTeamIds,
+      updatedBoardIds: [...updatedBoardIds].filter(
+        (id) => !boardIds.includes(id),
+      ),
+    };
   });
 }
 
