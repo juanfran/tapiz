@@ -81,8 +81,25 @@ export async function getUserTeams(userId: string): Promise<UserTeam[]> {
     });
 }
 
-export async function deleteTeam(teamId: string) {
-  return db.delete(schema.teams).where(eq(schema.teams.id, teamId));
+/**
+ * Deletes a team (its boards cascade) and returns the deleted board ids. The
+ * team lock makes a concurrent team-board creation either finish first (and
+ * be included) or wait and fail.
+ */
+export async function deleteTeam(teamId: string): Promise<string[]> {
+  return db.transaction(async (tx) => {
+    await tx
+      .select({ id: schema.teams.id })
+      .from(schema.teams)
+      .where(eq(schema.teams.id, teamId))
+      .for('update');
+    const boards = await tx
+      .select({ id: schema.boards.id })
+      .from(schema.boards)
+      .where(eq(schema.boards.teamId, teamId));
+    await tx.delete(schema.teams).where(eq(schema.teams.id, teamId));
+    return boards.map((board) => board.id);
+  });
 }
 
 /**

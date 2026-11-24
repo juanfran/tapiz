@@ -11,6 +11,7 @@ import {
   checkTeamBoardsAccess,
   revokeBoardAccess,
   revalidateUserSubscriptions,
+  revokeTeamSubscriptions,
 } from '../global.js';
 import { sendEvent, sendUserEvent } from '../subscriptor.js';
 import {
@@ -136,13 +137,11 @@ export const teamRouter = router({
   delete: teamAdminProcedure
     .input(z.object({ teamId: z.string().uuid() }))
     .mutation(async (req) => {
-      const boards = await db.board.getBoardsByTeam(req.input.teamId);
-
-      await db.team.deleteTeam(req.input.teamId);
+      const boardIds = await db.team.deleteTeam(req.input.teamId);
 
       // After the commit, so a join that started meanwhile is caught too.
-      boards.forEach((board) => {
-        revokeBoardAccess(board.id);
+      boardIds.forEach((boardId) => {
+        revokeBoardAccess(boardId);
       });
 
       sendEvent(
@@ -155,6 +154,8 @@ export const teamRouter = router({
         },
         req.ctx.correlationId,
       );
+      // After the event, so subscribers receive it before leaving the room.
+      revokeTeamSubscriptions(req.input.teamId);
 
       return {
         success: true,

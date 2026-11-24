@@ -2,7 +2,12 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { db, psqlClient, startDB } from './init-db.js';
-import { changeRole, deleteMember, AdminRequiredConflict } from './team-db.js';
+import {
+  changeRole,
+  deleteMember,
+  deleteTeam,
+  AdminRequiredConflict,
+} from './team-db.js';
 import {
   changeRole as changeBoardRole,
   createBoard,
@@ -394,5 +399,17 @@ describe('team member removal (PostgreSQL)', () => {
     // The team still owns its board.
     await leaveBoard(alone, teamBoard);
     expect(await boardRole(teamBoard, alone)).toBeUndefined();
+  });
+
+  it('returns the boards a team deletion removed', async () => {
+    const admin = await account();
+    const teamId = await teamWith({ [admin]: 'admin' });
+    const first = await board({ [admin]: 'admin' }, teamId);
+    const second = await board({ [admin]: 'member' }, teamId);
+
+    expect((await deleteTeam(teamId)).sort()).toEqual([first, second].sort());
+    expect(
+      await db.select().from(boards).where(eq(boards.teamId, teamId)),
+    ).toHaveLength(0);
   });
 });

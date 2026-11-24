@@ -406,4 +406,46 @@ describe('realtime board access', () => {
 
     expect(socket.join).not.toHaveBeenCalledWith('board:board-1');
   });
+
+  it('leaves a deleted team room, including a subscription still checking', async () => {
+    const { client, socket } = fakeClient();
+    haveAccessTeam.mockResolvedValueOnce(true);
+    await handler(socket, 'sub')({ type: 'team', id: 'team-9' });
+    const check = deferred<boolean>();
+    haveAccessTeam.mockReturnValueOnce(check.promise);
+    haveAccessTeam.mockResolvedValue(false);
+    const pending = handler(socket, 'sub')({ type: 'team', id: 'team-10' });
+
+    client.revokeTeamSubscription('team-9');
+    client.revokeTeamSubscription('team-10');
+    check.resolve(true);
+    await pending;
+
+    expect(socket.leave).toHaveBeenCalledWith('team:team-9');
+    expect(socket.join).not.toHaveBeenCalledWith('team:team-10');
+  });
+
+  it('does not error when a cancelled join fails its second access check', async () => {
+    const { client, socket, server } = fakeClient();
+    client.boardId = undefined;
+    const recheck = deferred<boolean>();
+    let rechecking = false;
+    let calls = 0;
+    haveAccess.mockImplementation(() => {
+      calls += 1;
+      if (calls === 1) return Promise.resolve(true);
+      rechecking = true;
+      return recheck.promise;
+    });
+    server.getBoardUser.mockResolvedValue({ privateId: 'p', role: 'member' });
+
+    const joining = join(client, joinableBoardId);
+    client.invalidatePendingJoins(joinableBoardId);
+    await vi.waitFor(() => expect(rechecking).toBe(true));
+    handler(socket, 'leaveBoard')(undefined);
+    recheck.resolve(false);
+    await joining;
+
+    expect(socket.emit).not.toHaveBeenCalledWith('error', 'unauthorized');
+  });
 });

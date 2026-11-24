@@ -376,6 +376,9 @@ export const boardRouter = router({
         },
         req.ctx.correlationId,
       );
+      // A demotion can remove access (for example on a private personal
+      // board), including for sockets only subscribed to its events.
+      checkBoardAccess(req.input.boardId);
 
       return {
         success: true,
