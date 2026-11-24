@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { createUserSessionCookie } from '../auth.js';
-import { logOidcError } from './oidc-error.js';
+import { logOidcDatabaseError, logOidcError } from './oidc-error.js';
 import {
   clearOidcCookies,
   isStaleOidcCallback,
@@ -34,8 +34,11 @@ export async function oidcRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get('/api/auth/oidc/callback', async (req, reply) => {
+    // Failures after the provider exchange are database/session failures.
+    let providerVerified = false;
     try {
       const identity = await oidcIdentity(req);
+      providerVerified = true;
       clearOidcCookies(reply);
       let user = await getUserByOidcIdentity(identity.issuer, identity.subject);
       if (!user) {
@@ -86,7 +89,11 @@ export async function oidcRoutes(fastify: FastifyInstance) {
           .status(409)
           .send('Account already exists; contact an administrator');
       }
-      logOidcError('OIDC login failed', error);
+      if (providerVerified) {
+        logOidcDatabaseError('OIDC login failed', error);
+      } else {
+        logOidcError('OIDC login failed', error);
+      }
       return reply.status(400).send('OIDC login failed');
     }
   });
