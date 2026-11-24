@@ -10,32 +10,39 @@ export function getServer() {
   return server;
 }
 
-// A client still joining a board is included through `pendingBoardId`: its
-// refresh or revocation is queued after the join, so a change committed while
-// the join was checking access is never missed.
+// Clients still joining a board are included too: their pending joins are
+// marked stale synchronously (so they re-check access before publishing
+// anything), and the refresh or revocation is queued after the join.
 
 export function checkBoardAccess(boardId: string) {
   server?.clients
     .filter(
-      (client) =>
-        client.boardId === boardId || client.pendingBoardId === boardId,
+      (client) => client.boardId === boardId || client.hasPendingJoin(boardId),
     )
-    .forEach((client) => void client.refreshAccess());
+    .forEach((client) => {
+      client.invalidatePendingJoins(boardId);
+      void client.refreshAccess();
+    });
 }
 
 export function checkTeamBoardsAccess(teamId: string) {
   server?.clients
-    .filter((client) => client.teamId === teamId || client.pendingBoardId)
-    .forEach((client) => void client.refreshAccess());
+    .filter((client) => client.teamId === teamId || client.hasPendingJoin())
+    .forEach((client) => {
+      client.invalidatePendingJoins();
+      void client.refreshAccess();
+    });
 }
 
 export function revokeBoardAccess(boardId: string) {
   server?.clients
     .filter(
-      (client) =>
-        client.boardId === boardId || client.pendingBoardId === boardId,
+      (client) => client.boardId === boardId || client.hasPendingJoin(boardId),
     )
-    .forEach((client) => void client.revokeBoard(boardId));
+    .forEach((client) => {
+      client.invalidatePendingJoins(boardId);
+      void client.revokeBoard(boardId);
+    });
 }
 
 /**

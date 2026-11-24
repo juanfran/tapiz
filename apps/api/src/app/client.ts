@@ -11,6 +11,12 @@ import { validation } from './validation.js';
 import { z } from 'zod/v4';
 import * as R from 'remeda';
 
+interface PendingJoin {
+  boardId: string;
+  stale: boolean;
+  cancelled: boolean;
+}
+
 const subSchema = z.object({
   type: z.union([z.literal('board'), z.literal('team')]),
   id: z.string(),
@@ -21,11 +27,15 @@ export class Client {
   teamId?: string;
   isAdmin!: boolean;
   sendTimeout?: ReturnType<typeof setTimeout>;
-  pendingMsgs: unknown[] = [];
+  // Batched broadcasts, per board room: a board switch must not send one
+  // board's updates to the other board's room.
+  pendingMsgs = new Map<string, unknown[]>();
   correlationId = '';
   private privateId = '';
-  /** Board being joined; it becomes `boardId` once the join is authorised. */
-  pendingBoardId?: string;
+  // Joins queued or in progress. A change of access committed meanwhile
+  // marks them stale (re-checked before publishing anything), and a leave or
+  // disconnect cancels them.
+  private pendingJoins = new Set<PendingJoin>();
   // Event rooms joined through `sub`, independent of the active board.
   private boardSubscriptions = new Set<string>();
   private teamSubscriptions = new Set<string>();
@@ -49,9 +59,11 @@ export class Client {
     });
     this.socket.on('disconnect', () => {
       this.disconnected = true;
+      this.cancelPendingJoins();
       this.close();
     });
     this.socket.on('leaveBoard', () => {
+      this.cancelPendingJoins();
       void this.serialize(() => this.close());
     });
 
@@ -338,20 +350,43 @@ export class Client {
     await this.join({ boardId });
   }
 
+  /** Whether a join (of `boardId`, or of any board) is queued or running. */
+  hasPendingJoin(boardId?: string) {
+    return [...this.pendingJoins].some(
+      (join) => !boardId || join.boardId === boardId,
+    );
+  }
+
+  /**
+   * Called synchronously when access changed (after the database commit):
+   * pending joins re-check access before publishing anything.
+   */
+  invalidatePendingJoins(boardId?: string) {
+    for (const join of this.pendingJoins) {
+      if (!boardId || join.boardId === boardId) join.stale = true;
+    }
+  }
+
+  private cancelPendingJoins() {
+    for (const join of this.pendingJoins) join.cancelled = true;
+  }
+
   private join(message: { boardId: string }) {
-    // Marked as soon as it is queued, so changes committed while it waits
-    // are queued after it too.
-    this.pendingBoardId = message.boardId;
+    // Registered as soon as it is queued, so changes committed while it waits
+    // reach it.
+    const pending: PendingJoin = {
+      boardId: message.boardId,
+      stale: false,
+      cancelled: false,
+    };
+    this.pendingJoins.add(pending);
     return this.serialize(async () => {
-      this.pendingBoardId = message.boardId;
       try {
-        await this.authorizeAndJoin(message);
+        await this.authorizeAndJoin(pending);
       } catch (e) {
         console.error(e);
       } finally {
-        if (this.pendingBoardId === message.boardId) {
-          this.pendingBoardId = undefined;
-        }
+        this.pendingJoins.delete(pending);
       }
     });
   }
@@ -362,8 +397,8 @@ export class Client {
    * access is still being checked. A revocation committed meanwhile finds
    * this client through `pendingBoardId` and is queued after the join.
    */
-  private async authorizeAndJoin(message: { boardId: string }) {
-    const boardId = message.boardId;
+  private async authorizeAndJoin(pending: PendingJoin) {
+    const boardId = pending.boardId;
 
     if (!z.string().uuid().safeParse(boardId).success) {
       this.unauthorizedClose();
@@ -375,13 +410,42 @@ export class Client {
       return;
     }
 
-    const teamId = (await db.board.getBoardBasic(boardId))?.teamId ?? undefined;
+    let teamId = (await db.board.getBoardBasic(boardId))?.teamId ?? undefined;
     await this.server.createBoard(boardId);
     const boardUser = await this.server.getBoardUser(boardId, this.id);
-    const isAdmin = await this.isBoardAdmin(boardId);
-    const board = this.server.getBoard(boardId);
+    let isAdmin = await this.isBoardAdmin(boardId);
 
-    if (this.disconnected || !boardUser || !board) {
+    if (!boardUser) {
+      return;
+    }
+
+    // Settle everything that may have changed while awaiting, until nothing
+    // did; only then activate, without awaiting again.
+    for (let attempt = 0; ; attempt++) {
+      if (pending.cancelled || this.disconnected) {
+        return;
+      }
+      if (pending.stale) {
+        pending.stale = false;
+        if (!(await db.board.haveAccess(boardId, this.id))) {
+          this.socket.emit('error', 'unauthorized');
+          return;
+        }
+        teamId = (await db.board.getBoardBasic(boardId))?.teamId ?? undefined;
+        isAdmin = await this.isBoardAdmin(boardId);
+        continue;
+      }
+      // The last viewer may have released the board's state meanwhile.
+      if (!this.server.getBoard(boardId)) {
+        if (attempt > 3) return;
+        await this.server.createBoard(boardId);
+        continue;
+      }
+      break;
+    }
+
+    const board = this.server.getBoard(boardId);
+    if (!board) {
       return;
     }
 
@@ -421,9 +485,7 @@ export class Client {
 
     this.socket.join(boardId);
 
-    this.sendToClient(
-      this.getSetStateAction(this.server.getBoard(boardId) ?? board),
-    );
+    this.sendToClient(this.getSetStateAction(board));
   }
 
   async refreshIsAdmin() {
@@ -463,16 +525,20 @@ export class Client {
   }
 
   sendAll(boardId: string, msg: unknown) {
-    this.pendingMsgs.push(msg);
+    const messages = this.pendingMsgs.get(boardId) ?? [];
+    messages.push(msg);
+    this.pendingMsgs.set(boardId, messages);
 
     if (this.sendTimeout) {
       return;
     }
 
     this.sendTimeout = setTimeout(() => {
-      // send to all users in boardId but client
-      this.socket.to(boardId).emit('board', this.pendingMsgs);
-      this.pendingMsgs = [];
+      // send to all users in each board but this client
+      for (const [room, roomMessages] of this.pendingMsgs) {
+        this.socket.to(room).emit('board', roomMessages);
+      }
+      this.pendingMsgs.clear();
       this.sendTimeout = undefined;
     }, 50);
   }

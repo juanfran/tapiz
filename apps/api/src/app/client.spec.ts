@@ -182,7 +182,7 @@ describe('realtime board access', () => {
     server.getBoardUser.mockResolvedValue({ privateId: 'p', role: 'member' });
 
     const joining = join(client, joinableBoardId);
-    expect(client.pendingBoardId).toBe(joinableBoardId);
+    expect(client.hasPendingJoin(joinableBoardId)).toBe(true);
     expect(
       await client.parseStateActionMessage([
         { op: 'add', data: { type: 'note', id: 'n', content: {} } },
@@ -192,7 +192,7 @@ describe('realtime board access', () => {
     granted.resolve(true);
     await joining;
     expect(client.boardId).toBe(joinableBoardId);
-    expect(client.pendingBoardId).toBeUndefined();
+    expect(client.hasPendingJoin()).toBe(false);
   });
 
   it('leaves the board when asked to while the join was in progress', async () => {
@@ -209,25 +209,87 @@ describe('realtime board access', () => {
     await client.revokeBoard('unrelated');
 
     expect(client.boardId).toBeUndefined();
-    expect(socket.leave).toHaveBeenCalledWith(joinableBoardId);
+    // The abandoned join published nothing.
+    expect(socket.join).not.toHaveBeenCalled();
+    expect(socket.emit).not.toHaveBeenCalledWith('board', expect.anything());
   });
 
-  it('applies a revocation that arrives while the join is in progress', async () => {
+  it('publishes nothing for a join whose access is revoked meanwhile', async () => {
     const { client, socket, server } = fakeClient();
     client.boardId = undefined;
-    haveAccess.mockResolvedValue(true);
+    // Allowed when the join starts, revoked when it re-checks.
+    haveAccess.mockResolvedValueOnce(true).mockResolvedValue(false);
     const member = deferred<unknown>();
     server.getBoardUser.mockReturnValue(member.promise);
 
     const joining = join(client, joinableBoardId);
     await vi.waitFor(() => expect(server.getBoardUser).toHaveBeenCalled());
+    // What revokeBoardAccess / checkBoardAccess do after the commit.
+    client.invalidatePendingJoins(joinableBoardId);
     const revoking = client.revokeBoard(joinableBoardId);
     member.resolve({ privateId: 'p', role: 'member' });
     await Promise.all([joining, revoking]);
 
     expect(client.boardId).toBeUndefined();
+    expect(socket.join).not.toHaveBeenCalled();
+    expect(socket.emit).not.toHaveBeenCalledWith('board', expect.anything());
     expect(socket.emit).toHaveBeenCalledWith('error', 'unauthorized');
-    expect(socket.leave).toHaveBeenCalledWith(joinableBoardId);
+  });
+
+  it('keeps every queued join reachable by invalidations', async () => {
+    const { client, socket, server } = fakeClient();
+    client.boardId = undefined;
+    const otherBoardId = '00000000-0000-4000-8000-000000000003';
+    const firstCheck = deferred<boolean>();
+    haveAccess.mockReturnValueOnce(firstCheck.promise);
+    server.getBoardUser.mockResolvedValue({ privateId: 'p', role: 'member' });
+
+    const first = join(client, joinableBoardId);
+    const second = join(client, otherBoardId);
+    expect(client.hasPendingJoin(joinableBoardId)).toBe(true);
+    expect(client.hasPendingJoin(otherBoardId)).toBe(true);
+
+    client.invalidatePendingJoins(joinableBoardId);
+    haveAccess.mockImplementation(async (boardId: string) => {
+      return boardId !== joinableBoardId;
+    });
+    firstCheck.resolve(true);
+    await Promise.all([first, second]);
+
+    expect(socket.join).not.toHaveBeenCalledWith(joinableBoardId);
+    expect(client.boardId).toBe(otherBoardId);
+  });
+
+  it('reloads a board whose state was released during the join', async () => {
+    const { client, server } = fakeClient();
+    client.boardId = undefined;
+    haveAccess.mockResolvedValue(true);
+    server.getBoardUser.mockResolvedValue({ privateId: 'p', role: 'member' });
+    // Released by the last viewer, then loaded again.
+    server.getBoard.mockReturnValueOnce(undefined as never);
+
+    await join(client, joinableBoardId);
+
+    expect(server.createBoard).toHaveBeenCalledTimes(2);
+    expect(client.boardId).toBe(joinableBoardId);
+  });
+
+  it('batches broadcasts per board room', () => {
+    vi.useFakeTimers();
+    const { client, socket } = fakeClient();
+    const rooms = new Map<string, ReturnType<typeof vi.fn>>();
+    socket.to.mockImplementation(((room: string) => {
+      const emit = vi.fn();
+      rooms.set(room, emit);
+      return { emit };
+    }) as never);
+
+    client.sendAll('board-a', 'left a');
+    client.sendAll('board-b', 'joined b');
+    vi.advanceTimersByTime(60);
+
+    expect(rooms.get('board-a')).toHaveBeenCalledWith('board', ['left a']);
+    expect(rooms.get('board-b')).toHaveBeenCalledWith('board', ['joined b']);
   });
 
   it('does not activate a board after the socket disconnected', async () => {
