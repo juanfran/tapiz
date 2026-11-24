@@ -11,6 +11,7 @@ function fakeClient() {
     on: vi.fn(),
     emit: vi.fn(),
     leave: vi.fn((room: string) => rooms.get(room)?.delete('socket-1')),
+    join: vi.fn(),
     disconnect: vi.fn(),
     to: vi.fn(() => ({ emit: vi.fn() })),
   };
@@ -33,15 +34,23 @@ function fakeClient() {
 }
 
 const realBoard = db.board;
+const realTeam = db.team;
 const haveAccess = vi.fn();
+const haveAccessTeam = vi.fn();
 
 beforeEach(() => {
   // `db.board` is an ES module namespace; replace it on the plain `db` object.
-  db.board = { ...realBoard, haveAccess } as typeof realBoard;
+  db.board = {
+    ...realBoard,
+    haveAccess,
+    getBoardBasic: vi.fn(async () => undefined),
+  } as unknown as typeof realBoard;
+  db.team = { ...realTeam, haveAccessTeam } as typeof realTeam;
 });
 
 afterEach(() => {
   db.board = realBoard;
+  db.team = realTeam;
   vi.clearAllMocks();
   vi.useRealTimers();
 });
@@ -67,7 +76,41 @@ describe('realtime board access', () => {
         { op: 'add', data: { type: 'note', id: 'n', content: {} } },
       ] as never),
     ).toEqual([]);
+    // Ignored before reaching the board state.
+    server.getBoard.mockClear();
+    await client.parseStateActionMessage([] as never);
     expect(server.getBoard).not.toHaveBeenCalled();
     expect(socket.disconnect).not.toHaveBeenCalled();
+  });
+
+  it('forgets a board whose state is still loading without throwing', () => {
+    const { client, socket, server } = fakeClient();
+    server.getBoard.mockReturnValue(undefined as never);
+
+    expect(() => client.revokeBoard()).not.toThrow();
+
+    expect(server.setState).not.toHaveBeenCalled();
+    expect(socket.leave).toHaveBeenCalledWith('board-1');
+    expect(client.boardId).toBeUndefined();
+  });
+
+  it('leaves event rooms it lost access to, even for inactive boards', async () => {
+    const { client, socket } = fakeClient();
+    const on = (event: string) =>
+      socket.on.mock.calls.find(([name]) => name === event)?.[1] as (
+        message: unknown,
+      ) => Promise<void>;
+    haveAccess.mockResolvedValue(true);
+    haveAccessTeam.mockResolvedValue(true);
+    await on('sub')({ type: 'board', id: 'old-board' });
+    await on('sub')({ type: 'team', id: 'team-1' });
+    expect(socket.join).toHaveBeenCalledWith('board:old-board');
+
+    haveAccess.mockResolvedValue(false);
+    haveAccessTeam.mockResolvedValue(false);
+    await client.revalidateSubscriptions();
+
+    expect(socket.leave).toHaveBeenCalledWith('board:old-board');
+    expect(socket.leave).toHaveBeenCalledWith('team:team-1');
   });
 });

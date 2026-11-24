@@ -34,12 +34,15 @@ export function revokeBoardAccess(boardId: string) {
     });
 }
 
-/** Stops a former team member's sockets from receiving the team's events. */
-export function revokeTeamSubscription(teamId: string, userId: string) {
+/**
+ * Re-checks the team and board event rooms of a user's sockets, for example
+ * after they left a team, and leaves the ones they lost access to.
+ */
+export function revalidateUserSubscriptions(userId: string) {
   server?.clients
     .filter((client) => client.id === userId)
     .forEach((client) => {
-      void client.socket.leave(`team:${teamId}`);
+      void client.revalidateSubscriptions();
     });
 }
 

@@ -15,19 +15,49 @@ import {
   disconnectUser,
   revokeBoardAccess,
 } from '../global.js';
+import { sendEvent } from '../subscriptor.js';
 
 export const userRouter = router({
   removeAccount: protectedProcedure.mutation(async (req) => {
     // Sessions are deleted inside the same transaction.
     const removed = await db.user.removeAccount(req.ctx.user.sub);
-    deleteUploadedFiles(removed.files);
-    // Sockets are authenticated only when they connect, so close them now,
-    // drop everyone else from the boards that no longer exist, and refresh
-    // the cached admin rights of people promoted on the remaining ones.
-    disconnectUser(req.ctx.user.sub);
-    removed.boardIds.forEach((boardId) => revokeBoardAccess(boardId));
-    removed.updatedBoardIds.forEach((boardId) => checkBoardAccess(boardId));
-    removed.updatedTeamIds.forEach((teamId) => checkTeamBoardsAccess(teamId));
+
+    // The account is gone at this point; cleanup failures are logged rather
+    // than reported as a failed deletion.
+    try {
+      deleteUploadedFiles(removed.files);
+      // Sockets are authenticated only when they connect, so close them now,
+      // drop everyone else from the boards that no longer exist, and refresh
+      // the cached admin rights of people promoted on the remaining ones.
+      disconnectUser(req.ctx.user.sub);
+      removed.boardIds.forEach((boardId) => revokeBoardAccess(boardId));
+      removed.updatedBoardIds.forEach((boardId) => checkBoardAccess(boardId));
+      removed.updatedTeamIds.forEach((teamId) => checkTeamBoardsAccess(teamId));
+      // Same events as a manual role change, so open pages update.
+      for (const promotion of removed.promotions) {
+        if ('teamId' in promotion) {
+          sendEvent(
+            {
+              room: `team:${promotion.teamId}`,
+              event: 'changeRoleTeam',
+              content: { userId: promotion.userId, role: 'admin' },
+            },
+            req.ctx.correlationId,
+          );
+        } else {
+          sendEvent(
+            {
+              room: `board:${promotion.boardId}`,
+              event: 'changeRoleBoard',
+              content: { userId: promotion.userId, role: 'admin' },
+            },
+            req.ctx.correlationId,
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Account removal cleanup failed', error);
+    }
 
     return {
       success: true,

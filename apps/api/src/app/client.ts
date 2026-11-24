@@ -10,8 +10,6 @@ import db from './db/index.js';
 import { validation } from './validation.js';
 import { z } from 'zod/v4';
 import * as R from 'remeda';
-import { haveAccess } from './db/board-db.js';
-import { haveAccessTeam } from './db/team-db.js';
 
 const subSchema = z.object({
   type: z.union([z.literal('board'), z.literal('team')]),
@@ -26,6 +24,9 @@ export class Client {
   pendingMsgs: unknown[] = [];
   correlationId = '';
   private privateId = '';
+  // Event rooms joined through `sub`, independent of the active board.
+  private boardSubscriptions = new Set<string>();
+  private teamSubscriptions = new Set<string>();
 
   constructor(
     public socket: Socket,
@@ -58,19 +59,21 @@ export class Client {
       const { type, id } = messageResult;
 
       if (type === 'board') {
-        const validUser = await haveAccess(id, this.id);
+        const validUser = await db.board.haveAccess(id, this.id);
 
         if (validUser) {
           this.socket.join(`board:${id}`);
+          this.boardSubscriptions.add(id);
         } else {
           this.unauthorizedClose();
           return;
         }
       } else if (type === 'team') {
-        const validUser = await haveAccessTeam(id, this.id);
+        const validUser = await db.team.haveAccessTeam(id, this.id);
 
         if (validUser) {
           this.socket.join(`team:${id}`);
+          this.teamSubscriptions.add(id);
         } else {
           this.unauthorizedClose();
           return;
@@ -164,14 +167,40 @@ export class Client {
       return;
     }
 
-    const haveAccess = await db.board.haveAccess(this.boardId, this.id);
+    const boardId = this.boardId;
+    const haveAccess = await db.board.haveAccess(boardId, this.id);
+
+    if (this.boardId !== boardId) {
+      return;
+    }
 
     if (!haveAccess) {
       this.revokeBoard();
       return;
     }
 
+    // The board may have changed team (for example after an account removal).
+    this.teamId = (await db.board.getBoardBasic(boardId))?.teamId ?? undefined;
     this.refreshIsAdmin();
+  }
+
+  /**
+   * Re-checks the event rooms joined through `sub` (which can outlive the
+   * active board) and leaves the ones the user no longer has access to.
+   */
+  async revalidateSubscriptions() {
+    for (const boardId of [...this.boardSubscriptions]) {
+      if (!(await db.board.haveAccess(boardId, this.id))) {
+        this.boardSubscriptions.delete(boardId);
+        void this.socket.leave(`board:${boardId}`);
+      }
+    }
+    for (const teamId of [...this.teamSubscriptions]) {
+      if (!(await db.team.haveAccessTeam(teamId, this.id))) {
+        this.teamSubscriptions.delete(teamId);
+        void this.socket.leave(`team:${teamId}`);
+      }
+    }
   }
 
   /**
@@ -182,12 +211,23 @@ export class Client {
    */
   revokeBoard() {
     this.socket.emit('error', 'unauthorized');
-    if (this.boardId) void this.socket.leave(`board:${this.boardId}`);
+    if (this.boardId) {
+      this.boardSubscriptions.delete(this.boardId);
+      void this.socket.leave(`board:${this.boardId}`);
+    }
     this.close();
   }
 
   close() {
     if (!this.boardId) {
+      return;
+    }
+
+    // A join may still be loading the board's state: just forget the board.
+    if (!this.server.getBoard(this.boardId)) {
+      this.socket.leave(this.boardId);
+      this.boardId = undefined;
+      this.teamId = undefined;
       return;
     }
 
@@ -284,7 +324,13 @@ export class Client {
     this.boardId = message.boardId;
 
     try {
-      await this.server.createBoard(this.boardId);
+      await this.server.createBoard(message.boardId);
+
+      // Revoked or switched boards while the state was loading.
+      if (this.boardId !== message.boardId) {
+        return;
+      }
+
       const user: UserNode = {
         type: 'user',
         id: this.id,

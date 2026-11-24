@@ -3,7 +3,11 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { db, psqlClient, startDB } from './init-db.js';
 import { changeRole, deleteMember, AdminRequiredConflict } from './team-db.js';
-import { changeRole as changeBoardRole } from './board-db.js';
+import {
+  changeRole as changeBoardRole,
+  createBoard,
+  NotTeamMemberError,
+} from './board-db.js';
 import { haveAccess } from './board-db.js';
 import {
   accounts,
@@ -259,5 +263,23 @@ describe('team member removal (PostgreSQL)', () => {
         await boardRole(boardId, second),
       ].sort(),
     ).toEqual(['admin', 'member']);
+  });
+
+  it('does not let a removed member create a board in the team', async () => {
+    const [admin, removed] = [await account(), await account()];
+    const teamId = await teamWith({ [admin]: 'admin', [removed]: 'member' });
+    await deleteMember(teamId, removed);
+
+    await expect(
+      createBoard('After removal', removed, [], teamId, {
+        requireTeamMember: true,
+      }),
+    ).rejects.toBeInstanceOf(NotTeamMemberError);
+
+    const created = await createBoard('Member board', admin, [], teamId, {
+      requireTeamMember: true,
+    });
+    boardIds.push(created.id);
+    expect(await boardRole(created.id, admin)).toBe('admin');
   });
 });

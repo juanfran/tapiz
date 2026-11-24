@@ -307,27 +307,54 @@ export async function getUsersBoardsByTeam(
   }));
 }
 
+/** The owner is not (or no longer) a member of the board's team. */
+export class NotTeamMemberError extends Error {
+  constructor() {
+    super('Not a team member');
+  }
+}
+
 export async function createBoard(
   name = 'New board',
   ownerId: string,
   board: TuNode[],
   teamId: string | null,
+  options: { requireTeamMember?: boolean } = {},
 ) {
-  const result = await db
-    .insert(schema.boards)
-    .values({ name, board, teamId })
-    .returning();
+  return db.transaction(async (tx) => {
+    if (teamId && options.requireTeamMember) {
+      // Shares the team lock with deleteMember, so a concurrent removal from
+      // the team either happens first (and this fails) or waits.
+      await tx
+        .select({ id: schema.teams.id })
+        .from(schema.teams)
+        .where(eq(schema.teams.id, teamId))
+        .for('share');
+      const [membership] = await tx
+        .select({ accountId: schema.teamMembers.accountId })
+        .from(schema.teamMembers)
+        .where(
+          and(
+            eq(schema.teamMembers.teamId, teamId),
+            eq(schema.teamMembers.accountId, ownerId),
+          ),
+        );
+      if (!membership) throw new NotTeamMemberError();
+    }
 
-  await db
-    .insert(schema.acountsToBoards)
-    .values({
+    const result = await tx
+      .insert(schema.boards)
+      .values({ name, board, teamId })
+      .returning();
+
+    await tx.insert(schema.acountsToBoards).values({
       accountId: ownerId,
       boardId: result[0].id,
       role: 'admin',
-    })
-    .returning();
+    });
 
-  return result[0];
+    return result[0];
+  });
 }
 
 export async function getBoardFiles(boardId: string) {

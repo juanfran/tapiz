@@ -3,7 +3,17 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
-import { exhaustMap, filter, map, mergeMap, switchMap, tap } from 'rxjs';
+import {
+  catchError,
+  exhaustMap,
+  filter,
+  map,
+  mergeMap,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
+import { NotificationService } from '../../../../shared/notification/notification.service';
 import { HomeActions } from '../home.actions';
 import { AuthService } from '../../../../services/auth.service';
 import { TeamApiService } from '../../../../services/team-api.service';
@@ -17,7 +27,11 @@ import { selectRouteParams } from '../../../../router.selectors';
 export const initHomeFeatchTeams$ = createEffect(
   (actions$ = inject(Actions), teamApiService = inject(TeamApiService)) => {
     return actions$.pipe(
-      ofType(HomeActions.initHome, HomeActions.acceptInvitationSuccess),
+      ofType(
+        HomeActions.initHome,
+        HomeActions.acceptInvitationSuccess,
+        HomeActions.fetchTeams,
+      ),
       exhaustMap(() => {
         return teamApiService.fetchTeams();
       }),
@@ -516,20 +530,34 @@ export const leaveTeam$ = createEffect(
     actions$ = inject(Actions),
     teamApiService = inject(TeamApiService),
     router = inject(Router),
+    notificationService = inject(NotificationService),
   ) => {
     return actions$.pipe(
       ofType(HomeActions.leaveTeam),
       mergeMap((action) => {
-        return teamApiService.leaveTeam(action.id);
+        return teamApiService.leaveTeam(action.id).pipe(
+          tap(() => {
+            router.navigate(['/']);
+          }),
+          map(() => null),
+          // The API refuses to let the last admin (or member) leave; the team
+          // was removed optimistically, so reload it and explain why.
+          catchError(() => {
+            notificationService.open({
+              message:
+                'You cannot leave this team: make someone else an admin first, or delete the team.',
+              action: 'Close',
+              type: 'error',
+            });
+            return of(HomeActions.fetchTeams());
+          }),
+        );
       }),
-      tap(() => {
-        router.navigate(['/']);
-      }),
+      filterNil(),
     );
   },
   {
     functional: true,
-    dispatch: false,
   },
 );
 
