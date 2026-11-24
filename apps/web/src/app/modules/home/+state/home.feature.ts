@@ -80,7 +80,8 @@ const reducer = createReducer(
   }),
   on(
     HomeActions.removeBoard,
-    HomeActions.leaveBoard,
+    // Only once the server agreed: a refused leave keeps the board listed.
+    HomeActions.leaveBoardSuccess,
     (state, { id }): HomeState => {
       return {
         ...state,

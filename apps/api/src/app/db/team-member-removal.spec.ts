@@ -379,4 +379,20 @@ describe('team member removal (PostgreSQL)', () => {
       expect(created.reason).not.toMatchObject({ code: '40P01' });
     }
   });
+
+  it('refuses to let the last member leave a personal board, not a team board', async () => {
+    const [alone, admin] = [await account(), await account()];
+    const personalBoard = await board({ [alone]: 'guest' });
+    const teamId = await teamWith({ [admin]: 'admin', [alone]: 'member' });
+    const teamBoard = await board({ [alone]: 'member' }, teamId);
+
+    await expect(leaveBoard(alone, personalBoard)).rejects.toBeInstanceOf(
+      AdminRequiredConflict,
+    );
+    expect(await boardRole(personalBoard, alone)).toBe('guest');
+
+    // The team still owns its board.
+    await leaveBoard(alone, teamBoard);
+    expect(await boardRole(teamBoard, alone)).toBeUndefined();
+  });
 });

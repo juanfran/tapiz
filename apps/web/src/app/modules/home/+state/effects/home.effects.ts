@@ -184,11 +184,12 @@ export const leaveBoard$ = createEffect(
       ofType(HomeActions.leaveBoard),
       mergeMap((action) => {
         return boardApiService.leaveBoard(action.id).pipe(
+          map(() => HomeActions.leaveBoardSuccess({ id: action.id })),
           // Keep the effect alive; the last admin cannot leave a shared board.
           catchError((error: unknown) => {
             notificationService.open({
               message: isConflict(error)
-                ? 'You cannot leave this board: make someone else an admin first.'
+                ? 'You cannot leave this board: make someone else an admin first, or delete it.'
                 : 'Could not leave the board. Please try again.',
               action: 'Close',
               type: 'error',
@@ -197,11 +198,11 @@ export const leaveBoard$ = createEffect(
           }),
         );
       }),
+      filterNil(),
     );
   },
   {
     functional: true,
-    dispatch: false,
   },
 );
 
@@ -568,7 +569,9 @@ export const leaveTeam$ = createEffect(
           tap(() => {
             router.navigate(['/']);
           }),
-          map(() => null),
+          // Reload so a fetch that started before the leave cannot bring the
+          // team back into the list.
+          map(() => HomeActions.fetchTeams()),
           // The team was removed optimistically: reload it and explain why.
           catchError((error: unknown) => {
             notificationService.open({

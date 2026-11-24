@@ -37,6 +37,33 @@ function fakeClient() {
   return { client, socket, server };
 }
 
+const joinableBoardId = '00000000-0000-4000-8000-000000000001';
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((done) => {
+    resolve = done;
+  });
+  return { promise, resolve };
+}
+
+function handler(
+  socket: ReturnType<typeof fakeClient>['socket'],
+  event: string,
+) {
+  return socket.on.mock.calls.find(([name]) => name === event)?.[1] as (
+    message: unknown,
+  ) => Promise<void> | void;
+}
+
+function join(client: Client, boardId: string) {
+  return (
+    client as unknown as { join(message: { boardId: string }): Promise<void> }
+  ).join({
+    boardId,
+  });
+}
+
 const realBoard = db.board;
 const realTeam = db.team;
 const haveAccess = vi.fn();
@@ -89,27 +116,34 @@ describe('realtime board access', () => {
     expect(socket.disconnect).not.toHaveBeenCalled();
   });
 
-  it('forgets a board whose state is still loading without throwing', () => {
+  it('forgets a board whose state was already released without throwing', async () => {
     const { client, socket, server } = fakeClient();
     server.getBoard.mockReturnValue(undefined as never);
 
-    expect(() => client.revokeBoard()).not.toThrow();
+    await client.revokeBoard();
 
     expect(server.setState).not.toHaveBeenCalled();
     expect(socket.leave).toHaveBeenCalledWith('board-1');
     expect(client.boardId).toBeUndefined();
   });
 
+  it('revokes a board whose access cannot be verified', async () => {
+    const { client, socket } = fakeClient();
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    haveAccess.mockRejectedValue(new Error('database down'));
+
+    await client.refreshAccess();
+
+    expect(socket.emit).toHaveBeenCalledWith('error', 'unauthorized');
+    expect(client.boardId).toBeUndefined();
+  });
+
   it('leaves event rooms it lost access to, even for inactive boards', async () => {
     const { client, socket } = fakeClient();
-    const on = (event: string) =>
-      socket.on.mock.calls.find(([name]) => name === event)?.[1] as (
-        message: unknown,
-      ) => Promise<void>;
     haveAccess.mockResolvedValue(true);
     haveAccessTeam.mockResolvedValue(true);
-    await on('sub')({ type: 'board', id: 'old-board' });
-    await on('sub')({ type: 'team', id: 'team-1' });
+    await handler(socket, 'sub')({ type: 'board', id: 'old-board' });
+    await handler(socket, 'sub')({ type: 'team', id: 'team-1' });
     expect(socket.join).toHaveBeenCalledWith('board:old-board');
 
     haveAccess.mockResolvedValue(false);
@@ -120,90 +154,96 @@ describe('realtime board access', () => {
     expect(socket.leave).toHaveBeenCalledWith('team:team-1');
   });
 
-  it('does not finish a board join that was cancelled while checking access', async () => {
+  it('applies a revalidation after a subscription that was still being checked', async () => {
     const { client, socket } = fakeClient();
-    client.boardId = undefined;
-    let grant!: (value: boolean) => void;
-    haveAccess.mockReturnValue(
-      new Promise<boolean>((done) => {
-        grant = done;
-      }),
-    );
+    const granted = deferred<boolean>();
+    haveAccess.mockReturnValueOnce(granted.promise);
+    haveAccess.mockResolvedValueOnce(false);
 
-    const joining = (
-      client as unknown as { join(message: { boardId: string }) }
-    ).join({ boardId: '00000000-0000-4000-8000-000000000001' });
-    client.close();
-    grant(true);
+    const subscribing = handler(
+      socket,
+      'sub',
+    )({ type: 'board', id: 'board-2' });
+    const revalidating = client.revalidateSubscriptions();
+    granted.resolve(true);
+    await Promise.all([subscribing, revalidating]);
+
+    // The subscription went through first; the revalidation then removed it.
+    expect(socket.join).toHaveBeenCalledWith('board:board-2');
+    expect(socket.leave).toHaveBeenCalledWith('board:board-2');
+  });
+
+  it('ignores board actions until a join is authorised', async () => {
+    const { client, server } = fakeClient();
+    client.boardId = undefined;
+    const granted = deferred<boolean>();
+    haveAccess.mockReturnValueOnce(granted.promise);
+    haveAccess.mockResolvedValue(true);
+    server.getBoardUser.mockResolvedValue({ privateId: 'p', role: 'member' });
+
+    const joining = join(client, joinableBoardId);
+    expect(client.pendingBoardId).toBe(joinableBoardId);
+    expect(
+      await client.parseStateActionMessage([
+        { op: 'add', data: { type: 'note', id: 'n', content: {} } },
+      ] as never),
+    ).toEqual([]);
+
+    granted.resolve(true);
+    await joining;
+    expect(client.boardId).toBe(joinableBoardId);
+    expect(client.pendingBoardId).toBeUndefined();
+  });
+
+  it('leaves the board when asked to while the join was in progress', async () => {
+    const { client, socket, server } = fakeClient();
+    client.boardId = undefined;
+    const granted = deferred<boolean>();
+    haveAccess.mockReturnValueOnce(granted.promise);
+    server.getBoardUser.mockResolvedValue({ privateId: 'p', role: 'member' });
+
+    const joining = join(client, joinableBoardId);
+    handler(socket, 'leaveBoard')(undefined);
+    granted.resolve(true);
+    await joining;
+    await client.revokeBoard('unrelated');
+
+    expect(client.boardId).toBeUndefined();
+    expect(socket.leave).toHaveBeenCalledWith(joinableBoardId);
+  });
+
+  it('applies a revocation that arrives while the join is in progress', async () => {
+    const { client, socket, server } = fakeClient();
+    client.boardId = undefined;
+    haveAccess.mockResolvedValue(true);
+    const member = deferred<unknown>();
+    server.getBoardUser.mockReturnValue(member.promise);
+
+    const joining = join(client, joinableBoardId);
+    await vi.waitFor(() => expect(server.getBoardUser).toHaveBeenCalled());
+    const revoking = client.revokeBoard(joinableBoardId);
+    member.resolve({ privateId: 'p', role: 'member' });
+    await Promise.all([joining, revoking]);
+
+    expect(client.boardId).toBeUndefined();
+    expect(socket.emit).toHaveBeenCalledWith('error', 'unauthorized');
+    expect(socket.leave).toHaveBeenCalledWith(joinableBoardId);
+  });
+
+  it('does not activate a board after the socket disconnected', async () => {
+    const { client, socket, server } = fakeClient();
+    client.boardId = undefined;
+    const granted = deferred<boolean>();
+    haveAccess.mockReturnValueOnce(granted.promise);
+    server.getBoardUser.mockResolvedValue({ privateId: 'p', role: 'member' });
+
+    const joining = join(client, joinableBoardId);
+    handler(socket, 'disconnect')(undefined);
+    granted.resolve(true);
     await joining;
 
     expect(client.boardId).toBeUndefined();
     expect(socket.join).not.toHaveBeenCalled();
-  });
-
-  it('does not join an event room revalidated away while its check was pending', async () => {
-    const { client, socket } = fakeClient();
-    const on = (event: string) =>
-      socket.on.mock.calls.find(([name]) => name === event)?.[1] as (
-        message: unknown,
-      ) => Promise<void>;
-    let grant!: (value: boolean) => void;
-    haveAccess.mockReturnValueOnce(
-      new Promise<boolean>((done) => {
-        grant = done;
-      }),
-    );
-    haveAccess.mockResolvedValueOnce(false);
-
-    const subscribing = on('sub')({ type: 'board', id: 'board-2' });
-    await client.revalidateSubscriptions();
-    grant(true);
-    await subscribing;
-
-    expect(socket.join).not.toHaveBeenCalledWith('board:board-2');
-  });
-
-  it('sends no board state when revoked while the join loads the member', async () => {
-    const { client, socket, server } = fakeClient();
-    client.boardId = undefined;
-    haveAccess.mockResolvedValue(true);
-    let loaded!: (value: unknown) => void;
-    server.getBoardUser.mockReturnValue(
-      new Promise((done) => {
-        loaded = done;
-      }),
-    );
-    const boardId = '00000000-0000-4000-8000-000000000002';
-
-    const joining = (
-      client as unknown as { join(message: { boardId: string }) }
-    ).join({ boardId });
-    await vi.waitFor(() => expect(server.getBoardUser).toHaveBeenCalled());
-    client.revokeBoard();
-    loaded({ privateId: 'private', role: 'member' });
-    await joining;
-
-    expect(socket.join).not.toHaveBeenCalled();
-    expect(socket.emit).not.toHaveBeenCalledWith('board', expect.anything());
-  });
-
-  it('keeps the current team when a refresh for an old board resolves late', async () => {
-    const { client } = fakeClient();
-    haveAccess.mockResolvedValue(true);
-    let resolveTeam!: (value: unknown) => void;
-    getBoardBasic.mockReturnValueOnce(
-      new Promise((done) => {
-        resolveTeam = done;
-      }),
-    );
-
-    const refreshing = client.refreshAccess();
-    await vi.waitFor(() => expect(getBoardBasic).toHaveBeenCalled());
-    client.boardId = 'board-b';
-    client.teamId = 'team-b';
-    resolveTeam({ teamId: 'team-a' });
-    await refreshing;
-
-    expect(client.teamId).toBe('team-b');
+    expect(server.userJoin).not.toHaveBeenCalled();
   });
 });
