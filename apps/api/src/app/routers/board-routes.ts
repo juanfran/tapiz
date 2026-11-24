@@ -14,6 +14,7 @@ import { sendEvent, sendUserEvent } from '../subscriptor.js';
 import { sendMentionNotificationEmail } from '../mailer.js';
 import { rateLimitedMiddleware } from '../rate-limited.js';
 import { getBoardAdmins } from '../db/board-db.js';
+import { asConflict } from './admin-conflict.js';
 
 export const boardRouter = router({
   create: protectedProcedure
@@ -346,22 +347,13 @@ export const boardRouter = router({
       }),
     )
     .mutation(async (req) => {
-      if (req.input.role !== 'admin') {
-        const boardAdmins = await getBoardAdmins(req.input.boardId);
-
-        const admins = boardAdmins.filter(
-          (member) => member !== req.input.userId,
-        );
-
-        if (!admins.length) {
-          throw new TRPCError({ code: 'CONFLICT' });
-        }
-      }
-
-      await db.board.changeRole(
-        req.input.boardId,
-        req.input.userId,
-        req.input.role,
+      // The "at least one admin left" check runs inside the locked update.
+      await asConflict(() =>
+        db.board.changeRole(
+          req.input.boardId,
+          req.input.userId,
+          req.input.role,
+        ),
       );
 
       sendEvent(

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import { db, psqlClient, startDB } from './init-db.js';
 import { removeAccount } from './user-db.js';
 import {
@@ -9,11 +9,46 @@ import {
   acountsToBoards,
   boardFiles,
   boards,
+  invitations,
   teamMembers,
   teams,
 } from '../schema.js';
 
 type BoardRole = 'admin' | 'member' | 'guest';
+
+/**
+ * Opens pool connections up front: postgres.js connects lazily, so without
+ * this the first of two "concurrent" transactions can finish before the
+ * second even has a connection, and the race never happens.
+ */
+async function warmPool() {
+  await Promise.all(
+    Array.from({ length: 6 }, () => db.execute(sql`select pg_sleep(0.05)`)),
+  );
+}
+
+const pause = (ms: number) => new Promise((done) => setTimeout(done, ms));
+
+/** Starts a transaction that does `before`, waits for `release`, then `after`. */
+function heldTransaction(
+  before: (
+    tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+  ) => Promise<unknown>,
+  after: (
+    tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+  ) => Promise<unknown>,
+) {
+  let release!: () => void;
+  const gate = new Promise<void>((done) => {
+    release = done;
+  });
+  const done = db.transaction(async (tx) => {
+    await before(tx);
+    await gate;
+    await after(tx);
+  });
+  return { release, done };
+}
 
 const accountIds: string[] = [];
 const teamIds: string[] = [];
@@ -311,7 +346,7 @@ describe('account removal (PostgreSQL)', () => {
     ).toHaveLength(0);
   });
 
-  it('keeps shared teams and boards manageable when two admins leave at once', async () => {
+  it('keeps a team manageable when its two admins leave at once', async () => {
     const [first, second, member] = [
       await account(),
       await account(),
@@ -322,25 +357,92 @@ describe('account removal (PostgreSQL)', () => {
       [second]: 'admin',
       [member]: 'member',
     });
-    const boardId = await board({
-      [first]: 'admin',
-      [second]: 'admin',
-      [member]: 'member',
-    });
 
+    await warmPool();
     const results = await Promise.all([
       removeAccount(first),
       removeAccount(second),
     ]);
 
     expect(await teamRoles(teamId)).toEqual({ [member]: 'admin' });
-    expect(await boardRoles(boardId)).toEqual({ [member]: 'admin' });
     expect(results.flatMap((result) => result.updatedTeamIds)).toEqual([
       teamId,
     ]);
+  });
+
+  it('keeps a personal board manageable when its two admins leave at once', async () => {
+    const [first, second, member] = [
+      await account(),
+      await account(),
+      await account(),
+    ];
+    const boardId = await board({
+      [first]: 'admin',
+      [second]: 'admin',
+      [member]: 'member',
+    });
+
+    await warmPool();
+    const results = await Promise.all([
+      removeAccount(first),
+      removeAccount(second),
+    ]);
+
+    expect(await boardRoles(boardId)).toEqual({ [member]: 'admin' });
     expect(results.flatMap((result) => result.updatedBoardIds)).toEqual([
       boardId,
     ]);
+  });
+
+  it('completes when a login creates a session during the removal', async () => {
+    const leaving = await account();
+    await warmPool();
+    const login = heldTransaction(
+      (tx) =>
+        tx.insert(accountsToSession).values({
+          id: `session-${randomUUID()}`,
+          userId: leaving,
+          expiresAt: new Date(Date.now() + 60_000),
+        }),
+      async () => undefined,
+    );
+    await pause(50);
+    const removing = removeAccount(leaving);
+    await pause(100);
+    login.release();
+
+    await Promise.all([login.done, removing]);
+
+    expect(
+      await db.select().from(accounts).where(eq(accounts.id, leaving)),
+    ).toHaveLength(0);
+  });
+
+  it('completes when an invitation it sent is accepted during the removal', async () => {
+    const [inviter, invitee] = [await account(), await account()];
+    const teamId = await team({ [inviter]: 'admin' });
+    const [{ id: invitationId }] = await db
+      .insert(invitations)
+      .values({ teamId, inviterId: inviter, userId: invitee, role: 'member' })
+      .returning({ id: invitations.id });
+
+    await warmPool();
+    const accepting = heldTransaction(
+      (tx) => tx.delete(invitations).where(eq(invitations.id, invitationId)),
+      (tx) =>
+        tx
+          .insert(teamMembers)
+          .values({ teamId, accountId: invitee, role: 'member' }),
+    );
+    await pause(50);
+    const removing = removeAccount(inviter);
+    await pause(100);
+    accepting.release();
+
+    await Promise.all([accepting.done, removing]);
+
+    // The new member joined first, so the team survives with them as admin.
+    expect(await teamRoles(teamId)).toEqual({ [invitee]: 'admin' });
   });
 
   it('deletes the sessions in the same transaction', async () => {

@@ -17,8 +17,8 @@ import {
   addBoardsToSpace,
   createSpace,
   getSpaceBoards,
-  TeamMemberRemovalConflict,
 } from '../db/team-db.js';
+import { asConflict } from './admin-conflict.js';
 import { Space } from '@tapiz/board-commons';
 import { sendInvitationEmail } from '../mailer.js';
 
@@ -27,15 +27,7 @@ import { sendInvitationEmail } from '../mailer.js';
  * membership: open team boards are re-checked and the team room is left.
  */
 async function removeTeamMember(teamId: string, userId: string) {
-  let removed: boolean;
-  try {
-    removed = await db.team.deleteMember(teamId, userId);
-  } catch (error) {
-    if (error instanceof TeamMemberRemovalConflict) {
-      throw new TRPCError({ code: 'CONFLICT' });
-    }
-    throw error;
-  }
+  const removed = await asConflict(() => db.team.deleteMember(teamId, userId));
 
   if (removed) {
     checkTeamBoardsAccess(teamId);
@@ -176,22 +168,9 @@ export const teamRouter = router({
       }),
     )
     .mutation(async (req) => {
-      if (req.input.role !== 'admin') {
-        // check if there is at least one admin left
-        const teamMembers = await db.team.getTeamMembers(req.input.teamId);
-        const admins = teamMembers.filter(
-          (member) => member.role === 'admin' && member.id !== req.input.userId,
-        );
-
-        if (!admins.length) {
-          throw new TRPCError({ code: 'CONFLICT' });
-        }
-      }
-
-      await db.team.changeRole(
-        req.input.teamId,
-        req.input.userId,
-        req.input.role,
+      // The "at least one admin left" check runs inside the locked update.
+      await asConflict(() =>
+        db.team.changeRole(req.input.teamId, req.input.userId, req.input.role),
       );
 
       checkTeamBoardsAccess(req.input.teamId);

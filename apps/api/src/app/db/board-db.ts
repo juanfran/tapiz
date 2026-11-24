@@ -8,6 +8,7 @@ import {
   sql,
   SQLWrapper,
   isNull,
+  ne,
 } from 'drizzle-orm';
 import { db } from './init-db.js';
 import * as schema from '../schema.js';
@@ -23,6 +24,7 @@ import { SetNonNullable } from 'type-fest';
 import * as team from './team-db.js';
 import { getUserTeam } from './team-db.js';
 import { deleteBoardFiles } from '../file-upload.js';
+import { AdminRequiredConflict } from './admin-conflict.js';
 
 export async function getBoard(boardId: string) {
   const results = await db
@@ -412,20 +414,61 @@ export async function rename(id: string, name: string) {
   return db.update(schema.boards).set({ name }).where(eq(schema.boards.id, id));
 }
 
+/**
+ * Changes a member's board role. Demoting the last admin (counting the team
+ * admins of a team board) throws AdminRequiredConflict; the check runs under
+ * a lock on the board, so concurrent changes cannot both pass it.
+ */
 export async function changeRole(
   boardId: string,
   userId: string,
   role: 'admin' | 'member' | 'guest',
 ) {
-  return db
-    .update(schema.acountsToBoards)
-    .set({ role })
-    .where(
-      and(
-        eq(schema.acountsToBoards.boardId, boardId),
-        eq(schema.acountsToBoards.accountId, userId),
-      ),
-    );
+  return db.transaction(async (tx) => {
+    const [board] = await tx
+      .select({ teamId: schema.boards.teamId })
+      .from(schema.boards)
+      .where(eq(schema.boards.id, boardId))
+      .for('update');
+
+    if (role !== 'admin') {
+      const boardAdmins = await tx
+        .select({ accountId: schema.acountsToBoards.accountId })
+        .from(schema.acountsToBoards)
+        .where(
+          and(
+            eq(schema.acountsToBoards.boardId, boardId),
+            eq(schema.acountsToBoards.role, 'admin'),
+            ne(schema.acountsToBoards.accountId, userId),
+          ),
+        );
+      const teamAdmins = board?.teamId
+        ? await tx
+            .select({ accountId: schema.teamMembers.accountId })
+            .from(schema.teamMembers)
+            .where(
+              and(
+                eq(schema.teamMembers.teamId, board.teamId),
+                eq(schema.teamMembers.role, 'admin'),
+                ne(schema.teamMembers.accountId, userId),
+              ),
+            )
+        : [];
+      if (!boardAdmins.length && !teamAdmins.length) {
+        throw new AdminRequiredConflict();
+      }
+    }
+
+    await tx
+      .update(schema.acountsToBoards)
+      .set({ role })
+      .where(
+        and(
+          eq(schema.acountsToBoards.boardId, boardId),
+          eq(schema.acountsToBoards.accountId, userId),
+        ),
+      );
+  });
 }
 
 export async function deleteMember(boardId: string, userId: string) {

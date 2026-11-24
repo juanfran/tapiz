@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray, ne } from 'drizzle-orm';
 import { db } from './init-db.js';
 import * as schema from '../schema.js';
 import {
@@ -8,6 +8,9 @@ import {
   UserTeam,
 } from '@tapiz/board-commons';
 import { SetNonNullable } from 'type-fest';
+import { AdminRequiredConflict } from './admin-conflict.js';
+
+export { AdminRequiredConflict };
 
 export async function createTeam(
   name: string,
@@ -82,20 +85,48 @@ export async function deleteTeam(teamId: string) {
   return db.delete(schema.teams).where(eq(schema.teams.id, teamId));
 }
 
+/**
+ * Changes a member's team role. Demoting the last admin throws
+ * AdminRequiredConflict; the check runs under a lock on the team, so two
+ * concurrent demotions (or a demotion and an account removal) cannot both
+ * pass it.
+ */
 export async function changeRole(
   teamId: string,
   userId: string,
   role: 'admin' | 'member',
 ) {
-  return db
-    .update(schema.teamMembers)
-    .set({ role })
-    .where(
-      and(
-        eq(schema.teamMembers.teamId, teamId),
-        eq(schema.teamMembers.accountId, userId),
-      ),
-    );
+  return db.transaction(async (tx) => {
+    await tx
+      .select({ id: schema.teams.id })
+      .from(schema.teams)
+      .where(eq(schema.teams.id, teamId))
+      .for('update');
+
+    if (role !== 'admin') {
+      const otherAdmins = await tx
+        .select({ accountId: schema.teamMembers.accountId })
+        .from(schema.teamMembers)
+        .where(
+          and(
+            eq(schema.teamMembers.teamId, teamId),
+            eq(schema.teamMembers.role, 'admin'),
+            ne(schema.teamMembers.accountId, userId),
+          ),
+        );
+      if (!otherAdmins.length) throw new AdminRequiredConflict();
+    }
+
+    await tx
+      .update(schema.teamMembers)
+      .set({ role })
+      .where(
+        and(
+          eq(schema.teamMembers.teamId, teamId),
+          eq(schema.teamMembers.accountId, userId),
+        ),
+      );
+  });
 }
 
 export async function deleteStarredBoardsByUser(
@@ -112,13 +143,6 @@ export async function deleteStarredBoardsByUser(
     );
 }
 
-/** Removing this member would leave the team without an admin or empty. */
-export class TeamMemberRemovalConflict extends Error {
-  constructor() {
-    super('The team would be left without an admin');
-  }
-}
-
 /**
  * Removes someone from a team (kicked or leaving). Their roles on the team's
  * boards come from that membership, so they are removed too: otherwise a
@@ -127,7 +151,7 @@ export class TeamMemberRemovalConflict extends Error {
  * affected, because they are never team members, and nothing happens when the
  * user is not a member.
  *
- * Throws TeamMemberRemovalConflict when the last admin or the last member
+ * Throws AdminRequiredConflict when the last admin or the last member
  * would leave; the check runs under a lock on the team, so concurrent
  * removals cannot both pass it.
  *
@@ -162,7 +186,7 @@ export async function deleteMember(
       !others.length ||
       (member.role === 'admin' && !others.some((it) => it.role === 'admin'))
     ) {
-      throw new TeamMemberRemovalConflict();
+      throw new AdminRequiredConflict();
     }
 
     await tx

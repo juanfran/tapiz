@@ -1,8 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { db, psqlClient, startDB } from './init-db.js';
-import { deleteMember, TeamMemberRemovalConflict } from './team-db.js';
+import { changeRole, deleteMember, AdminRequiredConflict } from './team-db.js';
+import { changeRole as changeBoardRole } from './board-db.js';
 import { haveAccess } from './board-db.js';
 import {
   accounts,
@@ -12,6 +13,13 @@ import {
   teamMembers,
   teams,
 } from '../schema.js';
+
+// postgres.js connects lazily; open connections so the race really happens.
+async function warmPool() {
+  await Promise.all(
+    Array.from({ length: 6 }, () => db.execute(sql`select pg_sleep(0.05)`)),
+  );
+}
 
 const accountIds: string[] = [];
 const teamIds: string[] = [];
@@ -163,10 +171,10 @@ describe('team member removal (PostgreSQL)', () => {
     const teamBoard = await board({ [admin]: 'admin' }, teamId);
 
     await expect(deleteMember(teamId, admin)).rejects.toBeInstanceOf(
-      TeamMemberRemovalConflict,
+      AdminRequiredConflict,
     );
     await expect(deleteMember(soloTeam, alone)).rejects.toBeInstanceOf(
-      TeamMemberRemovalConflict,
+      AdminRequiredConflict,
     );
     expect(await boardRole(teamBoard, admin)).toBe('admin');
     expect(await deleteMember(teamId, member)).toBe(true);
@@ -184,6 +192,7 @@ describe('team member removal (PostgreSQL)', () => {
       [member]: 'member',
     });
 
+    await warmPool();
     const results = await Promise.allSettled([
       deleteMember(teamId, first),
       deleteMember(teamId, second),
@@ -198,5 +207,57 @@ describe('team member removal (PostgreSQL)', () => {
       .from(teamMembers)
       .where(eq(teamMembers.teamId, teamId));
     expect(roles.map((row) => row.role).sort()).toEqual(['admin', 'member']);
+  });
+
+  it('rejects the last non-admin member of a team without admins', async () => {
+    const alone = await account();
+    const teamId = await teamWith({ [alone]: 'member' });
+
+    await expect(deleteMember(teamId, alone)).rejects.toBeInstanceOf(
+      AdminRequiredConflict,
+    );
+  });
+
+  it('keeps one team admin when two admins demote each other at once', async () => {
+    const [first, second] = [await account(), await account()];
+    const teamId = await teamWith({ [first]: 'admin', [second]: 'admin' });
+
+    await warmPool();
+    const results = await Promise.allSettled([
+      changeRole(teamId, first, 'member'),
+      changeRole(teamId, second, 'member'),
+    ]);
+
+    expect(results.map((result) => result.status).sort()).toEqual([
+      'fulfilled',
+      'rejected',
+    ]);
+    const roles = await db
+      .select({ role: teamMembers.role })
+      .from(teamMembers)
+      .where(eq(teamMembers.teamId, teamId));
+    expect(roles.map((row) => row.role).sort()).toEqual(['admin', 'member']);
+  });
+
+  it('keeps one board admin when two admins demote each other at once', async () => {
+    const [first, second] = [await account(), await account()];
+    const boardId = await board({ [first]: 'admin', [second]: 'admin' });
+
+    await warmPool();
+    const results = await Promise.allSettled([
+      changeBoardRole(boardId, first, 'member'),
+      changeBoardRole(boardId, second, 'member'),
+    ]);
+
+    expect(results.map((result) => result.status).sort()).toEqual([
+      'fulfilled',
+      'rejected',
+    ]);
+    expect(
+      [
+        await boardRole(boardId, first),
+        await boardRole(boardId, second),
+      ].sort(),
+    ).toEqual(['admin', 'member']);
   });
 });
