@@ -84,7 +84,8 @@ beforeEach(() => {
 afterEach(() => {
   db.board = realBoard;
   db.team = realTeam;
-  vi.clearAllMocks();
+  // Also drops unconsumed `mockResolvedValueOnce` values.
+  vi.resetAllMocks();
   vi.useRealTimers();
 });
 
@@ -168,9 +169,9 @@ describe('realtime board access', () => {
     granted.resolve(true);
     await Promise.all([subscribing, revalidating]);
 
-    // The subscription went through first; the revalidation then removed it.
-    expect(socket.join).toHaveBeenCalledWith('board:board-2');
-    expect(socket.leave).toHaveBeenCalledWith('board:board-2');
+    // The pending check was marked stale, re-checked, and never joined.
+    expect(socket.join).not.toHaveBeenCalledWith('board:board-2');
+    expect(socket.emit).toHaveBeenCalledWith('error', 'unauthorized');
   });
 
   it('ignores board actions until a join is authorised', async () => {
@@ -322,5 +323,56 @@ describe('realtime board access', () => {
     expect(client.boardId).toBeUndefined();
     expect(socket.emit).toHaveBeenCalledWith('error', 'unauthorized');
     stuck.resolve(true);
+  });
+
+  it('sends a returning viewer its own node as connected', async () => {
+    const { client, socket, server } = fakeClient();
+    client.boardId = undefined;
+    haveAccess.mockResolvedValue(true);
+    server.getBoardUser.mockResolvedValue({ privateId: 'p', role: 'member' });
+    const offline = [
+      { id: 'user-1', type: 'user', content: { connected: false } },
+    ];
+    const online = [
+      { id: 'user-1', type: 'user', content: { connected: true } },
+    ];
+    let joined = false;
+    server.userJoin.mockImplementation(() => {
+      joined = true;
+    });
+    server.getBoard.mockImplementation((() =>
+      joined ? online : offline) as never);
+
+    await join(client, joinableBoardId);
+
+    expect(socket.emit).toHaveBeenCalledWith('board', [
+      expect.objectContaining({ data: online }),
+    ]);
+  });
+
+  it('neither errors nor disconnects for an abandoned join that is denied', async () => {
+    const { client, socket } = fakeClient();
+    client.boardId = undefined;
+    const check = deferred<boolean>();
+    haveAccess.mockReturnValueOnce(check.promise);
+
+    const joining = join(client, joinableBoardId);
+    handler(socket, 'leaveBoard')(undefined);
+    check.resolve(false);
+    await joining;
+
+    expect(socket.emit).not.toHaveBeenCalledWith('error', 'unauthorized');
+    expect(socket.disconnect).not.toHaveBeenCalled();
+  });
+
+  it('drops the board when its membership is gone on refresh', async () => {
+    const { client, socket, server } = fakeClient();
+    haveAccess.mockResolvedValue(true);
+    server.getBoardUser.mockResolvedValue(undefined);
+
+    await client.refreshAccess();
+
+    expect(client.boardId).toBeUndefined();
+    expect(socket.emit).toHaveBeenCalledWith('error', 'unauthorized');
   });
 });

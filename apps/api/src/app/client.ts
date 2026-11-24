@@ -17,6 +17,12 @@ interface PendingJoin {
   cancelled: boolean;
 }
 
+interface PendingSubscription {
+  type: 'board' | 'team';
+  id: string;
+  stale: boolean;
+}
+
 const subSchema = z.object({
   type: z.union([z.literal('board'), z.literal('team')]),
   id: z.string(),
@@ -36,6 +42,9 @@ export class Client {
   // marks them stale (re-checked before publishing anything), and a leave or
   // disconnect cancels them.
   private pendingJoins = new Set<PendingJoin>();
+  // Same for `sub` checks in progress: a revalidation or revocation marks
+  // them stale, and they re-check before entering the room.
+  private pendingSubscriptions = new Set<PendingSubscription>();
   // Event rooms joined through `sub`, independent of the active board.
   private boardSubscriptions = new Set<string>();
   private teamSubscriptions = new Set<string>();
@@ -66,8 +75,9 @@ export class Client {
       this.close();
     });
     this.socket.on('leaveBoard', () => {
+      // Leave right away; queued joins are cancelled and publish nothing.
       this.cancelPendingJoins();
-      void this.serialize(() => this.close());
+      this.close();
     });
 
     // simulate disconnect
@@ -94,17 +104,39 @@ export class Client {
   }
 
   subscriptorMessage(message: { type: 'board' | 'team'; id: string }) {
-    return this.serializeSubscription(() => this.subscribe(message));
+    const parsed = subSchema.safeParse(message);
+    if (!parsed.success) {
+      this.socket.disconnect();
+      return Promise.resolve();
+    }
+    // Registered as soon as it is queued, so a revalidation or revocation
+    // meanwhile reaches it.
+    const pending: PendingSubscription = { ...parsed.data, stale: false };
+    this.pendingSubscriptions.add(pending);
+    return this.serializeSubscription(() => this.subscribe(pending)).finally(
+      () => this.pendingSubscriptions.delete(pending),
+    );
   }
 
-  private async subscribe(message: { type: 'board' | 'team'; id: string }) {
+  private async subscribe(pending: PendingSubscription) {
     try {
-      const { type, id } = subSchema.parse(message);
+      const { type, id } = pending;
 
-      const validUser =
+      const check = () =>
         type === 'board'
-          ? await db.board.haveAccess(id, this.id)
-          : await db.team.haveAccessTeam(id, this.id);
+          ? db.board.haveAccess(id, this.id)
+          : db.team.haveAccessTeam(id, this.id);
+
+      let validUser = await check();
+      // Access changed while checking: decide with a fresh read.
+      while (validUser && pending.stale) {
+        pending.stale = false;
+        validUser = await check();
+      }
+
+      if (this.disconnected) {
+        return;
+      }
 
       if (!validUser) {
         this.unauthorizedClose();
@@ -117,6 +149,14 @@ export class Client {
       );
     } catch {
       this.socket.disconnect();
+    }
+  }
+
+  private invalidatePendingSubscriptions(type?: 'board', id?: string) {
+    for (const pending of this.pendingSubscriptions) {
+      if (!type || (pending.type === type && pending.id === id)) {
+        pending.stale = true;
+      }
     }
   }
 
@@ -221,9 +261,21 @@ export class Client {
       return;
     }
 
+    // The membership may have been removed and the board still be reachable
+    // (public): without a current row, the client must join again.
+    const boardUser = await this.server.getBoardUser(boardId, this.id);
+    if (this.boardId !== boardId) {
+      return;
+    }
+    if (!boardUser) {
+      this.dropBoard();
+      return;
+    }
+
     // The board may have changed team (for example after an account removal).
     this.teamId = (await db.board.getBoardBasic(boardId))?.teamId ?? undefined;
     this.isAdmin = await this.isBoardAdmin(boardId);
+    this.privateId = boardUser.privateId;
   }
 
   /**
@@ -231,7 +283,10 @@ export class Client {
    * active board) and leaves the ones the user no longer has access to.
    */
   revalidateSubscriptions() {
-    return this.serializeSubscription(async () => {
+    // Checks still in progress re-check before joining; joined rooms are
+    // re-checked right away instead of waiting behind queued `sub` messages.
+    this.invalidatePendingSubscriptions();
+    return (async () => {
       // A room whose access cannot be verified is left as well.
       const allowed = (check: Promise<boolean>) =>
         check.catch((error: unknown) => {
@@ -250,7 +305,7 @@ export class Client {
           void this.socket.leave(`team:${teamId}`);
         }
       }
-    });
+    })();
   }
 
   /**
@@ -265,6 +320,9 @@ export class Client {
     // it; the queued pass catches a join of that board still in progress.
     if (!boardId || this.boardId === boardId) {
       this.dropBoard();
+    }
+    if (boardId) {
+      this.invalidatePendingSubscriptions('board', boardId);
     }
     if (!boardId) {
       return Promise.resolve();
@@ -427,13 +485,14 @@ export class Client {
     }
 
     if (!(await db.board.haveAccess(boardId, this.id))) {
-      this.unauthorizedClose();
+      // A join the user already abandoned must not disconnect the socket.
+      if (!pending.cancelled && !this.disconnected) this.unauthorizedClose();
       return;
     }
 
     let teamId = (await db.board.getBoardBasic(boardId))?.teamId ?? undefined;
     await this.server.createBoard(boardId);
-    const boardUser = await this.server.getBoardUser(boardId, this.id);
+    let boardUser = await this.server.getBoardUser(boardId, this.id);
     let isAdmin = await this.isBoardAdmin(boardId);
 
     if (!boardUser) {
@@ -454,6 +513,9 @@ export class Client {
         }
         teamId = (await db.board.getBoardBasic(boardId))?.teamId ?? undefined;
         isAdmin = await this.isBoardAdmin(boardId);
+        // The membership (and its private id) may have been replaced.
+        boardUser = await this.server.getBoardUser(boardId, this.id);
+        if (!boardUser) return;
         continue;
       }
       // The last viewer may have released the board's state meanwhile.
@@ -506,7 +568,10 @@ export class Client {
 
     this.socket.join(boardId);
 
-    this.sendToClient(this.getSetStateAction(board));
+    // After userJoin, so a returning viewer gets its own node as connected.
+    this.sendToClient(
+      this.getSetStateAction(this.server.getBoard(boardId) ?? board),
+    );
   }
 
   async refreshIsAdmin() {
