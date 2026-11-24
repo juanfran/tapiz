@@ -24,11 +24,16 @@ export class Client {
   pendingMsgs: unknown[] = [];
   correlationId = '';
   private privateId = '';
+  /** Board being joined; it becomes `boardId` once the join is authorised. */
+  pendingBoardId?: string;
   // Event rooms joined through `sub`, independent of the active board.
   private boardSubscriptions = new Set<string>();
   private teamSubscriptions = new Set<string>();
-  // Bumped by close(), so a join still in progress knows it was cancelled.
-  private joinGeneration = 0;
+  private disconnected = false;
+  // Joins, subscriptions, access refreshes and revocations of this socket run
+  // one at a time, so none of them can act on a state another one changed
+  // while it was waiting for the database.
+  private operations: Promise<unknown> = Promise.resolve();
 
   constructor(
     public socket: Socket,
@@ -43,10 +48,11 @@ export class Client {
       this.correlationId = correlationId;
     });
     this.socket.on('disconnect', () => {
+      this.disconnected = true;
       this.close();
     });
     this.socket.on('leaveBoard', () => {
-      this.close();
+      void this.serialize(() => this.close());
     });
 
     // simulate disconnect
@@ -54,37 +60,36 @@ export class Client {
     //   this.socket.conn.close();
     // }, 10000);
   }
-  async subscriptorMessage(message: { type: 'board' | 'team'; id: string }) {
+  private serialize<T>(operation: () => Promise<T> | T): Promise<T> {
+    const run = this.operations.then(() =>
+      this.disconnected ? (undefined as T) : operation(),
+    );
+    this.operations = run.catch(() => undefined);
+    return run;
+  }
+
+  subscriptorMessage(message: { type: 'board' | 'team'; id: string }) {
+    return this.serialize(() => this.subscribe(message));
+  }
+
+  private async subscribe(message: { type: 'board' | 'team'; id: string }) {
     try {
-      const messageResult = subSchema.parse(message);
+      const { type, id } = subSchema.parse(message);
 
-      const { type, id } = messageResult;
+      const validUser =
+        type === 'board'
+          ? await db.board.haveAccess(id, this.id)
+          : await db.team.haveAccessTeam(id, this.id);
 
-      // Registered before the check: a revalidation running meanwhile
-      // removes it, and then the room is not joined.
-      if (type === 'board') {
-        this.boardSubscriptions.add(id);
-        const validUser = await db.board.haveAccess(id, this.id);
-
-        if (validUser && this.boardSubscriptions.has(id)) {
-          this.socket.join(`board:${id}`);
-        } else {
-          this.boardSubscriptions.delete(id);
-          this.unauthorizedClose();
-          return;
-        }
-      } else if (type === 'team') {
-        this.teamSubscriptions.add(id);
-        const validUser = await db.team.haveAccessTeam(id, this.id);
-
-        if (validUser && this.teamSubscriptions.has(id)) {
-          this.socket.join(`team:${id}`);
-        } else {
-          this.teamSubscriptions.delete(id);
-          this.unauthorizedClose();
-          return;
-        }
+      if (!validUser) {
+        this.unauthorizedClose();
+        return;
       }
+
+      this.socket.join(`${type}:${id}`);
+      (type === 'board' ? this.boardSubscriptions : this.teamSubscriptions).add(
+        id,
+      );
     } catch {
       this.socket.disconnect();
     }
@@ -167,83 +172,93 @@ export class Client {
     }
   }
 
-  async refreshAccess() {
-    if (!this.boardId) {
-      this.unauthorizedClose(false);
-      return;
-    }
+  /** Re-checks the access to the active (or being joined) board. */
+  refreshAccess() {
+    return this.serialize(async () => {
+      try {
+        await this.refreshActiveBoard();
+      } catch (error) {
+        // Access that cannot be verified is revoked.
+        console.error('Board access check failed', error);
+        this.dropBoard();
+      }
+    });
+  }
 
+  private async refreshActiveBoard() {
     const boardId = this.boardId;
-    const haveAccess = await db.board.haveAccess(boardId, this.id);
-
-    if (this.boardId !== boardId) {
+    if (!boardId) {
       return;
     }
 
-    if (!haveAccess) {
-      this.revokeBoard();
+    if (!(await db.board.haveAccess(boardId, this.id))) {
+      this.dropBoard();
       return;
     }
 
     // The board may have changed team (for example after an account removal).
-    const teamId = (await db.board.getBoardBasic(boardId))?.teamId ?? undefined;
-
-    if (this.boardId !== boardId) {
-      return;
-    }
-
-    this.teamId = teamId;
-    this.refreshIsAdmin();
+    this.teamId = (await db.board.getBoardBasic(boardId))?.teamId ?? undefined;
+    this.isAdmin = await this.isBoardAdmin(boardId);
   }
 
   /**
    * Re-checks the event rooms joined through `sub` (which can outlive the
    * active board) and leaves the ones the user no longer has access to.
    */
-  async revalidateSubscriptions() {
-    // A room whose access cannot be verified is left as well.
-    const allowed = (check: Promise<boolean>) =>
-      check.catch((error: unknown) => {
-        console.error('Subscription access check failed', error);
-        return false;
-      });
-    for (const boardId of [...this.boardSubscriptions]) {
-      if (!(await allowed(db.board.haveAccess(boardId, this.id)))) {
-        this.boardSubscriptions.delete(boardId);
-        void this.socket.leave(`board:${boardId}`);
+  revalidateSubscriptions() {
+    return this.serialize(async () => {
+      // A room whose access cannot be verified is left as well.
+      const allowed = (check: Promise<boolean>) =>
+        check.catch((error: unknown) => {
+          console.error('Subscription access check failed', error);
+          return false;
+        });
+      for (const boardId of [...this.boardSubscriptions]) {
+        if (!(await allowed(db.board.haveAccess(boardId, this.id)))) {
+          this.boardSubscriptions.delete(boardId);
+          void this.socket.leave(`board:${boardId}`);
+        }
       }
-    }
-    for (const teamId of [...this.teamSubscriptions]) {
-      if (!(await allowed(db.team.haveAccessTeam(teamId, this.id)))) {
-        this.teamSubscriptions.delete(teamId);
-        void this.socket.leave(`team:${teamId}`);
+      for (const teamId of [...this.teamSubscriptions]) {
+        if (!(await allowed(db.team.haveAccessTeam(teamId, this.id)))) {
+          this.teamSubscriptions.delete(teamId);
+          void this.socket.leave(`team:${teamId}`);
+        }
       }
-    }
+    });
   }
 
   /**
-   * Drops the current board after losing access (or after the board was
-   * deleted): leave its room and forget it, so no further updates are
-   * received and state actions are ignored even if the client ignores the
-   * error event. The socket stays connected for other boards and teams.
+   * Drops a board after losing access (or after it was deleted), once any
+   * join in progress has finished: leave its rooms and forget it, so no
+   * further updates are received and state actions are ignored even if the
+   * client ignores the error event. The socket stays connected for other
+   * boards and teams. Without `boardId`, drops whatever board is active.
    */
-  revokeBoard() {
-    this.socket.emit('error', 'unauthorized');
-    if (this.boardId) {
-      this.boardSubscriptions.delete(this.boardId);
-      void this.socket.leave(`board:${this.boardId}`);
+  revokeBoard(boardId?: string) {
+    return this.serialize(() => {
+      if (!boardId || this.boardId === boardId) {
+        this.dropBoard();
+      }
+    });
+  }
+
+  private dropBoard() {
+    if (!this.boardId) {
+      return;
     }
+    this.socket.emit('error', 'unauthorized');
+    this.boardSubscriptions.delete(this.boardId);
+    void this.socket.leave(`board:${this.boardId}`);
     this.close();
   }
 
   close() {
-    this.joinGeneration++;
-
     if (!this.boardId) {
       return;
     }
 
-    // A join may still be loading the board's state: just forget the board.
+    // The board's state may already have been released: just forget it.
     if (!this.server.getBoard(this.boardId)) {
       this.socket.leave(this.boardId);
       this.boardId = undefined;
@@ -323,103 +338,92 @@ export class Client {
     await this.join({ boardId });
   }
 
-  private async join(message: { boardId: string }) {
-    const result = z.string().uuid().safeParse(message.boardId);
-
-    if (!result.success) {
-      this.unauthorizedClose();
-      return;
-    }
-
-    const generation = ++this.joinGeneration;
-    // close() (a revocation, a leave or another join) cancels this join.
-    const cancelled = () =>
-      generation !== this.joinGeneration || this.boardId !== message.boardId;
-
-    const haveAccess = await db.board.haveAccess(message.boardId, this.id);
-
-    if (!haveAccess) {
-      this.unauthorizedClose();
-      return;
-    }
-
-    if (generation !== this.joinGeneration) return;
-
-    this.teamId =
-      (await db.board.getBoardBasic(message.boardId))?.teamId ?? undefined;
-
-    if (generation !== this.joinGeneration) return;
-
-    this.boardId = message.boardId;
-
-    try {
-      await this.server.createBoard(message.boardId);
-
-      if (cancelled()) {
-        return;
+  private join(message: { boardId: string }) {
+    // Marked as soon as it is queued, so changes committed while it waits
+    // are queued after it too.
+    this.pendingBoardId = message.boardId;
+    return this.serialize(async () => {
+      this.pendingBoardId = message.boardId;
+      try {
+        await this.authorizeAndJoin(message);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (this.pendingBoardId === message.boardId) {
+          this.pendingBoardId = undefined;
+        }
       }
+    });
+  }
 
-      const user: UserNode = {
-        type: 'user',
+  /**
+   * Runs every check first and only then activates the board in one
+   * synchronous step, so state actions are never accepted for a board whose
+   * access is still being checked. A revocation committed meanwhile finds
+   * this client through `pendingBoardId` and is queued after the join.
+   */
+  private async authorizeAndJoin(message: { boardId: string }) {
+    const boardId = message.boardId;
+
+    if (!z.string().uuid().safeParse(boardId).success) {
+      this.unauthorizedClose();
+      return;
+    }
+
+    if (!(await db.board.haveAccess(boardId, this.id))) {
+      this.unauthorizedClose();
+      return;
+    }
+
+    const teamId = (await db.board.getBoardBasic(boardId))?.teamId ?? undefined;
+    await this.server.createBoard(boardId);
+    const boardUser = await this.server.getBoardUser(boardId, this.id);
+    const isAdmin = await this.isBoardAdmin(boardId);
+    const board = this.server.getBoard(boardId);
+
+    if (this.disconnected || !boardUser || !board) {
+      return;
+    }
+
+    // Activate: nothing below awaits.
+    if (this.boardId && this.boardId !== boardId) {
+      this.close();
+    }
+
+    const user: UserNode = {
+      type: 'user',
+      id: this.id,
+      content: {
         id: this.id,
-        content: {
-          id: this.id,
-          name: this.username,
-          visible: false,
-          connected: true,
-          cursor: null,
-        },
-      };
+        name: this.username,
+        visible: false,
+        connected: true,
+        cursor: null,
+      },
+    };
 
-      const isAlreadyInBoard = this.server.isUserInBoard(this.boardId, this.id);
+    const isAlreadyInBoard = this.server.isUserInBoard(boardId, this.id);
+    const userInBoard = board.find((it) => it.id === this.id) as UserNode;
+    user.content.visible = userInBoard?.content.visible ?? false;
 
-      this.server.userJoin(this.boardId, user);
+    this.server.userJoin(boardId, user);
+    this.boardId = boardId;
+    this.teamId = teamId;
+    this.isAdmin = isAdmin;
+    this.privateId = boardUser.privateId;
 
-      const board = this.server.getBoard(message.boardId);
-      const boardUser = await this.server.getBoardUser(
-        message.boardId,
-        this.id,
-      );
+    const userAction: StateActions = {
+      data: user,
+      op: isAlreadyInBoard ? 'patch' : 'add',
+    };
 
-      if (cancelled() || !boardUser || !board) {
-        return;
-      }
+    this.sendAll(boardId, this.getStateAction([userAction]));
 
-      const userInBoard = board.find((it) => it.id === this.id) as UserNode;
+    this.socket.join(boardId);
 
-      user.content.visible = userInBoard?.content.visible ?? false;
-
-      await this.refreshIsAdmin();
-
-      if (cancelled()) return;
-
-      this.privateId = boardUser.privateId;
-
-      // Check access once more now that boardId/teamId are set: a revocation
-      // committed before this check is seen here, and one committed after it
-      // finds this client through its boardId/teamId and revokes it.
-      if (
-        cancelled() ||
-        !(await db.board.haveAccess(message.boardId, this.id))
-      ) {
-        if (!cancelled()) this.revokeBoard();
-        return;
-      }
-      if (cancelled()) return;
-
-      const userAction: StateActions = {
-        data: user,
-        op: isAlreadyInBoard ? 'patch' : 'add',
-      };
-
-      this.sendAll(message.boardId, this.getStateAction([userAction]));
-
-      this.socket.join(message.boardId);
-
-      this.sendToClient(this.getSetStateAction(board));
-    } catch (e) {
-      console.error(e);
-    }
+    this.sendToClient(
+      this.getSetStateAction(this.server.getBoard(boardId) ?? board),
+    );
   }
 
   async refreshIsAdmin() {
@@ -427,9 +431,17 @@ export class Client {
       return;
     }
 
-    const admins = await db.board.getBoardAdmins(this.boardId);
+    const boardId = this.boardId;
+    const isAdmin = await this.isBoardAdmin(boardId);
 
-    this.isAdmin = admins.includes(this.id);
+    if (this.boardId === boardId) {
+      this.isAdmin = isAdmin;
+    }
+  }
+
+  private async isBoardAdmin(boardId: string) {
+    const admins = await db.board.getBoardAdmins(boardId);
+    return admins.includes(this.id);
   }
 
   getSetStateAction(nodes: TuNode[]) {

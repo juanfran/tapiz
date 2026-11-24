@@ -34,7 +34,7 @@ describe('leaveTeam$', () => {
     actions$.next(HomeActions.leaveTeam({ id: 'team-1' }));
     actions$.complete();
 
-    expect(await output).toEqual([]);
+    expect(await output).toEqual([HomeActions.fetchTeams()]);
     expect(router.navigate).toHaveBeenCalledWith(['/']);
     expect(notifications.open).not.toHaveBeenCalled();
   });

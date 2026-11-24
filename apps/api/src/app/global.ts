@@ -1,5 +1,4 @@
 import { type Server } from './server.js';
-import type { Client } from './client.js';
 
 let server: Server | null = null;
 
@@ -11,32 +10,32 @@ export function getServer() {
   return server;
 }
 
-/** Re-checks a client's board access; one that can't be verified is revoked. */
-function refreshClientAccess(client: Client) {
-  client.refreshAccess().catch((error: unknown) => {
-    console.error('Board access check failed', error);
-    client.revokeBoard();
-  });
-}
+// A client still joining a board is included through `pendingBoardId`: its
+// refresh or revocation is queued after the join, so a change committed while
+// the join was checking access is never missed.
 
 export function checkBoardAccess(boardId: string) {
   server?.clients
-    .filter((client) => client.boardId === boardId)
-    .forEach(refreshClientAccess);
+    .filter(
+      (client) =>
+        client.boardId === boardId || client.pendingBoardId === boardId,
+    )
+    .forEach((client) => void client.refreshAccess());
 }
 
 export function checkTeamBoardsAccess(teamId: string) {
   server?.clients
-    .filter((client) => client.teamId === teamId)
-    .forEach(refreshClientAccess);
+    .filter((client) => client.teamId === teamId || client.pendingBoardId)
+    .forEach((client) => void client.refreshAccess());
 }
 
 export function revokeBoardAccess(boardId: string) {
   server?.clients
-    .filter((client) => client.boardId === boardId)
-    .forEach((client) => {
-      client.revokeBoard();
-    });
+    .filter(
+      (client) =>
+        client.boardId === boardId || client.pendingBoardId === boardId,
+    )
+    .forEach((client) => void client.revokeBoard(boardId));
 }
 
 /**

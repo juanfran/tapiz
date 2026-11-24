@@ -413,7 +413,8 @@ export async function deleteUserBoards(userId: string) {
 
 /**
  * Leaves a board. The last admin (counting the team admins of a team board)
- * cannot leave while other people still use it: AdminRequiredConflict. The
+ * cannot leave while other people still use it, and the last member cannot
+ * leave a personal board (it would become unreachable): AdminRequiredConflict. The
  * check runs under a lock on the board, like role changes and account
  * removal, so it sees a promotion made meanwhile.
  */
@@ -434,6 +435,12 @@ export async function leaveBoard(userId: string, boardId: string) {
       .where(eq(schema.acountsToBoards.boardId, boardId));
     const member = members.find((it) => it.accountId === userId);
     const others = members.filter((it) => it.accountId !== userId);
+
+    // A personal board nobody else uses would be left unreachable: it has to
+    // be deleted instead.
+    if (member && !others.length && !board?.teamId) {
+      throw new AdminRequiredConflict();
+    }
 
     if (member?.role === 'admin' && others.length) {
       const teamAdmins = board?.teamId

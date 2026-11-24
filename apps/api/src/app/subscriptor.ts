@@ -30,7 +30,8 @@ export const sendUserEvent = (event: UserWsEvents) => {
     return;
   }
 
-  const currentUserClient = server.clients.find((it) => it.id === event.userId);
-
-  currentUserClient?.socket.emit('user', event);
+  // Every tab of the user, not only the first connected socket.
+  server.clients
+    .filter((it) => it.id === event.userId)
+    .forEach((client) => client.socket.emit('user', event));
 };
