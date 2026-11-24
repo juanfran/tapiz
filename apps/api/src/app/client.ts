@@ -44,6 +44,9 @@ export class Client {
   // one at a time, so none of them can act on a state another one changed
   // while it was waiting for the database.
   private operations: Promise<unknown> = Promise.resolve();
+  // Event-room subscriptions only need ordering among themselves; a separate
+  // queue keeps a stream of `sub` messages from delaying a revocation.
+  private subscriptionOperations: Promise<unknown> = Promise.resolve();
 
   constructor(
     public socket: Socket,
@@ -80,8 +83,18 @@ export class Client {
     return run;
   }
 
+  private serializeSubscription<T>(
+    operation: () => Promise<T> | T,
+  ): Promise<T> {
+    const run = this.subscriptionOperations.then(() =>
+      this.disconnected ? (undefined as T) : operation(),
+    );
+    this.subscriptionOperations = run.catch(() => undefined);
+    return run;
+  }
+
   subscriptorMessage(message: { type: 'board' | 'team'; id: string }) {
-    return this.serialize(() => this.subscribe(message));
+    return this.serializeSubscription(() => this.subscribe(message));
   }
 
   private async subscribe(message: { type: 'board' | 'team'; id: string }) {
@@ -218,7 +231,7 @@ export class Client {
    * active board) and leaves the ones the user no longer has access to.
    */
   revalidateSubscriptions() {
-    return this.serialize(async () => {
+    return this.serializeSubscription(async () => {
       // A room whose access cannot be verified is left as well.
       const allowed = (check: Promise<boolean>) =>
         check.catch((error: unknown) => {
@@ -248,8 +261,16 @@ export class Client {
    * boards and teams. Without `boardId`, drops whatever board is active.
    */
   revokeBoard(boardId?: string) {
+    // The active board is dropped right away, so nothing queued can delay
+    // it; the queued pass catches a join of that board still in progress.
+    if (!boardId || this.boardId === boardId) {
+      this.dropBoard();
+    }
+    if (!boardId) {
+      return Promise.resolve();
+    }
     return this.serialize(() => {
-      if (!boardId || this.boardId === boardId) {
+      if (this.boardId === boardId) {
         this.dropBoard();
       }
     });

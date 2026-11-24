@@ -308,4 +308,19 @@ describe('realtime board access', () => {
     expect(socket.join).not.toHaveBeenCalled();
     expect(server.userJoin).not.toHaveBeenCalled();
   });
+
+  it('revokes the active board even while subscriptions are being checked', async () => {
+    const { client, socket } = fakeClient();
+    const stuck = deferred<boolean>();
+    haveAccess.mockReturnValue(stuck.promise);
+    for (let i = 0; i < 100; i++) {
+      void handler(socket, 'sub')({ type: 'board', id: `other-${i}` });
+    }
+
+    void client.revokeBoard('board-1');
+
+    expect(client.boardId).toBeUndefined();
+    expect(socket.emit).toHaveBeenCalledWith('error', 'unauthorized');
+    stuck.resolve(true);
+  });
 });
