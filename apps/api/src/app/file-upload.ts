@@ -141,8 +141,12 @@ export async function fileUpload(fastify: FastifyInstance) {
 export async function deleteBoardFiles(boardId: string) {
   const files = await db.board.getBoardFiles(boardId);
 
-  for (const file of files) {
-    unlink(path.join(uploadFolder + '/' + file.name), (err) => {
+  deleteUploadedFiles(files.map((file) => file.name));
+}
+
+export function deleteUploadedFiles(names: string[]) {
+  for (const name of names) {
+    unlink(path.join(uploadFolder + '/' + name), (err) => {
       console.log(err);
     });
   }

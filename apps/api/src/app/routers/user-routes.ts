@@ -8,65 +8,14 @@ import { lucia } from '../auth.js';
 import { userSettingsValidator } from '@tapiz/board-commons/validators/user-settings.validator.js';
 import { withDefaultUserSettings } from '@tapiz/board-commons';
 import { generateApiToken, hashApiToken } from '../api-token.js';
+import { deleteUploadedFiles } from '../file-upload.js';
 
 export const userRouter = router({
   removeAccount: protectedProcedure.mutation(async (req) => {
     await lucia.invalidateUserSessions(req.ctx.user.sub);
 
-    let teams = await db.team.getUserTeams(req.ctx.user.sub);
-
-    teams = teams.filter(async (team) => {
-      const members = await db.team.getTeamMembers(team.id);
-
-      return members.length === 1;
-    });
-
-    const teamsWithMembers: string[] = [];
-    const teamsWithoutMembers: string[] = [];
-
-    for (const team of teams) {
-      const members = await db.team.getTeamMembers(team.id);
-
-      if (members.length === 1) {
-        teamsWithoutMembers.push(team.id);
-      } else {
-        teamsWithMembers.push(team.id);
-      }
-    }
-
-    teamsWithoutMembers.forEach(async (teamId) => {
-      await db.team.deleteTeam(teamId);
-    });
-
-    teamsWithMembers.forEach(async (teamId) => {
-      const members = await db.team.getTeamMembers(teamId);
-
-      const newOwner = members.find((member) => member.id !== req.ctx.user.sub);
-
-      if (newOwner) {
-        await db.team.changeRole(teamId, newOwner.id, 'admin');
-      }
-    });
-
-    const boards = await db.board.getBoards(req.ctx.user.sub);
-
-    boards.forEach(async (board) => {
-      const members = await db.board.getBoardUsers(board.id);
-
-      if (members.length === 1 && !board.teamId) {
-        db.board.deleteBoard(board.id);
-      } else if (members.length > 1) {
-        const newOwner = members.find(
-          (member) => member.id !== req.ctx.user.sub,
-        );
-
-        if (newOwner) {
-          await db.board.changeRole(board.id, newOwner.id, 'admin');
-        }
-      }
-    });
-
-    await db.user.deleteAccount(req.ctx.user.sub);
+    const files = await db.user.removeAccount(req.ctx.user.sub);
+    deleteUploadedFiles(files);
 
     return {
       success: true,
