@@ -51,6 +51,23 @@ pnpm exec nx test web -- --run src/app/modules/board/services/board-zoom.service
 To debug with a visible browser, add `--browser.headless=false`. Shared-library
 and API tests continue to run in Node. Run `pnpm test` for all non-API unit tests.
 
+### API and OIDC tests
+
+Run all API tests, including the OIDC database regression tests, with:
+
+```shell
+pnpm e2e:tests
+```
+
+To run only the OIDC database suites:
+
+```shell
+pnpm test:oidc-db
+```
+
+These tests use the database configured by the `POSTGRES_*` environment variables.
+Point them at a development or disposable PostgreSQL database.
+
 ## MCP Server
 
 The API exposes a Streamable HTTP MCP server for realtime board automation. See [Tapiz MCP Server](mcp.md) for architecture, token setup, tool behavior, and local connection examples.
