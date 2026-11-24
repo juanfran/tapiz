@@ -15,14 +15,15 @@ export function getServer() {
 // anything), and the refresh or revocation is queued after the join.
 
 export function checkBoardAccess(boardId: string) {
-  server?.clients
-    .filter(
-      (client) => client.boardId === boardId || client.hasPendingJoin(boardId),
-    )
-    .forEach((client) => {
+  server?.clients.forEach((client) => {
+    if (client.boardId === boardId || client.hasPendingJoin(boardId)) {
       client.invalidatePendingJoins(boardId);
       void client.refreshAccess();
-    });
+    }
+    if (client.hasBoardSubscription(boardId)) {
+      void client.revalidateBoardSubscription(boardId);
+    }
+  });
 }
 
 export function checkTeamBoardsAccess(teamId: string) {
@@ -35,14 +36,15 @@ export function checkTeamBoardsAccess(teamId: string) {
 }
 
 export function revokeBoardAccess(boardId: string) {
-  server?.clients
-    .filter(
-      (client) => client.boardId === boardId || client.hasPendingJoin(boardId),
-    )
-    .forEach((client) => {
+  server?.clients.forEach((client) => {
+    if (client.boardId === boardId || client.hasPendingJoin(boardId)) {
       client.invalidatePendingJoins(boardId);
       void client.revokeBoard(boardId);
-    });
+    }
+    if (client.hasBoardSubscription(boardId)) {
+      void client.revalidateBoardSubscription(boardId, { revoke: true });
+    }
+  });
 }
 
 /**

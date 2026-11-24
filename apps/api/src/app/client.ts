@@ -152,6 +152,40 @@ export class Client {
     }
   }
 
+  /** Subscribed (or subscribing) to a board's event room. */
+  hasBoardSubscription(boardId: string) {
+    return (
+      this.boardSubscriptions.has(boardId) ||
+      [...this.pendingSubscriptions].some(
+        (it) => it.type === 'board' && it.id === boardId,
+      )
+    );
+  }
+
+  /**
+   * Re-checks one board's event room after its access changed (privacy,
+   * roles, deletion), also when the board is not open: the web client stays
+   * subscribed after leaving a board. With `revoke`, leaves it regardless.
+   */
+  revalidateBoardSubscription(
+    boardId: string,
+    options: { revoke?: boolean } = {},
+  ) {
+    this.invalidatePendingSubscriptions('board', boardId);
+    if (!this.boardSubscriptions.has(boardId)) {
+      return Promise.resolve();
+    }
+    return (async () => {
+      const allowed =
+        !options.revoke &&
+        (await db.board.haveAccess(boardId, this.id).catch(() => false));
+      if (!allowed) {
+        this.boardSubscriptions.delete(boardId);
+        void this.socket.leave(`board:${boardId}`);
+      }
+    })();
+  }
+
   private invalidatePendingSubscriptions(type?: 'board', id?: string) {
     for (const pending of this.pendingSubscriptions) {
       if (!type || (pending.type === type && pending.id === id)) {

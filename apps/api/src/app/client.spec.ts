@@ -375,4 +375,35 @@ describe('realtime board access', () => {
     expect(client.boardId).toBeUndefined();
     expect(socket.emit).toHaveBeenCalledWith('error', 'unauthorized');
   });
+
+  it('leaves the event room of a board it no longer has open once access is lost', async () => {
+    const { client, socket } = fakeClient();
+    client.boardId = undefined;
+    haveAccess.mockResolvedValue(true);
+    await handler(socket, 'sub')({ type: 'board', id: 'board-7' });
+    expect(client.hasBoardSubscription('board-7')).toBe(true);
+
+    haveAccess.mockResolvedValue(false);
+    await client.revalidateBoardSubscription('board-7');
+
+    expect(socket.leave).toHaveBeenCalledWith('board:board-7');
+    expect(client.hasBoardSubscription('board-7')).toBe(false);
+  });
+
+  it('does not re-enter a board event room revoked while its sub was checking', async () => {
+    const { client, socket } = fakeClient();
+    const check = deferred<boolean>();
+    haveAccess.mockReturnValueOnce(check.promise);
+    haveAccess.mockResolvedValue(false);
+
+    const subscribing = handler(
+      socket,
+      'sub',
+    )({ type: 'board', id: 'board-1' });
+    void client.revokeBoard('board-1');
+    check.resolve(true);
+    await subscribing;
+
+    expect(socket.join).not.toHaveBeenCalledWith('board:board-1');
+  });
 });
