@@ -49,9 +49,10 @@ Follow these steps to set up Tapiz using Docker:
    public client.
 
    Tapiz uses discovery, state, nonce and PKCE S256, and validates the ID
-   token with `openid-client`, including its signature and, when present, that
-   Tapiz's client ID is its only audience and, when present, its `azp`
-   (authorized party). Requests to the provider
+   token with `openid-client`, including its signature and its audience:
+   Tapiz's client ID must be an audience, extra audiences (such as Zitadel's
+   project ID) require `azp` (authorized party) to equal it, and an `azp`
+   naming another client is always rejected. Requests to the provider
    time out after 10 seconds. Over HTTPS the transient login cookies use the
    `__Host-` prefix, so they are bound to the API host and cannot be planted
    from a sibling subdomain. The provider must sign

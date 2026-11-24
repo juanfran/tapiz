@@ -234,11 +234,11 @@ describe('OIDC authorization-code exchange', () => {
     ).resolves.toMatchObject({ subject: 'subject-123' });
   });
 
-  it('rejects an ID token that also lists an untrusted audience', async () => {
+  it('accepts extra audiences when azp names the Tapiz client', async () => {
     vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
       claims: () => ({
         iss: issuer,
-        aud: ['test-client', 'other-client'],
+        aud: ['test-client', 'zitadel-project-id'],
         azp: 'test-client',
         sub: 'subject-123',
         email: 'person@example.test',
@@ -247,7 +247,7 @@ describe('OIDC authorization-code exchange', () => {
     } as Awaited<ReturnType<typeof oidc.authorizationCodeGrant>>);
     await expect(
       request('code=abc&state=expected-state', cookies),
-    ).rejects.toThrow('Unexpected OIDC audience');
+    ).resolves.toMatchObject({ subject: 'subject-123' });
   });
 
   it('rejects repeated callback parameters before the token exchange', async () => {
