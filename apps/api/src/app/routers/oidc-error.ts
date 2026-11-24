@@ -2,6 +2,8 @@ const safeMessages = new Set([
   'Invalid OIDC authorization response',
   'Missing or invalid OIDC identity',
   'Unexpected OIDC authorized party',
+  'Unexpected OIDC audience',
+  'OIDC_ISSUER must be the issuer identifier, not a discovery document URL',
   'Invalid OIDC issuer or subject',
   'A verified email claim is required',
   'OIDC account creation failed',
@@ -78,7 +80,7 @@ function stringProperty(value: unknown, key: string): string | undefined {
 // oauth4webapi keeps values (claims, bodies, keys) in `cause` and uses fixed
 // messages such as `unexpected ID Token "nonce" claim value`. Only messages
 // made of these characters are logged, so no URL, email or token can pass.
-const libraryMessagePattern = /^[A-Za-z0-9 "()_.,-]{1,120}$/;
+const libraryMessagePattern = /^[A-Za-z0-9 "`()_.,-]{1,120}$/;
 const libraryErrorNames = new Set([
   'OperationProcessingError',
   'UnsupportedOperationError',
@@ -149,7 +151,7 @@ export function logOidcError(context: string, error: unknown) {
     // token; with it (for example a too-short RSA key), the detail is precise.
     message = detail
       ? `Unsupported provider operation: ${detail}`
-      : 'Unsupported provider operation; ID tokens must be signed with an asymmetric algorithm (RS256, PS256 or ES256) published in the provider JWKS';
+      : 'Unsupported provider operation; check that ID tokens are signed with an asymmetric algorithm (RS256, PS256 or ES256) published in the provider JWKS';
   } else if (detail && !safeMessages.has(message)) {
     message = `${message}: ${detail}`;
   }

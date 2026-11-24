@@ -29,6 +29,25 @@ describe('OIDC identity claims', () => {
     });
   });
 
+  it('keeps only absolute HTTP(S) profile pictures', () => {
+    expect(
+      identityFromClaims(
+        { ...claims, picture: 'https://idp.example.test/a.png' },
+        issuer,
+      ).picture,
+    ).toBe('https://idp.example.test/a.png');
+    for (const picture of [
+      'data:image/png;base64,AAAA',
+      'javascript:alert(1)',
+      'avatar.png',
+      `https://idp.example.test/${'a'.repeat(2100)}`,
+    ]) {
+      expect(identityFromClaims({ ...claims, picture }, issuer).picture).toBe(
+        undefined,
+      );
+    }
+  });
+
   it('rejects claims from a different issuer', () => {
     expect(() =>
       identityFromClaims(claims, 'https://other.example.test'),

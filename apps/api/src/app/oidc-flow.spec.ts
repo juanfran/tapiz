@@ -66,6 +66,7 @@ describe('OIDC authorization-code exchange', () => {
     vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
       claims: () => ({
         iss: issuer,
+        aud: 'test-client',
         sub: 'subject-123',
         email: 'person@example.test',
         email_verified: true,
@@ -94,7 +95,7 @@ describe('OIDC authorization-code exchange', () => {
 
   it('uses a verified UserInfo email when ID token omits it', async () => {
     vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
-      claims: () => ({ iss: issuer, sub: 'subject-123' }),
+      claims: () => ({ iss: issuer, aud: 'test-client', sub: 'subject-123' }),
       access_token: 'access-token',
     } as Awaited<ReturnType<typeof oidc.authorizationCodeGrant>>);
     vi.mocked(oidc.fetchUserInfo).mockResolvedValue({
@@ -123,7 +124,7 @@ describe('OIDC authorization-code exchange', () => {
 
   it('rejects UserInfo with a mismatched subject', async () => {
     vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
-      claims: () => ({ iss: issuer, sub: 'subject-123' }),
+      claims: () => ({ iss: issuer, aud: 'test-client', sub: 'subject-123' }),
       access_token: 'access-token',
     } as Awaited<ReturnType<typeof oidc.authorizationCodeGrant>>);
     vi.mocked(oidc.fetchUserInfo).mockRejectedValue(
@@ -139,6 +140,7 @@ describe('OIDC authorization-code exchange', () => {
     vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
       claims: () => ({
         iss: issuer,
+        aud: 'test-client',
         sub: 'subject-123',
         email: 'person@example.test',
         email_verified: true,
@@ -161,6 +163,7 @@ describe('OIDC authorization-code exchange', () => {
     vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
       claims: () => ({
         iss: issuer,
+        aud: 'test-client',
         sub: 'subject-123',
         email: 'person@example.test',
         email_verified: true,
@@ -183,6 +186,7 @@ describe('OIDC authorization-code exchange', () => {
     vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
       claims: () => ({
         iss: issuer,
+        aud: 'test-client',
         sub: 'subject-123',
         email: 'person@example.test',
         email_verified: true,
@@ -230,6 +234,92 @@ describe('OIDC authorization-code exchange', () => {
     ).resolves.toMatchObject({ subject: 'subject-123' });
   });
 
+  it('rejects an ID token that also lists an untrusted audience', async () => {
+    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
+      claims: () => ({
+        iss: issuer,
+        aud: ['test-client', 'other-client'],
+        azp: 'test-client',
+        sub: 'subject-123',
+        email: 'person@example.test',
+        email_verified: true,
+      }),
+    } as Awaited<ReturnType<typeof oidc.authorizationCodeGrant>>);
+    await expect(
+      request('code=abc&state=expected-state', cookies),
+    ).rejects.toThrow('Unexpected OIDC audience');
+  });
+
+  it('rejects repeated callback parameters before the token exchange', async () => {
+    for (const query of [
+      { code: ['first', 'second'], state: 'expected-state' },
+      { code: 'abc', state: 'expected-state', iss: [issuer, issuer] },
+    ]) {
+      await expect(
+        oidcIdentity({ query, cookies } as unknown as Parameters<
+          typeof oidcIdentity
+        >[0]),
+      ).rejects.toThrow('Invalid OIDC authorization response');
+    }
+    expect(oidc.authorizationCodeGrant).not.toHaveBeenCalled();
+  });
+
+  it('fills a missing name and picture from UserInfo without replacing the ID token email', async () => {
+    process.env['OIDC_CLIENT_SECRET'] = 'profile-secret';
+    vi.mocked(oidc.discovery).mockResolvedValue({
+      serverMetadata: () => ({
+        issuer,
+        userinfo_endpoint: `${issuer}/userinfo`,
+      }),
+    } as Awaited<ReturnType<typeof oidc.discovery>>);
+    vi.mocked(oidc.authorizationCodeGrant).mockResolvedValue({
+      claims: () => ({
+        iss: issuer,
+        aud: 'test-client',
+        sub: 'subject-123',
+        email: 'person@example.test',
+        email_verified: true,
+      }),
+      access_token: 'access-token',
+    } as Awaited<ReturnType<typeof oidc.authorizationCodeGrant>>);
+    vi.mocked(oidc.fetchUserInfo).mockResolvedValue({
+      sub: 'subject-123',
+      email: 'other@example.test',
+      email_verified: true,
+      name: 'UserInfo Name',
+      picture: 'https://idp.example.test/avatar.png',
+    });
+    await expect(
+      request('code=abc&state=expected-state', cookies),
+    ).resolves.toMatchObject({
+      email: 'person@example.test',
+      name: 'UserInfo Name',
+      picture: 'https://idp.example.test/avatar.png',
+    });
+    expect(oidc.fetchUserInfo).toHaveBeenCalledWith(
+      expect.anything(),
+      'access-token',
+      'subject-123',
+    );
+
+    vi.mocked(oidc.fetchUserInfo).mockRejectedValue(new Error('unavailable'));
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    try {
+      await expect(
+        request('code=abc&state=expected-state', cookies),
+      ).resolves.toMatchObject({
+        email: 'person@example.test',
+        name: undefined,
+        picture: undefined,
+      });
+      expect(spy).toHaveBeenCalledWith(
+        expect.stringContaining('OIDC profile lookup failed'),
+      );
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   it('rejects invalid client authentication and callback settings at startup', () => {
     process.env['OIDC_CLIENT_SECRET'] = '';
     expect(() => validateOidcConfiguration()).toThrow(
@@ -239,7 +329,13 @@ describe('OIDC authorization-code exchange', () => {
     process.env['OIDC_TOKEN_ENDPOINT_AUTH_METHOD'] = 'none';
     expect(() => validateOidcConfiguration()).toThrow('must be empty');
     process.env['OIDC_TOKEN_ENDPOINT_AUTH_METHOD'] = 'client_secret_basic';
-    for (const apiUrl of ['', '/api', 'ftp://example.test/api']) {
+    for (const apiUrl of [
+      '',
+      '/api',
+      'ftp://example.test/api',
+      'https://example.test/api?x=1',
+      'https://example.test/api#x',
+    ]) {
       process.env['API_URL'] = apiUrl;
       expect(() => validateOidcConfiguration()).toThrow('API_URL');
     }
@@ -251,6 +347,9 @@ describe('OIDC authorization-code exchange', () => {
     process.env['OIDC_ISSUER'] = issuer;
     process.env['OIDC_TOKEN_ENDPOINT_AUTH_METHOD'] = 'private_key_jwt';
     expect(() => validateOidcConfiguration()).toThrow('Unsupported');
+    process.env['OIDC_TOKEN_ENDPOINT_AUTH_METHOD'] = 'client_secret_basic';
+    process.env['OIDC_ISSUER'] = `${issuer}/.well-known/openid-configuration`;
+    expect(() => validateOidcConfiguration()).toThrow('issuer identifier');
   });
 
   it('does not accept a rejected token exchange', async () => {

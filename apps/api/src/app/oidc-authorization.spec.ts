@@ -126,6 +126,14 @@ describe('OIDC authorization request', () => {
     }
   });
 
+  it('builds the callback URL without a double slash for a trailing-slash API_URL', async () => {
+    vi.stubEnv('API_URL', 'https://tapiz.example.test/api/');
+    const { location } = await startLogin();
+    expect(location.searchParams.get('redirect_uri')).toBe(
+      'https://tapiz.example.test/api/auth/oidc/callback',
+    );
+  });
+
   it('marks a callback from an older login attempt as stale', async () => {
     vi.mocked(oidc.discovery).mockClear();
     const error = await oidcIdentity({

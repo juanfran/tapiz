@@ -203,4 +203,19 @@ describe('OIDC failure logging', () => {
       'OIDC login failed: database error (ECONNREFUSED): Database operation failed',
     );
   });
+
+  it('reports an unsupported token type instead of signing advice', () => {
+    const inner = Object.assign(new Error('unsupported `token_type` value'), {
+      name: 'UnsupportedOperationError',
+    });
+    logOidcError(
+      'OIDC login failed',
+      Object.assign(new Error('unsupported operation', { cause: inner }), {
+        code: 'OAUTH_UNSUPPORTED_OPERATION',
+      }),
+    );
+    expect(logged()).toBe(
+      'OIDC login failed: OAUTH_UNSUPPORTED_OPERATION: Unsupported provider operation: unsupported `token_type` value',
+    );
+  });
 });

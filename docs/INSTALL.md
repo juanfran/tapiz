@@ -35,7 +35,8 @@ Follow these steps to set up Tapiz using Docker:
    `http://localhost:8000/api/auth/oidc/callback` as its redirect URI. The
    redirect may be local HTTP for development, but `OIDC_ISSUER` must be an
    HTTPS issuer URL (for Keycloak:
-   `https://idp.example.com/realms/<realm>`), plus `OIDC_CLIENT_ID`,
+   `https://idp.example.com/realms/<realm>`; the issuer identifier itself, not
+   its `/.well-known/openid-configuration` URL), plus `OIDC_CLIENT_ID`,
    `OIDC_CLIENT_SECRET`, and optionally `OIDC_DISPLAY_NAME`. Token endpoint
    client authentication defaults to `client_secret_basic` (the OIDC discovery
    default); set `OIDC_TOKEN_ENDPOINT_AUTH_METHOD=client_secret_post` only if
@@ -49,7 +50,8 @@ Follow these steps to set up Tapiz using Docker:
 
    Tapiz uses discovery, state, nonce and PKCE S256, and validates the ID
    token with `openid-client`, including its signature and, when present, that
-   its `azp` (authorized party) is Tapiz's client ID. Requests to the provider
+   Tapiz's client ID is its only audience and, when present, its `azp`
+   (authorized party). Requests to the provider
    time out after 10 seconds. Over HTTPS the transient login cookies use the
    `__Host-` prefix, so they are bound to the API host and cannot be planted
    from a sibling subdomain. The provider must sign
@@ -58,7 +60,9 @@ Follow these steps to set up Tapiz using Docker:
    are written to the API log with the provider's OAuth error code (for example
    `invalid_client` or `access_denied`) or the network error code, never tokens
    or secrets. If the ID token omits a verified email, Tapiz
-   fetches UserInfo and checks its subject against the ID token. Users are
+   fetches UserInfo and checks its subject against the ID token; when only the
+   name or picture is missing it tries UserInfo too, without blocking login if
+   that fails. Profile pictures must be absolute HTTP(S) URLs. Users are
    keyed by issuer and subject, so changing `OIDC_ISSUER` (a new host or
    realm) gives every user a new identity, and existing users then get HTTP 409
    until their accounts are re-keyed in `oidc_identities`. A verified email is

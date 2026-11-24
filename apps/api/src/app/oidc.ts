@@ -1,5 +1,6 @@
 import * as oidc from 'openid-client';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { logOidcError } from './routers/oidc-error.js';
 
 // Bounds token, UserInfo and JWKS requests as well as discovery.
 const providerTimeoutSeconds = 10;
@@ -58,19 +59,31 @@ function issuerUrl() {
   if (url.protocol !== 'https:') {
     throw new Error('OIDC_ISSUER must use HTTPS');
   }
+  // openid-client only compares the discovered issuer with the configured one
+  // when it resolves the well-known URL itself.
+  if (url.pathname.includes('/.well-known/') || url.search || url.hash) {
+    throw new Error(
+      'OIDC_ISSUER must be the issuer identifier, not a discovery document URL',
+    );
+  }
   return url;
 }
 
 function callbackUrl() {
   let url: URL;
   try {
-    url = new URL(`${process.env['API_URL'] ?? ''}/auth/oidc/callback`);
+    url = new URL(process.env['API_URL'] ?? '');
   } catch {
     throw new Error('API_URL must be an absolute HTTP(S) URL');
   }
-  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+  if (
+    (url.protocol !== 'https:' && url.protocol !== 'http:') ||
+    url.search ||
+    url.hash
+  ) {
     throw new Error('API_URL must be an absolute HTTP(S) URL');
   }
+  url.pathname = `${url.pathname.replace(/\/+$/, '')}/auth/oidc/callback`;
   return url;
 }
 
@@ -180,7 +193,20 @@ export function isStaleOidcCallback(error: unknown) {
 }
 
 export async function oidcIdentity(req: FastifyRequest) {
-  const query = req.query as {
+  const query = req.query as Record<string, unknown>;
+  // Fastify turns repeated parameters into arrays; a valid authorization
+  // response carries each of these at most once.
+  for (const name of ['code', 'state', 'iss', 'error']) {
+    if (query[name] !== undefined && typeof query[name] !== 'string') {
+      throw new Error('Invalid OIDC authorization response');
+    }
+  }
+  const {
+    code,
+    state: queryState,
+    iss,
+    error: providerError,
+  } = query as {
     code?: string;
     state?: string;
     iss?: string;
@@ -190,32 +216,32 @@ export async function oidcIdentity(req: FastifyRequest) {
   const state = req.cookies[names.state];
   const nonce = req.cookies[names.nonce];
   const verifier = req.cookies[names.verifier];
-  if (query.state && state && query.state !== state) {
+  if (queryState && state && queryState !== state) {
     throw Object.assign(new Error('Invalid OIDC authorization response'), {
-      error: query.error,
+      error: providerError,
       staleOidcState: true,
     });
   }
   if (
-    query.error ||
-    !query.code ||
-    !query.state ||
+    providerError ||
+    !code ||
+    !queryState ||
     !state ||
     !nonce ||
     !verifier ||
-    query.state !== state
+    queryState !== state
   ) {
     // Keep the provider's error code (for example `access_denied`) for logs;
     // the logger only records it when it is a plain OAuth error token.
     throw Object.assign(new Error('Invalid OIDC authorization response'), {
-      error: query.error,
+      error: providerError,
     });
   }
   const config = await configuration();
   const callback = callbackUrl();
-  callback.searchParams.set('code', query.code);
-  callback.searchParams.set('state', query.state);
-  if (query.iss) callback.searchParams.set('iss', query.iss);
+  callback.searchParams.set('code', code);
+  callback.searchParams.set('state', queryState);
+  if (iss) callback.searchParams.set('iss', iss);
   const tokens = await oidc.authorizationCodeGrant(config, callback, {
     expectedState: state,
     expectedNonce: nonce,
@@ -226,44 +252,76 @@ export async function oidcIdentity(req: FastifyRequest) {
   if (!claims?.sub || claims.iss !== config.serverMetadata().issuer) {
     throw new Error('Missing or invalid OIDC identity');
   }
-  // openid-client only checks `azp` when `aud` lists several audiences. A token
-  // issued to another client must be rejected even with a single audience.
-  if (
-    claims.azp !== undefined &&
-    claims.azp !== process.env['OIDC_CLIENT_ID']
-  ) {
+  const clientId = process.env['OIDC_CLIENT_ID'];
+  // openid-client accepts any audience list that includes Tapiz (checking
+  // `azp` only for several audiences). Tapiz trusts no other audience, so the
+  // token must be issued to it alone (OIDC Core 3.1.3.7, steps 3 to 5).
+  const audiences = Array.isArray(claims.aud) ? claims.aud : [claims.aud];
+  if (audiences.length !== 1 || audiences[0] !== clientId) {
+    throw new Error('Unexpected OIDC audience');
+  }
+  if (claims.azp !== undefined && claims.azp !== clientId) {
     throw new Error('Unexpected OIDC authorized party');
   }
-  // Providers may return requested profile/email claims only from UserInfo.
-  // Keep the issuer and subject from the validated ID token as the identity key.
-  if (
-    typeof claims['email'] !== 'string' ||
-    claims['email_verified'] !== true
-  ) {
+  // Providers may return requested email/profile claims only from UserInfo.
+  // The validated ID token's issuer and subject stay the identity key.
+  const emailInIdToken =
+    typeof claims['email'] === 'string' && claims['email_verified'] === true;
+  const profileInIdToken =
+    nonEmptyString(claims['name']) && nonEmptyString(claims['picture']);
+  let userInfo: oidc.UserInfoResponse | undefined;
+  if (!emailInIdToken) {
     if (!tokens.access_token) {
       throw new Error('A verified email claim is required');
     }
-    const userInfo = await oidc.fetchUserInfo(
+    userInfo = await oidc.fetchUserInfo(
       config,
       tokens.access_token,
       claims.sub,
     );
-    return identityFromClaims(
-      {
-        ...claims,
-        email: userInfo.email,
-        email_verified: userInfo.email_verified,
-        name:
-          typeof claims['name'] === 'string' ? claims['name'] : userInfo.name,
-        picture:
-          typeof claims['picture'] === 'string'
-            ? claims['picture']
-            : userInfo.picture,
-      },
-      config.serverMetadata().issuer,
-    );
+  } else if (
+    !profileInIdToken &&
+    tokens.access_token &&
+    config.serverMetadata().userinfo_endpoint
+  ) {
+    // Optional: only refreshes name/picture, so a failure must not block login.
+    try {
+      userInfo = await oidc.fetchUserInfo(
+        config,
+        tokens.access_token,
+        claims.sub,
+      );
+    } catch (error) {
+      logOidcError('OIDC profile lookup failed', error);
+    }
   }
-  return identityFromClaims(claims, config.serverMetadata().issuer);
+  return identityFromClaims(
+    {
+      ...claims,
+      email: emailInIdToken ? claims['email'] : userInfo?.email,
+      email_verified: emailInIdToken ? true : userInfo?.email_verified,
+      name: nonEmptyString(claims['name']) ? claims['name'] : userInfo?.name,
+      picture: usablePicture(claims['picture'])
+        ? claims['picture']
+        : userInfo?.picture,
+    },
+    config.serverMetadata().issuer,
+  );
+}
+
+function nonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0;
+}
+
+/** Only absolute HTTP(S) URLs render as avatars (`ngSrc` rejects others). */
+function usablePicture(value: unknown): value is string {
+  if (!nonEmptyString(value) || value.length > 2048) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' || url.protocol === 'http:';
+  } catch {
+    return false;
+  }
 }
 
 export function identityFromClaims(
@@ -297,9 +355,6 @@ export function identityFromClaims(
       typeof claims['name'] === 'string' && claims['name']
         ? claims['name'].slice(0, 256)
         : undefined,
-    picture:
-      typeof claims['picture'] === 'string' && claims['picture']
-        ? claims['picture']
-        : undefined,
+    picture: usablePicture(claims['picture']) ? claims['picture'] : undefined,
   };
 }
