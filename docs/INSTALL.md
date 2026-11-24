@@ -29,8 +29,9 @@ Follow these steps to set up Tapiz using Docker:
 
    Google is optional when OpenID Connect is configured. For Keycloak or another
    OIDC provider, create a web client with standard authorization-code flow
-   (confidential is recommended; a public client works if you leave
-   `OIDC_CLIENT_SECRET` empty, and PKCE still protects the code) and register
+   (confidential is recommended; for a public client leave
+   `OIDC_CLIENT_SECRET` empty and set `OIDC_TOKEN_ENDPOINT_AUTH_METHOD=none`,
+   and PKCE still protects the code) and register
    `http://localhost:8000/api/auth/oidc/callback` as its redirect URI. The
    redirect may be local HTTP for development, but `OIDC_ISSUER` must be an
    HTTPS issuer URL (for Keycloak:
@@ -38,10 +39,17 @@ Follow these steps to set up Tapiz using Docker:
    `OIDC_CLIENT_SECRET`, and optionally `OIDC_DISPLAY_NAME`. Token endpoint
    client authentication defaults to `client_secret_basic` (the OIDC discovery
    default); set `OIDC_TOKEN_ENDPOINT_AUTH_METHOD=client_secret_post` only if
-   the provider and registered client require POST authentication.
+   the provider and registered client require POST authentication. Both
+   secret methods require `OIDC_CLIENT_SECRET`; `none` requires it to be
+   empty. The API refuses to start with an invalid combination, a non-HTTPS
+   issuer or an `API_URL` that is not an absolute HTTP(S) URL.
 
    Tapiz uses discovery, state, nonce and PKCE S256, and validates the ID
-   token with `openid-client`, including its signature. The provider must sign
+   token with `openid-client`, including its signature and, when present, that
+   its `azp` (authorized party) is Tapiz's client ID. Requests to the provider
+   time out after 10 seconds. Over HTTPS the transient login cookies use the
+   `__Host-` prefix, so they are bound to the API host and cannot be planted
+   from a sibling subdomain. The provider must sign
    ID tokens with an asymmetric algorithm (RS256, PS256 or ES256) whose keys are
    published in its JWKS; HS256-signed ID tokens are rejected. Login failures
    are written to the API log with the provider's OAuth error code (for example

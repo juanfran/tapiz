@@ -54,6 +54,8 @@ describe('OIDC configuration', () => {
   function configure(method: string) {
     vi.stubEnv('OIDC_ISSUER', issuer);
     vi.stubEnv('OIDC_CLIENT_ID', 'tapiz');
+    vi.stubEnv('OIDC_CLIENT_SECRET', 'secret');
+    vi.stubEnv('API_URL', 'https://tapiz.example.test/api');
     vi.stubEnv('OIDC_TOKEN_ENDPOINT_AUTH_METHOD', method);
   }
 

@@ -1,15 +1,33 @@
 import * as oidc from 'openid-client';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-// Scope the transient cookies to the callback path, which follows API_URL so
-// that deployments serving the API under a path prefix still receive them.
-function cookieOptions() {
+// Bounds token, UserInfo and JWKS requests as well as discovery.
+const providerTimeoutSeconds = 10;
+
+/**
+ * Transient authorization cookies. On HTTPS they use the `__Host-` prefix:
+ * browsers only accept such cookies from the API host itself (Secure, no
+ * Domain, Path=/), so a sibling subdomain cannot plant a forged transaction
+ * (login CSRF). Plain-HTTP development keeps unprefixed cookies scoped to the
+ * callback path, which follows API_URL for deployments under a path prefix.
+ */
+function transientCookies() {
+  const callback = callbackUrl();
+  const secure = callback.protocol === 'https:';
+  const prefix = secure ? '__Host-' : '';
   return {
-    path: new URL(redirectUri()).pathname,
-    httpOnly: true,
-    sameSite: 'lax' as const,
-    secure: process.env['API_URL']?.startsWith('https://') ?? false,
-    maxAge: 600,
+    names: {
+      state: `${prefix}oidc_state`,
+      nonce: `${prefix}oidc_nonce`,
+      verifier: `${prefix}oidc_verifier`,
+    },
+    options: {
+      path: secure ? '/' : callback.pathname,
+      httpOnly: true,
+      sameSite: 'lax' as const,
+      secure,
+      maxAge: 600,
+    },
   };
 }
 
@@ -20,7 +38,8 @@ export function oidcEnabled() {
 export function validateOidcConfiguration() {
   if (process.env['OIDC_ISSUER'] || process.env['OIDC_CLIENT_ID']) {
     issuerUrl();
-    tokenEndpointAuthMethod();
+    callbackUrl();
+    clientAuthentication();
   }
 }
 
@@ -42,17 +61,54 @@ function issuerUrl() {
   return url;
 }
 
-function redirectUri() {
-  return `${process.env['API_URL']}/auth/oidc/callback`;
+function callbackUrl() {
+  let url: URL;
+  try {
+    url = new URL(`${process.env['API_URL'] ?? ''}/auth/oidc/callback`);
+  } catch {
+    throw new Error('API_URL must be an absolute HTTP(S) URL');
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+    throw new Error('API_URL must be an absolute HTTP(S) URL');
+  }
+  return url;
 }
 
-function tokenEndpointAuthMethod() {
+function redirectUri() {
+  return callbackUrl().href;
+}
+
+function clientAuthentication() {
   const method =
     process.env['OIDC_TOKEN_ENDPOINT_AUTH_METHOD'] || 'client_secret_basic';
-  if (method !== 'client_secret_basic' && method !== 'client_secret_post') {
-    throw new Error('Unsupported OIDC token endpoint authentication method');
+  const secret = process.env['OIDC_CLIENT_SECRET'] ?? '';
+  switch (method) {
+    case 'none':
+      // Public client: PKCE protects the authorization code.
+      if (secret) {
+        throw new Error(
+          'OIDC_CLIENT_SECRET must be empty when OIDC_TOKEN_ENDPOINT_AUTH_METHOD is none',
+        );
+      }
+      return { method, secret: undefined, auth: oidc.None() };
+    case 'client_secret_basic':
+    case 'client_secret_post':
+      if (!secret) {
+        throw new Error(
+          'OIDC_CLIENT_SECRET is required unless OIDC_TOKEN_ENDPOINT_AUTH_METHOD is none',
+        );
+      }
+      return {
+        method,
+        secret,
+        auth:
+          method === 'client_secret_post'
+            ? oidc.ClientSecretPost(secret)
+            : oidc.ClientSecretBasic(secret),
+      };
+    default:
+      throw new Error('Unsupported OIDC token endpoint authentication method');
   }
-  return method;
 }
 
 let configPromise: Promise<oidc.Configuration> | undefined;
@@ -60,25 +116,17 @@ let configKey: string | undefined;
 function configuration() {
   const issuer = issuerUrl();
   const clientId = process.env['OIDC_CLIENT_ID'] ?? '';
-  const secret = process.env['OIDC_CLIENT_SECRET'];
-  const method = tokenEndpointAuthMethod();
+  const { method, secret, auth } = clientAuthentication();
   const key = JSON.stringify([issuer.href, clientId, secret, method]);
   if (configKey !== key) {
     configPromise = undefined;
     configKey = key;
   }
   return (configPromise ??= oidc
-    .discovery(
-      issuer,
-      clientId,
-      secret,
-      secret
-        ? method === 'client_secret_post'
-          ? oidc.ClientSecretPost(secret)
-          : oidc.ClientSecretBasic(secret)
-        : undefined,
-      { execute: [oidc.enableNonRepudiationChecks] },
-    )
+    .discovery(issuer, clientId, secret, auth, {
+      execute: [oidc.enableNonRepudiationChecks],
+      timeout: providerTimeoutSeconds,
+    })
     .catch((error: unknown) => {
       configPromise = undefined;
       throw error;
@@ -91,10 +139,10 @@ export async function oidcAuthorizationUrl(reply: FastifyReply) {
   const nonce = oidc.randomNonce();
   const verifier = oidc.randomPKCECodeVerifier();
   const challenge = await oidc.calculatePKCECodeChallenge(verifier);
-  const options = cookieOptions();
-  reply.setCookie('oidc_state', state, options);
-  reply.setCookie('oidc_nonce', nonce, options);
-  reply.setCookie('oidc_verifier', verifier, options);
+  const { names, options } = transientCookies();
+  reply.setCookie(names.state, state, options);
+  reply.setCookie(names.nonce, nonce, options);
+  reply.setCookie(names.verifier, verifier, options);
   return oidc.buildAuthorizationUrl(config, {
     redirect_uri: redirectUri(),
     scope: 'openid profile email',
@@ -106,9 +154,14 @@ export async function oidcAuthorizationUrl(reply: FastifyReply) {
 }
 
 export function clearOidcCookies(reply: FastifyReply) {
-  const { path } = cookieOptions();
-  for (const name of ['oidc_state', 'oidc_nonce', 'oidc_verifier']) {
-    reply.clearCookie(name, { path });
+  const { names, options } = transientCookies();
+  for (const name of Object.values(names)) {
+    reply.clearCookie(name, {
+      path: options.path,
+      secure: options.secure,
+      httpOnly: true,
+      sameSite: 'lax',
+    });
   }
 }
 
@@ -133,9 +186,10 @@ export async function oidcIdentity(req: FastifyRequest) {
     iss?: string;
     error?: string;
   };
-  const state = req.cookies['oidc_state'];
-  const nonce = req.cookies['oidc_nonce'];
-  const verifier = req.cookies['oidc_verifier'];
+  const { names } = transientCookies();
+  const state = req.cookies[names.state];
+  const nonce = req.cookies[names.nonce];
+  const verifier = req.cookies[names.verifier];
   if (query.state && state && query.state !== state) {
     throw Object.assign(new Error('Invalid OIDC authorization response'), {
       error: query.error,
@@ -158,7 +212,7 @@ export async function oidcIdentity(req: FastifyRequest) {
     });
   }
   const config = await configuration();
-  const callback = new URL(redirectUri());
+  const callback = callbackUrl();
   callback.searchParams.set('code', query.code);
   callback.searchParams.set('state', query.state);
   if (query.iss) callback.searchParams.set('iss', query.iss);
@@ -171,6 +225,14 @@ export async function oidcIdentity(req: FastifyRequest) {
   const claims = tokens.claims();
   if (!claims?.sub || claims.iss !== config.serverMetadata().issuer) {
     throw new Error('Missing or invalid OIDC identity');
+  }
+  // openid-client only checks `azp` when `aud` lists several audiences. A token
+  // issued to another client must be rejected even with a single audience.
+  if (
+    claims.azp !== undefined &&
+    claims.azp !== process.env['OIDC_CLIENT_ID']
+  ) {
+    throw new Error('Unexpected OIDC authorized party');
   }
   // Providers may return requested profile/email claims only from UserInfo.
   // Keep the issuer and subject from the validated ID token as the identity key.
