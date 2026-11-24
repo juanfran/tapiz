@@ -1,13 +1,17 @@
 import * as oidc from 'openid-client';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
-const cookieOptions = {
-  path: '/api/auth/oidc/callback',
-  httpOnly: true,
-  sameSite: 'lax' as const,
-  secure: process.env['API_URL']?.startsWith('https://') ?? false,
-  maxAge: 600,
-};
+// Scope the transient cookies to the callback path, which follows API_URL so
+// that deployments serving the API under a path prefix still receive them.
+function cookieOptions() {
+  return {
+    path: new URL(redirectUri()).pathname,
+    httpOnly: true,
+    sameSite: 'lax' as const,
+    secure: process.env['API_URL']?.startsWith('https://') ?? false,
+    maxAge: 600,
+  };
+}
 
 export function oidcEnabled() {
   return Boolean(process.env['OIDC_ISSUER'] && process.env['OIDC_CLIENT_ID']);
@@ -87,9 +91,10 @@ export async function oidcAuthorizationUrl(reply: FastifyReply) {
   const nonce = oidc.randomNonce();
   const verifier = oidc.randomPKCECodeVerifier();
   const challenge = await oidc.calculatePKCECodeChallenge(verifier);
-  reply.setCookie('oidc_state', state, cookieOptions);
-  reply.setCookie('oidc_nonce', nonce, cookieOptions);
-  reply.setCookie('oidc_verifier', verifier, cookieOptions);
+  const options = cookieOptions();
+  reply.setCookie('oidc_state', state, options);
+  reply.setCookie('oidc_nonce', nonce, options);
+  reply.setCookie('oidc_verifier', verifier, options);
   return oidc.buildAuthorizationUrl(config, {
     redirect_uri: redirectUri(),
     scope: 'openid profile email',
@@ -101,9 +106,24 @@ export async function oidcAuthorizationUrl(reply: FastifyReply) {
 }
 
 export function clearOidcCookies(reply: FastifyReply) {
+  const { path } = cookieOptions();
   for (const name of ['oidc_state', 'oidc_nonce', 'oidc_verifier']) {
-    reply.clearCookie(name, { path: cookieOptions.path });
+    reply.clearCookie(name, { path });
   }
+}
+
+/**
+ * A callback whose state does not match the cookies belongs to an older login
+ * attempt (for example another tab). Its cookies belong to the newest attempt,
+ * so they must survive this failure for that attempt to complete.
+ */
+export function isStaleOidcCallback(error: unknown) {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'staleOidcState' in error &&
+    error.staleOidcState === true
+  );
 }
 
 export async function oidcIdentity(req: FastifyRequest) {
@@ -116,6 +136,12 @@ export async function oidcIdentity(req: FastifyRequest) {
   const state = req.cookies['oidc_state'];
   const nonce = req.cookies['oidc_nonce'];
   const verifier = req.cookies['oidc_verifier'];
+  if (query.state && state && query.state !== state) {
+    throw Object.assign(new Error('Invalid OIDC authorization response'), {
+      error: query.error,
+      staleOidcState: true,
+    });
+  }
   if (
     query.error ||
     !query.code ||
@@ -165,8 +191,12 @@ export async function oidcIdentity(req: FastifyRequest) {
         ...claims,
         email: userInfo.email,
         email_verified: userInfo.email_verified,
-        name: claims['name'] ?? userInfo.name,
-        picture: claims['picture'] ?? userInfo.picture,
+        name:
+          typeof claims['name'] === 'string' ? claims['name'] : userInfo.name,
+        picture:
+          typeof claims['picture'] === 'string'
+            ? claims['picture']
+            : userInfo.picture,
       },
       config.serverMetadata().issuer,
     );
@@ -199,9 +229,15 @@ export function identityFromClaims(
     issuer: expectedIssuer,
     subject: claims['sub'],
     email: email.toLowerCase(),
+    // Undefined when the provider sent no profile claim, so a returning user's
+    // stored name/picture is kept instead of being replaced by a fallback.
     name:
-      typeof claims['name'] === 'string' ? claims['name'].slice(0, 256) : email,
+      typeof claims['name'] === 'string' && claims['name']
+        ? claims['name'].slice(0, 256)
+        : undefined,
     picture:
-      typeof claims['picture'] === 'string' ? claims['picture'] : undefined,
+      typeof claims['picture'] === 'string' && claims['picture']
+        ? claims['picture']
+        : undefined,
   };
 }

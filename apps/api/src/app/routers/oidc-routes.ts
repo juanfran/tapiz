@@ -3,13 +3,14 @@ import { createUserSessionCookie } from '../auth.js';
 import { logOidcError } from './oidc-error.js';
 import {
   clearOidcCookies,
+  isStaleOidcCallback,
   oidcAuthorizationUrl,
   oidcIdentity,
 } from '../oidc.js';
 import {
   createOidcUser,
   getUserByOidcIdentity,
-  refreshOidcUserEmail,
+  refreshOidcUser,
 } from '../db/user-db.js';
 
 function isUniqueViolation(error: unknown): boolean {
@@ -42,7 +43,7 @@ export async function oidcRoutes(fastify: FastifyInstance) {
           await createOidcUser(
             identity.issuer,
             identity.subject,
-            identity.name,
+            identity.name ?? identity.email,
             identity.email,
             identity.picture,
           );
@@ -56,13 +57,13 @@ export async function oidcRoutes(fastify: FastifyInstance) {
         user ??= await getUserByOidcIdentity(identity.issuer, identity.subject);
         if (!user) throw new Error('OIDC account creation failed');
       }
-      // Refresh the verified email before issuing a session: invitation checks
-      // use the account email, not OIDC claims from the callback.
-      user = await refreshOidcUserEmail(
-        identity.issuer,
-        identity.subject,
-        identity.email,
-      );
+      // Refresh the verified email (and profile) before issuing a session:
+      // invitation checks use the account email, not OIDC claims.
+      user = await refreshOidcUser(identity.issuer, identity.subject, {
+        email: identity.email,
+        name: identity.name,
+        picture: identity.picture,
+      });
       if (!user) throw new Error('OIDC identity no longer exists');
       const sessionCookie = await createUserSessionCookie(user.id);
       reply.setCookie(
@@ -74,7 +75,7 @@ export async function oidcRoutes(fastify: FastifyInstance) {
         `${process.env['FRONTEND_URL']}/login-redirect?status=success`,
       );
     } catch (error) {
-      clearOidcCookies(reply);
+      if (!isStaleOidcCallback(error)) clearOidcCookies(reply);
       if (isUniqueViolation(error)) {
         // The email is personal data; administrators can find the collision
         // with the documented case-insensitive email query.

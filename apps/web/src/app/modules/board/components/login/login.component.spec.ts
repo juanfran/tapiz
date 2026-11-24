@@ -48,4 +48,11 @@ describe('Login providers', () => {
     expect(login.providers()).toBeNull();
     expect(login.providersError()).toBe(true);
   });
+
+  it('shows an error when provider discovery returns an error status', async () => {
+    const login = component(async () => ({ ok: false }) as Response);
+    await login.ngOnInit();
+    expect(login.providers()).toBeNull();
+    expect(login.providersError()).toBe(true);
+  });
 });

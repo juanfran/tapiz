@@ -20,6 +20,13 @@
   </p>
 
   <div class="login-buttons">
+    @if (!providers() && !providersError()) {
+      <p
+        class="loading"
+        role="status">
+        Loading sign-in options…
+      </p>
+    }
     @if (providersError()) {
       <p role="alert">
         Sign-in providers are unavailable. Please reload the page.

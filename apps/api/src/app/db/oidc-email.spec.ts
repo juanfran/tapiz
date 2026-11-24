@@ -5,8 +5,10 @@ import { db, psqlClient, startDB } from './init-db.js';
 import {
   createOidcUser,
   getUserByOidcIdentity,
-  refreshOidcUserEmail,
+  refreshOidcUser,
+  getUserByEmail,
   getUserInvitationsByEmail,
+  inviteByEmail,
   acceptInvitation,
 } from './user-db.js';
 import {
@@ -60,7 +62,7 @@ describe('OIDC email and identity constraints (PostgreSQL)', () => {
         .insert(invitations)
         .values({ email: newAddress, teamId, role: 'member', inviterId: id })
         .returning({ id: invitations.id });
-      const user = await refreshOidcUserEmail(issuer, sub, newAddress);
+      const user = await refreshOidcUser(issuer, sub, { email: newAddress });
       expect(user).toMatchObject({ id, email: newAddress });
       if (!user) throw new Error('OIDC account not found');
       expect(await getUserByOidcIdentity(issuer, sub)).toMatchObject({
@@ -227,7 +229,7 @@ describe('OIDC email and identity constraints (PostgreSQL)', () => {
     const first = await createAccount(firstAddress);
     const second = await createAccount(secondAddress);
     await expect(
-      refreshOidcUserEmail(issuer, first.sub, secondAddress),
+      refreshOidcUser(issuer, first.sub, { email: secondAddress }),
     ).rejects.toMatchObject({ code: '23505' });
     expect(await getUserByOidcIdentity(issuer, first.sub)).toMatchObject({
       id: first.id,
@@ -251,5 +253,49 @@ describe('OIDC email and identity constraints (PostgreSQL)', () => {
         }),
       ]),
     );
+  });
+
+  it('finds accounts and stores invitations case-insensitively', async () => {
+    const address = email('lookup');
+    const mixed = address.toUpperCase();
+    const { id } = await createAccount(address);
+    const [{ id: teamId }] = await db
+      .insert(teams)
+      .values({ name: 'Mixed-case invite' })
+      .returning({ id: teams.id });
+    try {
+      expect(await getUserByEmail(mixed)).toMatchObject({ id });
+      const invitation = await inviteByEmail(mixed, id, { teamId }, 'member');
+      expect(invitation.email).toBe(address);
+      expect(
+        (await getUserInvitationsByEmail(address)).map((v) => v.id),
+      ).toContain(invitation.id);
+    } finally {
+      await db.delete(invitations).where(eq(invitations.teamId, teamId));
+      await db.delete(teams).where(eq(teams.id, teamId));
+    }
+  });
+
+  it('refreshes the profile of a returning user only with claims it received', async () => {
+    const address = email('profile');
+    const { id, sub } = await createAccount(address);
+    expect(
+      await refreshOidcUser(issuer, sub, {
+        email: address,
+        name: 'Renamed User',
+        picture: 'https://idp.example.test/avatar.png',
+      }),
+    ).toMatchObject({
+      id,
+      name: 'Renamed User',
+      picture: 'https://idp.example.test/avatar.png',
+    });
+    expect(
+      await refreshOidcUser(issuer, sub, { email: address }),
+    ).toMatchObject({
+      id,
+      name: 'Renamed User',
+      picture: 'https://idp.example.test/avatar.png',
+    });
   });
 });
