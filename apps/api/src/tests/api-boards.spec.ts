@@ -283,6 +283,21 @@ describe('board', () => {
     expect(boards2.length).toEqual(0);
   });
 
+  it('refuses to demote the only admin of a personal board', async () => {
+    const caller = await getUserCaller(71);
+    const board = await caller.board.create({ name: 'only admin' });
+
+    const result = await errorCall(async () =>
+      caller.board.changeRole({
+        boardId: board.id,
+        userId: getAuth(71).sub,
+        role: 'member',
+      }),
+    );
+
+    expect(result?.code).toBe('CONFLICT');
+  });
+
   describe('list boards', () => {
     it('guest user on a public board', async () => {
       const callerUser1 = await getUserCaller(1);
