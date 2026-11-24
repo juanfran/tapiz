@@ -18,6 +18,10 @@ function fakeClient() {
   const server = {
     setState: vi.fn(),
     emptyBoard: vi.fn(),
+    createBoard: vi.fn(async () => undefined),
+    isUserInBoard: vi.fn(() => false),
+    userJoin: vi.fn(),
+    getBoardUser: vi.fn(),
     getBoard: vi.fn(() => []),
     io: { of: () => ({ adapter: { rooms } }) },
   };
@@ -37,13 +41,15 @@ const realBoard = db.board;
 const realTeam = db.team;
 const haveAccess = vi.fn();
 const haveAccessTeam = vi.fn();
+const getBoardBasic = vi.fn(async (): Promise<unknown> => undefined);
 
 beforeEach(() => {
   // `db.board` is an ES module namespace; replace it on the plain `db` object.
   db.board = {
     ...realBoard,
     haveAccess,
-    getBoardBasic: vi.fn(async () => undefined),
+    getBoardBasic,
+    getBoardAdmins: vi.fn(async () => []),
   } as unknown as typeof realBoard;
   db.team = { ...realTeam, haveAccessTeam } as typeof realTeam;
 });
@@ -155,5 +161,49 @@ describe('realtime board access', () => {
     await subscribing;
 
     expect(socket.join).not.toHaveBeenCalledWith('board:board-2');
+  });
+
+  it('sends no board state when revoked while the join loads the member', async () => {
+    const { client, socket, server } = fakeClient();
+    client.boardId = undefined;
+    haveAccess.mockResolvedValue(true);
+    let loaded!: (value: unknown) => void;
+    server.getBoardUser.mockReturnValue(
+      new Promise((done) => {
+        loaded = done;
+      }),
+    );
+    const boardId = '00000000-0000-4000-8000-000000000002';
+
+    const joining = (
+      client as unknown as { join(message: { boardId: string }) }
+    ).join({ boardId });
+    await vi.waitFor(() => expect(server.getBoardUser).toHaveBeenCalled());
+    client.revokeBoard();
+    loaded({ privateId: 'private', role: 'member' });
+    await joining;
+
+    expect(socket.join).not.toHaveBeenCalled();
+    expect(socket.emit).not.toHaveBeenCalledWith('board', expect.anything());
+  });
+
+  it('keeps the current team when a refresh for an old board resolves late', async () => {
+    const { client } = fakeClient();
+    haveAccess.mockResolvedValue(true);
+    let resolveTeam!: (value: unknown) => void;
+    getBoardBasic.mockReturnValueOnce(
+      new Promise((done) => {
+        resolveTeam = done;
+      }),
+    );
+
+    const refreshing = client.refreshAccess();
+    await vi.waitFor(() => expect(getBoardBasic).toHaveBeenCalled());
+    client.boardId = 'board-b';
+    client.teamId = 'team-b';
+    resolveTeam({ teamId: 'team-a' });
+    await refreshing;
+
+    expect(client.teamId).toBe('team-b');
   });
 });

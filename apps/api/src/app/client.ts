@@ -186,7 +186,13 @@ export class Client {
     }
 
     // The board may have changed team (for example after an account removal).
-    this.teamId = (await db.board.getBoardBasic(boardId))?.teamId ?? undefined;
+    const teamId = (await db.board.getBoardBasic(boardId))?.teamId ?? undefined;
+
+    if (this.boardId !== boardId) {
+      return;
+    }
+
+    this.teamId = teamId;
     this.refreshIsAdmin();
   }
 
@@ -369,10 +375,13 @@ export class Client {
 
       this.server.userJoin(this.boardId, user);
 
-      const board = this.server.getBoard(this.boardId);
-      const boardUser = await this.server.getBoardUser(this.boardId, this.id);
+      const board = this.server.getBoard(message.boardId);
+      const boardUser = await this.server.getBoardUser(
+        message.boardId,
+        this.id,
+      );
 
-      if (!boardUser || !board) {
+      if (cancelled() || !boardUser || !board) {
         return;
       }
 
@@ -381,6 +390,9 @@ export class Client {
       user.content.visible = userInBoard?.content.visible ?? false;
 
       await this.refreshIsAdmin();
+
+      if (cancelled()) return;
+
       this.privateId = boardUser.privateId;
 
       // Check access once more now that boardId/teamId are set: a revocation
@@ -400,9 +412,9 @@ export class Client {
         op: isAlreadyInBoard ? 'patch' : 'add',
       };
 
-      this.sendAll(this.boardId, this.getStateAction([userAction]));
+      this.sendAll(message.boardId, this.getStateAction([userAction]));
 
-      this.socket.join(this.boardId);
+      this.socket.join(message.boardId);
 
       this.sendToClient(this.getSetStateAction(board));
     } catch (e) {
