@@ -10,7 +10,7 @@ import db from '../db/index.js';
 import {
   checkTeamBoardsAccess,
   revokeBoardAccess,
-  revokeTeamSubscription,
+  revalidateUserSubscriptions,
 } from '../global.js';
 import { sendEvent, sendUserEvent } from '../subscriptor.js';
 import {
@@ -31,7 +31,7 @@ async function removeTeamMember(teamId: string, userId: string) {
 
   if (removed) {
     checkTeamBoardsAccess(teamId);
-    revokeTeamSubscription(teamId, userId);
+    revalidateUserSubscriptions(userId);
   }
 }
 

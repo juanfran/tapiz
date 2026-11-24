@@ -150,6 +150,11 @@ export interface RemovedAccount {
   updatedTeamIds: string[];
   /** Kept boards whose admin or team changed. */
   updatedBoardIds: string[];
+  /** Who became admin of which team or board. */
+  promotions: (
+    | { teamId: string; userId: string }
+    | { boardId: string; userId: string }
+  )[];
 }
 
 export async function removeAccount(userId: string): Promise<RemovedAccount> {
@@ -158,18 +163,23 @@ export async function removeAccount(userId: string): Promise<RemovedAccount> {
     const deletedBoardIds: string[] = [];
     const updatedTeamIds: string[] = [];
     const updatedBoardIds = new Set<string>();
+    const promotions: RemovedAccount['promotions'] = [];
 
-    // Delete the invitations the user sent or received before taking any
-    // lock: an invitation being accepted meanwhile holds its row and then
-    // needs the team or board, so cascading them later could deadlock.
-    await tx
-      .delete(schema.invitations)
-      .where(
-        or(
-          eq(schema.invitations.inviterId, userId),
-          eq(schema.invitations.userId, userId),
-        ),
-      );
+    // Delete the invitations the user sent or received (by id or by email)
+    // before taking any lock: an invitation being accepted meanwhile holds
+    // its row and then needs the team or board, so cascading them later could
+    // deadlock. Email invitations would otherwise outlive the account.
+    await tx.delete(schema.invitations).where(
+      or(
+        eq(schema.invitations.inviterId, userId),
+        eq(schema.invitations.userId, userId),
+        sql`lower(${schema.invitations.email}) = (
+            select lower(${schema.accounts.email})
+            from ${schema.accounts}
+            where ${schema.accounts.id} = ${userId}
+          )`,
+      ),
+    );
 
     // Lock the account first: a login inserting a session meanwhile then
     // either finishes before (and its session is deleted below) or waits and
@@ -233,7 +243,8 @@ export async function removeAccount(userId: string): Promise<RemovedAccount> {
             ne(schema.teamMembers.accountId, userId),
           ),
         )
-        .orderBy(schema.teamMembers.accountId);
+        .orderBy(schema.teamMembers.accountId)
+        .for('update');
 
       if (!others.length) {
         deletedTeamIds.push(membership.teamId);
@@ -251,6 +262,10 @@ export async function removeAccount(userId: string): Promise<RemovedAccount> {
             ),
           );
         updatedTeamIds.push(membership.teamId);
+        promotions.push({
+          teamId: membership.teamId,
+          userId: others[0].accountId,
+        });
       }
     }
 
@@ -283,7 +298,10 @@ export async function removeAccount(userId: string): Promise<RemovedAccount> {
         .orderBy(
           sql`${schema.acountsToBoards.lastAccessedAt} desc nulls last`,
           schema.acountsToBoards.accountId,
-        );
+        )
+        // Lock the candidates, so one leaving the board meanwhile cannot make
+        // the promotion update zero rows.
+        .for('update');
 
     // Gives a board without a team an admin: a member if possible (the most
     // recently active one), otherwise a guest, so it stays manageable.
@@ -304,6 +322,7 @@ export async function removeAccount(userId: string): Promise<RemovedAccount> {
             eq(schema.acountsToBoards.accountId, newAdmin.accountId),
           ),
         );
+      promotions.push({ boardId, userId: newAdmin.accountId });
     };
 
     for (const membership of boardMemberships) {
@@ -374,6 +393,7 @@ export async function removeAccount(userId: string): Promise<RemovedAccount> {
       updatedBoardIds: [...updatedBoardIds].filter(
         (id) => !boardIds.includes(id),
       ),
+      promotions,
     };
   });
 }

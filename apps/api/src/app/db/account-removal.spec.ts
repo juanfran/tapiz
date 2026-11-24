@@ -462,4 +462,54 @@ describe('account removal (PostgreSQL)', () => {
         .where(eq(accountsToSession.userId, leaving)),
     ).toHaveLength(0);
   });
+
+  it('deletes invitations sent to or by the user, including email ones', async () => {
+    const [leaving, admin] = [await account(), await account()];
+    const teamId = await team({ [admin]: 'admin' });
+    const [leavingAccount] = await db
+      .select({ email: accounts.email })
+      .from(accounts)
+      .where(eq(accounts.id, leaving));
+    const rows = await db
+      .insert(invitations)
+      .values([
+        // Sent by the leaving user.
+        { teamId, inviterId: leaving, email: 'someone@example.test' },
+        // Addressed to the leaving user, by id and by (mixed-case) email.
+        { teamId, inviterId: admin, userId: leaving },
+        { teamId, inviterId: admin, email: leavingAccount.email.toUpperCase() },
+        // Unrelated.
+        { teamId, inviterId: admin, email: 'unrelated@example.test' },
+      ])
+      .returning({ id: invitations.id, email: invitations.email });
+
+    await removeAccount(leaving);
+
+    const remaining = await db
+      .select({ id: invitations.id })
+      .from(invitations)
+      .where(
+        inArray(
+          invitations.id,
+          rows.map((row) => row.id),
+        ),
+      );
+    expect(remaining).toEqual([{ id: rows[3].id }]);
+  });
+
+  it('reports who was promoted', async () => {
+    const [leaving, member] = [await account(), await account()];
+    const teamId = await team({ [leaving]: 'admin', [member]: 'member' });
+    const boardId = await board({ [leaving]: 'admin', [member]: 'member' });
+
+    const removed = await removeAccount(leaving);
+
+    expect(removed.promotions).toEqual(
+      expect.arrayContaining([
+        { teamId, userId: member },
+        { boardId, userId: member },
+      ]),
+    );
+    expect(removed.promotions).toHaveLength(2);
+  });
 });

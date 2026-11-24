@@ -13,7 +13,7 @@ import { checkBoardAccess, revokeBoardAccess } from '../global.js';
 import { sendEvent, sendUserEvent } from '../subscriptor.js';
 import { sendMentionNotificationEmail } from '../mailer.js';
 import { rateLimitedMiddleware } from '../rate-limited.js';
-import { getBoardAdmins } from '../db/board-db.js';
+import { getBoardAdmins, NotTeamMemberError } from '../db/board-db.js';
 import { asConflict } from './admin-conflict.js';
 
 export const boardRouter = router({
@@ -48,12 +48,18 @@ export const boardRouter = router({
         }
       }
 
-      const newBoard = await db.board.createBoard(
-        req.input.name,
-        req.ctx.user.sub,
-        [],
-        team?.id ?? null,
-      );
+      // The membership is checked again inside the insert, under a team
+      // lock, so a member removed meanwhile cannot end up owning a board.
+      const newBoard = await db.board
+        .createBoard(req.input.name, req.ctx.user.sub, [], team?.id ?? null, {
+          requireTeamMember: true,
+        })
+        .catch((error: unknown) => {
+          if (error instanceof NotTeamMemberError) {
+            throw new TRPCError({ code: 'UNAUTHORIZED' });
+          }
+          throw error;
+        });
 
       if (team?.id) {
         sendEvent(
@@ -81,8 +87,7 @@ export const boardRouter = router({
     if (owners.includes(req.ctx.user.sub)) {
       await db.board.deleteBoard(req.input.boardId);
 
-      revokeBoardAccess(req.input.boardId);
-
+      // Notify subscribers before revoking, which removes them from the room.
       sendEvent(
         {
           room: `board:${req.input.boardId}`,
@@ -93,6 +98,8 @@ export const boardRouter = router({
         },
         req.ctx.correlationId,
       );
+
+      revokeBoardAccess(req.input.boardId);
 
       return {
         success: true,
