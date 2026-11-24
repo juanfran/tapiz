@@ -9,13 +9,18 @@ import { userSettingsValidator } from '@tapiz/board-commons/validators/user-sett
 import { withDefaultUserSettings } from '@tapiz/board-commons';
 import { generateApiToken, hashApiToken } from '../api-token.js';
 import { deleteUploadedFiles } from '../file-upload.js';
+import { disconnectUser, revokeBoardAccess } from '../global.js';
 
 export const userRouter = router({
   removeAccount: protectedProcedure.mutation(async (req) => {
     await lucia.invalidateUserSessions(req.ctx.user.sub);
 
-    const files = await db.user.removeAccount(req.ctx.user.sub);
-    deleteUploadedFiles(files);
+    const removed = await db.user.removeAccount(req.ctx.user.sub);
+    deleteUploadedFiles(removed.files);
+    // Sockets are authenticated only when they connect, so close them now,
+    // and drop everyone else from the boards that no longer exist.
+    disconnectUser(req.ctx.user.sub);
+    removed.boardIds.forEach((boardId) => revokeBoardAccess(boardId));
 
     return {
       success: true,

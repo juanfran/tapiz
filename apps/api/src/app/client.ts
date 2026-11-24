@@ -167,11 +167,22 @@ export class Client {
     const haveAccess = await db.board.haveAccess(this.boardId, this.id);
 
     if (!haveAccess) {
-      this.unauthorizedClose(false);
+      this.revokeBoard();
       return;
     }
 
     this.refreshIsAdmin();
+  }
+
+  /**
+   * Drops the current board after losing access (or after the board was
+   * deleted): leave its room and forget it, so no further updates are
+   * received and state actions are ignored even if the client ignores the
+   * error event. The socket stays connected for other boards and teams.
+   */
+  revokeBoard() {
+    this.socket.emit('error', 'unauthorized');
+    this.close();
   }
 
   close() {
