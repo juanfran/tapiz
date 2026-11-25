@@ -13,6 +13,7 @@ import {
   checkBoardAccess,
   checkTeamBoardsAccess,
   disconnectUser,
+  revalidateUserSubscriptions,
   revokeBoardAccess,
 } from '../global.js';
 import { sendEvent, sendUserEvent } from '../subscriptor.js';
@@ -132,6 +133,10 @@ export const userRouter = router({
       if (!result) {
         throw new TRPCError({ code: 'NOT_FOUND' });
       }
+
+      // An access grant: realtime checks still in progress (a denied `sub`,
+      // an older revalidation) must not decide with what they read before.
+      revalidateUserSubscriptions(req.ctx.user.sub);
 
       return {
         success: true,

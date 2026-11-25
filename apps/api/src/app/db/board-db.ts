@@ -78,7 +78,9 @@ export async function haveAccess(boardId: string, userId: string) {
   // Even if the user is not a team member, they can access the board if they
   // are an admin. A plain member (or guest) row does not grant access to a
   // private board: those rows are created by opening a public board, and
-  // demoting someone on a private personal board removes their access.
+  // demoting someone on a private personal board removes their access. No
+  // route creates board invitations; a leftover one accepted as member (see
+  // acceptInvitation) grants no access to a private board either.
   if (boardUser?.role === 'admin') {
     return true;
   }

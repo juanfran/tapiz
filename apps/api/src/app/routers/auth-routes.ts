@@ -24,7 +24,8 @@ export async function googleCallback(fastify: FastifyInstance) {
       return;
     }
 
-    // Single use: the transaction is consumed whatever the outcome.
+    // Single use: once the state matches, the transaction is consumed whatever
+    // the outcome.
     for (const name of Object.values(names)) {
       rep.clearCookie(name, {
         path: options.path,

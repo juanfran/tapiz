@@ -443,6 +443,22 @@ describe('realtime board access', () => {
     expect(socket.disconnect).not.toHaveBeenCalled();
   });
 
+  it('re-checks a denied team subscription after the user gained access', async () => {
+    const { client, socket } = fakeClient();
+    const denial = deferred<boolean>();
+    haveAccessTeam.mockReturnValueOnce(denial.promise);
+    haveAccessTeam.mockResolvedValue(true);
+
+    const subscribing = handler(socket, 'sub')({ type: 'team', id: 'team-4' });
+    // What accepting a team invitation does after the commit.
+    void client.revalidateSubscriptions();
+    denial.resolve(false);
+    await subscribing;
+
+    expect(socket.join).toHaveBeenCalledWith('team:team-4');
+    expect(socket.disconnect).not.toHaveBeenCalled();
+  });
+
   it('keeps the event room of a public board after its membership is gone', async () => {
     const { client, socket, server } = fakeClient();
     haveAccess.mockResolvedValue(true);
