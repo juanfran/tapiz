@@ -13,7 +13,7 @@ import { checkBoardAccess, revokeBoardAccess } from '../global.js';
 import { sendEvent, sendUserEvent } from '../subscriptor.js';
 import { sendMentionNotificationEmail } from '../mailer.js';
 import { rateLimitedMiddleware } from '../rate-limited.js';
-import { getBoardAdmins, NotTeamMemberError } from '../db/board-db.js';
+import { NotTeamMemberError } from '../db/board-db.js';
 import { asConflict } from './admin-conflict.js';
 
 export const boardRouter = router({
@@ -122,17 +122,36 @@ export const boardRouter = router({
     };
   }),
   duplicate: boardMemberProcedure.mutation(async (req) => {
-    const newBoard = await db.board.createBoard(
-      req.ctx.board.name + ' (copy)',
-      req.ctx.user.sub,
-      req.ctx.board.board,
-      req.ctx.board.teamId,
-    );
+    // Only team members copy into the team; anyone else who can open the
+    // board (for example a public one) gets a personal copy.
+    const sourceTeamId = req.ctx.board.teamId;
+    const teamId =
+      sourceTeamId &&
+      (await db.team.getUserTeam(sourceTeamId, req.ctx.user.sub))
+        ? sourceTeamId
+        : null;
+
+    // The membership is checked again inside the insert, under a team lock.
+    const newBoard = await db.board
+      .createBoard(
+        req.ctx.board.name + ' (copy)',
+        req.ctx.user.sub,
+        req.ctx.board.board,
+        teamId,
+        { requireTeamMember: true },
+      )
+      .catch((error: unknown) => {
+        if (error instanceof NotTeamMemberError) {
+          throw new TRPCError({ code: 'UNAUTHORIZED' });
+        }
+        throw error;
+      });
 
     return {
       id: newBoard.id,
       name: req.ctx.board.name,
-      role: req.ctx.userBoard?.role ?? 'guest',
+      teamId: newBoard.teamId,
+      role: 'admin',
       isAdmin: true,
       createdAt: newBoard.createdAt,
     } as BoardUser;
@@ -392,17 +411,10 @@ export const boardRouter = router({
       }),
     )
     .mutation(async (req) => {
-      const boardAdmins = await getBoardAdmins(req.input.boardId);
-
-      const admins = boardAdmins.filter(
-        (member) => member !== req.input.userId,
+      // The "at least one admin left" check runs inside the locked delete.
+      const removed = await asConflict(() =>
+        db.board.deleteMember(req.input.boardId, req.input.userId),
       );
-
-      if (!admins.length) {
-        throw new TRPCError({ code: 'CONFLICT' });
-      }
-
-      await db.board.deleteMember(req.input.boardId, req.input.userId);
 
       sendEvent(
         {
@@ -414,6 +426,11 @@ export const boardRouter = router({
         },
         req.ctx.correlationId,
       );
+      // The removed member may lose access (for example a private personal
+      // board), including for sockets only subscribed to its events.
+      if (removed) {
+        checkBoardAccess(req.input.boardId);
+      }
 
       return {
         success: true,
