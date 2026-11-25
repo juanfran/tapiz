@@ -18,6 +18,7 @@ import {
   addBoardsToSpace,
   createSpace,
   getSpaceBoards,
+  TeamDeletionForbiddenError,
 } from '../db/team-db.js';
 import { asConflict } from './admin-conflict.js';
 import { Space } from '@tapiz/board-commons';
@@ -134,10 +135,19 @@ export const teamRouter = router({
 
       return invitation;
     }),
-  delete: teamAdminProcedure
+  // Team admins, or the only member of a legacy team without admins; checked
+  // under the team lock.
+  delete: teamMemberProcedure
     .input(z.object({ teamId: z.string().uuid() }))
     .mutation(async (req) => {
-      const boardIds = await db.team.deleteTeam(req.input.teamId);
+      const boardIds = await db.team
+        .deleteTeam(req.input.teamId, { deletedBy: req.ctx.user.sub })
+        .catch((error: unknown) => {
+          if (error instanceof TeamDeletionForbiddenError) {
+            throw new TRPCError({ code: 'UNAUTHORIZED' });
+          }
+          throw error;
+        });
 
       // After the commit, so a join that started meanwhile is caught too.
       boardIds.forEach((boardId) => {

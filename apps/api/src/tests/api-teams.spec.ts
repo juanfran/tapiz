@@ -1,5 +1,8 @@
 import { randProductName } from '@ngneat/falso';
-import { startDB } from '../app/db/init-db';
+import { eq } from 'drizzle-orm';
+import { db as database, startDB } from '../app/db/init-db';
+import db from '../app/db';
+import * as schema from '../app/schema';
 
 import {
   errorCall,
@@ -345,6 +348,58 @@ describe('Api - teams', () => {
       );
 
       expect(result?.code).toBe('CONFLICT');
+    });
+  });
+
+  describe('legacy team without admins', () => {
+    // Old data: teams whose only members are plain members.
+    async function teamWithoutAdmins(...userIndexes: number[]) {
+      const [owner, ...others] = userIndexes;
+      const team = await db.team.createTeam(
+        randProductName(),
+        getAuth(owner).sub,
+      );
+      for (const index of others) {
+        await db.user.addTeamMember(getAuth(index).sub, team.id, 'member');
+      }
+      await database
+        .update(schema.teamMembers)
+        .set({ role: 'member' })
+        .where(eq(schema.teamMembers.teamId, team.id));
+      return team.id;
+    }
+
+    it('lets its only member delete it', async () => {
+      const teamId = await teamWithoutAdmins(82);
+      const caller = await getUserCaller(82);
+
+      await caller.team.delete({ teamId });
+
+      expect(await db.team.getTeam(teamId)).toBeUndefined();
+    });
+
+    it('still requires an admin while other members remain', async () => {
+      const teamId = await teamWithoutAdmins(83, 84);
+
+      const result = await errorCall(async () =>
+        (await getUserCaller(83)).team.delete({ teamId }),
+      );
+
+      expect(result?.code).toBe('UNAUTHORIZED');
+      expect(await db.team.getTeam(teamId)).toBeTruthy();
+    });
+
+    it('does not let a plain member delete a team with an admin', async () => {
+      const admin = await getUserCaller(85);
+      const teamId = (await admin.team.new({ name: randProductName() })).id;
+      await db.user.addTeamMember(getAuth(86).sub, teamId, 'member');
+      await admin.team.leave({ teamId }).catch(() => undefined);
+
+      const result = await errorCall(async () =>
+        (await getUserCaller(86)).team.delete({ teamId }),
+      );
+
+      expect(result?.code).toBe('UNAUTHORIZED');
     });
   });
 

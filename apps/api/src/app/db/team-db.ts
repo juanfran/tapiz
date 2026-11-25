@@ -81,18 +81,45 @@ export async function getUserTeams(userId: string): Promise<UserTeam[]> {
     });
 }
 
+/** The user may not delete the team. */
+export class TeamDeletionForbiddenError extends Error {
+  constructor() {
+    super('Only a team admin can delete the team');
+  }
+}
+
 /**
  * Deletes a team (its boards cascade) and returns the deleted board ids. The
  * team lock makes a concurrent team-board creation either finish first (and
  * be included) or wait and fail.
+ *
+ * With `deletedBy`, that user must be a team admin or, for legacy teams left
+ * without admins, its only member (who could neither leave nor delete it
+ * otherwise); checked under the lock, else TeamDeletionForbiddenError.
  */
-export async function deleteTeam(teamId: string): Promise<string[]> {
+export async function deleteTeam(
+  teamId: string,
+  options: { deletedBy?: string } = {},
+): Promise<string[]> {
   return db.transaction(async (tx) => {
     await tx
       .select({ id: schema.teams.id })
       .from(schema.teams)
       .where(eq(schema.teams.id, teamId))
       .for('update');
+    if (options.deletedBy) {
+      const members = await tx
+        .select({
+          accountId: schema.teamMembers.accountId,
+          role: schema.teamMembers.role,
+        })
+        .from(schema.teamMembers)
+        .where(eq(schema.teamMembers.teamId, teamId));
+      const member = members.find((it) => it.accountId === options.deletedBy);
+      if (!member || (member.role !== 'admin' && members.length > 1)) {
+        throw new TeamDeletionForbiddenError();
+      }
+    }
     const boards = await tx
       .select({ id: schema.boards.id })
       .from(schema.boards)

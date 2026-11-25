@@ -75,7 +75,10 @@ export async function haveAccess(boardId: string, userId: string) {
 
   const boardUser = await getBoardUser(boardId, userId);
 
-  // event if the user is not team member, they can access the board if they are an admin
+  // Even if the user is not a team member, they can access the board if they
+  // are an admin. A plain member (or guest) row does not grant access to a
+  // private board: those rows are created by opening a public board, and
+  // demoting someone on a private personal board removes their access.
   if (boardUser?.role === 'admin') {
     return true;
   }
@@ -411,6 +414,52 @@ export async function deleteUserBoards(userId: string) {
   await Promise.all(boards.map((board) => deleteBoard(board.id)));
 }
 
+type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+/**
+ * Throws AdminRequiredConflict unless the board keeps an admin once `userId`
+ * loses their board role: another board admin, or any team admin of a team
+ * board (including `userId`, whose team role is not affected). Call it with
+ * the board locked.
+ */
+async function assertAdminRemains(
+  tx: Transaction,
+  boardId: string,
+  teamId: string | null,
+  userId: string,
+) {
+  const [boardAdmin] = await tx
+    .select({ accountId: schema.acountsToBoards.accountId })
+    .from(schema.acountsToBoards)
+    .where(
+      and(
+        eq(schema.acountsToBoards.boardId, boardId),
+        eq(schema.acountsToBoards.role, 'admin'),
+        ne(schema.acountsToBoards.accountId, userId),
+      ),
+    )
+    .limit(1);
+  if (boardAdmin) {
+    return;
+  }
+
+  const [teamAdmin] = teamId
+    ? await tx
+        .select({ accountId: schema.teamMembers.accountId })
+        .from(schema.teamMembers)
+        .where(
+          and(
+            eq(schema.teamMembers.teamId, teamId),
+            eq(schema.teamMembers.role, 'admin'),
+          ),
+        )
+        .limit(1)
+    : [];
+  if (!teamAdmin) {
+    throw new AdminRequiredConflict();
+  }
+}
+
 /**
  * Leaves a board. The last admin (counting the team admins of a team board)
  * cannot leave while other people still use it, and the last member cannot
@@ -443,21 +492,7 @@ export async function leaveBoard(userId: string, boardId: string) {
     }
 
     if (member?.role === 'admin' && others.length) {
-      const teamAdmins = board?.teamId
-        ? await tx
-            .select({ accountId: schema.teamMembers.accountId })
-            .from(schema.teamMembers)
-            .where(
-              and(
-                eq(schema.teamMembers.teamId, board.teamId),
-                eq(schema.teamMembers.role, 'admin'),
-                ne(schema.teamMembers.accountId, userId),
-              ),
-            )
-        : [];
-      if (!others.some((it) => it.role === 'admin') && !teamAdmins.length) {
-        throw new AdminRequiredConflict();
-      }
+      await assertAdminRemains(tx, boardId, board?.teamId ?? null, userId);
     }
 
     await tx
@@ -517,31 +552,7 @@ export async function changeRole(
       .for('update');
 
     if (role !== 'admin') {
-      const boardAdmins = await tx
-        .select({ accountId: schema.acountsToBoards.accountId })
-        .from(schema.acountsToBoards)
-        .where(
-          and(
-            eq(schema.acountsToBoards.boardId, boardId),
-            eq(schema.acountsToBoards.role, 'admin'),
-            ne(schema.acountsToBoards.accountId, userId),
-          ),
-        );
-      const teamAdmins = board?.teamId
-        ? await tx
-            .select({ accountId: schema.teamMembers.accountId })
-            .from(schema.teamMembers)
-            .where(
-              and(
-                eq(schema.teamMembers.teamId, board.teamId),
-                eq(schema.teamMembers.role, 'admin'),
-                ne(schema.teamMembers.accountId, userId),
-              ),
-            )
-        : [];
-      if (!boardAdmins.length && !teamAdmins.length) {
-        throw new AdminRequiredConflict();
-      }
+      await assertAdminRemains(tx, boardId, board?.teamId ?? null, userId);
     }
 
     await tx
@@ -556,15 +567,51 @@ export async function changeRole(
   });
 }
 
-export async function deleteMember(boardId: string, userId: string) {
-  return db
-    .delete(schema.acountsToBoards)
-    .where(
-      and(
-        eq(schema.acountsToBoards.boardId, boardId),
-        eq(schema.acountsToBoards.accountId, userId),
-      ),
-    );
+/**
+ * Removes someone from a board. Removing the last admin (counting the team
+ * admins of a team board) throws AdminRequiredConflict; like changeRole, the
+ * check runs under a lock on the board. Returns whether a member was removed.
+ */
+export async function deleteMember(
+  boardId: string,
+  userId: string,
+): Promise<boolean> {
+  return db.transaction(async (tx) => {
+    const [board] = await tx
+      .select({ teamId: schema.boards.teamId })
+      .from(schema.boards)
+      .where(eq(schema.boards.id, boardId))
+      .for('update');
+
+    const [member] = await tx
+      .select({ role: schema.acountsToBoards.role })
+      .from(schema.acountsToBoards)
+      .where(
+        and(
+          eq(schema.acountsToBoards.boardId, boardId),
+          eq(schema.acountsToBoards.accountId, userId),
+        ),
+      );
+
+    if (!member) {
+      return false;
+    }
+
+    if (member.role === 'admin') {
+      await assertAdminRemains(tx, boardId, board?.teamId ?? null, userId);
+    }
+
+    await tx
+      .delete(schema.acountsToBoards)
+      .where(
+        and(
+          eq(schema.acountsToBoards.boardId, boardId),
+          eq(schema.acountsToBoards.accountId, userId),
+        ),
+      );
+
+    return true;
+  });
 }
 
 export async function updateBoardName(boardId: string, name: string) {

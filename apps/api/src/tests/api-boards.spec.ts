@@ -283,6 +283,113 @@ describe('board', () => {
     expect(boards2.length).toEqual(0);
   });
 
+  it('copies a public team board as a personal board for non-members', async () => {
+    const teamAdmin = await getUserCaller(1);
+    const outsider = await getUserCaller(40);
+    const board = await teamAdmin.board.create({
+      name: randProductName(),
+      teamId,
+    });
+    await teamAdmin.board.changePrivacy({ boardId: board.id, isPublic: true });
+    const teamBoards = await db.board.getBoardsByTeam(teamId);
+
+    const copy = await outsider.board.duplicate({ boardId: board.id });
+
+    expect((await db.board.getBoardBasic(copy.id))?.teamId).toBeNull();
+    expect(await db.board.getBoardsByTeam(teamId)).toHaveLength(
+      teamBoards.length,
+    );
+    expect(await db.board.getBoardAdmins(copy.id)).toEqual([getAuth(40).sub]);
+  });
+
+  it('copies a team board into the team for team members', async () => {
+    const member = await getUserCaller(70);
+    const board = await member.board.create({
+      name: randProductName(),
+      teamId,
+    });
+
+    const copy = await member.board.duplicate({ boardId: board.id });
+
+    expect((await db.board.getBoardBasic(copy.id))?.teamId).toBe(teamId);
+  });
+
+  it('lets a team admin leave a team board they were the only board admin of', async () => {
+    const teamAdmin = await getUserCaller(1);
+    const board = await teamAdmin.board.create({
+      name: randProductName(),
+      teamId,
+    });
+    // Another member opens it, so the board has other users.
+    await (await getUserCaller(70)).board.board({ boardId: board.id });
+
+    await teamAdmin.board.leave({ boardId: board.id });
+
+    // Still admin through the team.
+    expect(await db.board.getBoardAdmins(board.id)).toContain(getAuth(1).sub);
+  });
+
+  it('lets a team admin hand over their board role on a team board', async () => {
+    const teamAdmin = await getUserCaller(1);
+    const board = await teamAdmin.board.create({
+      name: randProductName(),
+      teamId,
+    });
+
+    await teamAdmin.board.changeRole({
+      boardId: board.id,
+      userId: getAuth(1).sub,
+      role: 'member',
+    });
+
+    expect(await db.board.getBoardAdmins(board.id)).toContain(getAuth(1).sub);
+  });
+
+  it('refuses to remove the only admin of a personal board', async () => {
+    const admin = await getUserCaller(72);
+    const board = await admin.board.create({ name: randProductName() });
+
+    const result = await errorCall(async () =>
+      admin.board.deleteMember({
+        boardId: board.id,
+        userId: getAuth(72).sub,
+      }),
+    );
+
+    expect(result?.code).toBe('CONFLICT');
+    expect(await db.board.getBoardAdmins(board.id)).toEqual([getAuth(72).sub]);
+  });
+
+  it('lets an admin remove a board member', async () => {
+    const admin = await getUserCaller(73);
+    const board = await admin.board.create({ name: randProductName() });
+    await db.board.joinBoard(getAuth(74).sub, board.id);
+
+    await admin.board.deleteMember({
+      boardId: board.id,
+      userId: getAuth(74).sub,
+    });
+
+    expect(await db.board.getBoardUser(board.id, getAuth(74).sub)).toBe(
+      undefined,
+    );
+  });
+
+  it('keeps an admin when two admins remove each other at once', async () => {
+    const first = await getUserCaller(76);
+    const board = await first.board.create({ name: randProductName() });
+    await db.user.addBoardMember(getAuth(77).sub, board.id, 'admin');
+    const second = await getUserCaller(77);
+
+    const results = await Promise.allSettled([
+      first.board.deleteMember({ boardId: board.id, userId: getAuth(77).sub }),
+      second.board.deleteMember({ boardId: board.id, userId: getAuth(76).sub }),
+    ]);
+
+    expect(results.filter((it) => it.status === 'fulfilled')).toHaveLength(1);
+    expect(await db.board.getBoardAdmins(board.id)).toHaveLength(1);
+  });
+
   it('refuses to demote the only admin of a personal board', async () => {
     const caller = await getUserCaller(71);
     const board = await caller.board.create({ name: 'only admin' });
