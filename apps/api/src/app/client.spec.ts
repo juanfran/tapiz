@@ -99,7 +99,6 @@ describe('realtime board access', () => {
 
     expect(socket.emit).toHaveBeenCalledWith('error', 'unauthorized');
     expect(socket.leave).toHaveBeenCalledWith('board-1');
-    expect(socket.leave).toHaveBeenCalledWith('board:board-1');
     // The last socket leaving releases the board's in-memory state.
     expect(server.emptyBoard).toHaveBeenCalledWith('board-1');
     expect(client.boardId).toBeUndefined();
@@ -388,6 +387,89 @@ describe('realtime board access', () => {
 
     expect(socket.leave).toHaveBeenCalledWith('board:board-7');
     expect(client.hasBoardSubscription('board-7')).toBe(false);
+  });
+
+  it('keeps a board event room granted again while an older denial was pending', async () => {
+    const { client, socket } = fakeClient();
+    haveAccess.mockResolvedValueOnce(true);
+    await handler(socket, 'sub')({ type: 'board', id: 'board-2' });
+    const denial = deferred<boolean>();
+    haveAccess.mockReturnValueOnce(denial.promise);
+    haveAccess.mockResolvedValue(true);
+
+    // Read as private, then the board becomes public and a new sub succeeds.
+    const revalidating = client.revalidateBoardSubscription('board-2');
+    await handler(socket, 'sub')({ type: 'board', id: 'board-2' });
+    denial.resolve(false);
+    await revalidating;
+
+    expect(socket.leave).not.toHaveBeenCalledWith('board:board-2');
+    expect(client.hasBoardSubscription('board-2')).toBe(true);
+  });
+
+  it('keeps a team event room granted again while an older denial was pending', async () => {
+    const { client, socket } = fakeClient();
+    client.boardId = undefined;
+    haveAccessTeam.mockResolvedValueOnce(true);
+    await handler(socket, 'sub')({ type: 'team', id: 'team-2' });
+    const denial = deferred<boolean>();
+    haveAccessTeam.mockReturnValueOnce(denial.promise);
+    haveAccessTeam.mockResolvedValue(true);
+
+    const revalidating = client.revalidateSubscriptions();
+    await handler(socket, 'sub')({ type: 'team', id: 'team-2' });
+    denial.resolve(false);
+    await revalidating;
+
+    expect(socket.leave).not.toHaveBeenCalledWith('team:team-2');
+  });
+
+  it('re-checks a denied subscription whose access changed meanwhile', async () => {
+    const { client, socket } = fakeClient();
+    const denial = deferred<boolean>();
+    haveAccess.mockReturnValueOnce(denial.promise);
+    haveAccess.mockResolvedValue(true);
+
+    const subscribing = handler(
+      socket,
+      'sub',
+    )({ type: 'board', id: 'board-3' });
+    // For example the board was made public while the check was running.
+    void client.revalidateBoardSubscription('board-3');
+    denial.resolve(false);
+    await subscribing;
+
+    expect(socket.join).toHaveBeenCalledWith('board:board-3');
+    expect(socket.disconnect).not.toHaveBeenCalled();
+  });
+
+  it('keeps the event room of a public board after its membership is gone', async () => {
+    const { client, socket, server } = fakeClient();
+    haveAccess.mockResolvedValue(true);
+    await handler(socket, 'sub')({ type: 'board', id: 'board-1' });
+    server.getBoardUser.mockResolvedValue(undefined);
+
+    await client.refreshAccess();
+    // Let the event room re-check finish.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(client.boardId).toBeUndefined();
+    expect(socket.leave).not.toHaveBeenCalledWith('board:board-1');
+    expect(client.hasBoardSubscription('board-1')).toBe(true);
+  });
+
+  it('leaves the event room of a dropped board it can no longer reach', async () => {
+    const { client, socket } = fakeClient();
+    haveAccess.mockResolvedValueOnce(true);
+    await handler(socket, 'sub')({ type: 'board', id: 'board-1' });
+    haveAccess.mockResolvedValue(false);
+
+    await client.refreshAccess();
+
+    await vi.waitFor(() =>
+      expect(socket.leave).toHaveBeenCalledWith('board:board-1'),
+    );
+    expect(client.hasBoardSubscription('board-1')).toBe(false);
   });
 
   it('does not re-enter a board event room revoked while its sub was checking', async () => {

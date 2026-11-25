@@ -18,38 +18,72 @@ export class Server {
   private state: Record<string, ReturnType<typeof syncNodeBox>> = {};
   private stateSubscriptions: Record<string, Subscription> = {};
   private boardSettings: Record<string, BoardSettings> = {};
+  // Writes of each board's state, in order. A board is only loaded again
+  // once they finished, so a viewer joining right after the last one left
+  // does not get an older snapshot.
+  private saves: Record<string, Promise<void>> = {};
+  // Loads in progress, shared by concurrent joins of the same board.
+  private loads: Record<string, Promise<void>> = {};
 
   constructor(public io: WsServer) {}
 
   public async connection(socket: Socket, cookies: Record<string, string>) {
-    const sessionId = cookies[lucia.sessionCookieName];
-    if (sessionId) {
-      const { session, user } = await validateSession(sessionId);
+    // The client may send messages (join, sub...) as soon as it connects,
+    // while the session is still being checked: keep them for the Client.
+    const early: [string, unknown[]][] = [];
+    const keep = (event: string, ...args: unknown[]) => {
+      early.push([event, args]);
+    };
+    socket.onAny(keep);
 
-      if (session && user) {
-        const dbUser = await db.user.getUser(user.id);
-
-        if (dbUser) {
-          const client = new Client(
-            socket,
-            this,
-            dbUser.name,
-            dbUser.id,
-            dbUser.email,
-          );
-
-          this.clients.push(client);
-
-          socket.on('disconnect', () => {
-            this.clientClose(client);
-          });
-
-          return;
-        }
-      }
+    let dbUser: Awaited<ReturnType<typeof db.user.getUser>> | undefined;
+    try {
+      dbUser = await this.authenticate(cookies);
+    } finally {
+      socket.offAny(keep);
     }
 
-    socket.disconnect();
+    if (!dbUser) {
+      socket.disconnect();
+      return;
+    }
+
+    // Gone while checking: its disconnect handlers would never run.
+    if (socket.disconnected) {
+      return;
+    }
+
+    const client = new Client(
+      socket,
+      this,
+      dbUser.name,
+      dbUser.id,
+      dbUser.email,
+    );
+
+    this.clients.push(client);
+
+    socket.on('disconnect', () => {
+      this.clientClose(client);
+    });
+
+    for (const [event, args] of early) {
+      socket.listeners(event).forEach((listener) => listener(...args));
+    }
+  }
+
+  private async authenticate(cookies: Record<string, string>) {
+    const sessionId = cookies[lucia.sessionCookieName];
+    if (!sessionId) {
+      return;
+    }
+
+    const { session, user } = await validateSession(sessionId);
+    if (!session || !user) {
+      return;
+    }
+
+    return db.user.getUser(user.id);
   }
 
   private findBoardSettings(boardId: string): BoardSettings {
@@ -79,46 +113,76 @@ export class Server {
     this.clients = this.clients.filter((it) => it !== client);
   }
 
-  public async createBoard(boardId: string) {
-    if (!this.state[boardId]) {
-      if (this.stateSubscriptions[boardId]) {
-        this.emptyBoard(boardId);
-      }
-
-      const board = await db.board.getBoard(boardId);
-
-      if (!board) {
-        throw new Error('board not found');
-      }
-
-      const boardNodes = board.board ?? [];
-
-      this.state[boardId] = syncNodeBox({ history: 0, log: false });
-
-      this.updateBoard(
-        boardId,
-        boardNodes.map((it) => {
-          if (!isUserNode(it)) {
-            return it;
-          }
-
-          return {
-            ...it,
-            content: {
-              ...it.content,
-              connected: false,
-              cursor: null,
-            },
-          } satisfies UserNode;
-        }),
-      );
-      this.stateSubscriptions[boardId] = this.state[boardId]
-        .sync()
-        .pipe(throttleTime(2000))
-        .subscribe((state) => {
-          db.board.updateBoard(boardId, state);
-        });
+  public createBoard(boardId: string): Promise<void> {
+    if (this.state[boardId]) {
+      return Promise.resolve();
     }
+
+    this.loads[boardId] ??= this.loadBoard(boardId).finally(() => {
+      delete this.loads[boardId];
+    });
+
+    return this.loads[boardId];
+  }
+
+  private async loadBoard(boardId: string) {
+    if (this.stateSubscriptions[boardId]) {
+      this.emptyBoard(boardId);
+    }
+
+    await this.saves[boardId];
+
+    const board = await db.board.getBoard(boardId);
+
+    if (!board) {
+      throw new Error('board not found');
+    }
+
+    const boardNodes = board.board ?? [];
+
+    this.state[boardId] = syncNodeBox({ history: 0, log: false });
+
+    this.updateBoard(
+      boardId,
+      boardNodes.map((it) => {
+        if (!isUserNode(it)) {
+          return it;
+        }
+
+        return {
+          ...it,
+          content: {
+            ...it.content,
+            connected: false,
+            cursor: null,
+          },
+        } satisfies UserNode;
+      }),
+    );
+    this.stateSubscriptions[boardId] = this.state[boardId]
+      .sync()
+      .pipe(throttleTime(2000))
+      .subscribe((state) => {
+        this.saveBoard(boardId, state);
+      });
+  }
+
+  /** Queues a write of the board's state after the previous ones. */
+  private saveBoard(boardId: string, state: TuNode[]) {
+    const save = (this.saves[boardId] ?? Promise.resolve())
+      .then(() => db.board.updateBoard(boardId, state))
+      .then(
+        () => undefined,
+        (error: unknown) => {
+          console.error('Board save failed', error);
+        },
+      );
+    this.saves[boardId] = save;
+    void save.then(() => {
+      if (this.saves[boardId] === save) {
+        delete this.saves[boardId];
+      }
+    });
   }
 
   public getBoard(boardId: string): TuNode[] | undefined {
@@ -136,7 +200,10 @@ export class Server {
   }
 
   public emptyBoard(boardId: string) {
-    db.board.updateBoard(boardId, this.state[boardId].get());
+    const state = this.state[boardId];
+    if (state) {
+      this.saveBoard(boardId, state.get());
+    }
 
     delete this.state[boardId];
 
