@@ -147,9 +147,9 @@ export const boardRouter = router({
     .mutation(async (req) => {
       await db.board.setBoardPrivacy(req.input.boardId, req.input.isPublic);
 
-      if (!req.input.isPublic) {
-        checkBoardAccess(req.input.boardId);
-      }
+      // Both ways: going private revokes access, and going public must win
+      // over denials still being checked.
+      checkBoardAccess(req.input.boardId);
 
       return {
         success: true,

@@ -48,6 +48,11 @@ export class Client {
   // Event rooms joined through `sub`, independent of the active board.
   private boardSubscriptions = new Set<string>();
   private teamSubscriptions = new Set<string>();
+  // Latest access decision per event room (`board:<id>`, `team:<id>`): a
+  // grant or the start of a new check replaces it, so a check only applies
+  // its result while it is still the latest one. Values never repeat.
+  private eventRoomVersions = new Map<string, number>();
+  private lastEventRoomVersion = 0;
   private disconnected = false;
   // Joins, subscriptions, access refreshes and revocations of this socket run
   // one at a time, so none of them can act on a state another one changed
@@ -128,8 +133,9 @@ export class Client {
           : db.team.haveAccessTeam(id, this.id);
 
       let validUser = await check();
-      // Access changed while checking: decide with a fresh read.
-      while (validUser && pending.stale) {
+      // Access changed while checking (lost or granted): decide with a fresh
+      // read.
+      while (pending.stale) {
         pending.stale = false;
         validUser = await check();
       }
@@ -147,6 +153,8 @@ export class Client {
       (type === 'board' ? this.boardSubscriptions : this.teamSubscriptions).add(
         id,
       );
+      // A fresh grant: older checks still in progress no longer decide.
+      this.markEventRoom(type, id);
     } catch {
       this.socket.disconnect();
     }
@@ -175,29 +183,62 @@ export class Client {
     if (!this.boardSubscriptions.has(boardId)) {
       return Promise.resolve();
     }
-    return (async () => {
-      const allowed =
-        !options.revoke &&
-        (await db.board.haveAccess(boardId, this.id).catch(() => false));
-      if (!allowed) {
-        this.boardSubscriptions.delete(boardId);
-        void this.socket.leave(`board:${boardId}`);
-      }
-    })();
+    if (options.revoke) {
+      this.leaveEventRoom('board', boardId);
+      return Promise.resolve();
+    }
+    return this.recheckEventRoom('board', boardId);
   }
 
   /** Leaves a deleted team's event room; pending checks re-check and fail. */
   revokeTeamSubscription(teamId: string) {
-    for (const pending of this.pendingSubscriptions) {
-      if (pending.type === 'team' && pending.id === teamId)
-        pending.stale = true;
-    }
-    if (this.teamSubscriptions.delete(teamId)) {
-      void this.socket.leave(`team:${teamId}`);
+    this.invalidatePendingSubscriptions('team', teamId);
+    if (this.teamSubscriptions.has(teamId)) {
+      this.leaveEventRoom('team', teamId);
     }
   }
 
-  private invalidatePendingSubscriptions(type?: 'board', id?: string) {
+  private markEventRoom(type: 'board' | 'team', id: string) {
+    const version = ++this.lastEventRoomVersion;
+    this.eventRoomVersions.set(`${type}:${id}`, version);
+    return version;
+  }
+
+  private leaveEventRoom(type: 'board' | 'team', id: string) {
+    (type === 'board'
+      ? this.boardSubscriptions
+      : this.teamSubscriptions
+    ).delete(id);
+    this.eventRoomVersions.delete(`${type}:${id}`);
+    void this.socket.leave(`${type}:${id}`);
+  }
+
+  /**
+   * Re-checks a joined event room and leaves it without access. The result
+   * is dropped when a newer check started or the room was granted again
+   * meanwhile: that one decides. A room whose access cannot be verified is
+   * left as well.
+   */
+  private async recheckEventRoom(type: 'board' | 'team', id: string) {
+    // Marked before awaiting, so it happens synchronously on call.
+    const version = this.markEventRoom(type, id);
+    const check =
+      type === 'board'
+        ? db.board.haveAccess(id, this.id)
+        : db.team.haveAccessTeam(id, this.id);
+    const allowed = await check.catch((error: unknown) => {
+      console.error('Subscription access check failed', error);
+      return false;
+    });
+    if (this.eventRoomVersions.get(`${type}:${id}`) !== version) {
+      return;
+    }
+    if (!allowed) {
+      this.leaveEventRoom(type, id);
+    }
+  }
+
+  private invalidatePendingSubscriptions(type?: 'board' | 'team', id?: string) {
     for (const pending of this.pendingSubscriptions) {
       if (!type || (pending.type === type && pending.id === id)) {
         pending.stale = true;
@@ -331,26 +372,14 @@ export class Client {
     // Checks still in progress re-check before joining; joined rooms are
     // re-checked right away instead of waiting behind queued `sub` messages.
     this.invalidatePendingSubscriptions();
-    return (async () => {
-      // A room whose access cannot be verified is left as well.
-      const allowed = (check: Promise<boolean>) =>
-        check.catch((error: unknown) => {
-          console.error('Subscription access check failed', error);
-          return false;
-        });
-      for (const boardId of [...this.boardSubscriptions]) {
-        if (!(await allowed(db.board.haveAccess(boardId, this.id)))) {
-          this.boardSubscriptions.delete(boardId);
-          void this.socket.leave(`board:${boardId}`);
-        }
-      }
-      for (const teamId of [...this.teamSubscriptions]) {
-        if (!(await allowed(db.team.haveAccessTeam(teamId, this.id)))) {
-          this.teamSubscriptions.delete(teamId);
-          void this.socket.leave(`team:${teamId}`);
-        }
-      }
-    })();
+    return Promise.all([
+      ...[...this.boardSubscriptions].map((boardId) =>
+        this.recheckEventRoom('board', boardId),
+      ),
+      ...[...this.teamSubscriptions].map((teamId) =>
+        this.recheckEventRoom('team', teamId),
+      ),
+    ]).then(() => undefined);
   }
 
   /**
@@ -380,13 +409,17 @@ export class Client {
   }
 
   private dropBoard() {
-    if (!this.boardId) {
+    const boardId = this.boardId;
+    if (!boardId) {
       return;
     }
     this.socket.emit('error', 'unauthorized');
-    this.boardSubscriptions.delete(this.boardId);
-    void this.socket.leave(`board:${this.boardId}`);
     this.close();
+    // The event room has its own access check: losing the membership of a
+    // public board, for example, keeps its events.
+    if (this.boardSubscriptions.has(boardId)) {
+      void this.recheckEventRoom('board', boardId);
+    }
   }
 
   close() {
