@@ -23,13 +23,13 @@ vi.mock('../db/index.js', () => ({
   default: { user: { createUser: vi.fn() } },
 }));
 
-async function callback() {
+async function callback(cookie = 'state=expected; code_verifier=verifier') {
   const app = Fastify();
   await app.register(fastifyCookie);
   await app.register(googleCallback);
   const response = await app.inject({
     url: '/api/auth/callback?code=authorization-code&state=expected',
-    headers: { cookie: 'state=expected; code_verifier=verifier' },
+    headers: { cookie },
   });
   await app.close();
   return response;
@@ -38,6 +38,7 @@ async function callback() {
 beforeEach(() => {
   vi.resetAllMocks();
   process.env['FRONTEND_URL'] = 'http://localhost:4300';
+  process.env['API_URL'] = 'http://localhost:8000/api';
   vi.mocked(validateAuthorizationCode).mockResolvedValue({
     accessToken: 'token',
   } as Awaited<ReturnType<typeof validateAuthorizationCode>>);
@@ -109,4 +110,38 @@ describe('Google callback email verification', () => {
       expect(createUserSessionCookie).not.toHaveBeenCalled();
     },
   );
+});
+
+describe('Google login cookies on HTTPS', () => {
+  beforeEach(() => {
+    process.env['API_URL'] = 'https://tapiz.example.test/api';
+  });
+
+  it('accepts the __Host- prefixed transaction and clears it', async () => {
+    const response = await callback(
+      '__Host-state=expected; __Host-code_verifier=verifier',
+    );
+
+    expect(response.statusCode).toBe(302);
+    expect(validateAuthorizationCode).toHaveBeenCalledWith(
+      'authorization-code',
+      'verifier',
+    );
+    const cleared = response.cookies.filter((it) =>
+      ['__Host-state', '__Host-code_verifier'].includes(it.name),
+    );
+    expect(cleared).toHaveLength(2);
+    cleared.forEach((it) => {
+      expect(it.value).toBe('');
+      expect(it.path).toBe('/');
+      expect(it.secure).toBe(true);
+    });
+  });
+
+  it('ignores unprefixed cookies a sibling subdomain could plant', async () => {
+    const response = await callback('state=expected; code_verifier=verifier');
+
+    expect(response.statusCode).toBe(400);
+    expect(validateAuthorizationCode).not.toHaveBeenCalled();
+  });
 });

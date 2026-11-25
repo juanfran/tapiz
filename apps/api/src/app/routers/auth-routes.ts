@@ -7,6 +7,7 @@ import {
 import { getUserByGoogleId, updateUser } from '../db/user-db.js';
 import { generateId } from 'lucia';
 import db from '../db/index.js';
+import { googleTransientCookies } from '../google-cookies.js';
 
 export async function googleCallback(fastify: FastifyInstance) {
   fastify.get('/api/auth/callback', async (req, rep) => {
@@ -14,12 +15,23 @@ export async function googleCallback(fastify: FastifyInstance) {
 
     const { code, state } = query;
 
-    const storedState = req.cookies['state'];
-    const storedCodeVerifier = req.cookies['code_verifier'];
+    const { names, options } = googleTransientCookies();
+    const storedState = req.cookies[names.state];
+    const storedCodeVerifier = req.cookies[names.verifier];
 
     if (!code || !storedState || !storedCodeVerifier || state !== storedState) {
       rep.status(400).send();
       return;
+    }
+
+    // Single use: the transaction is consumed whatever the outcome.
+    for (const name of Object.values(names)) {
+      rep.clearCookie(name, {
+        path: options.path,
+        secure: options.secure,
+        httpOnly: true,
+        sameSite: options.sameSite,
+      });
     }
 
     if (query.code) {

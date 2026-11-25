@@ -3,6 +3,7 @@ import { Google, generateCodeVerifier, generateState } from 'arctic';
 import { Lucia } from 'lucia';
 import { PostgresJsAdapter } from '@lucia-auth/adapter-postgresql';
 import postgres from 'postgres';
+import { googleTransientCookies } from './google-cookies.js';
 
 if (
   (!process.env['GOOGLE_CLIENT_ID'] || !process.env['GOOGLE_CLIENT_SECRET']) &&
@@ -60,19 +61,9 @@ export const getAuthUrl = async (reply: FastifyReply) => {
 
   url.searchParams.set('access_type', 'offline');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (reply as any).setCookie('state', state, {
-    path: '/',
-    httpOnly: true,
-    maxAge: 60 * 10,
-  });
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (reply as any).setCookie('code_verifier', codeVerifier, {
-    path: '/',
-    httpOnly: true,
-    maxAge: 60 * 10,
-  });
+  const { names, options } = googleTransientCookies();
+  reply.setCookie(names.state, state, options);
+  reply.setCookie(names.verifier, codeVerifier, options);
 
   return url;
 };
