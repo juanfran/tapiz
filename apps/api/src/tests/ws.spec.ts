@@ -7,9 +7,12 @@ import {
   initWs,
 } from './test-helpers';
 import { getBoardUser } from '../app/db/board-db';
+import { Server } from '../app/server';
+import { io } from 'socket.io-client';
 
 describe('ws', () => {
   let socket: Awaited<ReturnType<typeof initWs>>;
+  let wsServer: Server;
   const port = 8011;
 
   const send = (obj: unknown) => {
@@ -25,7 +28,7 @@ describe('ws', () => {
   beforeAll(async () => {
     await startDB();
     await createMultipleUsers();
-    await initTestServer(port);
+    wsServer = await initTestServer(port);
     socket = await initWs(port);
   });
 
@@ -48,5 +51,29 @@ describe('ws', () => {
 
     expect(board).toBeTruthy();
     expect(socket.connected).toEqual(true);
+  });
+
+  it('joins with a message sent right after connecting', async () => {
+    const caller = await getUserCaller(2);
+    const board = await caller.board.create({ name: 'early join' });
+
+    // Emitted without waiting: it reaches the server while the session is
+    // still being checked.
+    const early = io(`ws://localhost:${port}`, {
+      transports: ['websocket'],
+      extraHeaders: { Cookie: 'auth=2' },
+    });
+    early.emit('board', [{ action: 'join', boardId: board.id }]);
+
+    try {
+      await vi.waitFor(() => {
+        expect(
+          wsServer.clients.find((client) => client.id === getAuth(2).sub)
+            ?.boardId,
+        ).toBe(board.id);
+      });
+    } finally {
+      early.close();
+    }
   });
 });

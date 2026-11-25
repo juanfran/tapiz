@@ -31,14 +31,6 @@ describe('ws', () => {
     socket = await initWs(port);
   });
 
-  function onClose() {
-    return new Promise((resolve) => {
-      socket.on('close', () => {
-        resolve(null);
-      });
-    });
-  }
-
   it('join & leave free memory', async () => {
     const caller = await getUserCaller(1);
 
@@ -57,9 +49,10 @@ describe('ws', () => {
 
     socket.close();
 
-    await onClose();
-
-    expect(wsServer.clients.length).toEqual(0);
-    expect(wsServer.getBoard(board1.id)).toBeFalsy();
+    // The server handles the disconnect asynchronously.
+    await vi.waitFor(() => {
+      expect(wsServer.clients.length).toEqual(0);
+      expect(wsServer.getBoard(board1.id)).toBeFalsy();
+    });
   });
 });

@@ -8,6 +8,8 @@ import { initTRPC } from '@trpc/server';
 import { Server } from '../app/server.js';
 import db from '../app/db/index.js';
 import { io } from 'socket.io-client';
+import { parse } from 'cookie';
+import { setServer } from '../app/global.js';
 
 const t = initTRPC.context().create();
 
@@ -78,7 +80,24 @@ export const initTestServer = (port: number): Promise<Server> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     fastify.register(fastifyIO as any);
 
-    const server = new Server(fastify.io);
+    let server!: Server;
+
+    fastify.ready((err) => {
+      if (err) throw err;
+
+      // `fastify.io` exists once the plugin is registered.
+      server = new Server(fastify.io);
+      // Routes notify realtime clients through the global server.
+      setServer(server);
+
+      // Wired like the app server (init-server.ts).
+      fastify.io.on('connection', (socket) => {
+        void server.connection(
+          socket,
+          parse(socket.request.headers.cookie ?? ''),
+        );
+      });
+    });
 
     fastify.listen({ port }, (err) => {
       if (err) throw err;
@@ -89,11 +108,16 @@ export const initTestServer = (port: number): Promise<Server> => {
   });
 };
 
-export const initWs = (port: number): Promise<ReturnType<typeof io>> => {
+/** Connects as `usersTest[userIndex]` (see the session mock in test-setup). */
+export const initWs = (
+  port: number,
+  userIndex = 1,
+): Promise<ReturnType<typeof io>> => {
   return new Promise((resolve) => {
-    const ws = io(`ws://localhost:${port}/events`, {
+    const ws = io(`ws://localhost:${port}`, {
+      transports: ['websocket'],
       extraHeaders: {
-        Cookie: 'auth=1',
+        Cookie: `auth=${userIndex}`,
       },
     });
 
