@@ -43,3 +43,50 @@ jobs:
       - name: Test
         id: pnpm-test
         run: pnpm test
+
+  test-api:
+    name: API Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tapiz
+          POSTGRES_PASSWORD: tapiz
+          POSTGRES_DB: tapiz
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tapiz"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT_HOST: 5432
+      POSTGRES_USER: tapiz
+      POSTGRES_PASSWORD: tapiz
+      POSTGRES_DB: tapiz
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      # Runs the migrations, then the unit and integration specs (including
+      # the websocket ones) against the service database.
+      - name: Test
+        run: pnpm e2e:tests

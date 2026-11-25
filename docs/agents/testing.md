@@ -7,6 +7,7 @@ Use focused tests while iterating, then run the checks that cover the changed su
 - Unit tests live next to source files as `*.spec.ts`.
 - Web tests use Vitest with setup in `apps/web/src/test-setup.ts`.
 - API tests use Vitest with setup in `apps/api/src/test-setup.ts`.
+- API tests need PostgreSQL (the `POSTGRES_*` variables) and run its migrations; `pnpm test` skips them, and CI runs them with `pnpm e2e:tests` in the API Tests job.
 - Use `vi.fn()` or local fixtures for mocks.
 - Prefer interaction-focused specs for complex board behavior.
 
